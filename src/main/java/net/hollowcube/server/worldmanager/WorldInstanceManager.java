@@ -7,7 +7,7 @@ import net.minestom.server.instance.InstanceManager;
 public class WorldInstanceManager {
     private static final int MAX_PLAYERS_PER_WORLD = 50;
 
-    private InstanceManager instanceManager;
+    private final InstanceManager instanceManager;
 
     private static InstanceContainer baseInstance;
 

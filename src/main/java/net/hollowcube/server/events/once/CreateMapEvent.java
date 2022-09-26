@@ -1,12 +1,12 @@
 package net.hollowcube.server.events.once;
 
+import net.hollowcube.server.MapMaker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
-import omega.mapmaker.MapMaker;
 
 public class CreateMapEvent {
     public static void onCreateMap(Player player, String mapName) {

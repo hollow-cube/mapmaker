@@ -1,8 +1,7 @@
 package net.hollowcube.server.util.gui.inventory;
 
+import net.hollowcube.server.util.gui.item.ItemUtils;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemStack;
-import omega.mapmaker.util.gui.item.ItemUtils;
 
 public class InventoryUtils {
     public static void setPlayerLobbyInventory(Player player) {

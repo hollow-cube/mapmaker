@@ -1,7 +1,7 @@
 package net.hollowcube.server.events.once;
 
+import net.hollowcube.server.MapMaker;
 import net.minestom.server.instance.block.Block;
-import omega.mapmaker.MapMaker;
 
 public class ServerStartupEvent {
     public static void onServerStartup() {
