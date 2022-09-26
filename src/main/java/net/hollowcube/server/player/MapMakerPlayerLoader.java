@@ -1,7 +1,7 @@
 package net.hollowcube.server.player;
 
+import net.hollowcube.server.util.gui.inventory.InventoryUtils;
 import net.minestom.server.entity.Player;
-import omega.mapmaker.util.gui.inventory.InventoryUtils;
 
 import java.util.ArrayList;
 import java.util.List;

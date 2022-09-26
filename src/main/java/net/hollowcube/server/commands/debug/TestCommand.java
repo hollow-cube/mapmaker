@@ -7,9 +7,7 @@ public class TestCommand extends Command {
     public TestCommand() {
         super("test");
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("Usage: /test <input-to-echo>");
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /test <input-to-echo>"));
 
         var echoArg = ArgumentType.String("echo");
 

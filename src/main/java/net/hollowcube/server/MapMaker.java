@@ -1,16 +1,16 @@
 package net.hollowcube.server;
 
-import omega.mapmaker.player.MapMakerPlayerManager;
-import omega.mapmaker.worldmanager.WorldInstanceManager;
+import net.hollowcube.server.player.MapMakerPlayerManager;
+import net.hollowcube.server.worldmanager.WorldInstanceManager;
 
 public class MapMaker {
     private static MapMaker instance;
 
-    private WorldInstanceManager worldInstanceManager;
-    private MapMakerPlayerManager mapMakerPlayerManager;
+    private final WorldInstanceManager worldInstanceManager;
+    private final MapMakerPlayerManager mapMakerPlayerManager;
 
     public MapMaker() {
-        this.instance = this;
+        instance = this;
 
         this.worldInstanceManager = new WorldInstanceManager();
         this.mapMakerPlayerManager = new MapMakerPlayerManager();

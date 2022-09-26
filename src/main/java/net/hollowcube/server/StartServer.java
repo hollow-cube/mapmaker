@@ -1,9 +1,9 @@
 package net.hollowcube.server;
 
+import net.hollowcube.server.commands.CommandLoader;
+import net.hollowcube.server.events.listeners.ListenerManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.extras.MojangAuth;
-import net.hollowcube.server.commands.CommandManager;
-import net.hollowcube.server.events.listeners.ListenerManager;
 
 import static net.hollowcube.server.events.once.ServerStartupEvent.onServerStartup;
 
@@ -15,7 +15,7 @@ public class StartServer {
         MapMaker instance = new MapMaker();
 
         // Register all commands
-        CommandManager commands = new CommandManager();
+        CommandLoader commands = new CommandLoader();
         commands.registerCommands();
 
         // Register all listeners
