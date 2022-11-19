@@ -30,4 +30,4 @@ jobs:
           push: true
           tags: |
             hollowcube/mapmaker:latest
-            hollowcube/mapmaker:$GITHUB_SHA
+            hollowcube/mapmaker:${{ github.sha}}
