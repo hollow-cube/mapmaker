@@ -1,4 +1,4 @@
-package net.hollowcube.server.commands.map;
+package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.server.MapMaker;
 import net.kyori.adventure.text.Component;

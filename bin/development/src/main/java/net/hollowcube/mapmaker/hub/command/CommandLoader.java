@@ -1,10 +1,7 @@
-package net.hollowcube.server.commands;
+package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.server.commands.debug.StopCommand;
 import net.hollowcube.server.commands.debug.TestCommand;
-import net.hollowcube.server.commands.map.CreateMapCommand;
-import net.hollowcube.server.commands.map.JoinMapCommand;
-import net.hollowcube.server.commands.map.LeaveMapCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 

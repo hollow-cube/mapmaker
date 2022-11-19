@@ -1,6 +1,6 @@
 package net.hollowcube.server;
 
-import net.hollowcube.server.commands.CommandLoader;
+import net.hollowcube.mapmaker.hub.command.CommandLoader;
 import net.hollowcube.server.events.listeners.ListenerManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.extras.MojangAuth;

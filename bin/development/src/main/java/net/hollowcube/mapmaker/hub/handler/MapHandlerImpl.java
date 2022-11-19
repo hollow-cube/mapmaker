@@ -1,0 +1,60 @@
+package net.hollowcube.mapmaker.hub.handler;
+
+import net.hollowcube.mapmaker.hub.MapHandle;
+import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.storage.MapStorage;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+public class MapHandlerImpl implements MapHandler {
+    protected final MapStorage storage;
+    protected final MapOrchestrator orchestrator;
+
+    public MapHandlerImpl(MapStorage storage, MapOrchestrator orchestrator) {
+        this.storage = storage;
+        this.orchestrator = orchestrator;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<MapData> createMap(@NotNull Player player, MapData.@NotNull Type type, @NotNull String name) {
+        var map = new MapData(UUID.randomUUID().toString(), type);
+        map.setName(name);
+        return storage.createMap(map)
+                .thenApply(map1 -> {
+                    player.sendMessage("Created map " + map.id());
+                    System.out.println("Created map " + map.id());
+                    return map1;
+                })
+                .exceptionallyCompose(e -> {
+                    // If the ID was in use, attempt to create it again
+                    if (e == MapStorage.DUPLICATE_ENTRY) {
+                        return createMap(player, type, name);
+                    }
+
+                    player.sendMessage("Failed to create map: " + e.getMessage());
+                    return CompletableFuture.failedFuture(e);
+                });
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player) {
+        player.sendMessage("Editing map " + mapId);
+        return storage.getMapById(mapId)
+                .thenCompose(map -> orchestrator.openMap(map, MapHandle.FLAG_EDIT))
+                .thenCompose(handle -> orchestrator.joinMap(player, handle))
+                .exceptionally(e -> {
+                    // Specific error for map not found
+                    if (e == MapStorage.NOT_FOUND) {
+                        player.sendMessage("Map not found: " + mapId);
+                        return null;
+                    }
+
+                    // Some other error
+                    player.sendMessage("Failed to join map: " + e.getMessage());
+                    return null;
+                });
+    }
+}
