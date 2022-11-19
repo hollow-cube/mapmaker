@@ -5,7 +5,7 @@ ADD . .
 
 RUN gradle :bin:development:shadowJar --no-daemon
 
-FROM eclipse-temurin:17-alpine as runtime
+FROM openjdk:17-alpine as runtime
 
 WORKDIR /app
 COPY --from=build /app/bin/development/build/libs/development-all.jar /app/server.jar
