@@ -1,0 +1,17 @@
+version: "3.0"
+
+networks:
+  mapmaker:
+    driver: bridge
+
+services:
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../build/local/mongo:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: test
+    networks:
+      - mapmaker

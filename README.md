@@ -1,1 +1,3 @@
 # MapMaker
+
+See `bin/development`
