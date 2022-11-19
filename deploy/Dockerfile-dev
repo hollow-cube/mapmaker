@@ -1,0 +1,14 @@
+FROM gradle:7.4-jdk17-jammy AS build
+
+WORKDIR /app
+ADD . .
+
+RUN gradle :bin:development:shadowJar --no-daemon
+
+FROM eclipse-temurin:17-alpine as runtime
+
+WORKDIR /app
+COPY --from=build /app/bin/development/build/libs/development-all.jar /app/server.jar
+
+EXPOSE 25565
+CMD ["java", "-jar", "server.jar"]

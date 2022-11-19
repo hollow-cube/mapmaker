@@ -3,6 +3,7 @@ import net.ltgt.gradle.errorprone.errorprone
 subprojects {
     apply(plugin = "java")
     apply(plugin = "net.ltgt.errorprone")
+    apply(plugin = "com.github.johnrengelman.shadow")
 
     group = "net.hollowcube.mapmaker"
 
