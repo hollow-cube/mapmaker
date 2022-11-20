@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.hub.handler.MapOrchestrator;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -61,9 +60,8 @@ public class LocalMapOrchestrator implements MapOrchestrator {
         }
 
         var instance = handle.instance();
-        player.setInstance(instance, new Pos(0, 60, 0));
 
-        return CompletableFuture.completedFuture(null);
+        return player.setInstance(instance, new Pos(0, 60, 0));
     }
 
     public record Handle(

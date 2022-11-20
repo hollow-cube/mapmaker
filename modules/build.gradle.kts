@@ -34,7 +34,7 @@ subprojects {
         // Minestom
         compileOnly("com.github.minestommmo:Minestom:${rootProject.property("minestomVersion")}")
 
-        // Testing
+        implementation("com.github.hollow-cube.common:common:${rootProject.property("commonVersion")}")
         testImplementation("com.github.hollow-cube.common:test:${rootProject.property("commonVersion")}")
     }
 

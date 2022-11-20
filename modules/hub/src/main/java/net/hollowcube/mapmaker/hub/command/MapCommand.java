@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.command;
 
-import net.hollowcube.mapmaker.hub.MapHandle;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
