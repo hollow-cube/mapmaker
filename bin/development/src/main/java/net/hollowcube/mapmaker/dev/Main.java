@@ -1,9 +1,12 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.mapmaker.gui.inventory.InventoryUtils;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -31,6 +34,11 @@ public class Main {
 
             //todo temp
             player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
+
+            player.sendMessage(
+                    Component.text("Welcome to ", NamedTextColor.WHITE)
+                            .append(Component.text("Map Maker!", NamedTextColor.AQUA)));
+            InventoryUtils.setPlayerLobbyInventory(player);
         });
 
         var mapHandler = new MapHandlerImpl(MapStorage.memory(), new LocalMapOrchestrator());

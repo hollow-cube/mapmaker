@@ -46,7 +46,8 @@ public class LocalMapOrchestrator implements MapOrchestrator {
     @Override
     public @NotNull CompletableFuture<MapHandle> openMap(@NotNull MapData map, int flags) {
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer(BRIGHT_DIMENSION);
-        instance.setGenerator(unit -> unit.modifier().fill(new Vec(-5, 39, -5), new Vec(5, 40, 5), Block.STONE));
+//        instance.setGenerator(unit -> unit.modifier().fill(new Vec(-5, 39, -5), new Vec(5, 40, 5), Block.STONE));
+        instance.setBlock(0, 58, 0, Block.WHITE_WOOL);
         instance.getWorldBorder().setDiameter(100);
         var handle = new Handle(UUID.randomUUID().toString(), map.id(), flags, instance);
         mapInstances.put(map.id(), instance);
@@ -60,7 +61,7 @@ public class LocalMapOrchestrator implements MapOrchestrator {
         }
 
         var instance = handle.instance();
-        player.setInstance(instance, new Pos(0, 40, 0));
+        player.setInstance(instance, new Pos(0, 60, 0));
 
         return CompletableFuture.completedFuture(null);
     }

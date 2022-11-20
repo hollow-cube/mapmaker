@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.hub.handler;
 import net.hollowcube.mapmaker.hub.MapHandle;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +26,9 @@ public class MapHandlerImpl implements MapHandler {
         map.setName(name);
         return storage.createMap(map)
                 .thenApply(map1 -> {
-                    player.sendMessage("Created map " + map.id());
+                    player.sendMessage(
+                            Component.text("Successfully created ", NamedTextColor.WHITE)
+                                    .append(Component.text(map1.name(), NamedTextColor.AQUA)));
                     System.out.println("Created map " + map.id());
                     return map1;
                 })
