@@ -14,7 +14,7 @@ public class MapDebugCommand extends Command {
         super("debug-map");
         this.maps = maps;
 
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /debug-map <map-name>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /debug-map <subcommand>"));
 
         addSyntax(this::listActive, ArgumentType.Literal("list"));
     }

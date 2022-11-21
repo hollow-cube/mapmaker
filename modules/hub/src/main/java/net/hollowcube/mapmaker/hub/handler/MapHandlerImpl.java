@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,7 @@ public class MapHandlerImpl implements MapHandler {
                 .thenApply(map1 -> {
                     player.sendMessage(
                             Component.text("Successfully created ", NamedTextColor.WHITE)
-                                    .append(Component.text(map1.name(), NamedTextColor.AQUA)));
+                                    .append(Component.text(map1.name(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map1.id()))));
                     System.out.println("Created map " + map.id());
                     return map1;
                 })
