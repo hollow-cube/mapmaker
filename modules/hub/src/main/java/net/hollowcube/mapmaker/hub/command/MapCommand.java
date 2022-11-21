@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.command;
 
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -12,7 +13,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapCommand extends Command {
+public class MapCommand extends BaseHubCommand {
     private final MapHandler handler;
 
     public MapCommand(MapHandler handler) {

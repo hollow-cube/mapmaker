@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.handler;
 
-import net.hollowcube.mapmaker.hub.MapHandle;
+import net.hollowcube.mapmaker.map.MapHandle;
+import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
@@ -13,11 +14,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class MapHandlerImpl implements MapHandler {
     protected final MapStorage storage;
-    protected final MapOrchestrator orchestrator;
+    protected final MapManager maps;
 
-    public MapHandlerImpl(MapStorage storage, MapOrchestrator orchestrator) {
+    public MapHandlerImpl(MapStorage storage, MapManager maps) {
         this.storage = storage;
-        this.orchestrator = orchestrator;
+        this.maps = maps;
     }
 
     @Override
@@ -47,8 +48,7 @@ public class MapHandlerImpl implements MapHandler {
     public @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player) {
         player.sendMessage("Editing map " + mapId);
         return storage.getMapById(mapId)
-                .thenCompose(map -> orchestrator.openMap(map, MapHandle.FLAG_EDIT))
-                .thenCompose(handle -> orchestrator.joinMap(player, handle))
+                .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_EDIT, player))
                 .exceptionally(e -> {
                     // Specific error for map not found
                     if (e == MapStorage.NOT_FOUND) {

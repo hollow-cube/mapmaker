@@ -1,23 +1,32 @@
-package net.hollowcube.mapmaker.dev;
+package net.hollowcube.map;
 
-import net.hollowcube.mapmaker.hub.MapHandle;
-import net.hollowcube.mapmaker.hub.handler.MapOrchestrator;
+import net.hollowcube.map.command.HubCommand;
+import net.hollowcube.map.command.MapDebugCommand;
+import net.hollowcube.mapmaker.map.MapHandle;
+import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class LocalMapOrchestrator implements MapOrchestrator {
+/**
+ * Wrapper for managing maps.
+ *
+ * Will eventually act as the api for interacting with other hub and map nodes. Will need some refactoring
+ */
+public class MapServer implements MapManager {
+    public static final Tag<Boolean> MAP_MARKER = Tag.Boolean("mapmaker:map_marker");
 
     private static final DimensionType BRIGHT_DIMENSION = DimensionType.builder(NamespaceID.from("mapmaker:bright"))
             .ultrawarm(false)
@@ -40,36 +49,29 @@ public class LocalMapOrchestrator implements MapOrchestrator {
         MinecraftServer.getDimensionTypeManager().addDimension(BRIGHT_DIMENSION);
     }
 
-    private final Map<String, Instance> mapInstances = new ConcurrentHashMap<>();
+    public final Map<String, WeakReference<Instance>> instances = new HashMap<>();
+
+    public MapServer() {
+        var commandManager = MinecraftServer.getCommandManager();
+        commandManager.register(new MapDebugCommand(this));
+        commandManager.register(new HubCommand());
+    }
 
     @Override
-    public @NotNull CompletableFuture<MapHandle> openMap(@NotNull MapData map, int flags) {
+    public @NotNull CompletableFuture<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player) {
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer(BRIGHT_DIMENSION);
-//        instance.setGenerator(unit -> unit.modifier().fill(new Vec(-5, 39, -5), new Vec(5, 40, 5), Block.STONE));
         instance.setBlock(0, 58, 0, Block.WHITE_WOOL);
         instance.getWorldBorder().setDiameter(100);
-        var handle = new Handle(UUID.randomUUID().toString(), map.id(), flags, instance);
-        mapInstances.put(map.id(), instance);
-        return CompletableFuture.completedFuture(handle);
+        instance.setTag(MAP_MARKER, true);
+
+        instances.put(map.id(), new WeakReference<>(instance));
+
+        return player.setInstance(instance, new Pos(0, 60, 0))
+                .thenAccept(unused -> player.refreshCommands());
     }
 
-    @Override
-    public @NotNull CompletableFuture<Void> joinMap(@NotNull Player player, @NotNull MapHandle anyHandle) {
-        if (!(anyHandle instanceof Handle handle)) {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("unsupported map handle: " + anyHandle.getClass().getName()));
-        }
+    private void handleInstanceLeave() {
 
-        var instance = handle.instance();
-
-        return player.setInstance(instance, new Pos(0, 60, 0));
-    }
-
-    public record Handle(
-            @NotNull String id,
-            @NotNull String mapId,
-            int flags,
-            @NotNull Instance instance
-    ) implements MapHandle {
     }
 
 }
