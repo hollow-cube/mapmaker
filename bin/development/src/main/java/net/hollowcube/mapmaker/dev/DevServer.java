@@ -37,7 +37,7 @@ public class DevServer {
     private final MapServer maps;
 
     public DevServer() {
-        var mongoUri = System.getProperty("mongo.uri");
+        var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
             this.playerStorage = PlayerStorage.memory();
             this.mapStorage = MapStorage.memory();

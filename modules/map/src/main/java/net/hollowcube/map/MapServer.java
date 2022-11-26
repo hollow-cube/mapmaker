@@ -22,7 +22,6 @@ import java.util.concurrent.CompletableFuture;
  * Will eventually act as the api for interacting with other hub and map nodes. Will need some refactoring
  */
 public class MapServer implements MapManager {
-    public static final Tag<Boolean> MAP_MARKER = Tag.Boolean("mapmaker:map_marker");
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
 
