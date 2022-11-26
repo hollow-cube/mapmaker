@@ -8,28 +8,40 @@ public class MapData {
         BUILD_SHOWCASE
     }
 
-    private final String id;
-    private final Type type;
+    private String id;
+    private Type type;
     private String name;
 
-    public MapData(@NotNull String id, @NotNull Type type) {
-        this.id = id;
-        this.type = type;
-    }
-
-    public @NotNull String id() {
+    public String getId() {
         return id;
     }
 
-    public @NotNull Type type() {
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Type getType() {
         return type;
     }
 
-    public @NotNull String name() {
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public String getName() {
         return name;
     }
 
-    public void setName(@NotNull String name) {
+    public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "MapData{" +
+                "id='" + id + '\'' +
+                ", type=" + type +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

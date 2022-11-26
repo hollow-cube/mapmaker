@@ -22,8 +22,8 @@ public class MapDebugCommand extends Command {
     private void listActive(CommandSender sender, CommandContext context) {
         System.gc();
 
-        sender.sendMessage("Active maps (" + maps.instances.size() + "):");
-        maps.instances.forEach((name, instance) -> sender.sendMessage(name + ": " + instance.get()));
+//        sender.sendMessage("Active maps (" + maps.instances.size() + "):");
+//        maps.instances.forEach((name, instance) -> sender.sendMessage(name + ": " + instance.get()));
     }
 
 }

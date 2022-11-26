@@ -63,8 +63,8 @@ public class MapCommand extends BaseHubCommand {
             if (!(sender instanceof Player player)) return;
 
             var mapId = context.get(mapIdArg);
-
-
+            handler.infoMap(mapId, player)
+                    .exceptionally(FutureUtil::handleException);
         }
     }
 

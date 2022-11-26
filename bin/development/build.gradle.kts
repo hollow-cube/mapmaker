@@ -12,5 +12,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("net.hollowcube.mapmaker.dev.Main")
+    mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
 }

@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.instance.MapInstance;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
@@ -24,6 +25,6 @@ public class BaseMapCommand extends Command {
         }
         var instance = player.getInstance();
         if (instance == null) return false;
-        return instance.hasTag(MapServer.MAP_MARKER);
+        return instance.hasTag(MapInstance.MAP_ID);
     }
 }

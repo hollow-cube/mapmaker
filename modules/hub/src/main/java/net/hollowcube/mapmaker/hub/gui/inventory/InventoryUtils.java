@@ -1,6 +1,6 @@
-package net.hollowcube.mapmaker.gui.inventory;
+package net.hollowcube.mapmaker.hub.gui.inventory;
 
-import net.hollowcube.mapmaker.gui.item.ItemUtils;
+import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
 import net.minestom.server.entity.Player;
 
 public class InventoryUtils {

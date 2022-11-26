@@ -12,7 +12,7 @@ class MapStorageMemory implements MapStorage {
 
     @Override
     public @NotNull CompletableFuture<MapData> createMap(@NotNull MapData map) {
-        var existing = mapsById.putIfAbsent(map.id(), map);
+        var existing = mapsById.putIfAbsent(map.getId(), map);
         if (existing != null)
             return CompletableFuture.failedFuture(DUPLICATE_ENTRY);
         return CompletableFuture.completedFuture(map);

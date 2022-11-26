@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.gui.item;
+package net.hollowcube.mapmaker.hub.gui.item;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

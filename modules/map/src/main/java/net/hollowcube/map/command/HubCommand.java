@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.map.event.PlayerInstanceLeaveEvent;
+import net.hollowcube.mapmaker.hub.HubManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
@@ -27,9 +28,7 @@ public class HubCommand extends BaseMapCommand {
         var oldInstance = player.getInstance();
 
         sender.sendMessage("Returning to hub");
-        var hubInstance = MinecraftServer.getInstanceManager().getInstance(new UUID(0, 0));
-        player.setInstance(hubInstance, new Pos(0, 40, 0));
+        HubManager.TemporaryIAmTerrible.INSTANCE.sendToHub(player);
         MinecraftServer.getInstanceManager().unregisterInstance(oldInstance);
-//        EventDispatcher.call(new PlayerInstanceLeaveEvent(player));
     }
 }

@@ -16,8 +16,8 @@ class PlayerStorageMemory implements PlayerStorage {
 
     @Override
     public @NotNull CompletableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
-        LOGGER.info("Creating player {}", player.id());
-        var existing = playersById.putIfAbsent(player.id(), player);
+        LOGGER.info("Creating player {}", player.getId());
+        var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
             return CompletableFuture.failedFuture(DUPLICATE_ENTRY);
         return CompletableFuture.completedFuture(player);
@@ -37,7 +37,7 @@ class PlayerStorageMemory implements PlayerStorage {
     public @NotNull CompletableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
         LOGGER.info("Getting player by uuid {}", uuid);
         for (var entry : playersById.entrySet()) {
-            if (entry.getValue().id().equals(uuid)) {
+            if (entry.getValue().getId().equals(uuid)) {
                 return CompletableFuture.completedFuture(entry.getValue());
             }
         }

@@ -19,15 +19,23 @@ public class PlayerData {
 
     public static final Tag<PlayerData> DATA = TagUtil.noop("mapmaker:player_data");
 
-    // The player's network id, which can be different from their UUID
-    private final String id;
+    private String id;
+    private String uuid;
 
-    public PlayerData(@NotNull String id) {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
         this.id = id;
     }
 
-    public @NotNull String id() {
-        return id;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override
