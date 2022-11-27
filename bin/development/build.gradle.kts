@@ -4,7 +4,10 @@ plugins {
 
 dependencies {
     implementation("com.github.minestommmo:Minestom:${rootProject.property("minestomVersion")}")
-    implementation("com.github.hollow-cube.common:common:f73dc3434ef99")
+
+    val commonVersion = rootProject.property("commonVersion")
+    implementation("com.github.hollow-cube.common:common:${commonVersion}")
+    implementation("com.github.hollow-cube.common:block-placement:${commonVersion}")
 
     implementation(project(":modules:common"))
     implementation(project(":modules:hub"))
