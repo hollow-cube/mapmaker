@@ -32,7 +32,7 @@ subprojects {
         implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 
         // Minestom
-        compileOnly("com.github.minestommmo:Minestom:${rootProject.property("minestomVersion")}")
+        compileOnly("com.github.hollow-cube:Minestom:${rootProject.property("minestomVersion")}")
 
         implementation("com.github.hollow-cube.common:common:${rootProject.property("commonVersion")}")
         testImplementation("com.github.hollow-cube.common:test:${rootProject.property("commonVersion")}")

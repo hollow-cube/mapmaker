@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
+import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -91,6 +92,8 @@ public class DevServer {
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
 
         registerCommands();
+
+        TerraformWorldEdit.init();
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {

@@ -8,6 +8,7 @@ include(":modules:canvas")
 include(":modules:common")
 include(":modules:hub")
 include(":modules:map")
+include(":modules:terraform")
 
 // Binaries
 include(":bin")
