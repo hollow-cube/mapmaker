@@ -1,0 +1,28 @@
+package net.hollowcube.mapmaker.storage;
+
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClients;
+import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.util.MongoUtil;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.CompletableFuture;
+
+public interface PlayerStorage extends Storage {
+
+    static @NotNull PlayerStorage memory() {
+        return new PlayerStorageMemory();
+    }
+
+    static @NotNull PlayerStorage mongo(@NotNull String uri) {
+        return new PlayerStorageMongo(MongoUtil.getClient(uri));
+    }
+
+    @NotNull CompletableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);
+
+    @NotNull CompletableFuture<@NotNull PlayerData> getPlayerById(@NotNull String id);
+
+    @NotNull CompletableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
+
+}
