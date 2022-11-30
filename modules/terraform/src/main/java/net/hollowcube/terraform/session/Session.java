@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.session;
 
+import net.hollowcube.terraform.clipboard.Clipboard;
 import net.hollowcube.terraform.history.Change;
 import net.hollowcube.terraform.region.selector.CuboidRegionSelector;
 import net.hollowcube.terraform.region.selector.RegionSelector;
@@ -45,6 +46,7 @@ public class Session {
     }
 
     private RegionSelector regionSelector = new CuboidRegionSelector();
+    private final Clipboard clipboard = new Clipboard();
     private final LinkedList<Change> history = new LinkedList<>();
     private int historyPointer = 0;
 
@@ -74,4 +76,11 @@ public class Session {
         historyPointer--;
         return history.get(historyPointer).undo(instance);
     }
+
+    // Clipboard
+
+    public @NotNull Clipboard getClipboard() {
+        return clipboard;
+    }
+
 }

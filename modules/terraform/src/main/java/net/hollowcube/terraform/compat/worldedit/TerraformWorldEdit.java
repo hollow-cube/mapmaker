@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.compat.worldedit;
 
+import net.hollowcube.terraform.compat.worldedit.command.ClipboardCommands;
 import net.hollowcube.terraform.compat.worldedit.command.HistoryCommands;
 import net.hollowcube.terraform.compat.worldedit.command.RegionCommands;
 import net.hollowcube.terraform.compat.worldedit.command.SelectionCommands;
@@ -13,6 +14,7 @@ public class TerraformWorldEdit {
         new SelectionCommands(commands);
         new RegionCommands(commands);
         new HistoryCommands(commands);
+        new ClipboardCommands(commands);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addChild(WandHandler.EVENT_NODE);
