@@ -20,4 +20,6 @@ public interface MapStorage extends Storage {
 
     @NotNull CompletableFuture<MapData> getMapById(@NotNull String mapId);
 
+    @NotNull CompletableFuture<Void> updateMap(@NotNull MapData map);
+
 }
