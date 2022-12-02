@@ -63,6 +63,7 @@ public final class MongoUtil {
                     case "_id" -> value.setId(reader.readString());
                     case "type" -> value.setType(MapData.Type.valueOf(reader.readString()));
                     case "name" -> value.setName(reader.readString());
+                    case "mapFileId" -> value.setMapFileId(reader.readString());
                 }
             }
             reader.readEndDocument();
@@ -75,6 +76,9 @@ public final class MongoUtil {
             writer.writeString("_id", value.getId());
             writer.writeString("type", value.getType().name());
             writer.writeString("name", value.getName());
+            if (value.getMapFileId() != null) {
+                writer.writeString("mapFileId", value.getMapFileId());
+            }
             writer.writeEndDocument();
         }
 

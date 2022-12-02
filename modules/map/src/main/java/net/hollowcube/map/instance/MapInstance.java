@@ -5,9 +5,9 @@ import net.hollowcube.database.FileStorageS3;
 import net.hollowcube.map.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.map.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.map.util.FileUtil;
-import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.util.DimensionUtil;
+import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.mapmaker.util.TagUtil;
 import net.hollowcube.world.compression.WorldCompressor;
 import net.hollowcube.world.decompression.WorldDecompressor;
@@ -15,7 +15,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
@@ -23,8 +22,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,25 +38,7 @@ public class MapInstance {
 
     public static @NotNull CompletableFuture<@NotNull Instance> create(@NotNull MapData map, int flags) {
         var instance = new InstanceContainer(UUID.randomUUID(), DimensionUtil.FULL_BRIGHT);
-//        instance.setBlock(0, 58, 0, Block.WHITE_WOOL);
         instance.getWorldBorder().setDiameter(100); //todo
-
-        // Load world
-        try {
-//            var data = storage.downloadFile(map.getId() + "/v0").join();
-//            var compressedData = new byte[data.available()];
-//            data.read(compressedData);
-//            data.close();
-//            var regions = WorldDecompressor.decompressWorldRegionFiles(compressedData, 1024 * 1024 * 10);
-
-//            var basePath = Path.of("world/" + map.getId());
-//            Files.createDirectories(basePath);
-//            for (var region : regions) {
-//                Files.write(basePath.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
-//            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         instance.setChunkLoader(new AnvilLoader("world/" + map.getId()));
 
         instance.setTag(MAP_ID, map.getId());
@@ -77,7 +56,48 @@ public class MapInstance {
             eventNode.addListener(PlayerSpawnInInstanceEvent.class, MapInstance::initPlayerForEditing);
         }
 
-        return CompletableFuture.completedFuture(instance);
+        // Load world
+        if (map.getMapFileId() == null) {
+            // No map file, create an empty world
+            instance.setBlock(0, 58, 0, Block.WHITE_WOOL);
+            return CompletableFuture.completedFuture(instance);
+        } else {
+            return storage.downloadFile(map.getMapFileId())
+                    .thenApply(is -> {
+                        try (is) {
+                            var data = new byte[is.available()];
+                            is.read(data);
+
+                            var basePath = Path.of("world/" + map.getId() + "/region");
+                            Files.createDirectories(basePath);
+                            for (var region : WorldDecompressor.decompressWorldRegionFiles(data, 1024 * 1024 * 10)) {
+                                Files.write(basePath.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
+                            }
+
+                            return instance;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+
+//        try {
+//            var data = storage.downloadFile(map.getId() + "/v0").join();
+//            var compressedData = new byte[data.available()];
+//            data.read(compressedData);
+//            data.close();
+//            var regions = WorldDecompressor.decompressWorldRegionFiles(compressedData, 1024 * 1024 * 10);
+//
+//            var basePath = Path.of("world/" + map.getId());
+//            Files.createDirectories(basePath);
+//            for (var region : regions) {
+//                Files.write(basePath.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        return CompletableFuture.completedFuture(instance);
     }
 
     private static void preventBlockBreak(PlayerBlockBreakEvent event) {
@@ -110,18 +130,24 @@ public class MapInstance {
         // Attempt to save instance
         var instance = event.getInstance();
         var map = Objects.requireNonNull(instance.getTag(MAP_DATA));
-        instance.saveChunksToStorage().thenAccept(result -> {
-//            var compressed = WorldCompressor.compressWorldRegionFiles("world/" + map.getId(), null);
-//            storage.uploadFile(map.getId() + "/v0", new ByteArrayInputStream(compressed.getCompressedData()), compressed.getCompressedData().length)
-//                    .join();
-//            try {
-//                FileUtil.deleteDirectory(Path.of("world/" + map.getId()));
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-            System.out.println("Saved instance: " + map.getId());
-            MinecraftServer.getInstanceManager().unregisterInstance(instance);
-        });
+        instance.saveChunksToStorage()
+                .thenCompose(result -> {
+                    var compressed = WorldCompressor.compressWorldRegionFiles("world/" + map.getId(), null);
+                    return storage.uploadFile(map.getId() + "/v0", new ByteArrayInputStream(compressed.getCompressedData()), compressed.getCompressedData().length);
+                })
+                .thenCompose(fileId -> {
+                    map.setMapFileId(fileId);
+                    return StaticAbuse.mapStorage.updateMap(map);
+                })
+                .thenAccept(unused -> {
+//                    try {
+//                        FileUtil.deleteDirectory(Path.of("world/" + map.getId()));
+//                    } catch (Exception e) {
+//                        throw new RuntimeException(e);
+//                    }
+                    System.out.println("Saved instance: " + map.getId());
+                    MinecraftServer.getInstanceManager().unregisterInstance(instance);
+                });
     }
 
 }

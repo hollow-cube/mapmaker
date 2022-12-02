@@ -46,6 +46,17 @@ public class MapStorageMongo implements MapStorage {
         }, ForkJoinPool.commonPool());
     }
 
+    @Override
+    public @NotNull CompletableFuture<Void> updateMap(@NotNull MapData map) {
+        return CompletableFuture.supplyAsync(() -> {
+            var filter = eq("_id", map.getId());
+            var result = collection().replaceOne(filter, map);
+            if (result.getModifiedCount() == 0)
+                throw NOT_FOUND;
+            return null;
+        }, ForkJoinPool.commonPool());
+    }
+
     private @NotNull MongoCollection<MapData> collection() {
         return client.getDatabase(DB_NAME).getCollection("maps", MapData.class);
     }

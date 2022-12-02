@@ -25,4 +25,12 @@ class MapStorageMemory implements MapStorage {
             return CompletableFuture.failedFuture(NOT_FOUND);
         return CompletableFuture.completedFuture(map);
     }
+
+    @Override
+    public @NotNull CompletableFuture<Void> updateMap(@NotNull MapData map) {
+        if (!mapsById.containsKey(map.getId()))
+            return CompletableFuture.failedFuture(NOT_FOUND);
+        mapsById.put(map.getId(), map);
+        return CompletableFuture.completedFuture(null);
+    }
 }

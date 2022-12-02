@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
+import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -53,6 +54,8 @@ public class DevServer {
             this.playerStorage = PlayerStorage.mongo(mongoUri);
             this.mapStorage = MapStorage.mongo(mongoUri);
         }
+
+        StaticAbuse.mapStorage = mapStorage;
 
         this.hub = new HubServer();
         this.maps = new MapServer();
