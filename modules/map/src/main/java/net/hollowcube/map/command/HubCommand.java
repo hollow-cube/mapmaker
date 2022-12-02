@@ -28,7 +28,7 @@ public class HubCommand extends BaseMapCommand {
         var oldInstance = player.getInstance();
 
         sender.sendMessage("Returning to hub");
+        EventDispatcher.call(new PlayerInstanceLeaveEvent(player));
         HubManager.TemporaryIAmTerrible.INSTANCE.sendToHub(player);
-        MinecraftServer.getInstanceManager().unregisterInstance(oldInstance);
     }
 }
