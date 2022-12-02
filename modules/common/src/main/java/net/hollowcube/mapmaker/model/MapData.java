@@ -12,6 +12,9 @@ public class MapData {
     private Type type;
     private String name;
 
+    // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
+    private String mapFileId;
+
     public String getId() {
         return id;
     }
@@ -34,6 +37,14 @@ public class MapData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMapFileId() {
+        return mapFileId;
+    }
+
+    public void setMapFileId(String mapFileId) {
+        this.mapFileId = mapFileId;
     }
 
     @Override
