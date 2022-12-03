@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.Storage;
+import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -66,7 +67,7 @@ public class MapHandlerImpl implements MapHandler {
 
                     // Some other error
                     player.sendMessage("Failed to join map: " + e.getMessage());
-                    return null;
+                    return FutureUtil.handleException(e);
                 });
     }
 

@@ -1,8 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.instance.MapInstance;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
@@ -14,14 +12,9 @@ import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.trait.BlockEvent;
-import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.extras.MojangAuth;
 
 import java.util.concurrent.CompletableFuture;
@@ -67,13 +60,14 @@ public class DevServer {
 
         registerCommands();
 
-        var placementHandler = EventNode.event("placement-rules", EventFilter.BLOCK, event -> {
-            if (event instanceof InstanceEvent instanceEvent)
-                return instanceEvent.getInstance().hasTag(MapInstance.MAP_ID);
-            return false;
-        });
-        eventHandler.addChild(placementHandler);
-        HCPlacementRules.init(placementHandler);
+        //todo move placement rules to map server stuff
+//        var placementHandler = EventNode.event("placement-rules", EventFilter.BLOCK, event -> {
+//            if (event instanceof InstanceEvent instanceEvent)
+//                return instanceEvent.getInstance().hasTag(MapWorld.MAP_ID);
+//            return false;
+//        });
+//        eventHandler.addChild(placementHandler);
+//        HCPlacementRules.init(placementHandler);
     }
 
     private void registerCommands() {
