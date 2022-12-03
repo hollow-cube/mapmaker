@@ -72,6 +72,24 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
+    public @NotNull CompletableFuture<Void> playMap(@NotNull String mapId, @NotNull Player player) {
+        player.sendMessage("Playing map " + mapId);
+        return storage.getMapById(mapId)
+                .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_NONE, player))
+                .exceptionally(e -> {
+                    // Specific error for map not found
+                    if (e == MapStorage.NOT_FOUND) {
+                        player.sendMessage("Map not found: " + mapId);
+                        return null;
+                    }
+
+                    // Some other error
+                    player.sendMessage("Failed to join map: " + e.getMessage());
+                    return FutureUtil.handleException(e);
+                });
+    }
+
+    @Override
     public @NotNull CompletableFuture<Void> infoMap(@NotNull String mapId, @NotNull Player player) {
         return storage.getMapById(mapId)
                 .thenAccept(map -> {

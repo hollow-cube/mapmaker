@@ -23,6 +23,7 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new Create());
         addSubcommand(new Info());
         addSubcommand(new Edit());
+        addSubcommand(new Play());
     }
 
     private class Create extends Command {
@@ -82,9 +83,28 @@ public class MapCommand extends BaseHubCommand {
         private void editWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) return;
 
-            //todo handler should handle this, and handler should have an interface to create maps
             var mapId = context.get(idArg);
             handler.editMap(mapId, player)
+                    .exceptionally(FutureUtil::handleException);
+        }
+    }
+
+    private class Play extends Command {
+        private final Argument<String> idArg = ArgumentType.String("map-id");
+
+        public Play() {
+            super("play");
+
+            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map play <map-id>"));
+
+            addSyntax(this::editWithId, idArg);
+        }
+
+        private void editWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) return;
+
+            var mapId = context.get(idArg);
+            handler.playMap(mapId, player)
                     .exceptionally(FutureUtil::handleException);
         }
     }

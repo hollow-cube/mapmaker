@@ -12,6 +12,8 @@ public interface MapHandler {
 
     @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player);
 
+    @NotNull CompletableFuture<Void> playMap(@NotNull String mapId, @NotNull Player player);
+
     @NotNull CompletableFuture<Void> infoMap(@NotNull String mapId, @NotNull Player player);
 
 }

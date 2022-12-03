@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
@@ -17,11 +18,13 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 public class DevServer {
     public static void main(String[] args) {
         System.setProperty("minestom.terminal.disabled", "true");
+        System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
         var server = MinecraftServer.init();
 
@@ -102,7 +105,9 @@ public class DevServer {
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
-        if (!event.isFirstSpawn()) return;
+        //todo this should be handled by hub
+        if (event.getSpawnInstance().hasTag(MapWorld.MAP_ID))
+            return;
 
         var player = event.getPlayer();
         player.setPermissionLevel(4);
