@@ -6,7 +6,7 @@ import net.minestom.server.world.DimensionType;
 
 public class DimensionUtil {
 
-    public static final DimensionType FULL_BRIGHT = DimensionType.builder(NamespaceID.from("bright_dim"))
+    public static final DimensionType FULL_BRIGHT = DimensionType.builder(NamespaceID.from("bright_dim_2"))
             .ultrawarm(false)
             .natural(true)
             .piglinSafe(false)
@@ -24,7 +24,6 @@ public class DimensionUtil {
             .build();
 
     static {
-        System.out.println(MinecraftServer.getDimensionTypeManager().unmodifiableList());
         MinecraftServer.getDimensionTypeManager().addDimension(FULL_BRIGHT);
     }
 }
