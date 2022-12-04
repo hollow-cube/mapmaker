@@ -75,7 +75,7 @@ public class DevServer {
 
     private void registerCommands() {
         var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapCommand(new MapHandlerImpl(mapStorage, maps)));
+        commands.register(new MapCommand(new MapHandlerImpl(mapStorage, maps))); //todo move me to map server
     }
 
     private void handlePreLogin(AsyncPlayerPreLoginEvent event) {
