@@ -1,5 +1,6 @@
 package net.hollowcube.map;
 
+import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.MapWorld;
@@ -11,8 +12,10 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,14 @@ public class MapServer implements MapManager {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
+
+        var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
+            if (event instanceof InstanceEvent instanceEvent)
+                return instanceEvent.getInstance().hasTag(MapWorld.MAP_ID);
+            return false;
+        });
+        MinecraftServer.getGlobalEventHandler().addChild(blockEvents);
+        HCPlacementRules.init(blockEvents);
 
         var s3Address = System.getenv("MM_S3_ADDRESS");
         if (s3Address == null) s3Address = "http://localhost:9000/";
