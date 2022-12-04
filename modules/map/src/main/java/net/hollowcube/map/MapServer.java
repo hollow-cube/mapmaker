@@ -6,7 +6,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.world.WorldManager;
-import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,11 +30,7 @@ public class MapServer implements MapManager {
     public static final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
-    private final WorldManager worldManager = new WorldManager(FileStorageS3.connect(
-            "http://localhost:9000/",
-            "DTprdE3DBZ7vG8wQ",
-            "qByxgkPV7rO7zo12KmRUkikSBMwYJCRj"
-    ));
+    private final WorldManager worldManager;
 
 
     // map id -> flags -> world
@@ -47,6 +41,12 @@ public class MapServer implements MapManager {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
+
+        var s3Address = System.getenv("MM_S3_ADDRESS");
+        if (s3Address == null) s3Address = "http://localhost:9000/";
+        var s3AccessKey = System.getenv("MM_S3_ACCESS_KEY");
+        var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
+        worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
 
         var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand());

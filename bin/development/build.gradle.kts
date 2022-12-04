@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     application
 }
@@ -15,4 +17,8 @@ dependencies {
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
+}
+
+tasks.withType<ShadowJar> {
+    isZip64 = true
 }
