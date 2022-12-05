@@ -5,11 +5,13 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
+import net.hollowcube.mapmaker.metrics.MetricManager;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
+import net.hollowcube.world.storage.PostgreSQLManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -41,6 +43,9 @@ public class DevServer {
     private final HubServer hub;
     private final MapServer maps;
 
+    private final PostgreSQLManager postgreSQLManager;
+    private final MetricManager metricManager;
+
     public DevServer() {
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
@@ -55,6 +60,9 @@ public class DevServer {
 
         this.hub = new HubServer();
         this.maps = new MapServer();
+
+        this.postgreSQLManager = new PostgreSQLManager();
+        this.metricManager = new MetricManager(postgreSQLManager);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
