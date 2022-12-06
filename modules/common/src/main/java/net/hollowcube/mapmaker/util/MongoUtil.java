@@ -61,7 +61,6 @@ public final class MongoUtil {
             while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
                 switch (reader.readName()) {
                     case "_id" -> value.setId(reader.readString());
-                    case "type" -> value.setType(MapData.Type.valueOf(reader.readString()));
                     case "name" -> value.setName(reader.readString());
                     case "mapFileId" -> value.setMapFileId(reader.readString());
                 }
@@ -74,7 +73,6 @@ public final class MongoUtil {
         public void encode(BsonWriter writer, MapData value, EncoderContext encoderContext) {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
-            writer.writeString("type", value.getType().name());
             writer.writeString("name", value.getName());
             if (value.getMapFileId() != null) {
                 writer.writeString("mapFileId", value.getMapFileId());

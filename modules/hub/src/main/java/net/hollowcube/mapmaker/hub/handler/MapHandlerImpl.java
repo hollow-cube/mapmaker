@@ -29,10 +29,9 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull CompletableFuture<MapData> createMap(@NotNull Player player, MapData.@NotNull Type type, @NotNull String name) {
+    public @NotNull CompletableFuture<MapData> createMap(@NotNull Player player, @NotNull String name) {
         var map = new MapData();
         map.setId(UUID.randomUUID().toString());
-        map.setType(type);
         map.setName(name);
         return storage.createMap(map)
                 .thenApply(map1 -> {
@@ -45,7 +44,7 @@ public class MapHandlerImpl implements MapHandler {
                 .exceptionallyCompose(e -> {
                     // If the ID was in use, attempt to create it again
                     if (e == MapStorage.DUPLICATE_ENTRY) {
-                        return createMap(player, type, name);
+                        return createMap(player, name);
                     }
 
                     player.sendMessage("Failed to create map: " + e.getMessage());

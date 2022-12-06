@@ -25,7 +25,6 @@ public class MapCommand extends BaseHubCommand {
     }
 
     private class Create extends Command {
-        private final Argument<MapData.Type> typeArg = ArgumentType.Enum("type", MapData.Type.class);
         private final Argument<String> nameArg = ArgumentType.String("name");
 
         public Create() {
@@ -33,16 +32,15 @@ public class MapCommand extends BaseHubCommand {
 
             setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map create <type> <name>"));
 
-            addSyntax(this::createWithTypeAndName, typeArg, nameArg);
+            addSyntax(this::createWithTypeAndName, nameArg);
         }
 
         private void createWithTypeAndName(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) return;
 
-            var type = context.get(typeArg);
             var name = context.get(nameArg);
 
-            handler.createMap(player, type, name)
+            handler.createMap(player, name)
                     .exceptionally(FutureUtil::handleException);
         }
     }
