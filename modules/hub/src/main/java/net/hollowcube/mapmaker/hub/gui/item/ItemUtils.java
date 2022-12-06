@@ -8,6 +8,13 @@ import net.minestom.server.item.Material;
 
 public class ItemUtils {
     // Default player hotbar
+
+    public static final ItemStack BLANK_ITEM = ItemStack.of(Material.STICK)
+            .withMeta(meta -> meta.customModelData(1000));
+
+    public static final int PLAY_ITEM_CMD = 500;
+    public static final int CREATE_ITEM_CMD = 501;
+
     private static final Component NAME_PLAY_MAPS =
             Component.text("Play Maps ", NamedTextColor.BLUE)
                     .append(Component.text("(", NamedTextColor.DARK_GRAY))
@@ -34,6 +41,7 @@ public class ItemUtils {
             ItemStack.builder(Material.NETHER_STAR)
                     .displayName(NAME_PLAY_MAPS)
                     .lore(LORE_PLAY_MAPS[0], LORE_PLAY_MAPS[1])
+                    .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
                     .build();
 
     public static final ItemStack GUI_CREATE_MAPS =
@@ -41,5 +49,6 @@ public class ItemUtils {
                     .displayName(NAME_CREATE_MAPS)
                     .lore(LORE_CREATE_MAPS[0], LORE_CREATE_MAPS[1])
                     .meta(metabuilder -> metabuilder.hideFlag(ItemHideFlag.HIDE_ATTRIBUTES))
+                    .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
                     .build();
 }

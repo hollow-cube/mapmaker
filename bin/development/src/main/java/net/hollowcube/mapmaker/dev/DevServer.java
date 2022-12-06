@@ -10,15 +10,23 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.PropertyResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 public class DevServer {
@@ -33,6 +41,14 @@ public class DevServer {
         new DevServer();
 
         server.start("0.0.0.0", 25565);
+
+        try {
+            var props = new Properties();
+            props.load(Files.newInputStream(Path.of("/Users/matt/dev/projects/mmo/mapmaker/bin/development/src/main/resources/lang/en_US.properties")));
+            System.out.println(props);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private final PlayerStorage playerStorage;
@@ -42,6 +58,8 @@ public class DevServer {
     private final MapServer maps;
 
     public DevServer() {
+        setupTranslation();
+
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
             this.playerStorage = PlayerStorage.memory();
@@ -62,15 +80,19 @@ public class DevServer {
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
 
         registerCommands();
+    }
 
-        //todo move placement rules to map server stuff
-//        var placementHandler = EventNode.event("placement-rules", EventFilter.BLOCK, event -> {
-//            if (event instanceof InstanceEvent instanceEvent)
-//                return instanceEvent.getInstance().hasTag(MapWorld.MAP_ID);
-//            return false;
-//        });
-//        eventHandler.addChild(placementHandler);
-//        HCPlacementRules.init(placementHandler);
+    private void setupTranslation() {
+        try {
+            MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+            var registry = TranslationRegistry.create(Key.key("mapmaker", "i18n"));
+            var bundle = new PropertyResourceBundle(DevServer.class.getResourceAsStream("/lang/en_US.properties"));
+            registry.registerAll(Locale.ENGLISH, bundle, true);
+            registry.defaultLocale(Locale.ENGLISH);
+            GlobalTranslator.translator().addSource(registry);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void registerCommands() {
@@ -115,6 +137,7 @@ public class DevServer {
 
         //todo temp
         player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
+        player.sendMessage(Component.translatable("test.translation"));
     }
 
 }

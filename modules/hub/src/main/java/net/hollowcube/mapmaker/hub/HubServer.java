@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.mapmaker.hub.gui.inventory.InventoryUtils;
+import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
+import net.hollowcube.mapmaker.hub.gui.section.BuildMaps;
 import net.hollowcube.mapmaker.util.DimensionUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,6 +14,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
@@ -39,6 +43,7 @@ public class HubServer implements HubManager {
                 EventFilter.INSTANCE, e -> e.getInstance().hasTag(HUB_MARKER));
         eventNode.addChild(instanceEvents);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
+        eventNode.addListener(PlayerUseItemEvent.class, this::handleUseItem);
     }
 
     public @NotNull Instance getInstance() {
@@ -68,6 +73,21 @@ public class HubServer implements HubManager {
             player.sendMessage(Component.text("Welcome to ", NamedTextColor.WHITE)
                     .append(Component.text("Map Maker!", NamedTextColor.AQUA)));
         }
+    }
+
+    private void handleUseItem(@NotNull PlayerUseItemEvent event) {
+        var instance = event.getInstance();
+        if (!instance.hasTag(HUB_MARKER)) return;
+        event.setCancelled(true);
+
+        var item = event.getItemStack();
+        var player = event.getPlayer();
+        switch (item.meta().getCustomModelData()) {
+            case ItemUtils.PLAY_ITEM_CMD -> System.out.println("open play item gui");
+            case ItemUtils.CREATE_ITEM_CMD -> player.openInventory(new RouterSection(new BuildMaps()).getInventory());
+
+        }
+
     }
 
 }
