@@ -1,7 +1,9 @@
 package net.hollowcube.map;
 
 import net.hollowcube.block.placement.HCPlacementRules;
+import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
+import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapManager;
@@ -44,6 +46,9 @@ public class MapServer implements MapManager {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
+        eventNode.addListener(MapWorldCompleteEvent.class, event -> {
+            System.out.println("completed map");
+        });
 
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
             if (event instanceof InstanceEvent instanceEvent)
@@ -61,6 +66,7 @@ public class MapServer implements MapManager {
 
         var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand());
+        commandManager.register(new GiveCommand());
     }
 
     public @NotNull WorldManager worldManager() {

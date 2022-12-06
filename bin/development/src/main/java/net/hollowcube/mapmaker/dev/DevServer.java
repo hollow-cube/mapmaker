@@ -5,6 +5,7 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
@@ -27,6 +28,7 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ServiceLoader;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -92,6 +94,13 @@ public class DevServer {
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
 
         registerCommands();
+
+        int i = 0;
+        for (var facet : ServiceLoader.load(Facet.class)) {
+            facet.hook(MinecraftServer.process());
+            i++;
+        }
+        System.out.println("loaded " + i + " facets");
 
         TerraformWorldEdit.init();
     }

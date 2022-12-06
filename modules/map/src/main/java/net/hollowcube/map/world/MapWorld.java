@@ -14,14 +14,23 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class MapWorld extends BaseWorld {
+
     public static final Tag<String> MAP_ID = Tag.String("mapmaker:map/id");
     public static final Tag<MapData> MAP_DATA = TagUtil.noop("mapmaker:map/data");
+
+    private static final Tag<MapWorld> THIS_TAG = TagUtil.noop("mapmaker:map/world");
+
+    public static @NotNull MapWorld fromInstance(@NotNull Instance instance) {
+        return Objects.requireNonNull(instance.getTag(THIS_TAG));
+    }
 
     public static final int FLAG_NONE = 0;
     public static final int FLAG_EDIT = 1;
@@ -37,6 +46,7 @@ public class MapWorld extends BaseWorld {
         instance().getWorldBorder().setDiameter(100); //todo
         instance().setGenerator(MapGenerators.flatWorld());
 
+        instance().setTag(THIS_TAG, this);
         instance().setTag(MAP_ID, map.getId());
         instance().setTag(MAP_DATA, map);
 
