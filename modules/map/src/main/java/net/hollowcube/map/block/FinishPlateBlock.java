@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
+import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.item.FinishPlateItem;
 import net.hollowcube.map.item.ItemManager;
 import net.hollowcube.map.item.NamedItems;
@@ -53,6 +54,9 @@ public class FinishPlateBlock implements Facet {
         server.block().registerHandler(Handler.INSTANCE.getNamespaceId(), () -> Handler.INSTANCE);
         server.eventHandler().addListener(MapWorldRegisterEvent.class, event -> {
             event.getInstance().eventNode().addChild(node);
+        });
+        server.eventHandler().addListener(MapWorldUnregisterEvent.class, event -> {
+            event.getInstance().eventNode().removeChild(node);
         });
     }
 
