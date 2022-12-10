@@ -1,7 +1,11 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.mapmaker.hub.gui.inventory.InventoryUtils;
+import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
+import net.hollowcube.mapmaker.map.MapManager;
+import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
 import net.hollowcube.mapmaker.hub.gui.section.BuildMaps;
 import net.hollowcube.mapmaker.util.DimensionUtil;
@@ -9,9 +13,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
-import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
@@ -30,7 +34,7 @@ public class HubServer implements HubManager {
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:hub");
     private final Instance instance; // Hub instance
 
-    public HubServer() {
+    public HubServer(@NotNull MapStorage mapStorage, @NotNull MapManager maps) {
         TemporaryIAmTerrible.INSTANCE = this;
 
         instance = new InstanceContainer(UUID.randomUUID(), DimensionUtil.FULL_BRIGHT);
@@ -39,10 +43,10 @@ public class HubServer implements HubManager {
         instance.setTag(HUB_MARKER, true);
 
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
-        var instanceEvents = EventNode.event("mapmaker:hub/instance",
-                EventFilter.INSTANCE, e -> e.getInstance().hasTag(HUB_MARKER));
-        eventNode.addChild(instanceEvents);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
+
+        var commands = MinecraftServer.getCommandManager();
+        commands.register(new MapCommand(new MapHandlerImpl(mapStorage, maps)));
         eventNode.addListener(PlayerUseItemEvent.class, this::handleUseItem);
     }
 
@@ -70,6 +74,7 @@ public class HubServer implements HubManager {
 
         InventoryUtils.setPlayerLobbyInventory(player);
         if (event.isFirstSpawn()) {
+            player.setGameMode(GameMode.ADVENTURE);
             player.sendMessage(Component.text("Welcome to ", NamedTextColor.WHITE)
                     .append(Component.text("Map Maker!", NamedTextColor.AQUA)));
         }

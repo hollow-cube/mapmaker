@@ -1,20 +1,10 @@
 package net.hollowcube.mapmaker.storage;
 
-import org.jetbrains.annotations.Nullable;
+import net.hollowcube.mapmaker.error.Error;
 
 public interface Storage {
-    RuntimeException NOT_FOUND = new RuntimeException("not found");
-    RuntimeException DUPLICATE_ENTRY = new RuntimeException("already exists");
 
-    static boolean isNotFound(@Nullable Throwable e) {
-        if (e == null) return false;
-        if (e == NOT_FOUND) return true;
-        return isNotFound(e.getCause());
-    }
+    Error ERR_NOT_FOUND = Error.of("not found");
+    Error ERR_DUPLICATE_ENTRY = Error.of("already exists");
 
-    static boolean isDuplicateEntry(@Nullable Throwable e) {
-        if (e == null) return false;
-        if (e == DUPLICATE_ENTRY) return true;
-        return isNotFound(e.getCause());
-    }
 }

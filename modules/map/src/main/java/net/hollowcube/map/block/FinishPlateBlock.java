@@ -5,7 +5,6 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
-import net.hollowcube.map.item.FinishPlateItem;
 import net.hollowcube.map.item.ItemManager;
 import net.hollowcube.map.item.NamedItems;
 import net.hollowcube.map.world.MapWorld;

@@ -4,11 +4,9 @@ import io.helidon.health.HealthSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.error.Error;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.command.MapCommand;
-import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -85,15 +83,13 @@ public class DevServer {
 
         StaticAbuse.mapStorage = mapStorage;
 
-        this.hub = new HubServer();
         this.maps = new MapServer();
+        this.hub = new HubServer(mapStorage, maps);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
-
-        registerCommands();
 
         int i = 0;
         for (var facet : ServiceLoader.load(Facet.class)) {
@@ -121,7 +117,7 @@ public class DevServer {
         var player = event.getPlayer();
         playerStorage.getPlayerByUuid(event.getPlayerUuid().toString())
                 .exceptionallyCompose(e -> {
-                    if (Storage.isNotFound(e)) {
+                    if (e instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
@@ -144,15 +140,12 @@ public class DevServer {
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
-        //todo this should be handled by hub
-        if (event.getSpawnInstance().hasTag(MapWorld.MAP_ID))
-            return;
+        if (!event.isFirstSpawn()) return;
 
         var player = event.getPlayer();
         player.setPermissionLevel(4);
-        player.setGameMode(GameMode.CREATIVE);
 
-        //todo temp
+        //todo temp. PLAYER_ID is the players network ID (not necessarily their uuid, for bedrock or other users)
         player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
 
         // Alpha watermark

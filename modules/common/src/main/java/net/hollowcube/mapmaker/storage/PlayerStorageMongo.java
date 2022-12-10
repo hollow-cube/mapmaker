@@ -26,7 +26,7 @@ public class PlayerStorageMongo implements PlayerStorage {
             try {
                 collection().insertOne(player);
             } catch (DuplicateKeyException ignored) {
-                throw DUPLICATE_ENTRY;
+                throw ERR_DUPLICATE_ENTRY;
             }
             return player;
         }, ForkJoinPool.commonPool());
@@ -38,7 +38,7 @@ public class PlayerStorageMongo implements PlayerStorage {
             var filter = eq("_id", id);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                throw NOT_FOUND;
+                throw ERR_NOT_FOUND;
             return result;
         }, ForkJoinPool.commonPool());
     }
@@ -49,7 +49,7 @@ public class PlayerStorageMongo implements PlayerStorage {
             var filter = eq("uuid", uuid);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                throw NOT_FOUND;
+                throw ERR_NOT_FOUND;
             return result;
         }, ForkJoinPool.commonPool());
     }
