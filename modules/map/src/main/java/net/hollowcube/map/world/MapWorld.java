@@ -1,5 +1,7 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.util.FutureUtil;
 import net.hollowcube.world.WorldManager;
@@ -64,6 +66,9 @@ public class MapWorld extends BaseWorld {
 
         // Handle the last person leaving
         eventNode.addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave);
+
+        // Mark the map as registered
+        EventDispatcher.call(new MapWorldRegisterEvent(this));
     }
 
     public @NotNull MapData map() {
@@ -106,8 +111,12 @@ public class MapWorld extends BaseWorld {
 
     private void initPlayerForPlaying(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
+        player.setTag(MapHooks.PLAYING, true);
+
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
+
+
 
         player.sendMessage("Now playing " + map.getName());
     }
@@ -121,6 +130,18 @@ public class MapWorld extends BaseWorld {
     }
 
     private void handlePlayerLeave(@NotNull PlayerInstanceLeaveEvent event) {
+        // Always remove playing tag if present
+        var player = event.getPlayer();
+        player.removeTag(MapHooks.PLAYING);
+
+        // Handle unloading the world when the last player leaves
+        //todo need to immediately unregister the world from the world manager so that no players are added.
+        //todo what happens if a bid is sent and then the last player leaves? do we track that a bid is out?
+        // or just tell the player an error occurred and send them back
+        // 1) Require the hub to send a message indicating which bid was selected, hold the server until that message
+        //    is received. During this time the map is marked unready and will not be submitted for more bids until
+        //    that player joins, at which point it becomes active again.
+
         // During event, the player is still in the instance, so we check for 1 remaining player.
         if (instance().getPlayers().size() > 1) return;
 

@@ -9,11 +9,13 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.world.WorldManager;
+import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -43,11 +45,16 @@ public class MapServer implements MapManager {
     private final Map<String, Map<Integer, MapWorld>> maps = new ConcurrentHashMap<>();
 
     public MapServer() {
+        new PlayerSpawnInInstanceEvent(null); // Idk why the static initializer is not triggering from other usages
+
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
         eventNode.addListener(MapWorldCompleteEvent.class, event -> {
-            System.out.println("completed map");
+            var player = event.getPlayer();
+            player.setTag(MapHooks.PLAYING, false);
+
+            player.sendMessage("Map complete!");
         });
 
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
