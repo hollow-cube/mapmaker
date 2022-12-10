@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * todo: this should be removed in favor of a local bid interface on both sides.
+ */
 public interface HubManager {
 
     @NotNull CompletableFuture<Void> sendToHub(@NotNull Player player);

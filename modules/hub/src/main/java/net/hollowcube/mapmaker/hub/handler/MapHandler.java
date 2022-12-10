@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface MapHandler {
 
-    @NotNull CompletableFuture<MapData> createMap(@NotNull Player player, @NotNull String name);
+    @NotNull CompletableFuture<Void> createMap(@NotNull Player player, @NotNull String name);
 
     @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player);
 

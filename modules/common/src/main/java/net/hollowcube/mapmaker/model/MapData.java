@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.model;
 public class MapData {
 
     private String id;
+    private String owner;
     private String name;
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
@@ -14,6 +15,14 @@ public class MapData {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public String getName() {
@@ -39,4 +48,5 @@ public class MapData {
                 ", name='" + name + '\'' +
                 '}';
     }
+
 }

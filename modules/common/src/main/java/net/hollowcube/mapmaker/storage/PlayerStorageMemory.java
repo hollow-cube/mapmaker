@@ -19,7 +19,7 @@ class PlayerStorageMemory implements PlayerStorage {
         LOGGER.info("Creating player {}", player.getId());
         var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
-            return CompletableFuture.failedFuture(DUPLICATE_ENTRY);
+            return CompletableFuture.failedFuture(ERR_DUPLICATE_ENTRY);
         return CompletableFuture.completedFuture(player);
     }
 
@@ -28,7 +28,7 @@ class PlayerStorageMemory implements PlayerStorage {
         LOGGER.info("Getting player by id {}", id);
         var player = playersById.get(id);
         if (player == null) {
-            return CompletableFuture.failedFuture(NOT_FOUND);
+            return CompletableFuture.failedFuture(ERR_NOT_FOUND);
         }
         return CompletableFuture.completedFuture(player);
     }
@@ -41,6 +41,6 @@ class PlayerStorageMemory implements PlayerStorage {
                 return CompletableFuture.completedFuture(entry.getValue());
             }
         }
-        return CompletableFuture.failedFuture(NOT_FOUND);
+        return CompletableFuture.failedFuture(ERR_NOT_FOUND);
     }
 }

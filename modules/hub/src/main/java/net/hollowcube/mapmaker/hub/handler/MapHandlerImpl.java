@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.hub.handler;
 
+import net.hollowcube.mapmaker.error.Error;
 import net.hollowcube.mapmaker.map.MapHandle;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.player.PlayerHooks;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.util.FutureUtil;
@@ -29,22 +31,29 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull CompletableFuture<MapData> createMap(@NotNull Player player, @NotNull String name) {
+    public @NotNull CompletableFuture<Void> createMap(@NotNull Player player, @NotNull String name) {
         var map = new MapData();
         map.setId(UUID.randomUUID().toString());
+        map.setOwner(PlayerHooks.getId(player));
         map.setName(name);
         return storage.createMap(map)
-                .thenApply(map1 -> {
+                .thenAccept(map1 -> {
                     player.sendMessage(
                             Component.text("Successfully created ", NamedTextColor.WHITE)
                                     .append(Component.text(map1.getName(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map1.getId()))));
                     System.out.println("Created map " + map.getId());
-                    return map1;
                 })
                 .exceptionallyCompose(e -> {
                     // If the ID was in use, attempt to create it again
-                    if (e == MapStorage.DUPLICATE_ENTRY) {
-                        return createMap(player, name);
+                    if (e.getCause() instanceof Error err) {
+                        if (err.is(MapStorage.ERR_DUPLICATE_NAME)) {
+                            player.sendMessage("Map named " + name + " already exists.");
+                            return CompletableFuture.completedFuture(null);
+                        }
+
+                        if (err.is(Storage.ERR_DUPLICATE_ENTRY)) {
+                            return createMap(player, name);
+                        }
                     }
 
                     player.sendMessage("Failed to create map: " + e.getMessage());
@@ -59,7 +68,7 @@ public class MapHandlerImpl implements MapHandler {
                 .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_EDIT, player))
                 .exceptionally(e -> {
                     // Specific error for map not found
-                    if (e == MapStorage.NOT_FOUND) {
+                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
                         return null;
                     }
@@ -77,7 +86,7 @@ public class MapHandlerImpl implements MapHandler {
                 .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_NONE, player))
                 .exceptionally(e -> {
                     // Specific error for map not found
-                    if (e == MapStorage.NOT_FOUND) {
+                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
                         return null;
                     }
@@ -100,7 +109,7 @@ public class MapHandlerImpl implements MapHandler {
                 })
                 .exceptionally(e -> {
                     // Specific error for map not found
-                    if (e == Storage.NOT_FOUND) {
+                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
                         return null;
                     }

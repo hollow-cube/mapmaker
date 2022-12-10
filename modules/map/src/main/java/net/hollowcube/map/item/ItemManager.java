@@ -5,7 +5,6 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.Suggestion;
-import net.minestom.server.command.builder.suggestion.SuggestionCallback;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -23,6 +22,12 @@ import java.util.Map;
 public class ItemManager {
     private static final Map<NamespaceID, ItemStack> items = new HashMap<>();
 
+    static {
+        for (var material : Material.values()) {
+            items.put(material.namespace(), ItemStack.of(material));
+        }
+    }
+
     public static final Argument<@Nullable ItemStack> ARGUMENT = ArgumentType.ResourceLocation("item")
             .setSuggestionCallback(ItemManager::commandCompleter)
             .map(ItemManager::getItem);
@@ -35,15 +40,16 @@ public class ItemManager {
         var input = suggestion.getInput().substring(suggestion.getStart() - 1).trim();
 
         if (input.isBlank()) {
-            //todo handle any item better
+            items.keySet().stream()
+                    .limit(20)
+                    .forEach(name -> suggestion.addEntry(new SuggestionEntry(name.toString())));
             return;
         }
 
-        for (var name : items.keySet()) {
-            if (name.namespace().startsWith(input) || name.path().startsWith(input)) {
-                suggestion.addEntry(new SuggestionEntry(name.toString()));
-            }
-        }
+        items.keySet().stream()
+                .filter(name -> name.namespace().startsWith(input) || name.path().startsWith(input))
+                .limit(20)
+                .forEach(name -> suggestion.addEntry(new SuggestionEntry(name.toString())));
     }
 
     private static @Nullable ItemStack getItem(@NotNull String name) {

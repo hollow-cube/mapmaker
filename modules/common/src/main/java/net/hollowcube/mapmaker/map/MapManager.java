@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Handles loading and saving maps, as well as associated locking mechanisms (todo).
+ * todo: this should be removed in favor of a local bid interface on both sides.
  */
 public interface MapManager {
 
