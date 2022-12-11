@@ -6,6 +6,7 @@ import io.helidon.webserver.WebServer;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -55,6 +57,10 @@ public class DevServer {
         webServer.start()
                 .thenAccept(ws -> System.out.println("Web server is running at :" + ws.port()));
         //todo handle kill code and stop everything gracefully.
+        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
+
+        MojangAuth.init();
 
         server.start();
         minecraftServer.start("0.0.0.0", 25565);
@@ -107,11 +113,6 @@ public class DevServer {
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"),
                 () -> HealthCheckResponse.up("mapmaker")
         );
-    }
-
-    private void registerCommands() {
-        var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapCommand(new MapHandlerImpl(mapStorage, maps))); //todo move me to map server
     }
 
     private void handlePreLogin(AsyncPlayerPreLoginEvent event) {
