@@ -1,0 +1,81 @@
+package net.hollowcube.mapmaker.hub.handler;
+
+import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.result.Error;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
+import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.storage.Storage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+public class MapAdminHandler {
+    private static final Logger logger = LoggerFactory.getLogger(MapAdminHandler.class);
+
+    private final MapStorage storage;
+
+    public MapAdminHandler(@NotNull MapStorage storage) {
+        this.storage = storage;
+    }
+
+    public void showMapList(@NotNull Player player, @Nullable String playerId) {
+        //todo need to validate players existence
+        FutureResult<List<MapData>> future = playerId == null ? FutureResult.error(Error.of("not implemented")) : storage.getMapsByPlayer(playerId);
+        future.then(maps -> {
+            if (maps.isEmpty()) {
+                List<Component> msg;
+                if (playerId != null)
+                    msg = LanguageProvider.createMultiTranslatable("command.map.admin.list.empty.player", Component.text(playerId));
+                else msg = LanguageProvider.createMultiTranslatable("command.map.admin.list.empty");
+                msg.forEach(player::sendMessage);
+                return;
+            }
+
+            var msg = playerId != null ? LanguageProvider.createMultiTranslatable("command.map.admin.list.header.player", Component.text(playerId))
+                    : LanguageProvider.createMultiTranslatable("command.map.admin.list.header");
+            msg.forEach(player::sendMessage);
+
+            for (MapData map : maps) {
+                var entryMsg = LanguageProvider.createMultiTranslatable("command.map.admin.list.entry",
+                        Component.text(map.getId()).clickEvent(ClickEvent.copyToClipboard(map.getId())).hoverEvent(Component.text("Click to copy")),
+                        Component.text(map.getName()));
+                entryMsg.forEach(player::sendMessage);
+            }
+        });
+
+    }
+
+    public void showMapInfoById(@NotNull Player player, @NotNull String mapId) {
+        storage.getMapById(mapId)
+                .then(map -> {
+                    var msg = LanguageProvider.createMultiTranslatable("command.map.admin.info.map",
+                            Component.text(map.getId()).clickEvent(ClickEvent.copyToClipboard(map.getId())).hoverEvent(Component.text("Click to copy")),
+                            Component.text(map.getName()),
+                            Component.text(map.getOwner()));
+                    msg.forEach(player::sendMessage);
+                })
+                .mapErr(err -> {
+                    if (err.is(Storage.ERR_NOT_FOUND)) {
+                        // Specific error for map not found
+                        var msg = LanguageProvider.createMultiTranslatable("command.map.admin.info.not_found", Component.text(mapId));
+                        msg.forEach(player::sendMessage);
+                    } else {
+                        // Some other error
+                        var msg = LanguageProvider.createMultiTranslatable("command.map.admin.info.unknown_error",
+                                Component.text(err.message()), Component.text(mapId));
+                        msg.forEach(player::sendMessage);
+                        logger.error("failed to fetch map info for {}: {}", mapId, err);
+                    }
+                    return Result.ofNull();
+                });
+    }
+
+}

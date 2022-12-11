@@ -11,10 +11,10 @@ import net.hollowcube.mapmaker.result.Result;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 
 public class MapStorageMongo implements MapStorage {
     private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
@@ -70,6 +70,27 @@ public class MapStorageMongo implements MapStorage {
             if (result.getModifiedCount() == 0)
                 return Result.error(ERR_NOT_FOUND);
             return Result.of(null);
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
+        return FutureResult.supply(() -> {
+            var filter = eq("owner", playerId);
+            var result = collection().find(filter).into(new ArrayList<>());
+            return Result.of(result);
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId) {
+        return FutureResult.supply(() -> {
+            var filter = and(eq("owner", playerId),
+                    or(eq("_id", nameOrId), eq("name", nameOrId)));
+            var result = collection().find(filter).limit(1).first();
+            if (result == null)
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result);
         });
     }
 

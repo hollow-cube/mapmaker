@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.Storage;
-import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class MapHandlerImpl implements MapHandler {
     public static final Logger LOGGER = LoggerFactory.getLogger(MapHandlerImpl.class);
@@ -29,6 +27,11 @@ public class MapHandlerImpl implements MapHandler {
     public MapHandlerImpl(MapStorage storage, MapManager maps) {
         this.storage = storage;
         this.maps = maps;
+    }
+
+    @Override
+    public @NotNull MapStorage storage() {
+        return storage;
     }
 
     @Override
@@ -61,14 +64,17 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull FutureResult<Void> editMap(@NotNull String mapId, @NotNull Player player) {
-        player.sendMessage("Editing map " + mapId);
-        return storage.getMapById(mapId)
+    public @NotNull FutureResult<Void> editMap(@NotNull String nameOrId, @NotNull Player player) {
+        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
+                .map(map -> {
+                    player.sendMessage("Editing map " + map.getName());
+                    return map;
+                })
                 .flatMap(map -> maps.joinMap(map, MapHandle.FLAG_EDIT, player))
                 .mapErr(err -> {
                     // Specific error for map not found
                     if (err.is(Storage.ERR_NOT_FOUND)) {
-                        player.sendMessage("Map not found: " + mapId);
+                        player.sendMessage("Map not found: " + nameOrId);
                         return Result.ofNull();
                     }
 
@@ -79,14 +85,17 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull FutureResult<Void> playMap(@NotNull String mapId, @NotNull Player player) {
-        player.sendMessage("Playing map " + mapId);
-        return storage.getMapById(mapId)
+    public @NotNull FutureResult<Void> playMap(@NotNull String nameOrId, @NotNull Player player) {
+        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
+                .map(map -> {
+                    player.sendMessage("Playing map " + map.getName());
+                    return map;
+                })
                 .flatMap(map -> maps.joinMap(map, MapHandle.FLAG_NONE, player))
                 .mapErr(err -> {
                     // Specific error for map not found
                     if (err.is(Storage.ERR_NOT_FOUND)) {
-                        player.sendMessage("Map not found: " + mapId);
+                        player.sendMessage("Map not found: " + nameOrId);
                         return Result.ofNull();
                     }
 
@@ -97,8 +106,8 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull FutureResult<Void> infoMap(@NotNull String mapId, @NotNull Player player) {
-        return storage.getMapById(mapId)
+    public @NotNull FutureResult<Void> infoMap(@NotNull String nameOrId, @NotNull Player player) {
+        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
                 .then(map -> {
                     player.sendMessage(Component.text("Map info for ", NamedTextColor.WHITE)
                             .append(Component.text(map.getName(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map.getId()))));
@@ -108,7 +117,7 @@ public class MapHandlerImpl implements MapHandler {
                 .mapErr(err -> {
                     // Specific error for map not found
                     if (err.is(Storage.ERR_NOT_FOUND)) {
-                        player.sendMessage("Map not found: " + mapId);
+                        player.sendMessage("Map not found: " + nameOrId);
                         return Result.ofNull();
                     }
 

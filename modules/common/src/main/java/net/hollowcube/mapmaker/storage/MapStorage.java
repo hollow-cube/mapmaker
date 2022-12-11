@@ -6,6 +6,8 @@ import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.util.MongoUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public interface MapStorage extends Storage {
     Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}");
 
@@ -26,5 +28,12 @@ public interface MapStorage extends Storage {
     @NotNull FutureResult<MapData> getMapById(@NotNull String mapId);
 
     @NotNull FutureResult<Void> updateMap(@NotNull MapData map);
+
+
+    // Player specific map searches
+
+    @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId);
+
+    @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId);
 
 }
