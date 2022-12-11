@@ -17,12 +17,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-/**
- * Naive component translation system.
- * <p>
- * Should be replaced with adventure translation or something else in the future.
- */
-
 public class LanguageProvider {
     private static final Properties properties = new Properties();
 
@@ -33,6 +27,17 @@ public class LanguageProvider {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+        for (var name : properties.stringPropertyNames()) {
+            var value = properties.getProperty(name);
+            if (!value.contains("\n")) continue;
+
+            properties.remove(name);
+            var lines = value.split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                properties.setProperty(name + "." + i, lines[i]);
+            }
         }
     }
 
@@ -121,5 +126,22 @@ public class LanguageProvider {
             resolvers[i] = Placeholder.component(String.valueOf(i), translatable.args().get(i));
         }
         return MiniMessage.miniMessage().deserialize(raw, resolvers);
+    }
+
+    /**
+     * A workaround to having variable length translations (eg lore lines, description lines).
+     * Eventually will be replaced with proxy translation, which will support newlines.
+     */
+    public static List<Component> createMultiTranslatable(@NotNull String key, Component... args) {
+        var entries = properties.stringPropertyNames().stream()
+                .filter(k -> {
+                    if (!k.startsWith(key)) return false;
+                    var rest = k.substring(key.length());
+                    return rest.length() == 0 || rest.matches("\\.[0-9]+");
+                })
+                .map(k -> (Component) Component.translatable(k, args))
+                .toList();
+        if (entries.isEmpty()) return List.of(Component.text(key));
+        return entries;
     }
 }

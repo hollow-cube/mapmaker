@@ -9,6 +9,7 @@ import net.hollowcube.map.item.ItemManager;
 import net.hollowcube.map.item.NamedItems;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.facet.Facet;
+import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -31,13 +32,9 @@ public class FinishPlateBlock implements Facet {
 
     public static final ItemStack ITEM = ItemStack.builder(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)
             .meta(m -> m.customModelData(NamedItems.FINISH_PLATE))
-            .displayName(Component.text("Finish Plate", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
-            .lore(
-                    Component.text("Marks the finish line of the map.", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.text("You can place multiple of these at once.", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ).build();
+            .displayName(Component.translatable("item.finish_plate.name"))
+            .lore(LanguageProvider.createMultiTranslatable("item.finish_plate.lore"))
+            .build();
 
     private static EventNode<? extends InstanceEvent> node = EventNode.type("mapmaker:item/finish_plate", EventFilter.INSTANCE)
             .setPriority(-1000) //todo need to be careful when this is registered, dont want it to trigger before the non-edit mode handlers

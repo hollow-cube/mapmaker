@@ -2,8 +2,11 @@ package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,5 +42,24 @@ class MapStorageMemory implements MapStorage {
             return FutureResult.error(ERR_NOT_FOUND);
         mapsById.put(map.getId(), map);
         return FutureResult.of(null);
+    }
+
+    @Override
+    public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
+        var maps = new ArrayList<MapData>();
+        for (var map : mapsById.values()) {
+            if (map.getOwner().equals(playerId))
+                maps.add(map);
+        }
+        return FutureResult.of(maps);
+    }
+
+    @Override
+    public @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId) {
+        for (var map : mapsById.values()) {
+            if (map.getOwner().equals(playerId) && (map.getId().equals(nameOrId) || map.getName().equalsIgnoreCase(nameOrId)))
+                return FutureResult.of(map);
+        }
+        return FutureResult.error(ERR_NOT_FOUND);
     }
 }

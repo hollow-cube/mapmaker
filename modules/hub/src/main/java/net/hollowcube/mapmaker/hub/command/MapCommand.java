@@ -11,6 +11,19 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapCommand extends BaseHubCommand {
+
+    /*
+    PLAYERS
+    /map -> usage
+    /map create <name> -> creates a map under the current player
+    /map delete <name> -> deletes a map for the current player
+    /map edit <name> -> edits a map for the current player (by name)
+    /map list -> lists all maps for the current player
+
+
+     */
+
+
     private final MapHandler handler;
 
     public MapCommand(MapHandler handler) {
@@ -21,6 +34,8 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new Info());
         addSubcommand(new Edit());
         addSubcommand(new Play());
+
+        addSubcommand(new MapAdminCommand(handler.storage()));
     }
 
     private class Create extends Command {
