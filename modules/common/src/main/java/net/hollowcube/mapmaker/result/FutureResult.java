@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,6 +20,11 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     /** Creates a new {@link FutureResult} which is already completed with the given {@link Error}. */
     static <T> @NotNull FutureResult<T> error(@NotNull Error error) {
         return new FutureResults.CF<>(CompletableFuture.completedFuture(Result.error(error)));
+    }
+
+    /** Creates a new {@link FutureResult} which is already completed with a null result and no error. */
+    static <T> @NotNull FutureResult<T> ofNull() {
+        return new FutureResults.CF<>(CompletableFuture.completedFuture(Result.ofNull()));
     }
 
     /** Creates a new {@link FutureResult} executing the given {@link Supplier} in the jvm common pool. */
@@ -42,6 +48,8 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
 
     // Handler methods
 
+    @NotNull FutureResult<Void> then(@NotNull Consumer<T> consumer);
+
     @NotNull <S> FutureResult<S> map(@NotNull Function<T, S> mapper);
     @NotNull FutureResult<T> mapErr(@NotNull Function<@NotNull Error, @NotNull Result<T>> mapper);
 
@@ -50,6 +58,13 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
 
 
     // Compatibility
+
+    static <T> @NotNull FutureResult<T> wrap(@NotNull CompletableFuture<T> future) {
+        //todo need to wrap exceptions in Error type here
+        return new FutureResults.CF<>(future
+                .thenApply(Result::of)
+                .exceptionally(e -> Result.error(Error.of(e))));
+    }
 
     @NotNull CompletableFuture<Result<T>> toCompletableFuture();
 

@@ -1,10 +1,11 @@
 package net.hollowcube.mapmaker.hub.handler;
 
-import net.hollowcube.mapmaker.error.Error;
 import net.hollowcube.mapmaker.map.MapHandle;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.player.PlayerHooks;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.util.FutureUtil;
@@ -31,93 +32,89 @@ public class MapHandlerImpl implements MapHandler {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> createMap(@NotNull Player player, @NotNull String name) {
+    public @NotNull FutureResult<Void> createMap(@NotNull Player player, @NotNull String name) {
         var map = new MapData();
         map.setId(UUID.randomUUID().toString());
         map.setOwner(PlayerHooks.getId(player));
         map.setName(name);
         return storage.createMap(map)
-                .thenAccept(map1 -> {
+                .then(map1 -> {
                     player.sendMessage(
                             Component.text("Successfully created ", NamedTextColor.WHITE)
                                     .append(Component.text(map1.getName(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map1.getId()))));
                     System.out.println("Created map " + map.getId());
                 })
-                .exceptionallyCompose(e -> {
-                    // If the ID was in use, attempt to create it again
-                    if (e.getCause() instanceof Error err) {
-                        if (err.is(MapStorage.ERR_DUPLICATE_NAME)) {
-                            player.sendMessage("Map named " + name + " already exists.");
-                            return CompletableFuture.completedFuture(null);
-                        }
-
-                        if (err.is(Storage.ERR_DUPLICATE_ENTRY)) {
-                            return createMap(player, name);
-                        }
+                .flatMapErr(err -> {
+                    if (err.is(MapStorage.ERR_DUPLICATE_NAME)) {
+                        player.sendMessage("Map named " + name + " already exists.");
+                        return FutureResult.ofNull();
                     }
 
-                    player.sendMessage("Failed to create map: " + e.getMessage());
-                    return CompletableFuture.failedFuture(e);
+                    // If the ID was in use, attempt to create it again
+                    if (err.is(Storage.ERR_DUPLICATE_ENTRY)) {
+                        return createMap(player, name);
+                    }
+
+                    player.sendMessage("Failed to create map: " + err.message());
+                    return FutureResult.error(err.wrap("failed to create map: {0}"));
                 });
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player) {
+    public @NotNull FutureResult<Void> editMap(@NotNull String mapId, @NotNull Player player) {
         player.sendMessage("Editing map " + mapId);
         return storage.getMapById(mapId)
-                .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_EDIT, player))
-                .exceptionally(e -> {
+                .flatMap(map -> maps.joinMap(map, MapHandle.FLAG_EDIT, player))
+                .mapErr(err -> {
                     // Specific error for map not found
-                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
+                    if (err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
-                        return null;
+                        return Result.ofNull();
                     }
 
                     // Some other error
-                    player.sendMessage("Failed to join map: " + e.getMessage());
-                    return FutureUtil.handleException(e);
+                    player.sendMessage("Failed to join map: " + err);
+                    return Result.error(err.wrap("failed to edit map: {0}"));
                 });
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> playMap(@NotNull String mapId, @NotNull Player player) {
+    public @NotNull FutureResult<Void> playMap(@NotNull String mapId, @NotNull Player player) {
         player.sendMessage("Playing map " + mapId);
         return storage.getMapById(mapId)
-                .thenCompose(map -> maps.joinMap(map, MapHandle.FLAG_NONE, player))
-                .exceptionally(e -> {
+                .flatMap(map -> maps.joinMap(map, MapHandle.FLAG_NONE, player))
+                .mapErr(err -> {
                     // Specific error for map not found
-                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
+                    if (err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
-                        return null;
+                        return Result.ofNull();
                     }
 
                     // Some other error
-                    player.sendMessage("Failed to join map: " + e.getMessage());
-                    return FutureUtil.handleException(e);
+                    player.sendMessage("Failed to join map: " + err.message());
+                    return Result.error(err.wrap("failed to play map: {0}"));
                 });
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> infoMap(@NotNull String mapId, @NotNull Player player) {
+    public @NotNull FutureResult<Void> infoMap(@NotNull String mapId, @NotNull Player player) {
         return storage.getMapById(mapId)
-                .thenAccept(map -> {
-                    //todo copilot generated this message, should refactor it
+                .then(map -> {
                     player.sendMessage(Component.text("Map info for ", NamedTextColor.WHITE)
                             .append(Component.text(map.getName(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map.getId()))));
                     player.sendMessage(Component.text("ID: ", NamedTextColor.WHITE)
                             .append(Component.text(map.getId(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map.getId()))));
                 })
-                .exceptionally(e -> {
+                .mapErr(err -> {
                     // Specific error for map not found
-                    if (e.getCause() instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
+                    if (err.is(Storage.ERR_NOT_FOUND)) {
                         player.sendMessage("Map not found: " + mapId);
-                        return null;
+                        return Result.ofNull();
                     }
 
                     // Some other error
-                    player.sendMessage("Failed to get map info: " + e.getMessage());
-                    LOGGER.error("Failed to get map info", e);
-                    return null;
+                    player.sendMessage("Failed to get map info: " + err.message());
+                    return Result.error(err.wrap("failed to get map info: {0}"));
                 });
     }
 }

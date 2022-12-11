@@ -48,4 +48,23 @@ class Errors {
             return message();
         }
     }
+
+    public static final class ExceptionError implements Error {
+        private final Throwable exception;
+
+        public ExceptionError(@NotNull Throwable exception) {
+            this.exception = exception;
+        }
+
+        @Override
+        public @NotNull String message() {
+            //todo probably want to include the stacktrace or something
+            return exception.getMessage();
+        }
+
+        @Override
+        public String toString() {
+            return message();
+        }
+    }
 }

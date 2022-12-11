@@ -4,10 +4,11 @@ import io.helidon.health.HealthSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.mapmaker.error.Error;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
@@ -116,22 +117,25 @@ public class DevServer {
     private void handlePreLogin(AsyncPlayerPreLoginEvent event) {
         var player = event.getPlayer();
         playerStorage.getPlayerByUuid(event.getPlayerUuid().toString())
-                .exceptionallyCompose(e -> {
-                    if (e instanceof Error err && err.is(Storage.ERR_NOT_FOUND)) {
+                .flatMapErr(err -> {
+                    if (err.is(Storage.ERR_NOT_FOUND)) {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
                         return playerStorage.createPlayer(data);
                     }
-                    return CompletableFuture.failedFuture(e);
+                    return FutureResult.error(err);
                 })
-                .thenAccept(data -> player.setTag(PlayerData.DATA, data))
-                .exceptionally(e -> {
-                    System.out.println("Failed to load player data for " + player.getUsername());
-                    e.printStackTrace();
+                .then(data -> {
+                    player.setTag(PlayerData.PLAYER_ID, data.getId());
+                    player.setTag(PlayerData.DATA, data);
+                })
+                .mapErr(err -> {
+                    System.out.println("Failed to load player data for " + player.getUsername() + ": " + err);
                     player.kick(Component.text("Failed to load data"));
-                    return null;
+                    return Result.ofNull();
                 });
+        //todo need to hold player until this finishes
     }
 
     private void handleLogin(PlayerLoginEvent event) {

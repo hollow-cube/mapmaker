@@ -1,19 +1,17 @@
 package net.hollowcube.mapmaker.hub.handler;
 
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.result.FutureResult;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.CompletableFuture;
-
 public interface MapHandler {
 
-    @NotNull CompletableFuture<Void> createMap(@NotNull Player player, @NotNull String name);
+    @NotNull FutureResult<Void> createMap(@NotNull Player player, @NotNull String name);
 
-    @NotNull CompletableFuture<Void> editMap(@NotNull String mapId, @NotNull Player player);
+    @NotNull FutureResult<Void> editMap(@NotNull String mapId, @NotNull Player player);
 
-    @NotNull CompletableFuture<Void> playMap(@NotNull String mapId, @NotNull Player player);
+    @NotNull FutureResult<Void> playMap(@NotNull String mapId, @NotNull Player player);
 
-    @NotNull CompletableFuture<Void> infoMap(@NotNull String mapId, @NotNull Player player);
+    @NotNull FutureResult<Void> infoMap(@NotNull String mapId, @NotNull Player player);
 
 }

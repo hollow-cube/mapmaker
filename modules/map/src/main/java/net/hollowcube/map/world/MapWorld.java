@@ -91,6 +91,7 @@ public class MapWorld extends BaseWorld {
                 .thenCompose(fileId -> {
                     map.setMapFileId(fileId);
                     return StaticAbuse.mapStorage.updateMap(map)
+                            .toCompletableFuture()
                             // Still need to return the file id.
                             .thenApply(unused -> fileId);
                 });
@@ -115,8 +116,6 @@ public class MapWorld extends BaseWorld {
 
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
-
-
 
         player.sendMessage("Now playing " + map.getName());
     }

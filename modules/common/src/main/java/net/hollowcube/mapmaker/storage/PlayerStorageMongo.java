@@ -4,6 +4,8 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -21,37 +23,37 @@ public class PlayerStorageMongo implements PlayerStorage {
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
+        return FutureResult.supply(() -> {
             try {
                 collection().insertOne(player);
             } catch (DuplicateKeyException ignored) {
-                throw ERR_DUPLICATE_ENTRY;
+                return Result.error(ERR_DUPLICATE_ENTRY);
             }
-            return player;
-        }, ForkJoinPool.commonPool());
+            return Result.of(player);
+        });
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> getPlayerById(@NotNull String id) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id) {
+        return FutureResult.supply(() -> {
             var filter = eq("_id", id);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                throw ERR_NOT_FOUND;
-            return result;
-        }, ForkJoinPool.commonPool());
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result);
+        });
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
+        return FutureResult.supply(() -> {
             var filter = eq("uuid", uuid);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                throw ERR_NOT_FOUND;
-            return result;
-        }, ForkJoinPool.commonPool());
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result);
+        });
     }
 
     private @NotNull MongoCollection<PlayerData> collection() {

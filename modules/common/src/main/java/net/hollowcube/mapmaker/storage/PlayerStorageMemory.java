@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,32 +16,32 @@ class PlayerStorageMemory implements PlayerStorage {
     private final Map<String, PlayerData> playersById = new HashMap<>();
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
+    public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
         LOGGER.info("Creating player {}", player.getId());
         var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
-            return CompletableFuture.failedFuture(ERR_DUPLICATE_ENTRY);
-        return CompletableFuture.completedFuture(player);
+            return FutureResult.error(ERR_DUPLICATE_ENTRY);
+        return FutureResult.of(player);
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> getPlayerById(@NotNull String id) {
+    public @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id) {
         LOGGER.info("Getting player by id {}", id);
         var player = playersById.get(id);
         if (player == null) {
-            return CompletableFuture.failedFuture(ERR_NOT_FOUND);
+            return FutureResult.error(ERR_NOT_FOUND);
         }
-        return CompletableFuture.completedFuture(player);
+        return FutureResult.of(player);
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
+    public @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
         LOGGER.info("Getting player by uuid {}", uuid);
         for (var entry : playersById.entrySet()) {
             if (entry.getValue().getId().equals(uuid)) {
-                return CompletableFuture.completedFuture(entry.getValue());
+                return FutureResult.of(entry.getValue());
             }
         }
-        return CompletableFuture.failedFuture(ERR_NOT_FOUND);
+        return FutureResult.error(ERR_NOT_FOUND);
     }
 }

@@ -6,6 +6,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,8 +32,8 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull CompletableFuture<MapData> createMap(@NotNull MapData map) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
+        return FutureResult.supply(() -> {
             try {
                 collection().insertOne(map);
             } catch (MongoWriteException err) {
@@ -39,36 +41,36 @@ public class MapStorageMongo implements MapStorage {
                     // This is a pretty cursed way to check for this error. Mongo does not seem to inform which key
                     // or index caused the error (in a raw form), so we just look for the index name in the error message.
                     if (err.getError().getMessage().contains(OWNER_NAME_INDEX_NAME))
-                        throw ERR_DUPLICATE_NAME;
+                        return Result.error(ERR_DUPLICATE_NAME);
 
                     // ID mismatch
-                    throw ERR_DUPLICATE_ENTRY;
+                    return Result.error(ERR_DUPLICATE_ENTRY);
                 }
             }
-            return map;
-        }, ForkJoinPool.commonPool());
+            return Result.of(map);
+        });
     }
 
     @Override
-    public @NotNull CompletableFuture<MapData> getMapById(@NotNull String mapId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<MapData> getMapById(@NotNull String mapId) {
+        return FutureResult.supply(() -> {
             var filter = eq("_id", mapId);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                throw ERR_NOT_FOUND;
-            return result;
-        }, ForkJoinPool.commonPool());
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result);
+        });
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> updateMap(@NotNull MapData map) {
-        return CompletableFuture.supplyAsync(() -> {
+    public @NotNull FutureResult<Void> updateMap(@NotNull MapData map) {
+        return FutureResult.supply(() -> {
             var filter = eq("_id", map.getId());
             var result = collection().replaceOne(filter, map);
             if (result.getModifiedCount() == 0)
-                throw ERR_NOT_FOUND;
-            return null;
-        }, ForkJoinPool.commonPool());
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(null);
+        });
     }
 
     private @NotNull MongoCollection<MapData> collection() {
