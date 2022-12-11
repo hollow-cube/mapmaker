@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.storage;
 
-import net.hollowcube.mapmaker.error.Error;
+import net.hollowcube.mapmaker.result.Error;
 
 public interface Storage {
 

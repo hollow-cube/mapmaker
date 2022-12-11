@@ -1,10 +1,9 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.result.FutureResult;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Handles loading and saving maps, as well as associated locking mechanisms (todo).
@@ -25,6 +24,6 @@ public interface MapManager {
      * <p>
      * After calling this method, the player should be considered invalid unless the future fails.
      */
-    @NotNull CompletableFuture<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player);
+    @NotNull FutureResult<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player);
 
 }

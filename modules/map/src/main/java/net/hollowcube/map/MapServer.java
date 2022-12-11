@@ -8,6 +8,7 @@ import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -81,13 +82,13 @@ public class MapServer implements MapManager {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player) {
+    public @NotNull FutureResult<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player) {
         var activeMaps = maps.computeIfAbsent(map.getId(), id -> new ConcurrentHashMap<>());
 
         // Search for a world with the same flags
         var activeWorld = activeMaps.get(flags);
         if (activeWorld != null) {
-            return player.setInstance(activeWorld.instance(), new Pos(0.5, 60, 0.5));
+            return FutureResult.wrap(player.setInstance(activeWorld.instance(), new Pos(0.5, 60, 0.5)));
         }
 
         // No such map, create a new one
@@ -97,7 +98,8 @@ public class MapServer implements MapManager {
         CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
         if (map.getMapFileId() != null)
             future = world.loadWorld();
-        return future.thenCompose(unused -> player.setInstance(world.instance(), new Pos(0.5, 60, 0.5)));
+        return FutureResult.wrap(future.thenCompose(unused ->
+                player.setInstance(world.instance(), new Pos(0.5, 60, 0.5))));
     }
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {

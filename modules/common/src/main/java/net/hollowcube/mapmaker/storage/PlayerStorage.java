@@ -1,10 +1,9 @@
 package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.util.MongoUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 public interface PlayerStorage extends Storage {
 
@@ -16,10 +15,10 @@ public interface PlayerStorage extends Storage {
         return new PlayerStorageMongo(MongoUtil.getClient(uri));
     }
 
-    @NotNull CompletableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);
+    @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);
 
-    @NotNull CompletableFuture<@NotNull PlayerData> getPlayerById(@NotNull String id);
+    @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id);
 
-    @NotNull CompletableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
+    @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
 
 }

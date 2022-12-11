@@ -1,8 +1,7 @@
 package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
-import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.util.FutureUtil;
+import net.hollowcube.mapmaker.result.Result;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -41,7 +40,10 @@ public class MapCommand extends BaseHubCommand {
             var name = context.get(nameArg);
 
             handler.createMap(player, name)
-                    .exceptionally(FutureUtil::handleException);
+                    .mapErr(err -> {
+                        LOGGER.error("Failed to create map: {}", err);
+                        return Result.error(err);
+                    });
         }
     }
 
@@ -61,7 +63,10 @@ public class MapCommand extends BaseHubCommand {
 
             var mapId = context.get(mapIdArg);
             handler.infoMap(mapId, player)
-                    .exceptionally(FutureUtil::handleException);
+                    .mapErr(err -> {
+                        LOGGER.error("Failed to create map: {}", err);
+                        return Result.error(err);
+                    });
         }
     }
 
@@ -81,7 +86,10 @@ public class MapCommand extends BaseHubCommand {
 
             var mapId = context.get(idArg);
             handler.editMap(mapId, player)
-                    .exceptionally(FutureUtil::handleException);
+                    .mapErr(err -> {
+                        LOGGER.error("Failed to create map: {}", err);
+                        return Result.error(err);
+                    });
         }
     }
 
@@ -101,7 +109,10 @@ public class MapCommand extends BaseHubCommand {
 
             var mapId = context.get(idArg);
             handler.playMap(mapId, player)
-                    .exceptionally(FutureUtil::handleException);
+                    .mapErr(err -> {
+                        LOGGER.error("Failed to create map: {}", err);
+                        return Result.error(err);
+                    });
         }
     }
 }

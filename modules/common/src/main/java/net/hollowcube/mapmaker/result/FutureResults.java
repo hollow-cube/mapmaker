@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 class FutureResults {
@@ -15,6 +16,15 @@ class FutureResults {
 
         public CF(@NotNull CompletableFuture<Result<T>> future) {
             this.future = future;
+        }
+
+        @Override
+        public @NotNull FutureResult<Void> then(@NotNull Consumer<T> consumer) {
+            return new CF<>(future.thenApply(result -> {
+                if (result.isErr()) return Result.error(result.error());
+                consumer.accept(result.result());
+                return Result.ofNull();
+            }));
         }
 
         @Override
