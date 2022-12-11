@@ -75,8 +75,7 @@ public class HubServer implements HubManager {
         InventoryUtils.setPlayerLobbyInventory(player);
         if (event.isFirstSpawn()) {
             player.setGameMode(GameMode.ADVENTURE);
-            player.sendMessage(Component.text("Welcome to ", NamedTextColor.WHITE)
-                    .append(Component.text("Map Maker!", NamedTextColor.AQUA)));
+            player.sendMessage(Component.translatable("test.welcome_message"));
         }
     }
 
