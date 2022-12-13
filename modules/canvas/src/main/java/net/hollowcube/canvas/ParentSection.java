@@ -71,9 +71,9 @@ public non-sealed class ParentSection extends Section {
         if (child == null) return false;
 
         // Convert slot to child's coordinate system
-        int x = slot % 9, y = slot / 9;
-        int cx = x - (child.offset() % 9), cy = y - (child.offset() / 9);
-        slot = cx + 9 * cy;
+        int x = slot % width(), y = slot / width();
+        int cx = x - (child.offset() % width()), cy = y - (child.offset() / width());
+        slot = cx + child.width() * cy;
 
         return child.handleClick(slot, player, clickType);
     }
