@@ -33,6 +33,11 @@ public non-sealed class ItemSection extends Section {
         }
     }
 
+    protected @NotNull ItemStack getItem(int index) {
+        //todo bounds check
+        return items[index];
+    }
+
     @Override
     protected void mount() {
         super.mount();
