@@ -10,8 +10,10 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.minestom.server.MinecraftServer;
@@ -114,6 +116,11 @@ public class DevServer {
 
         //todo temp
         player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
+
+        // Alpha watermark
+        String watermarkString = String.format("MapMaker %s (%s), Not representative of final product", Constants.VERSION, Constants.COMMIT_HASH);
+        player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
+                .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
     }
 
 }
