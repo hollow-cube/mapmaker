@@ -34,7 +34,7 @@ public non-sealed class ItemSection extends Section {
     }
 
     protected @NotNull ItemStack getItem(int index) {
-        //todo bounds check
+        Check.argCondition(index < 0 || index >= width() * height(), "index out of bounds");
         return items[index];
     }
 
@@ -44,6 +44,9 @@ public non-sealed class ItemSection extends Section {
 
         // Update all items in parent
         for (int i = 0; i < items.length; i++) {
+            var item = items[i];
+            // No need to update when air, parent has already cleared this space
+            if (item.isAir()) continue;
             parent().updateItem(getIndexInParent(i), items[i]);
         }
     }

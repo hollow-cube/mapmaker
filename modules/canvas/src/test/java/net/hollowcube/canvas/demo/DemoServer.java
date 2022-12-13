@@ -1,7 +1,6 @@
 package net.hollowcube.canvas.demo;
 
 import net.hollowcube.canvas.ItemSection;
-import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
@@ -27,7 +26,7 @@ public class DemoServer {
     public static final Map<String, Supplier<Section>> guis = new HashMap<>();
 
     static {
-        guis.put("empty", () -> new ItemSection(1, 1){});
+        guis.put("empty", () -> new ItemSection(9, 1){});
         guis.put("button", () -> {
             var gui = new GroupSection(9, 1);
 
@@ -43,7 +42,7 @@ public class DemoServer {
         });
         guis.put("counter", CounterDemo::new);
         guis.put("pagination", PaginationDemo::new);
-        guis.put("history", HistoryDemo::new);
+        guis.put("history", () -> new RouterSection(new HistoryDemo()));
         guis.put("title", TitleDemo::new);
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);

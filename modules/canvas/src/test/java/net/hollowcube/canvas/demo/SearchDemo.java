@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.demo;
 
 import net.hollowcube.canvas.ParentSection;
+import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
@@ -26,9 +27,6 @@ public class SearchDemo extends ParentSection {
     public SearchDemo() {
         super(9, 9);
 
-        // Back button (or exit)
-        add(0, new ButtonSection(1, 1, ItemStack.of(Material.PLAYER_HEAD), () -> {
-        }));
         // Info button
         add(8, new ButtonSection(1, 1, ItemStack.of(Material.PLAYER_HEAD), () -> {
         }));
@@ -64,6 +62,23 @@ public class SearchDemo extends ParentSection {
         // Add basic options for now
         //todo once again problems would be solved by re adding that out of bounds check
         add(1, 6, basicOptions);
+    }
+
+    @Override
+    protected void mount() {
+        super.mount();
+        // Add back button if there is a history, otherwise add exit button
+        if (find(RouterSection.class).hasHistory()) {
+            add(0, new ButtonSection(1, 1, ItemStack.of(Material.ARROW), () -> {
+                var router = find(RouterSection.class);
+                if (router == null) return;
+                router.pop();
+            }));
+        } else {
+            add(0, new ButtonSection(1, 1, ItemStack.of(Material.BARRIER), () -> {
+                System.out.println("Exit");
+            }));
+        }
     }
 
     private @Nullable Section getPage(int pageNumber) {
