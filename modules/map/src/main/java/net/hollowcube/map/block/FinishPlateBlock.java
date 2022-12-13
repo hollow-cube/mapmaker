@@ -10,9 +10,8 @@ import net.hollowcube.map.item.NamedItems;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Vec;
@@ -29,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 @AutoService(Facet.class)
 public class FinishPlateBlock implements Facet {
     public static final NamespaceID ID = NamespaceID.from("mapmaker:finish_plate");
+    public static final String POI_TYPE = "mapmaker:finish_plate";
 
     public static final ItemStack ITEM = ItemStack.builder(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)
             .meta(m -> m.customModelData(NamedItems.FINISH_PLATE))
@@ -57,6 +57,8 @@ public class FinishPlateBlock implements Facet {
     }
 
     private static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
+        var map = MapWorld.fromInstance(event.getInstance()).map();
+        map.addPOI(new MapData.POI(POI_TYPE, event.getBlockPosition()));
         event.setBlock(event.getBlock().withHandler(Handler.INSTANCE));
     }
 
@@ -94,6 +96,12 @@ public class FinishPlateBlock implements Facet {
                 // Player has stepped on the finish plate, trigger a map completion event
                 EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.fromInstance(instance), player));
             }
+        }
+
+        @Override
+        public void onDestroy(@NotNull Destroy destroy) {
+            var map = MapWorld.fromInstance(destroy.getInstance()).map();
+            map.removePOI(destroy.getBlockPosition());
         }
     }
 }

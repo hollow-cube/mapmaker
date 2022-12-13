@@ -1,5 +1,11 @@
 package net.hollowcube.mapmaker.model;
 
+import net.minestom.server.coordinate.Point;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class MapData {
 
     private String id;
@@ -8,6 +14,7 @@ public class MapData {
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
     private String mapFileId;
+    private List<POI> pois = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -41,6 +48,18 @@ public class MapData {
         this.mapFileId = mapFileId;
     }
 
+    public List<POI> getPois() {
+        return pois;
+    }
+
+    public void addPOI(@NotNull POI poi) {
+        pois.add(poi);
+    }
+
+    public void removePOI(@NotNull Point pos) {
+        pois.removeIf(poi -> poi.pos.equals(pos));
+    }
+
     @Override
     public String toString() {
         return "MapData{" +
@@ -48,5 +67,7 @@ public class MapData {
                 ", name='" + name + '\'' +
                 '}';
     }
+
+    public record POI(String type, Point pos) {}
 
 }
