@@ -52,6 +52,11 @@ public non-sealed class ParentSection extends Section {
         for (int i = 0; i < comp.width(); i++) {
             for (int j = 0; j < comp.height(); j++) {
                 childMap[(x + i) + width() * (y + j)] = null;
+
+                // Clear existing items
+                if (isMounted()) {
+                    updateItem((x + i) + width() * (y + j), ItemStack.AIR);
+                }
             }
         }
 
