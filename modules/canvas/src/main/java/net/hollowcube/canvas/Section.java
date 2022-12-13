@@ -19,6 +19,14 @@ public sealed abstract class Section permits ItemSection, ParentSection {
 
     // Public API
 
+    /**
+     * Utility method to mount this section in a {@link RootSection} and show it to the player
+     * (unless it is already a {@link RootSection}).
+     */
+    public void showToPlayer(@NotNull Player player) {
+        new RootSection(this).showToPlayer(player);
+    }
+
     public final int width() {
         return _width();
     }

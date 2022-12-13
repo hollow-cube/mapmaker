@@ -1,18 +1,36 @@
 package net.hollowcube.canvas;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.inventory.condition.InventoryCondition;
+import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.WindowItemsPacket;
+import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static net.minestom.server.inventory.PlayerInventory.INVENTORY_SIZE;
+import static net.minestom.server.utils.inventory.PlayerInventoryUtils.convertToPacketSlot;
 
 public sealed class RootSection extends ParentSection permits RouterSection {
     private int width, height;
-    private Inventory inventory;
+    private InventoryWrapper inventory;
     private Section section = null;
+
+    // The number of rows of the player inventory currently in use.
+    private int playerInventoryRows = 0;
 
     public RootSection(@NotNull Section section) {
         // We override these methods, so their value is just a marker in case it crops up somewhere it shouldnt.
@@ -22,6 +40,11 @@ public sealed class RootSection extends ParentSection permits RouterSection {
 
     public @NotNull Inventory getInventory() {
         return inventory;
+    }
+
+    @Override
+    public void showToPlayer(@NotNull Player player) {
+        player.openInventory(getInventory());
     }
 
     @Override
@@ -38,8 +61,17 @@ public sealed class RootSection extends ParentSection permits RouterSection {
 
     @Override
     void updateItem(int index, @NotNull ItemStack itemStack) {
-        inventory.setItemStack(index, itemStack);
-        //todo does not need to call item events, and should wait/batch updates on tick perhaps
+        Check.argCondition(index < 0 || index >= width * height, "index out of bounds");
+
+        // If it is inside the open inventory, set it directly.
+        if (index < 9 * 6) {
+            //todo does not need to call item events, and should wait/batch updates on tick perhaps
+            inventory.setItemStack(index, itemStack);
+            return;
+        }
+
+        // Otherwise, set it in the (ghost) player inventory.
+        inventory.setPlayerItemStack(index - 9 * 6, itemStack);
     }
 
     // Click handling
@@ -79,18 +111,15 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         // Unmount old component if relevant
         Inventory oldInv = this.inventory;
         if (this.section != null) {
+            // Remove inventory condition immediately, do not want ghost clicks or anything
+            this.inventory.getInventoryConditions().clear();
             this.section.removeParent();
-            this.inventory.getInventoryConditions().clear(); // Do not want ghost clicks or anything
         }
 
-        this.inventory = new Inventory(updateSize(newSection), "Chest");
+        var name = this.inventory == null ? Component.text("Chest") : this.inventory.getTitle();
+        this.inventory = new InventoryWrapper(updateSize(newSection), name);
         this.section = newSection;
         this.section.setParent(this, 0);
-
-        inventory.addInventoryCondition((player, slot, clickType, result) -> {
-            var allow = tryHandleClick(slot, player, clickType);
-            result.setCancel(!allow);
-        });
 
         if (oldInv != null) {
             // Migrate the viewers to the new inventory
@@ -101,8 +130,10 @@ public sealed class RootSection extends ParentSection permits RouterSection {
     }
 
     private @NotNull InventoryType updateSize(@NotNull Section section) {
-        Check.argCondition(section.width() > 9, "component width must be <= 9, was {}", section.width());
-        Check.argCondition(section.height() > 6, "component height must be <= 6, was {}", section.height());
+//        Check.argCondition(section.width() > 9, "section width must be <= 9, was {}", section.width());
+        //todo support for non-9 width inventories
+        Check.argCondition(section.width() != 9, "section width must be 9");
+        Check.argCondition(section.height() > 10, "section height must be <= 10, was {}", section.height());
         width = section.width();
         height = section.height();
         return switch (section.height()) {
@@ -112,7 +143,146 @@ public sealed class RootSection extends ParentSection permits RouterSection {
             case 4 -> InventoryType.CHEST_4_ROW;
             case 5 -> InventoryType.CHEST_5_ROW;
             case 6 -> InventoryType.CHEST_6_ROW;
+            case 7, 8, 9, 10 -> {
+                playerInventoryRows = section.height() - 6;
+                yield InventoryType.CHEST_6_ROW;
+            }
             default -> throw new IllegalStateException("Unreachabe");
         };
     }
+
+    private class InventoryWrapper extends Inventory {
+        private static final Logger logger = LoggerFactory.getLogger(InventoryWrapper.class);
+
+        private final InventoryCondition playerCondition = this::playerInvClick;
+
+        private final ItemStack[] playerInv = new ItemStack[9 * 4];
+
+        public InventoryWrapper(@NotNull InventoryType inventoryType, @NotNull Component title) {
+            super(inventoryType, title);
+            Arrays.fill(playerInv, ItemStack.AIR);
+            update();
+
+            addInventoryCondition(this::openedInvClick);
+        }
+
+        @Override
+        public boolean addViewer(@NotNull Player player) {
+            var result = super.addViewer(player);
+            if (result && ensureDelegatingPlayerInventory(player)) {
+                player.getInventory().addInventoryCondition(playerCondition);
+                updatePlayerInventory();
+            }
+            return result;
+        }
+
+        @Override
+        public boolean removeViewer(@NotNull Player player) {
+            var result = super.removeViewer(player);
+            if (result) {
+                player.getInventory().getInventoryConditions().remove(playerCondition);
+                player.getInventory().update();
+            }
+            return result;
+        }
+
+        public boolean needsPlayerInventory() {
+            return playerInventoryRows > 0;
+        }
+
+        // Takes slot as a player inventory slot (eg 0-35 from top to bottom)
+        public void setPlayerItemStack(int slot, @NotNull ItemStack itemStack) {
+            playerInv[slot] = itemStack;
+            updatePlayerInventory();
+        }
+
+        public void updatePlayerInventory() {
+            getViewers().forEach(player -> player.sendPacket(createWindowItemsPacket(player)));
+        }
+
+        private void openedInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
+            var allow = tryHandleClick(slot, player, clickType);
+            result.setCancel(!allow);
+        }
+
+        private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
+            slot = convertPlayerSlotToChestSlot(slot);
+            if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
+            slot = 9 * 6 + slot; // Offset to the bottom of the chest
+
+            var allow = tryHandleClick(slot, player, clickType);
+            result.setCancel(!allow);
+        }
+
+        private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {
+            ItemStack[] convertedSlots = new ItemStack[PlayerInventory.INVENTORY_SIZE];
+            Arrays.fill(convertedSlots, ItemStack.AIR);
+            for (int i = 0; i < convertedSlots.length; i++) {
+                var packetSlot = PlayerInventoryUtils.convertToPacketSlot(i);
+                var chestSlot = convertPlayerSlotToChestSlot(i);
+                if (i < 9 * 4 && chestSlot < 9 * playerInventoryRows) {
+                    convertedSlots[packetSlot] = playerInv[chestSlot];
+                } else {
+                    convertedSlots[packetSlot] = player.getInventory().getItemStack(i);
+                }
+            }
+            return new WindowItemsPacket((byte) 0, 0, List.of(convertedSlots), getCursorItem(player));
+        }
+
+        private int convertPlayerSlotToChestSlot(int slot) {
+            if (0 <= slot && slot < 9) {
+                // Hotbar
+                return slot + (9 * 3);
+            } else if (9 <= slot && slot < 36) {
+                // Main inventory
+                return slot - 9;
+            } else return -1;
+        }
+
+        /** Ensures that the current PlayerInventory is a {@link DelegatingPlayerInventory}. */
+        private boolean ensureDelegatingPlayerInventory(@NotNull Player player) {
+            if (player.getInventory() instanceof DelegatingPlayerInventory) return true;
+
+            // Update the field with reflection
+            try {
+                var field = Player.class.getDeclaredField("inventory");
+                field.setAccessible(true);
+                field.set(player, new DelegatingPlayerInventory(player));
+                return true;
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                logger.error("failed to update player inventory to delegating inventory. this is required for extended inventory support. ", e);
+                player.closeInventory();
+                return false;
+            }
+        }
+    }
+
+    private class DelegatingPlayerInventory extends PlayerInventory {
+
+        public DelegatingPlayerInventory(@NotNull Player player) {
+            super(player);
+
+            // Copy all contents of players current inventory to this one
+            var old = player.getInventory();
+            // PlayerInventory
+            setCursorItem(old.getCursorItem());
+            // AbstractInventory
+            System.arraycopy(old.getItemStacks(), 0, itemStacks, 0, INVENTORY_SIZE);
+            getInventoryConditions().addAll(old.getInventoryConditions());
+            tagHandler().updateContent(old.tagHandler().asCompound());
+        }
+
+        @Override
+        public void update() {
+            // In case we are in an InventoryWrapper (a canvas managed inventory), and it needs player inventory updates,
+            // forward the update there and do not call the super method.
+            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
+                wrapper.updatePlayerInventory();
+                return;
+            }
+
+            super.update();
+        }
+    }
+
 }

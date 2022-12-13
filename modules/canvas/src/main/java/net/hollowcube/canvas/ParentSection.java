@@ -90,13 +90,9 @@ public non-sealed class ParentSection extends Section {
     protected void unmount() {
         super.unmount();
 
-        for (var entry : children.entrySet()) {
-            entry.getValue().removeParent();
+        for (var child : children.values()) {
+            child.removeParent();
         }
-//        for (var child : children) {
-            //todo
-//            child.setParent(null, child.offset());
-//        }
     }
 
     /**

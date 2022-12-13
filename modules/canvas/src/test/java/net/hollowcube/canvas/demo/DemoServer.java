@@ -3,6 +3,7 @@ package net.hollowcube.canvas.demo;
 import net.hollowcube.canvas.ItemSection;
 import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.RouterSection;
+import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.minestom.server.MinecraftServer;
@@ -14,6 +15,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
@@ -22,10 +24,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class DemoServer {
-    public static final Map<String, Supplier<RootSection>> guis = new HashMap<>();
+    public static final Map<String, Supplier<Section>> guis = new HashMap<>();
 
     static {
-        guis.put("empty", () -> new RootSection(new ItemSection(1, 1){}));
+        guis.put("empty", () -> new ItemSection(1, 1){});
         guis.put("button", () -> {
             var gui = new GroupSection(9, 1);
 
@@ -37,12 +39,13 @@ public class DemoServer {
                 System.out.println("You clicked the other button!");
             }));
 
-            return new RootSection(gui);
+            return gui;
         });
-        guis.put("counter", () -> new RootSection(new CounterDemo()));
-        guis.put("pagination", () -> new RootSection(new PaginationDemo()));
-        guis.put("history", () -> new RouterSection(new HistoryDemo()));
-        guis.put("title", () -> new RootSection(new TitleDemo()));
+        guis.put("counter", CounterDemo::new);
+        guis.put("pagination", PaginationDemo::new);
+        guis.put("history", HistoryDemo::new);
+        guis.put("title", TitleDemo::new);
+        guis.put("big", BigInventoryDemo::new);
     }
 
     public static void main(String[] args) {
@@ -60,6 +63,10 @@ public class DemoServer {
         eventHandler.addListener(PlayerSpawnEvent.class, event -> {
             var player = event.getPlayer();
             player.setGameMode(GameMode.CREATIVE);
+
+            for (int i = 0; i < PlayerInventory.INVENTORY_SIZE; i++) {
+                player.getInventory().setItemStack(i, ItemStack.of(Material.STICK));
+            }
         });
 
         var command = new Command("gui");
@@ -67,8 +74,7 @@ public class DemoServer {
             var name = context.<String>get("name");
             var player = (Player) sender;
 
-            var gui = guis.get(name).get();
-            player.openInventory(gui.getInventory());
+            guis.get(name).get().showToPlayer(player);
         }, ArgumentType.Word("name").from(guis.keySet().toArray(new String[0])));
         MinecraftServer.getCommandManager().register(command);
 
