@@ -9,7 +9,6 @@ import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.inventory.condition.InventoryCondition;
 import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
@@ -20,9 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static net.minestom.server.inventory.PlayerInventory.INVENTORY_SIZE;
-import static net.minestom.server.utils.inventory.PlayerInventoryUtils.convertToPacketSlot;
 
 public sealed class RootSection extends ParentSection permits RouterSection {
     private int width, height;
@@ -64,6 +60,7 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         Check.argCondition(index < 0 || index >= width * height, "index out of bounds");
 
         // If it is inside the open inventory, set it directly.
+        //todo hardcoded to chest inventory, will need to be changed for other inventory types
         if (index < 9 * 6) {
             //todo does not need to call item events, and should wait/batch updates on tick perhaps
             inventory.setItemStack(index, itemStack);
@@ -71,6 +68,7 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         }
 
         // Otherwise, set it in the (ghost) player inventory.
+        //todo hardcoded double chest size
         inventory.setPlayerItemStack(index - 9 * 6, itemStack);
     }
 
@@ -208,6 +206,7 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
             slot = convertPlayerSlotToChestSlot(slot);
             if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
+            //todo hardcoded double chest
             slot = 9 * 6 + slot; // Offset to the bottom of the chest
 
             var allow = tryHandleClick(slot, player, clickType);

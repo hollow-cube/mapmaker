@@ -29,7 +29,13 @@ public class HistoryDemo extends ParentSection {
             router.push(new Page3());
         }));
 
-        add(3, 0, new ButtonSection(1, 1, ItemStack.of(Material.BARRIER), () -> {
+        add(3, 0, new ButtonSection(1, 1, ItemStack.of(Material.ENCHANTING_TABLE), () -> {
+            var router = find(RouterSection.class);
+            if (router == null) return;
+            router.push(new SearchDemo());
+        }));
+
+        add(4, 0, new ButtonSection(1, 1, ItemStack.of(Material.BARRIER), () -> {
             var router = find(RouterSection.class);
             if (router == null) return;
             router.push(new HistoryDemo());
