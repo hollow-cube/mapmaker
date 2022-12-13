@@ -41,14 +41,6 @@ public class DevServer {
         new DevServer();
 
         server.start("0.0.0.0", 25565);
-
-        try {
-            var props = new Properties();
-            props.load(Files.newInputStream(Path.of("/Users/matt/dev/projects/mmo/mapmaker/bin/development/src/main/resources/lang/en_US.properties")));
-            System.out.println(props);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private final PlayerStorage playerStorage;
@@ -58,8 +50,6 @@ public class DevServer {
     private final MapServer maps;
 
     public DevServer() {
-        setupTranslation();
-
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
             this.playerStorage = PlayerStorage.memory();
@@ -80,19 +70,6 @@ public class DevServer {
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
 
         registerCommands();
-    }
-
-    private void setupTranslation() {
-        try {
-            MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
-            var registry = TranslationRegistry.create(Key.key("mapmaker", "i18n"));
-            var bundle = new PropertyResourceBundle(DevServer.class.getResourceAsStream("/lang/en_US.properties"));
-            registry.registerAll(Locale.ENGLISH, bundle, true);
-            registry.defaultLocale(Locale.ENGLISH);
-            GlobalTranslator.translator().addSource(registry);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void registerCommands() {
@@ -137,7 +114,6 @@ public class DevServer {
 
         //todo temp
         player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
-        player.sendMessage(Component.translatable("test.translation"));
     }
 
 }
