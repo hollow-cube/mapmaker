@@ -19,10 +19,7 @@ public class MapCommand extends BaseHubCommand {
     /map delete <name> -> deletes a map for the current player
     /map edit <name> -> edits a map for the current player (by name)
     /map list -> lists all maps for the current player
-
-
      */
-
 
     private final MapHandler handler;
 

@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.minestom.server.coordinate.Vec;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
@@ -64,6 +65,24 @@ public final class MongoUtil {
                     case "owner" -> value.setOwner(reader.readString());
                     case "name" -> value.setName(reader.readString());
                     case "mapFileId" -> value.setMapFileId(reader.readString());
+                    case "pois" -> {
+                        reader.readStartArray();
+                        while (reader.readBsonType() == BsonType.DOCUMENT) {
+                            reader.readStartDocument();
+                            var type = reader.readString("type");
+                            reader.readName();
+                            reader.readStartDocument();
+                            var pos = new Vec(
+                                    reader.readDouble("x"),
+                                    reader.readDouble("y"),
+                                    reader.readDouble("z"));
+                            reader.readEndDocument();
+
+                            value.addPOI(new MapData.POI(type, pos));
+                            reader.readEndDocument();
+                        }
+                        reader.readEndArray();
+                    }
                 }
             }
             reader.readEndDocument();
@@ -79,6 +98,19 @@ public final class MongoUtil {
             if (value.getMapFileId() != null) {
                 writer.writeString("mapFileId", value.getMapFileId());
             }
+            writer.writeStartArray("pois");
+            for (var poi : value.getPois()) {
+                writer.writeStartDocument();
+                writer.writeString("type", poi.type());
+                writer.writeStartDocument("pos");
+                writer.writeDouble("x", poi.pos().x());
+                writer.writeDouble("y", poi.pos().y());
+                writer.writeDouble("z", poi.pos().z());
+                writer.writeEndDocument();
+                writer.writeEndDocument();
+            }
+            writer.writeEndArray();
+
             writer.writeEndDocument();
         }
 
