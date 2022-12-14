@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":modules:hub"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
+    implementation(project(":modules:canvas"))
 }
 
 application {
