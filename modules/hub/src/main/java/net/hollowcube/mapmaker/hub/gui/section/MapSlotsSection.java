@@ -18,8 +18,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 public class MapSlotsSection extends ParentSection {
 
     public MapSlotsSection(@NotNull PlayerData playerData) {

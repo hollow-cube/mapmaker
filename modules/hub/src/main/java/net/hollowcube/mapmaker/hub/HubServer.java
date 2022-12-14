@@ -1,16 +1,15 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.canvas.RouterSection;
+import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.gui.inventory.InventoryUtils;
+import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
+import net.hollowcube.mapmaker.hub.gui.section.BuildMaps;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
 import net.hollowcube.mapmaker.map.MapManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
-import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
-import net.hollowcube.mapmaker.hub.gui.section.BuildMaps;
 import net.hollowcube.mapmaker.util.DimensionUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;

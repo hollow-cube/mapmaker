@@ -8,9 +8,6 @@ import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
-
 import static com.mongodb.client.model.Filters.eq;
 
 public class PlayerStorageMongo implements PlayerStorage {
