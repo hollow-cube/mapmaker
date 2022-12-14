@@ -5,11 +5,16 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ButtonSection extends ItemSection {
-    private final Runnable onClick;
+    private Runnable onClick;
 
-    public ButtonSection(int width, int height, @NotNull ItemStack item, @NotNull Runnable onClick) {
+    public ButtonSection(int width, int height, @NotNull ItemStack item) {
+        this(width, height, item, null);
+    }
+
+    public ButtonSection(int width, int height, @NotNull ItemStack item, @Nullable Runnable onClick) {
         super(width, height);
         this.onClick = onClick;
 
@@ -24,6 +29,10 @@ public class ButtonSection extends ItemSection {
 
     public @NotNull ItemStack getItem() {
         return getItem(0);
+    }
+
+    protected void setOnClick(@NotNull Runnable onClick) {
+        this.onClick = onClick;
     }
 
     @Override

@@ -34,6 +34,18 @@ public final class MongoUtil {
                 switch (reader.readName()) {
                     case "_id" -> player.setId(reader.readString());
                     case "uuid" -> player.setUuid(reader.readString());
+                    case "unlocked_map_slots" -> player.setUnlockedMapSlots(reader.readInt32());
+                    case "map_slots" -> {
+                        reader.readStartArray();
+                        for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
+                            if (reader.readBsonType() == BsonType.NULL) {
+                                reader.readNull();
+                                continue;
+                            }
+                            player.setMapSlot(i, reader.readString());
+                        }
+                        reader.readEndArray();
+                    }
                 }
             }
             reader.readEndDocument();
@@ -45,6 +57,16 @@ public final class MongoUtil {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
             writer.writeString("uuid", value.getUuid());
+            writer.writeInt32("unlocked_map_slots", value.getUnlockedMapSlots());
+            writer.writeStartArray("map_slots");
+            for (var mapId : value.getMapSlots()) {
+                if (mapId == null) {
+                    writer.writeNull();
+                } else {
+                    writer.writeString(mapId);
+                }
+            }
+            writer.writeEndArray();
             writer.writeEndDocument();
         }
 

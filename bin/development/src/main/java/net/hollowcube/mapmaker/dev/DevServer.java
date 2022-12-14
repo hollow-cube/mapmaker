@@ -3,9 +3,12 @@ package net.hollowcube.mapmaker.dev;
 import io.helidon.health.HealthSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
+import net.hollowcube.canvas.RouterSection;
+import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.gui.section.MapSlotsSection;
 import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.result.FutureResult;
@@ -19,8 +22,11 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -104,6 +110,15 @@ public class DevServer {
             i++;
         }
         System.out.println("loaded " + i + " facets");
+
+        var cmd = new Command("test");
+        cmd.setDefaultExecutor((sender, context) -> {
+            var player = (Player) sender;
+            var sec = new GroupSection(9, 3);
+            sec.add(0, 0, new MapSlotsSection(player.getTag(PlayerData.DATA)));
+            new RouterSection(sec).showToPlayer(player);
+        });
+        MinecraftServer.getCommandManager().register(cmd);
 
         TerraformWorldEdit.init();
     }
