@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 class PlayerStorageMemory implements PlayerStorage {
     public static final Logger LOGGER = LoggerFactory.getLogger(PlayerStorageMemory.class);

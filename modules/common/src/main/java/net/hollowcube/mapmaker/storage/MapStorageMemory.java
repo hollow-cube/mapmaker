@@ -2,13 +2,11 @@ package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 class MapStorageMemory implements MapStorage {
