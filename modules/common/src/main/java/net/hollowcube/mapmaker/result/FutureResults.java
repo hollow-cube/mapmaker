@@ -26,6 +26,14 @@ class FutureResults {
         }
 
         @Override
+        public @NotNull FutureResult<Void> thenErr(@NotNull Consumer<Error> consumer) {
+            return new CF<>(future.thenApply(result -> {
+                if (result.isErr()) consumer.accept(result.error());
+                return Result.ofNull();
+            }));
+        }
+
+        @Override
         public @NotNull <S> FutureResult<S> map(@NotNull Function<T, S> mapper) {
             return new CF<>(future.thenApply(result -> {
                 if (result.isErr())

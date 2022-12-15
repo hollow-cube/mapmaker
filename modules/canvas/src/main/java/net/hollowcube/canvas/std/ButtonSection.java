@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.std;
 
+import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.ItemSection;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -8,13 +9,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ButtonSection extends ItemSection {
-    private Runnable onClick;
+    private ClickHandler onClick;
 
     public ButtonSection(int width, int height, @NotNull ItemStack item) {
-        this(width, height, item, null);
+        this(width, height, item, (ClickHandler) null);
     }
 
     public ButtonSection(int width, int height, @NotNull ItemStack item, @Nullable Runnable onClick) {
+        this(width, height, item, (ClickHandler) null);
+        if (onClick != null) setOnClick(onClick);
+    }
+
+    public ButtonSection(int width, int height, @NotNull ItemStack item, @Nullable ClickHandler onClick) {
         super(width, height);
         this.onClick = onClick;
 
@@ -31,14 +37,21 @@ public class ButtonSection extends ItemSection {
         return getItem(0);
     }
 
+    protected void setClickHandler(@NotNull ClickHandler handler) {
+        this.onClick = handler;
+    }
+
     protected void setOnClick(@NotNull Runnable onClick) {
-        this.onClick = onClick;
+        this.onClick = (player, slot, clickType) -> {
+            if (clickType == ClickType.LEFT_CLICK) {
+                onClick.run();
+            }
+            return ClickHandler.DENY;
+        };
     }
 
     @Override
     protected boolean handleClick(int slot, @NotNull Player player, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK)
-            onClick.run();
-        return false;
+        return onClick.handleClick(player, slot, clickType);
     }
 }

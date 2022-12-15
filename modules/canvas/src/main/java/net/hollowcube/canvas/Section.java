@@ -101,4 +101,11 @@ public sealed abstract class Section permits ItemSection, ParentSection {
         this.offset = -1;
     }
 
+    // Env object stuff
+
+    protected <T> @NotNull T getContext(@NotNull Class<T> type) {
+        Check.stateCondition(!isMounted(), "component is not mounted");
+        return parent.getContext(type);
+    }
+
 }

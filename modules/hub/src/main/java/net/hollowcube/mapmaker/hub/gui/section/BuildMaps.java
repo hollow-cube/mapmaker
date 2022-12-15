@@ -41,7 +41,6 @@ public class BuildMaps extends ParentSection {
         add(0, 2, new ButtonSection(2, 1, PUBLISHED_MAPS_ITEM, this::viewPublishedMaps));
         add(2, 2, new ButtonSection(2, 1, PLAY_WITH_FRIENDS_ITEM, this::playWithFriends));
 
-
     }
 
     @Override

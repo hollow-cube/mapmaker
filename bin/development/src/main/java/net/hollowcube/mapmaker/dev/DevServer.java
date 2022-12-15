@@ -7,7 +7,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.facet.Facet;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.HubServerOld;
 import net.hollowcube.mapmaker.hub.gui.section.MapSlotsSection;
 import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -73,7 +73,7 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
 
-    private HubServer hub;
+    private HubServerOld hub;
     private MapServer maps;
 
     public DevServer() {
@@ -95,7 +95,7 @@ public class DevServer {
         StaticAbuse.mapStorage = mapStorage;
 
         this.maps = new MapServer();
-        this.hub = new HubServer(mapStorage, maps);
+        this.hub = new HubServerOld(mapStorage, maps);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
