@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public sealed class RootSection extends ParentSection permits RouterSection {
     private int width, height;
@@ -28,9 +29,17 @@ public sealed class RootSection extends ParentSection permits RouterSection {
     // The number of rows of the player inventory currently in use.
     private int playerInventoryRows = 0;
 
+    private final Map<Class<?>, Object> context;
+
     public RootSection(@NotNull Section section) {
+        this(section, Map.of());
+    }
+
+    public RootSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
         // We override these methods, so their value is just a marker in case it crops up somewhere it shouldnt.
         super(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        this.context = context;
+
         replaceInventory(section);
     }
 
@@ -147,6 +156,11 @@ public sealed class RootSection extends ParentSection permits RouterSection {
             }
             default -> throw new IllegalStateException("Unreachabe");
         };
+    }
+
+    @Override
+    protected <T> @NotNull T getContext(@NotNull Class<T> type) {
+        return type.cast(context.get(type));
     }
 
     private class InventoryWrapper extends Inventory {

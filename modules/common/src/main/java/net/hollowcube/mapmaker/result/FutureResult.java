@@ -49,6 +49,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     // Handler methods
 
     @NotNull FutureResult<Void> then(@NotNull Consumer<T> consumer);
+    @NotNull FutureResult<Void> thenErr(@NotNull Consumer<Error> consumer);
 
     @NotNull <S> FutureResult<S> map(@NotNull Function<T, S> mapper);
     @NotNull FutureResult<T> mapErr(@NotNull Function<@NotNull Error, @NotNull Result<T>> mapper);

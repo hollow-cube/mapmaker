@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
 
 /**
  * Router component is a replacement for RootComponent, it enables a history/routing feature when used in child components.
@@ -12,7 +13,11 @@ public final class RouterSection extends RootSection {
     private final Deque<Section> history = new ArrayDeque<>();
 
     public RouterSection(@NotNull Section section) {
-        super(section);
+        this(section, Map.of());
+    }
+
+    public RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
+        super(section, context);
         history.addLast(section);
     }
 

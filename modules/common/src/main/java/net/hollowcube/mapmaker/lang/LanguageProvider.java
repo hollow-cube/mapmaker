@@ -144,4 +144,20 @@ public class LanguageProvider {
         if (entries.isEmpty()) return List.of(Component.text(key));
         return entries;
     }
+
+    /**
+     * A workaround to having variable length translations (eg lore lines, description lines).
+     * Eventually will be replaced with proxy translation, which will support newlines.
+     */
+    public static List<Component> optionalMultiTranslatable(@NotNull String key, @NotNull List<Component> args) {
+        var entries = properties.stringPropertyNames().stream()
+                .filter(k -> {
+                    if (!k.startsWith(key)) return false;
+                    var rest = k.substring(key.length());
+                    return rest.length() == 0 || rest.matches("\\.[0-9]+");
+                })
+                .map(k -> (Component) Component.translatable(k, args))
+                .toList();
+        return entries;
+    }
 }
