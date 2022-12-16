@@ -63,8 +63,22 @@ jobs:
         run: |
           helm package ./bin/development/deploy/mapmaker-dev --version "3.0.0-${{ github.sha }}" --app-version ${{ github.sha }}
           curl --data-binary "@mapmaker-dev-3.0.0-${{ github.sha }}.tgz" https://${{ secrets.HELM_REGISTRY_USER }}:${{ secrets.HELM_REGISTRY_PASS }}@helm.hollowcube.net/api/charts
-#  helm-deploy:
-#    runs-on: ubuntu-latest
-#    needs:
-#      - docker-build
-#      - helm-build
+  helm-deploy:
+    runs-on: 'ubuntu-latest'
+    needs:
+      - docker-build
+      - helm-build
+    steps:
+      - uses: 'deliverybot/helm@v1'
+        with:
+          release: "mapmaker"
+          namespace: "default"
+          chart: "hollowcube/mapmaker-dev"
+          version: "3.0.0-${{ github.sha }}"
+          token: "${{ github.token }}"
+          repo: "https://helm.hollowcube.net"
+          repo-alias: hollowcube
+          repo-username: ${{ secrets.HELM_REGISTRY_USER }}
+          repo-password: ${{ secrets.HELM_REGISTRY_PASS }}
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
