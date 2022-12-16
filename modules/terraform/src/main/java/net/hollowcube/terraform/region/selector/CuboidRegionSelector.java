@@ -23,21 +23,20 @@ public class CuboidRegionSelector implements RegionSelector {
 
     @Override
     public boolean selectPrimary(@NotNull Point point) {
-        if (point.equals(pos1)) return false;
+        if (point.sameBlock(pos1)) return false;
         pos1 = point;
         return true;
     }
 
     @Override
     public boolean selectSecondary(@NotNull Point point) {
-        if (point.equals(pos2)) return false;
+        if (point.sameBlock(pos2)) return false;
         pos2 = point;
         return true;
     }
 
     @Override
     public void clear() {
-        System.out.println("cleared");
         instance = null;
         pos1 = null;
         pos2 = null;

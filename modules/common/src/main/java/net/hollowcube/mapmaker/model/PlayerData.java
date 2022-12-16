@@ -1,15 +1,7 @@
 package net.hollowcube.mapmaker.model;
 
 import net.hollowcube.mapmaker.util.TagUtil;
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagSerializer;
-import net.minestom.server.tag.TagWritable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 /**
  * MapMaker data for a single player.

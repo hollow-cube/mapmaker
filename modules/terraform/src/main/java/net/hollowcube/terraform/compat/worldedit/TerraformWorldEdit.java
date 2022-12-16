@@ -19,5 +19,4 @@ public class TerraformWorldEdit {
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addChild(WandHandler.EVENT_NODE);
     }
-
 }

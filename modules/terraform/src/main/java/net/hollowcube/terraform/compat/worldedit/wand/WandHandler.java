@@ -27,13 +27,11 @@ public class WandHandler {
         event.setCancelled(true);
 
         var player = event.getPlayer();
-        var session = Session.forPlayer(player);
-        var selector = session.getRegionSelector(player.getInstance());
+        var selector = Session.forPlayer(player).getRegionSelector(player.getInstance());
 
         var pos = event.getBlockPosition();
-        var changed = selector.selectPrimary(pos);
-        if (changed) {
-            player.sendMessage(MessageFormat.format("pos1 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
+        if (selector.selectPrimary(pos)) {
+            player.sendMessage(MessageFormat.format("Pos1 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
         }
     }
 
@@ -42,13 +40,12 @@ public class WandHandler {
         if (!isWandItem(itemStack)) return;
 
         var player = event.getPlayer();
-        var session = Session.forPlayer(player);
-        var selector = session.getRegionSelector(player.getInstance());
+        var selector =  Session.forPlayer(player).getRegionSelector(player.getInstance());
 
         var pos = event.getPosition();
         var changed = selector.selectSecondary(pos);
         if (changed) {
-            player.sendMessage(MessageFormat.format("pos2 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
+            player.sendMessage(MessageFormat.format("Pos2 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
         }
     }
 

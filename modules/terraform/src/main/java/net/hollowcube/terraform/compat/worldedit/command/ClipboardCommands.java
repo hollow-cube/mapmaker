@@ -43,8 +43,7 @@ public class ClipboardCommands {
         if (!(sender instanceof Player player))
             throw new UnsupportedOperationException("only implemented for players");
 
-        var session = Session.forPlayer(player);
-        var clipboard = session.getClipboard().get();
+        var clipboard =  Session.forPlayer(player).getClipboard().get();
         if (clipboard == null) {
             player.sendMessage("No clipboard contents");
             return;

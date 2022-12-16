@@ -14,5 +14,4 @@ public class Clipboard {
     public @Nullable Schematic get() {
         return current;
     }
-
 }

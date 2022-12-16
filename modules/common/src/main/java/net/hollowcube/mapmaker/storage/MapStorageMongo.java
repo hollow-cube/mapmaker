@@ -1,11 +1,8 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoWriteConcernException;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.InsertOneOptions;
 import net.hollowcube.mapmaker.model.MapData;
 import org.jetbrains.annotations.NotNull;
 
