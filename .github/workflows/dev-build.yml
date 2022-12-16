@@ -69,16 +69,29 @@ jobs:
       - docker-build
       - helm-build
     steps:
-      - uses: 'deliverybot/helm@v1'
+      - uses: azure/setup-helm@v3
         with:
-          release: "mapmaker"
-          namespace: "default"
-          chart: "hollowcube/mapmaker-dev"
-          version: "3.0.0-${{ github.sha }}"
-          token: "${{ github.token }}"
-          repo: "https://helm.hollowcube.net"
-          repo-alias: hollowcube
-          repo-username: ${{ secrets.HELM_REGISTRY_USER }}
-          repo-password: ${{ secrets.HELM_REGISTRY_PASS }}
+          version: v3.10.2
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Helm
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+          helm repo add hollowcube https://helm.hollowcube.net --username ${{ secrets.HELM_REGISTRY_USER }} --password ${{ secrets.HELM_REGISTRY_PASS }}
+      - name: Run upgrade
+        run: |
+          helm upgrade --install mapmaker-dev hollowcube/mapmaker-dev --version "3.0.0-${{ github.sha }}"
         env:
-          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+#      - uses: 'deliverybot/helm@v1'
+#        with:
+#          release: "mapmaker"
+#          namespace: "default"
+#          chart: "hollowcube/mapmaker-dev"
+#          version: "3.0.0-${{ github.sha }}"
+#          token: "${{ github.token }}"
+#          repo: "https://helm.hollowcube.net"
+#          repo-alias: hollowcube
+#          repo-username: ${{ secrets.HELM_REGISTRY_USER }}
+#          repo-password: ${{ secrets.HELM_REGISTRY_PASS }}
+#        env:
+#          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
