@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.hub.command;
 
-import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.util.FutureUtil;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;

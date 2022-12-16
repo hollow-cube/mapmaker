@@ -86,6 +86,4 @@ public class SelectionCommands {
 
         sender.sendMessage("Left click: select pos #1; Right click: select pos #2");
     }
-
-
 }

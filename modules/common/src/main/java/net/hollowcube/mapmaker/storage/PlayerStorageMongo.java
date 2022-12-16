@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.storage;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import org.jetbrains.annotations.NotNull;
 

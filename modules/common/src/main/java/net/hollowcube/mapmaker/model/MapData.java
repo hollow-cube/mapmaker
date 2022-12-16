@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.model;
 
-import org.jetbrains.annotations.NotNull;
-
 public class MapData {
 
     public enum Type {

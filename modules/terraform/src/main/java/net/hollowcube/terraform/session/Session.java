@@ -13,8 +13,6 @@ import net.minestom.server.tag.TagWritable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
@@ -45,7 +43,7 @@ public class Session {
         return session;
     }
 
-    private RegionSelector regionSelector = new CuboidRegionSelector();
+    private final RegionSelector regionSelector = new CuboidRegionSelector();
     private final Clipboard clipboard = new Clipboard();
     private final LinkedList<Change> history = new LinkedList<>();
     private int historyPointer = 0;
@@ -55,24 +53,23 @@ public class Session {
             regionSelector.clear();
             regionSelector.setInstance(instance);
         }
-
         return regionSelector;
     }
 
     // History
-
     public void remember(@NotNull Change change) {
         if (historyPointer != history.size())
             history.add(historyPointer, change);
-        else history.add(change);
+        else
+            history.add(change);
         historyPointer++;
     }
 
     public CompletableFuture<Void> undo(@NotNull Instance instance) {
         //todo need to decide what is instance local and what is tracking instances.
-
         if (historyPointer == 0)
             return CompletableFuture.failedFuture(new IllegalStateException("Nothing to undo"));
+
         historyPointer--;
         return history.get(historyPointer).undo(instance);
     }
@@ -82,5 +79,4 @@ public class Session {
     public @NotNull Clipboard getClipboard() {
         return clipboard;
     }
-
 }

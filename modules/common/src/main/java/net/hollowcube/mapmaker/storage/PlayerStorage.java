@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.storage;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClients;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.util.MongoUtil;
 import org.jetbrains.annotations.NotNull;
