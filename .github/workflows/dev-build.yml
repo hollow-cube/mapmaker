@@ -75,13 +75,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Helm
         run: |
-          echo $KUBECONFIG > kubeconfig
+          echo KUBECONF > ~/.kube/config
           helm repo add hollowcube https://helm.hollowcube.net --username ${{ secrets.HELM_REGISTRY_USER }} --password ${{ secrets.HELM_REGISTRY_PASS }}
       - name: Run upgrade
         run: |
-          helm upgrade --install mapmaker-dev hollowcube/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig kubeconfig
+          helm upgrade --install mapmaker-dev hollowcube/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ~/.kube/config
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          KUBECONF: ${{ secrets.KUBECONFIG }}
 #      - uses: 'deliverybot/helm@v1'
 #        with:
 #          release: "mapmaker"
