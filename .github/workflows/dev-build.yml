@@ -75,7 +75,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Helm
         run: |
-          echo KUBECONF > ~/.kube/config
+          echo $KUBECONF > ~/.kube/config
           helm repo add hollowcube https://helm.hollowcube.net --username ${{ secrets.HELM_REGISTRY_USER }} --password ${{ secrets.HELM_REGISTRY_PASS }}
       - name: Run upgrade
         run: |
