@@ -19,9 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RegionCommands {
 
     public RegionCommands(CommandManager commands) {
-
         commands.register(new SetCommand());
-
     }
 
 
@@ -59,7 +57,6 @@ public class RegionCommands {
                 session.remember(new MultiBlockChange(batch, inverse.get()));
                 sender.sendMessage("Done!");
             }));
-
         }
     }
 }

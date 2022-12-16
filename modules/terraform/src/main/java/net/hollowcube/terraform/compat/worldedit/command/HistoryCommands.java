@@ -11,6 +11,7 @@ public class HistoryCommands {
 
     public HistoryCommands(CommandManager commands) {
         commands.register(CommandUtil.singleSyntaxCommand("/undo", this::undo));
+        commands.register(CommandUtil.singleSyntaxCommand("/redo", this::redo));
     }
 
     public void undo(@NotNull CommandSender sender) {
@@ -19,6 +20,19 @@ public class HistoryCommands {
 
         var session = Session.forPlayer(player);
         session.undo(player.getInstance())
+                .thenAccept(unused -> player.sendMessage("Done!"))
+                .exceptionally(e -> {
+                    player.sendMessage("Error: " + e.getMessage());
+                    return null;
+                });
+    }
+
+    public void redo(@NotNull CommandSender sender) {
+        if (!(sender instanceof Player player))
+            throw new UnsupportedOperationException("only implemented for players");
+
+        var session = Session.forPlayer(player);
+        session.redo(player.getInstance())
                 .thenAccept(unused -> player.sendMessage("Done!"))
                 .exceptionally(e -> {
                     player.sendMessage("Error: " + e.getMessage());
