@@ -44,7 +44,6 @@ public class DevServer {
     private final MapServer maps;
 
     private final PostgreSQLManager postgreSQLManager;
-    private final MetricManager metricManager;
 
     public DevServer() {
         var mongoUri = System.getenv("MM_MONGO_URI");
@@ -62,7 +61,7 @@ public class DevServer {
         this.maps = new MapServer();
 
         this.postgreSQLManager = new PostgreSQLManager();
-        this.metricManager = new MetricManager(postgreSQLManager);
+        MetricManager.init(postgreSQLManager);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
