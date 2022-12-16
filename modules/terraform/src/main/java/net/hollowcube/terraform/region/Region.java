@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.region;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public interface Region extends Iterable<@NotNull Point> {
 
     //todo instance
-
+    @NotNull Instance instance();
     /** Minimum rectangular bounding point */
     @NotNull Point min();
     /** Maximum rectangular bounding point */

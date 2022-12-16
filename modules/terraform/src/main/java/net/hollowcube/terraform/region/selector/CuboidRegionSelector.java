@@ -45,6 +45,6 @@ public class CuboidRegionSelector implements RegionSelector {
     @Override
     public @Nullable Region getRegion() {
         if (instance == null || pos1 == null || pos2 == null) return null;
-        return new CuboidRegion(pos1, pos2);
+        return new CuboidRegion(instance, pos1, pos2);
     }
 }

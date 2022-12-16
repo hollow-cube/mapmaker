@@ -3,11 +3,13 @@ package net.hollowcube.terraform.region;
 import net.hollowcube.terraform.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
 public record CuboidRegion(
+        @NotNull Instance instance,
         @NotNull Point pos1,
         @NotNull Point pos2
 ) implements Region {

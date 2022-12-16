@@ -15,12 +15,10 @@ import java.text.MessageFormat;
 public class SelectionCommands {
 
     public SelectionCommands(@NotNull CommandManager commands) {
-
         commands.register(CommandUtil.singleSyntaxCommand("/pos1", this::pos1));
         commands.register(CommandUtil.singleSyntaxCommand("/pos2", this::pos2));
         commands.register(CommandUtil.singleSyntaxCommand("/size", this::size));
         commands.register(CommandUtil.singleSyntaxCommand("/wand", this::wand));
-
     }
 
     public void pos1(@NotNull CommandSender sender) {
@@ -34,7 +32,7 @@ public class SelectionCommands {
         selector.selectPrimary(pos);
 
         //todo temp
-        player.sendMessage(MessageFormat.format("pos1 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
+        player.sendMessage(MessageFormat.format("Pos1 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
     }
 
     public void pos2(@NotNull CommandSender sender) {
@@ -48,7 +46,7 @@ public class SelectionCommands {
         selector.selectSecondary(pos);
 
         //todo temp
-        player.sendMessage(MessageFormat.format("pos2 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
+        player.sendMessage(MessageFormat.format("Pos2 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
     }
 
     public void size(@NotNull CommandSender sender) {
@@ -82,8 +80,8 @@ public class SelectionCommands {
         boolean added = player.getInventory().addItemStack(ItemStack.of(Material.WOODEN_AXE));
         if (!added) {
             sender.sendMessage("not enough inventory space");
+        } else {
+            sender.sendMessage("Left click: select Pos #1; Right click: select Pos #2");
         }
-
-        sender.sendMessage("Left click: select pos #1; Right click: select pos #2");
     }
 }

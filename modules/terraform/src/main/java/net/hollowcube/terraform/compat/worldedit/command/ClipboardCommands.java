@@ -31,7 +31,7 @@ public class ClipboardCommands {
         var builder = new SchematicBuilder();
         builder.setOffset(selection.min().sub(player.getPosition()));
         for (var pos : selection) {
-            var block = player.getInstance().getBlock(pos);
+            var block = selection.instance().getBlock(pos);
             builder.addBlock(pos, block);
         }
 
@@ -43,7 +43,7 @@ public class ClipboardCommands {
         if (!(sender instanceof Player player))
             throw new UnsupportedOperationException("only implemented for players");
 
-        var clipboard =  Session.forPlayer(player).getClipboard().get();
+        var clipboard = Session.forPlayer(player).getClipboard().get();
         if (clipboard == null) {
             player.sendMessage("No clipboard contents");
             return;

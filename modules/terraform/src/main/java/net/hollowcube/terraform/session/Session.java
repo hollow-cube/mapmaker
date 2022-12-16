@@ -74,6 +74,14 @@ public class Session {
         return history.get(historyPointer).undo(instance);
     }
 
+    public CompletableFuture<Void> redo(@NotNull Instance instance) {
+        if (historyPointer >= history.size() - 1)
+            return CompletableFuture.failedFuture(new IllegalStateException("Nothing to redo"));
+
+        historyPointer++;
+        return history.get(historyPointer).redo(instance);
+    }
+
     // Clipboard
 
     public @NotNull Clipboard getClipboard() {
