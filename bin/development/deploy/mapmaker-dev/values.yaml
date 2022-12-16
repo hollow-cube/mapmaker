@@ -7,8 +7,6 @@ replicaCount: 1
 image:
   repository: registry.hollowcube.net/mapmaker-dev
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
 
 imagePullSecrets:
   - name: regcred
