@@ -1,0 +1,24 @@
+name: deploy test
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v1
+      - name: 'Deploy'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: 'mapmaker-test'
+          namespace: 'default'
+          version: '${{ github.sha }}'
+          chart: 'hollowcube/mapmaker'
+          chart_version: '3.0.0-b68258d084ce96cf3bc90246a546cbe0b2f3e7c0'
+          token: '${{ github.token }}'
+          repository: 'https://mapmaker:Qp6EYTTrKs99XphTMFMnVbXV@helm.hollowcube.net'
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
