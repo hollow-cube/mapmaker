@@ -1,7 +1,5 @@
 name: deploy-test2
 
-#name: ci
-#
 on:
   push:
     branches:
