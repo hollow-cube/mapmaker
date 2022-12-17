@@ -37,6 +37,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            - name: minecraft
+              containerPort: 25565
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /alive
