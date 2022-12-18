@@ -28,6 +28,6 @@ spec:
       targetPort: minecraft
       protocol: TCP
       name: minecraft
-
+      nodePort: 30565
   selector:
     {{- include "mapmaker-dev.selectorLabels" . | nindent 4 }}
