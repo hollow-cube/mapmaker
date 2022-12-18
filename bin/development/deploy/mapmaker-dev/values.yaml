@@ -10,8 +10,8 @@ image:
 
 env:
   MM_S3_ADDRESS: "https://minio.dev.hollowcube.net/"
-  MM_S3_ACCESS_KEY: "YC3IEsD7wGQuXGUI"
-  MM_S3_SECRET_KEY: "fZZdFJLBcpRLW17Du1XeGyHizjoxJJCd"
+  MM_S3_ACCESS_KEY: "Ai65UJERihroEJTi"
+  MM_S3_SECRET_KEY: "fzp8s99MvaZojs3BIpPLVNcc3dfpvPDv"
 
 imagePullSecrets:
   - name: regcred
