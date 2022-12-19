@@ -33,9 +33,8 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ServiceLoader;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.ServiceLoader;
 
 public class DevServer {
     public static void main(String[] args) {
@@ -50,24 +49,21 @@ public class DevServer {
                 .addRouting(Routing.builder()
                         .register(HealthSupport.builder()
                                 .webContext("alive")
-                                .addLiveness()
+                                .addLiveness(() -> HealthCheckResponse.up("mapmaker"))
                                 .build())
                         .register(HealthSupport.builder()
                                 .webContext("ready")
-                                .addReadiness()
+                                .addReadiness(server.readinessChecks())
                                 .build())
                         .build())
                 .build();
         webServer.start()
                 .thenAccept(ws -> System.out.println("Web server is running at :" + ws.port()));
-        //todo handle kill code and stop everything gracefully.
-        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
-        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
-
-        MojangAuth.init();
 
         server.start();
         minecraftServer.start("0.0.0.0", 25565);
+
+        //todo handle kill code and stop everything gracefully.
     }
 
     private PlayerStorage playerStorage;
@@ -82,6 +78,9 @@ public class DevServer {
 
     public void start() {
         MojangAuth.init();
+
+        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
 
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
