@@ -1,6 +1,6 @@
 package net.hollowcube.map.command;
 
-import net.hollowcube.mapmaker.hub.HubManager;
+import net.hollowcube.mapmaker.oldtoremove.HubManager;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;

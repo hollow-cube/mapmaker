@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map;
+package net.hollowcube.mapmaker.oldtoremove;
 
 import org.jetbrains.annotations.NotNull;
 

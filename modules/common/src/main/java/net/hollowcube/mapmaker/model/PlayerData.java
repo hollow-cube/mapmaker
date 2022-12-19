@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.model;
 
-import net.hollowcube.mapmaker.util.TagUtil;
+import net.hollowcube.mapmaker.util.ExtraTags;
+import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * MapMaker data for a single player.
@@ -14,7 +15,11 @@ import java.util.List;
 public class PlayerData {
     public static final Tag<String> PLAYER_ID = Tag.String("mapmaker:player_id");
 
-    public static final Tag<PlayerData> DATA = TagUtil.noop("mapmaker:player_data");
+    public static final Tag<PlayerData> DATA = ExtraTags.Transient("mapmaker:player_data");
+
+    public static @NotNull PlayerData fromPlayer(@NotNull Player player) {
+        return player.getTag(DATA);
+    }
 
     public static final int MAX_MAP_SLOTS = 5;
 
@@ -52,8 +57,8 @@ public class PlayerData {
         this.mapSlots = mapSlots;
     }
 
-    public @NotNull List<String> getMapSlots() {
-        return List.of(mapSlots);
+    public @NotNull String[] getMapSlots() {
+        return Arrays.copyOf(mapSlots, mapSlots.length);
     }
 
     public @Nullable String getMapSlot(int slot) {

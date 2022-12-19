@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.result.Error;
 import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
-import net.hollowcube.mapmaker.storage.Storage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.entity.Player;
@@ -63,7 +62,7 @@ public class MapAdminHandler {
                     msg.forEach(player::sendMessage);
                 })
                 .mapErr(err -> {
-                    if (err.is(Storage.ERR_NOT_FOUND)) {
+                    if (err.is(MapStorage.ERR_NOT_FOUND)) {
                         // Specific error for map not found
                         var msg = LanguageProvider.createMultiTranslatable("command.map.admin.info.not_found", Component.text(mapId));
                         msg.forEach(player::sendMessage);

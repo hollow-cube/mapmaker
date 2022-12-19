@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map;
+package net.hollowcube.mapmaker.oldtoremove;
 
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.result.FutureResult;

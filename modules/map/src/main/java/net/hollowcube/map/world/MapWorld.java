@@ -4,8 +4,8 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.util.ExtraTags;
 import net.hollowcube.mapmaker.util.StaticAbuse;
-import net.hollowcube.mapmaker.util.TagUtil;
 import net.hollowcube.util.FutureUtil;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.WorldManager;
@@ -26,9 +26,9 @@ import java.util.concurrent.CompletableFuture;
 public class MapWorld extends BaseWorld {
 
     public static final Tag<String> MAP_ID = Tag.String("mapmaker:map/id");
-    public static final Tag<MapData> MAP_DATA = TagUtil.noop("mapmaker:map/data");
+    public static final Tag<MapData> MAP_DATA = ExtraTags.Transient("mapmaker:map/data");
 
-    private static final Tag<MapWorld> THIS_TAG = TagUtil.noop("mapmaker:map/world");
+    private static final Tag<MapWorld> THIS_TAG = ExtraTags.Transient("mapmaker:map/world");
 
     public static @NotNull MapWorld fromInstance(@NotNull Instance instance) {
         return Objects.requireNonNull(instance.getTag(THIS_TAG));
