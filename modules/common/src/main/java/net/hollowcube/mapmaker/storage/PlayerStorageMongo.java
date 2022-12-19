@@ -23,7 +23,8 @@ public class PlayerStorageMongo implements PlayerStorage {
     public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
         return FutureResult.supply(() -> {
             try {
-                collection().insertOne(player);
+                var result = collection().insertOne(player);
+                System.out.println(result);
             } catch (DuplicateKeyException ignored) {
                 return Result.error(ERR_DUPLICATE_ENTRY);
             }
@@ -50,6 +51,17 @@ public class PlayerStorageMongo implements PlayerStorage {
             if (result == null)
                 return Result.error(ERR_NOT_FOUND);
             return Result.of(result);
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player) {
+        return FutureResult.supply(() -> {
+            var filter = eq("_id", player.getId());
+            var result = collection().replaceOne(filter, player);
+            if (result.getModifiedCount() == 0)
+                return Result.error(ERR_NOT_FOUND);
+            return Result.ofNull();
         });
     }
 

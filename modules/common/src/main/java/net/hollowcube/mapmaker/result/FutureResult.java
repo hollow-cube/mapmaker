@@ -29,7 +29,14 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
 
     /** Creates a new {@link FutureResult} executing the given {@link Supplier} in the jvm common pool. */
     static <T> @NotNull FutureResult<T> supply(@NotNull Supplier<@NotNull Result<T>> supplier) {
-        return new FutureResults.CF<>(CompletableFuture.supplyAsync(supplier, ForkJoinPool.commonPool()));
+        return new FutureResults.CF<>(CompletableFuture.supplyAsync(() -> {
+            try {
+                return supplier.get();
+            } catch (Throwable t) {
+                t.printStackTrace(); //todo
+                throw new RuntimeException(t);
+            }
+        }, ForkJoinPool.commonPool()));
     }
 
     /**

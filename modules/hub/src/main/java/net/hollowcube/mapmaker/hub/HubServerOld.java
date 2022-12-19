@@ -6,9 +6,11 @@ import net.hollowcube.mapmaker.hub.gui.HubUIs;
 import net.hollowcube.mapmaker.hub.gui.inventory.InventoryUtils;
 import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
 import net.hollowcube.mapmaker.hub.gui.section.BuildMaps;
-import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
-import net.hollowcube.mapmaker.map.MapManager;
+import net.hollowcube.mapmaker.hub.handler.MapHandler;
+import net.hollowcube.mapmaker.oldtoremove.HubManager;
+import net.hollowcube.mapmaker.oldtoremove.MapManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.util.DimensionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -34,7 +36,7 @@ public class HubServerOld implements HubManager {
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:hub");
     private final Instance instance; // Hub instance
 
-    public HubServerOld(@NotNull MapStorage mapStorage, @NotNull MapManager maps) {
+    public HubServerOld(@NotNull MapStorage mapStorage, @NotNull MapManager maps, @NotNull PlayerStorage playerStorage) {
         TemporaryIAmTerrible.INSTANCE = this;
 
         instance = new InstanceContainer(UUID.randomUUID(), DimensionUtil.FULL_BRIGHT);
@@ -46,7 +48,7 @@ public class HubServerOld implements HubManager {
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
 
         var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapCommand(new MapHandlerImpl(mapStorage, maps)));
+        commands.register(new MapCommand(new MapHandler(mapStorage, maps, playerStorage)));
         eventNode.addListener(PlayerUseItemEvent.class, this::handleUseItem);
     }
 

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub;
+package net.hollowcube.mapmaker.oldtoremove;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;

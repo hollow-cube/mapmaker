@@ -43,4 +43,14 @@ class PlayerStorageMemory implements PlayerStorage {
         }
         return FutureResult.error(ERR_NOT_FOUND);
     }
+
+    @Override
+    public @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player) {
+        LOGGER.info("Updating player {}", player.getId());
+        if (!playersById.containsKey(player.getId()))
+            return FutureResult.error(ERR_NOT_FOUND);
+        playersById.put(player.getId(), player);
+        return FutureResult.ofNull();
+    }
+
 }

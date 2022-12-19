@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.mapmaker.storage.Storage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.kyori.adventure.bossbar.BossBar;
@@ -94,7 +93,7 @@ public class DevServer {
         StaticAbuse.mapStorage = mapStorage;
 
         this.maps = new MapServer();
-        this.hub = new HubServerOld(mapStorage, maps);
+        this.hub = new HubServerOld(mapStorage, maps, playerStorage);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -131,10 +130,11 @@ public class DevServer {
         var player = event.getPlayer();
         playerStorage.getPlayerByUuid(event.getPlayerUuid().toString())
                 .flatMapErr(err -> {
-                    if (err.is(Storage.ERR_NOT_FOUND)) {
+                    if (err.is(PlayerStorage.ERR_NOT_FOUND)) {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
+                        data.setUnlockedMapSlots(3);
                         return playerStorage.createPlayer(data);
                     }
                     return FutureResult.error(err);
