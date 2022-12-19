@@ -31,6 +31,12 @@ tasks.withType<ShadowJar> {
 blossom {
     //todo manage these better
     replaceToken("{MAPMAKER_VERSION}", "3.0.0-alpha")
-    replaceToken("{MAPMAKER_COMMIT}", "dev")
+
+    val commitHash = System.getenv("COMMIT_SHA")
+    if (commitHash != null) {
+        replaceToken("{MAPMAKER_COMMIT}", commitHash.substring(0..6))
+    } else {
+        replaceToken("{MAPMAKER_COMMIT}", "dev")
+    }
     replaceToken("{MINESTOM_VERSION}", minestomVersion)
 }
