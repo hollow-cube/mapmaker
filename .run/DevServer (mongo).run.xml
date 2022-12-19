@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DevServer (mongo)" type="Application" factoryName="Application">
+    <envs>
+      <env name="MM_MONGO_URI" value="mongodb://localhost:27017" />
+      <env name="MM_S3_ACCESS_KEY" value="mapmaker" />
+      <env name="MM_S3_SECRET_KEY" value="mapmaker" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
+    <module name="mapmaker.bin.development.main" />
+    <option name="VM_PARAMETERS" value="-truffle -XX:+IgnoreUnrecognizedVMOptions" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="net.hollowcube.mapmaker.dev.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
