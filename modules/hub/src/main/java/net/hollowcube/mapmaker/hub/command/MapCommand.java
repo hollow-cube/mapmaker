@@ -36,6 +36,7 @@ public class MapCommand extends BaseHubCommand {
         this.handler = handler;
 
         addSubcommand(new Create());
+        addSubcommand(new Publish());
         addSubcommand(new Info());
         addSubcommand(new Edit());
         addSubcommand(new Play());
@@ -78,6 +79,41 @@ public class MapCommand extends BaseHubCommand {
                         } else if (err.is(MapHandler.ERR_DUPLICATE_NAME)) {
                             LanguageProvider.createMultiTranslatable("command.map.create.name_in_use",
                                     Component.text(name)).forEach(player::sendMessage);
+                        } else {
+                            LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
+                                    Component.text(err.toString())).forEach(player::sendMessage);
+                            logger.error("Error creating map: {}", err);
+                        }
+                    });
+        }
+    }
+
+    public class Publish extends Command {
+        private final Argument<Integer> slotArg = ArgumentType.Integer("slot").min(1).max(PlayerData.MAX_MAP_SLOTS + 1);
+
+        public Publish() {
+            super("publish");
+
+            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map publish <slot>"));
+
+            addSyntax(this::publishWithSlot, slotArg);
+        }
+
+        private void publishWithSlot(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) return;
+
+            var slot = context.get(slotArg);
+
+            handler.publishMap(player, slot - 1)
+                    .then(unused -> {
+                        LanguageProvider.createMultiTranslatable("command.map.publish.success",
+                                Component.text(slot)).forEach(player::sendMessage);
+                        logger.info("{} published map in slot {}", player.getUsername(), slot);
+                    })
+                    .thenErr(err -> {
+                        if (err.is(MapHandler.ERR_SLOT_NOT_IN_USE)) {
+                            LanguageProvider.createMultiTranslatable("command.map.public.slot_not_in_use",
+                                    Component.text(slot)).forEach(player::sendMessage);
                         } else {
                             LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
                                     Component.text(err.toString())).forEach(player::sendMessage);

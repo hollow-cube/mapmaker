@@ -4,6 +4,7 @@ import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.util.StaticAbuse;

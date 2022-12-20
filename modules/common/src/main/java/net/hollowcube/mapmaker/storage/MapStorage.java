@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface MapStorage {
 
-    Error ERR_NOT_FOUND = Error.of("not found");
-    Error ERR_DUPLICATE_ENTRY = Error.of("already exists");
+    Error ERR_NOT_FOUND = Error.of("map not found");
+    Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
     Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}");
 
     static @NotNull MapStorage memory() {

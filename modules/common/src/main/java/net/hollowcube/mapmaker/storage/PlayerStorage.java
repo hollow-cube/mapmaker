@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface PlayerStorage {
 
-    Error ERR_NOT_FOUND = Error.of("not found");
-    Error ERR_DUPLICATE_ENTRY = Error.of("already exists");
+    Error ERR_NOT_FOUND = Error.of("player not found");
+    Error ERR_DUPLICATE_ENTRY = Error.of("player already exists");
 
     static @NotNull PlayerStorage memory() {
         return new PlayerStorageMemory();

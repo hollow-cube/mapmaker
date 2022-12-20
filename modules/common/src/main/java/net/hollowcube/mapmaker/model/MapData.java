@@ -14,6 +14,12 @@ public class MapData {
     private String owner;
     private String name;
 
+    // Published state
+    private boolean published = false;
+    private String publishedId;
+
+    // The following is unqueryable data, may be stored in serialized form.
+
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
     private String mapFileId;
     private Pos spawnPoint = new Pos(0, 40, 0);
@@ -45,6 +51,24 @@ public class MapData {
     public void setName(String name) {
         this.name = name;
     }
+
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
+    public String getPublishedId() {
+        return publishedId;
+    }
+
+    public void setPublishedId(String publishedId) {
+        this.publishedId = publishedId;
+    }
+
 
     public String getMapFileId() {
         return mapFileId;

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.map;
+package net.hollowcube.mapmaker.hub.gui.map.component;
 
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.mapmaker.lang.LanguageProvider;

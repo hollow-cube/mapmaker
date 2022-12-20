@@ -138,6 +138,8 @@ public final class MongoUtil {
                         }
                         reader.readEndArray();
                     }
+                    case "published" -> value.setPublished(reader.readBoolean());
+                    case "publishedId" -> value.setPublishedId(reader.readString());
                 }
             }
             reader.readEndDocument();
@@ -180,6 +182,11 @@ public final class MongoUtil {
                 writer.writeEndDocument();
             }
             writer.writeEndArray();
+            if (value.isPublished()) {
+                writer.writeBoolean("published", true);
+                writer.writeString("publishedId", value.getPublishedId());
+            }
+
             writer.writeEndDocument();
         }
 
