@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.world;
 
+import net.hollowcube.mapmaker.hub.gui.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.WorldManager;
@@ -24,6 +25,8 @@ public class HubWorld extends BaseWorld {
         instance().setGenerator(HubGenerators.stoneWorld());
 
         var eventNode = instance().eventNode();
+        eventNode.addChild(HubHotbar.eventNode());
+
         //todo add some WorldConfig options passed on world create. Can add some useful/common ones
         // like setting a generator (default to void probably), preventing block placement/breaking, etc.
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak);
@@ -52,6 +55,7 @@ public class HubWorld extends BaseWorld {
 
         player.setGameMode(GameMode.ADVENTURE);
 
-        //todo set inventory
+        player.getInventory().clear();
+        HubHotbar.applyToPlayer(player);
     }
 }

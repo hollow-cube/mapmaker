@@ -15,6 +15,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface HubServer {
 
+    class StaticAbuse {
+        public static HubServer INSTANCE;
+    }
+
     @NotNull PlayerStorage players();
 
     @NotNull MapStorage maps();

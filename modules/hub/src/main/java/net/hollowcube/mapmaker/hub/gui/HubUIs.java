@@ -10,4 +10,5 @@ public final class HubUIs {
     public static @NotNull Section createMaps() {
         return new CreateMapsView();
     }
+
 }

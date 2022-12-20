@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.section;
+package net.hollowcube.mapmaker.hub.gui.map;
 
 import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.ParentSection;

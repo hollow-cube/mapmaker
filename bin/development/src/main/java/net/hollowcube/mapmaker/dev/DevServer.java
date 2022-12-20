@@ -7,8 +7,9 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.facet.Facet;
-import net.hollowcube.mapmaker.hub.HubServerOld;
-import net.hollowcube.mapmaker.hub.gui.section.MapSlotsSection;
+import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.HubServerImpl;
+import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.result.FutureResult;
@@ -17,12 +18,15 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
+import net.hollowcube.world.WorldManager;
+import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
@@ -68,7 +72,7 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
 
-    private HubServerOld hub;
+    private HubServer hub;
     private MapServer maps;
 
     public DevServer() {
@@ -92,8 +96,14 @@ public class DevServer {
 
         StaticAbuse.mapStorage = mapStorage;
 
+        var s3Address = System.getenv("MM_S3_ADDRESS");
+        if (s3Address == null) s3Address = "http://localhost:9000/";
+        var s3AccessKey = System.getenv("MM_S3_ACCESS_KEY");
+        var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
+        var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
+
         this.maps = new MapServer();
-        this.hub = new HubServerOld(mapStorage, maps, playerStorage);
+        this.hub = new HubServerImpl(playerStorage, mapStorage, worldManager, maps);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -111,7 +121,7 @@ public class DevServer {
         cmd.setDefaultExecutor((sender, context) -> {
             var player = (Player) sender;
             var sec = new GroupSection(9, 3);
-            sec.add(0, 0, new MapSlotsSection(player.getTag(PlayerData.DATA)));
+            sec.add(0, 0, new MapSlotsView(player.getTag(PlayerData.DATA)));
             new RouterSection(sec).showToPlayer(player);
         });
         MinecraftServer.getCommandManager().register(cmd);
@@ -152,8 +162,8 @@ public class DevServer {
     }
 
     private void handleLogin(PlayerLoginEvent event) {
-        event.setSpawningInstance(hub.getInstance());
-        event.getPlayer().setRespawnPoint(hub.getSpawnPos());
+        event.setSpawningInstance(hub.world().instance());
+        event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
