@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.gui.map;
 import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RootSection;
 import net.hollowcube.mapmaker.hub.gui.common.InfoButton;
-import net.hollowcube.mapmaker.hub.gui.section.MapSlotsSection;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +19,7 @@ public class CreateMapsView extends ParentSection {
 
         // Map selector
         var temp = MinecraftServer.getConnectionManager().getPlayer("notmattw").getTag(PlayerData.DATA);
-        add(0, 1, new MapSlotsSection(temp));
+        add(0, 1, new MapSlotsView(temp));
 
         // Other buttons
         //todo

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.section;
+package net.hollowcube.mapmaker.hub.gui.map;
 
 import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RouterSection;
@@ -12,9 +12,9 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class MapSlotsSection extends ParentSection {
+public class MapSlotsView extends ParentSection {
 
-    public MapSlotsSection(@NotNull PlayerData playerData) {
+    public MapSlotsView(@NotNull PlayerData playerData) {
         super(5, 1);
 
         for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {

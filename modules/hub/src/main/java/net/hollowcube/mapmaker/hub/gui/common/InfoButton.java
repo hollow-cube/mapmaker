@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
-import net.hollowcube.mapmaker.hub.gui.item.ItemUtils;
+import net.hollowcube.mapmaker.hub.gui.old.ItemUtils;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.command;
 
-import net.hollowcube.mapmaker.hub.HubServerOld;
+import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
@@ -23,6 +23,6 @@ class BaseHubCommand extends Command {
         }
         var instance = player.getInstance();
         if (instance == null) return false;
-        return instance.hasTag(HubServerOld.HUB_MARKER);
+        return instance.hasTag(HubWorld.MARKER);
     }
 }
