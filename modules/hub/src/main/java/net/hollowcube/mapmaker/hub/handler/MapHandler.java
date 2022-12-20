@@ -24,6 +24,7 @@ public class MapHandler {
     public static final Logger LOGGER = LoggerFactory.getLogger(MapHandler.class);
 
     public static final Error ERR_SLOT_IN_USE = Error.of("slot in use");
+    public static final Error ERR_SLOT_NOT_IN_USE = Error.of("slot in use");
     public static final Error ERR_DUPLICATE_NAME = Error.of("duplicate name");
 
     protected final MapStorage storage;
@@ -72,6 +73,22 @@ public class MapHandler {
 
                     return FutureResult.error(err.wrap("failed to create map: {0}"));
                 });
+    }
+
+    public @NotNull FutureResult<Void> publishMap(@NotNull Player player, int slot) {
+        var playerData = PlayerData.fromPlayer(player);
+        var mapId = playerData.getMapSlot(slot);
+        if (mapId == null) return FutureResult.error(ERR_SLOT_NOT_IN_USE);
+
+        return storage.getMapById(mapId)
+                .flatMap(map -> {
+                    map.setPublished(true);
+                    map.setPublishedId("TODO");
+                    playerData.setMapSlot(slot, null);
+                    return storage.updateMap(map)
+                            .flatMap(unused -> playerStorage.updatePlayer(playerData));
+                })
+                .mapErr(err -> Result.error(err.wrap("failed to publish map: {0}")));
     }
 
     public @NotNull FutureResult<Void> editMap(@NotNull String nameOrId, @NotNull Player player) {

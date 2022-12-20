@@ -6,6 +6,7 @@ import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.hub.gui.common.TranslatedButtonSection;
+import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.result.Error;
 import net.hollowcube.mapmaker.result.FutureResult;
