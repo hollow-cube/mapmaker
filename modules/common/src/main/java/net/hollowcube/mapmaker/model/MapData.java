@@ -4,7 +4,9 @@ import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class MapData {
 
@@ -14,7 +16,10 @@ public class MapData {
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
     private String mapFileId;
-    private List<POI> pois = new ArrayList<>();
+    private final List<POI> pois = new ArrayList<>();
+
+    private final int MAX_COMPLETION_TIMES = 10;
+    private final List<CompletionTime> completionTimes = new ArrayList<>(MAX_COMPLETION_TIMES + 1);
 
     public String getId() {
         return id;
@@ -60,6 +65,19 @@ public class MapData {
         pois.removeIf(poi -> poi.pos.equals(pos));
     }
 
+    private void tryAddTime(UUID id, int time) {
+        for (int i = 0; i < completionTimes.size(); i++) {
+            if (time < completionTimes.get(i).timeInMills) {
+                // Insert
+                completionTimes.add(i, new CompletionTime(id, time));
+            }
+        }
+        // Remove times until we are at the max
+        while (completionTimes.size() > MAX_COMPLETION_TIMES) {
+            completionTimes.remove(completionTimes.size() - 1);
+        }
+    }
+
     @Override
     public String toString() {
         return "MapData{" +
@@ -69,5 +87,7 @@ public class MapData {
     }
 
     public record POI(String type, Point pos) {}
+
+    public record CompletionTime(UUID playerUUID, int timeInMills) {}
 
 }
