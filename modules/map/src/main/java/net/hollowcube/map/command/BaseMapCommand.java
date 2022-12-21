@@ -31,6 +31,7 @@ public class BaseMapCommand extends Command {
         var instance = player.getInstance();
         // Disallowed if there is no instance or it is not a map world
         if (instance == null || !instance.hasTag(MapWorld.MAP_ID)) return false;
+        // If not edit only we can return true immediately (allowed no matter the map mode)
         if (!editOnly) return true;
 
         var mapWorld = MapWorld.fromInstance(instance);

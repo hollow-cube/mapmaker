@@ -18,25 +18,34 @@ public class SetSpawnCommand extends BaseMapCommand {
         super(true, "setspawn");
 
         addSyntax(this::setSpawn);
-        addSyntax(this::setSpawnWithPos, positionArg, rotationArg);
+        addSyntax(this::setSpawnWithPos, positionArg);
+        addSyntax(this::setSpawnWithPosAndRot, positionArg, rotationArg);
     }
 
     private void setSpawn(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) return;
-        var newSpawnPoint = player.getPosition();
 
-        var map = MapWorld.fromInstance(player.getInstance()).map();
-        map.setSpawnPoint(newSpawnPoint);
-        player.sendMessage("Set spawn to " + newSpawnPoint); //todo translation
+        updateMapPos(player, player.getPosition());
     }
 
     private void setSpawnWithPos(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) return;
 
         var pos = context.get(positionArg).fromSender(player);
-        var rot = context.get(positionArg).fromView(player);
-        var newSpawnPoint = new Pos(pos.x(), pos.y(), pos.z(), (float) rot.x(), (float) rot.z());
+        updateMapPos(player, new Pos(pos.x(), pos.y(), pos.z(),
+                player.getPosition().yaw(), player.getPosition().pitch()));
+    }
 
+    private void setSpawnWithPosAndRot(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) return;
+
+        var pos = context.get(positionArg).fromSender(player);
+        var rot = context.get(positionArg).fromView(player);
+
+        updateMapPos(player, new Pos(pos.x(), pos.y(), pos.z(), (float) rot.x(), (float) rot.z()));
+    }
+
+    private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
         var map = MapWorld.fromInstance(player.getInstance()).map();
         map.setSpawnPoint(newSpawnPoint);
         player.sendMessage("Set spawn to " + newSpawnPoint); //todo translation
