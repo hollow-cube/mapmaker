@@ -111,7 +111,7 @@ public final class MongoUtil {
                         while (reader.readBsonType() == BsonType.DOCUMENT) {
                             reader.readStartDocument();
                             UUID id = UUID.fromString(reader.readString("uuid"));
-                            long timestamp = reader.readInt64();
+                            long timestamp = reader.readInt64("timestamp");
                             reader.readEndDocument();
                             value.tryAddTime(id, timestamp);
                         }
@@ -148,7 +148,7 @@ public final class MongoUtil {
             for (var completion : value.getCompletionTimes()) {
                 writer.writeStartDocument();
                 writer.writeString("uuid", completion.playerUUID().toString());
-                writer.writeInt64(completion.timeInMills());
+                writer.writeInt64("timestamp", completion.timeInMills());
                 writer.writeEndDocument();
             }
             writer.writeEndArray();
