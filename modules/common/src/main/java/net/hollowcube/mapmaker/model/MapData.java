@@ -65,17 +65,31 @@ public class MapData {
         pois.removeIf(poi -> poi.pos.equals(pos));
     }
 
-    private void tryAddTime(UUID id, int time) {
+    public void tryAddTime(UUID id, long time) {
+        int index = -1;
         for (int i = 0; i < completionTimes.size(); i++) {
+            // Find index
             if (time < completionTimes.get(i).timeInMills) {
-                // Insert
-                completionTimes.add(i, new CompletionTime(id, time));
+                index = i;
+                break;
             }
         }
-        // Remove times until we are at the max
+        if (index == -1) {
+            // We were not able to find an index, could be in a couple of states, array is empty, it's the last possible time, etc
+            // Add onto end, we will correct it later
+            completionTimes.add(new CompletionTime(id, time));
+        } else {
+            // found insertion index
+            completionTimes.add(index, new CompletionTime(id, time));
+        }
+        // Remove times until we are at the max to correct data
         while (completionTimes.size() > MAX_COMPLETION_TIMES) {
             completionTimes.remove(completionTimes.size() - 1);
         }
+    }
+
+    public List<CompletionTime> getCompletionTimes() {
+        return completionTimes;
     }
 
     @Override
@@ -88,6 +102,6 @@ public class MapData {
 
     public record POI(String type, Point pos) {}
 
-    public record CompletionTime(UUID playerUUID, int timeInMills) {}
+    public record CompletionTime(UUID playerUUID, long timeInMills) {}
 
 }

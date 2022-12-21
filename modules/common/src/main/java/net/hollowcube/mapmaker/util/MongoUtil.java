@@ -19,6 +19,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MongoUtil {
@@ -105,6 +106,17 @@ public final class MongoUtil {
                         }
                         reader.readEndArray();
                     }
+                    case "completion-times" -> {
+                        reader.readStartArray();
+                        while (reader.readBsonType() == BsonType.DOCUMENT) {
+                            reader.readStartDocument();
+                            UUID id = UUID.fromString(reader.readString("uuid"));
+                            long timestamp = reader.readInt64();
+                            reader.readEndDocument();
+                            value.tryAddTime(id, timestamp);
+                        }
+                        reader.readEndArray();
+                    }
                 }
             }
             reader.readEndDocument();
@@ -132,7 +144,14 @@ public final class MongoUtil {
                 writer.writeEndDocument();
             }
             writer.writeEndArray();
-
+            writer.writeStartArray("completion-times");
+            for (var completion : value.getCompletionTimes()) {
+                writer.writeStartDocument();
+                writer.writeString("uuid", completion.playerUUID().toString());
+                writer.writeInt64(completion.timeInMills());
+                writer.writeEndDocument();
+            }
+            writer.writeEndArray();
             writer.writeEndDocument();
         }
 
