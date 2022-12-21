@@ -3,6 +3,7 @@ package net.hollowcube.map;
 import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
+import net.hollowcube.map.command.SetSpawnCommand;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.MapWorld;
@@ -74,6 +75,7 @@ public class MapServer implements MapManager {
         var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand());
         commandManager.register(new GiveCommand());
+        commandManager.register(new SetSpawnCommand());
     }
 
     public @NotNull WorldManager worldManager() {

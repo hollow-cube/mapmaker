@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.model;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class MapData {
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
     private String mapFileId;
+    private Pos spawnPoint = new Pos(0, 40, 0);
     private final List<POI> pois = new ArrayList<>();
 
     private final int MAX_COMPLETION_TIMES = 10;
@@ -50,6 +52,14 @@ public class MapData {
 
     public void setMapFileId(String mapFileId) {
         this.mapFileId = mapFileId;
+    }
+
+    public @NotNull Pos getSpawnPoint() {
+        return spawnPoint;
+    }
+
+    public void setSpawnPoint(@NotNull Pos spawnPoint) {
+        this.spawnPoint = spawnPoint;
     }
 
     public List<POI> getPois() {

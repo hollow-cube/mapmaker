@@ -105,6 +105,7 @@ public class MapWorld extends BaseWorld {
 
     private void initPlayerForEditing(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
+        player.teleport(map.getSpawnPoint());
         player.setGameMode(GameMode.CREATIVE);
 
         player.sendMessage("Now editing " + map.getName());
@@ -112,6 +113,7 @@ public class MapWorld extends BaseWorld {
 
     private void initPlayerForPlaying(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
+        player.teleport(map.getSpawnPoint());
         player.setTag(MapHooks.PLAYING, true);
 
         player.setGameMode(GameMode.ADVENTURE);

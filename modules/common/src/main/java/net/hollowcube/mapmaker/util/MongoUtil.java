@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.bson.BsonReader;
 import org.bson.BsonType;
@@ -88,6 +89,26 @@ public final class MongoUtil {
                     case "owner" -> value.setOwner(reader.readString());
                     case "name" -> value.setName(reader.readString());
                     case "mapFileId" -> value.setMapFileId(reader.readString());
+                    case "spawn_point" -> {
+                        reader.readStartDocument();
+                        double x = 0.0;
+                        double y = 0.0;
+                        double z = 0.0;
+                        float yaw = 0.0f;
+                        float pitch = 0.0f;
+                        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                            switch (reader.readName()) {
+                                case "x" -> x = reader.readDouble();
+                                case "y" -> y = reader.readDouble();
+                                case "z" -> z = reader.readDouble();
+                                case "yaw" -> yaw = (float) reader.readDouble();
+                                case "pitch" -> pitch = (float) reader.readDouble();
+                                default -> throw new RuntimeException("Unknown field: " + reader.readName());
+                            }
+                        }
+                        reader.readEndDocument();
+                        value.setSpawnPoint(new Pos(x, y, z, yaw, pitch));
+                    }
                     case "pois" -> {
                         reader.readStartArray();
                         while (reader.readBsonType() == BsonType.DOCUMENT) {
@@ -132,6 +153,13 @@ public final class MongoUtil {
             if (value.getMapFileId() != null) {
                 writer.writeString("mapFileId", value.getMapFileId());
             }
+            writer.writeStartDocument("spawn_point");
+            writer.writeDouble("x", value.getSpawnPoint().x());
+            writer.writeDouble("y", value.getSpawnPoint().y());
+            writer.writeDouble("z", value.getSpawnPoint().z());
+            writer.writeDouble("yaw", value.getSpawnPoint().yaw());
+            writer.writeDouble("pitch", value.getSpawnPoint().pitch());
+            writer.writeEndDocument();
             writer.writeStartArray("pois");
             for (var poi : value.getPois()) {
                 writer.writeStartDocument();
