@@ -19,6 +19,9 @@ public class MapData {
     private Pos spawnPoint = new Pos(0, 40, 0);
     private final List<POI> pois = new ArrayList<>();
 
+    private long playCount;
+    private long mapCompletedCount;
+
     private final int MAX_COMPLETION_TIMES = 10;
     private final List<CompletionTime> completionTimes = new ArrayList<>(MAX_COMPLETION_TIMES + 1);
 
@@ -107,6 +110,30 @@ public class MapData {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    public long getPlayCount() {
+        return playCount;
+    }
+
+    public void incrementPlayCount() {
+        this.playCount++;
+    }
+
+    public void setPlayCount(long playCount) {
+        this.playCount = playCount;
+    }
+
+    public long getMapCompletedCount() {
+        return mapCompletedCount;
+    }
+
+    public void incrementMapCompletedCount() {
+        this.mapCompletedCount++;
+    }
+
+    public void setMapCompletedCount(long mapCompletedCount) {
+        this.mapCompletedCount = mapCompletedCount;
     }
 
     public record POI(String type, Point pos) {}

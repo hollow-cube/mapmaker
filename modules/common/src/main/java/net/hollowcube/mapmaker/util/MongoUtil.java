@@ -138,6 +138,8 @@ public final class MongoUtil {
                         }
                         reader.readEndArray();
                     }
+                    case "playcount" -> value.setPlayCount(reader.readInt64());
+                    case "completedcount" -> value.setMapCompletedCount(reader.readInt64());
                 }
             }
             reader.readEndDocument();
@@ -180,6 +182,8 @@ public final class MongoUtil {
                 writer.writeEndDocument();
             }
             writer.writeEndArray();
+            writer.writeInt64("playcount", value.getPlayCount());
+            writer.writeInt64("completedcount", value.getMapCompletedCount());
             writer.writeEndDocument();
         }
 
