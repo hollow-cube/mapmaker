@@ -32,6 +32,11 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.item.metadata.WrittenBookMeta;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
@@ -125,6 +130,23 @@ public class DevServer {
             new RouterSection(sec).showToPlayer(player);
         });
         MinecraftServer.getCommandManager().register(cmd);
+
+        var cmd2 = new Command("lec");
+        cmd2.setDefaultExecutor((sender, context) -> {
+            var player = (Player) sender;
+            var lec = new Inventory(InventoryType.LECTERN, "TITLE WOWOWOWOWOW");
+            lec.setItemStack(0, ItemStack.builder(Material.WRITTEN_BOOK)
+                    .meta(WrittenBookMeta.class, meta -> {
+                        meta.title("Seth is dumb");
+                        meta.author("Ben");
+                        meta.pages(
+                                Component.text("ABC")
+                        );
+                    })
+                    .build());
+            player.openInventory(lec);
+        });
+        MinecraftServer.getCommandManager().register(cmd2);
 
         TerraformWorldEdit.init();
     }
