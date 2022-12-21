@@ -11,9 +11,15 @@ import org.jetbrains.annotations.Nullable;
  * A command which is only available in a mapmaker map (does not restrict to playing or editing)
  */
 public class BaseMapCommand extends Command {
+    private final boolean editOnly;
 
     public BaseMapCommand(@NotNull String name, @Nullable String... aliases) {
+        this(false, name, aliases);
+    }
+
+    public BaseMapCommand(boolean editOnly, @NotNull String name, @Nullable String... aliases) {
         super(name, aliases);
+        this.editOnly = editOnly;
 
         setCondition(this::isInMap);
     }
@@ -23,7 +29,11 @@ public class BaseMapCommand extends Command {
             return false;
         }
         var instance = player.getInstance();
-        if (instance == null) return false;
-        return instance.hasTag(MapWorld.MAP_ID);
+        // Disallowed if there is no instance or it is not a map world
+        if (instance == null || !instance.hasTag(MapWorld.MAP_ID)) return false;
+        if (!editOnly) return true;
+
+        var mapWorld = MapWorld.fromInstance(instance);
+        return (mapWorld.flags() & MapWorld.FLAG_EDIT) != 0;
     }
 }
