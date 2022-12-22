@@ -23,8 +23,7 @@ public class PlayerStorageMongo implements PlayerStorage {
     public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
         return FutureResult.supply(() -> {
             try {
-                var result = collection().insertOne(player);
-                System.out.println(result);
+                collection().insertOne(player);
             } catch (DuplicateKeyException ignored) {
                 return Result.error(ERR_DUPLICATE_ENTRY);
             }

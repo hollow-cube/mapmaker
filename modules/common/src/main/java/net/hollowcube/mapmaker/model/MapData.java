@@ -16,6 +16,9 @@ public class MapData {
 
     // Published state
     private boolean published = false;
+    // Published id is a short ID for users to reference a map.
+    // This ID is assigned when a map is published and not guaranteed to be consistent. It should never be stored
+    // internally as a reference to a map. Use the ID instead.
     private String publishedId;
 
     // The following is unqueryable data, may be stored in serialized form.

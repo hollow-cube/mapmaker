@@ -33,7 +33,7 @@ public non-sealed class ParentSection extends Section {
     }
 
     protected @Nullable Section get(int index) {
-        //todo bounds check
+        checkBounds(index);
         return childMap[index];
     }
 

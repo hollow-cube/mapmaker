@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.hollowcube.world.WorldManager;
@@ -71,6 +72,7 @@ public class DevServer {
 
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
+    private SaveStateStorage saveStateStorage;
 
     private HubServer hub;
     private MapServer maps;
@@ -89,9 +91,11 @@ public class DevServer {
         if (mongoUri == null) {
             this.playerStorage = PlayerStorage.memory();
             this.mapStorage = MapStorage.memory();
+            this.saveStateStorage = SaveStateStorage.memory();
         } else {
             this.playerStorage = PlayerStorage.mongo(mongoUri);
             this.mapStorage = MapStorage.mongo(mongoUri);
+            this.saveStateStorage = SaveStateStorage.mongo(mongoUri);
         }
 
         StaticAbuse.mapStorage = mapStorage;
@@ -102,7 +106,7 @@ public class DevServer {
         var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
         var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
 
-        this.maps = new MapServer();
+        this.maps = new MapServer(saveStateStorage);
         this.hub = new HubServerImpl(playerStorage, mapStorage, worldManager, maps);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();

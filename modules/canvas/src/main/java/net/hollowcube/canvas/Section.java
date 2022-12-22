@@ -101,6 +101,10 @@ public sealed abstract class Section permits ItemSection, ParentSection {
         this.offset = -1;
     }
 
+    protected void checkBounds(int index) {
+        Check.argCondition(index < 0 || index >= width() * height(), "index out of bounds");
+    }
+
     // Env object stuff
 
     protected <T> @NotNull T getContext(@NotNull Class<T> type) {

@@ -42,14 +42,16 @@ public class MapServer implements MapManager {
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
     private final WorldManager worldManager;
-    private final SaveStateStorage saveStateStorage = SaveStateStorage.memory();
+    private final SaveStateStorage saveStateStorage;
 
 
     // map id -> play|edit -> world
     // Used to send players to the same world if there is already one instance of it.
     private final Map<String, Map<Class<?>, MapWorld>> maps = new ConcurrentHashMap<>();
 
-    public MapServer() {
+    public MapServer(@NotNull SaveStateStorage saveStateStorage) {
+        this.saveStateStorage = saveStateStorage;
+
         new PlayerSpawnInInstanceEvent(null); // Idk why the static initializer is not triggering from other usages
 
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);

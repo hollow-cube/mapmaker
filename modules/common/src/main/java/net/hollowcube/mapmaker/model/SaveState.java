@@ -11,8 +11,6 @@ import java.util.Objects;
 
 /**
  * A player may have one or more save state for each map they have played.
- *
- * While playing a map, the
  */
 public class SaveState {
     public static final Tag<SaveState> TAG = ExtraTags.Transient("mapmaker:map/save_state");

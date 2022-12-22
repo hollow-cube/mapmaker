@@ -33,8 +33,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
             try {
                 return supplier.get();
             } catch (Throwable t) {
-                t.printStackTrace(); //todo
-                throw new RuntimeException(t);
+                return Result.error(Error.of(t));
             }
         }, ForkJoinPool.commonPool()));
     }

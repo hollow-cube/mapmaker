@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.storage;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.result.Error;
 import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.util.MongoUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -15,6 +16,10 @@ public interface SaveStateStorage {
 
     static @NotNull SaveStateStorage memory() {
         return new SaveStateStorageMemory();
+    }
+
+    static @NotNull SaveStateStorage mongo(@NotNull String mongoUri) {
+        return new SaveStateStorageMongo(MongoUtil.getClient(mongoUri));
     }
 
     @NotNull FutureResult<@NotNull SaveState> createSaveState(@NotNull SaveState saveState);
