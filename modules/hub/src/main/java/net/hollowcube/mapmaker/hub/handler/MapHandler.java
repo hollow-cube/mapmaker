@@ -80,15 +80,16 @@ public class MapHandler {
         var mapId = playerData.getMapSlot(slot);
         if (mapId == null) return FutureResult.error(ERR_SLOT_NOT_IN_USE);
 
-        return storage.getMapById(mapId)
-                .flatMap(map -> {
-                    map.setPublished(true);
-                    map.setPublishedId("TODO");
-                    playerData.setMapSlot(slot, null);
-                    return storage.updateMap(map)
-                            .flatMap(unused -> playerStorage.updatePlayer(playerData));
-                })
-                .mapErr(err -> Result.error(err.wrap("failed to publish map: {0}")));
+        return storage.getNextId()
+                .flatMap(publishedId -> storage.getMapById(mapId)
+                        .flatMap(map -> {
+                            map.setPublished(true);
+                            map.setPublishedId(publishedId);
+                            playerData.setMapSlot(slot, null);
+                            return storage.updateMap(map)
+                                    .flatMap(unused -> playerStorage.updatePlayer(playerData));
+                        })
+                        .mapErr(err -> Result.error(err.wrap("failed to publish map: {0}"))));
     }
 
     public @NotNull FutureResult<Void> editMap(@NotNull String nameOrId, @NotNull Player player) {

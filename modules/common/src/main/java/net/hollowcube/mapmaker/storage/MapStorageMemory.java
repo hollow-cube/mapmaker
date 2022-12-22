@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class MapStorageMemory implements MapStorage {
     private final Map<String, MapData> mapsById = new ConcurrentHashMap<>();
+    private final AtomicInteger nextId = new AtomicInteger(1);
 
     @Override
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
@@ -59,5 +61,12 @@ class MapStorageMemory implements MapStorage {
                 return FutureResult.of(map);
         }
         return FutureResult.error(ERR_NOT_FOUND);
+    }
+
+    @Override
+    public @NotNull FutureResult<String> getNextId() {
+        var n = nextId.getAndIncrement();
+        var id = "00000" + Integer.toString(n, 36);
+        return FutureResult.of(id.substring(id.length() - 5));
     }
 }
