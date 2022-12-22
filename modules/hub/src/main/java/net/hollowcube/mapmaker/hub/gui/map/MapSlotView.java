@@ -3,8 +3,10 @@ package net.hollowcube.mapmaker.hub.gui.map;
 import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RootSection;
+import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
+import net.hollowcube.mapmaker.hub.gui.common.GenericNameInput;
 import net.hollowcube.mapmaker.hub.gui.common.TranslatedButtonSection;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.model.MapData;
@@ -22,6 +24,8 @@ import java.util.List;
 
 public class MapSlotView extends ParentSection {
     private final ButtonSection loadingButton;
+
+    private MapData map;
 
     public MapSlotView(int slot, @Nullable FutureResult<MapData> mapFuture) {
         super(9, 6);
@@ -50,6 +54,8 @@ public class MapSlotView extends ParentSection {
     }
 
     private void mapLoaded(@NotNull MapData mapData) {
+        this.map = mapData;
+
         // Remove loading button
         unmountChild(4, 2, loadingButton);
 
@@ -72,6 +78,12 @@ public class MapSlotView extends ParentSection {
                 .displayName(Component.text(err.message()))
                 .build(), () -> {
         }));
+    }
+
+    // Update logic
+
+    private void saveMap() {
+        //todo
     }
 
     // Buttons
@@ -118,7 +130,23 @@ public class MapSlotView extends ParentSection {
     }
 
     private void handleEditName() {
-        //todo
+        var router = find(RouterSection.class);
+        router.push(new GenericNameInput(this::updateName));
+    }
+
+    private void updateName(@NotNull String name) {
+        //todo this flow sucks. Would much rather have an "update" method on the button section
+        // that updates its current name.
+
+        map.setName(name);
+        saveMap();
+
+        // Update button
+        unmountChild(4, 3, get(4, 3));
+        add(4, 3, new TranslatedButtonSection(
+                "gui.map_slot.name", List.of(),
+                Material.ANVIL, this::handleEditName
+        ));
     }
 
     private void addTagsButton() {

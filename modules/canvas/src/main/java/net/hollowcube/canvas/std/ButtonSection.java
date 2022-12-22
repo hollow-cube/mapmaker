@@ -52,6 +52,7 @@ public class ButtonSection extends ItemSection {
 
     @Override
     protected boolean handleClick(int slot, @NotNull Player player, @NotNull ClickType clickType) {
+        if (onClick == null) return ClickHandler.DENY;
         return onClick.handleClick(player, slot, clickType);
     }
 }
