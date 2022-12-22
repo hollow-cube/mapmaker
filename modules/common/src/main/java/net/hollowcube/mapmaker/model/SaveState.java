@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.model;
 
-import net.minestom.server.coordinate.Point;
+import net.hollowcube.mapmaker.util.ExtraTags;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.tag.Tag;
 
 import java.time.Instant;
 
@@ -10,6 +12,8 @@ import java.time.Instant;
  * While playing a map, the
  */
 public class SaveState {
+    public static final Tag<SaveState> TAG = ExtraTags.Transient("mapmaker:map/save_state");
+
     private String id;
     private String playerId;
     private String mapId;
@@ -20,7 +24,7 @@ public class SaveState {
     // The total time spent inside this save state.
     private long playtime;
 
-    private Point pos;
+    private Pos pos;
 
     public String getId() {
         return id;
@@ -69,11 +73,11 @@ public class SaveState {
         this.completed = completed;
     }
 
-    public Point getPos() {
+    public Pos getPos() {
         return pos;
     }
 
-    public void setPos(Point pos) {
+    public void setPos(Pos pos) {
         this.pos = pos;
     }
 
