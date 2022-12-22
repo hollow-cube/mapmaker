@@ -46,6 +46,7 @@ public class DemoServer {
         guis.put("title", TitleDemo::new);
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);
+        guis.put("anvil", AnvilInputDemo::new);
     }
 
     public static void main(String[] args) {

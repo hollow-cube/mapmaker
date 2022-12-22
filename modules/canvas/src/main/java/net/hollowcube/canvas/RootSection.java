@@ -1,5 +1,6 @@
 package net.hollowcube.canvas;
 
+import net.hollowcube.canvas.std.AnvilSection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
@@ -143,6 +144,13 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         Check.argCondition(section.height() > 10, "section height must be <= 10, was {}", section.height());
         width = section.width();
         height = section.height();
+
+        // Special case for anvil GUIs
+        if (section instanceof AnvilSection) {
+            playerInventoryRows = section.height() - 1;
+            return InventoryType.ANVIL;
+        }
+
         return switch (section.height()) {
             case 1 -> InventoryType.CHEST_1_ROW;
             case 2 -> InventoryType.CHEST_2_ROW;
