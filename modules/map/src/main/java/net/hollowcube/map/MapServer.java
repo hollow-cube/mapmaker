@@ -6,7 +6,9 @@ import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.SetSpawnCommand;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
+import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.oldtoremove.MapManager;
 import net.hollowcube.mapmaker.result.FutureResult;
@@ -43,9 +45,9 @@ public class MapServer implements MapManager {
     private final SaveStateStorage saveStateStorage = SaveStateStorage.memory();
 
 
-    // map id -> flags -> world
+    // map id -> play|edit -> world
     // Used to send players to the same world if there is already one instance of it.
-    private final Map<String, Map<Integer, MapWorld>> maps = new ConcurrentHashMap<>();
+    private final Map<String, Map<Class<?>, MapWorld>> maps = new ConcurrentHashMap<>();
 
     public MapServer() {
         new PlayerSpawnInInstanceEvent(null); // Idk why the static initializer is not triggering from other usages
@@ -93,14 +95,15 @@ public class MapServer implements MapManager {
         var activeMaps = maps.computeIfAbsent(map.getId(), id -> new ConcurrentHashMap<>());
 
         // Search for a world with the same flags
-        var activeWorld = activeMaps.get(flags);
+        var isEditing = (flags & MapWorld.FLAG_EDIT) != 0;
+        var activeWorld = activeMaps.get(isEditing ? EditingMapWorld.class : PlayingMapWorld.class);
         if (activeWorld != null) {
             return FutureResult.wrap(player.setInstance(activeWorld.instance(), new Pos(0.5, 60, 0.5)));
         }
 
         // No such map, create a new one
-        var world = new MapWorld(this, map, flags);
-        activeMaps.put(flags, world);
+        MapWorld world = isEditing ? new EditingMapWorld(this, map) : new PlayingMapWorld(this, map);
+        activeMaps.put(world.getClass(), world);
 
         CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
         if (map.getMapFileId() != null)
@@ -126,7 +129,7 @@ public class MapServer implements MapManager {
             return;
         }
 
-        var removed = activeMaps.remove(event.mapWorld().flags());
+        var removed = activeMaps.remove(event.mapWorld().getClass());
         if (removed == null) {
             // Something went wrong and the instance is not registered
             logger.error("Attempted to unregister {}, but it was not registered.", event.getMap().getId());
