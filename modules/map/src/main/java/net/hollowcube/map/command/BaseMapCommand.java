@@ -1,5 +1,6 @@
 package net.hollowcube.map.command;
 
+import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -35,6 +36,6 @@ public class BaseMapCommand extends Command {
         if (!editOnly) return true;
 
         var mapWorld = MapWorld.fromInstance(instance);
-        return (mapWorld.flags() & MapWorld.FLAG_EDIT) != 0;
+        return mapWorld instanceof EditingMapWorld;
     }
 }
