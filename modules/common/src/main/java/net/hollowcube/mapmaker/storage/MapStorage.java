@@ -39,4 +39,9 @@ public interface MapStorage {
 
     @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId);
 
+
+    // Other utilities
+
+    @NotNull FutureResult<String> getNextId();
+
 }

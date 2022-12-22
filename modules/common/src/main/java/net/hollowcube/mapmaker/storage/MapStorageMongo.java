@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
     private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
@@ -94,7 +95,27 @@ public class MapStorageMongo implements MapStorage {
         });
     }
 
+    public @NotNull FutureResult<String> getNextId() {
+        return FutureResult.supply(() -> {
+            var filter = new Document();
+            var update = inc("nextId", 1);
+            var result = shortIdCollection().findOneAndUpdate(filter, update);
+            if (result == null) {
+                // Document does not exist
+                shortIdCollection().insertOne(new Document("nextId", 1));
+                return Result.of("00001");
+            }
+            var n = result.getInteger("nextId");
+            var id = "00000" + Integer.toString(n, 36);
+            return Result.of(id.substring(id.length() - 5));
+        });
+    }
+
     private @NotNull MongoCollection<MapData> collection() {
         return client.getDatabase(DB_NAME).getCollection("maps", MapData.class);
+    }
+
+    private @NotNull MongoCollection<Document> shortIdCollection() {
+        return client.getDatabase(DB_NAME).getCollection("id_inc");
     }
 }
