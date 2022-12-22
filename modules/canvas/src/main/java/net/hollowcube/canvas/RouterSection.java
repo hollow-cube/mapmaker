@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public final class RouterSection extends RootSection {
     private final Deque<Section> history = new ArrayDeque<>();
+    private Section current;
 
     public RouterSection(@NotNull Section section) {
         this(section, Map.of());
@@ -19,6 +20,7 @@ public final class RouterSection extends RootSection {
     public RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
         super(section, context);
         history.addLast(section);
+        current = section;
     }
 
     // Public API
@@ -33,6 +35,13 @@ public final class RouterSection extends RootSection {
     public void push(@NotNull Section section) {
         history.addLast(section);
         replaceInventory(section);
+        current = section;
+    }
+
+    /** Pushes a new view onto the inventory, but does _not_ save it in the history stack */
+    public void pushTransient(@NotNull Section section) {
+        replaceInventory(section);
+        current = section;
     }
 
     public void pop() {
@@ -40,6 +49,7 @@ public final class RouterSection extends RootSection {
 
         history.removeLast();
         replaceInventory(history.getLast());
+        current = history.getLast();
     }
 
 
@@ -48,13 +58,13 @@ public final class RouterSection extends RootSection {
     @Override
     protected void mount() {
         super.mount();
-        history.getLast().setParent(this, 0);
+        current.setParent(this, 0);
     }
 
     @Override
     protected void unmount() {
         super.unmount();
-        history.getLast().removeParent();
+        current.removeParent();
     }
 
 }
