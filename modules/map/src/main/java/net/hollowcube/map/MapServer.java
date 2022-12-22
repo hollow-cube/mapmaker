@@ -10,6 +10,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.oldtoremove.MapManager;
 import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -39,6 +40,7 @@ public class MapServer implements MapManager {
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
     private final WorldManager worldManager;
+    private final SaveStateStorage saveStateStorage = SaveStateStorage.memory();
 
 
     // map id -> flags -> world
@@ -82,6 +84,10 @@ public class MapServer implements MapManager {
         return worldManager;
     }
 
+    public @NotNull SaveStateStorage saveStateStorage() {
+        return saveStateStorage;
+    }
+
     @Override
     public @NotNull FutureResult<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player) {
         var activeMaps = maps.computeIfAbsent(map.getId(), id -> new ConcurrentHashMap<>());
@@ -93,7 +99,7 @@ public class MapServer implements MapManager {
         }
 
         // No such map, create a new one
-        var world = new MapWorld(worldManager, map, flags);
+        var world = new MapWorld(this, map, flags);
         activeMaps.put(flags, world);
 
         CompletableFuture<Void> future = CompletableFuture.completedFuture(null);

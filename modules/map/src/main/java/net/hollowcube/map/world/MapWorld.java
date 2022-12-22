@@ -1,14 +1,18 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.mapmaker.player.PlayerHooks;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.mapmaker.util.ExtraTags;
 import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.util.FutureUtil;
 import net.hollowcube.world.BaseWorld;
-import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.generation.MapGenerators;
@@ -19,11 +23,16 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MapWorld extends BaseWorld {
+    private static final Logger logger = LoggerFactory.getLogger(MapWorld.class);
 
     public static final Tag<String> MAP_ID = Tag.String("mapmaker:map/id");
     public static final Tag<MapData> MAP_DATA = ExtraTags.Transient("mapmaker:map/data");
@@ -37,11 +46,13 @@ public class MapWorld extends BaseWorld {
     public static final int FLAG_NONE = 0;
     public static final int FLAG_EDIT = 1;
 
+    private MapServer mapServer;
     private final MapData map;
     private final int flags;
 
-    public MapWorld(@NotNull WorldManager worldManager, @NotNull MapData map, int flags) {
-        super(worldManager, map.getId());
+    public MapWorld(@NotNull MapServer mapServer, @NotNull MapData map, int flags) {
+        super(mapServer.worldManager(), map.getId());
+        this.mapServer = mapServer;
         this.map = map;
         this.flags = flags;
 
@@ -113,13 +124,40 @@ public class MapWorld extends BaseWorld {
 
     private void initPlayerForPlaying(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
-        player.teleport(map.getSpawnPoint());
-        player.setTag(MapHooks.PLAYING, true);
+        var playerId = PlayerHooks.getId(player);
 
-        player.setGameMode(GameMode.ADVENTURE);
-        player.setAllowFlying(true);
+        //todo this wont work really. Need to hold the player somewhere while we load their savestate
+        var saveStates = mapServer.saveStateStorage();
+        saveStates.getLatestSaveState(playerId, map.getId())
+                .flatMapErr(err -> {
+                    if (err.is(SaveStateStorage.ERR_NOT_FOUND)) {
+                        // Create savestate if not exists
+                        var saveState = new SaveState();
+                        saveState.setId(UUID.randomUUID().toString());
+                        saveState.setPlayerId(playerId);
+                        saveState.setMapId(map.getId());
+                        saveState.setStartTime(Instant.now());
+                        saveState.setPos(map.getSpawnPoint());
+                        return saveStates.createSaveState(saveState);
+                    }
 
-        player.sendMessage("Now playing " + map.getName());
+                    // Any other error
+                    return FutureResult.error(err);
+                })
+                .then(saveState -> {
+                    player.setTag(MapHooks.PLAYING, true);
+                    player.setTag(SaveState.TAG, saveState);
+
+                    player.teleport(saveState.getPos());
+                    player.setGameMode(GameMode.ADVENTURE);
+                    player.setAllowFlying(true);
+
+                    player.sendMessage("Now playing " + map.getName());
+                })
+                .thenErr(err -> {
+                    logger.error("Failed to load save state for player {} in map {}: {}", playerId, map.getId(), err);
+                    player.kick("failed to load save state: " + err.message());
+                });
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {
@@ -134,6 +172,17 @@ public class MapWorld extends BaseWorld {
         // Always remove playing tag if present
         var player = event.getPlayer();
         player.removeTag(MapHooks.PLAYING);
+
+        // Save savestate
+        var saveState = player.getTag(SaveState.TAG);
+        player.removeTag(SaveState.TAG);
+        saveState.setPos(player.getPosition());
+        mapServer.saveStateStorage().updateSaveState(saveState)
+                .thenErr(err -> {
+                    logger.error("Failed to save save state for player {} in map {}: {}",
+                            PlayerHooks.getId(player), map.getId(), err);
+                });
+
 
         // Handle unloading the world when the last player leaves
         //todo need to immediately unregister the world from the world manager so that no players are added.
