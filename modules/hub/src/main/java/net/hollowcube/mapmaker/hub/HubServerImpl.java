@@ -5,6 +5,7 @@ import net.hollowcube.canvas.Section;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.hollowcube.mapmaker.oldtoremove.HubManager;
 import net.hollowcube.mapmaker.oldtoremove.MapManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -47,6 +48,8 @@ public class HubServerImpl implements HubServer {
 
         var commands = MinecraftServer.getCommandManager();
         commands.register(new MapCommand(mapHandler));
+
+        HubManager.TemporaryIAmTerrible.INSTANCE = player -> player.setInstance(world.instance());
     }
 
     @Override
