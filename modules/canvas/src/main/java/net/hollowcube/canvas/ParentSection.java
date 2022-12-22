@@ -32,6 +32,15 @@ public non-sealed class ParentSection extends Section {
         return comp;
     }
 
+    protected @Nullable Section get(int index) {
+        //todo bounds check
+        return childMap[index];
+    }
+
+    protected @Nullable Section get(int x, int y) {
+        return get(y * width() + x);
+    }
+
     protected void mountChild(int x, int y, @NotNull Section comp) {
         var offset = x + width() * y;
         children.put(offset, comp);
@@ -63,6 +72,10 @@ public non-sealed class ParentSection extends Section {
         if (isMounted()) {
             comp.removeParent();
         }
+    }
+
+    protected void unmountChild(int index, @NotNull Section comp) {
+        unmountChild(index % width(), index / width(), comp);
     }
 
     @Override
