@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.bson.BsonReader;
@@ -19,6 +20,7 @@ import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -196,12 +198,77 @@ public final class MongoUtil {
         }
     };
 
+    private static final Codec<SaveState> SAVE_STATE_CODEC = new Codec<>() {
+        @Override
+        public SaveState decode(BsonReader reader, DecoderContext decoderContext) {
+            var value = new SaveState();
+            reader.readStartDocument();
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                switch (reader.readName()) {
+                    case "_id" -> value.setId(reader.readString());
+                    case "player_id" -> value.setPlayerId(reader.readString());
+                    case "map_id" -> value.setMapId(reader.readString());
+                    case "completed" -> value.setCompleted(reader.readBoolean());
+                    case "start_time" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
+                    case "playtime" -> value.setPlaytime(reader.readInt64());
+                    case "pos" -> {
+                        reader.readStartDocument();
+                        double x = 0.0;
+                        double y = 0.0;
+                        double z = 0.0;
+                        float yaw = 0.0f;
+                        float pitch = 0.0f;
+                        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                            switch (reader.readName()) {
+                                case "x" -> x = reader.readDouble();
+                                case "y" -> y = reader.readDouble();
+                                case "z" -> z = reader.readDouble();
+                                case "yaw" -> yaw = (float) reader.readDouble();
+                                case "pitch" -> pitch = (float) reader.readDouble();
+                                default -> throw new RuntimeException("Unknown field: " + reader.readName());
+                            }
+                        }
+                        reader.readEndDocument();
+                        value.setPos(new Pos(x, y, z, yaw, pitch));
+                    }
+                }
+            }
+            reader.readEndDocument();
+            return value;
+        }
+
+        @Override
+        public void encode(BsonWriter writer, SaveState value, EncoderContext encoderContext) {
+            writer.writeStartDocument();
+            writer.writeString("_id", value.getId());
+            writer.writeString("player_id", value.getPlayerId());
+            writer.writeString("map_id", value.getMapId());
+            if (value.isCompleted())
+                writer.writeBoolean("completed", true);
+            writer.writeDateTime("start_time", value.getStartTime().toEpochMilli());
+            writer.writeInt64("playtime", value.getPlaytime());
+            writer.writeStartDocument("pos");
+            writer.writeDouble("x", value.getPos().x());
+            writer.writeDouble("y", value.getPos().y());
+            writer.writeDouble("z", value.getPos().z());
+            writer.writeDouble("yaw", value.getPos().yaw());
+            writer.writeDouble("pitch", value.getPos().pitch());
+            writer.writeEndDocument();
+            writer.writeEndDocument();
+        }
+
+        @Override
+        public Class<SaveState> getEncoderClass() {
+            return SaveState.class;
+        }
+    };
+
     private static final Map<String, MongoClient> clients = new ConcurrentHashMap<>();
 
     public static final MongoClientSettings BASE_CLIENT_SETTINGS = MongoClientSettings.builder()
             .uuidRepresentation(UuidRepresentation.STANDARD)
             .codecRegistry(CodecRegistries.fromRegistries(
-                    CodecRegistries.fromCodecs(PLAYER_DATA_CODEC, MAP_DATA_CODEC),
+                    CodecRegistries.fromCodecs(PLAYER_DATA_CODEC, MAP_DATA_CODEC, SAVE_STATE_CODEC),
                     MongoClientSettings.getDefaultCodecRegistry()
             ))
             .build();
