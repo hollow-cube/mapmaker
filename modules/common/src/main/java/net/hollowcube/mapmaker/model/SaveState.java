@@ -2,9 +2,12 @@ package net.hollowcube.mapmaker.model;
 
 import net.hollowcube.mapmaker.util.ExtraTags;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * A player may have one or more save state for each map they have played.
@@ -13,6 +16,10 @@ import java.time.Instant;
  */
 public class SaveState {
     public static final Tag<SaveState> TAG = ExtraTags.Transient("mapmaker:map/save_state");
+
+    public static @NotNull SaveState fromPlayer(@NotNull Player player) {
+        return Objects.requireNonNull(player.getTag(TAG));
+    }
 
     private String id;
     private String playerId;
@@ -23,6 +30,7 @@ public class SaveState {
     private Instant startTime;
     // The total time spent inside this save state.
     private long playtime;
+    private transient long playtimeUpdate;
 
     private Pos pos;
 
@@ -65,6 +73,15 @@ public class SaveState {
     public void setPlaytime(long playtime) {
         this.playtime = playtime;
     }
+
+    public long getPlaytimeUpdate() {
+        return playtimeUpdate;
+    }
+
+    public void setPlaytimeUpdate(long playtimeUpdate) {
+        this.playtimeUpdate = playtimeUpdate;
+    }
+
     public boolean isCompleted() {
         return completed;
     }
