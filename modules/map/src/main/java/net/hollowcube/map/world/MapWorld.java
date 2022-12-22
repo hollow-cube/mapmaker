@@ -183,7 +183,6 @@ public class MapWorld extends BaseWorld {
                             PlayerHooks.getId(player), map.getId(), err);
                 });
 
-
         // Handle unloading the world when the last player leaves
         //todo need to immediately unregister the world from the world manager so that no players are added.
         //todo what happens if a bid is sent and then the last player leaves? do we track that a bid is out?
