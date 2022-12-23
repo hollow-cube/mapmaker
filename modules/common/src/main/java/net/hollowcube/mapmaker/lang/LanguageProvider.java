@@ -96,7 +96,7 @@ public class LanguageProvider {
             if (value == null) return null;
             return ComponentUtil.fromStringSafe(value);
         });
-        if (translated == null) return Component.text(translatable.key());
+        if (translated == null) return component;
 
         List<Component> args = translatable.args();
         if (args.size() != 0) {
