@@ -3,7 +3,6 @@ package net.hollowcube.chat.command;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
 import net.hollowcube.chat.storage.ChatStorage;
-import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -12,9 +11,12 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.System.Logger.Level;
 import java.util.List;
 
 public class LogCommand extends Command {
+    private final System.Logger logger = System.getLogger(LogCommand.class.getName());
+
     private final ChatStorage storage;
 
     public LogCommand(@NotNull ChatStorage storage) {
@@ -80,8 +82,7 @@ public class LogCommand extends Command {
         parseFilters(query, context.get("filters"));
 
         storage.queryChatMessages(query.build())
-                .exceptionally(FutureUtil::handleException)
-                .thenAccept(messages -> {
+                .then(messages -> {
                     if (messages == null) {
                         // An error occurred, it was already reported internally. Inform the sender
                         sender.sendMessage(Component.translatable("command.chat.log.err_unknown"));
@@ -98,7 +99,10 @@ public class LogCommand extends Command {
                         sender.sendMessage(String.format("%s: %s", message.sender(), message.message()));
                     }
                 })
-                .exceptionally(FutureUtil::handleException);
+                .thenErr(err -> {
+                    sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
+                    logger.log(Level.ERROR, "failed querying chat messages: {}", err);
+                });
     }
 
     private void parseFilters(ChatQuery.Builder query, List<CommandContext> filters) {

@@ -6,6 +6,7 @@ import io.helidon.webserver.WebServer;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.mapmaker.ServerRuntime;
 import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.HubServerImpl;
@@ -180,7 +181,8 @@ public class DevServer {
         player.setTag(PlayerData.PLAYER_ID, player.getUuid().toString());
 
         // Alpha watermark
-        String watermarkString = String.format("MapMaker %s (%s), Not representative of final product", Constants.VERSION, Constants.COMMIT_HASH);
+        var runtime = ServerRuntime.getRuntime();
+        String watermarkString = String.format("MapMaker %s (%s), Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
     }

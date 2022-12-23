@@ -3,51 +3,46 @@ package net.hollowcube.chat;
 import com.google.auto.service.AutoService;
 import net.hollowcube.chat.command.LogCommand;
 import net.hollowcube.chat.storage.ChatStorage;
-import net.hollowcube.server.Facet;
-import net.hollowcube.server.ServerWrapper;
+import net.hollowcube.mapmaker.ServerRuntime;
+import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.util.EventUtil;
-import net.hollowcube.util.FutureUtil;
+import net.minestom.server.ServerProcess;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerCommandEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
 
+import java.lang.System.Logger.Level;
 import java.time.Instant;
 
 @AutoService(Facet.class)
 public class ChatFacet implements Facet {
-
-    //todo where does this come from?
-    private static final String SERVER_NAME = "test_server";
-    private static final String DEFAULT_CHANNEL = "global";
-    private static final String COMMAND_CHANNEL = "command";
+    private static final System.Logger logger = System.getLogger(ChatFacet.class.getName());
+    private static final ServerRuntime runtime = ServerRuntime.getRuntime();
 
     private final EventNode<Event> eventNode = EventUtil
-            .notCancelledNode("net/hollowcube/chat")
+            .notCancelledNode("hollowcube:chat")
             // Very low priority to run other events which might cancel these beforehand
-            .setPriority(-10);
+            .setPriority(-10)
+            .addListener(PlayerChatEvent.class, this::handleChatEvent)
+            .addListener(PlayerCommandEvent.class, this::handleCommandEvent);
 
     private final ChatStorage storage;
 
     public ChatFacet() {
-        //todo this should be based on a config param, which should be loaded before loading managers
-        this(ChatStorage.noop());
-    }
-
-    @TestOnly
-    public ChatFacet(@NotNull ChatStorage storage) {
-        this.storage = storage;
-
-        eventNode.addListener(PlayerChatEvent.class, this::handleChatEvent);
-        eventNode.addListener(PlayerCommandEvent.class, this::handleCommandEvent);
+        var mongoUri = System.getenv("MM_MONGO_URI");
+        if (mongoUri != null) {
+            storage = ChatStorage.mongo(mongoUri);
+        } else {
+            storage = ChatStorage.noop();
+        }
     }
 
     @Override
-    public void hook(@NotNull ServerWrapper server) {
-        server.addEventNode(eventNode);
-        server.registerCommand(new LogCommand(storage));
+    public void hook(@NotNull ServerProcess server) {
+        server.eventHandler().addChild(eventNode);
+        server.command().register(new LogCommand(storage));
     }
 
     public EventNode<Event> eventNode() {
@@ -55,24 +50,22 @@ public class ChatFacet implements Facet {
     }
 
     private void handleChatEvent(PlayerChatEvent event) {
-        // Record message, ignore response.
         storage.recordChatMessage(new ChatMessage(
                 Instant.now(),
-                SERVER_NAME,
-                DEFAULT_CHANNEL,
+                runtime.workerId(),
+                ChatMessage.DEFAULT_CONTEXT,
                 event.getPlayer().getUuid(),
                 event.getMessage()
-        )).exceptionally(FutureUtil::handleException);
+        )).thenErr(err -> logger.log(Level.ERROR, "failed to record chat message: {}", err.message()));
     }
 
     private void handleCommandEvent(PlayerCommandEvent event) {
-        // Record command, ignore response.
         storage.recordChatMessage(new ChatMessage(
                 Instant.now(),
-                SERVER_NAME,
-                COMMAND_CHANNEL,
+                runtime.workerId(),
+                ChatMessage.COMMAND_CONTEXT,
                 event.getPlayer().getUuid(),
                 event.getCommand()
-        )).exceptionally(FutureUtil::handleException);
+        )).thenErr(err -> logger.log(Level.ERROR, "failed to record command: {}", err.message()));
     }
 }

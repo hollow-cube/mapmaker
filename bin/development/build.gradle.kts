@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
     implementation(project(":modules:canvas"))
+    implementation(project(":modules:chat"))
 }
 
 application {

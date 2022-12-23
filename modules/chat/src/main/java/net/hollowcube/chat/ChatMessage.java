@@ -12,5 +12,7 @@ public record ChatMessage(
         @NotNull UUID sender,
         @NotNull String message
 ) {
+    public static final String DEFAULT_CONTEXT = "global";
+    public static final String COMMAND_CONTEXT = "command";
 
 }
