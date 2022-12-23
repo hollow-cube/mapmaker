@@ -68,7 +68,7 @@ public class DevServer {
         server.start();
         minecraftServer.start("0.0.0.0", 25565);
 
-        //todo handle kill code and stop everything gracefully.
+        MinecraftServer.getSchedulerManager().buildShutdownTask(webServer::shutdown);
     }
 
     private PlayerStorage playerStorage;

@@ -22,7 +22,7 @@ public class GiveCommand extends BaseMapCommand {
 
     private void giveItem(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("You must be a player to use this command"); //todo standardize
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
 
