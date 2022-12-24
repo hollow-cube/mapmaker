@@ -162,9 +162,9 @@ public class MapCommand extends BaseHubCommand {
             if (!(sender instanceof Player player)) return;
 
             var mapId = context.get(idArg);
-            handler.editMap(mapId, player)
+            handler.editMap2(player, mapId)
                     .mapErr(err -> {
-                        LOGGER.error("Failed to create map: {}", err);
+                        LOGGER.error("Failed to edit map: {}", err);
                         return Result.error(err);
                     });
         }

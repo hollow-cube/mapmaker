@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class MapData {
+    // Permission keys
+    public static final String READ = "read";
+    public static final String WRITE = "write";
+    public static final String ADMIN = "admin";
 
     private String id;
     private String owner;
