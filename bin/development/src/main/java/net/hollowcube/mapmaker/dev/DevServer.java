@@ -19,8 +19,6 @@ import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
@@ -96,9 +94,6 @@ public class DevServer {
     private DevHubServer hub;
     private DevMapServer maps;
 
-    private HubServer hub;
-    private MapServer maps;
-
     public DevServer() {
 
     }
@@ -162,7 +157,7 @@ public class DevServer {
 
         var bridge = new DevServerBridge();
 
-        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager);
+        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager, mapPermissions);
         this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager);
         bridge.setHubServer(hub);
         bridge.setMapServer(maps);
