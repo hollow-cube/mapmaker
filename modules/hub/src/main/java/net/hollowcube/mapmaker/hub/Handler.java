@@ -29,6 +29,8 @@ public class Handler {
         this.server = server;
     }
 
+    //todo should not take a slot i dont think, could have a createMapInSlot or something though
+    //     Probably could take a playerid as well (eg just playerid and any map info, name will be defaulted)
     public @NotNull FutureResult<MapData> createMap(@NotNull Player player, @NotNull String name, int slot) {
         var playerData = PlayerData.fromPlayer(player);
 
@@ -67,6 +69,7 @@ public class Handler {
                 });
     }
 
+    //todo should not take a slot. Just a playerid and mapid
     public @NotNull FutureResult<Void> publishMap(@NotNull Player player, int slot) {
         var playerData = PlayerData.fromPlayer(player);
         var mapId = playerData.getMapSlot(slot);
@@ -84,6 +87,7 @@ public class Handler {
                         .mapErr(err -> Result.error(err.wrap("failed to publish map: {0}"))));
     }
 
+    //todo delete me
     public @NotNull FutureResult<Void> editMap(@NotNull String nameOrId, @NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
         return server.mapStorage().getPlayerMap(playerData.getId(), nameOrId)
@@ -114,6 +118,7 @@ public class Handler {
                 });
     }
 
+    //todo delete me, should be replaced by a playMap(Player, mapId)
     public @NotNull FutureResult<Void> playMap(@NotNull String nameOrId, @NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
         return server.mapStorage().getPlayerMap(playerData.getId(), nameOrId)
@@ -135,6 +140,7 @@ public class Handler {
                 });
     }
 
+    //todo delete me, can just be done with a call to map storage
     public @NotNull FutureResult<Void> infoMap(@NotNull String nameOrId, @NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
         return server.mapStorage().getPlayerMap(playerData.getId(), nameOrId)

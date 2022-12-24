@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class MapAdminHandler {
-    //todo merge with ActionHandler
+    //todo merge with Handler
     private static final Logger logger = LoggerFactory.getLogger(MapAdminHandler.class);
 
     private final MapStorage storage;
@@ -26,6 +26,7 @@ public class MapAdminHandler {
         this.storage = storage;
     }
 
+    //todo delete me, need a more general map query builder
     public void showMapList(@NotNull Player player, @Nullable String playerId) {
         //todo need to validate players existence
         FutureResult<List<MapData>> future = playerId == null ? FutureResult.error(Error.of("not implemented")) : storage.getMapsByPlayer(playerId);
@@ -53,6 +54,7 @@ public class MapAdminHandler {
 
     }
 
+    //todo delete me
     public void showMapInfoById(@NotNull Player player, @NotNull String mapId) {
         storage.getMapById(mapId)
                 .then(map -> {

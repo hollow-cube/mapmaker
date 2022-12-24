@@ -4,7 +4,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.hub.command.MapCommand;
+import net.hollowcube.mapmaker.hub.command.OldMapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -48,7 +48,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
         var worldResult = FutureResult.wrap(this.world.loadWorld());
 
         var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapCommand(this, mapHandler));
+        commands.register(new OldMapCommand(this, mapHandler));
 
         return FutureResult.allOf(worldResult)
                 .then(unused -> logger.info("Hub server initialized"));
