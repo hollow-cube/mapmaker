@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.permission;
 import com.authzed.api.v1.Core.ObjectReference;
 import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.common.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 
 public class PlatformPermissionManager extends ZPermissionManager {

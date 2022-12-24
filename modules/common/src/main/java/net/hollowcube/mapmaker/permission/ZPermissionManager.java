@@ -8,8 +8,8 @@ import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
 import com.authzed.api.v1.PermissionService.CheckPermissionResponse;
 import com.authzed.api.v1.PermissionService.WriteRelationshipsRequest;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;

@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.permission;
 import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
