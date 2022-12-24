@@ -48,7 +48,9 @@ public abstract class MapServerBase implements MapServer {
 
     public MapServerBase(@NotNull MapToHubBridge bridge) {
         this.bridge = bridge;
+    }
 
+    public @NotNull FutureResult<Void> init() {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
@@ -71,13 +73,14 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new HubCommand(bridge));
         commandManager.register(new GiveCommand());
         commandManager.register(new SetSpawnCommand());
+
+        return FutureResult.ofNull();
     }
 
-    public @NotNull FutureResult<Void> joinMap(@NotNull MapData map, int flags, @NotNull Player player) {
+    public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
         var activeMaps = maps.computeIfAbsent(map.getId(), id -> new ConcurrentHashMap<>());
 
         // Search for a world with the same flags
-        var isEditing = (flags & MapWorld.FLAG_EDIT) != 0;
         var activeWorld = activeMaps.get(isEditing ? EditingMapWorld.class : PlayingMapWorld.class);
         if (activeWorld != null) {
             return FutureResult.wrap(player.setInstance(activeWorld.instance(), new Pos(0.5, 60, 0.5)));

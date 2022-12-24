@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
 
+@SuppressWarnings("JavaLangClash") //todo probably should rename to Err or something
 public sealed interface Error permits Errors.ExceptionError, Errors.MultiError, Errors.SimpleError, Errors.WrappedError {
 
     static @NotNull Error of(@NotNull String message) {

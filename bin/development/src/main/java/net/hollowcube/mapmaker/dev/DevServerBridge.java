@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.hub.HubServer;
@@ -23,6 +24,12 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     //
     // HubToMapBridge implementation
     //
+
+    @Override
+    public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull String mapId, boolean edit) {
+        return map.mapStorage().getMapById(mapId)
+                .flatMap(map -> ((MapServerBase) this.map).joinMap(player, map, edit));
+    }
 
 
     //

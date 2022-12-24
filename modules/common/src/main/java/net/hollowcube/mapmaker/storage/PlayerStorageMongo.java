@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -17,13 +18,13 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.mongodb.client.model.Filters.eq;
 
-public class PlayerStorageMongo implements PlayerStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
-
+class PlayerStorageMongo implements PlayerStorage {
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public PlayerStorageMongo(@NotNull MongoClient client) {
+    public PlayerStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
     }
 
     @Override
@@ -72,15 +73,11 @@ public class PlayerStorageMongo implements PlayerStorage {
     }
 
     private @NotNull MongoCollection<PlayerData> collection() {
-        return client.getDatabase(DB_NAME).getCollection("players", PlayerData.class);
+        return client.getDatabase(config.database()).getCollection("players", PlayerData.class);
     }
 
     @AutoService(Codec.class)
     public static final class PlayerDataCodec implements Codec<PlayerData> {
-        public static final PlayerDataCodec INSTANCE = new PlayerDataCodec();
-
-        private PlayerDataCodec() {}
-
         @Override
         public PlayerData decode(BsonReader reader, DecoderContext decoderContext) {
             var player = new PlayerData();

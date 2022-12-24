@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.storage;
 
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,8 +19,11 @@ public interface MapStorage {
         return new MapStorageMemory();
     }
 
-    static MapStorage mongo(@NotNull String mongoUri) {
-        return new MapStorageMongo(MongoUtil.getClient(mongoUri));
+    static @NotNull FutureResult<MapStorage> mongo(@NotNull MongoConfig config) {
+        var clientFactory = MongoClientFactory.get();
+        return clientFactory.newClient(config)
+                .map(client -> new MapStorageMongo(client, config))
+                .flatMap(storage -> storage.init().map(unused -> storage));
     }
 
     /**

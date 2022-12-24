@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import org.bson.Document;
@@ -18,16 +19,17 @@ import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Sorts.descending;
 
 class ChatStorageMongo implements ChatStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
     private static final String CHAT_COLLECTION = "chat";
 
     //todo should be config value
     private static final int CHAT_QUERY_MAX_RESULT_WINDOW = 15;
 
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public ChatStorageMongo(@NotNull MongoClient client) {
+    public ChatStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
     }
 
     @Override
@@ -88,6 +90,6 @@ class ChatStorageMongo implements ChatStorage {
     }
 
     private MongoCollection<ChatMessage> collection() {
-        return client.getDatabase(DB_NAME).getCollection(CHAT_COLLECTION, ChatMessage.class);
+        return client.getDatabase(config.database()).getCollection(CHAT_COLLECTION, ChatMessage.class);
     }
 }

@@ -6,6 +6,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
@@ -28,18 +29,24 @@ import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
     private static final String OWNER_NAME_INDEX_NAME = "owner_name_unique";
 
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public MapStorageMongo(@NotNull MongoClient client) {
+    public MapStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
+    }
 
-        var indexKeys = new Document();
-        indexKeys.append("owner", 1);
-        indexKeys.append("name", 1);
-        collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
+    public @NotNull FutureResult<Void> init() {
+        return FutureResult.supply(() -> {
+            var indexKeys = new Document();
+            indexKeys.append("owner", 1);
+            indexKeys.append("name", 1);
+            collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
+            return Result.ofNull();
+        });
     }
 
     @Override
@@ -105,6 +112,7 @@ public class MapStorageMongo implements MapStorage {
         });
     }
 
+    @Override
     public @NotNull FutureResult<String> getNextId() {
         return FutureResult.supply(() -> {
             var filter = new Document();
@@ -122,19 +130,15 @@ public class MapStorageMongo implements MapStorage {
     }
 
     private @NotNull MongoCollection<MapData> collection() {
-        return client.getDatabase(DB_NAME).getCollection("maps", MapData.class);
+        return client.getDatabase(config.database()).getCollection("maps", MapData.class);
     }
 
     private @NotNull MongoCollection<Document> shortIdCollection() {
-        return client.getDatabase(DB_NAME).getCollection("id_inc");
+        return client.getDatabase(config.database()).getCollection("id_inc");
     }
 
     @AutoService(Codec.class)
     public static class MapDataCodec implements Codec<MapData> {
-        public static final MapDataCodec INSTANCE = new MapDataCodec();
-
-        private MapDataCodec() {}
-
         @Override
         public MapData decode(BsonReader reader, DecoderContext decoderContext) {
             var value = new MapData();

@@ -8,6 +8,7 @@ import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -51,7 +52,7 @@ public class MapSlotsView extends ParentSection {
             //  than half a second or something
             var mapId = playerData.getMapSlot(i);
             if (mapId != null) {
-                var mapFuture = StaticAbuse.mapStorage.getMapById(mapId);
+                var mapFuture = getContext(MapStorage.class).getMapById(mapId);
                 var newButton = new MapSlotButton(slot, mapFuture, () -> {
                     var router = find(RouterSection.class);
                     router.push(new MapSlotView(slot, mapFuture));

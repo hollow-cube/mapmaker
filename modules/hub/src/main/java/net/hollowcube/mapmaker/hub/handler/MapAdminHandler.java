@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class MapAdminHandler {
+    //todo merge with ActionHandler
     private static final Logger logger = LoggerFactory.getLogger(MapAdminHandler.class);
 
     private final MapStorage storage;

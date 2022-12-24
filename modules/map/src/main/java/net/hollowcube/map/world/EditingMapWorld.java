@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.util.FutureUtil;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class EditingMapWorld extends MapWorld {
 
     @Override
     protected @NotNull FutureResult<Void> initPlayer(@NotNull Player player) {
-        player.teleport(map.getSpawnPoint());
+        player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
         player.setGameMode(GameMode.CREATIVE);
 
         player.sendMessage("Now editing " + map.getName());

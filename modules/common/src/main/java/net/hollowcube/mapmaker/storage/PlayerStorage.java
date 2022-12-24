@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.storage;
 
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
 public interface PlayerStorage {
@@ -14,8 +16,10 @@ public interface PlayerStorage {
         return new PlayerStorageMemory();
     }
 
-    static @NotNull PlayerStorage mongo(@NotNull String uri) {
-        return new PlayerStorageMongo(MongoUtil.getClient(uri));
+    static @NotNull FutureResult<PlayerStorage> mongo(@NotNull MongoConfig config) {
+        var clientFactory = MongoClientFactory.get();
+        return clientFactory.newClient(config)
+                .map(client -> new PlayerStorageMongo(client, config));
     }
 
     @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);

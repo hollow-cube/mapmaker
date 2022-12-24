@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceLoader;
 
 public interface MongoClientFactory {
@@ -55,11 +57,14 @@ public interface MongoClientFactory {
             static MongoClientSettings instance = null;
         }
         if (Holder.instance == null) {
-            var codecs = ServiceLoader.load(Codec.class).stream().map(ServiceLoader.Provider::get).toArray();
+            List<Codec<?>> codecs = new ArrayList<>();
+            for (Codec<?> codec : ServiceLoader.load(Codec.class)) {
+                codecs.add(codec);
+            }
             Holder.instance = MongoClientSettings.builder()
                     .uuidRepresentation(UuidRepresentation.STANDARD)
                     .codecRegistry(CodecRegistries.fromRegistries(
-                            CodecRegistries.fromCodecs((Codec<?>[]) codecs),
+                            CodecRegistries.fromCodecs(codecs),
                             MongoClientSettings.getDefaultCodecRegistry()
                     ))
                     .build();

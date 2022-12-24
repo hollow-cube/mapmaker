@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -58,7 +59,7 @@ public class PlayingMapWorld extends MapWorld {
                     player.setTag(MapHooks.PLAYING, true);
                     player.setTag(SaveState.TAG, saveState);
 
-                    player.teleport(saveState.getPos());
+                    player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
                     player.setGameMode(GameMode.ADVENTURE);
                     player.setAllowFlying(true);
 

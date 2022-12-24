@@ -6,7 +6,7 @@ import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.mapmaker.hub.handler.MapHandler;
+import net.hollowcube.mapmaker.hub.Handler;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -59,7 +59,7 @@ public class CreateMapView extends ParentSection {
         createButton.setItem(LOADING_ICON);
 
         // Dispatch request to create the map with a short random name for now
-        var mapHandler = getContext(MapHandler.class);
+        var mapHandler = getContext(Handler.class);
         var tempName = Integer.toString(ThreadLocalRandom.current().nextInt(1000000), 36);
         mapHandler.createMap(player, tempName, slot - 1)
                 .then(map -> {

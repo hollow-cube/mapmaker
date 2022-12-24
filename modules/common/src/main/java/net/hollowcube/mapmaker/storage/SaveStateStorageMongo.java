@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.SaveState;
@@ -22,12 +23,12 @@ import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
 
 public class SaveStateStorageMongo implements SaveStateStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
-
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public SaveStateStorageMongo(@NotNull MongoClient client) {
+    public SaveStateStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
     }
 
     @Override
@@ -69,15 +70,11 @@ public class SaveStateStorageMongo implements SaveStateStorage {
     }
 
     private @NotNull MongoCollection<SaveState> collection() {
-        return client.getDatabase(DB_NAME).getCollection("savestates", SaveState.class);
+        return client.getDatabase(config.database()).getCollection("savestates", SaveState.class);
     }
 
     @AutoService(Codec.class)
     public static final class SaveStateCodec implements Codec<SaveState> {
-        public static final SaveStateCodec INSTANCE = new SaveStateCodec();
-
-        private SaveStateCodec() {}
-
         @Override
         public SaveState decode(BsonReader reader, DecoderContext decoderContext) {
             var value = new SaveState();
