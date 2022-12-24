@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.facet;
+package net.hollowcube.common.facet;
 
 import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.NotNull;

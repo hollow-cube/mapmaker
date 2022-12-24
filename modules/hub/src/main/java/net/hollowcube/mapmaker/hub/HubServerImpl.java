@@ -5,8 +5,6 @@ import net.hollowcube.canvas.Section;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
-import net.hollowcube.mapmaker.oldtoremove.HubManager;
-import net.hollowcube.mapmaker.oldtoremove.MapManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
@@ -28,13 +26,11 @@ public class HubServerImpl implements HubServer {
 
     private boolean ready = false;
 
-    public HubServerImpl(@NotNull PlayerStorage players, @NotNull MapStorage maps, @NotNull WorldManager worldManager, @NotNull MapManager TEMPREMOVEME_mapManager) {
-        StaticAbuse.INSTANCE = this; //todo
-
+    public HubServerImpl(@NotNull PlayerStorage players, @NotNull MapStorage maps, @NotNull WorldManager worldManager) {
         this.players = players;
         this.maps = maps;
 
-        this.mapHandler = new MapHandler(maps, TEMPREMOVEME_mapManager, players);
+        this.mapHandler = new MapHandler(maps, players);
 
         this.guiContext = Map.of(
                 HubServer.class, this,
@@ -48,8 +44,6 @@ public class HubServerImpl implements HubServer {
 
         var commands = MinecraftServer.getCommandManager();
         commands.register(new MapCommand(mapHandler));
-
-        HubManager.TemporaryIAmTerrible.INSTANCE = player -> player.setInstance(world.instance());
     }
 
     @Override
@@ -58,12 +52,12 @@ public class HubServerImpl implements HubServer {
     }
 
     @Override
-    public @NotNull PlayerStorage players() {
+    public @NotNull PlayerStorage playerStorage() {
         return players;
     }
 
     @Override
-    public @NotNull MapStorage maps() {
+    public @NotNull MapStorage mapStorage() {
         return maps;
     }
 

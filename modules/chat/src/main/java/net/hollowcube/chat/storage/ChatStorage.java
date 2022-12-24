@@ -2,8 +2,7 @@ package net.hollowcube.chat.storage;
 
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.util.MongoUtil;
+import net.hollowcube.common.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.handler;
 
-import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;

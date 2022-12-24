@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.hotbar;
 
+import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.map.CreateMapsView;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;

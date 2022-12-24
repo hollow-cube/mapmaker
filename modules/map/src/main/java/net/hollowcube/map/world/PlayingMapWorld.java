@@ -1,11 +1,11 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.mapmaker.player.PlayerHooks;
-import net.hollowcube.mapmaker.result.FutureResult;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
@@ -34,7 +34,7 @@ public class PlayingMapWorld extends MapWorld {
 
     @Override
     protected @NotNull FutureResult<Void> initPlayer(@NotNull Player player) {
-        var playerId = PlayerHooks.getId(player);
+        var playerId = PlayerData.fromPlayer(player).getId();
 
         //todo this wont work really. Need to hold the player somewhere while we load their savestate
         var saveStates = mapServer.saveStateStorage();
@@ -84,7 +84,7 @@ public class PlayingMapWorld extends MapWorld {
         return mapServer.saveStateStorage().updateSaveState(saveState)
                 .thenErr(err -> {
                     logger.error("Failed to save save state for player {} in map {}: {}",
-                            PlayerHooks.getId(player), map.getId(), err);
+                            PlayerData.fromPlayer(player).getId(), map.getId(), err);
                 });
     }
 

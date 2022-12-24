@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.dev;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.ServerRuntime;
+import net.hollowcube.common.ServerRuntime;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(ServerRuntime.class)

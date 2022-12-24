@@ -1,11 +1,18 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.auto.service.AutoService;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
+import org.bson.BsonReader;
+import org.bson.BsonType;
+import org.bson.BsonWriter;
+import org.bson.codecs.Codec;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -66,5 +73,61 @@ public class PlayerStorageMongo implements PlayerStorage {
 
     private @NotNull MongoCollection<PlayerData> collection() {
         return client.getDatabase(DB_NAME).getCollection("players", PlayerData.class);
+    }
+
+    @AutoService(Codec.class)
+    public static final class PlayerDataCodec implements Codec<PlayerData> {
+        public static final PlayerDataCodec INSTANCE = new PlayerDataCodec();
+
+        private PlayerDataCodec() {}
+
+        @Override
+        public PlayerData decode(BsonReader reader, DecoderContext decoderContext) {
+            var player = new PlayerData();
+            reader.readStartDocument();
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                switch (reader.readName()) {
+                    case "_id" -> player.setId(reader.readString());
+                    case "uuid" -> player.setUuid(reader.readString());
+                    case "unlocked_map_slots" -> player.setUnlockedMapSlots(reader.readInt32());
+                    case "map_slots" -> {
+                        reader.readStartArray();
+                        for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
+                            if (reader.readBsonType() == BsonType.NULL) {
+                                reader.readNull();
+                                continue;
+                            }
+                            player.setMapSlot(i, reader.readString());
+                        }
+                        reader.readEndArray();
+                    }
+                }
+            }
+            reader.readEndDocument();
+            return player;
+        }
+
+        @Override
+        public void encode(BsonWriter writer, PlayerData value, EncoderContext encoderContext) {
+            writer.writeStartDocument();
+            writer.writeString("_id", value.getId());
+            writer.writeString("uuid", value.getUuid());
+            writer.writeInt32("unlocked_map_slots", value.getUnlockedMapSlots());
+            writer.writeStartArray("map_slots");
+            for (var mapId : value.getMapSlots()) {
+                if (mapId == null) {
+                    writer.writeNull();
+                } else {
+                    writer.writeString(mapId);
+                }
+            }
+            writer.writeEndArray();
+            writer.writeEndDocument();
+        }
+
+        @Override
+        public Class<PlayerData> getEncoderClass() {
+            return PlayerData.class;
+        }
     }
 }

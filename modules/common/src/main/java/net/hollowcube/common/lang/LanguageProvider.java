@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.lang;
+package net.hollowcube.common.lang;
 
 import net.hollowcube.util.ComponentUtil;
 import net.kyori.adventure.text.Component;

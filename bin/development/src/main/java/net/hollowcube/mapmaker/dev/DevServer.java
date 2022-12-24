@@ -5,20 +5,19 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.facet.Facet;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.mapmaker.ServerRuntime;
-import net.hollowcube.mapmaker.facet.Facet;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.HubServerImpl;
 import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -104,16 +103,18 @@ public class DevServer {
             this.saveStateStorage = SaveStateStorage.mongo(mongoUri);
         }
 
-        StaticAbuse.mapStorage = mapStorage;
-
         var s3Address = System.getenv("MM_S3_ADDRESS");
         if (s3Address == null) s3Address = "http://localhost:9000/";
         var s3AccessKey = System.getenv("MM_S3_ACCESS_KEY");
         var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
         var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
 
-        this.maps = new MapServer(saveStateStorage);
+        var bridge = new DevServerBridge();
+
+        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager);
         this.hub = new HubServerImpl(playerStorage, mapStorage, worldManager, maps);
+        bridge.setHubServer(hub);
+        bridge.setMapServer(maps);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

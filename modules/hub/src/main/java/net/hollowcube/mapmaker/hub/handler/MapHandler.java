@@ -1,13 +1,10 @@
 package net.hollowcube.mapmaker.hub.handler;
 
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.oldtoremove.MapHandle;
-import net.hollowcube.mapmaker.oldtoremove.MapManager;
-import net.hollowcube.mapmaker.player.PlayerHooks;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.kyori.adventure.text.Component;
@@ -15,14 +12,10 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 public class MapHandler {
-    public static final Logger LOGGER = LoggerFactory.getLogger(MapHandler.class);
-
     public static final Error ERR_SLOT_IN_USE = Error.of("slot in use");
     public static final Error ERR_SLOT_NOT_IN_USE = Error.of("slot in use");
     public static final Error ERR_DUPLICATE_NAME = Error.of("duplicate name");
@@ -53,7 +46,7 @@ public class MapHandler {
         // Create map
         var map = new MapData();
         map.setId(UUID.randomUUID().toString());
-        map.setOwner(PlayerHooks.getId(player));
+        map.setOwner(playerData.getId());
         map.setName(name);
         return storage.createMap(map)
                 .flatMap(map1 -> {
@@ -93,7 +86,8 @@ public class MapHandler {
     }
 
     public @NotNull FutureResult<Void> editMap(@NotNull String nameOrId, @NotNull Player player) {
-        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
+        var playerData = PlayerData.fromPlayer(player);
+        return storage.getPlayerMap(playerData.getId(), nameOrId)
                 .map(map -> {
                     player.sendMessage("Editing map " + map.getName());
                     return map;
@@ -113,7 +107,8 @@ public class MapHandler {
     }
 
     public @NotNull FutureResult<Void> playMap(@NotNull String nameOrId, @NotNull Player player) {
-        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
+        var playerData = PlayerData.fromPlayer(player);
+        return storage.getPlayerMap(playerData.getId(), nameOrId)
                 .map(map -> {
                     player.sendMessage("Playing map " + map.getName());
                     return map;
@@ -133,7 +128,8 @@ public class MapHandler {
     }
 
     public @NotNull FutureResult<Void> infoMap(@NotNull String nameOrId, @NotNull Player player) {
-        return storage.getPlayerMap(PlayerHooks.getId(player), nameOrId)
+        var playerData = PlayerData.fromPlayer(player);
+        return storage.getPlayerMap(playerData.getId(), nameOrId)
                 .then(map -> {
                     player.sendMessage(Component.text("Map info for ", NamedTextColor.WHITE)
                             .append(Component.text(map.getName(), NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(map.getId()))));

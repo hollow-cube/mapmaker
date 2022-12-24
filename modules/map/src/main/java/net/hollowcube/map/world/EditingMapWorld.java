@@ -1,8 +1,8 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.result.FutureResult;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;

@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

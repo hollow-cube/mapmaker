@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker;
+package net.hollowcube.common;
 
 import org.jetbrains.annotations.NotNull;
 

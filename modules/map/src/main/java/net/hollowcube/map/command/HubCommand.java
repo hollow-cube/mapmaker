@@ -1,14 +1,22 @@
 package net.hollowcube.map.command;
 
-import net.hollowcube.mapmaker.oldtoremove.HubManager;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HubCommand extends BaseMapCommand {
-    public HubCommand() {
+    private static final Logger logger = LoggerFactory.getLogger(HubCommand.class);
+
+    private final MapToHubBridge bridge;
+
+    public HubCommand(@NotNull MapToHubBridge bridge) {
         super("hub");
+        this.bridge = bridge;
 
         setDefaultExecutor(this::returnToHub);
     }
@@ -18,9 +26,12 @@ public class HubCommand extends BaseMapCommand {
             return;
         }
 
-        var oldInstance = player.getInstance();
-
         sender.sendMessage("Returning to hub");
-        HubManager.TemporaryIAmTerrible.INSTANCE.sendToHub(player);
+        bridge.sendPlayerToHub(player)
+                .thenErr(err -> {
+                    logger.error("failed to send player {} to hub: {}", player.getUuid(), err.message());
+                    LanguageProvider.createMultiTranslatable("command.generic.unknown_error")
+                            .forEach(player::sendMessage);
+                });
     }
 }

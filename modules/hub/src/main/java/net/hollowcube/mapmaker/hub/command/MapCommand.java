@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.hub.command;
 
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.hub.handler.MapHandler;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.Result;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;

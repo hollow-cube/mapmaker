@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.gui.map.component;
 
 import net.hollowcube.canvas.std.ButtonSection;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;

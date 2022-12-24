@@ -1,5 +1,6 @@
-package net.hollowcube.mapmaker.util;
+package net.hollowcube.common.util;
 
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
@@ -15,7 +16,7 @@ public final class ExtraTags {
      * Returns a tag which does not serialize or deserialize.
      * <p>
      * Useful for storing transient references which would never need to be saved
-     * (eg a reference to a players {@link net.hollowcube.mapmaker.model.PlayerData})
+     * (eg a reference to a players {@link PlayerData})
      */
     public static <T> Tag<T> Transient(String name) {
         return Tag.Structure(name, new TagSerializer<>() {

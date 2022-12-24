@@ -1,6 +1,8 @@
 package net.hollowcube.map.block;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.facet.Facet;
+import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
@@ -8,8 +10,6 @@ import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.item.ItemManager;
 import net.hollowcube.map.item.NamedItems;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.facet.Facet;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.ServerProcess;
