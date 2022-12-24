@@ -20,6 +20,8 @@ dependencies {
     implementation(project(":modules:terraform"))
     implementation(project(":modules:canvas"))
     implementation(project(":modules:chat"))
+
+    implementation("org.yaml:snakeyaml:1.33")
 }
 
 application {
