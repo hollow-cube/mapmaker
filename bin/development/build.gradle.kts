@@ -20,6 +20,16 @@ dependencies {
     implementation(project(":modules:terraform"))
     implementation(project(":modules:canvas"))
     implementation(project(":modules:chat"))
+
+    // GRPC Internals for SpiceDB
+    implementation("com.authzed.api:authzed:0.4.0")
+    implementation("io.grpc:grpc-protobuf:1.51.1")
+    implementation("io.grpc:grpc-stub:1.51.1")
+    implementation("io.grpc:grpc-core:1.51.1")
+    implementation("io.grpc:grpc-netty:1.51.1")
+    implementation("io.grpc:grpc-netty-shaded:1.51.1")
+
+
 }
 
 application {

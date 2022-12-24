@@ -5,6 +5,13 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.oldtoremove.MapHandle;
+import net.hollowcube.mapmaker.oldtoremove.MapManager;
+import net.hollowcube.mapmaker.permission.MapPermissionManager;
+import net.hollowcube.mapmaker.player.PlayerHooks;
+import net.hollowcube.mapmaker.result.Error;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -51,6 +58,10 @@ public class Handler {
                             .mapErr(err -> Result.error(err.wrap("failed to update player data: {}")))
                             .map(unused -> map1);
                 })
+                // Set player as owner of the map
+                .flatMap(map1 -> mapPermissions.addMapOwner(map1.getId(), playerData.getId())
+                        .mapErr(err -> Result.error(err.wrap("failed to set player as owner of map: {}")))
+                        .map(unused -> map1))
                 .flatMapErr(err -> {
                     if (err.is(MapStorage.ERR_DUPLICATE_NAME))
                         return FutureResult.error(ERR_DUPLICATE_NAME);
@@ -98,6 +109,16 @@ public class Handler {
                     // Some other error
                     player.sendMessage("Failed to join map: " + err);
                     return Result.error(err.wrap("failed to edit map: {0}"));
+                });
+    }
+
+    public @NotNull FutureResult<Void> editMap2(@NotNull Player player, @NotNull String mapId) {
+        var playerData = PlayerData.fromPlayer(player);
+        return mapPermissions.checkPermission(mapId, playerData.getId(), MapData.WRITE)
+                .flatMap(unused -> storage.getMapById(mapId))
+                .flatMap(map -> {
+                    // Player has permission, send them to the map
+                    return maps.joinMap(map, MapHandle.FLAG_EDIT, player);
                 });
     }
 

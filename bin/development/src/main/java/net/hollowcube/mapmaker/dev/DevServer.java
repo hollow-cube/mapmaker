@@ -1,5 +1,9 @@
 package net.hollowcube.mapmaker.dev;
 
+import com.authzed.api.v1.PermissionsServiceGrpc;
+import com.authzed.grpcutil.BearerToken;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.helidon.health.HealthSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
@@ -13,6 +17,10 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.permission.MapPermissionManager;
+import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
+import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
@@ -82,8 +90,14 @@ public class DevServer {
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
+    private PlatformPermissionManager platformPermissions;
+    private MapPermissionManager mapPermissions;
+
     private DevHubServer hub;
     private DevMapServer maps;
+
+    private HubServer hub;
+    private MapServer maps;
 
     public DevServer() {
 
@@ -125,6 +139,17 @@ public class DevServer {
         var s3AccessKey = System.getenv("MM_S3_ACCESS_KEY");
         var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
         var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
+
+        // SpiceDB
+        ManagedChannel channel = ManagedChannelBuilder
+                .forTarget("localhost:50051")
+                .usePlaintext()
+                .build();
+        BearerToken bearerToken = new BearerToken("foobar");
+        PermissionsServiceGrpc.PermissionsServiceFutureStub permissionsService = PermissionsServiceGrpc.newFutureStub(channel)
+                .withCallCredentials(bearerToken);
+        this.platformPermissions = new PlatformPermissionManager(permissionsService);
+        this.mapPermissions = new MapPermissionManager(permissionsService);
 
         // End phase 1
         FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
