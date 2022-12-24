@@ -1,195 +1,150 @@
 package net.hollowcube.mapmaker.hub.command;
 
-import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.common.result.Result;
-import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.CommandExecutor;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentLoop;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapCommand extends BaseHubCommand {
-    private static final Logger logger = LoggerFactory.getLogger(MapCommand.class);
+    private final HubServer server;
 
-    /*
-    PLAYERS
-    /map -> usage
-    /map create <name> [slot] -> creates a map under the current player (if slot not specified it will choose the first available)
-    /map delete <name> -> deletes a map for the current player
-    /map edit <name> -> edits a map for the current player (by name)
-    /map list -> lists all maps for the current player
-     */
+    public MapCommand(@NotNull HubServer server) {
+        super("map", "m");
+        this.server = server;
 
-    private final Handler handler;
+        // Playing
+        addSubcommand(new PlayCommand());
 
-    public MapCommand(@NotNull HubServer server, Handler handler) {
-        super("map");
-        this.handler = handler;
+        // Building
+        addSubcommand(new CreateCommand());
+        addSubcommand(new EditCommand());
+        addSubcommand(new PublishCommand());
+        addSubcommand(new DeleteCommand());
 
-        addSubcommand(new Create());
-        addSubcommand(new Publish());
-        addSubcommand(new Info());
-        addSubcommand(new Edit());
-        addSubcommand(new Play());
-
-        addSubcommand(new MapAdminCommand(server.mapStorage()));
+        setDefaultExecutor(generateUsage());
     }
 
-    private class Create extends Command {
-        private final Argument<String> nameArg = ArgumentType.String("name");
-        private final Argument<Integer> slotArg = ArgumentType.Integer("slot").min(1).max(PlayerData.MAX_MAP_SLOTS + 1);
+    public class PlayCommand extends Command {
+        private final Argument<String> shortOrLongIdArg = ArgumentType.String("map");
 
-        public Create() {
-            super("create");
-
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map create <type> <name> <slot>"));
-
-            addSyntax(this::createWithTypeNameSlot, nameArg, slotArg);
-        }
-
-        private void createWithTypeNameSlot(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) return;
-
-            var name = context.get(nameArg);
-            var slot = context.get(slotArg);
-
-            handler.createMap(player, name, slot)
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.create.success",
-                                        Component.text(map.getName())
-                                                .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))
-                                                .clickEvent(ClickEvent.copyToClipboard(map.getId())),
-                                        Component.text(slot + 1))
-                                .forEach(player::sendMessage);
-                        logger.info("{} created map {} in slot {}", player.getUsername(), map.getName(), slot);
-                    })
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_SLOT_IN_USE)) {
-                            LanguageProvider.createMultiTranslatable("command.map.create.slot_in_use",
-                                    Component.text(slot + 1)).forEach(player::sendMessage);
-                        } else if (err.is(Handler.ERR_DUPLICATE_NAME)) {
-                            LanguageProvider.createMultiTranslatable("command.map.create.name_in_use",
-                                    Component.text(name)).forEach(player::sendMessage);
-                        } else {
-                            LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
-                                    Component.text(err.toString())).forEach(player::sendMessage);
-                            logger.error("Error creating map: {}", err);
-                        }
-                    });
-        }
-    }
-
-    public class Publish extends Command {
-        private final Argument<Integer> slotArg = ArgumentType.Integer("slot").min(1).max(PlayerData.MAX_MAP_SLOTS + 1);
-
-        public Publish() {
-            super("publish");
-
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map publish <slot>"));
-
-            addSyntax(this::publishWithSlot, slotArg);
-        }
-
-        private void publishWithSlot(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) return;
-
-            var slot = context.get(slotArg);
-
-            handler.publishMap(player, slot - 1)
-                    .then(unused -> {
-                        LanguageProvider.createMultiTranslatable("command.map.publish.success",
-                                Component.text(slot)).forEach(player::sendMessage);
-                        logger.info("{} published map in slot {}", player.getUsername(), slot);
-                    })
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_SLOT_NOT_IN_USE)) {
-                            LanguageProvider.createMultiTranslatable("command.map.public.slot_not_in_use",
-                                    Component.text(slot)).forEach(player::sendMessage);
-                        } else {
-                            LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
-                                    Component.text(err.toString())).forEach(player::sendMessage);
-                            logger.error("Error creating map: {}", err);
-                        }
-                    });
-        }
-    }
-
-    public class Info extends Command {
-        private final Argument<String> mapIdArg = ArgumentType.String("map-id");
-
-        public Info() {
-            super("info");
-
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map info <map-id>"));
-
-            addSyntax(this::infoWithMapId, mapIdArg);
-        }
-
-        private void infoWithMapId(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) return;
-
-            var mapId = context.get(mapIdArg);
-            handler.infoMap(mapId, player)
-                    .mapErr(err -> {
-                        LOGGER.error("Failed to create map: {}", err);
-                        return Result.error(err);
-                    });
-        }
-    }
-
-    private class Edit extends Command {
-        private final Argument<String> idArg = ArgumentType.String("map-id");
-
-        public Edit() {
-            super("edit");
-
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map edit <map-id>"));
-
-            addSyntax(this::editWithId, idArg);
-        }
-
-        private void editWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) return;
-
-            var mapId = context.get(idArg);
-            handler.editMap2(player, mapId)
-                    .mapErr(err -> {
-                        LOGGER.error("Failed to edit map: {}", err);
-                        return Result.error(err);
-                    });
-        }
-    }
-
-    private class Play extends Command {
-        private final Argument<String> idArg = ArgumentType.String("map-id");
-
-        public Play() {
+        public PlayCommand() {
             super("play");
 
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map play <map-id>"));
-
-            addSyntax(this::editWithId, idArg);
+            addSyntax(this::playMapWithId, shortOrLongIdArg);
+            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
         }
 
-        private void editWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) return;
-
-            var mapId = context.get(idArg);
-            handler.playMap(mapId, player)
-                    .mapErr(err -> {
-                        LOGGER.error("Failed to create map: {}", err);
-                        return Result.error(err);
-                    });
+        public void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var shortOrLongId = context.get(shortOrLongIdArg);
+            sender.sendMessage("TODO - play map " + shortOrLongId);
         }
+    }
+
+    public class CreateCommand extends Command {
+        private final Argument<Integer> mapSlot = ExtraArguments.MapSlot(true);
+        private final ArgumentLoop<CommandContext> createMapOptions = ArgumentType.Loop(
+                "options",
+                ArgumentType.Group(
+                        "nameGroup",
+                        ArgumentType.Literal("name"),
+                        ArgumentType.String("mapName")
+                )
+                //todo presets or other options
+        );
+
+        public CreateCommand() {
+            super("create");
+
+            addSyntax(this::createMapInGui, mapSlot);
+            addSyntax(this::createMapWithDefault, mapSlot, ArgumentType.Literal("default"));
+            addSyntax(this::createMapWithOptions, mapSlot, createMapOptions);
+
+            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
+        }
+
+        public void createMapInGui(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var slot = context.get(mapSlot);
+            sender.sendMessage("create map gui " + slot);
+        }
+
+        public void createMapWithDefault(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var slot = context.get(mapSlot);
+            sender.sendMessage("create map default " + slot);
+        }
+
+        public void createMapWithOptions(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var slot = context.get(mapSlot);
+            sender.sendMessage("create map options " + slot);
+        }
+    }
+
+    public class EditCommand extends Command {
+        private final Argument<String> longIdOrSlotArg = ArgumentType.String("map");
+
+        public EditCommand() {
+            super("edit");
+
+            //todo its possible it will be easier to use a separate syntax for slot vs long id
+            addSyntax(this::editMapWithId, longIdOrSlotArg);
+            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
+        }
+
+        public void editMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var longIdOrSlot = context.get(longIdOrSlotArg);
+            sender.sendMessage("TODO - edit map " + longIdOrSlot);
+        }
+    }
+
+    public class PublishCommand extends Command {
+        private final Argument<String> longIdOrSlotArg = ArgumentType.String("map");
+
+        public PublishCommand() {
+            super("publish");
+
+            //todo its possible it will be easier to use a separate syntax for slot vs long id
+            addSyntax(this::publishMapWithId, longIdOrSlotArg);
+            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
+        }
+
+        public void publishMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var longIdOrSlot = context.get(longIdOrSlotArg);
+            sender.sendMessage("TODO - publish map " + longIdOrSlot);
+        }
+    }
+
+    public class DeleteCommand extends Command {
+        private final Argument<String> longIdOrSlotArg = ArgumentType.String("map");
+
+        public DeleteCommand() {
+            super("delete");
+
+            //todo its possible it will be easier to use a separate syntax for slot vs long id
+            addSyntax(this::deleteMapWithId, longIdOrSlotArg);
+            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
+        }
+
+        public void deleteMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            var longIdOrSlot = context.get(longIdOrSlotArg);
+            sender.sendMessage("TODO - publish map " + longIdOrSlot);
+        }
+    }
+
+    private @NotNull CommandExecutor generateUsage() {
+        List<Component> messages = new ArrayList<>();
+
+        //todo generate usage. Move this to a BaseCommand in common and give it some fields like description
+        // which can be set and used in here.
+        messages.add(Component.text("usage todo"));
+
+        return (sender, context) -> messages.forEach(sender::sendMessage);
     }
 }

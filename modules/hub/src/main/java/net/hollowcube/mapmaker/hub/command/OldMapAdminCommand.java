@@ -11,7 +11,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapAdminCommand extends Command {
+public class OldMapAdminCommand extends Command {
     //todo how are we going to do completion on command arguments?
     //     - Querying mongo every time is almost certainly too slow, will need some kind of caching mechanism and maybe local filtering?
     //     - Or could use a service like meillisearch, but its more to setup and manage.
@@ -30,7 +30,7 @@ public class MapAdminCommand extends Command {
 
     private final MapAdminHandler handler;
 
-    public MapAdminCommand(@NotNull MapStorage storage) {
+    public OldMapAdminCommand(@NotNull MapStorage storage) {
         super("admin");
         this.handler = new MapAdminHandler(storage);
 
