@@ -7,17 +7,19 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
+import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class CreateMapView extends ParentSection {
     private static final Logger logger = LoggerFactory.getLogger(CreateMapView.class);
@@ -38,8 +40,9 @@ public class CreateMapView extends ParentSection {
     private final ButtonSection createButton = new ButtonSection(1, 1, TEMP_BUTTON, this::handleCreateButton);
 
     private final int slot;
+    private MapData protoMap;
 
-    public CreateMapView(int slot) {
+    public CreateMapView(@Range(from = 0, to = PlayerData.MAX_MAP_SLOTS - 1) int slot) {
         super(9, 3);
         this.slot = slot;
 
@@ -49,6 +52,7 @@ public class CreateMapView extends ParentSection {
     @Override
     protected void mount() {
         super.mount();
+        protoMap = new MapData();
 
         var root = find(RootSection.class);
         root.setTitle(Component.text("Create Map"));
@@ -58,14 +62,14 @@ public class CreateMapView extends ParentSection {
         // Swap to the loading icon
         createButton.setItem(LOADING_ICON);
 
+        var playerData = PlayerData.fromPlayer(player);
+        protoMap.setOwner(playerData.getId());
+
         // Dispatch request to create the map with a short random name for now
         var mapHandler = getContext(Handler.class);
-        var tempName = Integer.toString(ThreadLocalRandom.current().nextInt(1000000), 36);
-        mapHandler.createMap(player, tempName, slot - 1)
+        mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot)
                 .then(map -> {
                     // Map was created, open the map view
-                    //todo this is a case where the section is transient (eg should not be recorded by the history)
-                    // pressing a back button from the MapSlotView should take you to the map list, not this one.
                     var router = find(RouterSection.class);
                     router.push(new MapSlotView(slot, FutureResult.of(map)));
                 })

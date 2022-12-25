@@ -29,6 +29,13 @@ public class MapPermissionManager extends ZPermissionManager {
         return createRelationship(relationship);
     }
 
+    public @NotNull FutureResult<Void> deleteMap(@NotNull String mapId) {
+        var filter = Relationship.newBuilder()
+                .setResource(createMapObject(mapId))
+                .build();
+        return deleteRelationship(filter);
+    }
+
     public @NotNull FutureResult<Void> checkPermission(
             @NotNull String mapId, @NotNull String playerId,
             @NotNull @MagicConstant(valuesFromClass = MapData.class) String permission

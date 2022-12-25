@@ -16,7 +16,11 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 
 class PlayerStorageMongo implements PlayerStorage {
     private final MongoClient client;
@@ -70,6 +74,25 @@ class PlayerStorageMongo implements PlayerStorage {
                 return Result.error(ERR_NOT_FOUND);
             return Result.ofNull();
         });
+    }
+
+    @Override
+    public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
+        List<FutureResult<Void>> futures = new ArrayList<>();
+        return FutureResult.supply(() -> {
+            var filter = in("map_slots", mapId);
+            collection().find(filter).forEach(player -> {
+                for (int i = 0; i < player.getUnlockedMapSlots(); i++) {
+                    if (player.getMapSlot(i).equals(mapId)) {
+                        player.setMapSlot(i, null);
+                    }
+                }
+
+                //todo update as a transaction
+                futures.add(updatePlayer(player));
+            });
+            return Result.ofNull();
+        }).flatMap(unused -> FutureResult.allOf(futures.toArray(FutureResult[]::new)));
     }
 
     private @NotNull MongoCollection<PlayerData> collection() {

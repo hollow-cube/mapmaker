@@ -87,7 +87,18 @@ public class MapStorageMongo implements MapStorage {
             var result = collection().replaceOne(filter, map);
             if (result.getModifiedCount() == 0)
                 return Result.error(ERR_NOT_FOUND);
-            return Result.of(null);
+            return Result.ofNull();
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+        return FutureResult.supply(() -> {
+            var filter = eq("_id", mapId);
+            var result = collection().findOneAndDelete(filter);
+            if (result == null)
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result);
         });
     }
 

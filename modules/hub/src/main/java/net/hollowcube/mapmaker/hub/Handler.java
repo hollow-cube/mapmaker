@@ -19,9 +19,16 @@ import java.util.UUID;
  * however it does <i>not</i> handle presenting the results to a player. This job is left to GUIs and/or commands/chat.
  */
 public class Handler {
+    public static final Error ERR_SLOT_NOT_IN_USE = Error.of("slot in use"); //todo unused
+
+
+
+
+    public static final Error ERR_MAP_NOT_FOUND = Error.of("map not found");
+    public static final Error ERR_SLOT_LOCKED = Error.of("slot locked");
     public static final Error ERR_SLOT_IN_USE = Error.of("slot in use");
-    public static final Error ERR_SLOT_NOT_IN_USE = Error.of("slot in use");
-    public static final Error ERR_DUPLICATE_NAME = Error.of("duplicate name");
+    public static final Error ERR_MISSING_OWNER = Error.of("missing owner");
+    public static final Error ERR_INVALID_MAP_NAME = Error.of("invalid name");
 
     private final HubServer server;
 
@@ -29,45 +36,92 @@ public class Handler {
         this.server = server;
     }
 
-    //todo should not take a slot i dont think, could have a createMapInSlot or something though
-    //     Probably could take a playerid as well (eg just playerid and any map info, name will be defaulted)
-    public @NotNull FutureResult<MapData> createMap(@NotNull Player player, @NotNull String name, int slot) {
-        var playerData = PlayerData.fromPlayer(player);
+    /**
+     * Creates and sets up permissions for the given map.
+     *
+     * @apiNote The `owner` field _must_ be set. If not, ERR_MISSING_OWNER is returned.
+     * <p>
+     * The map ID is overwritten with a new UUID no matter the content.
+     * The return value should be used to determine the ID.
+     */
+    public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
+        //todo actually lookup the owner and make sure they exist
+        if (map.getOwner() == null)
+            return FutureResult.error(ERR_MISSING_OWNER);
+        if (!map.getName().matches(MapData.NAME_REGEX))
+            return FutureResult.error(ERR_INVALID_MAP_NAME);
 
-        // Ensure selected slot is available
-        var slotMap = playerData.getMapSlot(slot);
-        if (slotMap != null) {
-            return FutureResult.error(ERR_SLOT_IN_USE);
-        }
-
-        // Create map
-        var map = new MapData();
-        map.setId(UUID.randomUUID().toString());
-        map.setOwner(playerData.getId());
-        map.setName(name);
+        map.setId(UUID.randomUUID().toString()); // Create random ID
+        map.setPublished(false); // Sanity check
         return server.mapStorage().createMap(map)
-                .flatMap(map1 -> {
-                    // Update playerdata (todo this should be done as a transaction)
-                    playerData.setMapSlot(slot, map.getId());
-                    return server.playerStorage().updatePlayer(playerData)
-                            .mapErr(err -> Result.error(err.wrap("failed to update player data: {}")))
-                            .map(unused -> map1);
-                })
-                // Set player as owner of the map
-                .flatMap(map1 -> server.mapPermissions().addMapOwner(map1.getId(), playerData.getId())
-                        .mapErr(err -> Result.error(err.wrap("failed to set player as owner of map: {}")))
+                // Add permissions
+                .flatMap(map1 -> server.mapPermissions().addMapOwner(map1.getId(), map1.getOwner())
+                        .mapErr(err -> Result.error(err.wrap("failed to add owner to map permissions: {}")))
                         .map(unused -> map1))
+                // Retry on failure + wrap error
                 .flatMapErr(err -> {
-                    if (err.is(MapStorage.ERR_DUPLICATE_NAME))
-                        return FutureResult.error(ERR_DUPLICATE_NAME);
-
-                    // If the ID was in use, attempt to create it again
                     if (err.is(MapStorage.ERR_DUPLICATE_ENTRY))
-                        return createMap(player, name, slot);
+                        return createMap(map); // Try again w/ new ID
 
-                    return FutureResult.error(err.wrap("failed to create map: {0}"));
+                    return FutureResult.error(err.wrap("failed to create map: {}"));
                 });
     }
+
+    /**
+     * Creates the given map for the given player in the given slot.
+     * <p>
+     * The owner of the map is always set to the given {@link PlayerData}s ID.
+     * <p>
+     * If the slot is in use, ERR_SLOT_IN_USE is returned.
+     */
+    public @NotNull FutureResult<MapData> createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
+        // Ensure selected slot is available
+        var slotState = playerData.getSlotState(slot);
+        if (slotState == PlayerData.SLOT_STATE_LOCKED)
+            return FutureResult.error(ERR_SLOT_LOCKED);
+        if (slotState == PlayerData.SLOT_STATE_IN_USE)
+            return FutureResult.error(ERR_SLOT_IN_USE);
+
+        map.setOwner(playerData.getId());
+        map.setPublished(false); // Sanity check
+
+        return createMap(map)
+                // Set the map in the given player slot & save player
+                .flatMap(map1 -> {
+                    playerData.setMapSlot(slot, map1.getId());
+                    return server.playerStorage().updatePlayer(playerData)
+                            .mapErr(err -> Result.error(err.wrap("failed to update player: {}")))
+                            .map(unused -> map1);
+                });
+    }
+
+    /**
+     * Deletes a map by its ID. Does the following:
+     * <ol>
+     * <li>Delete the map object from Mongo</li>
+     * <li>Delete all relationships referencing the map from SpiceDB</li>
+     * <li>Find all players (for now just 1, but with trusted maps more) who have a record referencing that map</li>
+     * <li>Update each player individually (after removing the reference to the map)</li>
+     * </ol>
+     */
+    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+        //todo there is a missing permission check here, you could delete any map if you knew the ID
+        return server.mapStorage().deleteMap(mapId)
+                // Delete all associated permissions
+                .flatMap(map -> server.mapPermissions().deleteMap(mapId)
+                        .mapErr(err -> Result.error(err.wrap("failed to delete map permissions: {}")))
+                        .map(unused -> map))
+                // Delete from mongo
+                .flatMap(map -> server.playerStorage().unlinkMap(mapId)
+                        .mapErr(err -> Result.error(err.wrap("failed to unlink map from players: {}")))
+                        .map(unused -> map))
+                .mapErr(err -> {
+                    if (err.is(MapStorage.ERR_NOT_FOUND))
+                        return Result.error(ERR_MAP_NOT_FOUND);
+                    return Result.error(err.wrap("failed to delete map: {}"));
+                });
+    }
+
 
     //todo should not take a slot. Just a playerid and mapid
     public @NotNull FutureResult<Void> publishMap(@NotNull Player player, int slot) {
