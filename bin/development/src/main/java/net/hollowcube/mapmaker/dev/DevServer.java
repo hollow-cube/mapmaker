@@ -40,6 +40,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 public class DevServer {
     public static void main(String[] args) {
@@ -68,7 +70,10 @@ public class DevServer {
         server.start();
         minecraftServer.start("0.0.0.0", 25565);
 
-        MinecraftServer.getSchedulerManager().buildShutdownTask(webServer::shutdown);
+        MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
+                webServer.shutdown();
+                ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
+        });
     }
 
     private PlayerStorage playerStorage;
