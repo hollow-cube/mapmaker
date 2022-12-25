@@ -26,8 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MongoUtil {
-    private MongoUtil() {
-    }
+    private MongoUtil() {}
 
     private static final Codec<PlayerData> PLAYER_DATA_CODEC = new Codec<>() {
         @Override
@@ -63,7 +62,7 @@ public final class MongoUtil {
             writer.writeString("uuid", value.getUuid());
             writer.writeInt32("unlocked_map_slots", value.getUnlockedMapSlots());
             writer.writeStartArray("map_slots");
-            for (var mapId : value.getMapSlots()) {
+            for (String mapId : value.getMapSlots()) {
                 if (mapId == null) {
                     writer.writeNull();
                 } else {

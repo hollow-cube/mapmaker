@@ -1,6 +1,8 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.map.world.MapWorld;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -23,13 +25,19 @@ public class SetSpawnCommand extends BaseMapCommand {
     }
 
     private void setSpawn(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player player)) return;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            return;
+        }
 
         updateMapPos(player, player.getPosition());
     }
 
     private void setSpawnWithPos(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player player)) return;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            return;
+        }
 
         var pos = context.get(positionArg).fromSender(player);
         updateMapPos(player, new Pos(pos.x(), pos.y(), pos.z(),
@@ -37,10 +45,13 @@ public class SetSpawnCommand extends BaseMapCommand {
     }
 
     private void setSpawnWithPosAndRot(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player player)) return;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            return;
+        }
 
         var pos = context.get(positionArg).fromSender(player);
-        var rot = context.get(positionArg).fromView(player);
+        var rot = context.get(rotationArg).fromView(player);
 
         updateMapPos(player, new Pos(pos.x(), pos.y(), pos.z(), (float) rot.x(), (float) rot.z()));
     }
@@ -48,6 +59,10 @@ public class SetSpawnCommand extends BaseMapCommand {
     private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
         var map = MapWorld.fromInstance(player.getInstance()).map();
         map.setSpawnPoint(newSpawnPoint);
-        player.sendMessage("Set spawn to " + newSpawnPoint); //todo translation
+        player.sendMessage(Component.translatable("command.map.setspawn", Component.text(Math.floor(newSpawnPoint.x())).hoverEvent(Component.text(newSpawnPoint.x(), NamedTextColor.DARK_AQUA)),
+                Component.text(Math.floor(newSpawnPoint.y())).hoverEvent(Component.text(newSpawnPoint.y(), NamedTextColor.DARK_AQUA)),
+                Component.text(Math.floor(newSpawnPoint.z())).hoverEvent(Component.text(newSpawnPoint.z(), NamedTextColor.DARK_AQUA)),
+                Component.text(Math.floor(newSpawnPoint.pitch())).hoverEvent(Component.text(newSpawnPoint.pitch(), NamedTextColor.DARK_AQUA)),
+                Component.text(Math.floor(newSpawnPoint.yaw())).hoverEvent(Component.text(newSpawnPoint.yaw(), NamedTextColor.DARK_AQUA))));
     }
 }
