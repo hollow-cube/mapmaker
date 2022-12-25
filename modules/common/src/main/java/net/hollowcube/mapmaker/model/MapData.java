@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.model;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -14,9 +15,11 @@ public class MapData {
     public static final String WRITE = "write";
     public static final String ADMIN = "admin";
 
+    public static final @Language("regexp") String NAME_REGEX = "[a-zA-Z0-9_ ]{1,32}";
+
     private String id;
     private String owner;
-    private String name;
+    private String name = "Untitled Map";
 
     // Published state
     private boolean published = false;

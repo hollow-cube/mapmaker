@@ -45,6 +45,13 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
+    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+        if (!mapsById.containsKey(mapId))
+            return FutureResult.error(ERR_NOT_FOUND);
+        return FutureResult.of(mapsById.remove(mapId));
+    }
+
+    @Override
     public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
         var maps = new ArrayList<MapData>();
         for (var map : mapsById.values()) {

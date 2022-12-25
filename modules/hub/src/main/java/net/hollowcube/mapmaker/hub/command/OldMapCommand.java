@@ -6,8 +6,6 @@ import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -62,7 +60,7 @@ public class OldMapCommand extends BaseHubCommand {
     private final Handler handler;
 
     public OldMapCommand(@NotNull HubServer server, Handler handler) {
-        super("map");
+        super("oldmap");
         this.handler = handler;
 
         addSubcommand(new Create());
@@ -92,29 +90,29 @@ public class OldMapCommand extends BaseHubCommand {
             var name = context.get(nameArg);
             var slot = context.get(slotArg);
 
-            handler.createMap(player, name, slot)
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.create.success",
-                                        Component.text(map.getName())
-                                                .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))
-                                                .clickEvent(ClickEvent.copyToClipboard(map.getId())),
-                                        Component.text(slot + 1))
-                                .forEach(player::sendMessage);
-                        logger.info("{} created map {} in slot {}", player.getUsername(), map.getName(), slot);
-                    })
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_SLOT_IN_USE)) {
-                            LanguageProvider.createMultiTranslatable("command.map.create.slot_in_use",
-                                    Component.text(slot + 1)).forEach(player::sendMessage);
-                        } else if (err.is(Handler.ERR_DUPLICATE_NAME)) {
-                            LanguageProvider.createMultiTranslatable("command.map.create.name_in_use",
-                                    Component.text(name)).forEach(player::sendMessage);
-                        } else {
-                            LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
-                                    Component.text(err.toString())).forEach(player::sendMessage);
-                            logger.error("Error creating map: {}", err);
-                        }
-                    });
+//            handler.createMap(player, name, slot)
+//                    .then(map -> {
+//                        LanguageProvider.createMultiTranslatable("command.map.create.success",
+//                                        Component.text(map.getName())
+//                                                .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))
+//                                                .clickEvent(ClickEvent.copyToClipboard(map.getId())),
+//                                        Component.text(slot + 1))
+//                                .forEach(player::sendMessage);
+//                        logger.info("{} created map {} in slot {}", player.getUsername(), map.getName(), slot);
+//                    })
+//                    .thenErr(err -> {
+//                        if (err.is(Handler.ERR_SLOT_NOT_AVAILABLE)) {
+//                            LanguageProvider.createMultiTranslatable("command.map.create.slot_in_use",
+//                                    Component.text(slot + 1)).forEach(player::sendMessage);
+//                        } else if (err.is(Handler.ERR_DUPLICATE_NAME)) {
+//                            LanguageProvider.createMultiTranslatable("command.map.create.name_in_use",
+//                                    Component.text(name)).forEach(player::sendMessage);
+//                        } else {
+//                            LanguageProvider.createMultiTranslatable("command.generic.unknown_error",
+//                                    Component.text(err.toString())).forEach(player::sendMessage);
+//                            logger.error("Error creating map: {}", err);
+//                        }
+//                    });
         }
     }
 

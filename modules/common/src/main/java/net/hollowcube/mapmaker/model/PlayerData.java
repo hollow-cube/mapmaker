@@ -23,6 +23,10 @@ public class PlayerData {
 
     public static final int MAX_MAP_SLOTS = 5;
 
+    public static final int SLOT_STATE_OPEN = 0;
+    public static final int SLOT_STATE_LOCKED = 1;
+    public static final int SLOT_STATE_IN_USE = 2;
+
     private String id;
     private String uuid;
 
@@ -59,6 +63,12 @@ public class PlayerData {
 
     public @NotNull String[] getMapSlots() {
         return Arrays.copyOf(mapSlots, mapSlots.length);
+    }
+
+    public int getSlotState(int slot) {
+        if (!(slot >= 0 && slot < unlockedMapSlots))
+            return 1; // Map locked
+        return mapSlots[slot] == null ? 0 : 2; // Map already exists
     }
 
     public @Nullable String getMapSlot(int slot) {

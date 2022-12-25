@@ -13,7 +13,7 @@ public interface MapStorage {
 
     Error ERR_NOT_FOUND = Error.of("map not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
-    Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}");
+    Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}"); //todo remove me, names do not need to be unique.
 
     static @NotNull MapStorage memory() {
         return new MapStorageMemory();
@@ -35,6 +35,8 @@ public interface MapStorage {
     @NotNull FutureResult<MapData> getMapById(@NotNull String mapId);
 
     @NotNull FutureResult<Void> updateMap(@NotNull MapData map);
+
+    @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId);
 
 
     // Player specific map searches

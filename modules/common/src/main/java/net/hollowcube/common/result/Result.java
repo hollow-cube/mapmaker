@@ -6,7 +6,7 @@ import org.jetbrains.annotations.UnknownNullability;
 public record Result<T>(@UnknownNullability T result, @UnknownNullability Error error) {
     static final Result<Object> NULL = new Result<>(null, null);
 
-    public static <T> @NotNull Result<T> of(@UnknownNullability T result) {
+    public static <T> @NotNull Result<T> of(@NotNull T result) {
         return new Result<>(result, null);
     }
     public static <T> @NotNull Result<T> error(@NotNull Error err) {

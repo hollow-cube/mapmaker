@@ -47,6 +47,18 @@ class ZPermissionManager {
                 .setOperation(RelationshipUpdate.Operation.OPERATION_CREATE)
                 .setRelationship(relationship)
                 .build();
+        return writeRelationshipUpdate(update);
+    }
+
+    protected @NotNull FutureResult<Void> deleteRelationship(@NotNull Relationship relationship) {
+        var update = RelationshipUpdate.newBuilder()
+                .setOperation(RelationshipUpdate.Operation.OPERATION_DELETE)
+                .setRelationship(relationship)
+                .build();
+        return writeRelationshipUpdate(update);
+    }
+
+    protected @NotNull FutureResult<Void> writeRelationshipUpdate(@NotNull RelationshipUpdate update) {
         var req = WriteRelationshipsRequest.newBuilder()
                 .addUpdates(update)
                 .build();

@@ -13,7 +13,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     // Factory methods
 
     /** Creates a new {@link FutureResult} which is already completed with the given result. */
-    static <T> @NotNull FutureResult<T> of(T result) {
+    static <T> @NotNull FutureResult<T> of(@NotNull T result) {
         return new FutureResults.CF<>(CompletableFuture.completedFuture(Result.of(result)));
     }
 
@@ -48,7 +48,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
         var futures = new CompletableFuture[results.length];
         for (int i = 0; i < results.length; i++)
             futures[i] = results[i].toCompletableFuture();
-        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> Result.of(null)));
+        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> Result.ofNull()));
     }
 
 
