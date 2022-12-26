@@ -4,8 +4,6 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,22 +44,13 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
-        var maps = new ArrayList<MapData>();
-        for (var map : mapsById.values()) {
-            if (map.getOwner().equals(playerId))
-                maps.add(map);
-        }
-        return FutureResult.of(maps);
-    }
-
-    @Override
-    public @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId) {
-        for (var map : mapsById.values()) {
-            if (map.getOwner().equals(playerId) && (map.getId().equals(nameOrId) || map.getName().equalsIgnoreCase(nameOrId)))
-                return FutureResult.of(map);
-        }
-        return FutureResult.error(ERR_NOT_FOUND);
+    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
+        return mapsById.values().stream()
+                .filter(map -> map.getPublishedId().equalsIgnoreCase(shortMapId))
+                .findFirst()
+                .map(MapData::getId)
+                .map(FutureResult::of)
+                .orElse(FutureResult.error(ERR_NOT_FOUND));
     }
 
     @Override

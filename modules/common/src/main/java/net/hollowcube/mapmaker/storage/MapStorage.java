@@ -7,8 +7,6 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public interface MapStorage {
 
     Error ERR_NOT_FOUND = Error.of("map not found");
@@ -37,12 +35,7 @@ public interface MapStorage {
 
     @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId);
 
-
-    // Player specific map searches
-
-    @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId);
-
-    @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId);
+    @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId);
 
 
     // Other utilities
