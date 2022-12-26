@@ -213,7 +213,7 @@ public class DevServer {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
-                        data.setUnlockedMapSlots(3);
+                        data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         return playerStorage.createPlayer(data);
                     }
                     return FutureResult.error(err);
