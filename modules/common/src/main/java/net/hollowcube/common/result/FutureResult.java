@@ -63,6 +63,10 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     @NotNull <S> FutureResult<S> flatMap(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
     @NotNull FutureResult<T> flatMapErr(@NotNull Function<@NotNull Error, @NotNull FutureResult<T>> mapper);
 
+    @NotNull FutureResult<T> wrapErr(@NotNull String format);
+
+    @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
+
 
     // Compatibility
 

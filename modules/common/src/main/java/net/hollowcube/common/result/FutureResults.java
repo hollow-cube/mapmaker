@@ -99,6 +99,32 @@ class FutureResults {
         }
 
         @Override
+        public @NotNull FutureResult<T> wrapErr(@NotNull String format) {
+            return new CF<>(future.thenApply(result -> {
+                try {
+                    if (result.isErr())
+                        return Result.error(result.error().wrap(format));
+                    return result;
+                } catch (Throwable t) {
+                    return Result.error(Error.of(t));
+                }
+            }));
+        }
+
+        @Override
+        public @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper) {
+            return new CF<>(future.thenCompose(result -> {
+                try {
+                    if (result.isErr())
+                        return CompletableFuture.completedFuture(result);
+                    return mapper.apply(result.result()).toCompletableFuture().thenApply(r -> result);
+                } catch (Throwable t) {
+                    return FutureResult.<T>error(Error.of(t)).toCompletableFuture();
+                }
+            }));
+        }
+
+        @Override
         public @NotNull CompletableFuture<Result<T>> toCompletableFuture() {
             return future;
         }

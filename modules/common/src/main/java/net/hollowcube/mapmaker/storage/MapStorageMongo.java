@@ -20,11 +20,10 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
@@ -102,23 +101,14 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
+    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
         return FutureResult.supply(() -> {
-            var filter = eq("owner", playerId);
-            var result = collection().find(filter).into(new ArrayList<>());
-            return Result.of(result);
-        });
-    }
-
-    @Override
-    public @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId) {
-        return FutureResult.supply(() -> {
-            var filter = and(eq("owner", playerId),
-                    or(eq("_id", nameOrId), eq("name", nameOrId)));
-            var result = collection().find(filter).limit(1).first();
+            var filter = eq("published_id", shortMapId);
+            var projection = include("_id");
+            var result = collection().find(filter).projection(projection).limit(1).first();
             if (result == null)
                 return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
+            return Result.of(result.getId());
         });
     }
 

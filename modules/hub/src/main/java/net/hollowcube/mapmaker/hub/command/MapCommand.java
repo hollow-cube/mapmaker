@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.map.CreateMapView;
@@ -106,8 +107,37 @@ public class MapCommand extends BaseHubCommand {
         }
 
         public void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                return;
+            }
+
             var shortOrLongId = context.get(shortOrLongIdArg);
-            sender.sendMessage("TODO - play map " + shortOrLongId);
+            FutureResult<String> mapIdFuture;
+            if (shortOrLongId.length() < 36) {
+                // Assume short ID
+                mapIdFuture = server.mapStorage().lookupShortId(shortOrLongId)
+                        .wrapErr("failed to lookup shortId for " + shortOrLongId + ": {}");
+            } else {
+                mapIdFuture = FutureResult.of(shortOrLongId);
+            }
+
+            mapIdFuture
+                    .flatMap(mapId -> handler.playMap(player, mapId))
+                    .thenErr(err -> {
+                        if (err.is(MapStorage.ERR_NOT_FOUND)) {
+                            sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(shortOrLongId)));
+                            return;
+                        }
+
+                        if (err.is(MapPermissionManager.ERR_NO_PERMISSION)) {
+                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
+                            return;
+                        }
+
+                        logger.error("failed to play map {}: {}", shortOrLongId, err);
+                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
+                    });
         }
     }
 
@@ -216,14 +246,35 @@ public class MapCommand extends BaseHubCommand {
         public EditCommand() {
             super("edit");
 
-            //todo its possible it will be easier to use a separate syntax for slot vs long id
             addSyntax(this::editMapWithId, longIdOrSlotArg);
             setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
         }
 
         public void editMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                return;
+            }
+
             var longIdOrSlot = context.get(longIdOrSlotArg);
-            sender.sendMessage("TODO - edit map " + longIdOrSlot);
+            var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
+            if (mapId == null) return;
+
+            handler.editMap(player, mapId)
+                    .thenErr(err -> {
+                        if (err.is(MapStorage.ERR_NOT_FOUND)) {
+                            sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(longIdOrSlot)));
+                            return;
+                        }
+
+                        if (err.is(MapPermissionManager.ERR_NO_PERMISSION)) {
+                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
+                            return;
+                        }
+
+                        logger.error("failed to edit map {}: {}", longIdOrSlot, err);
+                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
+                    });
         }
     }
 
@@ -239,8 +290,29 @@ public class MapCommand extends BaseHubCommand {
         }
 
         public void publishMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                return;
+            }
+
             var longIdOrSlot = context.get(longIdOrSlotArg);
-            sender.sendMessage("TODO - publish map " + longIdOrSlot);
+            var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
+            if (mapId == null) return;
+
+            handler.publishMap(PlayerData.fromPlayer(player).getId(), mapId)
+                    .then(map -> {
+                        LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
+                                .forEach(player::sendMessage);
+                    })
+                    .thenErr(err -> {
+                        if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
+                            player.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(mapId)));
+                            return;
+                        }
+
+                        player.sendMessage(Component.translatable("command.generic.unknown_error"));
+                        logger.error("failed to publish map {}: {}", mapId, err.message());
+                    });
         }
     }
 
@@ -249,7 +321,6 @@ public class MapCommand extends BaseHubCommand {
 
         public DeleteCommand() {
             super("delete");
-
 
             addSyntax(this::deleteMapWithId, longIdOrSlotArg);
             setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
