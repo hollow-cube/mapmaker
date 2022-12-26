@@ -78,6 +78,11 @@ public non-sealed class ParentSection extends Section {
         unmountChild(index % width(), index / width(), comp);
     }
 
+    /** Unmounts and removes all children **/
+    protected void clear() {
+        children.forEach(this::unmountChild);
+    }
+
     @Override
     protected boolean handleClick(int slot, @NotNull Player player, @NotNull ClickType clickType) {
         var child = childMap[slot];

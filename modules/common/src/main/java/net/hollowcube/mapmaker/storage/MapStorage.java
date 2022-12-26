@@ -13,7 +13,6 @@ public interface MapStorage {
 
     Error ERR_NOT_FOUND = Error.of("map not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
-    Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}"); //todo remove me, names do not need to be unique.
 
     static @NotNull MapStorage memory() {
         return new MapStorageMemory();

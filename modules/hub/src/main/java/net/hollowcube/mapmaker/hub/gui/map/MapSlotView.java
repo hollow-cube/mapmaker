@@ -7,6 +7,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.hub.gui.common.GenericNameInput;
 import net.hollowcube.mapmaker.hub.gui.common.TranslatedButtonSection;
@@ -15,7 +16,6 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,11 +25,13 @@ import java.util.List;
 public class MapSlotView extends ParentSection {
     private final ButtonSection loadingButton;
 
+    private final int slot;
     private MapData map;
+    private ActionView inner = null;
 
     public MapSlotView(int slot, @Nullable FutureResult<MapData> mapFuture) {
         super(9, 6);
-        add(0, 5, new BackOrCloseButton());
+        this.slot = slot;
 
         //todo for gui lib
         // better define removing something. Should be able to remove by any single one of its indices,
@@ -42,7 +44,6 @@ public class MapSlotView extends ParentSection {
             throw new RuntimeException("not implemented");
         }
 
-        add(4, 0, new MapSlotButton(slot, mapFuture));
         mapFuture.then(this::mapLoaded).thenErr(this::mapLoadError);
     }
 
@@ -56,83 +57,29 @@ public class MapSlotView extends ParentSection {
     private void mapLoaded(@NotNull MapData mapData) {
         this.map = mapData;
 
-        // Remove loading button
-        unmountChild(4, 2, loadingButton);
+        if (inner == null) {
+            // Remove loading button
+            unmountChild(4, 2, loadingButton);
+        } else {
+            unmountChild(0, 0, inner);
+        }
 
-        addEditButton();
-        addVerifyButton();
-        addDisplayItemButton();
-        addNameButton();
-        addTagsButton();
-
-        addDeleteButton();
-        addCopyButton();
+        inner = add(0, 0, new ActionView());
     }
 
     private void mapLoadError(@NotNull Error err) {
-        // Remove loading button
-        unmountChild(4, 2, loadingButton);
+//         Remove loading button
+//        unmountChild(4, 2, loadingButton);
 
         // Add error button in center todo translation
-        add(4, 2, new ButtonSection(1, 1, ItemStack.builder(Material.BARRIER)
-                .displayName(Component.text(err.message()))
-                .build(), () -> {
-        }));
+//        add(4, 2, new ButtonSection(1, 1, ItemStack.builder(Material.BARRIER)
+//                .displayName(Component.text(err.message()))
+//                .build(), () -> {
+//        }));
+        throw new RuntimeException(err.message());
     }
 
     // Update logic
-
-    private void saveMap() {
-        //todo
-    }
-
-    // Buttons
-
-    private void addEditButton() {
-        add(3, 2, new TranslatedButtonSection(
-                "gui.map_slot.edit", List.of(),
-                Material.DIAMOND_PICKAXE, this::handleEditMap
-        ));
-    }
-
-    private boolean handleEditMap(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        //todo
-        return ClickHandler.DENY;
-    }
-
-    private void addVerifyButton() {
-        add(5, 2, new TranslatedButtonSection(
-                "gui.map_slot.verify", List.of(),
-                Material.DIAMOND_BOOTS, this::handleVerifyMap
-        ));
-    }
-
-    private void handleVerifyMap() {
-        //todo
-    }
-
-    private void addDisplayItemButton() {
-        add(2, 3, new TranslatedButtonSection(
-                "gui.map_slot.displayitem", List.of(),
-                Material.ITEM_FRAME, this::handleSetDisplayItem
-        ));
-    }
-
-    private void handleSetDisplayItem() {
-        //todo
-    }
-
-    private void addNameButton() {
-        add(4, 3, new TranslatedButtonSection(
-                "gui.map_slot.name", List.of(),
-                Material.ANVIL, this::handleEditName
-        ));
-    }
-
-    private void handleEditName() {
-        var router = find(RouterSection.class);
-        router.push(new GenericNameInput(this::updateName));
-    }
 
     private void updateName(@NotNull String name) {
         //todo this flow sucks. Would much rather have an "update" method on the button section
@@ -140,45 +87,81 @@ public class MapSlotView extends ParentSection {
 
         map.setName(name);
         saveMap();
-
-        // Update button
-        unmountChild(4, 3, get(4, 3));
-        add(4, 3, new TranslatedButtonSection(
-                "gui.map_slot.name", List.of(),
-                Material.ANVIL, this::handleEditName
-        ));
+        mapLoaded(map);
     }
 
-    private void addTagsButton() {
-        add(6, 3, new TranslatedButtonSection(
-                "gui.map_slot.tags", List.of(),
-                Material.NAME_TAG, this::handleEditTags
-        ));
+    private void saveMap() {
+        var mapStorage = getContext(HubServer.class).mapStorage();
+        mapStorage.updateMap(map).thenErr(this::mapLoadError); //todo should refetch the map incase we have a desynced state.
     }
 
-    private void handleEditTags() {
-        //todo
-    }
+    // Buttons
 
-    private void addDeleteButton() {
-        add(3, 5, new TranslatedButtonSection(
-                "gui.map_slot.delete", List.of(),
-                Material.CAULDRON, this::handleDeleteMap
-        ));
-    }
+    private class ActionView extends ParentSection {
+        public ActionView() {
+            super(9, 6);
+            add(0, 5, new BackOrCloseButton());
+            add(4, 0, new MapSlotButton(slot, FutureResult.of(map)));
 
-    private void handleDeleteMap() {
-        //todo
-    }
+            add(3, 2, new TranslatedButtonSection(
+                    "gui.map_slot.edit", List.of(),
+                    Material.DIAMOND_PICKAXE, this::handleEditMap
+            ));
+            add(5, 2, new TranslatedButtonSection(
+                    "gui.map_slot.verify", List.of(),
+                    Material.DIAMOND_BOOTS, this::handleVerifyMap
+            ));
+            add(2, 3, new TranslatedButtonSection(
+                    "gui.map_slot.displayitem", List.of(),
+                    Material.ITEM_FRAME, this::handleSetDisplayItem
+            ));
+            add(4, 3, new TranslatedButtonSection(
+                    "gui.slot_view.set_name", List.of(Component.text(map.getName())),
+                    Material.ANVIL, this::handleEditName
+            ));
+            add(6, 3, new TranslatedButtonSection(
+                    "gui.map_slot.tags", List.of(),
+                    Material.NAME_TAG, this::handleEditTags
+            ));
+            add(3, 5, new TranslatedButtonSection(
+                    "gui.map_slot.delete", List.of(),
+                    Material.CAULDRON, this::handleDeleteMap
+            ));
+            add(5, 5, new TranslatedButtonSection(
+                    "gui.map_slot.copy", List.of(),
+                    Material.STRING, this::handleCopyMap
+            ));
+        }
 
-    private void addCopyButton() {
-        add(5, 5, new TranslatedButtonSection(
-                "gui.map_slot.copy", List.of(),
-                Material.STRING, this::handleCopyMap
-        ));
-    }
+        private boolean handleEditMap(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+            //todo
+            return ClickHandler.DENY;
+        }
 
-    private void handleCopyMap() {
+        private void handleVerifyMap() {
+            //todo
+        }
+
+        private void handleSetDisplayItem() {
+            //todo
+        }
+
+        private void handleEditName() {
+            var router = find(RouterSection.class);
+            router.push(new GenericNameInput(map.getName(), MapSlotView.this::updateName));
+        }
+
+        private void handleEditTags() {
+            //todo
+        }
+
+        private void handleDeleteMap() {
+            //todo
+        }
+
+        private void handleCopyMap() {
+
+        }
 
     }
 

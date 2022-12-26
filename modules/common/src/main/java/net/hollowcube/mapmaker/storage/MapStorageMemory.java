@@ -16,12 +16,6 @@ class MapStorageMemory implements MapStorage {
 
     @Override
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
-        var duplicateName = mapsById.values().stream()
-                .filter(storedMap -> storedMap.getName().equalsIgnoreCase(map.getName()))
-                .limit(1)
-                .count() == 1;
-        if (duplicateName)
-            return FutureResult.error(ERR_DUPLICATE_NAME);
         var existing = mapsById.putIfAbsent(map.getId(), map);
         if (existing != null)
             return FutureResult.error(ERR_DUPLICATE_ENTRY);

@@ -5,7 +5,6 @@ import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.IndexOptions;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
@@ -41,10 +40,10 @@ public class MapStorageMongo implements MapStorage {
 
     public @NotNull FutureResult<Void> init() {
         return FutureResult.supply(() -> {
-            var indexKeys = new Document();
-            indexKeys.append("owner", 1);
-            indexKeys.append("name", 1);
-            collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
+//            var indexKeys = new Document();
+//            indexKeys.append("owner", 1);
+//            indexKeys.append("name", 1);
+//            collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
             return Result.ofNull();
         });
     }
@@ -56,10 +55,10 @@ public class MapStorageMongo implements MapStorage {
                 collection().insertOne(map);
             } catch (MongoWriteException err) {
                 if (err.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    // This is a pretty cursed way to check for this error. Mongo does not seem to inform which key
-                    // or index caused the error (in a raw form), so we just look for the index name in the error message.
-                    if (err.getError().getMessage().contains(OWNER_NAME_INDEX_NAME))
-                        return Result.error(ERR_DUPLICATE_NAME);
+//                    // This is a pretty cursed way to check for this error. Mongo does not seem to inform which key
+//                    // or index caused the error (in a raw form), so we just look for the index name in the error message.
+//                    if (err.getError().getMessage().contains(OWNER_NAME_INDEX_NAME))
+//                        return Result.error(ERR_DUPLICATE_NAME);
 
                     // ID mismatch
                     return Result.error(ERR_DUPLICATE_ENTRY);
