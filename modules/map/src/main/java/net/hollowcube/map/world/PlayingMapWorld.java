@@ -1,8 +1,11 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
@@ -28,9 +31,13 @@ public class PlayingMapWorld extends MapWorld {
         super(mapServer, map);
 
         var eventNode = instance().eventNode();
-        eventNode.addListener(InstanceTickEvent.class, this::tick);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
+        eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+
+        if (MapHooks.isCompletable(map)) {
+            eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);
+        }
     }
 
     @Override
@@ -96,7 +103,8 @@ public class PlayingMapWorld extends MapWorld {
                 .thenErr(err -> logger.error("Failed to unload world: {}", err));
     }
 
-    private void tick(@NotNull InstanceTickEvent event) {
+    /** Ticks each player, updating their playtime action bar */
+    private void tickPlayers(@NotNull InstanceTickEvent event) {
         var now = System.currentTimeMillis();
         instance().getPlayers().forEach(player -> {
             if (!MapHooks.isPlayerPlaying(player)) return;
@@ -110,6 +118,22 @@ public class PlayingMapWorld extends MapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
+    }
+
+    private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {
+        var player = event.getPlayer();
+        player.setTag(MapHooks.PLAYING, false);
+
+        var playerData = PlayerData.fromPlayer(player);
+
+        // Update, save, and remove savestate
+        var saveState = player.getTag(SaveState.TAG);
+        saveState.setCompleted(true);
+        player.removeTag(SaveState.TAG);
+        mapServer.saveStateStorage().updateSaveState(saveState)
+                .thenErr(err -> logger.error("failed to save save state for player {}: {}", playerData.getId(), err));
+
+        player.openInventory(new RouterSection(new CompletedMapView()).getInventory()); //todo method in MapServer to open gui with appropriate context
     }
 
     private void updatePlayer(@NotNull Player player, long time) {
