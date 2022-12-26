@@ -53,9 +53,9 @@ public class MapSlotsView extends ParentSection {
             var mapId = playerData.getMapSlot(i);
             if (mapId != null) {
                 var mapFuture = getContext(MapStorage.class).getMapById(mapId);
-                var newButton = new MapSlotButton(slot, mapFuture, () -> {
+                var newButton = new MapSlotButton(slot - 1, mapFuture, () -> {
                     var router = find(RouterSection.class);
-                    router.push(new MapSlotView(slot, mapFuture));
+                    router.push(new MapSlotView(slot - 1, mapFuture));
                 });
 
                 var idx = i;
@@ -96,7 +96,7 @@ public class MapSlotsView extends ParentSection {
                 .build();
         return new ButtonSection(1, 1, item, () -> {
             var router = find(RouterSection.class);
-            router.pushTransient(new CreateMapView(slot));
+            router.pushTransient(new CreateMapView(slot - 1));
         });
     }
 

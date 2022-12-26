@@ -1,5 +1,6 @@
 package net.hollowcube.canvas;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -44,8 +45,18 @@ public final class RouterSection extends RootSection {
         current = section;
     }
 
+    /** Pushes a new view onto the inventory, clearing the history stack */
+    public void pushNew(@NotNull Section section) {
+        history.clear();
+        push(section);
+    }
+
     public void pop() {
-        if (!hasHistory()) return;
+        if (!hasHistory()) {
+            // If there is no history close the GUI
+            getInventory().getViewers().forEach(Player::closeInventory);
+            return;
+        }
 
         history.removeLast();
         replaceInventory(history.getLast());

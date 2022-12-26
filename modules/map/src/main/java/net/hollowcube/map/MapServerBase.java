@@ -5,7 +5,6 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.SetSpawnCommand;
-import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -54,12 +53,6 @@ public abstract class MapServerBase implements MapServer {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
-        eventNode.addListener(MapWorldCompleteEvent.class, event -> {
-            var player = event.getPlayer();
-            player.setTag(MapHooks.PLAYING, false);
-
-            player.sendMessage("Map complete!");
-        });
 
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
             if (event instanceof InstanceEvent instanceEvent)

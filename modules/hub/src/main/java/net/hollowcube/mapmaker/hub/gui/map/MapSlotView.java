@@ -7,6 +7,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.hub.gui.common.GenericNameInput;
@@ -19,19 +20,23 @@ import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class MapSlotView extends ParentSection {
+    private static final Logger logger = LoggerFactory.getLogger(MapSlotView.class);
+
     private final ButtonSection loadingButton;
 
-    private final int slot;
+    private final int rawSlot;
     private MapData map;
     private ActionView inner = null;
 
-    public MapSlotView(int slot, @Nullable FutureResult<MapData> mapFuture) {
+    public MapSlotView(int rawSlot, @Nullable FutureResult<MapData> mapFuture) {
         super(9, 6);
-        this.slot = slot;
+        this.rawSlot = rawSlot;
 
         //todo for gui lib
         // better define removing something. Should be able to remove by any single one of its indices,
@@ -82,12 +87,10 @@ public class MapSlotView extends ParentSection {
     // Update logic
 
     private void updateName(@NotNull String name) {
-        //todo this flow sucks. Would much rather have an "update" method on the button section
-        // that updates its current name.
-
         map.setName(name);
-        saveMap();
         mapLoaded(map);
+
+        saveMap(); // Save in background
     }
 
     private void saveMap() {
@@ -101,18 +104,18 @@ public class MapSlotView extends ParentSection {
         public ActionView() {
             super(9, 6);
             add(0, 5, new BackOrCloseButton());
-            add(4, 0, new MapSlotButton(slot, FutureResult.of(map)));
+            add(4, 0, new MapSlotButton(rawSlot, FutureResult.of(map)));
 
             add(3, 2, new TranslatedButtonSection(
-                    "gui.map_slot.edit", List.of(),
+                    "gui.slot_view.edit_map", List.of(),
                     Material.DIAMOND_PICKAXE, this::handleEditMap
             ));
             add(5, 2, new TranslatedButtonSection(
-                    "gui.map_slot.verify", List.of(),
+                    "gui.slot_view.verify_map", List.of(),
                     Material.DIAMOND_BOOTS, this::handleVerifyMap
             ));
             add(2, 3, new TranslatedButtonSection(
-                    "gui.map_slot.displayitem", List.of(),
+                    "gui.slot_view.set_display_item", List.of(),
                     Material.ITEM_FRAME, this::handleSetDisplayItem
             ));
             add(4, 3, new TranslatedButtonSection(
@@ -120,11 +123,11 @@ public class MapSlotView extends ParentSection {
                     Material.ANVIL, this::handleEditName
             ));
             add(6, 3, new TranslatedButtonSection(
-                    "gui.map_slot.tags", List.of(),
+                    "gui.map_slot.set_tags", List.of(),
                     Material.NAME_TAG, this::handleEditTags
             ));
             add(3, 5, new TranslatedButtonSection(
-                    "gui.map_slot.delete", List.of(),
+                    "gui.map_slot.delete_map", List.of(),
                     Material.CAULDRON, this::handleDeleteMap
             ));
             add(5, 5, new TranslatedButtonSection(
@@ -156,7 +159,14 @@ public class MapSlotView extends ParentSection {
         }
 
         private void handleDeleteMap() {
-            //todo
+            var handler = getContext(Handler.class);
+            handler.deleteMap(map.getId()).then(unused -> {
+                var router = find(RouterSection.class);
+                router.pushNew(new CreateMapsView());
+            }).thenErr(err -> {
+                logger.error("failed to delete mep {}: {}", map.getId(), err.message());
+                //todo show error in gui
+            });
         }
 
         private void handleCopyMap() {
