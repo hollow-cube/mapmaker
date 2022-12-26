@@ -3,7 +3,7 @@ package net.hollowcube.map.block;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.item.ItemManager;
@@ -25,44 +25,42 @@ import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(Facet.class)
-public class FinishPlateBlock implements Facet {
-    public static final NamespaceID ID = NamespaceID.from("mapmaker:finish_plate");
-    public static final String POI_TYPE = "mapmaker:finish_plate";
+public class CheckpointPlateBlock implements Facet {
+    public static final NamespaceID ID = NamespaceID.from("mapmaker:checkpoint_plate");
+    public static final String POI_TYPE = "mapmaker:checkpoint_plate";
 
-    public static final ItemStack ITEM = ItemStack.builder(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)
-            .meta(m -> m.customModelData(NamedItems.FINISH_PLATE))
-            .displayName(Component.translatable("item.finish_plate.name"))
-            .lore(LanguageProvider.createMultiTranslatable("item.finish_plate.lore"))
+    public static final ItemStack ITEM = ItemStack.builder(Material.HEAVY_WEIGHTED_PRESSURE_PLATE)
+            .meta(m -> m.customModelData(NamedItems.CHECKPOINT_PLATE))
+            .displayName(Component.translatable("item.checkpoint_plate.name"))
+            .lore(LanguageProvider.createMultiTranslatable("item.checkpoint_plate.lore"))
             .build();
 
-    private static EventNode<? extends InstanceEvent> node = EventNode.type("mapmaker:item/finish_plate", EventFilter.INSTANCE)
-            .setPriority(-1000) //todo need to be careful when this is registered, dont want it to trigger before the non-edit mode handlers
+    private static final EventNode<? extends InstanceEvent> eventNode = EventNode.type("mapmaker:item/checkpoint_plate", EventFilter.INSTANCE)
+            .setPriority(-1000)
             .addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
-                    .filter(event -> isFinishPlate(event.getPlayer().getItemInHand(event.getHand())))
+                    .filter(event -> isCheckpointPlate(event.getPlayer().getItemInHand(event.getHand())))
                     .ignoreCancelled(true)
-                    .handler(FinishPlateBlock::handlePlacement)
+                    .handler(CheckpointPlateBlock::handlePlacement)
                     .build());
 
     @Override
     public void hook(@NotNull ServerProcess server) {
         ItemManager.register(ID, ITEM);
         server.block().registerHandler(Handler.INSTANCE.getNamespaceId(), () -> Handler.INSTANCE);
-        server.eventHandler().addListener(MapWorldRegisterEvent.class, event -> {
-            event.getInstance().eventNode().addChild(node);
-        });
-        server.eventHandler().addListener(MapWorldUnregisterEvent.class, event -> {
-            event.getInstance().eventNode().removeChild(node);
-        });
+        server.eventHandler().addListener(MapWorldRegisterEvent.class, event -> event.getInstance()
+                .eventNode().addChild(eventNode));
+        server.eventHandler().addListener(MapWorldUnregisterEvent.class, event -> event.getInstance()
+                .eventNode().removeChild(eventNode));
     }
 
-    private static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
+    public static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
         var map = MapWorld.fromInstance(event.getInstance()).map();
         map.addPOI(new MapData.POI(POI_TYPE, event.getBlockPosition()));
         event.setBlock(event.getBlock().withHandler(Handler.INSTANCE));
     }
 
-    private static boolean isFinishPlate(@NotNull ItemStack itemStack) {
-        return itemStack.meta().getCustomModelData() == NamedItems.FINISH_PLATE;
+    private static boolean isCheckpointPlate(@NotNull ItemStack itemStack) {
+        return itemStack.meta().getCustomModelData() == NamedItems.CHECKPOINT_PLATE;
     }
 
     public static class Handler extends AbstractPlateHandler {
@@ -76,7 +74,7 @@ public class FinishPlateBlock implements Facet {
         @Override
         public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
             var instance = tick.getInstance();
-            EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.fromInstance(instance), player));
+            EventDispatcher.call(new MapWorldCheckpointReachedEvent(MapWorld.fromInstance(instance), player));
         }
 
         @Override

@@ -246,7 +246,7 @@ public class DevServer {
 
         // Alpha watermark
         var runtime = ServerRuntime.getRuntime();
-        String watermarkString = String.format("MapMaker %s (%s), Not representative of final product", runtime.version(), runtime.commit());
+        String watermarkString = String.format("MapMaker %s-%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
     }
