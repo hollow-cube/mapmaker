@@ -22,6 +22,7 @@ public class PlayerData {
     }
 
     public static final int MAX_MAP_SLOTS = 5;
+    public static final int DEFAULT_UNLOCKED_MAP_SLOTS = 2;
 
     public static final int SLOT_STATE_OPEN = 0;
     public static final int SLOT_STATE_LOCKED = 1;
