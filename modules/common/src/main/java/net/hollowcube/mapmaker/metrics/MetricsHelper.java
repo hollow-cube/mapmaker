@@ -14,25 +14,24 @@ public class MetricsHelper {
         this.metricManager = metricManager;
     }
 
-    public boolean addMetricFirstJoinTime(String UUID, double timestamp_ms) {
-        Metric metric = new Metric(MetricsEnum.USER_FIRST_JOIN_TIME_MS.ordinal(), UUID, "", timestamp_ms);
-        return metricManager.addMetric(metric);
+    public void addMetricFirstJoinTime(String uuid, double timestamp_ms) {
+        Metric metric = new Metric(MetricsEnum.USER_FIRST_JOIN_TIME_MS.ordinal(), uuid, "", timestamp_ms);
+        metricManager.addMetric(metric);
     }
 
-    public boolean addMetricJumpCount(String UUID) {
+    public void addMetricJumpCount(String uuid) {
         int id = MetricsEnum.USER_JUMP_COUNT.ordinal();
         Double jumps;
-        if ((jumps = metricManager.getCachedValue(id, UUID, "")) != null) { }
-        else if ((jumps = metricManager.getValue(id, UUID, "")) != null) { }
+        if ((jumps = metricManager.getValue(id, uuid, "")) != null) { }
         else {
-            System.out.println("Failed to update jump count for player " + UUID);
-            return false;
+            System.out.println("Could not find existing jump count for player " + uuid);
         }
-        return metricManager.updateMetricLocal(id, UUID, "", jumps + 1);
+        Metric metric = new Metric(id, uuid, "", jumps + 1);
+        metricManager.addMetric(metric);
     }
 
-    public boolean addMetricPlayTimeMs(String UUID, double timestamp_ms) {
-        Metric metric = new Metric(MetricsEnum.USER_PLAY_TIME_MS.ordinal(), UUID, "", timestamp_ms);
-        return metricManager.addMetric(metric);
+    public void addMetricPlayTimeMs(String uuid, double timestamp_ms) {
+        Metric metric = new Metric(MetricsEnum.USER_PLAY_TIME_MS.ordinal(), uuid, "", timestamp_ms);
+        metricManager.addMetric(metric);
     }
 }

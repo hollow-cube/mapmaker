@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.metrics;
 
-import net.hollowcube.world.storage.PostgreSQLManager;
+import net.hollowcube.mapmaker.storage.PostgreSQLManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,11 +25,19 @@ public class MetricManager {
     }
 
     /**
-     * Adds the provided metric to the metrics database
+     * Adds the provided metric to the cached metric list. Updates the metric if it already exists.
+     * @param metric
+     */
+    public void addMetric(Metric metric) {
+        cachedMetricList.add(metric);
+    }
+
+    /**
+     * Adds the provided metric to the metrics database. Updates the metric if it already exists.
      * @param metric
      * @return
      */
-    public boolean addMetric(Metric metric) {
+    private boolean uploadMetric(Metric metric) {
         try {
             return this.postgreSQLManager.execute("INSERT INTO metrics " +
                     "(id INTEGER, source VARCHAR(100), target VARCHAR(100), value DOUBLE) " +
@@ -49,7 +57,7 @@ public class MetricManager {
      * @param value
      * @return
      */
-    public boolean updateMetric(int id, String source, String target, double value) {
+    private boolean updateMetricDB(int id, String source, String target, double value) {
         try {
             ResultSet rs = this.postgreSQLManager.querySync("SELECT * FROM metrics WHERE " +
                     "id = " + id + " AND " +
@@ -58,37 +66,11 @@ public class MetricManager {
             if (rs.first()) {
                 rs.deleteRow();
             }
-            return addMetric(new Metric(id, source, target, value));
+            return uploadMetric(new Metric(id, source, target, value));
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * Adds a new metric locally (suggested for metrics which are called frequently) which will be stored
-     * until the next call of syncMetrics
-     * @param id
-     * @param source
-     * @param target
-     * @param value
-     * @return
-     */
-    public boolean addMetricLocal(int id, String source, String target, double value) {
-        return false;
-    }
-
-    /**
-     * Updates a metric locally (suggested for metrics which are called frequently) which will be stored
-     * until the next call of syncMetrics
-     * @param id
-     * @param source
-     * @param target
-     * @param value
-     * @return
-     */
-    public boolean updateMetricLocal(int id, String source, String target, double value) {
-        return false;
     }
 
     /**
@@ -97,9 +79,12 @@ public class MetricManager {
      */
     public void syncMetrics() {
         for (Metric metric : cachedMetricList) {
-            boolean success = updateMetric(metric.id, metric.source, metric.target, metric.value);
+            boolean success = updateMetricDB(metric.id, metric.source, metric.target, metric.value);
             if (!success) {
                 System.out.println("Failed to update metric " + metricString(metric));
+            }
+            else {
+                cachedMetricList.remove(metric);
             }
         }
     }
@@ -132,6 +117,10 @@ public class MetricManager {
     }
 
     public Double getValue(int id, String source, String target) {
+        Double value;
+        if ((value = getCachedValue(id, source, target)) != null) {
+            return value;
+        }
         try {
             ResultSet rs = this.postgreSQLManager.querySync("SELECT * FROM metrics WHERE " +
                     "id = " + id + " AND " +
@@ -140,7 +129,7 @@ public class MetricManager {
             if (rs.first()) {
                 return rs.getDouble("value");
             } else {
-                System.out.println("No value for provided metric");
+                System.out.println("No value for provided metric (cached or in database).");
                 return null;
             }
         } catch (SQLException e) {
@@ -149,7 +138,7 @@ public class MetricManager {
         }
     }
 
-    public Double getCachedValue(int id, String source, String target) {
+    private Double getCachedValue(int id, String source, String target) {
         try {
             Optional<Metric> matchingMetric =
                     cachedMetricList.stream().filter(metric -> (

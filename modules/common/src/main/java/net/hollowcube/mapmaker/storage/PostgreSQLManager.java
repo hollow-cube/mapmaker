@@ -1,4 +1,4 @@
-package net.hollowcube.world.storage;
+package net.hollowcube.mapmaker.storage;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.ExecutionType;
