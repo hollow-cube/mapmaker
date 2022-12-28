@@ -24,6 +24,8 @@ import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 @AutoService(Facet.class)
 public class CheckpointPlateBlock implements Facet {
     public static final NamespaceID ID = NamespaceID.from("mapmaker:checkpoint_plate");
@@ -55,7 +57,7 @@ public class CheckpointPlateBlock implements Facet {
 
     public static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
         var map = MapWorld.fromInstance(event.getInstance()).map();
-        map.addPOI(new MapData.POI(POI_TYPE, event.getBlockPosition()));
+        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), event.getBlockPosition()));
         event.setBlock(event.getBlock().withHandler(Handler.INSTANCE));
     }
 
@@ -73,8 +75,9 @@ public class CheckpointPlateBlock implements Facet {
 
         @Override
         public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-            var instance = tick.getInstance();
-            EventDispatcher.call(new MapWorldCheckpointReachedEvent(MapWorld.fromInstance(instance), player));
+            var mapWorld = MapWorld.fromInstance(tick.getInstance());
+            var checkpoint = mapWorld.map().getPoi(tick.getBlockPosition());
+            EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
         }
 
         @Override

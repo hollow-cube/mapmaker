@@ -24,6 +24,8 @@ import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 @AutoService(Facet.class)
 public class FinishPlateBlock implements Facet {
     public static final NamespaceID ID = NamespaceID.from("mapmaker:finish_plate");
@@ -57,7 +59,7 @@ public class FinishPlateBlock implements Facet {
 
     private static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
         var map = MapWorld.fromInstance(event.getInstance()).map();
-        map.addPOI(new MapData.POI(POI_TYPE, event.getBlockPosition()));
+        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), event.getBlockPosition()));
         event.setBlock(event.getBlock().withHandler(Handler.INSTANCE));
     }
 

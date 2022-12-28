@@ -9,6 +9,7 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.item.ItemStack;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
@@ -16,8 +17,14 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
+import java.io.StringReader;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
@@ -107,6 +114,25 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                         reader.readEndDocument();
                         value.setPos(new Pos(x, y, z, yaw, pitch));
                     }
+                    case "checkpoint" -> value.setCheckpoint(reader.readString());
+                    case "inventory" -> {
+                        reader.readStartArray();
+                        List<ItemStack> inv = new ArrayList<>();
+                        while (reader.readBsonType() != BsonType.NULL && reader.readBsonType() != BsonType.STRING) {
+                            if (reader.readBsonType() == null) {
+                                inv.add(ItemStack.AIR);
+                            } else {
+                                try {
+                                    var itemNbt = (NBTCompound) new SNBTParser(new StringReader(reader.readString())).parse();
+                                    inv.add(ItemStack.fromItemNBT(itemNbt));
+                                } catch (NBTException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                        value.setInventory(inv);
+                        reader.readEndArray();
+                    }
                 }
             }
             reader.readEndDocument();
@@ -123,13 +149,29 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                 writer.writeBoolean("completed", true);
             writer.writeDateTime("start_time", value.getStartTime().toEpochMilli());
             writer.writeInt64("playtime", value.getPlaytime());
-            writer.writeStartDocument("pos");
-            writer.writeDouble("x", value.getPos().x());
-            writer.writeDouble("y", value.getPos().y());
-            writer.writeDouble("z", value.getPos().z());
-            writer.writeDouble("yaw", value.getPos().yaw());
-            writer.writeDouble("pitch", value.getPos().pitch());
-            writer.writeEndDocument();
+            if (value.getPos() != null) {
+                writer.writeStartDocument("pos");
+                writer.writeDouble("x", value.getPos().x());
+                writer.writeDouble("y", value.getPos().y());
+                writer.writeDouble("z", value.getPos().z());
+                writer.writeDouble("yaw", value.getPos().yaw());
+                writer.writeDouble("pitch", value.getPos().pitch());
+                writer.writeEndDocument();
+            }
+            if (value.getCheckpoint() != null) {
+                writer.writeString("checkpoint", value.getCheckpoint());
+            }
+            if (value.getInventory() != null) {
+                writer.writeStartArray("inventory");
+                for (var item : value.getInventory()) {
+                    if (item == ItemStack.AIR) {
+                        writer.writeNull();
+                    } else {
+                        writer.writeString(item.toItemNBT().toSNBT());
+                    }
+                }
+                writer.writeEndArray();
+            }
             writer.writeEndDocument();
         }
 
