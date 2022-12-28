@@ -4,6 +4,7 @@
       <env name="MM_MONGO_URI" value="mongodb://localhost:27017" />
       <env name="MM_S3_ACCESS_KEY" value="mapmaker" />
       <env name="MM_S3_SECRET_KEY" value="mapmaker" />
+      <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />
