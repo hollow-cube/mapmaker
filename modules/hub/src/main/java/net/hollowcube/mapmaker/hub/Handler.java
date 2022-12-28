@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import io.prometheus.client.Histogram;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
@@ -16,6 +17,31 @@ import java.util.UUID;
  * however it does <i>not</i> handle presenting the results to a player. This job is left to GUIs and/or commands/chat.
  */
 public class Handler {
+    private static final Histogram createMapTime = Histogram.build()
+            .namespace("mapmaker").name("create_map_time_seconds")
+            .help("Histogram for the time it takes to create a map")
+            .register();
+    private static final Histogram createMapForPlayerInSlotTime = Histogram.build()
+            .namespace("mapmaker").name("create_map_for_player_in_slot_time_seconds")
+            .help("Histogram for the time it takes to create a map and assign it to a player in a slot")
+            .register();
+    private static final Histogram deleteMapTime = Histogram.build()
+            .namespace("mapmaker").name("delete_map_time_seconds")
+            .help("Histogram for the time it takes to delete a map")
+            .register();
+    private static final Histogram publishMapTime = Histogram.build()
+            .namespace("mapmaker").name("publish_map_time_seconds")
+            .help("Histogram for the time it takes to publish a map")
+            .register();
+    private static final Histogram playMapTime = Histogram.build()
+            .namespace("mapmaker").name("play_map_time_seconds")
+            .help("Histogram for the time it takes to join a map for playing")
+            //todo should add labels for whether it found an existing map vs had to start one
+            .register();
+    private static final Histogram editMapTime = Histogram.build()
+            .namespace("mapmaker").name("edit_map_time_seconds")
+            .help("Histogram for the time it takes to join a map for editing")
+            .register();
 
     public static final Error ERR_MAP_NOT_FOUND = Error.of("map not found");
     public static final Error ERR_MAP_NOT_PUBLISHED = Error.of("map not published");
@@ -40,6 +66,8 @@ public class Handler {
      * The return value should be used to determine the ID.
      */
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
+        var timer = createMapTime.startTimer();
+
         //todo actually lookup the owner and make sure they exist
         if (map.getOwner() == null)
             return FutureResult.error(ERR_MISSING_OWNER);
@@ -59,7 +87,8 @@ public class Handler {
                         return createMap(map); // Try again w/ new ID
 
                     return FutureResult.error(err.wrap("failed to create map: {}"));
-                });
+                })
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
     /**
@@ -70,6 +99,8 @@ public class Handler {
      * If the slot is in use, ERR_SLOT_IN_USE is returned.
      */
     public @NotNull FutureResult<MapData> createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
+        var timer = createMapForPlayerInSlotTime.startTimer();
+
         // Ensure selected slot is available
         var slotState = playerData.getSlotState(slot);
         if (slotState == PlayerData.SLOT_STATE_LOCKED)
@@ -87,7 +118,8 @@ public class Handler {
                     return server.playerStorage().updatePlayer(playerData)
                             .mapErr(err -> Result.error(err.wrap("failed to update player: {}")))
                             .map(unused -> map1);
-                });
+                })
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
     /**
@@ -100,6 +132,8 @@ public class Handler {
      * </ol>
      */
     public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+        var timer = deleteMapTime.startTimer();
+
         //todo there is a missing permission check here, you could delete any map if you knew the ID
         return server.mapStorage().deleteMap(mapId)
                 // Delete all associated permissions
@@ -114,7 +148,8 @@ public class Handler {
                     if (err.is(MapStorage.ERR_NOT_FOUND))
                         return Result.error(ERR_MAP_NOT_FOUND);
                     return Result.error(err.wrap("failed to delete map: {}"));
-                });
+                })
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
     /**
@@ -130,6 +165,8 @@ public class Handler {
      * </ul>
      */
     public @NotNull FutureResult<MapData> publishMap(@NotNull String playerId, @NotNull String mapId) {
+        var timer = publishMapTime.startTimer();
+
         return server.mapStorage().getMapById(mapId)
                 // Check admin permissions
                 .flatAlso(map -> server.mapPermissions().checkPermission(map.getId(), playerId, MapData.ADMIN)
@@ -149,10 +186,12 @@ public class Handler {
                         .wrapErr("failed to make map public: {}"))
                 // Save map
                 .flatAlso(map -> server.mapStorage().updateMap(map)
-                        .wrapErr("failed to update map: {}"));
+                        .wrapErr("failed to update map: {}"))
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
     public @NotNull FutureResult<Void> playMap(@NotNull Player player, @NotNull String mapId) {
+        var timer = playMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
         return server.mapStorage().getMapById(mapId)
                 // Ensure map is published and check permission
@@ -166,10 +205,12 @@ public class Handler {
                 })
                 // Send player to map instance
                 .flatMap(map -> server.bridge().joinMap(player, mapId, false)
-                        .wrapErr("failed to join map: {}"));
+                        .wrapErr("failed to join map: {}"))
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
     public @NotNull FutureResult<Void> editMap(@NotNull Player player, @NotNull String mapId) {
+        var timer = editMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
         return server.mapStorage().getMapById(mapId)
                 // Ensure map is not published and check write permission
@@ -183,7 +224,8 @@ public class Handler {
                 })
                 // Send player to map instance
                 .flatMap(map -> server.bridge().joinMap(player, mapId, true)
-                        .wrapErr("failed to join map: {}"));
+                        .wrapErr("failed to join map: {}"))
+                .alsoRaw(unused -> timer.observeDuration());
     }
 
 }

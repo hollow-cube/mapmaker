@@ -5,8 +5,10 @@ import com.authzed.grpcutil.BearerToken;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.helidon.health.HealthSupport;
+import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
+import io.prometheus.client.hotspot.DefaultExports;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.common.ServerRuntime;
@@ -68,10 +70,13 @@ public class DevServer {
                                 .webContext("ready")
                                 .addReadiness(server.readinessChecks())
                                 .build())
+                        .register(PrometheusSupport.create())
                         .build())
                 .build();
         webServer.start()
                 .thenAccept(ws -> System.out.println("Web server is running at :" + ws.port()));
+
+        DefaultExports.initialize();
 
         server.start();
         minecraftServer.start("0.0.0.0", 25565);
@@ -246,7 +251,7 @@ public class DevServer {
 
         // Alpha watermark
         var runtime = ServerRuntime.getRuntime();
-        String watermarkString = String.format("MapMaker %s-%s, Not representative of final product", runtime.version(), runtime.commit());
+        String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
     }

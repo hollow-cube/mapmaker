@@ -112,6 +112,18 @@ class FutureResults {
         }
 
         @Override
+        public @NotNull FutureResult<T> alsoRaw(@NotNull Consumer<@NotNull Result<T>> consumer) {
+            return new CF<>(future.thenApply(result -> {
+                try {
+                    consumer.accept(result);
+                    return result;
+                } catch (Throwable t) {
+                    return Result.error(Error.of(t));
+                }
+            }));
+        }
+
+        @Override
         public @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper) {
             return new CF<>(future.thenCompose(result -> {
                 try {

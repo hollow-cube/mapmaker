@@ -10,6 +10,7 @@ dependencies {
     // Helidon
     api(platform("io.helidon:helidon-dependencies:3.0.2"))
     api("io.helidon.health:helidon-health")
+    api("io.helidon.metrics:helidon-metrics-prometheus")
 
     // SpiceDB
     implementation("com.authzed.api:authzed:0.4.0")

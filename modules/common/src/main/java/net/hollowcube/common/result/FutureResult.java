@@ -65,6 +65,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
 
     @NotNull FutureResult<T> wrapErr(@NotNull String format);
 
+    @NotNull FutureResult<T> alsoRaw(@NotNull Consumer<@NotNull Result<T>> consumer);
     @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
 
 

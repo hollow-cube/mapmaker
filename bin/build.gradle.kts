@@ -28,6 +28,11 @@ subprojects {
         testAnnotationProcessor("com.google.auto.service:auto-service:1.0.1")
         implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 
+        // Prometheus
+        val prometheusVersion = rootProject.property("prometheusVersion")
+        implementation("io.prometheus:simpleclient:${prometheusVersion}")
+        implementation("io.prometheus:simpleclient_hotspot:${prometheusVersion}")
+
         // Testing
         testImplementation("com.github.hollow-cube.common:test:f73dc3434ef99")
     }
