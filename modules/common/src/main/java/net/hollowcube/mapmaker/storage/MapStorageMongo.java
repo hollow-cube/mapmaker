@@ -174,6 +174,7 @@ public class MapStorageMongo implements MapStorage {
                         while (reader.readBsonType() == BsonType.DOCUMENT) {
                             reader.readStartDocument();
                             var type = reader.readString("type");
+                            var id = reader.readString("id");
                             reader.readName();
                             reader.readStartDocument();
                             var pos = new Vec(
@@ -182,7 +183,7 @@ public class MapStorageMongo implements MapStorage {
                                     reader.readDouble("z"));
                             reader.readEndDocument();
 
-                            value.addPOI(new MapData.POI(type, pos));
+                            value.addPOI(new MapData.POI(type, id, pos));
                             reader.readEndDocument();
                         }
                         reader.readEndArray();
@@ -226,6 +227,7 @@ public class MapStorageMongo implements MapStorage {
             for (var poi : value.getPois()) {
                 writer.writeStartDocument();
                 writer.writeString("type", poi.type());
+                writer.writeString("id", poi.id());
                 writer.writeStartDocument("pos");
                 writer.writeDouble("x", poi.pos().x());
                 writer.writeDouble("y", poi.pos().y());

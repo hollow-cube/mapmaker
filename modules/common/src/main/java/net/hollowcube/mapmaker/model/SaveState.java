@@ -3,10 +3,12 @@ package net.hollowcube.mapmaker.model;
 import net.hollowcube.common.util.ExtraTags;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -30,7 +32,9 @@ public class SaveState {
     private long playtime;
     private transient long playtimeUpdate;
 
-    private Pos pos;
+    private Pos pos;                    // Used when `save_exact_pos=on`
+    private String checkpoint;          // Used when a checkpoint is present
+    private List<ItemStack> inventory;  // Used in build mode & when `save_inventory=on`
 
     public String getId() {
         return id;
@@ -96,4 +100,19 @@ public class SaveState {
         this.pos = pos;
     }
 
+    public String getCheckpoint() {
+        return checkpoint;
+    }
+
+    public void setCheckpoint(String checkpoint) {
+        this.checkpoint = checkpoint;
+    }
+
+    public List<ItemStack> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<ItemStack> inventory) {
+        this.inventory = inventory;
+    }
 }

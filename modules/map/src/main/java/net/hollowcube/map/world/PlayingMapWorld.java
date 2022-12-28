@@ -4,6 +4,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.mapmaker.model.MapData;
@@ -12,6 +13,7 @@ import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -34,6 +36,7 @@ public class PlayingMapWorld extends MapWorld {
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
         eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+        eventNode.addListener(MapWorldCheckpointReachedEvent.class, this::handleCheckpointUpdate);
 
         if (MapHooks.isCompletable(map)) {
             eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);
@@ -55,7 +58,6 @@ public class PlayingMapWorld extends MapWorld {
                         saveState.setPlayerId(playerId);
                         saveState.setMapId(map.getId());
                         saveState.setStartTime(Instant.now());
-                        saveState.setPos(map.getSpawnPoint());
                         return saveStates.createSaveState(saveState);
                     }
 
@@ -66,7 +68,15 @@ public class PlayingMapWorld extends MapWorld {
                     player.setTag(MapHooks.PLAYING, true);
                     player.setTag(SaveState.TAG, saveState);
 
-                    player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
+                    // If exact pos is saved, teleport there. Otherwise teleport to latest checkpoint or map spawn point
+                    if (saveState.getPos() != null) {
+                        player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
+                    } else if (saveState.getCheckpoint() != null) {
+                        var checkpoint = map.getPoi(saveState.getCheckpoint()); //todo handle null case
+                        player.teleport(new Pos(checkpoint.pos())).exceptionally(FutureUtil::handleException);
+                    } else {
+                        player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
+                    }
                     player.setGameMode(GameMode.ADVENTURE);
                     player.setAllowFlying(true);
 
@@ -86,7 +96,8 @@ public class PlayingMapWorld extends MapWorld {
         if (remove) player.removeTag(SaveState.TAG);
 
         // Update relevant fields
-        saveState.setPos(player.getPosition());
+        //todo should be based on a map setting
+//        saveState.setPos(player.getPosition());
 
         // Save
         return mapServer.saveStateStorage().updateSaveState(saveState)
@@ -118,6 +129,16 @@ public class PlayingMapWorld extends MapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
+    }
+
+    private void handleCheckpointUpdate(@NotNull MapWorldCheckpointReachedEvent event) {
+        var player = event.getPlayer();
+        var saveState = SaveState.fromPlayer(player);
+        if (event.getCheckpoint().id().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
+
+        // Reached a new checkpoint
+        saveState.setCheckpoint(event.getCheckpoint().id());
+        player.sendMessage(Component.translatable("play.checkpoint.reached"));
     }
 
     private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {

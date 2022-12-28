@@ -100,12 +100,30 @@ public class MapData {
         return pois;
     }
 
+    public POI getPoi(@NotNull Point pos) {
+        for (POI poi : pois) {
+            if (poi.pos.sameBlock(pos)) {
+                return poi;
+            }
+        }
+        return null;
+    }
+
+    public POI getPoi(@NotNull String id) {
+        for (POI poi : pois) {
+            if (poi.id.equals(id)) {
+                return poi;
+            }
+        }
+        return null;
+    }
+
     public void addPOI(@NotNull POI poi) {
         pois.add(poi);
     }
 
     public void removePOI(@NotNull Point pos) {
-        pois.removeIf(poi -> poi.pos.equals(pos));
+        pois.removeIf(poi -> poi.pos.sameBlock(pos));
     }
 
     public void tryAddTime(UUID id, long time) {
@@ -143,7 +161,7 @@ public class MapData {
                 '}';
     }
 
-    public record POI(String type, Point pos) {}
+    public record POI(String type, String id, Point pos) {}
 
     public record CompletionTime(UUID playerUUID, long timeInMills) {}
 
