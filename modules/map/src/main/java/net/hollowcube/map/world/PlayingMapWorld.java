@@ -4,8 +4,10 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.map.feature.CheckpointFeature;
 import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -16,6 +18,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -36,7 +39,8 @@ public class PlayingMapWorld extends MapWorld {
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
         eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
-        eventNode.addListener(MapWorldCheckpointReachedEvent.class, this::handleCheckpointUpdate);
+
+        eventNode.addChild(new CheckpointFeature().eventNode()); //todo auto registration with selector
 
         if (MapHooks.isCompletable(map)) {
             eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);
@@ -73,7 +77,7 @@ public class PlayingMapWorld extends MapWorld {
                         player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
                     } else if (saveState.getCheckpoint() != null) {
                         var checkpoint = map.getPoi(saveState.getCheckpoint()); //todo handle null case
-                        player.teleport(new Pos(checkpoint.pos())).exceptionally(FutureUtil::handleException);
+                        player.teleport(new Pos(checkpoint.getPos())).exceptionally(FutureUtil::handleException);
                     } else {
                         player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
                     }
@@ -83,6 +87,8 @@ public class PlayingMapWorld extends MapWorld {
                     player.sendMessage("Now playing " + map.getName());
 
                     saveState.setPlaytimeUpdate(System.currentTimeMillis()); // Start timer now
+
+                    EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
                 })
                 .thenErr(err -> {
                     logger.error("Failed to load save state for player {} in map {}: {}", playerId, map.getId(), err);
@@ -93,7 +99,10 @@ public class PlayingMapWorld extends MapWorld {
     @Override
     protected @NotNull FutureResult<Void> savePlayer(@NotNull Player player, boolean remove) {
         var saveState = player.getTag(SaveState.TAG);
-        if (remove) player.removeTag(SaveState.TAG);
+        if (remove) {
+            EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+            player.removeTag(SaveState.TAG);
+        }
 
         // Update relevant fields
         //todo should be based on a map setting
@@ -129,16 +138,6 @@ public class PlayingMapWorld extends MapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
-    }
-
-    private void handleCheckpointUpdate(@NotNull MapWorldCheckpointReachedEvent event) {
-        var player = event.getPlayer();
-        var saveState = SaveState.fromPlayer(player);
-        if (event.getCheckpoint().id().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
-
-        // Reached a new checkpoint
-        saveState.setCheckpoint(event.getCheckpoint().id());
-        player.sendMessage(Component.translatable("play.checkpoint.reached"));
     }
 
     private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {

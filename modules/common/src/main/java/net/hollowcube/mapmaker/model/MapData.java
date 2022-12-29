@@ -5,9 +5,7 @@ import net.minestom.server.coordinate.Pos;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class MapData {
     // Permission keys
@@ -161,7 +159,47 @@ public class MapData {
                 '}';
     }
 
-    public record POI(String type, String id, Point pos) {}
+    public static class POI {
+        private String type;
+        private String id;
+        private Point pos;
+        private Map<String, Object> data;
+
+        public POI(String type, String id, Point pos) {
+            this(type, id, pos, new HashMap<>());
+        }
+
+        public POI(String type, String id, Point pos, Map<String, Object> data) {
+            this.type = type;
+            this.id = id;
+            this.pos = pos;
+            this.data = new HashMap<>(data);
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public Point getPos() {
+            return pos;
+        }
+
+        public Map<String, Object> getData() {
+            return data;
+        }
+
+        public <T> T getOrDefault(@NotNull String key, T def) {
+            return (T) data.getOrDefault(key, def);
+        }
+
+        public void set(@NotNull String key, Object value) {
+            data.put(key, value);
+        }
+    }
 
     public record CompletionTime(UUID playerUUID, long timeInMills) {}
 

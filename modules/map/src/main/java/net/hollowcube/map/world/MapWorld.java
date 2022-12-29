@@ -68,6 +68,10 @@ public abstract class MapWorld extends BaseWorld {
         return map;
     }
 
+    public @NotNull MapServer server() {
+        return mapServer;
+    }
+
     /**
      * Called when a player joins the map.
      * <p>

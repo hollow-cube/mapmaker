@@ -1,6 +1,8 @@
 package net.hollowcube.map;
 
 import net.hollowcube.block.placement.HCPlacementRules;
+import net.hollowcube.canvas.RouterSection;
+import net.hollowcube.canvas.Section;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
@@ -114,4 +116,9 @@ public abstract class MapServerBase implements MapServer {
         }
     }
 
+    @Override
+    public void openGUIForPlayer(@NotNull Player player, @NotNull Section gui) {
+        //todo context
+        new RouterSection(gui).showToPlayer(player);
+    }
 }

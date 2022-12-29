@@ -26,7 +26,7 @@ public final class MapHooks {
     // Implicit tags
 
     public static boolean isCompletable(@NotNull MapData map) {
-        return map.getPois().stream().anyMatch(poi -> poi.type().equals(FinishPlateBlock.POI_TYPE));
+        return map.getPois().stream().anyMatch(poi -> poi.getType().equals(FinishPlateBlock.POI_TYPE));
     }
 
 
