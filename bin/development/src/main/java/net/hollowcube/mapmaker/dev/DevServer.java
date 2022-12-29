@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
+import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
@@ -53,6 +54,8 @@ import java.util.concurrent.TimeUnit;
 
 public class DevServer {
     public static void main(String[] args) {
+        long start = System.nanoTime();
+
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
@@ -85,6 +88,8 @@ public class DevServer {
                 webServer.shutdown();
                 ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
         });
+
+        logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
@@ -244,6 +249,7 @@ public class DevServer {
         if (!event.isFirstSpawn()) return;
 
         var player = event.getPlayer();
+        player.sendMessage(Component.text("Hello, ").append(new PlayerServiceImpl().getDisplayName(player.getUuid().toString()).toCompletableFuture().join().result()));
         player.setPermissionLevel(4);
 
         //todo temp. PLAYER_ID is the players network ID (not necessarily their uuid, for bedrock or other users)

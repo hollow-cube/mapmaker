@@ -1,4 +1,4 @@
-package net.hollowcube.map.block;
+package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.MapHooks;
 import net.minestom.server.collision.BoundingBox;
