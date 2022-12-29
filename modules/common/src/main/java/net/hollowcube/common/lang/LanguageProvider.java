@@ -139,7 +139,7 @@ public class LanguageProvider {
                     var rest = k.substring(key.length());
                     return rest.length() == 0 || rest.matches("\\.[0-9]+");
                 })
-                .sorted() // stringPropertyNames returns a set which breaks order. We resort here. I believe > 10 lines this will not work.
+                .sorted() // stringPropertyNames returns a set which breaks order. We resort here. >10 lines this will not work.
                 .map(k -> (Component) Component.translatable(k, args))
                 .toList();
         if (entries.isEmpty()) return List.of(Component.text(key));

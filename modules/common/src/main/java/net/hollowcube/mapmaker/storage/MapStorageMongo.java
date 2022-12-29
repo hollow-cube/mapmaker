@@ -18,6 +18,7 @@ import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
+import org.bson.codecs.MapCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -182,8 +183,10 @@ public class MapStorageMongo implements MapStorage {
                                     reader.readDouble("y"),
                                     reader.readDouble("z"));
                             reader.readEndDocument();
+                            reader.readName(); // data
+                            var data = decoderContext.decodeWithChildContext(new MapCodec(), reader);
 
-                            value.addPOI(new MapData.POI(type, id, pos));
+                            value.addPOI(new MapData.POI(type, id, pos, data));
                             reader.readEndDocument();
                         }
                         reader.readEndArray();
@@ -226,13 +229,15 @@ public class MapStorageMongo implements MapStorage {
             writer.writeStartArray("pois");
             for (var poi : value.getPois()) {
                 writer.writeStartDocument();
-                writer.writeString("type", poi.type());
-                writer.writeString("id", poi.id());
+                writer.writeString("type", poi.getType());
+                writer.writeString("id", poi.getId());
                 writer.writeStartDocument("pos");
-                writer.writeDouble("x", poi.pos().x());
-                writer.writeDouble("y", poi.pos().y());
-                writer.writeDouble("z", poi.pos().z());
+                writer.writeDouble("x", poi.getPos().x());
+                writer.writeDouble("y", poi.getPos().y());
+                writer.writeDouble("z", poi.getPos().z());
                 writer.writeEndDocument();
+                writer.writeName("data");
+                encoderContext.encodeWithChildContext(new MapCodec(), writer, poi.getData());
                 writer.writeEndDocument();
             }
             writer.writeEndArray();

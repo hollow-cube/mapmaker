@@ -7,8 +7,10 @@ import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
+import net.hollowcube.map.gui.block.CheckpointSettingsView;
 import net.hollowcube.map.item.ItemManager;
 import net.hollowcube.map.item.NamedItems;
+import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
@@ -79,6 +81,21 @@ public class CheckpointPlateBlock implements Facet {
             var mapWorld = MapWorld.fromInstance(tick.getInstance());
             var checkpoint = mapWorld.map().getPoi(tick.getBlockPosition());
             EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
+        }
+
+        @Override
+        public boolean onInteract(@NotNull Interaction interaction) {
+            var world = MapWorld.fromInstance(interaction.getInstance());
+            if (!(world instanceof EditingMapWorld)) return false;
+
+            var player = interaction.getPlayer();
+            if (player.isSneaking()) return false;
+
+            // Open checkpoint settings GUI
+            var checkpoint = world.map().getPoi(interaction.getBlockPosition());
+            world.server().openGUIForPlayer(player, new CheckpointSettingsView(checkpoint));
+
+            return true;
         }
 
         @Override
