@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.mapmaker.result.FutureResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;

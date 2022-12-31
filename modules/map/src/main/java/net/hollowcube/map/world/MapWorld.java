@@ -1,14 +1,14 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.player.PlayerHooks;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.util.ExtraTags;
-import net.hollowcube.mapmaker.util.StaticAbuse;
+import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.util.FutureUtil;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
@@ -39,8 +39,7 @@ public abstract class MapWorld extends BaseWorld {
         return Objects.requireNonNull(instance.getTag(THIS_TAG));
     }
 
-    public static final int FLAG_NONE = 0;
-    public static final int FLAG_EDIT = 1;
+    public static final int FLAG_EDIT = 1; //todo remove me
 
     protected MapServer mapServer;
     protected final MapData map;
@@ -78,10 +77,14 @@ public abstract class MapWorld extends BaseWorld {
      */
     protected abstract @NotNull FutureResult<Void> initPlayer(@NotNull Player player);
 
-    /** Called to save the player. If `remove` is set, the player is leaving the map and all state should be cleared as well */
+    /**
+     * Called to save the player. If `remove` is set, the player is leaving the map and all state should be cleared as well
+     */
     protected abstract @NotNull FutureResult<Void> savePlayer(@NotNull Player player, boolean remove);
 
-    /** Called to close this world, whatever that means for the world type (eg save the world for editing) */
+    /**
+     * Called to close this world, whatever that means for the world type (eg save the world for editing)
+     */
     protected abstract @NotNull FutureResult<Void> closeWorld();
 
 
@@ -98,7 +101,8 @@ public abstract class MapWorld extends BaseWorld {
         return super.saveWorld()
                 .thenCompose(fileId -> {
                     map.setMapFileId(fileId);
-                    return StaticAbuse.mapStorage.updateMap(map)
+                    return mapServer.mapStorage()
+                            .updateMap(map)
                             .toCompletableFuture()
                             // Still need to return the file id.
                             .thenApply(unused -> fileId);
@@ -115,7 +119,7 @@ public abstract class MapWorld extends BaseWorld {
         var player = event.getPlayer();
 
         // Teleport the player to spawn and show loading.
-        player.teleport(map.getSpawnPoint());
+        player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
         player.showTitle(Title.title(Component.text("Loading..."), Component.text(""),
                 Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(10000), Duration.ofSeconds(0))));
         //todo while loading they should not be able to do anything.
@@ -141,7 +145,7 @@ public abstract class MapWorld extends BaseWorld {
                     //todo should maybe hold the player for this or convey it somehow.
                     // maybe tell the proxy to tell the player
                     logger.error("Failed to save save state for player {} in map {}: {}",
-                            PlayerHooks.getId(player), map.getId(), err);
+                            PlayerData.fromPlayer(player).getId(), map.getId(), err);
                 });
 
         // Handle unloading the world when the last player leaves

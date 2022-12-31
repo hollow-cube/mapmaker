@@ -2,8 +2,9 @@ package net.hollowcube.chat.storage;
 
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.util.MongoUtil;
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -13,8 +14,10 @@ public interface ChatStorage {
         return new ChatStorageNoop();
     }
 
-    static @NotNull ChatStorage mongo(@NotNull String mongoUri) {
-        return new ChatStorageMongo(MongoUtil.getClient(mongoUri));
+    static @NotNull FutureResult<ChatStorage> mongo(@NotNull MongoConfig config) {
+        var clientFactory = MongoClientFactory.get();
+        return clientFactory.newClient(config)
+                .map(client -> new ChatStorageMongo(client, config));
     }
 
     /**

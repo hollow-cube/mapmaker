@@ -3,8 +3,9 @@ package net.hollowcube.chat;
 import com.google.auto.service.AutoService;
 import net.hollowcube.chat.command.LogCommand;
 import net.hollowcube.chat.storage.ChatStorage;
-import net.hollowcube.mapmaker.ServerRuntime;
-import net.hollowcube.mapmaker.facet.Facet;
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.facet.Facet;
 import net.hollowcube.util.EventUtil;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.event.Event;
@@ -31,9 +32,25 @@ public class ChatFacet implements Facet {
     private final ChatStorage storage;
 
     public ChatFacet() {
+        //todo need to have futureresult init for this
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri != null) {
-            storage = ChatStorage.mongo(mongoUri);
+            storage = ChatStorage.mongo(new MongoConfig() {
+                @Override
+                public @NotNull String uri() {
+                    return mongoUri;
+                }
+
+                @Override
+                public @NotNull String database() {
+                    return "mapmaker";
+                }
+
+                @Override
+                public boolean useTransactions() {
+                    return false;
+                }
+            }).toCompletableFuture().join().result();
         } else {
             storage = ChatStorage.noop();
         }

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.lang;
 
+import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import org.junit.Test;
 

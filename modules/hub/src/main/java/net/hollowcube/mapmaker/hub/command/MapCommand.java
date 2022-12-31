@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.hub.command;
 
-import net.hollowcube.mapmaker.hub.handler.MapHandler;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.Result;
+import net.hollowcube.mapmaker.hub.Handler;
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.Result;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -29,9 +30,9 @@ public class MapCommand extends BaseHubCommand {
     /map list -> lists all maps for the current player
      */
 
-    private final MapHandler handler;
+    private final Handler handler;
 
-    public MapCommand(MapHandler handler) {
+    public MapCommand(@NotNull HubServer server, Handler handler) {
         super("map");
         this.handler = handler;
 
@@ -41,7 +42,7 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new Edit());
         addSubcommand(new Play());
 
-        addSubcommand(new MapAdminCommand(handler.storage()));
+        addSubcommand(new MapAdminCommand(server.mapStorage()));
     }
 
     private class Create extends Command {
@@ -73,10 +74,10 @@ public class MapCommand extends BaseHubCommand {
                         logger.info("{} created map {} in slot {}", player.getUsername(), map.getName(), slot);
                     })
                     .thenErr(err -> {
-                        if (err.is(MapHandler.ERR_SLOT_IN_USE)) {
+                        if (err.is(Handler.ERR_SLOT_IN_USE)) {
                             LanguageProvider.createMultiTranslatable("command.map.create.slot_in_use",
                                     Component.text(slot + 1)).forEach(player::sendMessage);
-                        } else if (err.is(MapHandler.ERR_DUPLICATE_NAME)) {
+                        } else if (err.is(Handler.ERR_DUPLICATE_NAME)) {
                             LanguageProvider.createMultiTranslatable("command.map.create.name_in_use",
                                     Component.text(name)).forEach(player::sendMessage);
                         } else {
@@ -111,7 +112,7 @@ public class MapCommand extends BaseHubCommand {
                         logger.info("{} published map in slot {}", player.getUsername(), slot);
                     })
                     .thenErr(err -> {
-                        if (err.is(MapHandler.ERR_SLOT_NOT_IN_USE)) {
+                        if (err.is(Handler.ERR_SLOT_NOT_IN_USE)) {
                             LanguageProvider.createMultiTranslatable("command.map.public.slot_not_in_use",
                                     Component.text(slot)).forEach(player::sendMessage);
                         } else {

@@ -5,20 +5,17 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
-import net.hollowcube.map.MapServer;
-import net.hollowcube.mapmaker.ServerRuntime;
-import net.hollowcube.mapmaker.facet.Facet;
-import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.HubServerImpl;
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.facet.Facet;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.mapmaker.util.StaticAbuse;
 import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -37,7 +34,10 @@ import net.minestom.server.extras.MojangAuth;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ForkJoinPool;
@@ -76,12 +76,14 @@ public class DevServer {
         });
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
+
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
-    private HubServer hub;
-    private MapServer maps;
+    private DevHubServer hub;
+    private DevMapServer maps;
 
     public DevServer() {
 
@@ -90,8 +92,9 @@ public class DevServer {
     public void start() {
         MojangAuth.init();
 
-        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
-        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
+        List<FutureResult<Void>> startupTasks = new ArrayList<>();
+
+        // Start phase 1
 
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
@@ -99,12 +102,23 @@ public class DevServer {
             this.mapStorage = MapStorage.memory();
             this.saveStateStorage = SaveStateStorage.memory();
         } else {
-            this.playerStorage = PlayerStorage.mongo(mongoUri);
-            this.mapStorage = MapStorage.mongo(mongoUri);
-            this.saveStateStorage = SaveStateStorage.mongo(mongoUri);
+            //todo all remote services should have health checks
+            var mongoConfig = new MongoConfig() {
+                @Override public @NotNull String uri() { return mongoUri; }
+                @Override public @NotNull String database() { return "mapmaker"; }
+                @Override public boolean useTransactions() { return false; }
+            };
+            startupTasks.add(PlayerStorage.mongo(mongoConfig)
+                    .then(playerStorage -> this.playerStorage = playerStorage));
+            startupTasks.add(MapStorage.mongo(mongoConfig)
+                    .then(mapStorage -> this.mapStorage = mapStorage));
+            startupTasks.add(SaveStateStorage.mongo(mongoConfig)
+                    .then(saveStateStorage -> this.saveStateStorage = saveStateStorage)
+                    .thenErr(err -> {
+                        logger.error("Failed to connect to mongo: {}", err);
+                        System.exit(1);
+                    }));
         }
-
-        StaticAbuse.mapStorage = mapStorage;
 
         var s3Address = System.getenv("MM_S3_ADDRESS");
         if (s3Address == null) s3Address = "http://localhost:9000/";
@@ -112,13 +126,38 @@ public class DevServer {
         var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
         var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
 
-        this.maps = new MapServer(saveStateStorage);
-        this.hub = new HubServerImpl(playerStorage, mapStorage, worldManager, maps);
+        // End phase 1
+        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
+                .then(unused -> logger.info("Phase 1 complete."))
+                .thenErr(err -> logger.error("failed during startup: {}", err))
+                .toCompletableFuture().join();
+
+        // Start phase 2
+        startupTasks.clear();
+
+        var bridge = new DevServerBridge();
+
+        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager);
+        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager);
+        bridge.setHubServer(hub);
+        bridge.setMapServer(maps);
+        startupTasks.add(this.hub.init());
+        startupTasks.add(this.maps.init());
+
+        // End phase 2
+        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
+                .then(unused -> logger.info("Phase 2 complete."))
+                .toCompletableFuture().join();
+
+        // Other misc tasks (todo facets should return a future + be part of phase 3)
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
+
+        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
 
         int i = 0;
         for (var facet : ServiceLoader.load(Facet.class)) {
@@ -136,7 +175,7 @@ public class DevServer {
         });
         MinecraftServer.getCommandManager().register(cmd);
 
-        TerraformWorldEdit.init();
+        TerraformWorldEdit.init(); //todo only should be present in map servers
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {

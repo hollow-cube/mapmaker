@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.common;
 
 import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.std.ButtonSection;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;

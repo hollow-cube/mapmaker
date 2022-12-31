@@ -1,13 +1,13 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
 import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a section which may need to load behind a {@link net.hollowcube.mapmaker.result.FutureResult}.
+ * Represents a section which may need to load behind a {@link FutureResult}.
  */
 public class LoadableSection<T> extends ParentSection {
     private static final int LOADING_DELAY_TICKS = 5;

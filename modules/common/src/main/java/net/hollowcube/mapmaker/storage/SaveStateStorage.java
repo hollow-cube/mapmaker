@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.storage;
 
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.result.Error;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.mapmaker.result.Error;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.util.MongoUtil;
+import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,8 +19,10 @@ public interface SaveStateStorage {
         return new SaveStateStorageMemory();
     }
 
-    static @NotNull SaveStateStorage mongo(@NotNull String mongoUri) {
-        return new SaveStateStorageMongo(MongoUtil.getClient(mongoUri));
+    static @NotNull FutureResult<SaveStateStorage> mongo(@NotNull MongoConfig config) {
+        var clientFactory = MongoClientFactory.get();
+        return clientFactory.newClient(config)
+                .map(client -> new SaveStateStorageMongo(client, config));
     }
 
     @NotNull FutureResult<@NotNull SaveState> createSaveState(@NotNull SaveState saveState);

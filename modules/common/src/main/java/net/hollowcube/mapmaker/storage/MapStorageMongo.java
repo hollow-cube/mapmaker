@@ -1,35 +1,52 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.auto.service.AutoService;
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import org.bson.BsonReader;
+import org.bson.BsonType;
+import org.bson.BsonWriter;
 import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
     private static final String OWNER_NAME_INDEX_NAME = "owner_name_unique";
 
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public MapStorageMongo(@NotNull MongoClient client) {
+    public MapStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
+    }
 
-        var indexKeys = new Document();
-        indexKeys.append("owner", 1);
-        indexKeys.append("name", 1);
-        collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
+    public @NotNull FutureResult<Void> init() {
+        return FutureResult.supply(() -> {
+            var indexKeys = new Document();
+            indexKeys.append("owner", 1);
+            indexKeys.append("name", 1);
+            collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
+            return Result.ofNull();
+        });
     }
 
     @Override
@@ -95,6 +112,7 @@ public class MapStorageMongo implements MapStorage {
         });
     }
 
+    @Override
     public @NotNull FutureResult<String> getNextId() {
         return FutureResult.supply(() -> {
             var filter = new Document();
@@ -112,10 +130,129 @@ public class MapStorageMongo implements MapStorage {
     }
 
     private @NotNull MongoCollection<MapData> collection() {
-        return client.getDatabase(DB_NAME).getCollection("maps", MapData.class);
+        return client.getDatabase(config.database()).getCollection("maps", MapData.class);
     }
 
     private @NotNull MongoCollection<Document> shortIdCollection() {
-        return client.getDatabase(DB_NAME).getCollection("id_inc");
+        return client.getDatabase(config.database()).getCollection("id_inc");
+    }
+
+    @AutoService(Codec.class)
+    public static class MapDataCodec implements Codec<MapData> {
+        @Override
+        public MapData decode(BsonReader reader, DecoderContext decoderContext) {
+            var value = new MapData();
+            reader.readStartDocument();
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                switch (reader.readName()) {
+                    case "_id" -> value.setId(reader.readString());
+                    case "owner" -> value.setOwner(reader.readString());
+                    case "name" -> value.setName(reader.readString());
+                    case "mapFileId" -> value.setMapFileId(reader.readString());
+                    case "spawn_point" -> {
+                        reader.readStartDocument();
+                        double x = 0.0;
+                        double y = 0.0;
+                        double z = 0.0;
+                        float yaw = 0.0f;
+                        float pitch = 0.0f;
+                        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                            switch (reader.readName()) {
+                                case "x" -> x = reader.readDouble();
+                                case "y" -> y = reader.readDouble();
+                                case "z" -> z = reader.readDouble();
+                                case "yaw" -> yaw = (float) reader.readDouble();
+                                case "pitch" -> pitch = (float) reader.readDouble();
+                                default -> throw new RuntimeException("Unknown field: " + reader.readName());
+                            }
+                        }
+                        reader.readEndDocument();
+                        value.setSpawnPoint(new Pos(x, y, z, yaw, pitch));
+                    }
+                    case "pois" -> {
+                        reader.readStartArray();
+                        while (reader.readBsonType() == BsonType.DOCUMENT) {
+                            reader.readStartDocument();
+                            var type = reader.readString("type");
+                            reader.readName();
+                            reader.readStartDocument();
+                            var pos = new Vec(
+                                    reader.readDouble("x"),
+                                    reader.readDouble("y"),
+                                    reader.readDouble("z"));
+                            reader.readEndDocument();
+
+                            value.addPOI(new MapData.POI(type, pos));
+                            reader.readEndDocument();
+                        }
+                        reader.readEndArray();
+                    }
+                    case "completion-times" -> {
+                        reader.readStartArray();
+                        while (reader.readBsonType() == BsonType.DOCUMENT) {
+                            reader.readStartDocument();
+                            UUID id = UUID.fromString(reader.readString("uuid"));
+                            long timestamp = reader.readInt64("timestamp");
+                            reader.readEndDocument();
+                            value.tryAddTime(id, timestamp);
+                        }
+                        reader.readEndArray();
+                    }
+                    case "published" -> value.setPublished(reader.readBoolean());
+                    case "publishedId" -> value.setPublishedId(reader.readString());
+                }
+            }
+            reader.readEndDocument();
+            return value;
+        }
+
+        @Override
+        public void encode(BsonWriter writer, MapData value, EncoderContext encoderContext) {
+            writer.writeStartDocument();
+            writer.writeString("_id", value.getId());
+            writer.writeString("owner", value.getOwner());
+            writer.writeString("name", value.getName());
+            if (value.getMapFileId() != null) {
+                writer.writeString("mapFileId", value.getMapFileId());
+            }
+            writer.writeStartDocument("spawn_point");
+            writer.writeDouble("x", value.getSpawnPoint().x());
+            writer.writeDouble("y", value.getSpawnPoint().y());
+            writer.writeDouble("z", value.getSpawnPoint().z());
+            writer.writeDouble("yaw", value.getSpawnPoint().yaw());
+            writer.writeDouble("pitch", value.getSpawnPoint().pitch());
+            writer.writeEndDocument();
+            writer.writeStartArray("pois");
+            for (var poi : value.getPois()) {
+                writer.writeStartDocument();
+                writer.writeString("type", poi.type());
+                writer.writeStartDocument("pos");
+                writer.writeDouble("x", poi.pos().x());
+                writer.writeDouble("y", poi.pos().y());
+                writer.writeDouble("z", poi.pos().z());
+                writer.writeEndDocument();
+                writer.writeEndDocument();
+            }
+            writer.writeEndArray();
+            writer.writeStartArray("completion-times");
+            for (var completion : value.getCompletionTimes()) {
+                writer.writeStartDocument();
+                writer.writeString("uuid", completion.playerUUID().toString());
+                writer.writeInt64("timestamp", completion.timeInMills());
+                writer.writeEndDocument();
+            }
+            writer.writeEndArray();
+            if (value.isPublished()) {
+                writer.writeBoolean("published", true);
+                writer.writeString("publishedId", value.getPublishedId());
+            }
+
+            writer.writeEndDocument();
+        }
+
+        @Override
+        public Class<MapData> getEncoderClass() {
+            return MapData.class;
+        }
     }
 }

@@ -1,13 +1,15 @@
 package net.hollowcube.mapmaker.hub.world;
 
+import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.world.BaseWorld;
-import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,12 +18,21 @@ import java.util.concurrent.CompletableFuture;
 public class HubWorld extends BaseWorld {
     private static final String WORLD_NAME = "hub";
 
-    public static final Tag<Boolean> MARKER = Tag.Boolean("mapmaker:hub/marker");
+    public static final Tag<Boolean> MARKER = Tag.Boolean("mapmaker:hub/marker"); //todo unnecessary
+    private static final Tag<HubWorld> THIS = ExtraTags.Transient("mapmaker:hub/world");
 
-    public HubWorld(@NotNull WorldManager worldManager) {
-        super(worldManager, WORLD_NAME);
+    public static @NotNull HubWorld fromInstance(@NotNull Instance instance) {
+        return instance.getTag(THIS);
+    }
+
+    private final HubServer server;
+
+    public HubWorld(@NotNull HubServer server) {
+        super(server.worldManager(), WORLD_NAME);
+        this.server = server;
 
         instance().setTag(MARKER, true);
+        instance().setTag(THIS, this);
         instance().setGenerator(HubGenerators.stoneWorld());
 
         var eventNode = instance().eventNode();
@@ -33,6 +44,10 @@ public class HubWorld extends BaseWorld {
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace);
 
         eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn);
+    }
+
+    public @NotNull HubServer server() {
+        return server;
     }
 
     @Override

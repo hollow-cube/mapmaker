@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.canvas.Section;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
+import net.hollowcube.world.WorldManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,18 +17,13 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface HubServer {
 
-    class StaticAbuse {
-        public static HubServer INSTANCE;
-    }
+    @NotNull HubToMapBridge bridge();
 
-    @NotNull PlayerStorage players();
-
-    @NotNull MapStorage maps();
+    @NotNull PlayerStorage playerStorage();
+    @NotNull MapStorage mapStorage();
+    @NotNull WorldManager worldManager();
 
     @NotNull HubWorld world();
-
-    boolean isReady();
-
 
     void openGUIForPlayer(@NotNull Player player, @NotNull Section gui);
 

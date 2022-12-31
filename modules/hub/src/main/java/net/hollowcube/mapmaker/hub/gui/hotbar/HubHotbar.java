@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.hotbar;
 
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.CreateMapsView;
-import net.hollowcube.mapmaker.lang.LanguageProvider;
+import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -59,10 +59,11 @@ public final class HubHotbar {
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
+        var server = HubWorld.fromInstance(player.getInstance()).server();
         switch (customModelData) {
             case PLAY_ITEM_CMD -> {
             }
-            case CREATE_ITEM_CMD -> HubServer.StaticAbuse.INSTANCE.openGUIForPlayer(player, new CreateMapsView());
+            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
         }
     }
 

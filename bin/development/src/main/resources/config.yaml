@@ -1,0 +1,25 @@
+http:
+  host: 0.0.0.0
+  port: 9124
+
+minestom:
+  host: 0.0.0.0
+  port: 25565
+  # Translation mode: server,proxy
+  translation: server
+
+mongo:
+  uri: mongodb://localhost:27017
+  database: mapmaker
+  useTransactions: false
+
+s3:
+  address: http://localhost:9000
+  region: us-east-1 # Unused for minio
+  accessKey: mapmaker
+  secretKey: mapmaker
+
+spicedb:
+  address: http://localhost:50051
+  secretKey: foobar
+  # todo tls

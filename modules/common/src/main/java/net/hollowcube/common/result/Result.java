@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.result;
+package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
@@ -13,8 +13,8 @@ public record Result<T>(@UnknownNullability T result, @UnknownNullability Error 
         return new Result<>(null, err);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> @NotNull Result<T> ofNull() {
-        //noinspection unchecked
         return (Result<T>) NULL;
     }
 

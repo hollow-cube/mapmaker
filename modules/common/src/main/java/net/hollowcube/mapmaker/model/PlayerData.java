@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.model;
 
-import net.hollowcube.mapmaker.util.ExtraTags;
+import net.hollowcube.common.util.ExtraTags;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;

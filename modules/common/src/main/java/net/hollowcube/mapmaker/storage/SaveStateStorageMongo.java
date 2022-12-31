@@ -1,23 +1,34 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.auto.service.AutoService;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.mapmaker.result.FutureResult;
-import net.hollowcube.mapmaker.result.Result;
+import net.minestom.server.coordinate.Pos;
+import org.bson.BsonReader;
+import org.bson.BsonType;
+import org.bson.BsonWriter;
+import org.bson.codecs.Codec;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.Instant;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
 
 public class SaveStateStorageMongo implements SaveStateStorage {
-    private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
-
     private final MongoClient client;
+    private final MongoConfig config;
 
-    public SaveStateStorageMongo(@NotNull MongoClient client) {
+    public SaveStateStorageMongo(@NotNull MongoClient client, @NotNull MongoConfig config) {
         this.client = client;
+        this.config = config;
     }
 
     @Override
@@ -59,6 +70,72 @@ public class SaveStateStorageMongo implements SaveStateStorage {
     }
 
     private @NotNull MongoCollection<SaveState> collection() {
-        return client.getDatabase(DB_NAME).getCollection("savestates", SaveState.class);
+        return client.getDatabase(config.database()).getCollection("savestates", SaveState.class);
+    }
+
+    @AutoService(Codec.class)
+    public static final class SaveStateCodec implements Codec<SaveState> {
+        @Override
+        public SaveState decode(BsonReader reader, DecoderContext decoderContext) {
+            var value = new SaveState();
+            reader.readStartDocument();
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                switch (reader.readName()) {
+                    case "_id" -> value.setId(reader.readString());
+                    case "player_id" -> value.setPlayerId(reader.readString());
+                    case "map_id" -> value.setMapId(reader.readString());
+                    case "completed" -> value.setCompleted(reader.readBoolean());
+                    case "start_time" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
+                    case "playtime" -> value.setPlaytime(reader.readInt64());
+                    case "pos" -> {
+                        reader.readStartDocument();
+                        double x = 0.0;
+                        double y = 0.0;
+                        double z = 0.0;
+                        float yaw = 0.0f;
+                        float pitch = 0.0f;
+                        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                            switch (reader.readName()) {
+                                case "x" -> x = reader.readDouble();
+                                case "y" -> y = reader.readDouble();
+                                case "z" -> z = reader.readDouble();
+                                case "yaw" -> yaw = (float) reader.readDouble();
+                                case "pitch" -> pitch = (float) reader.readDouble();
+                                default -> throw new RuntimeException("Unknown field: " + reader.readName());
+                            }
+                        }
+                        reader.readEndDocument();
+                        value.setPos(new Pos(x, y, z, yaw, pitch));
+                    }
+                }
+            }
+            reader.readEndDocument();
+            return value;
+        }
+
+        @Override
+        public void encode(BsonWriter writer, SaveState value, EncoderContext encoderContext) {
+            writer.writeStartDocument();
+            writer.writeString("_id", value.getId());
+            writer.writeString("player_id", value.getPlayerId());
+            writer.writeString("map_id", value.getMapId());
+            if (value.isCompleted())
+                writer.writeBoolean("completed", true);
+            writer.writeDateTime("start_time", value.getStartTime().toEpochMilli());
+            writer.writeInt64("playtime", value.getPlaytime());
+            writer.writeStartDocument("pos");
+            writer.writeDouble("x", value.getPos().x());
+            writer.writeDouble("y", value.getPos().y());
+            writer.writeDouble("z", value.getPos().z());
+            writer.writeDouble("yaw", value.getPos().yaw());
+            writer.writeDouble("pitch", value.getPos().pitch());
+            writer.writeEndDocument();
+            writer.writeEndDocument();
+        }
+
+        @Override
+        public Class<SaveState> getEncoderClass() {
+            return SaveState.class;
+        }
     }
 }
