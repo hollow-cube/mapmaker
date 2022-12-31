@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -75,7 +76,7 @@ public class Handler {
             return FutureResult.error(ERR_INVALID_MAP_NAME);
 
         map.setId(UUID.randomUUID().toString()); // Create random ID
-        map.setPublished(false); // Sanity check
+        map.setPublishedAt(null); // Sanity check
         return server.mapStorage().createMap(map)
                 // Add permissions
                 .flatMap(map1 -> server.mapPermissions().addMapOwner(map1.getId(), map1.getOwner())
@@ -109,7 +110,7 @@ public class Handler {
             return FutureResult.error(ERR_SLOT_IN_USE);
 
         map.setOwner(playerData.getId());
-        map.setPublished(false); // Sanity check
+        map.setPublishedAt(null); // Sanity check
 
         return createMap(map)
                 // Set the map in the given player slot & save player
@@ -174,7 +175,7 @@ public class Handler {
                 // Fetch next short id & update map
                 .flatMap(map -> server.mapStorage().getNextId()
                         .map(shortId -> {
-                            map.setPublished(true);
+                            map.setPublishedAt(Instant.now());
                             map.setPublishedId(shortId);
                             return map;
                         }))

@@ -58,7 +58,6 @@ public class LanguageProvider {
      * @param component The component to translate
      * @return The component, or a component holding just the translation key if not found
      */
-
     public static @NotNull Component get(@NotNull Component component) {
         if (!(component instanceof TranslatableComponent translatable)) {
             return component;

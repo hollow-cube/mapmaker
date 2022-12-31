@@ -65,10 +65,10 @@ public class SaveStateStorageMongo implements SaveStateStorage {
     public @NotNull FutureResult<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId) {
         return FutureResult.supply(() -> {
             var filter = and(
-                    eq("player_id", playerId),
-                    eq("map_id", mapId),
+                    eq("playerId", playerId),
+                    eq("mapId", mapId),
                     or(eq("complete", false), not(exists("complete"))));
-            var sort = descending("start_time");
+            var sort = descending("startTime");
             var result = collection().find(filter, SaveState.class).sort(sort).limit(1).first();
             if (result == null)
                 return Result.error(ERR_NOT_FOUND);
@@ -89,10 +89,10 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
                 switch (reader.readName()) {
                     case "_id" -> value.setId(reader.readString());
-                    case "player_id" -> value.setPlayerId(reader.readString());
-                    case "map_id" -> value.setMapId(reader.readString());
+                    case "playerId" -> value.setPlayerId(reader.readString());
+                    case "mapId" -> value.setMapId(reader.readString());
                     case "completed" -> value.setCompleted(reader.readBoolean());
-                    case "start_time" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
+                    case "startTime" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
                     case "playtime" -> value.setPlaytime(reader.readInt64());
                     case "pos" -> {
                         reader.readStartDocument();
@@ -143,11 +143,11 @@ public class SaveStateStorageMongo implements SaveStateStorage {
         public void encode(BsonWriter writer, SaveState value, EncoderContext encoderContext) {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
-            writer.writeString("player_id", value.getPlayerId());
-            writer.writeString("map_id", value.getMapId());
+            writer.writeString("playerId", value.getPlayerId());
+            writer.writeString("mapId", value.getMapId());
             if (value.isCompleted())
                 writer.writeBoolean("completed", true);
-            writer.writeDateTime("start_time", value.getStartTime().toEpochMilli());
+            writer.writeDateTime("startTime", value.getStartTime().toEpochMilli());
             writer.writeInt64("playtime", value.getPlaytime());
             if (value.getPos() != null) {
                 writer.writeStartDocument("pos");

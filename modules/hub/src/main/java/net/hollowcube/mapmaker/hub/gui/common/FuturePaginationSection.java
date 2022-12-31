@@ -55,29 +55,28 @@ public class FuturePaginationSection extends ParentSection {
     @Override
     protected void unmount() {
         super.unmount();
-        // Clear state on unmount
-        reset();
     }
 
-    private void pageLoaded(long key, @Nullable PageData pageData) {
+    private void pageLoaded(long key, @NotNull PageData pageData) {
         // If the key is different, this is an old request (eg new page, unmount, reset, etc)
         if (key != this.key) return;
 
         // Unmount the current page (or loading).
         clear();
 
-        // If pageData is null it means we loaded the first page and it had no entries.
-        // In this case we will show an empty page icon.
+        // If a page has no entries it is either the first page with no results, or a bug.
+        // In either case we show an empty result page.
         // todo art for this
-        if (pageData == null) {
+        if (pageData.section == null) {
             add(0, 0, new ButtonSection(width(), height(), ItemStack.of(Material.BARRIER).withDisplayName(Component.text("No entries"))));
             return;
+        } else {
+            mountChild(0, 0, pageData.section);
         }
 
         // Add the page to the list of pages & mount it
         pages.add(page, pageData.section);
         hasNextPage = pageData.hasNextPage;
-        mountChild(0, 0, pageData.section);
         this.key = 0; // Reset key
 
         notifyHandlers();
@@ -205,11 +204,11 @@ public class FuturePaginationSection extends ParentSection {
 
     // Page function
 
-    public record PageData(@NotNull Section section, boolean hasNextPage) {}
+    public record PageData(@Nullable Section section, boolean hasNextPage) {}
 
     @FunctionalInterface
     public interface PageFunction {
-        @NotNull FutureResult<@Nullable PageData> getPage(int pageWidth, int pageHeight, int page);
+        @NotNull FutureResult<@NotNull PageData> getPage(int pageWidth, int pageHeight, int page);
     }
 
 

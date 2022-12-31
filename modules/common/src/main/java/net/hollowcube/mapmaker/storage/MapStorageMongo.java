@@ -21,10 +21,15 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.MapCodec;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.exists;
 import static com.mongodb.client.model.Projections.include;
+import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
@@ -104,12 +109,22 @@ public class MapStorageMongo implements MapStorage {
     @Override
     public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
         return FutureResult.supply(() -> {
-            var filter = eq("published_id", shortMapId);
+            var filter = eq("publishedId", shortMapId);
             var projection = include("_id");
             var result = collection().find(filter).projection(projection).limit(1).first();
             if (result == null)
                 return Result.error(ERR_NOT_FOUND);
             return Result.of(result.getId());
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
+        return FutureResult.supply(() -> {
+            var filter = exists("publishedAt");
+            var sort = descending("publishedAt");
+            var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
+            return Result.of(result);
         });
     }
 
@@ -150,7 +165,7 @@ public class MapStorageMongo implements MapStorage {
                     case "owner" -> value.setOwner(reader.readString());
                     case "name" -> value.setName(reader.readString());
                     case "mapFileId" -> value.setMapFileId(reader.readString());
-                    case "spawn_point" -> {
+                    case "spawnPoint" -> {
                         reader.readStartDocument();
                         double x = 0.0;
                         double y = 0.0;
@@ -191,7 +206,7 @@ public class MapStorageMongo implements MapStorage {
                         }
                         reader.readEndArray();
                     }
-                    case "completion-times" -> {
+                    case "completionTimes" -> {
                         reader.readStartArray();
                         while (reader.readBsonType() == BsonType.DOCUMENT) {
                             reader.readStartDocument();
@@ -202,7 +217,7 @@ public class MapStorageMongo implements MapStorage {
                         }
                         reader.readEndArray();
                     }
-                    case "published" -> value.setPublished(reader.readBoolean());
+                    case "publishedAt" -> value.setPublishedAt(Instant.ofEpochMilli(reader.readDateTime()));
                     case "publishedId" -> value.setPublishedId(reader.readString());
                 }
             }
@@ -219,7 +234,7 @@ public class MapStorageMongo implements MapStorage {
             if (value.getMapFileId() != null) {
                 writer.writeString("mapFileId", value.getMapFileId());
             }
-            writer.writeStartDocument("spawn_point");
+            writer.writeStartDocument("spawnPoint");
             writer.writeDouble("x", value.getSpawnPoint().x());
             writer.writeDouble("y", value.getSpawnPoint().y());
             writer.writeDouble("z", value.getSpawnPoint().z());
@@ -241,7 +256,7 @@ public class MapStorageMongo implements MapStorage {
                 writer.writeEndDocument();
             }
             writer.writeEndArray();
-            writer.writeStartArray("completion-times");
+            writer.writeStartArray("completionTimes");
             for (var completion : value.getCompletionTimes()) {
                 writer.writeStartDocument();
                 writer.writeString("uuid", completion.playerUUID().toString());
@@ -250,7 +265,7 @@ public class MapStorageMongo implements MapStorage {
             }
             writer.writeEndArray();
             if (value.isPublished()) {
-                writer.writeBoolean("published", true);
+                writer.writeDateTime("publishedAt", value.getPublishedAt().toEpochMilli());
                 writer.writeString("publishedId", value.getPublishedId());
             }
 

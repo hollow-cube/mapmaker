@@ -4,7 +4,9 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
+import java.time.Instant;
 import java.util.*;
 
 public class MapData {
@@ -20,7 +22,7 @@ public class MapData {
     private String name = "Untitled Map";
 
     // Published state
-    private boolean published = false;
+    private Instant publishedAt = null;
     // Published id is a short ID for users to reference a map.
     // This ID is assigned when a map is published and not guaranteed to be consistent. It should never be stored
     // internally as a reference to a map. Use the ID instead.
@@ -62,11 +64,15 @@ public class MapData {
 
 
     public boolean isPublished() {
-        return published;
+        return publishedAt != null;
     }
 
-    public void setPublished(boolean published) {
-        this.published = published;
+    public @UnknownNullability Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
     public String getPublishedId() {

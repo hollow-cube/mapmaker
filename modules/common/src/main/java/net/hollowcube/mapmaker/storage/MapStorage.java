@@ -7,6 +7,8 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public interface MapStorage {
 
     Error ERR_NOT_FOUND = Error.of("map not found");
@@ -36,6 +38,13 @@ public interface MapStorage {
     @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId);
 
     @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId);
+
+
+    /**
+     * Fetches the latest maps with the given offset and size. Used for paginating the map list right now, but will
+     * be replaced with a more complicated "MapQuery" builder/system later.
+     */
+    @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size);
 
 
     // Other utilities

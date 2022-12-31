@@ -80,7 +80,7 @@ class PlayerStorageMongo implements PlayerStorage {
     public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
         List<FutureResult<Void>> futures = new ArrayList<>();
         return FutureResult.supply(() -> {
-            var filter = in("map_slots", mapId);
+            var filter = in("mapSlots", mapId);
             collection().find(filter).forEach(player -> {
                 for (int i = 0; i < player.getUnlockedMapSlots(); i++) {
                     if (player.getMapSlot(i).equals(mapId)) {
@@ -109,8 +109,8 @@ class PlayerStorageMongo implements PlayerStorage {
                 switch (reader.readName()) {
                     case "_id" -> player.setId(reader.readString());
                     case "uuid" -> player.setUuid(reader.readString());
-                    case "unlocked_map_slots" -> player.setUnlockedMapSlots(reader.readInt32());
-                    case "map_slots" -> {
+                    case "unlockedMapSlots" -> player.setUnlockedMapSlots(reader.readInt32());
+                    case "mapSlots" -> {
                         reader.readStartArray();
                         for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
                             if (reader.readBsonType() == BsonType.NULL) {
@@ -132,8 +132,8 @@ class PlayerStorageMongo implements PlayerStorage {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
             writer.writeString("uuid", value.getUuid());
-            writer.writeInt32("unlocked_map_slots", value.getUnlockedMapSlots());
-            writer.writeStartArray("map_slots");
+            writer.writeInt32("unlockedMapSlots", value.getUnlockedMapSlots());
+            writer.writeStartArray("mapSlots");
             for (var mapId : value.getMapSlots()) {
                 if (mapId == null) {
                     writer.writeNull();

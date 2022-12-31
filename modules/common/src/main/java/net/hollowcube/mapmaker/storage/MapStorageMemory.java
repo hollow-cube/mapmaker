@@ -4,6 +4,8 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,6 +53,16 @@ class MapStorageMemory implements MapStorage {
                 .map(MapData::getId)
                 .map(FutureResult::of)
                 .orElse(FutureResult.error(ERR_NOT_FOUND));
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
+        return FutureResult.of(mapsById.values().stream()
+                .filter(MapData::isPublished)
+                .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
+                .skip(offset)
+                .limit(size)
+                .toList());
     }
 
     @Override
