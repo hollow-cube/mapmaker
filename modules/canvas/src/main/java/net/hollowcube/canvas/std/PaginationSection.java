@@ -24,15 +24,22 @@ public class PaginationSection extends ParentSection {
     public PaginationSection(int width, int height, @NotNull Function<Integer, @Nullable Section> pageFn) {
         super(width, height);
         this.pageFn = pageFn;
+        reset();
+    }
 
+    public void reset() {
+        page = 0;
+        pages.clear();
         var firstPage = pageFn.apply(0);
         if (firstPage != null) {
             add(0, 0, firstPage);
             pages.put(0, firstPage);
             pages.put(1, pageFn.apply(1));
         } else {
-            add(0, 0, new EmptySection(width, height));
+            add(0, 0, new EmptySection(width(), height()));
         }
+
+        notifyHandlers();
     }
 
     public int getPage() {
