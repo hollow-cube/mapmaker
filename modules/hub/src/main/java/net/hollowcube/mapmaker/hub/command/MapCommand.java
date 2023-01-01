@@ -284,7 +284,6 @@ public class MapCommand extends BaseHubCommand {
         public PublishCommand() {
             super("publish");
 
-            //todo its possible it will be easier to use a separate syntax for slot vs long id
             addSyntax(this::publishMapWithId, longIdOrSlotArg);
             setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
         }
