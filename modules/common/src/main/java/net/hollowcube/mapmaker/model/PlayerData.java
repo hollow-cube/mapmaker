@@ -69,8 +69,8 @@ public class PlayerData {
 
     public int getSlotState(int slot) {
         if (!(slot >= 0 && slot < unlockedMapSlots))
-            return 1; // Map locked
-        return mapSlots[slot] == null ? 0 : 2; // Map already exists
+            return SLOT_STATE_LOCKED;
+        return mapSlots[slot] == null ? SLOT_STATE_OPEN : SLOT_STATE_IN_USE;
     }
 
     public @Nullable String getMapSlot(int slot) {
