@@ -188,6 +188,11 @@ public class Handler {
                 // Save map
                 .flatAlso(map -> server.mapStorage().updateMap(map)
                         .wrapErr("failed to update map: {}"))
+                .mapErr(err -> {
+                    if (err.is(MapStorage.ERR_NOT_FOUND))
+                        return Result.error(ERR_MAP_NOT_FOUND);
+                    return Result.error(err.wrap("failed to publish map: {}"));
+                })
                 .alsoRaw(unused -> timer.observeDuration());
     }
 

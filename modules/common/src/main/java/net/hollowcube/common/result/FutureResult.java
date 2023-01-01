@@ -2,6 +2,8 @@ package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
@@ -46,9 +48,14 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
      */
     static @NotNull FutureResult<Void> allOf(@NotNull FutureResult<?>... results) {
         var futures = new CompletableFuture[results.length];
+        var errors = Collections.synchronizedList(new ArrayList<Error>());
         for (int i = 0; i < results.length; i++)
-            futures[i] = results[i].toCompletableFuture();
-        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> Result.ofNull()));
+            futures[i] = results[i].thenErr(errors::add).toCompletableFuture();
+        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> {
+            if (errors.isEmpty())
+                return Result.ofNull();
+            return Result.error(new Errors.MultiError(errors.toArray(Error[]::new)));
+        }));
     }
 
 
