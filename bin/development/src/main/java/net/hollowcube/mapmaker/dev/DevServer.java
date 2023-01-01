@@ -12,11 +12,11 @@ import io.prometheus.client.hotspot.DefaultExports;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.common.ServerRuntime;
-import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
+import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -46,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -59,11 +60,14 @@ public class DevServer {
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
+        var config = Config.loadFromFile(Path.of("config.yaml"));
+
         var minecraftServer = MinecraftServer.init();
         var server = new DevServer();
 
         WebServer webServer = WebServer.builder()
-                .port(9124)
+                .host(config.http().host())
+                .port(config.http().port())
                 .addRouting(Routing.builder()
                         .register(HealthSupport.builder()
                                 .webContext("alive")
@@ -77,12 +81,12 @@ public class DevServer {
                         .build())
                 .build();
         webServer.start()
-                .thenAccept(ws -> System.out.println("Web server is running at :" + ws.port()));
+                .thenAccept(ws -> System.out.println("Web server is running at " + config.http().host() + ":" + ws.port()));
 
         DefaultExports.initialize();
 
-        server.start();
-        minecraftServer.start("0.0.0.0", 25565);
+        server.start(config);
+        minecraftServer.start(config.minestom().host(), config.minestom().port());
 
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 webServer.shutdown();
@@ -108,7 +112,7 @@ public class DevServer {
 
     }
 
-    public void start() {
+    public void start(@NotNull Config config) {
         MojangAuth.init();
 
         List<FutureResult<Void>> startupTasks = new ArrayList<>();
@@ -122,16 +126,11 @@ public class DevServer {
             this.saveStateStorage = SaveStateStorage.memory();
         } else {
             //todo all remote services should have health checks
-            var mongoConfig = new MongoConfig() {
-                @Override public @NotNull String uri() { return mongoUri; }
-                @Override public @NotNull String database() { return "mapmaker"; }
-                @Override public boolean useTransactions() { return false; }
-            };
-            startupTasks.add(PlayerStorage.mongo(mongoConfig)
+            startupTasks.add(PlayerStorage.mongo(config.mongo())
                     .then(playerStorage -> this.playerStorage = playerStorage));
-            startupTasks.add(MapStorage.mongo(mongoConfig)
+            startupTasks.add(MapStorage.mongo(config.mongo())
                     .then(mapStorage -> this.mapStorage = mapStorage));
-            startupTasks.add(SaveStateStorage.mongo(mongoConfig)
+            startupTasks.add(SaveStateStorage.mongo(config.mongo())
                     .then(saveStateStorage -> this.saveStateStorage = saveStateStorage)
                     .thenErr(err -> {
                         logger.error("Failed to connect to mongo: {}", err);
@@ -139,18 +138,15 @@ public class DevServer {
                     }));
         }
 
-        var s3Address = System.getenv("MM_S3_ADDRESS");
-        if (s3Address == null) s3Address = "http://localhost:9000/";
-        var s3AccessKey = System.getenv("MM_S3_ACCESS_KEY");
-        var s3SecretKey = System.getenv("MM_S3_SECRET_KEY");
-        var worldManager = new WorldManager(FileStorageS3.connect(s3Address, s3AccessKey, s3SecretKey));
+        //todo replace with S3Config interface like with mongo
+        var worldManager = new WorldManager(FileStorageS3.connect(config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
 
         // SpiceDB
         ManagedChannel channel = ManagedChannelBuilder
-                .forTarget("localhost:50051")
+                .forTarget(config.spicedb().address())
                 .usePlaintext()
                 .build();
-        BearerToken bearerToken = new BearerToken("foobar");
+        BearerToken bearerToken = new BearerToken(config.spicedb().secretKey());
         PermissionsServiceGrpc.PermissionsServiceFutureStub permissionsService = PermissionsServiceGrpc.newFutureStub(channel)
                 .withCallCredentials(bearerToken);
         this.platformPermissions = new PlatformPermissionManager(permissionsService);

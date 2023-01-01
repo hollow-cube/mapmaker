@@ -40,6 +40,7 @@ public class ChatFacet implements Facet {
 
     public ChatFacet() {
         //todo need to have futureresult init for this
+        //todo need to give access to MongoConfig somehow here
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri != null) {
             storage = ChatStorage.mongo(new MongoConfig() {
