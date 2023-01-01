@@ -1,13 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DevServer (mongo)" type="Application" factoryName="Application">
     <envs>
-      <env name="MAPMAKER_SPICEDB_ADDRESS" value="grpc.authzed.com:443" />
-      <env name="MAPMAKER_SPICEDB_SECRETKEY" value="tc_mapmaker_dev_k8s_feb473a28a9f019649d29a209406219203c6619cbc878465af9065ae95001e70b9444eabf84c19130a8ad3ae9a8c9e28fa0ce492b32b13f44f102a6d23ea6ee6" />
-      <env name="MM_MONGO_URI" value="mongodb://localhost:27017" />
-      <env name="MM_S3_ACCESS_KEY" value="mapmaker" />
-      <env name="MM_S3_SECRET_KEY" value="mapmaker" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
-      <env name="MAPMAKER_SPICEDB_TLS" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />
