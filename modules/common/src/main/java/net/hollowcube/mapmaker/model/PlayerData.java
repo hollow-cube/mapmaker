@@ -68,7 +68,7 @@ public class PlayerData {
     }
 
     public int getSlotState(int slot) {
-        if (!(slot >= 0 && slot < unlockedMapSlots))
+        if (slot < 0 || slot >= unlockedMapSlots)
             return SLOT_STATE_LOCKED;
         return mapSlots[slot] == null ? SLOT_STATE_OPEN : SLOT_STATE_IN_USE;
     }
