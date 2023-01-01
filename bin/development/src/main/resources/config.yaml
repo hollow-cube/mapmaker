@@ -22,4 +22,4 @@ s3:
 spicedb:
   address: localhost:50051
   secretKey: foobar
-  # todo tls
+  tls: false

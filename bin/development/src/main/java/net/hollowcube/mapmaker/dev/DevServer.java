@@ -136,10 +136,12 @@ public class DevServer {
         var worldManager = new WorldManager(FileStorageS3.connect(config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
 
         // SpiceDB
-        ManagedChannel channel = ManagedChannelBuilder
-                .forTarget(config.spicedb().address())
-                .usePlaintext()
-                .build();
+        var channelBuilder = ManagedChannelBuilder
+                .forTarget(config.spicedb().address());
+        if (config.spicedb().tls())
+            channelBuilder.useTransportSecurity();
+        else channelBuilder.usePlaintext();
+        ManagedChannel channel = channelBuilder.build();
         BearerToken bearerToken = new BearerToken(config.spicedb().secretKey());
         PermissionsServiceGrpc.PermissionsServiceFutureStub permissionsService = PermissionsServiceGrpc.newFutureStub(channel)
                 .withCallCredentials(bearerToken);
