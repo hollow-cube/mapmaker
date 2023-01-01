@@ -6,6 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public record SpiceDBConf(
         String address,
-        @Setting("secretKey") String secretKey
+        @Setting("secretKey") String secretKey,
+        boolean tls
 ) {
 }

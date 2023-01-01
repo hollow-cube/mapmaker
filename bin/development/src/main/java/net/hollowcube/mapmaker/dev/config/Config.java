@@ -62,11 +62,10 @@ public record Config(
             // Do not care about non-leaf nodes
             if (node.childrenMap().size() != 0) return;
 
-            var path = new StringBuilder();
+            var path = new StringBuilder().append("MAPMAKER");
             for (int i = 0; i < node.path().size(); i++)
-                path.append(node.path().get(i).toString().toUpperCase(Locale.ROOT)).append("_");
+                path.append("_").append(node.path().get(i).toString().toUpperCase(Locale.ROOT));
             if (path.isEmpty()) return;
-            path.deleteCharAt(path.length() - 1);
 
             var value = System.getenv(path.toString());
             if (value == null) return;

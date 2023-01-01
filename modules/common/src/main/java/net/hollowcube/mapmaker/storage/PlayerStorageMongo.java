@@ -83,12 +83,14 @@ class PlayerStorageMongo implements PlayerStorage {
             var filter = in("mapSlots", mapId);
             collection().find(filter).forEach(player -> {
                 for (int i = 0; i < player.getUnlockedMapSlots(); i++) {
-                    if (player.getMapSlot(i).equals(mapId)) {
+                    if (mapId.equals(player.getMapSlot(i))) {
                         player.setMapSlot(i, null);
                     }
                 }
 
                 //todo update as a transaction
+                //todo updating a player like this is not really valid. We need to tell the server that this player was updated so that it may update its cached copy of the player data.
+                //     currently we do this and then if a player looks in that gui again it will still contain this map (unless they rejoin)
                 futures.add(updatePlayer(player));
             });
             return Result.ofNull();
