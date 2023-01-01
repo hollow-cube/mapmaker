@@ -138,7 +138,6 @@ public class DevServer {
                     }));
         }
 
-        //todo replace with S3Config interface like with mongo
         var worldManager = new WorldManager(FileStorageS3.connect(config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
 
         // SpiceDB
