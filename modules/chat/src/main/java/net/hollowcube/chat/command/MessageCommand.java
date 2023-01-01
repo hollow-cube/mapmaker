@@ -1,6 +1,7 @@
 package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatFacet;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -22,14 +23,12 @@ public class MessageCommand extends Command {
 
         addSyntax(this::sendMessageToPlayer, playerArg, messageArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("Usage: /msg <player> <message>");
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /msg <player> <message>"));
     }
 
     private void sendMessageToPlayer(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command.");
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
 
@@ -37,12 +36,12 @@ public class MessageCommand extends Command {
         var message = String.join(" ", context.get(messageArg));
 
         if (message.isBlank()) {
-            sender.sendMessage("empty message");
+            sender.sendMessage("empty message"); // todo translatable
             return;
         }
 
         if (target == null) {
-            sender.sendMessage("player not found");
+            sender.sendMessage("player not found"); // todo translatable
             return;
         }
 

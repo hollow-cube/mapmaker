@@ -46,9 +46,9 @@ public class PlayMapView extends ParentSection {
         player.closeInventory();
         getContext(Handler.class).playMap(player, map.getId())
                 .thenErr(err -> {
-                    // If an error occurs here the player is still here and it is our responsibility to handle this (with an error)
+                    // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
                     logger.error("failed to join map {} for {}: {}", map.getId(), PlayerData.fromPlayer(player).getId(), err.message());
-                    player.sendMessage(Component.translatable("todo.whatever.this.error.is"));
+                    player.sendMessage(Component.translatable("command.generic.unknown_error"));
                 });
         return ClickHandler.DENY;
     }

@@ -103,7 +103,7 @@ public class MapCommand extends BaseHubCommand {
             super("play");
 
             addSyntax(this::playMapWithId, shortOrLongIdArg);
-            setDefaultExecutor((sender, context) -> sender.sendMessage("todo"));
+            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map play [mapId]"));
         }
 
         public void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {

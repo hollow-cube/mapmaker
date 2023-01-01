@@ -89,6 +89,7 @@ public class ChatFacet implements Facet {
         storage.recordChatMessage(chatMessage)
                 .then(unused -> {
                     to.setTag(REPLY_TO, from.getUuid());
+                    from.setTag(REPLY_TO, to.getUuid());
                     from.sendMessage("to " + to.getUsername() + ": " + message);
                     to.sendMessage("from " + from.getUsername() + ": " + message);
                 })

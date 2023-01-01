@@ -1,6 +1,7 @@
 package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatFacet;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -21,14 +22,12 @@ public class ReplyCommand extends Command {
 
         addSyntax(this::sendReplyMessage, messageArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("Usage: /reply <message>");
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /reply <message>"));
     }
 
     private void sendReplyMessage(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command.");
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
 
@@ -39,13 +38,13 @@ public class ReplyCommand extends Command {
         }
         var target = MinecraftServer.getConnectionManager().getPlayer(targetId);
         if (target == null) {
-            sender.sendMessage("The player you were replying to is no longer online.");
+            sender.sendMessage("The player you were replying to is no longer online."); // todo translatable
             return;
         }
 
         var message = String.join(" ", context.get(messageArg));
         if (message.isBlank()) {
-            sender.sendMessage("empty message");
+            sender.sendMessage("empty message"); // todo translatable
             return;
         }
 
