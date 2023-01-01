@@ -76,7 +76,7 @@ public class DevServer {
                         .build())
                 .build();
         webServer.start()
-                .thenAccept(ws -> System.out.println("Web server is running at " + config.http().host() + ":" + ws.port()));
+                .thenAccept(ws -> logger.info("Web server is running at " + config.http().host() + ":" + ws.port()));
 
         DefaultExports.initialize();
 
