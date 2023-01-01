@@ -9,9 +9,18 @@ image:
   pullPolicy: Always
 
 env:
-  MM_S3_ADDRESS: "https://minio.dev.hollowcube.net/"
-  MM_S3_ACCESS_KEY: "Ai65UJERihroEJTi"
-  MM_S3_SECRET_KEY: "fzp8s99MvaZojs3BIpPLVNcc3dfpvPDv"
+  # todo obviously very insecure, need to replace all of these with secrets & probably some secret manager like Vault.
+  #      then delete all of these existing credentials
+  MAPMAKER_MONGO_URI: "mongodb+srv://admin:37nk6wH1j2XjSZnq@mapmaker.xxj8xag.mongodb.net/"
+  # Legacy, kept for chat facet which does not use config quite yet
+  MM_MONGO_URI: "mongodb+srv://admin:37nk6wH1j2XjSZnq@mapmaker.xxj8xag.mongodb.net/"
+  MAPMAKER_S3_ADDRESS: "https://minio.dev.hollowcube.net/"
+  MAPMAKER_S3_ACCESSKEY: "Ai65UJERihroEJTi"
+  MAPMAKER_S3_SECRETKEY: "fzp8s99MvaZojs3BIpPLVNcc3dfpvPDv"
+  MAPMAKER_SPICEDB_ADDRESS: "grpc.authzed.com:443"
+  MAPMAKER_SPICEDB_SECRETKEY: "tc_mapmaker_dev_k8s_feb473a28a9f019649d29a209406219203c6619cbc878465af9065ae95001e70b9444eabf84c19130a8ad3ae9a8c9e28fa0ce492b32b13f44f102a6d23ea6ee6"
+  MAPMAKER_SPICEDB_TLS: "true"
+  PROMETHEUS_DISABLE_CREATED_SERIES: "true"
 
 imagePullSecrets:
   - name: regcred

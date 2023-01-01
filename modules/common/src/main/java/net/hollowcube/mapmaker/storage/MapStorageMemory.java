@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,12 +17,6 @@ class MapStorageMemory implements MapStorage {
 
     @Override
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
-        var duplicateName = mapsById.values().stream()
-                .filter(storedMap -> storedMap.getName().equalsIgnoreCase(map.getName()))
-                .limit(1)
-                .count() == 1;
-        if (duplicateName)
-            return FutureResult.error(ERR_DUPLICATE_NAME);
         var existing = mapsById.putIfAbsent(map.getId(), map);
         if (existing != null)
             return FutureResult.error(ERR_DUPLICATE_ENTRY);
@@ -45,22 +40,47 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId) {
-        var maps = new ArrayList<MapData>();
-        for (var map : mapsById.values()) {
-            if (map.getOwner().equals(playerId))
-                maps.add(map);
-        }
-        return FutureResult.of(maps);
+    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+        if (!mapsById.containsKey(mapId))
+            return FutureResult.error(ERR_NOT_FOUND);
+        return FutureResult.of(mapsById.remove(mapId));
     }
 
     @Override
-    public @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId) {
-        for (var map : mapsById.values()) {
-            if (map.getOwner().equals(playerId) && (map.getId().equals(nameOrId) || map.getName().equalsIgnoreCase(nameOrId)))
-                return FutureResult.of(map);
-        }
-        return FutureResult.error(ERR_NOT_FOUND);
+    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
+        return mapsById.values().stream()
+                .filter(map -> map.getPublishedId().equalsIgnoreCase(shortMapId))
+                .findFirst()
+                .map(MapData::getId)
+                .map(FutureResult::of)
+                .orElse(FutureResult.error(ERR_NOT_FOUND));
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
+        return FutureResult.of(mapsById.values().stream()
+                .filter(MapData::isPublished)
+                .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
+                .skip(offset)
+                .limit(size)
+                .toList());
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
+        return FutureResult.of(mapsById.values().stream()
+                .filter(map -> {
+                    if (query.author() != null && !query.author().equals(map.getOwner()))
+                        return false;
+                    //noinspection RedundantIfStatement
+                    if (query.publishedOnly() != null && !map.isPublished())
+                        return false;
+                    return true;
+                })
+                .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
+                .skip(offset)
+                .limit(size)
+                .toList());
     }
 
     @Override

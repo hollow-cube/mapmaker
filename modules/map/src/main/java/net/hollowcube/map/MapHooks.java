@@ -1,5 +1,7 @@
 package net.hollowcube.map;
 
+import net.hollowcube.map.block.FinishPlateBlock;
+import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.ApiStatus;
@@ -19,6 +21,12 @@ public final class MapHooks {
     /** Returns true if the given player is currently playing. */
     public static boolean isPlayerPlaying(@NotNull Player player) {
         return player.getTag(PLAYING);
+    }
+
+    // Implicit tags
+
+    public static boolean isCompletable(@NotNull MapData map) {
+        return map.getPois().stream().anyMatch(poi -> poi.getType().equals(FinishPlateBlock.POI_TYPE));
     }
 
 

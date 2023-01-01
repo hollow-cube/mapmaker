@@ -43,4 +43,12 @@ public class TranslatedButtonSection extends ButtonSection {
                 .lore(LanguageProvider.optionalMultiTranslatable(baseTranslationKey + ".lore", args))
                 .build(), onClick);
     }
+
+    public TranslatedButtonSection(int width, int height, @NotNull String baseTranslationKey, @NotNull List<Component> args,
+                                   @NotNull Material mat, @Nullable ClickHandler onClick) {
+        super(width, height, ItemStack.builder(mat)
+                .displayName(Component.translatable(baseTranslationKey + ".name", args))
+                .lore(LanguageProvider.optionalMultiTranslatable(baseTranslationKey + ".lore", args))
+                .build(), onClick);
+    }
 }

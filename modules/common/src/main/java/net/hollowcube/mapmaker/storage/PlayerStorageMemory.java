@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 class PlayerStorageMemory implements PlayerStorage {
-    public static final Logger LOGGER = LoggerFactory.getLogger(PlayerStorageMemory.class);
+    public static final Logger logger = LoggerFactory.getLogger(PlayerStorageMemory.class);
 
     private final Map<String, PlayerData> playersById = new HashMap<>();
 
     @Override
     public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
-        LOGGER.info("Creating player {}", player.getId());
+        logger.info("Creating player {}", player.getId());
         var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
             return FutureResult.error(ERR_DUPLICATE_ENTRY);
@@ -25,7 +25,7 @@ class PlayerStorageMemory implements PlayerStorage {
 
     @Override
     public @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id) {
-        LOGGER.info("Getting player by id {}", id);
+        logger.info("Getting player by id {}", id);
         var player = playersById.get(id);
         if (player == null) {
             return FutureResult.error(ERR_NOT_FOUND);
@@ -35,7 +35,7 @@ class PlayerStorageMemory implements PlayerStorage {
 
     @Override
     public @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
-        LOGGER.info("Getting player by uuid {}", uuid);
+        logger.info("Getting player by uuid {}", uuid);
         for (var entry : playersById.entrySet()) {
             if (entry.getValue().getId().equals(uuid)) {
                 return FutureResult.of(entry.getValue());
@@ -46,11 +46,23 @@ class PlayerStorageMemory implements PlayerStorage {
 
     @Override
     public @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player) {
-        LOGGER.info("Updating player {}", player.getId());
+        logger.info("Updating player {}", player.getId());
         if (!playersById.containsKey(player.getId()))
             return FutureResult.error(ERR_NOT_FOUND);
         playersById.put(player.getId(), player);
         return FutureResult.ofNull();
     }
 
+    @Override
+    public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
+        logger.info("Unlinking map {}", mapId);
+        playersById.values().forEach(playerData -> {
+            for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
+                if (playerData.getMapSlot(i).equals(mapId)) {
+                    playerData.setMapSlot(i, null);
+                }
+            }
+        });
+        return FutureResult.ofNull();
+    }
 }

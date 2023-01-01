@@ -28,6 +28,11 @@ public interface PlayerStorage {
 
     @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
 
-    @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player);
+    @NotNull FutureResult<Void> updatePlayer(@NotNull PlayerData player);
+
+    /**
+     * Removes the given map from every player with an association.
+     */
+    @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId);
 
 }

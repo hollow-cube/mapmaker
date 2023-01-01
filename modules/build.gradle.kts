@@ -31,6 +31,10 @@ subprojects {
         testAnnotationProcessor("com.google.auto.service:auto-service:1.0.1")
         implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 
+        // Prometheus
+        val prometheusVersion = rootProject.property("prometheusVersion")
+        implementation("io.prometheus:simpleclient:${prometheusVersion}")
+
         // Minestom
         compileOnly("com.github.hollow-cube:Minestom:${rootProject.property("minestomVersion")}")
 

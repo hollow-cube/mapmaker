@@ -4,6 +4,7 @@ import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,6 @@ public interface MapStorage {
 
     Error ERR_NOT_FOUND = Error.of("map not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
-    Error ERR_DUPLICATE_NAME = ERR_DUPLICATE_ENTRY.wrap("name {0}");
 
     static @NotNull MapStorage memory() {
         return new MapStorageMemory();
@@ -36,12 +36,18 @@ public interface MapStorage {
 
     @NotNull FutureResult<Void> updateMap(@NotNull MapData map);
 
+    @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId);
 
-    // Player specific map searches
+    @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId);
 
-    @NotNull FutureResult<List<MapData>> getMapsByPlayer(@NotNull String playerId);
 
-    @NotNull FutureResult<MapData> getPlayerMap(@NotNull String playerId, @NotNull String nameOrId);
+    /**
+     * Fetches the latest maps with the given offset and size. Used for paginating the map list right now, but will
+     * be replaced with a more complicated "MapQuery" builder/system later.
+     */
+    @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size);
+
+    @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size);
 
 
     // Other utilities

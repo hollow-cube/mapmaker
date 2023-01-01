@@ -16,7 +16,11 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 
 class PlayerStorageMongo implements PlayerStorage {
     private final MongoClient client;
@@ -72,6 +76,27 @@ class PlayerStorageMongo implements PlayerStorage {
         });
     }
 
+    @Override
+    public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
+        List<FutureResult<Void>> futures = new ArrayList<>();
+        return FutureResult.supply(() -> {
+            var filter = in("mapSlots", mapId);
+            collection().find(filter).forEach(player -> {
+                for (int i = 0; i < player.getUnlockedMapSlots(); i++) {
+                    if (mapId.equals(player.getMapSlot(i))) {
+                        player.setMapSlot(i, null);
+                    }
+                }
+
+                //todo update as a transaction
+                //todo updating a player like this is not really valid. We need to tell the server that this player was updated so that it may update its cached copy of the player data.
+                //     currently we do this and then if a player looks in that gui again it will still contain this map (unless they rejoin)
+                futures.add(updatePlayer(player));
+            });
+            return Result.ofNull();
+        }).flatMap(unused -> FutureResult.allOf(futures.toArray(FutureResult[]::new)));
+    }
+
     private @NotNull MongoCollection<PlayerData> collection() {
         return client.getDatabase(config.database()).getCollection("players", PlayerData.class);
     }
@@ -86,8 +111,8 @@ class PlayerStorageMongo implements PlayerStorage {
                 switch (reader.readName()) {
                     case "_id" -> player.setId(reader.readString());
                     case "uuid" -> player.setUuid(reader.readString());
-                    case "unlocked_map_slots" -> player.setUnlockedMapSlots(reader.readInt32());
-                    case "map_slots" -> {
+                    case "unlockedMapSlots" -> player.setUnlockedMapSlots(reader.readInt32());
+                    case "mapSlots" -> {
                         reader.readStartArray();
                         for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
                             if (reader.readBsonType() == BsonType.NULL) {
@@ -109,8 +134,8 @@ class PlayerStorageMongo implements PlayerStorage {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
             writer.writeString("uuid", value.getUuid());
-            writer.writeInt32("unlocked_map_slots", value.getUnlockedMapSlots());
-            writer.writeStartArray("map_slots");
+            writer.writeInt32("unlockedMapSlots", value.getUnlockedMapSlots());
+            writer.writeStartArray("mapSlots");
             for (var mapId : value.getMapSlots()) {
                 if (mapId == null) {
                     writer.writeNull();

@@ -3,7 +3,8 @@ package net.hollowcube.map.block;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.map.MapHooks;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
@@ -13,8 +14,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.ServerProcess;
-import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -22,11 +21,12 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 @AutoService(Facet.class)
 public class FinishPlateBlock implements Facet {
@@ -48,7 +48,7 @@ public class FinishPlateBlock implements Facet {
                     .build());
 
     @Override
-    public void hook(@NotNull ServerProcess server) {
+    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
         ItemManager.register(ID, ITEM);
         server.block().registerHandler(Handler.INSTANCE.getNamespaceId(), () -> Handler.INSTANCE);
         server.eventHandler().addListener(MapWorldRegisterEvent.class, event -> {
@@ -57,11 +57,12 @@ public class FinishPlateBlock implements Facet {
         server.eventHandler().addListener(MapWorldUnregisterEvent.class, event -> {
             event.getInstance().eventNode().removeChild(node);
         });
+        return FutureResult.ofNull();
     }
 
     private static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {
         var map = MapWorld.fromInstance(event.getInstance()).map();
-        map.addPOI(new MapData.POI(POI_TYPE, event.getBlockPosition()));
+        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), event.getBlockPosition()));
         event.setBlock(event.getBlock().withHandler(Handler.INSTANCE));
     }
 
@@ -69,36 +70,18 @@ public class FinishPlateBlock implements Facet {
         return itemStack.meta().getCustomModelData() == NamedItems.FINISH_PLATE;
     }
 
-    public static class Handler implements BlockHandler {
-        private static final BoundingBox BOUNDING_BOX = new BoundingBox(14.0 / 16.0, 1.0 / 16.0, 14.0 / 16.0);
-
+    public static class Handler extends AbstractPlateHandler {
         public static final Handler INSTANCE = new Handler();
 
         @Override
         public @NotNull NamespaceID getNamespaceId() {
-            return NamespaceID.from("mapmaker:finish_plate");
+            return ID;
         }
 
         @Override
-        public boolean isTickable() {
-            return true;
-        }
-
-        @Override
-        public void tick(@NotNull Tick tick) {
+        public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
             var instance = tick.getInstance();
-            var pos = tick.getBlockPosition();
-            var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
-
-            // Check for collision with all players in instance
-            var entities = instance.getNearbyEntities(pos, 2);
-            for (var entity : entities) {
-                if (!(entity instanceof Player player) || !MapHooks.isPlayerPlaying(player)) continue;
-                if (!player.getBoundingBox().intersectBox(centerPos.sub(player.getPosition()), BOUNDING_BOX)) continue;
-
-                // Player has stepped on the finish plate, trigger a map completion event
-                EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.fromInstance(instance), player));
-            }
+            EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.fromInstance(instance), player));
         }
 
         @Override

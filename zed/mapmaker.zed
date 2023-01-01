@@ -1,0 +1,22 @@
+
+// Role definitions for the entirety of mapmaker
+definition mapmaker/platform {
+    // Platform admin, implicitly grants write permission on all resources
+    relation admin: mapmaker/player
+}
+
+definition mapmaker/player {}
+
+definition mapmaker/map {
+    relation platform: mapmaker/platform
+
+    relation owner: mapmaker/player
+    relation trusted: mapmaker/player
+
+    // Allow setting readership for anybody, will be done when the map is published.
+    relation viewer: mapmaker/player | mapmaker/player:*
+
+    permission admin = owner + platform->admin
+    permission write = admin + trusted
+    permission read = viewer + write
+}

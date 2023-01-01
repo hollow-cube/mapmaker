@@ -78,6 +78,20 @@ public non-sealed class ParentSection extends Section {
         unmountChild(index % width(), index / width(), comp);
     }
 
+    protected void unmountChild(int index) {
+        checkBounds(index);
+        var section = childMap[index];
+        if (section == null) return;
+        unmountChild(index % width(), index / width(), section);
+    }
+
+    /** Unmounts and removes all children **/
+    protected void clear() {
+        for (int i = 0; i < childMap.length; i++) {
+            unmountChild(i);
+        }
+    }
+
     @Override
     protected boolean handleClick(int slot, @NotNull Player player, @NotNull ClickType clickType) {
         var child = childMap[slot];

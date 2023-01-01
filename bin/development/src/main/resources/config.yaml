@@ -20,6 +20,6 @@ s3:
   secretKey: mapmaker
 
 spicedb:
-  address: http://localhost:50051
+  address: localhost:50051
   secretKey: foobar
-  # todo tls
+  tls: false

@@ -1,16 +1,24 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.map.feature.CheckpointFeature;
+import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -28,9 +36,15 @@ public class PlayingMapWorld extends MapWorld {
         super(mapServer, map);
 
         var eventNode = instance().eventNode();
-        eventNode.addListener(InstanceTickEvent.class, this::tick);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
+        eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+
+        eventNode.addChild(new CheckpointFeature().eventNode()); //todo auto registration with selector
+
+        if (MapHooks.isCompletable(map)) {
+            eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);
+        }
     }
 
     @Override
@@ -48,7 +62,6 @@ public class PlayingMapWorld extends MapWorld {
                         saveState.setPlayerId(playerId);
                         saveState.setMapId(map.getId());
                         saveState.setStartTime(Instant.now());
-                        saveState.setPos(map.getSpawnPoint());
                         return saveStates.createSaveState(saveState);
                     }
 
@@ -59,13 +72,23 @@ public class PlayingMapWorld extends MapWorld {
                     player.setTag(MapHooks.PLAYING, true);
                     player.setTag(SaveState.TAG, saveState);
 
-                    player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
+                    // If exact pos is saved, teleport there. Otherwise teleport to latest checkpoint or map spawn point
+                    if (saveState.getPos() != null) {
+                        player.teleport(saveState.getPos()).exceptionally(FutureUtil::handleException);
+                    } else if (saveState.getCheckpoint() != null) {
+                        var checkpoint = map.getPoi(saveState.getCheckpoint()); //todo handle null case
+                        player.teleport(new Pos(checkpoint.getPos())).exceptionally(FutureUtil::handleException);
+                    } else {
+                        player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
+                    }
                     player.setGameMode(GameMode.ADVENTURE);
                     player.setAllowFlying(true);
 
                     player.sendMessage("Now playing " + map.getName());
 
                     saveState.setPlaytimeUpdate(System.currentTimeMillis()); // Start timer now
+
+                    EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
                 })
                 .thenErr(err -> {
                     logger.error("Failed to load save state for player {} in map {}: {}", playerId, map.getId(), err);
@@ -76,10 +99,14 @@ public class PlayingMapWorld extends MapWorld {
     @Override
     protected @NotNull FutureResult<Void> savePlayer(@NotNull Player player, boolean remove) {
         var saveState = player.getTag(SaveState.TAG);
-        if (remove) player.removeTag(SaveState.TAG);
+        if (remove) {
+            EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+            player.removeTag(SaveState.TAG);
+        }
 
         // Update relevant fields
-        saveState.setPos(player.getPosition());
+        //todo should be based on a map setting
+//        saveState.setPos(player.getPosition());
 
         // Save
         return mapServer.saveStateStorage().updateSaveState(saveState)
@@ -96,7 +123,8 @@ public class PlayingMapWorld extends MapWorld {
                 .thenErr(err -> logger.error("Failed to unload world: {}", err));
     }
 
-    private void tick(@NotNull InstanceTickEvent event) {
+    /** Ticks each player, updating their playtime action bar */
+    private void tickPlayers(@NotNull InstanceTickEvent event) {
         var now = System.currentTimeMillis();
         instance().getPlayers().forEach(player -> {
             if (!MapHooks.isPlayerPlaying(player)) return;
@@ -110,6 +138,22 @@ public class PlayingMapWorld extends MapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
+    }
+
+    private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {
+        var player = event.getPlayer();
+        player.setTag(MapHooks.PLAYING, false);
+
+        var playerData = PlayerData.fromPlayer(player);
+
+        // Update, save, and remove savestate
+        var saveState = player.getTag(SaveState.TAG);
+        saveState.setCompleted(true);
+        player.removeTag(SaveState.TAG);
+        mapServer.saveStateStorage().updateSaveState(saveState)
+                .thenErr(err -> logger.error("failed to save save state for player {}: {}", playerData.getId(), err));
+
+        player.openInventory(new RouterSection(new CompletedMapView()).getInventory()); //todo method in MapServer to open gui with appropriate context
     }
 
     private void updatePlayer(@NotNull Player player, long time) {

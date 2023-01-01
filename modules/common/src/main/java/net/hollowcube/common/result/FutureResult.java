@@ -2,6 +2,8 @@ package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
@@ -13,7 +15,7 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     // Factory methods
 
     /** Creates a new {@link FutureResult} which is already completed with the given result. */
-    static <T> @NotNull FutureResult<T> of(T result) {
+    static <T> @NotNull FutureResult<T> of(@NotNull T result) {
         return new FutureResults.CF<>(CompletableFuture.completedFuture(Result.of(result)));
     }
 
@@ -46,9 +48,14 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
      */
     static @NotNull FutureResult<Void> allOf(@NotNull FutureResult<?>... results) {
         var futures = new CompletableFuture[results.length];
+        var errors = Collections.synchronizedList(new ArrayList<Error>());
         for (int i = 0; i < results.length; i++)
-            futures[i] = results[i].toCompletableFuture();
-        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> Result.of(null)));
+            futures[i] = results[i].thenErr(errors::add).toCompletableFuture();
+        return new FutureResults.CF<>(CompletableFuture.allOf(futures).thenApply(v -> {
+            if (errors.isEmpty())
+                return Result.ofNull();
+            return Result.error(new Errors.MultiError(errors.toArray(Error[]::new)));
+        }));
     }
 
 
@@ -62,6 +69,11 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
 
     @NotNull <S> FutureResult<S> flatMap(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
     @NotNull FutureResult<T> flatMapErr(@NotNull Function<@NotNull Error, @NotNull FutureResult<T>> mapper);
+
+    @NotNull FutureResult<T> wrapErr(@NotNull String format);
+
+    @NotNull FutureResult<T> alsoRaw(@NotNull Consumer<@NotNull Result<T>> consumer);
+    @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
 
 
     // Compatibility

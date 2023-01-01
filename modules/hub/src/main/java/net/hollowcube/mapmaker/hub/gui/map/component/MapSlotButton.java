@@ -23,26 +23,26 @@ public class MapSlotButton extends ButtonSection {
             .displayName(Component.translatable("gui.map_slot.loading.name"))
             .build();
 
-    private final int slot;
+    private final int rawSlot;
 
-    public MapSlotButton(int slot, @NotNull FutureResult<MapData> mapFuture) {
-        this(slot, mapFuture, null);
+    public MapSlotButton(int rawSlot, @NotNull FutureResult<MapData> mapFuture) {
+        this(rawSlot, mapFuture, null);
     }
 
-    public MapSlotButton(int slot, @NotNull FutureResult<MapData> mapFuture, @Nullable Runnable onClick) {
+    public MapSlotButton(int rawSlot, @NotNull FutureResult<MapData> mapFuture, @Nullable Runnable onClick) {
         super(1, 1, LOADING_ICON, onClick);
-        this.slot = slot;
+        this.rawSlot = rawSlot;
 
         mapFuture.then(this::mapLoaded).thenErr(this::mapLoadError);
     }
 
     private void mapLoaded(@NotNull MapData mapData) {
-        var args = List.of(Component.text(slot),
+        var args = List.of(Component.text(rawSlot + 1),
                 Component.text(mapData.getOwner()),
                 Component.text(mapData.getName()),
                 Component.text(mapData.getId()));
         setItem(ItemStack.builder(Material.GREEN_CONCRETE)
-                .amount(slot)
+                .amount(rawSlot + 1)
                 .displayName(Component.translatable("gui.map_slot.map.name", args))
                 .lore(LanguageProvider.createMultiTranslatable("gui.map_slot.map.lore", args.toArray(new Component[0])))
                 .build());
@@ -51,7 +51,7 @@ public class MapSlotButton extends ButtonSection {
     private void mapLoadError(@NotNull Error err) {
         //todo translations
         setItem(ItemStack.builder(Material.BARRIER)
-                .amount(slot)
+                .amount(rawSlot)
                 .displayName(Component.text(err.message()))
                 .build());
     }

@@ -22,6 +22,11 @@ public class PlayerData {
     }
 
     public static final int MAX_MAP_SLOTS = 5;
+    public static final int DEFAULT_UNLOCKED_MAP_SLOTS = 2;
+
+    public static final int SLOT_STATE_OPEN = 0;
+    public static final int SLOT_STATE_LOCKED = 1;
+    public static final int SLOT_STATE_IN_USE = 2;
 
     private String id;
     private String uuid;
@@ -57,8 +62,15 @@ public class PlayerData {
         this.mapSlots = mapSlots;
     }
 
-    public @NotNull String[] getMapSlots() {
+    // This type definition is disgusting, but means that the array itself is never null, but entries inside it may be.
+    public @Nullable String @NotNull [] getMapSlots() {
         return Arrays.copyOf(mapSlots, mapSlots.length);
+    }
+
+    public int getSlotState(int slot) {
+        if (slot < 0 || slot >= unlockedMapSlots)
+            return SLOT_STATE_LOCKED;
+        return mapSlots[slot] == null ? SLOT_STATE_OPEN : SLOT_STATE_IN_USE;
     }
 
     public @Nullable String getMapSlot(int slot) {
@@ -69,12 +81,5 @@ public class PlayerData {
     public void setMapSlot(int slot, @Nullable String mapId) {
         Check.argCondition(slot < 0 || slot >= MAX_MAP_SLOTS, "Slot must be between 0 and " + MAX_MAP_SLOTS);
         mapSlots[slot] = mapId;
-    }
-
-    @Override
-    public String toString() {
-        return "PlayerData{" +
-                "id='" + id + '\'' +
-                '}';
     }
 }

@@ -2,20 +2,27 @@ package net.hollowcube.mapmaker.model;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
 public class MapData {
+    // Permission keys
+    public static final String READ = "read";
+    public static final String WRITE = "write";
+    public static final String ADMIN = "admin";
+
+    public static final @Language("regexp") String NAME_REGEX = "[a-zA-Z0-9_ ]{1,32}";
 
     private String id;
     private String owner;
-    private String name;
+    private String name = "Untitled Map";
 
     // Published state
-    private boolean published = false;
+    private Instant publishedAt = null;
     // Published id is a short ID for users to reference a map.
     // This ID is assigned when a map is published and not guaranteed to be consistent. It should never be stored
     // internally as a reference to a map. Use the ID instead.
@@ -57,11 +64,15 @@ public class MapData {
 
 
     public boolean isPublished() {
-        return published;
+        return publishedAt != null;
     }
 
-    public void setPublished(boolean published) {
-        this.published = published;
+    public @UnknownNullability Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
     public String getPublishedId() {
@@ -93,12 +104,30 @@ public class MapData {
         return pois;
     }
 
+    public POI getPoi(@NotNull Point pos) {
+        for (POI poi : pois) {
+            if (poi.pos.sameBlock(pos)) {
+                return poi;
+            }
+        }
+        return null;
+    }
+
+    public POI getPoi(@NotNull String id) {
+        for (POI poi : pois) {
+            if (poi.id.equals(id)) {
+                return poi;
+            }
+        }
+        return null;
+    }
+
     public void addPOI(@NotNull POI poi) {
         pois.add(poi);
     }
 
     public void removePOI(@NotNull Point pos) {
-        pois.removeIf(poi -> poi.pos.equals(pos));
+        pois.removeIf(poi -> poi.pos.sameBlock(pos));
     }
 
     public void tryAddTime(UUID id, long time) {
@@ -136,7 +165,47 @@ public class MapData {
                 '}';
     }
 
-    public record POI(String type, Point pos) {}
+    public static class POI {
+        private String type;
+        private String id;
+        private Point pos;
+        private Map<String, Object> data;
+
+        public POI(String type, String id, Point pos) {
+            this(type, id, pos, new HashMap<>());
+        }
+
+        public POI(String type, String id, Point pos, Map<String, Object> data) {
+            this.type = type;
+            this.id = id;
+            this.pos = pos;
+            this.data = new HashMap<>(data);
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public Point getPos() {
+            return pos;
+        }
+
+        public Map<String, Object> getData() {
+            return data;
+        }
+
+        public <T> T getOrDefault(@NotNull String key, T def) {
+            return (T) data.getOrDefault(key, def);
+        }
+
+        public void set(@NotNull String key, Object value) {
+            data.put(key, value);
+        }
+    }
 
     public record CompletionTime(UUID playerUUID, long timeInMills) {}
 
