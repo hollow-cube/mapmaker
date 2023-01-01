@@ -31,7 +31,7 @@ dependencies {
 
     implementation("org.spongepowered:configurate-yaml:4.1.2")
 
-
+    implementation("ch.qos.logback:logback-classic:1.4.5")
 }
 
 application {
