@@ -82,11 +82,4 @@ public class PlayerData {
         Check.argCondition(slot < 0 || slot >= MAX_MAP_SLOTS, "Slot must be between 0 and " + MAX_MAP_SLOTS);
         mapSlots[slot] = mapId;
     }
-
-    @Override
-    public String toString() {
-        return "PlayerData{" +
-                "id='" + id + '\'' +
-                '}';
-    }
 }
