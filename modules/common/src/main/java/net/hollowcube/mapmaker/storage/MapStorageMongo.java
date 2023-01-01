@@ -9,6 +9,7 @@ import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.bson.BsonReader;
@@ -125,6 +126,17 @@ public class MapStorageMongo implements MapStorage {
             var sort = descending("publishedAt");
             var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
             return Result.of(result);
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
+        return FutureResult.supply(() -> {
+            var filter = new Document();
+//            if (query.author())
+
+//            return Result.of();
+            throw new RuntimeException("Not implemented");
         });
     }
 

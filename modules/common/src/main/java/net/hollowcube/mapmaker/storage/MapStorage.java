@@ -4,6 +4,7 @@ import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,8 @@ public interface MapStorage {
      * be replaced with a more complicated "MapQuery" builder/system later.
      */
     @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size);
+
+    @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size);
 
 
     // Other utilities

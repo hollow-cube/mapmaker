@@ -29,6 +29,8 @@ dependencies {
     implementation("io.grpc:grpc-netty:1.51.1")
     implementation("io.grpc:grpc-netty-shaded:1.51.1")
 
+    implementation("org.spongepowered:configurate-yaml:4.1.2")
+
 
 }
 

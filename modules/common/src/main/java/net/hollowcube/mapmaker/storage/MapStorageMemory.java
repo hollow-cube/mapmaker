@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.storage;
 
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -59,6 +60,23 @@ class MapStorageMemory implements MapStorage {
     public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
         return FutureResult.of(mapsById.values().stream()
                 .filter(MapData::isPublished)
+                .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
+                .skip(offset)
+                .limit(size)
+                .toList());
+    }
+
+    @Override
+    public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
+        return FutureResult.of(mapsById.values().stream()
+                .filter(map -> {
+                    if (query.author() != null && !query.author().equals(map.getOwner()))
+                        return false;
+                    //noinspection RedundantIfStatement
+                    if (query.publishedOnly() != null && !map.isPublished())
+                        return false;
+                    return true;
+                })
                 .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
                 .skip(offset)
                 .limit(size)
