@@ -3,6 +3,7 @@ package net.hollowcube.map.block;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
@@ -47,7 +48,7 @@ public class FinishPlateBlock implements Facet {
                     .build());
 
     @Override
-    public void hook(@NotNull ServerProcess server) {
+    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
         ItemManager.register(ID, ITEM);
         server.block().registerHandler(Handler.INSTANCE.getNamespaceId(), () -> Handler.INSTANCE);
         server.eventHandler().addListener(MapWorldRegisterEvent.class, event -> {
@@ -56,6 +57,7 @@ public class FinishPlateBlock implements Facet {
         server.eventHandler().addListener(MapWorldUnregisterEvent.class, event -> {
             event.getInstance().eventNode().removeChild(node);
         });
+        return FutureResult.ofNull();
     }
 
     private static void handlePlacement(@NotNull PlayerBlockPlaceEvent event) {

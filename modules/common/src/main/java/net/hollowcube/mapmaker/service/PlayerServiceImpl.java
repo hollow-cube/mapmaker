@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerServiceImpl implements PlayerService, Facet {
 
     @Override
-    public void hook(@NotNull ServerProcess server) {
-
+    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
+        return FutureResult.ofNull();
     }
 
     @Override

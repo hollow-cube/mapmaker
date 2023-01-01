@@ -9,15 +9,12 @@ import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import io.prometheus.client.hotspot.DefaultExports;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.dev.config.Config;
-import net.hollowcube.mapmaker.hub.gui.map.MapSlotsView;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -33,9 +30,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -154,7 +149,10 @@ public class DevServer {
         // End phase 1
         FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
                 .then(unused -> logger.info("Phase 1 complete."))
-                .thenErr(err -> logger.error("failed during startup: {}", err))
+                .thenErr(err -> {
+                    logger.error("failed during startup: {}", err);
+                    System.exit(1);
+                })
                 .toCompletableFuture().join();
 
         // Start phase 2
@@ -172,9 +170,14 @@ public class DevServer {
         // End phase 2
         FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
                 .then(unused -> logger.info("Phase 2 complete."))
+                .thenErr(err -> {
+                    logger.error("failed during startup: {}", err);
+                    System.exit(1);
+                })
                 .toCompletableFuture().join();
 
-        // Other misc tasks (todo facets should return a future + be part of phase 3)
+        // Start phase 3 (other misc tasks)
+        startupTasks.clear();
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -186,21 +189,21 @@ public class DevServer {
 
         int i = 0;
         for (var facet : ServiceLoader.load(Facet.class)) {
-            facet.hook(MinecraftServer.process());
+            startupTasks.add(facet.hook(MinecraftServer.process()));
             i++;
         }
-        System.out.println("loaded " + i + " facets");
-
-        var cmd = new Command("test");
-        cmd.setDefaultExecutor((sender, context) -> {
-            var player = (Player) sender;
-            var sec = new GroupSection(9, 3);
-            sec.add(0, 0, new MapSlotsView(player.getTag(PlayerData.DATA)));
-            new RouterSection(sec).showToPlayer(player);
-        });
-        MinecraftServer.getCommandManager().register(cmd);
+        logger.info("Loaded {} facets.", i);
 
         TerraformWorldEdit.init(); //todo only should be present in map servers
+
+        // End phase 3
+        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
+                .then(unused -> logger.info("Phase 3 complete."))
+                .thenErr(err -> {
+                    logger.error("failed during startup: {}", err);
+                    System.exit(1);
+                })
+                .toCompletableFuture().join();
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {

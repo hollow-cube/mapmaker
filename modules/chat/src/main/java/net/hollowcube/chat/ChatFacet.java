@@ -8,6 +8,7 @@ import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
+import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.util.EventUtil;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
@@ -65,11 +66,12 @@ public class ChatFacet implements Facet {
     }
 
     @Override
-    public void hook(@NotNull ServerProcess server) {
+    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));
         server.command().register(new ReplyCommand(this));
+        return FutureResult.ofNull();
     }
 
     public EventNode<Event> eventNode() {

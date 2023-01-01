@@ -1,5 +1,6 @@
 package net.hollowcube.common.facet;
 
+import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,5 +11,5 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Facet {
-    void hook(@NotNull ServerProcess server);
+    FutureResult<Void> hook(@NotNull ServerProcess server);
 }
