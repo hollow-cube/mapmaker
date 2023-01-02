@@ -2,6 +2,8 @@ package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 class Errors {
 
     public static boolean is(@NotNull Error error, @NotNull Error other) {
@@ -46,6 +48,19 @@ class Errors {
         @Override
         public String toString() {
             return message();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MultiError that = (MultiError) o;
+            return Arrays.equals(errors, that.errors);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(errors);
         }
     }
 

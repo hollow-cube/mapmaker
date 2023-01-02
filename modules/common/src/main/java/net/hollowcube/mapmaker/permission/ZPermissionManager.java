@@ -71,6 +71,9 @@ class ZPermissionManager {
                 future.complete(null);
             } catch (Throwable t) {
                 future.completeExceptionally(t);
+                if (t instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }, Runnable::run);
         return FutureResult.wrap(future);
@@ -84,6 +87,9 @@ class ZPermissionManager {
                 future.complete(asyncRes.get());
             } catch (Throwable t) {
                 future.completeExceptionally(t);
+                if (t instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }, Runnable::run);
         return FutureResult.wrap(future).flatMap(res -> {
