@@ -9,6 +9,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +30,7 @@ public record Config(
      * Loads the config from the given path, or loads the packaged one if the path does not exist.
      */
     public static @NotNull Config loadFromFile(@NotNull Path path) {
-        BufferedReader input;
+        BufferedReader input = null;
         try {
             if (Files.exists(path)) {
                 //noinspection resource
@@ -39,8 +40,9 @@ public record Config(
                 input = new BufferedReader(new InputStreamReader(Config.class.getResourceAsStream("/config.yaml")));
             }
 
+            var finalInput = input;
             var loader = YamlConfigurationLoader.builder()
-                    .source(() -> input)
+                    .source(() -> finalInput)
                     .build();
 
             var rootNode = loader.load();
@@ -52,6 +54,13 @@ public record Config(
             // Probably should shutdown gracefully, but this is in theory the first thing that runs so it doesnt matter that much.
             System.exit(1);
             throw new RuntimeException(e); // Does nothing besides stop the compiler from complaining about the exit above.
+        } finally {
+            try {
+                if (input != null)
+                    input.close();
+            } catch (IOException e) {
+                logger.error("failed to close config file", e);
+            }
         }
     }
 
