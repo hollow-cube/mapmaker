@@ -11,12 +11,14 @@ import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.hub.gui.common.GenericNameInput;
+import net.hollowcube.mapmaker.hub.gui.common.IconSelection;
 import net.hollowcube.mapmaker.hub.gui.common.TranslatedButtonSection;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,6 +95,13 @@ public class MapSlotView extends ParentSection {
         saveMap(); // Save in background
     }
 
+    private void updateIcon(@NotNull ItemStack itemStack) {
+        map.setIcon(itemStack);
+        mapLoaded(map);
+
+        saveMap();
+    }
+
     private void saveMap() {
         var mapStorage = getContext(HubServer.class).mapStorage();
         mapStorage.updateMap(map).thenErr(this::mapLoadError); //todo should refetch the map incase we have a desynced state.
@@ -146,7 +155,8 @@ public class MapSlotView extends ParentSection {
         }
 
         private void handleSetDisplayItem() {
-            //todo
+            var router = find(RouterSection.class);
+            router.push(new IconSelection(map.getIcon(), MapSlotView.this::updateIcon));
         }
 
         private void handleEditName() {

@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class Session {
 
-    private static final Tag<Session> SESSION = Tag.Structure("terraform:session", new TagSerializer<Session>() {
+    private static final Tag<Session> SESSION = Tag.Structure("terraform:session", new TagSerializer<>() {
         @Override
         public @Nullable Session read(@NotNull TagReadable reader) {
             throw new UnsupportedOperationException();
