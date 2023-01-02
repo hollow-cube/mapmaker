@@ -2,6 +2,8 @@ package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 
 class Errors {
@@ -65,6 +67,8 @@ class Errors {
     }
 
     public static final class ExceptionError implements Error {
+        private static final boolean VERBOSE_EXCEPTIONS = Integer.getInteger("hollowcube.verbose_exceptions", 1) != 0;
+
         private final Throwable exception;
 
         public ExceptionError(@NotNull Throwable exception) {
@@ -73,6 +77,11 @@ class Errors {
 
         @Override
         public @NotNull String message() {
+            if (VERBOSE_EXCEPTIONS) {
+                var writer = new StringWriter();
+                exception.printStackTrace(new PrintWriter(writer));
+                return writer.toString();
+            }
             //todo probably want to include the stacktrace or something
             return exception.getMessage();
         }
