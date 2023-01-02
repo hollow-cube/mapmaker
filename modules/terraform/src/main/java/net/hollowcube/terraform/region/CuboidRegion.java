@@ -7,6 +7,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public record CuboidRegion(
         @NotNull Instance instance,
@@ -56,6 +57,7 @@ public record CuboidRegion(
             if (++x > maxX) {
                 x = min().blockX();
                 if (++y > maxY) {
+                    if (++z > maxZ) throw new NoSuchElementException();
                     y = min().blockY();
                     z++;
                 }

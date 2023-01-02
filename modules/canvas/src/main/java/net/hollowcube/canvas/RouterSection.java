@@ -27,9 +27,6 @@ public final class RouterSection extends RootSection {
     // Public API
 
     public boolean hasHistory() {
-        // This null check is in case this is called during init somehow.
-        // I am not sure how it is happening and need to fix cases where it could.
-        if (history == null) return false;
         return history.size() > 1;
     }
 

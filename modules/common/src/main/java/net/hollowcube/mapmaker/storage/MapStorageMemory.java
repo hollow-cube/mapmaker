@@ -36,7 +36,7 @@ class MapStorageMemory implements MapStorage {
         if (!mapsById.containsKey(map.getId()))
             return FutureResult.error(ERR_NOT_FOUND);
         mapsById.put(map.getId(), map);
-        return FutureResult.of(null);
+        return FutureResult.ofNull();
     }
 
     @Override
