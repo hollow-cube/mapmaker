@@ -10,7 +10,6 @@ sonarqube{
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.projectName", "MapMaker")
         property("sonar.projectKey", "MapMaker")
-        property("sonar.login", findProperty("hollowSonarToken") as String)
     }
 }
 
