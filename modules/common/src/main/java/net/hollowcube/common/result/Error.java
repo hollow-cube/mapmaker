@@ -2,8 +2,6 @@ package net.hollowcube.common.result;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.text.MessageFormat;
-
 @SuppressWarnings("JavaLangClash") //todo probably should rename to Err or something
 public sealed interface Error permits Errors.ExceptionError, Errors.MultiError, Errors.SimpleError, Errors.WrappedError {
 
@@ -18,7 +16,7 @@ public sealed interface Error permits Errors.ExceptionError, Errors.MultiError, 
     @NotNull String message();
 
     default @NotNull Error wrap(@NotNull String message) {
-        return new Errors.WrappedError(MessageFormat.format(message, this.message()), this);
+        return new Errors.WrappedError(message + this.message(), this);
     }
 
     default boolean is(@NotNull Error error) {
