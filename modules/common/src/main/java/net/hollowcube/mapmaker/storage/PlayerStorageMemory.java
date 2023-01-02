@@ -58,7 +58,7 @@ class PlayerStorageMemory implements PlayerStorage {
         logger.info("Unlinking map {}", mapId);
         playersById.values().forEach(playerData -> {
             for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
-                if (playerData.getMapSlot(i).equals(mapId)) {
+                if (mapId.equals(playerData.getMapSlot(i))) {
                     playerData.setMapSlot(i, null);
                 }
             }

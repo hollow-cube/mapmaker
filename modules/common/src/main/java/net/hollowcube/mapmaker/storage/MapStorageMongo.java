@@ -12,14 +12,12 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import org.bson.BsonReader;
-import org.bson.BsonType;
-import org.bson.BsonWriter;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.MapCodec;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -27,8 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.exists;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Updates.inc;
@@ -132,11 +129,15 @@ public class MapStorageMongo implements MapStorage {
     @Override
     public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
         return FutureResult.supply(() -> {
-            var filter = new Document();
-//            if (query.author())
-
-//            return Result.of();
-            throw new RuntimeException("Not implemented");
+            var conditions = new ArrayList<Bson>();
+            if (query.author() != null)
+                conditions.add(eq("owner", query.author()));
+            if (query.publishedOnly() != null)
+                conditions.add(query.publishedOnly() ? exists("publishedAt") : not(exists("publishedAt")));
+            var filter = conditions.isEmpty() ? new BsonDocument() : and(conditions);
+            var sort = query.publishedOnly() != null && query.publishedOnly() ? descending("publishedAt") : descending("createdAt");
+            var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
+            return Result.of(result);
         });
     }
 
