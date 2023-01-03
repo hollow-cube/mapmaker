@@ -2,6 +2,7 @@ rootProject.name = "mapmaker"
 
 include(":modules")
 // Standalone modules
+include(":modules:commonnew")
 include(":modules:canvas")
 include(":modules:terraform")
 include(":modules:chat")

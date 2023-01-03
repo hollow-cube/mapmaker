@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":modules:canvas"))
+    api(project(":modules:commonnew"))
 
     implementation("org.mongodb:mongodb-driver-sync:4.7.0")
 

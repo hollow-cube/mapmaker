@@ -4,11 +4,15 @@ import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.view.std.ButtonView;
 import net.hollowcube.canvas.view.std.ItemView;
 import net.hollowcube.canvas.view.std.PaneView;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public interface View {
 
@@ -19,6 +23,7 @@ public interface View {
         return new PaneView(width, height);
     }
 
+
     // Single item
 
     @Pure
@@ -26,12 +31,8 @@ public interface View {
         return new ItemView(itemStack);
     }
 
-    // Button
 
-    @Pure
-    static @NotNull View Button(@NotNull ItemStack itemStack, @NotNull Runnable onClick) {
-        return Button(1, 1, itemStack, ClickHandler.leftClick(onClick));
-    }
+    // Button
 
     @Pure
     static @NotNull View Button(@NotNull ItemStack itemStack, @NotNull ClickHandler clickHandler) {
@@ -39,13 +40,31 @@ public interface View {
     }
 
     @Pure
-    static @NotNull View Button(int width, int height, @NotNull ItemStack itemStack, @NotNull Runnable onClick) {
-        return Button(width, height, itemStack, ClickHandler.leftClick(onClick));
+    static @NotNull View Button(int width, int height, @NotNull ItemStack itemStack, @NotNull ClickHandler clickHandler) {
+        return new ButtonView(width, height, itemStack, clickHandler);
+    }
+
+
+    // TranslatableButton
+
+    @Pure
+    static @NotNull View TranslatedButton(@NotNull Material material, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
+        return TranslatedButton(1, 1, material, 0, translationKey, args, onClick);
     }
 
     @Pure
-    static @NotNull View Button(int width, int height, @NotNull ItemStack itemStack, @NotNull ClickHandler clickHandler) {
-        return new ButtonView(width, height, itemStack, clickHandler);
+    static @NotNull View TranslatedButton(@NotNull Material material, int cmd, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
+        return TranslatedButton(1, 1, material, cmd, translationKey, args, onClick);
+    }
+
+    @Pure
+    static @NotNull View TranslatedButton(int width, int height, @NotNull Material material, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
+        return TranslatedButton(width, height, material, 0, translationKey, args, clickHandler);
+    }
+
+    @Pure
+    static @NotNull View TranslatedButton(int width, int height, @NotNull Material material, int cmd, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
+        return new ButtonView(width, height, material, cmd, translationKey, args, clickHandler);
     }
 
 

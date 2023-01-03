@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.demo.view;
 
+import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.view.View;
 import net.hollowcube.canvas.view.ViewContext;
 import net.kyori.adventure.text.Component;
@@ -19,14 +20,9 @@ public class CounterDemo {
     public static @NotNull View CounterDemo(@NotNull ViewContext context, int initial) {
         int count = context.get("count", () -> initial);
         var pane = View.Pane(9, 1);
-        pane.add(0, 0, View.Button(4, 1, ItemStack.of(Material.PAPER), () -> {
-            context.set("count", count - 1);
-        }));
+        pane.add(0, 0, View.Button(4, 1, ItemStack.of(Material.PAPER), ClickHandler.leftClick(() -> context.set("count", count - 1))));
         pane.add(4, 0, View.Item(ItemStack.of(Material.DIAMOND, 1).withDisplayName(Component.text("Count: " + count))));
-        pane.add(5, 0, View.Button(4, 1, ItemStack.of(Material.PAPER), () -> {
-            context.set("count", count + 1);
-        }));
-
+        pane.add(5, 0, View.Button(4, 1, ItemStack.of(Material.PAPER), ClickHandler.leftClick(() -> context.set("count", count + 1))));
         return pane;
     }
 
