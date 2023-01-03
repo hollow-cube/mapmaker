@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
 import net.hollowcube.mapmaker.metrics.Metric;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +19,14 @@ public class MetricStorageMongo implements MetricStorage {
 
     @Override
     public @NotNull CompletableFuture<@NotNull Boolean> addMetric(@NotNull Metric metric) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                collection().insertOne(metric);
+            } catch (DuplicateKeyException ignored) {
+                throw DUPLICATE_ENTRY;
+            }
+            return true;
+        });
     }
 
     @Override
@@ -28,5 +37,9 @@ public class MetricStorageMongo implements MetricStorage {
     @Override
     public @NotNull CompletableFuture<@NotNull Double> getValue(@NotNull int id, @NotNull String source, @NotNull String target) {
         return null;
+    }
+
+    private @NotNull MongoCollection<Metric> collection() {
+        return client.getDatabase(DB_NAME).getCollection("metrics", Metric.class);
     }
 }
