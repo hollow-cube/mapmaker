@@ -5,7 +5,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
-import net.hollowcube.mapmaker.metrics.MetricManager;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.*;
 import net.hollowcube.mapmaker.util.StaticAbuse;
@@ -17,7 +16,6 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 
-import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 public class DevServer {
@@ -50,7 +48,7 @@ public class DevServer {
         } else {
             this.playerStorage = PlayerStorage.mongo(mongoUri);
             this.mapStorage = MapStorage.mongo(mongoUri);
-            this.metricStorage = MetricStorage.mongo(mongoUri);
+            this.metricStorage = MetricStorage.mongo(mongoUri, (MetricStorageMemory) MetricStorage.memory());
         }
 
         StaticAbuse.mapStorage = mapStorage;

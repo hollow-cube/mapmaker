@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.metrics;
 
 public class Metric {
 
-    public int id;
-    public String source;
-    public String target;
-    public double value;
+    private int id;
+    private String source;
+    private String target;
+    private double value;
 
     public Metric(int id, String source, String target, double value) {
         this.id = id;
@@ -14,7 +14,37 @@ public class Metric {
         this.value = value;
     }
 
-    public String name() {
-        return
+    public Metric() { }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getSource() {
+        return this.source;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public String getTarget() {
+        return this.target;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    public double getValue() {
+        return this.value;
     }
 }

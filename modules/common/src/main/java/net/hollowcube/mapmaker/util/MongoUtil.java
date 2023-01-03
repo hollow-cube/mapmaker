@@ -4,6 +4,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import net.hollowcube.mapmaker.metrics.Metric;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import org.bson.BsonReader;
@@ -85,6 +86,39 @@ public final class MongoUtil {
         @Override
         public Class<MapData> getEncoderClass() {
             return MapData.class;
+        }
+    };
+
+    private static final Codec<Metric> METRIC_CODEC = new Codec<>() {
+        @Override
+        public void encode(BsonWriter writer, Metric value, EncoderContext encoderContext) {
+            writer.writeStartDocument();
+            writer.writeInt32("id", value.getId()); // NOT the primary key
+            writer.writeString("source", value.getSource());
+            writer.writeString("target", value.getTarget());
+            writer.writeDouble("value", value.getValue());
+            writer.writeEndDocument();
+        }
+
+        @Override
+        public Class<Metric> getEncoderClass() {
+            return Metric.class;
+        }
+
+        @Override
+        public Metric decode(BsonReader reader, DecoderContext decoderContext) {
+            var metric = new Metric();
+            reader.readStartDocument();
+            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                switch (reader.readName()) {
+                    case "id" -> metric.setId(reader.readInt32());
+                    case "source" -> metric.setSource(reader.readString());
+                    case "target" -> metric.setTarget(reader.readString());
+                    case "value" -> metric.setValue(reader.readDouble());
+                }
+            }
+            reader.readEndDocument();
+            return metric;
         }
     };
 

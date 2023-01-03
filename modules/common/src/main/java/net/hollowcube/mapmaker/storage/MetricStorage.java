@@ -12,8 +12,8 @@ public interface MetricStorage extends Storage {
         return new MetricStorageMemory();
     }
 
-    static @NotNull MetricStorage mongo(@NotNull String uri) {
-        return new MetricStorageMongo(MongoUtil.getClient(uri));
+    static @NotNull MetricStorage mongo(@NotNull String uri, @NotNull MetricStorageMemory cachedStorage) {
+        return new MetricStorageMongo(MongoUtil.getClient(uri), cachedStorage);
     }
 
     /**
@@ -26,9 +26,9 @@ public interface MetricStorage extends Storage {
     /**
      * Adds a new metric via insertion, overwrites metric with matching id, source, and target
      * @param metric
-     * @return
+     * @return Replaced metric with old value before update, null if did not exist prior
      */
-    @NotNull CompletableFuture<@NotNull Boolean> updateMetric(@NotNull Metric metric);
+    @NotNull CompletableFuture<Metric> updateMetric(@NotNull Metric metric);
 
     /**
      * Gets the existing value of a metric with matching id, source, and target
@@ -37,5 +37,5 @@ public interface MetricStorage extends Storage {
      * @param target
      * @return Double value if exists, null if does not exist
      */
-    @NotNull CompletableFuture<@NotNull Double> getValue(@NotNull int id, @NotNull String source, @NotNull String target);
+    @NotNull CompletableFuture<Double> getValue(@NotNull int id, @NotNull String source, @NotNull String target);
 }
