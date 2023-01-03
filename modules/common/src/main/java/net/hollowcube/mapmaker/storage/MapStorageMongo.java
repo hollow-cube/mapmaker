@@ -12,6 +12,8 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.bson.*;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
@@ -232,6 +234,12 @@ public class MapStorageMongo implements MapStorage {
                     }
                     case "publishedAt" -> value.setPublishedAt(Instant.ofEpochMilli(reader.readDateTime()));
                     case "publishedId" -> value.setPublishedId(reader.readString());
+                    case "icon" -> {
+                        Material material = Material.fromNamespaceId(reader.readString());
+                        if (material != null) {
+                            value.setIcon(ItemStack.of(material));
+                        }
+                    }
                 }
             }
             reader.readEndDocument();
@@ -281,7 +289,9 @@ public class MapStorageMongo implements MapStorage {
                 writer.writeDateTime("publishedAt", value.getPublishedAt().toEpochMilli());
                 writer.writeString("publishedId", value.getPublishedId());
             }
-
+            if (value.getIcon() != null) {
+                writer.writeString("icon", value.getIcon().material().namespace().toString());
+            }
             writer.writeEndDocument();
         }
 
