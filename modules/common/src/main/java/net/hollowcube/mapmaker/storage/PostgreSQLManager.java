@@ -3,18 +3,12 @@ package net.hollowcube.mapmaker.storage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.ExecutionType;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-// ==============
-// UNUSED FOR NOW
-// ==============
 public class PostgreSQLManager {
     private static PostgreSQLManager postgreSQLManager;
     private String address;
@@ -117,8 +111,16 @@ public class PostgreSQLManager {
         return postgreSQL.getConnection().prepareStatement(str).executeQuery();
     }
 
+    public ResultSet querySync(PreparedStatement stmt) throws SQLException {
+        return stmt.executeQuery();
+    }
+
     public boolean execute(String str) throws SQLException {
         return postgreSQL.getConnection().prepareStatement(str).execute();
+    }
+
+    public boolean execute(PreparedStatement stmt) throws SQLException {
+        return stmt.execute();
     }
 
     public static class PostgreSQL {

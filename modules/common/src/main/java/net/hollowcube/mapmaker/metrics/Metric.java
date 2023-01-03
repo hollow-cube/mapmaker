@@ -13,4 +13,8 @@ public class Metric {
         this.target = target;
         this.value = value;
     }
+
+    public String name() {
+        return
+    }
 }

@@ -7,11 +7,8 @@ import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.handler.MapHandlerImpl;
 import net.hollowcube.mapmaker.metrics.MetricManager;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.storage.MapStorage;
-import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.mapmaker.storage.Storage;
+import net.hollowcube.mapmaker.storage.*;
 import net.hollowcube.mapmaker.util.StaticAbuse;
-import net.hollowcube.world.storage.PostgreSQLManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -39,29 +36,27 @@ public class DevServer {
 
     private final PlayerStorage playerStorage;
     private final MapStorage mapStorage;
+    private final MetricStorage metricStorage;
 
     private final HubServer hub;
     private final MapServer maps;
-
-    private final PostgreSQLManager postgreSQLManager;
 
     public DevServer() {
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri == null) {
             this.playerStorage = PlayerStorage.memory();
             this.mapStorage = MapStorage.memory();
+            this.metricStorage = MetricStorage.memory();
         } else {
             this.playerStorage = PlayerStorage.mongo(mongoUri);
             this.mapStorage = MapStorage.mongo(mongoUri);
+            this.metricStorage = MetricStorage.mongo(mongoUri);
         }
 
         StaticAbuse.mapStorage = mapStorage;
 
         this.hub = new HubServer();
         this.maps = new MapServer();
-
-        this.postgreSQLManager = new PostgreSQLManager();
-        MetricManager.init(postgreSQLManager);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

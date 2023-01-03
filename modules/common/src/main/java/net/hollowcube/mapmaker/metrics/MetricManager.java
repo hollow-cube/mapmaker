@@ -1,7 +1,12 @@
 package net.hollowcube.mapmaker.metrics;
 
 import net.hollowcube.mapmaker.storage.PostgreSQLManager;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.timer.Task;
+import net.minestom.server.timer.TaskSchedule;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -9,8 +14,8 @@ import java.util.Set;
 
 public class MetricManager {
 
-    private PostgreSQLManager postgreSQLManager;
-    private Set<Metric> cachedMetricList;
+    private static PostgreSQLManager postgreSQLManager;
+    private static Set<Metric> cachedMetricList;
 
     public static void init(PostgreSQLManager postgreSQLManager) {
         postgreSQLManager = postgreSQLManager;
@@ -22,6 +27,12 @@ public class MetricManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Register callback to sync metrics
+        Runnable syncMetrics = () -> syncMetrics();
+        TaskSchedule delay = TaskSchedule.minutes(5);
+        TaskSchedule repeat = TaskSchedule.minutes(10);
+        MinecraftServer.getSchedulerManager().scheduleTask(syncMetrics, delay, repeat);
     }
 
     /**
@@ -37,11 +48,18 @@ public class MetricManager {
      * @param metric
      * @return
      */
-    private boolean uploadMetric(Metric metric) {
+    private static boolean uploadMetric(Metric metric) {
         try {
-            return this.postgreSQLManager.execute("INSERT INTO metrics " +
-                    "(id INTEGER, source VARCHAR(100), target VARCHAR(100), value DOUBLE) " +
-                    "VALUES (" + metric.id + ", " + metric.source + ", " + metric.target + ", " + metric.value + ")");
+            Connection conn = postgreSQLManager.postgreSQL.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO metrics (id INTEGER, source VARCHAR(100), target VARCHAR(100), value DOUBLE) " +
+                            "VALUES (?, ?, ?, ?)"
+            );
+            stmt.setInt(1, metric.id);
+            stmt.setString(2, metric.source);
+            stmt.setString(3, metric.target);
+            stmt.setDouble(4, metric.value);
+            return postgreSQLManager.execute(stmt);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -57,12 +75,16 @@ public class MetricManager {
      * @param value
      * @return
      */
-    private boolean updateMetricDB(int id, String source, String target, double value) {
+    private static boolean updateMetricDB(int id, String source, String target, double value) {
         try {
-            ResultSet rs = this.postgreSQLManager.querySync("SELECT * FROM metrics WHERE " +
-                    "id = " + id + " AND " +
-                    "source = '" + source + "' AND " +
-                    "target = '" + target + "'");
+            Connection conn = postgreSQLManager.postgreSQL.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT * FROM metrics WHERE id = ? AND source = '?' AND target = '?'"
+            );
+            stmt.setInt(1, id);
+            stmt.setString(2, source);
+            stmt.setString(3, target);
+            ResultSet rs = postgreSQLManager.querySync(stmt);
             if (rs.first()) {
                 rs.deleteRow();
             }
@@ -77,13 +99,12 @@ public class MetricManager {
      * Takes all locally stored metrics and syncs them with the database
      * @return
      */
-    public void syncMetrics() {
+    public static void syncMetrics() {
         for (Metric metric : cachedMetricList) {
             boolean success = updateMetricDB(metric.id, metric.source, metric.target, metric.value);
             if (!success) {
                 System.out.println("Failed to update metric " + metricString(metric));
-            }
-            else {
+            } else {
                 cachedMetricList.remove(metric);
             }
         }
@@ -94,26 +115,8 @@ public class MetricManager {
      * @param metric
      * @return
      */
-    private String metricString(Metric metric) {
+    private static String metricString(Metric metric) {
         return "ID " + metric.id + ", SRC " + metric.source + ", TGT " + metric.target + ", VAL" + metric.value;
-    }
-
-    private String metricString(int id, String source, String target) {
-        try {
-            ResultSet rs = this.postgreSQLManager.querySync("SELECT * FROM metrics WHERE " +
-                    "id = " + id + " AND " +
-                    "source = '" + source + "' AND " +
-                    "target = '" + target + "'");
-            if (rs.first()) {
-                return metricString(new Metric(id, source, target, rs.getDouble("value")));
-            }
-            else {
-                return "No metric for provided id, source, and target!";
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "Failure in printing metrics.";
-        }
     }
 
     public Double getValue(int id, String source, String target) {
@@ -122,10 +125,14 @@ public class MetricManager {
             return value;
         }
         try {
-            ResultSet rs = this.postgreSQLManager.querySync("SELECT * FROM metrics WHERE " +
-                    "id = " + id + " AND " +
-                    "source = '" + source + "' AND " +
-                    "target = '" + target + "'");
+            Connection conn = postgreSQLManager.postgreSQL.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT * FROM metrics WHERE id = ? AND source = '?' AND target = '?'"
+            );
+            stmt.setInt(1, id);
+            stmt.setString(2, source);
+            stmt.setString(3, target);
+            ResultSet rs = postgreSQLManager.querySync(stmt);
             if (rs.first()) {
                 return rs.getDouble("value");
             } else {
