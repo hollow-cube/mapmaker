@@ -10,4 +10,12 @@ public interface ClickHandler {
     boolean DENY = false;
 
     boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType);
+
+    static @NotNull ClickHandler leftClick(@NotNull Runnable runnable) {
+        return (player, slot, clickType) -> {
+            if (clickType == ClickType.LEFT_CLICK)
+                runnable.run();
+            return DENY;
+        };
+    }
 }

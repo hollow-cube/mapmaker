@@ -162,7 +162,7 @@ public sealed class RootSection extends ParentSection permits RouterSection {
                 playerInventoryRows = section.height() - 6;
                 yield InventoryType.CHEST_6_ROW;
             }
-            default -> throw new IllegalStateException("Unreachabe");
+            default -> throw new IllegalStateException("Unreachable");
         };
     }
 

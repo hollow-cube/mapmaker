@@ -1,10 +1,12 @@
 package net.hollowcube.canvas.demo;
 
 import net.hollowcube.canvas.ItemSection;
+import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
+import net.hollowcube.canvas.view.ViewHostingSection;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -47,6 +49,9 @@ public class DemoServer {
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);
         guis.put("anvil", AnvilInputDemo::new);
+
+        guis.put("dcounter", () -> new RootSection(new ViewHostingSection(net.hollowcube.canvas.demo.view.CounterDemo::CounterDemo)));
+        guis.put("dmulticounter", () -> new RootSection(new ViewHostingSection(net.hollowcube.canvas.demo.view.CounterDemo::MultiCounterDemo)));
     }
 
     public static void main(String[] args) {
