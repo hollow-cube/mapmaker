@@ -4,6 +4,7 @@
 .idea
 /bin/development/build/
 /modules/canvas/build/
+/modules/chat/build/
 /modules/common/build/
 /modules/hub/build/
 /modules/map/build/

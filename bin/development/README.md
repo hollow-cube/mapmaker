@@ -3,8 +3,8 @@ A combined hub and map server for local development and single server execution.
 
 ## Local Development
 A docker-compose file is provided for local development. It can be started one of two ways:
-- `docker-compose up -d` executed in `bin/development/local`.
-- Press the green play button in `bin/development/local/docker-compose.yml` in IntelliJ.
+- `docker-compose up -d` executed in `bin/development/deploy/local`.
+- Press the green play button in `bin/development/deploy/local/docker-compose.yml` in IntelliJ.
 
 The compose manifest provides the following services:
 - MongoDB

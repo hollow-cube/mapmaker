@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.model;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.item.ItemStack;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
@@ -32,6 +33,8 @@ public class MapData {
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
     private String mapFileId;
+    // ItemStack Icon to display the map as
+    private ItemStack icon;
     private Pos spawnPoint = new Pos(0, 40, 0);
     private final List<POI> pois = new ArrayList<>();
 
@@ -62,6 +65,13 @@ public class MapData {
         this.name = name;
     }
 
+    public ItemStack getIcon() {
+        return icon;
+    }
+
+    public void setIcon(ItemStack icon) {
+        this.icon = icon;
+    }
 
     public boolean isPublished() {
         return publishedAt != null;
