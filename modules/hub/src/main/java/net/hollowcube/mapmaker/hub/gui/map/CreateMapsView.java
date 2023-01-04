@@ -18,7 +18,7 @@ public class CreateMapsView extends ParentSection {
         add(8, 0, new InfoButton("gui.create_maps.info", false));
 
         // Map selector
-        var temp = MinecraftServer.getConnectionManager().getPlayer("notmattw").getTag(PlayerData.DATA);
+        var temp = MinecraftServer.getConnectionManager().getPlayer("ArcaneWarrior").getTag(PlayerData.DATA);
         add(0, 1, new MapSlotsView(temp));
 
         // Other buttons

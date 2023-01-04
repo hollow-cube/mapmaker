@@ -232,7 +232,7 @@ public class SearchDemo extends ParentSection {
         }
 
         @Override
-        public ItemStack getItem() {
+        public @NotNull ItemStack getItem() {
             return state ? on : off;
         }
 
