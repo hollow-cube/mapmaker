@@ -9,12 +9,13 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 
 public class MetricStorageMongo implements MetricStorageDB {
     private static final String DB_NAME = System.getProperty("mongo.db", "mapmaker");
@@ -54,30 +55,30 @@ public class MetricStorageMongo implements MetricStorageDB {
     }
 
     @Override
-    public @NotNull CompletableFuture<Metric> updateMetric(@NotNull Metric metric) {
+    public @NotNull CompletableFuture<Metric> updateMetric(@NotNull Metric metric, @NotNull int[] match_indices, @NotNull int[] update_indices) {
         return CompletableFuture.supplyAsync(() -> {
             var filter = and(
-                    eq("id", metric.getId()),
-                    eq("source", metric.getSource()),
-                    eq("target", metric.getTarget()));
-            var matchingMetric = collection().findOneAndReplace(filter, metric);
+                    eq("tag", metric.getTag()),
+                    all("values", metric.getValues(match_indices)));
+            var matchingMetric = collection().findOneAndDelete(filter);
+            Metric updateMetric = matchingMetric;
+            for (int idx : update_indices) {
+                updateMetric.setValue(idx, metric.getValue(idx));
+            }
+            collection().insertOne(updateMetric);
             return matchingMetric;
         }, ForkJoinPool.commonPool());
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull Double> getValue(@NotNull int id, @NotNull String source, @NotNull String target) {
+    public @NotNull CompletableFuture<Set<Metric>> getMatchingMetrics(@NotNull int tag, @NotNull ArrayList match_values, @NotNull int[] match_indices) {
         return CompletableFuture.supplyAsync(() -> {
             var filter = and(
-                    eq("id", id),
-                    eq("source", source),
-                    eq("target", target));
-            var matchingMetric = collection().find(filter).limit(1).first();
-            if (matchingMetric != null)
-                return matchingMetric.getValue();
-            else
-                return null;
-        });
+                    eq("tag", tag),
+                    all("values", match_values));
+            var matchingMetrics = collection().find(filter).into(new ArrayList<Metric>());
+            return (Set<Metric>) matchingMetrics;
+        }, ForkJoinPool.commonPool());
     }
 
     private @NotNull MongoCollection<Metric> collection() {
@@ -89,9 +90,9 @@ public class MetricStorageMongo implements MetricStorageDB {
         var cachedMetrics = cachedStorage.getCachedMetrics().get();
         for (Metric metric : cachedMetrics) {
             CompletableFuture<?> completableFuture =
-                    MetricsHelper.isUnique(metric.getId()) ?
-                    updateMetric(metric) :
-                    addMetric(metric);
+                    metric.isUnique() ?
+                        updateMetric(metric, metric.getMatchIndices(), metric.getUpdateIndices()) :
+                        addMetric(metric);
             cachedMetrics.remove(metric);
         }
         return CompletableFuture.completedFuture(true);

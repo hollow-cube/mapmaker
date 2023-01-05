@@ -1,50 +1,87 @@
 package net.hollowcube.mapmaker.metrics;
 
-public class Metric {
+import java.util.ArrayList;
 
-    private int id;
-    private String source;
-    private String target;
-    private double value;
+public class Metric<T> {
 
-    public Metric(int id, String source, String target, double value) {
-        this.id = id;
-        this.source = source;
-        this.target = target;
-        this.value = value;
+    private int tag;
+    private long timestamp;
+    private ArrayList values;
+
+    public Metric(int tag, long timestamp, ArrayList values) {
+        this.tag = tag;
+        this.timestamp = timestamp;
+        this.values = values;
+    }
+
+    public Metric(int tag, long timestamp, T ... values) {
+        this.tag = tag;
+        this.timestamp = timestamp;
+        for (T value : values) {
+            this.values.add(value);
+        }
+    }
+    
+    public Metric(int tag, long timestamp) {
+        this.tag = tag;
+        this.timestamp = timestamp;
+    }
+
+    public Metric(int tag) {
+        this.tag = tag;
     }
 
     public Metric() { }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTag(int tag) {
+        this.tag = tag;
     }
 
-    public int getId() {
-        return this.id;
+    public int getTag() {
+        return this.tag;
+    }
+    
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+    
+    public long getTimestamp() {
+        return this.timestamp;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setValues(ArrayList values) {
+        this.values = values;
     }
 
-    public String getSource() {
-        return this.source;
+    public void setValue(int index, T value) {
+        this.values.set(index, value);
     }
 
-    public void setTarget(String target) {
-        this.target = target;
+    public ArrayList getValues() {
+        return this.values;
+    }
+    
+    public ArrayList getValues(int[] indices) {
+        ArrayList values = null;
+        for (int i : indices) {
+            values.add(this.values.get(i));
+        }
+        return values;
     }
 
-    public String getTarget() {
-        return this.target;
+    public Object getValue(int index) {
+        return this.values.get(index);
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    public boolean isUnique() {
+        return MetricsHelper.isUnique(this.tag);
     }
 
-    public double getValue() {
-        return this.value;
+    public int[] getMatchIndices() {
+        return MetricsHelper.getMatchIndices(this.tag);
+    }
+
+    public int[] getUpdateIndices() {
+        return MetricsHelper.getUpdateIndices(this.tag);
     }
 }
