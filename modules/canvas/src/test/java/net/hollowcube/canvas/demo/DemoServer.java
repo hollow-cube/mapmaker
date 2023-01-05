@@ -4,6 +4,7 @@ import net.hollowcube.canvas.ItemSection;
 import net.hollowcube.canvas.RootSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.demo.view.FutureDemo;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.canvas.view.ViewHostingSection;
@@ -50,8 +51,9 @@ public class DemoServer {
         guis.put("search", SearchDemo::new);
         guis.put("anvil", AnvilInputDemo::new);
 
-        guis.put("dcounter", () -> new RootSection(new ViewHostingSection(net.hollowcube.canvas.demo.view.CounterDemo::CounterDemo)));
-        guis.put("dmulticounter", () -> new RootSection(new ViewHostingSection(net.hollowcube.canvas.demo.view.CounterDemo::MultiCounterDemo)));
+        guis.put("dcounter", () -> new RootSection(new ViewHostingSection(9, 1, net.hollowcube.canvas.demo.view.CounterDemo::CounterDemo)));
+        guis.put("dmulticounter", () -> new RootSection(new ViewHostingSection(9, 3, net.hollowcube.canvas.demo.view.CounterDemo::MultiCounterDemo)));
+        guis.put("dloading", () -> new RootSection(new ViewHostingSection(9, 1, FutureDemo::LoadingFutureDemo)));
     }
 
     public static void main(String[] args) {

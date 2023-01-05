@@ -13,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A view with the given size, completely filled with the given item. Clicks into this view are
+ * passed to the given {@link ClickHandler}.
+ */
 public record ButtonView(
         int width, int height,
         @NotNull ItemStack itemStack,

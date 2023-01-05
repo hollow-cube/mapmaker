@@ -2,8 +2,10 @@ package net.hollowcube.canvas.view;
 
 import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.view.std.ButtonView;
+import net.hollowcube.canvas.view.std.FutureSupport;
 import net.hollowcube.canvas.view.std.ItemView;
 import net.hollowcube.canvas.view.std.PaneView;
+import net.hollowcube.common.result.FutureResult;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -14,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface View {
+public interface View extends ViewFunc {
 
     // Pane/group
 
@@ -68,6 +70,15 @@ public interface View {
     }
 
 
+    // Loading
+    // todo add a second way with a default/generic error view.
+
+    @Pure
+    static @NotNull View Loading(@NotNull ViewContext context, @NotNull FutureResult<?> future, @NotNull ViewFunc loading, @NotNull ViewFunc loaded, @NotNull ViewFunc error) {
+        return FutureSupport.Loading(context, future, loading, loaded, error);
+    }
+
+
     // Implementation
 
     @Pure int width();
@@ -82,4 +93,8 @@ public interface View {
     @Pure
     boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType);
 
+
+    //todo may remove this, but it is kinda convenient in some cases for a view to also be a ViewFunc
+    @Override
+    default @NotNull View construct(@NotNull ViewContext context) { return this; }
 }

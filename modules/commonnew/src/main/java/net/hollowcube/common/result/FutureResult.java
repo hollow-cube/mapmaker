@@ -75,6 +75,9 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
     @NotNull FutureResult<T> alsoRaw(@NotNull Consumer<@NotNull Result<T>> consumer);
     @NotNull <S> FutureResult<T> flatAlso(@NotNull Function<T, @NotNull FutureResult<S>> mapper);
 
+    /** <b>Blocks</b> the current thread until this {@link FutureResult} is complete. */
+    @NotNull Result<T> await();
+
 
     // Compatibility
 

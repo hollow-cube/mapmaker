@@ -18,4 +18,8 @@ public interface ClickHandler {
             return DENY;
         };
     }
+
+    static @NotNull ClickHandler noop() {
+        return (player, slot, clickType) -> DENY;
+    }
 }

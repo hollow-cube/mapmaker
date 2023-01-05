@@ -5,8 +5,12 @@ import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.view.View;
+import net.hollowcube.canvas.view.ViewHostingSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
+import net.hollowcube.mapmaker.hub.gui2.ExtraViews;
+import net.hollowcube.mapmaker.hub.gui2.map.create.CreateMapViews;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
@@ -55,7 +59,11 @@ public class MapSlotsView extends ParentSection {
                 var mapFuture = getContext(MapStorage.class).getMapById(mapId);
                 var newButton = new MapSlotButton(slot - 1, mapFuture, () -> {
                     var router = find(RouterSection.class);
-                    router.push(new MapSlotView(slot - 1, mapFuture));
+                    router.push(new ViewHostingSection(9, 6, context -> View.Loading(context, mapFuture,
+                            c -> CreateMapViews.MapSlotViewLoading(slot - 1),
+                            // Safe because of how Loading calls the callbacks
+                            c -> CreateMapViews.MapSlotView(c, mapFuture.await().result(), slot - 1),
+                            c -> ExtraViews.Error(9, 6, mapFuture.await().error()))));
                 });
 
                 var idx = i;

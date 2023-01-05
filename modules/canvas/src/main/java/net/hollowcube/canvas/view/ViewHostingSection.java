@@ -1,6 +1,9 @@
 package net.hollowcube.canvas.view;
 
 import net.hollowcube.canvas.ItemSection;
+import net.hollowcube.canvas.RootSection;
+import net.hollowcube.canvas.RouterSection;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
@@ -9,29 +12,24 @@ public class ViewHostingSection extends ItemSection {
     private final ViewContextImpl.Root viewContext;
     private final ViewFunc viewFunc;
 
-    private View view;
+    private View view = null;
 
-    public ViewHostingSection(@NotNull ViewFunc viewFunc) {
-        this(viewFunc, new ViewContextImpl.Root());
-    }
-
-    private ViewHostingSection(@NotNull ViewFunc viewFunc, @NotNull ViewContextImpl.Root viewContext) {
-        this(viewFunc, viewContext, viewFunc.construct(viewContext));
-    }
-
-    private ViewHostingSection(@NotNull ViewFunc viewFunc, @NotNull ViewContextImpl.Root context, @NotNull View initialView) {
-        super(initialView.width(), initialView.height());
-        this.viewContext = context;
+    public ViewHostingSection(int width, int height, @NotNull ViewFunc viewFunc) {
+        super(width, height);
+        viewContext = new ViewContextImpl.Root();
         viewContext.setRedrawFunc(this::redraw);
-        this.viewFunc = viewFunc;
 
-        this.view = initialView;
+        this.viewFunc = viewFunc;
     }
 
     @Override
     protected void mount() {
         super.mount();
-        update();
+
+        find(RootSection.class).setTitle(Component.text(""));
+
+        viewContext.setRoot(find(RouterSection.class));
+        viewContext.redraw();
     }
 
     private void update() {
@@ -42,12 +40,14 @@ public class ViewHostingSection extends ItemSection {
     }
 
     private void redraw() {
-        viewContext.beginRender();
+        //todo maybe should throttle this to once per tick
+
+//        MinecraftServer.getSchedulerManager().buildTask(() -> {
         view = viewFunc.construct(viewContext);
-        viewContext.endRender();
 
         //todo assertion about width and height not changing
         update();
+//        }).executionType(ExecutionType.SYNC).schedule();
     }
 
     @Override

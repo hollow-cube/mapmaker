@@ -137,6 +137,11 @@ class FutureResults {
         }
 
         @Override
+        public @NotNull Result<T> await() {
+            return future.join();
+        }
+
+        @Override
         public @NotNull CompletableFuture<Result<T>> toCompletableFuture() {
             return future;
         }
