@@ -59,7 +59,6 @@ public record CuboidRegion(
                 if (++y > maxY) {
                     if (++z > maxZ) throw new NoSuchElementException();
                     y = min().blockY();
-                    z++;
                 }
             }
             return point;
