@@ -40,6 +40,7 @@ import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -54,6 +55,9 @@ public class DevServer {
 
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
+
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
         var config = Config.loadFromFile(Path.of("config.yaml"));
 

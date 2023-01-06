@@ -9,6 +9,8 @@ import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 public class ViewHostingSection extends ItemSection {
+    private static final System.Logger logger = System.getLogger(ViewHostingSection.class.getName());
+
     private final ViewFunc viewFunc;
     private ViewContextImpl.Root viewContext;
 

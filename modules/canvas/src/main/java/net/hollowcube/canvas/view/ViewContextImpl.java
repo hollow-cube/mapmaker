@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root {
+    private static final System.Logger logger = System.getLogger(ViewContextImpl.class.getName());
 
     private final Map<String, Object> map = new HashMap<>();
     private long flag = 0;
@@ -74,11 +75,15 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
     @Override
     public @NotNull View create(@NotNull String id, @NotNull ViewFunc viewFunc) {
         var existing = childrenToDestroy.remove(id);
-        if (existing == null)
+        if (existing == null) {
             existing = new ViewContextImpl(this);
+        }
 
         children.put(id, existing);
-        return viewFunc.construct(existing);
+        existing.beginRender();
+        var result = viewFunc.construct(existing);
+        existing.endRender();
+        return result;
     }
 
     @Override

@@ -31,7 +31,15 @@ dependencies {
 
     implementation("org.spongepowered:configurate-yaml:4.1.2")
 
+    // Helidon
+    implementation(platform("io.helidon:helidon-dependencies:3.0.2"))
+    implementation("io.helidon.health:helidon-health")
+    implementation("io.helidon.metrics:helidon-metrics-prometheus")
+    implementation("io.helidon.logging:helidon-logging-slf4j")
+
+    // Logging
     implementation("ch.qos.logback:logback-classic:1.4.5")
+    implementation("org.slf4j:jul-to-slf4j:2.0.6")
 }
 
 application {

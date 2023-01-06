@@ -60,7 +60,6 @@ public final class CreateMapViews {
 
     public static @NotNull View LoadableMapSlotButton(@NotNull ViewContext context, int rawSlot, @NotNull String mapId) {
         var mapFuture = context.get("map", () -> {
-            System.out.println("FETCH MAP");
             return context.env(MapStorage.class).getMapById(mapId);
         });
         var openMap = ClickHandler.leftClick(() -> context.pushView(9, 6, c ->
