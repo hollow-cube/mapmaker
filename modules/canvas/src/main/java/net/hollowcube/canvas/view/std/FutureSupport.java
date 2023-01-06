@@ -21,7 +21,6 @@ public final class FutureSupport {
                     logger.log(System.Logger.Level.ERROR, "Failed to load future: {}", res.error().message());
                 context.set("result", res);
             });
-            System.out.println("loading");
             return context.create("loadingComp", loadingComp);
         }
 

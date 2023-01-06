@@ -14,11 +14,13 @@ import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +39,14 @@ public sealed class RootSection extends ParentSection permits RouterSection {
     }
 
     public RootSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
+        this(section, context, null);
+    }
+
+    public RootSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context, @Nullable Player player) {
         // We override these methods, so their value is just a marker in case it crops up somewhere it shouldnt.
         super(Integer.MAX_VALUE, Integer.MAX_VALUE);
-        this.context = context;
+        this.context = new HashMap<>(context);
+        this.context.put(Player.class, player);
 
         replaceInventory(section);
     }

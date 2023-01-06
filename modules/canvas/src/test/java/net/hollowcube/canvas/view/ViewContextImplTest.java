@@ -11,7 +11,7 @@ public class ViewContextImplTest {
 
     @Test // Ensure the parent keeps the child across renders
     public void testParentChildPreservation() {
-        var root = new ViewContextImpl.Root();
+        var root = new ViewContextImpl.Root(null);
         var child1 = new AtomicReference<ViewContext>();
         var child2 = new AtomicReference<ViewContext>();
         root.create("test", c -> {
@@ -32,7 +32,7 @@ public class ViewContextImplTest {
 
     @Test // Ensure the parent does not keep the child when id changes
     public void testParentChildPreservation2() {
-        var root = new ViewContextImpl.Root();
+        var root = new ViewContextImpl.Root(null);
         var child1 = new AtomicReference<ViewContext>();
         var child2 = new AtomicReference<ViewContext>();
         root.create("test", c -> {

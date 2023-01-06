@@ -10,7 +10,7 @@ import net.hollowcube.canvas.view.ViewHostingSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.hub.gui2.ExtraViews;
-import net.hollowcube.mapmaker.hub.gui2.map.create.CreateMapViews;
+import net.hollowcube.mapmaker.hub.gui2.map.MapSlotViews;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
@@ -60,9 +60,9 @@ public class MapSlotsView extends ParentSection {
                 var newButton = new MapSlotButton(slot - 1, mapFuture, () -> {
                     var router = find(RouterSection.class);
                     router.push(new ViewHostingSection(9, 6, context -> View.Loading(context, mapFuture,
-                            c -> CreateMapViews.MapSlotViewLoading(slot - 1),
+                            c -> MapSlotViews.MapSlotViewLoading(slot - 1),
                             // Safe because of how Loading calls the callbacks
-                            c -> CreateMapViews.MapSlotView(c, mapFuture.await().result(), slot - 1),
+                            c -> MapSlotViews.MapSlotView(c, mapFuture.await().result(), slot - 1),
                             c -> ExtraViews.Error(9, 6, mapFuture.await().error()))));
                 });
 

@@ -1,6 +1,8 @@
 package net.hollowcube.canvas.view;
 
 import net.hollowcube.canvas.RouterSection;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -55,6 +57,21 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
     }
 
     @Override
+    public @NotNull Player player() {
+        return parent.player();
+    }
+
+    @Override
+    public <T> @NotNull T env(@NotNull Class<T> type) {
+        return parent.env(type);
+    }
+
+    @Override
+    public void setTitle(@NotNull Component title) {
+        parent.setTitle(title);
+    }
+
+    @Override
     public @NotNull View create(@NotNull String id, @NotNull ViewFunc viewFunc) {
         var existing = childrenToDestroy.remove(id);
         if (existing == null)
@@ -102,6 +119,8 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
 
 
     static final class Root extends ViewContextImpl {
+        private final Player player;
+
         private RouterSection router;
         private Runnable redrawFunc;
 
@@ -109,8 +128,9 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
         private boolean needsRedraw = false;
         private boolean isDrawing = false;
 
-        public Root() {
+        public Root(@NotNull Player player) {
             super(null);
+            this.player = player;
         }
 
         public void setRoot(@NotNull RouterSection router) {
@@ -120,6 +140,21 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
         void setRedrawFunc(@NotNull Runnable redrawFunc) {
             this.redrawFunc = redrawFunc;
             if (needsRedraw) redraw();
+        }
+
+        @Override
+        public @NotNull Player player() {
+            return player;
+        }
+
+        @Override
+        public <T> @NotNull T env(@NotNull Class<T> type) {
+            return router.getContext(type);
+        }
+
+        @Override
+        public void setTitle(@NotNull Component title) {
+            router.setTitle(title);
         }
 
         @Override

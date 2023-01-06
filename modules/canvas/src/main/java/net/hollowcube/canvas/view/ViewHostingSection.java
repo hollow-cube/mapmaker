@@ -9,15 +9,13 @@ import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 public class ViewHostingSection extends ItemSection {
-    private final ViewContextImpl.Root viewContext;
     private final ViewFunc viewFunc;
+    private ViewContextImpl.Root viewContext;
 
     private View view = null;
 
     public ViewHostingSection(int width, int height, @NotNull ViewFunc viewFunc) {
         super(width, height);
-        viewContext = new ViewContextImpl.Root();
-        viewContext.setRedrawFunc(this::redraw);
 
         this.viewFunc = viewFunc;
     }
@@ -25,6 +23,10 @@ public class ViewHostingSection extends ItemSection {
     @Override
     protected void mount() {
         super.mount();
+        if (viewContext == null) {
+            viewContext = new ViewContextImpl.Root(getContext(Player.class));
+            viewContext.setRedrawFunc(this::redraw);
+        }
 
         find(RootSection.class).setTitle(Component.text(""));
 

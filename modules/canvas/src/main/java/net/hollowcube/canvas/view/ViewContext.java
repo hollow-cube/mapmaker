@@ -1,5 +1,7 @@
 package net.hollowcube.canvas.view;
 
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +20,7 @@ public sealed interface ViewContext permits ViewContextImpl {
      */
     void markDirty();
 
+    // State
 
     <T> @NotNull T get(@NotNull String name, @NotNull Supplier<T> def);
     <T> @NotNull T get(@NotNull String name, @NotNull T def);
@@ -30,6 +33,21 @@ public sealed interface ViewContext permits ViewContextImpl {
     //todo not sure i want to keep this flag stuff. its basically just sugar for handling a single bit of state.
     long flag();
     long flag(long flag);
+
+    // Environment
+
+    @NotNull Player player();
+
+    <T> @NotNull T env(@NotNull Class<T> type); // todo maybe temp
+
+    void setTitle(@NotNull Component title); // todo temp maybe
+
+    /**
+     * Closes the GUI immediately for the viewer.
+     */
+    default void closeInventory() {
+        player().closeInventory();
+    }
 
     /**
      * Creates a child context with the given component. Child contexts are used to preserve state

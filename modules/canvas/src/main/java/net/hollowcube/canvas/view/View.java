@@ -50,23 +50,18 @@ public interface View extends ViewFunc {
     // TranslatableButton
 
     @Pure
-    static @NotNull View TranslatedButton(@NotNull Material material, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
-        return TranslatedButton(1, 1, material, 0, translationKey, args, onClick);
+    static @NotNull View TranslatedButton(@NotNull Material mat, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
+        return TranslatedButton(1, 1, ItemStack.of(mat), translationKey, args, onClick);
     }
 
     @Pure
-    static @NotNull View TranslatedButton(@NotNull Material material, int cmd, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
-        return TranslatedButton(1, 1, material, cmd, translationKey, args, onClick);
+    static @NotNull View TranslatedButton(@NotNull ItemStack baseItem, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler onClick) {
+        return TranslatedButton(1, 1, baseItem, translationKey, args, onClick);
     }
 
     @Pure
-    static @NotNull View TranslatedButton(int width, int height, @NotNull Material material, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
-        return TranslatedButton(width, height, material, 0, translationKey, args, clickHandler);
-    }
-
-    @Pure
-    static @NotNull View TranslatedButton(int width, int height, @NotNull Material material, int cmd, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
-        return new ButtonView(width, height, material, cmd, translationKey, args, clickHandler);
+    static @NotNull View TranslatedButton(int width, int height, @NotNull ItemStack baseItem, @NotNull String translationKey, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
+        return new ButtonView(width, height, baseItem, translationKey, args, clickHandler);
     }
 
 

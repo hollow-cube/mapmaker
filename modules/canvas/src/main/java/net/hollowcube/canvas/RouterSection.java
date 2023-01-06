@@ -2,6 +2,7 @@ package net.hollowcube.canvas;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -19,12 +20,22 @@ public final class RouterSection extends RootSection {
     }
 
     public RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
-        super(section, context);
+        this(section, context, null);
+    }
+
+    public RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context, @Nullable Player player) {
+        super(section, context, player);
         history.addLast(section);
         current = section;
     }
 
     // Public API
+
+
+    @Override
+    public <T> @NotNull T getContext(@NotNull Class<T> type) {
+        return super.getContext(type);
+    }
 
     public boolean hasHistory() {
         if (history == null) return false;

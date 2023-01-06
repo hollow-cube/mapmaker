@@ -13,7 +13,7 @@ public class ViewContextImplRootTest {
     @Test
     public void testCallRedraw() {
         var runnable = new TestRunnable();
-        var context = new ViewContextImpl.Root();
+        var context = new ViewContextImpl.Root(null);
         context.setRedrawFunc(runnable);
         context.redraw();
         runnable.assertRan();
@@ -26,7 +26,7 @@ public class ViewContextImplRootTest {
 
         AtomicBoolean call1 = new AtomicBoolean(false), call2 = new AtomicBoolean(false);
 
-        var context = new ViewContextImpl.Root();
+        var context = new ViewContextImpl.Root(null);
         context.setRedrawFunc(() -> {
             if (!call1.get()) {
                 assertFalse(call2.get());

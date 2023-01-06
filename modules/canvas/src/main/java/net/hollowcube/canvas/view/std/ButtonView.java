@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -23,12 +22,10 @@ public record ButtonView(
         @NotNull ClickHandler clickHandler
 ) implements View {
 
-    public ButtonView(int width, int height, @NotNull Material material, int cmd, @NotNull String key, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
-        this(width, height, ItemStack.builder(material)
-                .displayName(Component.translatable(key + ".name", args))
-                .lore(LanguageProvider.optionalMultiTranslatable(key + ".lore", args))
-                .meta(meta -> {if (cmd != 0) meta.customModelData(cmd);})
-                .build(),
+    public ButtonView(int width, int height, @NotNull ItemStack baseItem, @NotNull String key, @NotNull List<Component> args, @NotNull ClickHandler clickHandler) {
+        this(width, height, baseItem
+                .withDisplayName(Component.translatable(key + ".name", args))
+                .withLore(LanguageProvider.optionalMultiTranslatable(key + ".lore", args)),
                 clickHandler);
     }
 

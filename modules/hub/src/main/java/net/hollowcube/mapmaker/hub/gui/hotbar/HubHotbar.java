@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.hub.gui.hotbar;
 
+import net.hollowcube.canvas.view.ViewHostingSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.CreateMapsView;
 import net.hollowcube.mapmaker.hub.gui.search.MapSearchView;
+import net.hollowcube.mapmaker.hub.gui2.map.CreateMapViews;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -27,6 +29,7 @@ public final class HubHotbar {
 
     private static final int PLAY_ITEM_CMD = 500;
     private static final int CREATE_ITEM_CMD = 501;
+    private static final int CREATE_ITEM_CMD_2 = 502;
 
     private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.NETHER_STAR)
             .displayName(Component.translatable("gui.hub.hotbar.play_maps.name"))
@@ -40,6 +43,12 @@ public final class HubHotbar {
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 
+    private static final ItemStack CREATE_MAPS_ITEM_2 = ItemStack.builder(Material.DIAMOND_PICKAXE)
+            .displayName(Component.translatable("gui.hub.hotbar.create_maps.name"))
+            .lore(LanguageProvider.optionalMultiTranslatable("gui.hub.hotbar.create_maps.lore", List.of()))
+            .meta(meta -> meta.customModelData(CREATE_ITEM_CMD_2))
+            .build();
+
     public static @NotNull EventNode<InstanceEvent> eventNode() {
         return eventNode;
     }
@@ -47,6 +56,7 @@ public final class HubHotbar {
     public static void applyToPlayer(@NotNull Player player) {
         player.getInventory().setItemStack(0, PLAY_MAPS_ITEM);
         player.getInventory().setItemStack(1, CREATE_MAPS_ITEM);
+        player.getInventory().setItemStack(1, CREATE_MAPS_ITEM_2);
     }
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
@@ -64,6 +74,7 @@ public final class HubHotbar {
         switch (customModelData) {
             case PLAY_ITEM_CMD -> server.openGUIForPlayer(player, new MapSearchView());
             case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
+            case CREATE_ITEM_CMD_2 -> server.openGUIForPlayer(player, new ViewHostingSection(9, 3, CreateMapViews::CreateMapsView));
         }
     }
 

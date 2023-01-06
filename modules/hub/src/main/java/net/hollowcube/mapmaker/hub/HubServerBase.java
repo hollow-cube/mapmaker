@@ -61,6 +61,6 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
 
     @Override
     public void openGUIForPlayer(@NotNull Player player, @NotNull Section gui) {
-        new RouterSection(gui, guiContext).showToPlayer(player);
+        new RouterSection(gui, guiContext, player).showToPlayer(player);
     }
 }
