@@ -27,6 +27,7 @@ public final class RouterSection extends RootSection {
     // Public API
 
     public boolean hasHistory() {
+        if (history == null) return false;
         return history.size() > 1;
     }
 
