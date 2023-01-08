@@ -1,6 +1,6 @@
 package net.hollowcube.canvas.view.std;
 
-import net.hollowcube.canvas.view.util.TestView;
+import net.hollowcube.canvas.view.MockView;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -34,9 +34,9 @@ public class PaneViewTest {
         return IntStream.range(0, 9)
                 .mapToObj(i -> DynamicTest.dynamicTest("testAdd" + i, () -> {
                     var view = new PaneView(3, 3);
-                    var item = new TestView(1, 1);
+                    var item = new MockView(1, 1);
                     view.add(i % 3, i / 3, item);
-                    assertEquals(TestView.TEST_ITEM, view.getContents()[i]);
+                    assertEquals(MockView.TEST_ITEM, view.getContents()[i]);
                 }));
     }
 
@@ -44,50 +44,50 @@ public class PaneViewTest {
     public Stream<DynamicTest> testAddBig() {
         return IntStream.range(0, 4).mapToObj(i -> DynamicTest.dynamicTest("testAddBig" + i, () -> {
             var view = new PaneView(3, 3);
-            var item = new TestView(2, 2);
+            var item = new MockView(2, 2);
 
             int x = i % 2, y = i / 2;
             view.add(x, y, item);
 
-            assertEquals(TestView.TEST_ITEM, view.getContents()[x + y * 3]);
-            assertEquals(TestView.TEST_ITEM, view.getContents()[x + 1 + y * 3]);
-            assertEquals(TestView.TEST_ITEM, view.getContents()[x + (y + 1) * 3]);
-            assertEquals(TestView.TEST_ITEM, view.getContents()[x + 1 + (y + 1) * 3]);
+            assertEquals(MockView.TEST_ITEM, view.getContents()[x + y * 3]);
+            assertEquals(MockView.TEST_ITEM, view.getContents()[x + 1 + y * 3]);
+            assertEquals(MockView.TEST_ITEM, view.getContents()[x + (y + 1) * 3]);
+            assertEquals(MockView.TEST_ITEM, view.getContents()[x + 1 + (y + 1) * 3]);
         }));
     }
 
     @Test
     public void testOutOfBounds1() {
         var view = new PaneView(3, 3);
-        var item = new TestView(1, 1);
+        var item = new MockView(1, 1);
         assertThrows(IllegalArgumentException.class, () -> view.add(3, 0, item));
     }
 
     @Test
     public void testOutOfBounds2() {
         var view = new PaneView(3, 3);
-        var item = new TestView(1, 1);
+        var item = new MockView(1, 1);
         assertThrows(IllegalArgumentException.class, () -> view.add(0, 3, item));
     }
 
     @Test
     public void testOutOfBounds3() {
         var view = new PaneView(3, 3);
-        var item = new TestView(4, 1);
+        var item = new MockView(4, 1);
         assertThrows(IllegalArgumentException.class, () -> view.add(0, 0, item));
     }
 
     @Test
     public void testOutOfBounds4() {
         var view = new PaneView(3, 3);
-        var item = new TestView(1, 4);
+        var item = new MockView(1, 4);
         assertThrows(IllegalArgumentException.class, () -> view.add(0, 0, item));
     }
 
     @Test
     public void testOverlap1() {
         var view = new PaneView(3, 3);
-        var item = new TestView(1, 1);
+        var item = new MockView(1, 1);
         view.add(0, 0, item);
         assertThrows(IllegalArgumentException.class, () -> view.add(0, 0, item));
     }
@@ -95,7 +95,7 @@ public class PaneViewTest {
     @Test
     public void testOverlap2() {
         var view = new PaneView(3, 3);
-        var item = new TestView(2, 2);
+        var item = new MockView(2, 2);
         view.add(1, 1, item);
         assertThrows(IllegalArgumentException.class, () -> view.add(0, 0, item));
     }
@@ -109,7 +109,7 @@ public class PaneViewTest {
     @Test // Zero slot, no offset remapping
     public void testClickPassthrough1() {
         var view = new PaneView(3, 3);
-        var item = new TestView(1, 1);
+        var item = new MockView(1, 1);
         view.add(0, 0, item);
         view.handleClick(null, 0, null);
 
@@ -119,7 +119,7 @@ public class PaneViewTest {
     @Test // Click a non-zero slot, still no offset remapping
     public void testClickPassthrough2() {
         var view = new PaneView(3, 3);
-        var item = new TestView(3, 3);
+        var item = new MockView(3, 3);
         view.add(0, 0, item);
         view.handleClick(null, 4, null);
 
@@ -129,7 +129,7 @@ public class PaneViewTest {
     @Test // Click a non-zero slot, with offset remapping
     public void testClickPassthrough3() {
         var view = new PaneView(3, 3);
-        var item = new TestView(2, 2);
+        var item = new MockView(2, 2);
         view.add(1, 1, item);
         view.handleClick(null, 4, null);
 

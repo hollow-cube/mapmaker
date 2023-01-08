@@ -1,6 +1,5 @@
-package net.hollowcube.canvas.view.util;
+package net.hollowcube.canvas.view;
 
-import net.hollowcube.canvas.view.View;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -13,11 +12,39 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public record TestView(int width, int height, List<Integer> clickedSlots) implements View {
+//todo merge with TestView
+public class MockView implements View {
     public static final ItemStack TEST_ITEM = ItemStack.of(Material.DIAMOND);
 
-    public TestView(int width, int height) {
-        this(width, height, new ArrayList<>());
+    private final int width, height;
+
+    // Assertable state
+    private final List<Integer> clickedSlots = new ArrayList<>();
+    private int renderCount = 0;
+
+    public MockView(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    public MockView() {
+        this(1, 1);
+    }
+
+    @Override
+    public int width() {
+        return width;
+    }
+
+    @Override
+    public int height() {
+        return height;
+    }
+
+    @Override
+    public @NotNull View construct(@NotNull ViewContext context) {
+        renderCount++;
+        return View.super.construct(context);
     }
 
     @Override
@@ -39,5 +66,9 @@ public record TestView(int width, int height, List<Integer> clickedSlots) implem
         for (int i = 0; i < slots.length; i++) {
             assertEquals(slots[i], clickedSlots.get(i), "Slot " + i + " did not match: " + slots[i] + " != " + clickedSlots.get(i));
         }
+    }
+
+    public void assertRendered(int times) {
+        assertEquals(times, renderCount);
     }
 }

@@ -17,7 +17,7 @@ public class ItemViewTest {
 
     @Test
     public void testSizeConstraints() {
-        var view = new ItemView(TEST_ITEM);
+        var view = new ItemView(1, 1, TEST_ITEM);
         assertEquals(1, view.width());
         assertEquals(1, view.height());
         assertEquals(1, view.getContents().length);
@@ -25,13 +25,13 @@ public class ItemViewTest {
 
     @Test
     public void testClickHandling() {
-        var view = new ItemView(TEST_ITEM);
+        var view = new ItemView(1, 1, TEST_ITEM);
         assertFalse(view.handleClick(null, 0, ClickType.LEFT_CLICK));
     }
 
     @Test
     public void testContents() {
-        var view = new ItemView(TEST_ITEM);
+        var view = new ItemView(1, 1, TEST_ITEM);
         assertEquals(TEST_ITEM, view.getContents()[0]);
     }
 

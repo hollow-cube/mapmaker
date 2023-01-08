@@ -54,6 +54,7 @@ public class DemoServer {
         guis.put("dcounter", () -> new RootSection(new ViewHostingSection(9, 1, net.hollowcube.canvas.demo.view.CounterDemo::CounterDemo)));
         guis.put("dmulticounter", () -> new RootSection(new ViewHostingSection(9, 3, net.hollowcube.canvas.demo.view.CounterDemo::MultiCounterDemo)));
         guis.put("dloading", () -> new RootSection(new ViewHostingSection(9, 1, FutureDemo::LoadingFutureDemo)));
+        guis.put("dpagination", () -> new RootSection(new ViewHostingSection(9, 6, net.hollowcube.canvas.demo.view.PaginationDemo::PaneDemo)));
     }
 
     public static void main(String[] args) {

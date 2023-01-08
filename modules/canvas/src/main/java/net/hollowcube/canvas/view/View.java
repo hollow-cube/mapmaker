@@ -30,7 +30,30 @@ public interface View extends ViewFunc {
 
     @Pure
     static @NotNull View Item(@NotNull ItemStack itemStack) {
-        return new ItemView(itemStack);
+        return new ItemView(1, 1, itemStack);
+    }
+
+    @Pure
+    static @NotNull View Item(int width, int height, @NotNull ItemStack itemStack) {
+        return new ItemView(width, height, itemStack);
+    }
+
+
+    // Translated Item
+
+    @Pure
+    static @NotNull View TranslatedItem(@NotNull Material mat, @NotNull String translationKey, @NotNull List<Component> args) {
+        return TranslatedItem(1, 1, ItemStack.of(mat), translationKey, args);
+    }
+
+    @Pure
+    static @NotNull View TranslatedItem(@NotNull ItemStack baseItem, @NotNull String translationKey, @NotNull List<Component> args) {
+        return TranslatedItem(1, 1, baseItem, translationKey, args);
+    }
+
+    @Pure
+    static @NotNull View TranslatedItem(int width, int height, @NotNull ItemStack baseItem, @NotNull String translationKey, @NotNull List<Component> args) {
+        return new ItemView(width, height, baseItem, translationKey, args);
     }
 
 
@@ -44,6 +67,11 @@ public interface View extends ViewFunc {
     @Pure
     static @NotNull View Button(int width, int height, @NotNull ItemStack itemStack, @NotNull ClickHandler clickHandler) {
         return new ButtonView(width, height, itemStack, clickHandler);
+    }
+
+    @Pure
+    static @NotNull View Button(@NotNull ViewContext context, @NotNull ViewFunc viewFunc, @NotNull ClickHandler clickHandler) {
+        return new ButtonView(viewFunc.construct(context), clickHandler);
     }
 
 
@@ -72,6 +100,14 @@ public interface View extends ViewFunc {
     static @NotNull View Loading(@NotNull ViewContext context, @NotNull FutureResult<?> future, @NotNull ViewFunc loading, @NotNull ViewFunc loaded, @NotNull ViewFunc error) {
         return FutureSupport.Loading(context, future, loading, loaded, error);
     }
+
+
+    // Pagination
+
+//    @Pure
+//    static @NotNull View Pagination(@NotNull ViewContext context, @NotNull Pagination.Controller controller) {
+//
+//    }
 
 
     // Implementation

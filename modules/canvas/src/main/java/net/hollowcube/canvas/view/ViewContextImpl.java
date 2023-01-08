@@ -4,22 +4,21 @@ import net.hollowcube.canvas.RouterSection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
-sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root {
+non-sealed class ViewContextImpl implements ViewContext, State.Holder {
     private static final System.Logger logger = System.getLogger(ViewContextImpl.class.getName());
 
-    private final Map<String, Object> map = new HashMap<>();
-    private long flag = 0;
+    protected final Map<String, Object> map = new HashMap<>();
 
-    private Map<String, ViewContextImpl> children = new HashMap<>();
-    private Map<String, ViewContextImpl> childrenToDestroy = new HashMap<>();
+    protected Map<String, ViewContextImpl> children = new HashMap<>();
+    protected Map<String, ViewContextImpl> childrenToDestroy = new HashMap<>();
 
-    private final ViewContext parent;
+    protected final ViewContext parent;
 
     public ViewContextImpl(ViewContext parent) {
         this.parent = parent;
@@ -30,32 +29,25 @@ sealed class ViewContextImpl implements ViewContext permits ViewContextImpl.Root
         redraw();
     }
 
+    // State impl
+
     @Override
-    public <T> @NotNull T get(@NotNull String name, @NotNull Supplier<T> def) {
-        return (T) map.computeIfAbsent(name, unused -> def.get());
+    public boolean contains(@NotNull String id) {
+        return map.containsKey(id);
     }
 
     @Override
-    public <T> @NotNull T get(@NotNull String name, @NotNull T def) {
-        return (T) map.computeIfAbsent(name, unused -> def);
+    public @UnknownNullability Object get(@NotNull String id) {
+        return map.get(id);
     }
 
     @Override
-    public <T> void set(@NotNull String name, @NotNull T value) {
-        map.put(name, value);
-        redraw();
+    public void set(@NotNull String id, @UnknownNullability Object value, boolean markDirty) {
+        map.put(id, value);
+        if (markDirty) markDirty();
     }
 
-    @Override
-    public long flag() {
-        return flag;
-    }
-
-    @Override
-    public long flag(long flag) {
-        this.flag = flag;
-        return flag;
-    }
+    // Env impl
 
     @Override
     public @NotNull Player player() {

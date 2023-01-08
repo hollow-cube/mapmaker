@@ -3,11 +3,8 @@ package net.hollowcube.canvas.view;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
-
-public sealed interface ViewContext permits ViewContextImpl {
+public sealed interface ViewContext extends State.Getter, State.Setter permits ViewContextImpl {
 
     /**
      * The most basic primitive of controlling view updates. Marks the view as dirty, causing it to be re-rendered.
@@ -19,20 +16,6 @@ public sealed interface ViewContext permits ViewContextImpl {
      * {@link #set(String, Object)} triggers a view update on its own, this method does not need to be called in addition.
      */
     void markDirty();
-
-    // State
-
-    <T> @NotNull T get(@NotNull String name, @NotNull Supplier<T> def);
-    <T> @NotNull T get(@NotNull String name, @NotNull T def);
-    default <T> @Nullable T get(@NotNull String name) {
-        return get(name, () -> null);
-    }
-
-    <T> void set(@NotNull String name, @NotNull T value);
-
-    //todo not sure i want to keep this flag stuff. its basically just sugar for handling a single bit of state.
-    long flag();
-    long flag(long flag);
 
     // Environment
 

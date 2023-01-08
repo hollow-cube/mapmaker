@@ -1,6 +1,5 @@
 package net.hollowcube.canvas.view;
 
-import net.hollowcube.canvas.view.util.TestRunnable;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,11 +11,11 @@ public class ViewContextImplRootTest {
 
     @Test
     public void testCallRedraw() {
-        var runnable = new TestRunnable();
+        var called = new AtomicBoolean(false);
         var context = new ViewContextImpl.Root(null);
-        context.setRedrawFunc(runnable);
+        context.setRedrawFunc(() -> called.set(true));
         context.redraw();
-        runnable.assertRan();
+        assertTrue(called.get());
     }
 
     @Test

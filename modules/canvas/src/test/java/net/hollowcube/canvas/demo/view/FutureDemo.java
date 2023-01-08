@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.demo.view;
 
+import net.hollowcube.canvas.view.State;
 import net.hollowcube.canvas.view.View;
 import net.hollowcube.canvas.view.ViewContext;
 import net.hollowcube.common.result.FutureResult;
@@ -11,9 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class FutureDemo {
 
+    private static final State<FutureResult<?>> futureState = State.value("future", FutureResult::ofNull);
+
     public static @NotNull View LoadingFutureDemo(@NotNull ViewContext context) {
         var pane = View.Pane(9, 1);
-        var future = context.get("future", () -> FutureResult.supply(() -> {
+        var future = context.get(futureState, () -> FutureResult.supply(() -> {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {

@@ -26,7 +26,7 @@ public non-sealed class ItemSection extends Section {
      * @throws IllegalArgumentException if the index is out of bounds
      */
     protected void setItem(int index, @NotNull ItemStack item) {
-        Check.argCondition(index < 0 || index >= width() * height(), "index out of bounds");
+        Check.argCondition(index < 0 || index >= width() * height(), "index out of bounds " + index);
         items[index] = item;
         if (isMounted()) {
             parent().updateItem(getIndexInParent(index), item);

@@ -31,10 +31,16 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.AttachEntityPacket;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
@@ -264,6 +270,23 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+
+        var armorstand = new LivingEntity(EntityType.SKELETON);
+        armorstand.setInstance(event.getSpawnInstance(), new Pos(5, 40, 5)).join();
+        armorstand.setHelmet(ItemStack.builder(Material.STICK)
+                .meta(meta -> meta.customModelData(1002))
+                .build());
+
+        var slime = new LivingEntity(EntityType.SLIME);
+        slime.setInstance(event.getSpawnInstance(), new Pos(-5, 40, 5)).join();
+        var slimeMeta = (SlimeMeta) slime.getEntityMeta();
+        slimeMeta.setSize(20);
+
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            var packet = new AttachEntityPacket(armorstand, slime);
+            player.sendPacket(packet);
+
+        }).delay(1, net.minestom.server.utils.time.TimeUnit.SERVER_TICK).schedule();
     }
 
 }

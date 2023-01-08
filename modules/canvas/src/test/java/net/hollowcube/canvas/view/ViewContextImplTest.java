@@ -1,11 +1,11 @@
 package net.hollowcube.canvas.view;
 
-import net.hollowcube.canvas.view.util.TestView;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class ViewContextImplTest {
 
@@ -16,12 +16,12 @@ public class ViewContextImplTest {
         var child2 = new AtomicReference<ViewContext>();
         root.create("test", c -> {
             child1.set(c);
-            return new TestView(1, 1);
+            return new MockView(1, 1);
         });
         root.setRedrawFunc(() -> {
             root.create("test", c -> {
                 child2.set(c);
-                return new TestView(1, 1);
+                return new MockView(1, 1);
             });
         });
         root.redraw();
@@ -37,26 +37,17 @@ public class ViewContextImplTest {
         var child2 = new AtomicReference<ViewContext>();
         root.create("test", c -> {
             child1.set(c);
-            return new TestView(1, 1);
+            return new MockView(1, 1);
         });
         root.setRedrawFunc(() -> {
             root.create("test2", c -> {
                 child2.set(c);
-                return new TestView(1, 1);
+                return new MockView(1, 1);
             });
         });
         root.redraw();
 
         assertNotSame(child1.get(), child2.get());
-    }
-
-    @Test
-    public void testFlag() {
-        var context = new ViewContextImpl(null);
-        assertEquals(0, context.flag());
-        assertEquals(1, context.flag(1));
-        assertEquals(1, context.flag());
-        assertEquals(2, context.flag(2));
     }
 
 }
