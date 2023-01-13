@@ -21,7 +21,6 @@ import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
@@ -207,8 +206,6 @@ public class DevServer {
             i++;
         }
         logger.info("Loaded {} facets.", i);
-
-        TerraformWorldEdit.init(); //todo only should be present in map servers
 
         // End phase 3
         FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))

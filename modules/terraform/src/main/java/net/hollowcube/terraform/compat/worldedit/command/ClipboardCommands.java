@@ -10,14 +10,16 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClipboardCommands {
-    public ClipboardCommands(@NotNull CommandManager commands) {
-        commands.register(CommandUtil.singleSyntaxCommand("/copy", this::copy));
-        commands.register(CommandUtil.singleSyntaxCommand("/paste", this::paste));
-        commands.register(new RotateCommand());
+    public ClipboardCommands(@NotNull CommandManager commands, @Nullable CommandCondition commandCondition) {
+        commands.register(CommandUtil.singleSyntaxCommand("/copy", this::copy, commandCondition));
+        commands.register(CommandUtil.singleSyntaxCommand("/paste", this::paste, commandCondition));
+        commands.register(new RotateCommand(commandCondition));
     }
 
     public void copy(@NotNull CommandSender sender) {
@@ -61,8 +63,9 @@ public class ClipboardCommands {
     public static class RotateCommand extends Command {
         private final ArgumentWord rotateArg = ArgumentType.Word("rotation").from("90", "180", "270");
 
-        public RotateCommand() {
+        public RotateCommand(@Nullable CommandCondition commandCondition) {
             super("/rotate");
+            setCondition(commandCondition);
 
             setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: //rotate <degrees>"));
             addSyntax(this::rotateClipboard, rotateArg);

@@ -5,20 +5,22 @@ import net.hollowcube.terraform.region.CuboidRegion;
 import net.hollowcube.terraform.session.Session;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
 
 public class SelectionCommands {
 
-    public SelectionCommands(@NotNull CommandManager commands) {
-        commands.register(CommandUtil.singleSyntaxCommand("/pos1", this::pos1));
-        commands.register(CommandUtil.singleSyntaxCommand("/pos2", this::pos2));
-        commands.register(CommandUtil.singleSyntaxCommand("/size", this::size));
-        commands.register(CommandUtil.singleSyntaxCommand("/wand", this::wand));
+    public SelectionCommands(@NotNull CommandManager commands, @Nullable CommandCondition commandCondition) {
+        commands.register(CommandUtil.singleSyntaxCommand("/pos1", this::pos1, commandCondition));
+        commands.register(CommandUtil.singleSyntaxCommand("/pos2", this::pos2, commandCondition));
+        commands.register(CommandUtil.singleSyntaxCommand("/size", this::size, commandCondition));
+        commands.register(CommandUtil.singleSyntaxCommand("/wand", this::wand, commandCondition));
     }
 
     public void pos1(@NotNull CommandSender sender) {
