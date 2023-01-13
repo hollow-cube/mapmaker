@@ -39,6 +39,7 @@ import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -48,17 +49,31 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 public class DevServer {
+    private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
+
     public static void main(String[] args) {
         long start = System.nanoTime();
 
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
+        // Convert JUL messages to SLF4J
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+
+        // Prometheus JVM exporters
+        DefaultExports.initialize();
+
+        // Load config
         var config = Config.loadFromFile(Path.of("config.yaml"));
 
+        // Begin server initialization
         var minecraftServer = MinecraftServer.init();
+        MinecraftServer.getExceptionManager().setExceptionHandler(t ->
+                logger.error("An uncaught exception has been handled", t));
         var server = new DevServer();
 
+        // Add health check & metrics web server.
         WebServer webServer = WebServer.builder()
                 .host(config.http().host())
                 .port(config.http().port())
@@ -77,11 +92,11 @@ public class DevServer {
         webServer.start()
                 .thenAccept(ws -> logger.info("Web server is running at " + config.http().host() + ":" + ws.port()));
 
-        DefaultExports.initialize();
-
+        // Finish server initialization
         server.start(config);
         minecraftServer.start(config.minestom().host(), config.minestom().port());
 
+        // Add shutdown hook for graceful shutdown
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 webServer.shutdown();
                 ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
@@ -89,8 +104,6 @@ public class DevServer {
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
 
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
