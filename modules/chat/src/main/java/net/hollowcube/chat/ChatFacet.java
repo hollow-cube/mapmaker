@@ -1,6 +1,8 @@
 package net.hollowcube.chat;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import net.hollowcube.chat.command.LogCommand;
 import net.hollowcube.chat.command.MessageCommand;
 import net.hollowcube.chat.command.ReplyCommand;
@@ -19,10 +21,12 @@ import net.minestom.server.event.player.PlayerCommandEvent;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 
 import java.lang.System.Logger.Level;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.ForkJoinPool;
 
 @AutoService(Facet.class)
 public class ChatFacet implements Facet {
@@ -48,25 +52,34 @@ public class ChatFacet implements Facet {
         //todo need to give access to MongoConfig somehow here
         var mongoUri = System.getenv("MM_MONGO_URI");
         if (mongoUri != null) {
-            storage = ChatStorage.mongo(new MongoConfig() {
-                @Override
-                public @NotNull String uri() {
-                    return mongoUri;
-                }
+            try {
+                storage = ChatStorage.mongo(new MongoConfig() {
+                    @Override
+                    public @NotNull String uri() {
+                        return mongoUri;
+                    }
 
-                @Override
-                public @NotNull String database() {
-                    return "mapmaker";
-                }
+                    @Override
+                    public @NotNull String database() {
+                        return "mapmaker";
+                    }
 
-                @Override
-                public boolean useTransactions() {
-                    return false;
-                }
-            }).toCompletableFuture().join().result();
+                    @Override
+                    public boolean useTransactions() {
+                        return false;
+                    }
+                }).get();
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
         } else {
-            storage = ChatStorage.noop();
+            storage = ChatStorage.memory();
         }
+    }
+
+    @TestOnly
+    ChatFacet(@NotNull ChatStorage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -88,40 +101,78 @@ public class ChatFacet implements Facet {
                 runtime.workerId(),
                 //todo these should be using the players data id, not uuid
                 String.join("%s:%s", from.getUuid().toString(), to.getUuid().toString()),
-                from.getUuid(),
+                from.getUuid().toString(),
                 message
         );
 
-        storage.recordChatMessage(chatMessage)
-                .then(unused -> {
-                    to.setTag(REPLY_TO, from.getUuid());
-                    from.setTag(REPLY_TO, to.getUuid());
-                    from.sendMessage("to " + to.getUsername() + ": " + message);
-                    to.sendMessage("from " + from.getUsername() + ": " + message);
-                })
-                .thenErr(err -> {
-                    logger.log(Level.ERROR, "Error sending private message", err);
-                    from.sendMessage("Error sending private message");
-                });
+        Futures.addCallback(
+                storage.recordChatMessage(chatMessage),
+                new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        to.setTag(REPLY_TO, from.getUuid());
+                        from.setTag(REPLY_TO, to.getUuid());
+                        from.sendMessage("to " + to.getUsername() + ": " + message);
+                        to.sendMessage("from " + from.getUsername() + ": " + message);
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        logger.log(Level.ERROR, "Error sending private message", t);
+                        from.sendMessage("Error sending private message");
+                    }
+                },
+                ForkJoinPool.commonPool()
+        );
     }
 
     private void handleChatEvent(PlayerChatEvent event) {
-        storage.recordChatMessage(new ChatMessage(
+        var message = new ChatMessage(
                 Instant.now(),
                 runtime.workerId(),
                 ChatMessage.DEFAULT_CONTEXT,
-                event.getPlayer().getUuid(),
+                event.getPlayer().getUuid().toString(),
                 event.getMessage()
-        )).thenErr(err -> logger.log(Level.ERROR, "failed to record chat message: {}", err.message()));
+        );
+        Futures.addCallback(
+                storage.recordChatMessage(message),
+                new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        //todo send to other servers
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        logger.log(Level.ERROR, "Error recording chat message", t);
+                    }
+                },
+                ForkJoinPool.commonPool()
+        );
     }
 
     private void handleCommandEvent(PlayerCommandEvent event) {
-        storage.recordChatMessage(new ChatMessage(
+        var message = new ChatMessage(
                 Instant.now(),
                 runtime.workerId(),
                 ChatMessage.COMMAND_CONTEXT,
-                event.getPlayer().getUuid(),
+                event.getPlayer().getUuid().toString(),
                 event.getCommand()
-        )).thenErr(err -> logger.log(Level.ERROR, "failed to record command: {}", err.message()));
+        );
+        Futures.addCallback(
+                storage.recordChatMessage(message),
+                new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        //todo send to other servers
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        logger.log(Level.ERROR, "Error recording command", t);
+                    }
+                },
+                ForkJoinPool.commonPool()
+        );
     }
 }

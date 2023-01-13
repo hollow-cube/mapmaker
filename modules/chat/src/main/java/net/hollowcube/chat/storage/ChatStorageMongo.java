@@ -1,25 +1,26 @@
 package net.hollowcube.chat.storage;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.excludeId;
 import static com.mongodb.client.model.Sorts.descending;
 
 class ChatStorageMongo implements ChatStorage {
-    private static final String CHAT_COLLECTION = "chat";
+    static final String CHAT_COLLECTION = "chat";
 
     //todo should be config value
     private static final int CHAT_QUERY_MAX_RESULT_WINDOW = 15;
@@ -33,24 +34,23 @@ class ChatStorageMongo implements ChatStorage {
     }
 
     @Override
-    public @NotNull FutureResult<Void> recordChatMessage(@NotNull ChatMessage message) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<Void> recordChatMessage(@NotNull ChatMessage message) {
+        return Futures.submit(() -> {
             collection().insertOne(message);
-            return Result.ofNull();
-        });
+        }, ForkJoinPool.commonPool());
     }
 
     @Override
-    public @NotNull FutureResult<List<ChatMessage>> queryChatMessages(@NotNull ChatQuery query) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<List<ChatMessage>> queryChatMessages(@NotNull ChatQuery query) {
+        return Futures.submit(() -> {
             List<ChatMessage> results = new ArrayList<>();
             collection().find(chatQueryToBson(query))
                     .projection(excludeId())
                     .sort(descending("timestamp"))
                     .limit(CHAT_QUERY_MAX_RESULT_WINDOW)
                     .into(results);
-            return Result.of(results);
-        });
+            return List.copyOf(results);
+        }, ForkJoinPool.commonPool());
     }
 
     /**
