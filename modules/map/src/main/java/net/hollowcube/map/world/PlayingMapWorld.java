@@ -2,6 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
@@ -13,7 +14,6 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;

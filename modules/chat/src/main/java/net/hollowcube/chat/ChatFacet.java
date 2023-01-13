@@ -9,13 +9,14 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.util.EventUtil;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerCommandEvent;
+import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,8 +31,11 @@ public class ChatFacet implements Facet {
 
     public static final Tag<UUID> REPLY_TO = Tag.UUID("chat:reply_to");
 
-    private final EventNode<Event> eventNode = EventUtil
-            .notCancelledNode("hollowcube:chat")
+    private final EventNode<Event> eventNode = EventNode.event("hollowcube:chat", EventFilter.ALL, event -> {
+                if (event instanceof CancellableEvent cancellableEvent)
+                    return !cancellableEvent.isCancelled();
+                return true;
+            })
             // Very low priority to run other events which might cancel these beforehand
             .setPriority(-10)
             .addListener(PlayerChatEvent.class, this::handleChatEvent)

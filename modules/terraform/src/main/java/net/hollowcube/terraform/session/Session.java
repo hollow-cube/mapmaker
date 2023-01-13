@@ -13,7 +13,8 @@ import net.minestom.server.tag.TagWritable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -45,7 +46,7 @@ public class Session {
 
     private final RegionSelector regionSelector = new CuboidRegionSelector();
     private final Clipboard clipboard = new Clipboard();
-    private final LinkedList<Change> history = new LinkedList<>();
+    private final List<Change> history = new ArrayList<>();
     private int historyPointer = 0;
 
     public @NotNull RegionSelector getRegionSelector(@NotNull Instance instance) {

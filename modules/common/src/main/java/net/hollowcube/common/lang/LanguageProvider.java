@@ -1,9 +1,10 @@
 package net.hollowcube.common.lang;
 
-import net.hollowcube.util.ComponentUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -65,7 +66,7 @@ public class LanguageProvider {
 
         String value = properties.getProperty(translatable.key());
         if (value == null) return Component.text(translatable.key());
-        Component translated = ComponentUtil.fromStringSafe(value);
+        Component translated = fromStringSafe(value);
         List<Component> args = translatable.args();
         if (args.size() != 0) {
             translated = translated.replaceText(TextReplacementConfig.builder()
@@ -93,7 +94,7 @@ public class LanguageProvider {
         Component translated = componentCache.computeIfAbsent(translatable.key(), key -> {
             String value = properties.getProperty(translatable.key());
             if (value == null) return null;
-            return ComponentUtil.fromStringSafe(value);
+            return fromStringSafe(value);
         });
         if (translated == null) return component;
 
@@ -163,5 +164,9 @@ public class LanguageProvider {
                 .map(k -> (Component) Component.translatable(k, args))
                 .toList();
         return entries;
+    }
+
+    private static @NotNull Component fromStringSafe(@NotNull String text) {
+        return Component.text(text, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
     }
 }

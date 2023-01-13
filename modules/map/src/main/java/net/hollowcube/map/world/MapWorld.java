@@ -2,13 +2,13 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.util.FutureUtil;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;

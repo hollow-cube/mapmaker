@@ -17,7 +17,6 @@ import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
-import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -97,7 +96,7 @@ public class DevServer {
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
-    private PlatformPermissionManager platformPermissions;
+//    private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
 
     private DevHubServer hub;
@@ -145,7 +144,7 @@ public class DevServer {
         BearerToken bearerToken = new BearerToken(config.spicedb().secretKey());
         PermissionsServiceGrpc.PermissionsServiceFutureStub permissionsService = PermissionsServiceGrpc.newFutureStub(channel)
                 .withCallCredentials(bearerToken);
-        this.platformPermissions = new PlatformPermissionManager(permissionsService);
+//        this.platformPermissions = new PlatformPermissionManager(permissionsService);
         this.mapPermissions = new MapPermissionManager(permissionsService);
 
         // End phase 1

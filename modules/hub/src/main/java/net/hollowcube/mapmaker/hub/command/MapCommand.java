@@ -377,7 +377,9 @@ public class MapCommand extends BaseHubCommand {
             }
 
             mapId = playerData.getMapSlot(slot);
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+            // It's not a number, which is ok it might be a UUID
+        }
 
         // Try to parse into uuid
         if (mapId == null) {

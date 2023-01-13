@@ -23,7 +23,7 @@ public class RegionCommands {
     }
 
 
-    public class SetCommand extends Command {
+    public static class SetCommand extends Command {
         Argument<Block> blockArg = ArgumentType.BlockState("block");
 
         public SetCommand() {

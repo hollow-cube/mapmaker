@@ -169,14 +169,14 @@ public class SearchDemo extends ParentSection {
             selected = index;
         }
 
-        private class TempSubOption extends ParentSection {
+        private static class TempSubOption extends ParentSection {
             public TempSubOption(int i) {
                 super(7, 1);
                 add(i, 0, new ButtonSection(1, 1, ItemStack.of(Material.BRICK), () -> {}));
             }
         }
 
-        private class QualityOption extends ParentSection {
+        private static class QualityOption extends ParentSection {
             public QualityOption() {
                 super(7, 1);
 
@@ -188,7 +188,7 @@ public class SearchDemo extends ParentSection {
             }
         }
 
-        private class TagOption extends ParentSection {
+        private static class TagOption extends ParentSection {
             public static final int ENTRIES = 12;
             public static final int PAGE_SIZE = 5;
 

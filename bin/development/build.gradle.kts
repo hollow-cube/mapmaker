@@ -15,6 +15,7 @@ dependencies {
     implementation("com.github.hollow-cube.common:instances:${commonVersion}")
 
     implementation(project(":modules:common"))
+    implementation(project(":modules:core"))
     implementation(project(":modules:hub"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
@@ -28,6 +29,11 @@ dependencies {
     implementation("io.grpc:grpc-core:1.51.1")
     implementation("io.grpc:grpc-netty:1.51.1")
     implementation("io.grpc:grpc-netty-shaded:1.51.1")
+
+    // Helidon
+    implementation(platform("io.helidon:helidon-dependencies:3.0.2"))
+    implementation("io.helidon.health:helidon-health")
+    implementation("io.helidon.metrics:helidon-metrics-prometheus")
 
     implementation("org.spongepowered:configurate-yaml:4.1.2")
 

@@ -278,7 +278,7 @@ public sealed class RootSection extends ParentSection permits RouterSection {
         }
     }
 
-    private class DelegatingPlayerInventory extends PlayerInventory {
+    private static class DelegatingPlayerInventory extends PlayerInventory {
 
         public DelegatingPlayerInventory(@NotNull Player player) {
             super(player);
