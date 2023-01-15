@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -15,7 +14,7 @@ public record ChatQuery(
         //todo timestamps
         @NotNull List<String> serverIds,
         @NotNull List<String> contexts,
-        @NotNull List<UUID> senders,
+        @NotNull List<String> senders,
         @Nullable String message
 ) {
     public static final Predicate<String> SERVER_ID_REGEX = Pattern.compile("[a-zA-Z0-9_-]*").asMatchPredicate();
@@ -41,7 +40,7 @@ public record ChatQuery(
     public static class Builder {
         private final List<String> serverIds = new ArrayList<>();
         private final List<String> channelIds = new ArrayList<>();
-        private final List<UUID> senders = new ArrayList<>();
+        private final List<String> senders = new ArrayList<>();
         private String message = null;
 
         private Builder() {}
@@ -69,12 +68,12 @@ public record ChatQuery(
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder sender(UUID... senders) {
+        public @NotNull Builder sender(String... senders) {
             return this.senders(Arrays.asList(senders));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder senders(List<UUID> senders) {
+        public @NotNull Builder senders(List<String> senders) {
             this.senders.addAll(senders);
             return this;
         }

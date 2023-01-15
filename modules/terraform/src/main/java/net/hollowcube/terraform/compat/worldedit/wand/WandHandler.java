@@ -5,7 +5,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
-import net.minestom.server.event.trait.PlayerEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import java.text.MessageFormat;
  */
 public class WandHandler {
 
-    public static EventNode<PlayerEvent> EVENT_NODE = EventNode.type("tf_we:wand", EventFilter.PLAYER)
+    public static EventNode<InstanceEvent> EVENT_NODE = EventNode.type("tf_we:wand", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, WandHandler::leftClicked)
             .addListener(PlayerUseItemOnBlockEvent.class, WandHandler::rightClicked);
 

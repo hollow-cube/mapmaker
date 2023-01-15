@@ -15,7 +15,6 @@ public class MapEntryButton extends ButtonSection {
     /**
      * Creates a button representing a map, used for showing maps in long lists.
      *
-     * @param map
      * @param clickToView If true, clicking the button will show the {@link PlayMapView} for the map.
      */
     public MapEntryButton(@NotNull MapData map, boolean clickToView) {

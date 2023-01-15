@@ -28,6 +28,7 @@ public class AnvilInputDemo extends AnvilSection {
         }));
     }
 
+    @Override
     public void onInput(@NotNull String input) {
         System.out.println("Input: " + input);
     }

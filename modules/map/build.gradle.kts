@@ -1,7 +1,8 @@
 
 dependencies {
-    implementation(project(":modules:common"))
+    implementation(project(":modules:core"))
     implementation(project(":modules:canvas"))
+    implementation(project(":modules:terraform"))
 
     val commonVersion = rootProject.property("commonVersion")
     implementation("com.github.hollow-cube.common:instances:${commonVersion}")

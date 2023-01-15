@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.gui.map;
 
-import net.hollowcube.canvas.ClickHandler;
 import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
@@ -103,17 +102,10 @@ public class MapSlotsView extends ParentSection {
     // This class only exists to use as a marker for a locked slot, see comment in asyncLoadMapSlots
     private static class LockedButton extends ButtonSection {
 
-        public LockedButton(int width, int height, @NotNull ItemStack item) {
-            super(width, height, item);
-        }
-
         public LockedButton(int width, int height, @NotNull ItemStack item, @Nullable Runnable onClick) {
             super(width, height, item, onClick);
         }
 
-        public LockedButton(int width, int height, @NotNull ItemStack item, @Nullable ClickHandler onClick) {
-            super(width, height, item, onClick);
-        }
     }
 
 }

@@ -1,6 +1,6 @@
 package net.hollowcube.common.result;
 
-import net.hollowcube.util.FutureUtil;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +40,7 @@ class FutureResults {
                     return Result.ofNull();
                 } catch (Throwable t) {
                     // This is typically a terminating call, so we do the equivalent of rethrowing the exception.
-                    FutureUtil.handleException(t);
+                    MinecraftServer.getExceptionManager().handleException(t);
                     return Result.error(Error.of(t));
                 }
             }));

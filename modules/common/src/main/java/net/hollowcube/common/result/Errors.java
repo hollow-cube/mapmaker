@@ -55,8 +55,7 @@ class Errors {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            MultiError that = (MultiError) o;
+            if (!(o instanceof MultiError that)) return false;
             return Arrays.equals(errors, that.errors);
         }
 

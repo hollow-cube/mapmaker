@@ -64,10 +64,6 @@ public class MapSearchView extends ParentSection {
                 });
     }
 
-    private void updateQuery() {
-        pagination.reset();
-    }
-
     private static class MapEntry extends ButtonSection {
         private final MapData map;
 

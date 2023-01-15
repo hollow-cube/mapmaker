@@ -4,14 +4,16 @@ import net.hollowcube.terraform.compat.worldedit.util.CommandUtil;
 import net.hollowcube.terraform.session.Session;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class HistoryCommands {
 
-    public HistoryCommands(CommandManager commands) {
-        commands.register(CommandUtil.singleSyntaxCommand("/undo", this::undo));
-        commands.register(CommandUtil.singleSyntaxCommand("/redo", this::redo));
+    public HistoryCommands(CommandManager commands, @Nullable CommandCondition commandCondition) {
+        commands.register(CommandUtil.singleSyntaxCommand("/undo", this::undo, commandCondition));
+        commands.register(CommandUtil.singleSyntaxCommand("/redo", this::redo, commandCondition));
     }
 
     public void undo(@NotNull CommandSender sender) {
