@@ -1,6 +1,6 @@
 
 dependencies {
-    implementation(project(":modules:common"))
+    implementation(project(":modules:core"))
     implementation(project(":modules:canvas"))
 
     val commonVersion = rootProject.property("commonVersion")

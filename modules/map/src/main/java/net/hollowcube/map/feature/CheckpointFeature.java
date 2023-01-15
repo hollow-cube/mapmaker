@@ -1,6 +1,7 @@
 package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
@@ -73,11 +74,13 @@ public class CheckpointFeature implements MapFeature {
                 var checkpoint = saveState.getCheckpoint();
                 if (checkpoint == null) {
                     // No checkpoint set, return to spawn
-                    player.teleport(map.getSpawnPoint());
+                    player.teleport(map.getSpawnPoint())
+                            .exceptionally(FutureUtil::handleException);
                 } else {
                     // Return to checkpoint
                     var checkpointPos = map.getPoi(checkpoint).getPos();
-                    player.teleport(Pos.fromPoint(checkpointPos));
+                    player.teleport(Pos.fromPoint(checkpointPos))
+                            .exceptionally(FutureUtil::handleException);
                 }
             }
         }

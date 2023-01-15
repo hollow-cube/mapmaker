@@ -176,10 +176,10 @@ public class MapData {
     }
 
     public static class POI {
-        private String type;
-        private String id;
-        private Point pos;
-        private Map<String, Object> data;
+        private final String type;
+        private final String id;
+        private final Point pos;
+        private final Map<String, Object> data;
 
         public POI(String type, String id, Point pos) {
             this(type, id, pos, new HashMap<>());
@@ -209,6 +209,7 @@ public class MapData {
         }
 
         public <T> T getOrDefault(@NotNull String key, T def) {
+            //noinspection unchecked
             return (T) data.getOrDefault(key, def);
         }
 

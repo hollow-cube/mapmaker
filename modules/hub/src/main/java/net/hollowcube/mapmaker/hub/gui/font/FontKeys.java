@@ -1,11 +1,15 @@
 package net.hollowcube.mapmaker.hub.gui.font;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
 public final class FontKeys {
     private FontKeys() {
     }
 
     // Represents -2^index pixels of space
-    public static final String[] NEGATIVE_SPACE = new String[]{
+    public static final @NotNull List<String> NEGATIVE_SPACE = List.of(
             "\uF801", // -1
             "\uF802", // -2
             "\uF804", // -4
@@ -16,11 +20,11 @@ public final class FontKeys {
             "\uF80C", // -128
             "\uF80D", // -256
             "\uF80E", // -512
-            "\uF80F", // -1024
-    };
+            "\uF80F"  // -1024
+    );
 
     // Represents 2^index pixels of space
-    public static final String[] POSITIVE_SPACE = new String[]{
+    public static final @NotNull List<String> POSITIVE_SPACE = List.of(
             "\uF821", // 1
             "\uF822", // 2
             "\uF824", // 4
@@ -31,7 +35,7 @@ public final class FontKeys {
             "\uF82C", // 128
             "\uF82D", // 256
             "\uF82E", // 512
-            "\uF82F", // 1024
-    };
+            "\uF82F"  // 1024
+    );
 
 }

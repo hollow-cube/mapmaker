@@ -33,7 +33,6 @@ import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Updates.inc;
 
 public class MapStorageMongo implements MapStorage {
-    private static final String OWNER_NAME_INDEX_NAME = "owner_name_unique";
 
     private final MongoClient client;
     private final MongoConfig config;
@@ -44,13 +43,7 @@ public class MapStorageMongo implements MapStorage {
     }
 
     public @NotNull FutureResult<Void> init() {
-        return FutureResult.supply(() -> {
-//            var indexKeys = new Document();
-//            indexKeys.append("owner", 1);
-//            indexKeys.append("name", 1);
-//            collection().createIndex(indexKeys, new IndexOptions().unique(true).name(OWNER_NAME_INDEX_NAME));
-            return Result.ofNull();
-        });
+        return FutureResult.ofNull();
     }
 
     @Override
