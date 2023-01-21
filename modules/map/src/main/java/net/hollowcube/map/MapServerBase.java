@@ -4,7 +4,6 @@ import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.map.command.BaseMapCommand;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.SetSpawnCommand;
@@ -14,7 +13,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.terraform.compat.worldedit.TerraformWorldEdit;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -69,7 +67,7 @@ public abstract class MapServerBase implements MapServer {
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> instance.hasTag(MapWorld.MAP_ID));
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        TerraformWorldEdit.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+//        TerraformWorldEdit.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 
         var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand(bridge));

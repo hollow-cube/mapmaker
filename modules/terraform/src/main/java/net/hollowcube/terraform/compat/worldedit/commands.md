@@ -1,6 +1,7 @@
 # WorldEdit Commands
 
 A comprehensive list of worledit commands which will be supported.
+https://worldedit.enginehub.org/en/latest/commands/
 
 Commands are not supported for the following reasons (at least):
 
@@ -21,7 +22,7 @@ Statuses are as follows:
 
 - 🚧 /we help
 - 🚧 /we version
-- 🚧 /we trace - WHAT DOES THIS DO??
+- ❌ /we trace - Perf/limits are not configurable via commands
 - ❌ /we reload - No config to reload
 - ❌ /we cui - CUI will be autodetected (with a setting somewhere to toggle)
 - ❌ /we tz - No snapshot system
@@ -32,14 +33,13 @@ Statuses are as follows:
 - ❌ //limit - Perf/limits are not configurable via commands
 - ❌ //timeout - Perf/limits are not configurable via commands
 - ❌ //perf - Perf/limits are not configurable via commands
-- 🚧 //reorder - WHAT DOES THIS DO??
-- 🚧 //drawsel - WHAT DOES THIS DO??
+- ❌ //reorder - Perf/limits are not configurable via commands
+- ❌ //drawsel - CUI will be autodetected (with a setting somewhere to toggle)
 - ❌ //world - Cross world operations are not supported
   - caveat: eventually clipboard may be global
 - ❌ //watchdog - Watchdog not supported
-- ❌ //gmask - No global masking, everything is per player
-  - caveat: May support a "global" mask for a single world in the future. In that case, this command 
-    would adjust the mask for the current world
+- 🚧 //gmask
+  - caveat: sets globally for a specific player
 - 🚧 //toggleplace
 - ❌ //searchitem - Unrelated to world building
 
@@ -49,11 +49,11 @@ Statuses are as follows:
 
 ### SELECTION
 
-- 🚧 //pos1
-- 🚧 //pos2
+- ✅ //pos1
+- ✅ //pos2
 - 🚧 //hpos1
 - 🚧 //hpos2
-- 🚧 //chunk
+- 🚧 //chunk - sets primary in min corner, secondary in max corner. Thats all.
 - 🚧 //wand - Really just an alias for the wand tool
 - ❌ //toggleeditwand - Terraform tools are locked to a specific instance of an item, not all items of the type.
 - 🚧 //contract

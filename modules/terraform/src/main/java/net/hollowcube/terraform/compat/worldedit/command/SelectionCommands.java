@@ -1,56 +1,93 @@
 package net.hollowcube.terraform.compat.worldedit.command;
 
-import net.hollowcube.terraform.compat.worldedit.util.CommandUtil;
-import net.hollowcube.terraform.region.CuboidRegion;
-import net.hollowcube.terraform.session.Session;
-import net.minestom.server.command.CommandManager;
+import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.arguments.relative.ArgumentRelativeVec3;
 import net.minestom.server.command.builder.condition.CommandCondition;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.MessageFormat;
+public final class SelectionCommands {
+    private SelectionCommands() {}
 
-public class SelectionCommands {
+    public static final class Pos1 extends Command {
+        private final ArgumentRelativeVec3 coordinatesArg = ArgumentType.RelativeVec3("coordinates");
 
-    public SelectionCommands(@NotNull CommandManager commands, @Nullable CommandCondition commandCondition) {
-        commands.register(CommandUtil.singleSyntaxCommand("/pos1", this::pos1, commandCondition));
-        commands.register(CommandUtil.singleSyntaxCommand("/pos2", this::pos2, commandCondition));
-        commands.register(CommandUtil.singleSyntaxCommand("/size", this::size, commandCondition));
-        commands.register(CommandUtil.singleSyntaxCommand("/wand", this::wand, commandCondition));
+        public Pos1(@Nullable CommandCondition condition) {
+            super("/pos1");
+            setCondition(condition);
+
+            setDefaultExecutor(this::setPos1);
+        }
+
+        public void setPos1(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.worldedit.only_players"));
+                return;
+            }
+
+            Point coordinates;
+            if (context.has(coordinatesArg)) {
+                coordinates = context.get(coordinatesArg).fromSender(sender);
+            } else {
+                coordinates = player.getPosition();
+            }
+
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
+
+            if (selection.selectPrimary(coordinates)) {
+                selection.explainPrimary(coordinates);
+            } else {
+                player.sendMessage(Component.translatable("command.worldedit.pos1.already_set"));
+            }
+        }
     }
 
-    public void pos1(@NotNull CommandSender sender) {
-        if (!(sender instanceof Player player))
-            throw new UnsupportedOperationException("only implemented for players");
+    public static final class Pos2 extends Command {
+        private final ArgumentRelativeVec3 coordinatesArg = ArgumentType.RelativeVec3("coordinates");
 
-        var session = Session.forPlayer(player);
-        var selector = session.getRegionSelector(player.getInstance());
+        public Pos2(@Nullable CommandCondition condition) {
+            super("/pos2");
+            setCondition(condition);
 
-        var pos = player.getPosition();
-        selector.selectPrimary(pos);
+            setDefaultExecutor(this::setPos1);
+        }
 
-        //todo temp
-        player.sendMessage(MessageFormat.format("Pos1 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
+        public void setPos1(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.worldedit.only_players"));
+                return;
+            }
+
+            Point coordinates;
+            if (context.has(coordinatesArg)) {
+                coordinates = context.get(coordinatesArg).fromSender(sender);
+            } else {
+                coordinates = player.getPosition();
+            }
+
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
+
+            if (selection.selectSecondary(coordinates)) {
+                selection.explainSecondary(coordinates);
+            } else {
+                player.sendMessage(Component.translatable("command.worldedit.pos2.already_set"));
+            }
+        }
     }
 
-    public void pos2(@NotNull CommandSender sender) {
-        if (!(sender instanceof Player player))
-            throw new UnsupportedOperationException("only implemented for players");
 
-        var session = Session.forPlayer(player);
-        var selector = session.getRegionSelector(player.getInstance());
 
-        var pos = player.getPosition();
-        selector.selectSecondary(pos);
-
-        //todo temp
-        player.sendMessage(MessageFormat.format("Pos2 set to {0},{1},{2}", pos.blockX(), pos.blockY(), pos.blockZ()));
-    }
-
+/*
     public void size(@NotNull CommandSender sender) {
         if (!(sender instanceof Player player))
             throw new UnsupportedOperationException("only implemented for players");
@@ -85,5 +122,5 @@ public class SelectionCommands {
         } else {
             sender.sendMessage("Left click: select Pos #1; Right click: select Pos #2");
         }
-    }
+    }*/
 }

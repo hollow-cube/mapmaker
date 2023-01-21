@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 public final class CoordinateUtil {
     private CoordinateUtil() {}
 
+    public static @NotNull Point floor(@NotNull Point point) {
+        return new Vec(point.blockX(), point.blockY(), point.blockZ());
+    }
+
     public static @NotNull Point min(@NotNull Point a, @NotNull Point b) {
         return new Vec(
                 Math.min(a.x(), b.x()),
