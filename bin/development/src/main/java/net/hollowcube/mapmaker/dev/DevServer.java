@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -212,6 +213,7 @@ public class DevServer {
         logger.info("Loaded {} facets.", i);
 
         var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+        Terraform.init(terraformEventNode, null);
         TerraformCompat.init(terraformEventNode, null);
 
         // End phase 3

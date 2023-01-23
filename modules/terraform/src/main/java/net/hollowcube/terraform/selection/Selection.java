@@ -19,6 +19,7 @@ public class Selection {
 
     private SelectionRenderer renderer;
     private RegionSelector selector;
+    private Region.Type regionType = Region.Type.CUBOID;
     private Region cachedRegion = null;
 
     public Selection(@NotNull Player player, @NotNull String name) {
@@ -34,7 +35,18 @@ public class Selection {
         //    send a message indicating that they have fallen back to <next highest priority>
 
         this.renderer = new DebugRendererSelectionRenderer(player, ColorScheme.DEFAULT, name);
-        this.selector = Region.Type.CUBOID.newSelector(player, renderer);
+        this.selector = regionType.newSelector(player, renderer);
+    }
+
+    public @NotNull Region.Type type() {
+        return this.regionType;
+    }
+
+    public void setType(@NotNull Region.Type type) {
+        this.regionType = type;
+        this.selector = type.newSelector(player, renderer);
+        this.selector.clear(); // Updates CUI
+        this.cachedRegion = null;
     }
 
     @ApiStatus.Internal
@@ -42,28 +54,20 @@ public class Selection {
         return selector;
     }
 
-    public boolean selectPrimary(@NotNull Point point) {
-        if (selector.selectPrimary(point)) {
+    public boolean selectPrimary(@NotNull Point point, boolean explain) {
+        if (selector.selectPrimary(point, explain)) {
             cachedRegion = null;
             return true;
         }
         return false;
     }
 
-    public void explainPrimary(@NotNull Point point) {
-        selector.explainPrimary(point);
-    }
-
-    public boolean selectSecondary(@NotNull Point point) {
-        if (selector.selectSecondary(point)) {
+    public boolean selectSecondary(@NotNull Point point, boolean explain) {
+        if (selector.selectSecondary(point, explain)) {
             cachedRegion = null;
             return true;
         }
         return false;
-    }
-
-    public void explainSecondary(@NotNull Point point) {
-        selector.explainSecondary(point);
     }
 
     public void clear() {

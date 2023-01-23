@@ -24,43 +24,39 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
     }
 
     @Override
-    public boolean selectPrimary(@NotNull Point point) {
+    public boolean selectPrimary(@NotNull Point point, boolean explain) {
         // Add a new curve with the given point as the first
         // unless there is already a curve with the last point at this current point
         if (!curves.isEmpty() && curves.get(curves.size() - 1).last().sameBlock(point))
             return false;
 
         curves.add(new Curve(point));
+
+        updateRender();
+        if (explain) {
+            player.sendMessage(Component.translatable("command.worldedit.bezier.explain.primary",
+                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        }
         return true;
     }
 
     @Override
-    public void explainPrimary(@NotNull Point point) {
-        updateRender();
-        player.sendMessage(Component.translatable("command.worldedit.bezier.explain.primary",
-                Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
-    }
-
-    @Override
-    public boolean selectSecondary(@NotNull Point point) {
+    public boolean selectSecondary(@NotNull Point point, boolean explain) {
         // If this is the first point, a secondary selection acts the same as a primary one
-        if (curves.isEmpty()) return selectPrimary(point);
+        if (curves.isEmpty()) return selectPrimary(point, explain);
 
         // Add the given point to the last curve
         // unless the last point of the last curve is the same as the given point
         var curve = curves.get(curves.size() - 1);
         if (curve.last().sameBlock(point)) return false;
         curve.addLast(point);
-        return true;
-    }
 
-    @Override
-    public void explainSecondary(@NotNull Point point) {
-        //todo should i think replace these explain functions with an "explain" flag as an argument
-        // that way context can be preserved to explain better. We already have a reference to the player anyway.
         updateRender();
-        player.sendMessage(Component.translatable("command.worldedit.bezier.explain.secondary",
-                Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        if (explain) {
+            player.sendMessage(Component.translatable("command.worldedit.bezier.explain.secondary",
+                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        }
+        return true;
     }
 
     @Override
@@ -110,8 +106,6 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         updateRender();
         return true;
     }
-
-
 
 
     public int getMaxCurveSize() {
@@ -307,7 +301,9 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
             return new Curve(newPoints);
         }
 
-        /** Returns a point at the given distance on the given segment. The segment is the integer part, the distance is the decimal part. */
+        /**
+         * Returns a point at the given distance on the given segment. The segment is the integer part, the distance is the decimal part.
+         */
         public @NotNull Point getSegmentPoint(double d) {
             BezierSegment segment;
             if (d >= segments.length) {
@@ -406,9 +402,9 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
                 ));
                 for (int n = n2 - 2; n >= 0; --n) {
                     this.segments[n].setControl1(new Vec(
-                            (this.segments[n].getSomeVec().x() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().x()) / (double)this.segments[n].getYVar(),
-                            (this.segments[n].getSomeVec().y() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().y()) / (double)this.segments[n].getYVar(),
-                            (this.segments[n].getSomeVec().z() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().z()) / (double)this.segments[n].getYVar()
+                            (this.segments[n].getSomeVec().x() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().x()) / (double) this.segments[n].getYVar(),
+                            (this.segments[n].getSomeVec().y() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().y()) / (double) this.segments[n].getYVar(),
+                            (this.segments[n].getSomeVec().z() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().z()) / (double) this.segments[n].getYVar()
                     ));
                 }
                 for (int n = 0; n < n2 - 1; ++n) {
@@ -523,7 +519,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 
 
             private static double bezierPoint(double t, double p0, double p1, double p2, double p3) {
-                return p0*Math.pow(1-t, 3) + 3*p1*Math.pow(1-t, 2)*t + 3*p2*(1-t)*t*t + p3*t*t*t;
+                return p0 * Math.pow(1 - t, 3) + 3 * p1 * Math.pow(1 - t, 2) * t + 3 * p2 * (1 - t) * t * t + p3 * t * t * t;
             }
         }
 

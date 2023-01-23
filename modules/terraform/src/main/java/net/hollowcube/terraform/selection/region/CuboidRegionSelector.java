@@ -19,31 +19,31 @@ public class CuboidRegionSelector implements RegionSelector {
     }
 
     @Override
-    public boolean selectPrimary(@NotNull Point point) {
+    public boolean selectPrimary(@NotNull Point point, boolean explain) {
         if (pos1 != null && point.sameBlock(pos1)) return false;
         pos1 = CoordinateUtil.floor(point);
+
+        updateRender();
+        if (explain) {
+            player.sendMessage(Component.translatable("command.worldedit.cuboid.explain.primary",
+                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        }
+
         return true;
     }
 
     @Override
-    public void explainPrimary(@NotNull Point point) {
-        updateRender();
-        player.sendMessage(Component.translatable("command.worldedit.cuboid.explain.primary",
-                Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
-    }
-
-    @Override
-    public boolean selectSecondary(@NotNull Point point) {
+    public boolean selectSecondary(@NotNull Point point, boolean explain) {
         if (pos2 != null && point.sameBlock(pos2)) return false;
         pos2 = CoordinateUtil.floor(point);
-        return true;
-    }
 
-    @Override
-    public void explainSecondary(@NotNull Point point) {
         updateRender();
-        player.sendMessage(Component.translatable("command.worldedit.cuboid.explain.secondary",
-                Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        if (explain) {
+            player.sendMessage(Component.translatable("command.worldedit.cuboid.explain.secondary",
+                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+        }
+
+        return true;
     }
 
     @Override

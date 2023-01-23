@@ -58,6 +58,10 @@ public class LocalSession {
         return selection.computeIfAbsent(name.toLowerCase(Locale.ROOT), n -> new Selection(playerSession.player(), n));
     }
 
+    public @NotNull Collection<String> selectionNames() {
+        return Set.copyOf(selection.keySet());
+    }
+
     // Action
 
     public @NotNull ActionBuilder action() {

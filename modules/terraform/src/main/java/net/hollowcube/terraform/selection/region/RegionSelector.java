@@ -6,14 +6,30 @@ import org.jetbrains.annotations.Nullable;
 
 public interface RegionSelector {
 
-    boolean selectPrimary(@NotNull Point point);
-    void explainPrimary(@NotNull Point point);
+    /**
+     * Adds/sets a primary selection point to the current region.
+     *
+     * @param explain If true, the change in selection will be "explained" to the player.
+     *                If not updated, no explanation will be sent to the player.
+     *                The CUI rendering will be updated regardless of this option.
+     * @return True if the point was added, false if it was not (nothing was changed)
+     */
+    boolean selectPrimary(@NotNull Point point, boolean explain);
 
-    boolean selectSecondary(@NotNull Point point);
-    void explainSecondary(@NotNull Point point);
+    /**
+     * Adds/sets a secondary selection point to the current region.
+     *
+     * @param explain If true, the change in selection will be "explained" to the player.
+     *                If not updated, no explanation will be sent to the player.
+     *                The CUI rendering will be updated regardless of this option.
+     * @return True if the point was added, false if it was not (nothing was changed)
+     */
+    boolean selectSecondary(@NotNull Point point, boolean explain);
 
+    /** Completely wipes the selection, updates the rendering but does not send any message. */
     void clear();
 
+    /** Returns the current region, or null if the selection is incomplete. */
     @Nullable Region region();
 
 }

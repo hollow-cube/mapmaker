@@ -14,8 +14,8 @@ public class TestCuboidRegionSelector {
     @Test
     public void testTwoPointSel() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectPrimary(new Vec(1, 1, 1));
-        selector.selectSecondary(new Vec(2, 2, 2));
+        selector.selectPrimary(new Vec(1, 1, 1), false);
+        selector.selectSecondary(new Vec(2, 2, 2), false);
 
         var cuboid = assertInstanceOf(CuboidRegion.class, selector.region());
         //noinspection DataFlowIssue Intellij doesn't know what its talking about
@@ -26,11 +26,11 @@ public class TestCuboidRegionSelector {
     @Test
     public void testPointReplacement() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectPrimary(new Vec(1, 1, 1));
-        selector.selectSecondary(new Vec(2, 2, 2));
+        selector.selectPrimary(new Vec(1, 1, 1), false);
+        selector.selectSecondary(new Vec(2, 2, 2), false);
 
-        selector.selectSecondary(new Vec(3, 3, 3));
-        selector.selectPrimary(new Vec(4, 4, 4));
+        selector.selectSecondary(new Vec(3, 3, 3), false);
+        selector.selectPrimary(new Vec(4, 4, 4), false);
 
         var cuboid = assertInstanceOf(CuboidRegion.class, selector.region());
         //noinspection DataFlowIssue Intellij doesn't know what its talking about
@@ -41,8 +41,8 @@ public class TestCuboidRegionSelector {
     @Test
     public void testCoordinateFloor() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectPrimary(new Vec(1.5, 1.5, 1.99999));
-        selector.selectSecondary(new Vec(2.1, 2.5, 2.2));
+        selector.selectPrimary(new Vec(1.5, 1.5, 1.99999), false);
+        selector.selectSecondary(new Vec(2.1, 2.5, 2.2), false);
 
         var cuboid = assertInstanceOf(CuboidRegion.class, selector.region());
         //noinspection DataFlowIssue Intellij doesn't know what its talking about
@@ -53,7 +53,7 @@ public class TestCuboidRegionSelector {
     @Test
     public void testIncompleteSelection1() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectPrimary(new Vec(1, 1, 1));
+        selector.selectPrimary(new Vec(1, 1, 1), false);
 
         assertNull(selector.region());
     }
@@ -61,7 +61,7 @@ public class TestCuboidRegionSelector {
     @Test
     public void testIncompleteSelection2() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectSecondary(new Vec(2, 2, 2));
+        selector.selectSecondary(new Vec(2, 2, 2), false);
 
         assertNull(selector.region());
     }
@@ -69,8 +69,8 @@ public class TestCuboidRegionSelector {
     @Test
     public void testIncompleteSelection3() {
         var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
-        selector.selectPrimary(new Vec(1, 1, 1));
-        selector.selectSecondary(new Vec(2, 2, 2));
+        selector.selectPrimary(new Vec(1, 1, 1), false);
+        selector.selectSecondary(new Vec(2, 2, 2), false);
         selector.clear();
 
         assertNull(selector.region());

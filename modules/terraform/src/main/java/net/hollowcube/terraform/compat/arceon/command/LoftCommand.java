@@ -1,7 +1,8 @@
 package net.hollowcube.terraform.compat.arceon.command;
 
-import net.hollowcube.terraform.compat.arceon.tool.LoftTool;
+import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.selection.region.BezierSurfaceRegionSelector;
+import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -14,6 +15,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class LoftCommand extends Command {
+    public static final String SELECTION = "loft";
+
+    public static @NotNull Selection getSelection(@NotNull Player player) {
+        var session = LocalSession.forPlayer(player);
+        var selection = session.selection(SELECTION);
+        if (selection.type() != Region.Type.BEZIER_SURFACE)
+            selection.setType(Region.Type.BEZIER_SURFACE);
+        return selection;
+    }
 
     public LoftCommand(@Nullable CommandCondition condition) {
         super("loft", "/loft");
@@ -46,12 +56,8 @@ public class LoftCommand extends Command {
                 return;
             }
 
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(LoftTool.SELECTION);
-
-            if (selection.selectPrimary(player.getPosition())) {
-                selection.explainPrimary(player.getPosition()); //todo once again replace explain logic with an argument to selectPrimary
-            } else {
+            var changed = getSelection(player).selectPrimary(player.getPosition(), true);
+            if (!changed) {
                 sender.sendMessage("blah did not update"); //todo
             }
         }
@@ -70,12 +76,8 @@ public class LoftCommand extends Command {
                 return;
             }
 
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(LoftTool.SELECTION);
-
-            if (selection.selectSecondary(player.getPosition())) {
-                selection.explainSecondary(player.getPosition()); //todo once again replace explain logic with an argument to selectPrimary
-            } else {
+            var changed = getSelection(player).selectSecondary(player.getPosition(), true);
+            if (!changed) {
                 sender.sendMessage("blah did not update"); //todo
             }
         }
@@ -95,13 +97,8 @@ public class LoftCommand extends Command {
                 return;
             }
 
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(LoftTool.SELECTION);
-
-            if (!(selection.selector() instanceof BezierSurfaceRegionSelector selector)) {
-                sender.sendMessage("blah not a bezier surface"); //todo
-                return;
-            }
+            // getSelection ensures that the selection is a BezierSurfaceRegion
+            var selector = (BezierSurfaceRegionSelector) getSelection(player).selector();
 
             var removed = context.has("-c")
                     ? selector.removePointClosestTo(player.getPosition())
@@ -127,10 +124,7 @@ public class LoftCommand extends Command {
                 return;
             }
 
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(LoftTool.SELECTION);
-
-            selection.clear();
+            getSelection(player).clear();
             //todo this message should be handled by clear call + an explain flag or something
             sender.sendMessage("Cleared all frames.");
         }
