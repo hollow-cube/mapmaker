@@ -12,7 +12,8 @@ public class PlayerSession {
     public static final Tag<PlayerSession> TAG = ExtraTags.Transient("terraform:player_session");
 
     public static @NotNull PlayerSession fromPlayer(@NotNull Player player) {
-        return player.getTag(TAG);
+        return new PlayerSession(player);
+//        return player.getTag(TAG);
     }
 
     private final Player player;

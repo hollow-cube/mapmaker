@@ -20,16 +20,19 @@ Statuses are as follows:
 
 ### GENERAL
 
-- 🚧 /we help
-- 🚧 /we version
+- ❌ /we help - Use //help ...
+- ❌ /we version - Not WorldEdit (may have some command that shows the terraform version, idk)
 - ❌ /we trace - Perf/limits are not configurable via commands
 - ❌ /we reload - No config to reload
 - ❌ /we cui - CUI will be autodetected (with a setting somewhere to toggle)
 - ❌ /we tz - No snapshot system
 - ❌ /we report - Either a separate in game report system or discord or something
-- 🚧 //undo
-- 🚧 //redo
-- 🚧 //clearhistory
+- ✅ //undo
+  - 🚧 //undo [player]
+- ✅ //redo
+  - 🚧 //redo [player]
+- ✅ //clearhistory
+  - 🚧 //clearhistory [player]
 - ❌ //limit - Perf/limits are not configurable via commands
 - ❌ //timeout - Perf/limits are not configurable via commands
 - ❌ //perf - Perf/limits are not configurable via commands
@@ -40,7 +43,7 @@ Statuses are as follows:
 - ❌ //watchdog - Watchdog not supported
 - 🚧 //gmask
   - caveat: sets globally for a specific player
-- 🚧 //toggleplace
+- ❌ //toggleplace - Will add if someone asks for it
 - ❌ //searchitem - Unrelated to world building
 
 ### NAVIGATION
@@ -51,8 +54,8 @@ Statuses are as follows:
 
 - ✅ //pos1
 - ✅ //pos2
-- 🚧 //hpos1
-- 🚧 //hpos2
+- ✅ //hpos1
+- ✅ //hpos2
 - 🚧 //chunk - sets primary in min corner, secondary in max corner. Thats all.
 - 🚧 //wand - Really just an alias for the wand tool
 - ❌ //toggleeditwand - Terraform tools are locked to a specific instance of an item, not all items of the type.
@@ -68,7 +71,7 @@ Statuses are as follows:
 
 ### REGION
 
-- 🚧 //set
+- ⚠️ //set
 - 🚧 //line
 - 🚧 //curve
 - 🚧 //replace

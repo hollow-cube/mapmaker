@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.compat.worldedit;
 
+import net.hollowcube.terraform.compat.worldedit.command.GeneralCommands;
 import net.hollowcube.terraform.compat.worldedit.command.RegionCommands;
 import net.hollowcube.terraform.compat.worldedit.command.SelectionCommands;
 import net.minestom.server.MinecraftServer;
@@ -16,10 +17,14 @@ public final class TerraformWorldEdit {
         var commands = MinecraftServer.getCommandManager();
 
         // General
+        commands.register(new GeneralCommands.Undo());
+        commands.register(new GeneralCommands.Redo());
 
         // Selection
         commands.register(new SelectionCommands.Pos1(condition));
         commands.register(new SelectionCommands.Pos2(condition));
+        commands.register(new SelectionCommands.HPos1(condition));
+        commands.register(new SelectionCommands.HPos2(condition));
 
         // Region
         commands.register(new RegionCommands.Set(condition));

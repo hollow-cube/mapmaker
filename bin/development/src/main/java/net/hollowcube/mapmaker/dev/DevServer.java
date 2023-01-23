@@ -30,6 +30,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -264,6 +265,7 @@ public class DevServer {
         if (!event.isFirstSpawn()) return;
 
         var player = event.getPlayer();
+        player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
         player.sendMessage(Component.text("Hello, ").append(new PlayerServiceImpl().getDisplayName(player.getUuid().toString()).toCompletableFuture().join().result()));
         player.setPermissionLevel(4);

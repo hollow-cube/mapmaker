@@ -49,7 +49,8 @@ public class DebugRendererSelectionRenderer implements SelectionRenderer {
                 .end(CoordinateUtil.max(point1, point2))
                 .edgeColor(colorScheme.primary())
                 .edgeLayer(Layer.TOP)
-                .faceColor(colorScheme.secondary())
+                .faceColor(0x0)
+//                .faceColor(colorScheme.secondary())
                 .build());
     }
 

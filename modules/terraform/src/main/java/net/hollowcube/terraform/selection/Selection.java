@@ -34,7 +34,7 @@ public class Selection {
         //    send a message indicating that they have fallen back to <next highest priority>
 
         this.renderer = new DebugRendererSelectionRenderer(player, ColorScheme.DEFAULT, name);
-        this.selector = Region.Type.BEZIER_SURFACE.newSelector(player, renderer);
+        this.selector = Region.Type.CUBOID.newSelector(player, renderer);
     }
 
     @ApiStatus.Internal

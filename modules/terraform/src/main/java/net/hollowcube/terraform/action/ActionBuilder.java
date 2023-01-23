@@ -1,8 +1,9 @@
 package net.hollowcube.terraform.action;
 
+import net.hollowcube.terraform.history.Change;
+import net.hollowcube.terraform.instance.SchemBlockBatch;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Contract;
@@ -48,14 +49,19 @@ public class ActionBuilder {
         Check.notNull(block, "No action specified");
 
         int i = 0;
-        var applyBatch = new AbsoluteBlockBatch();
+        var applyBatch = new SchemBlockBatch();
         for (var point : source) {
             applyBatch.setBlock(point, block);
             i++;
         }
 
-        applyBatch.apply(session.instance(), null);
-        callback.accept(new ActionSummary(i));
+        var updates = i;
+        var redoSchematic = applyBatch.getSchematic();
+        applyBatch.apply(session.instance())
+                .thenAccept(undoSchematic -> {
+                    session.remember(Change.of(undoSchematic, redoSchematic));
+                    callback.accept(new ActionSummary(updates));
+                });
     }
 
 }
