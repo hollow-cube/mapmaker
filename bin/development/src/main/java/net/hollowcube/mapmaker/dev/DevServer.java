@@ -21,6 +21,8 @@ import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
@@ -29,6 +31,9 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -97,8 +102,8 @@ public class DevServer {
 
         // Add shutdown hook for graceful shutdown
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
-                webServer.shutdown();
-                ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
+            webServer.shutdown();
+            ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
         });
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
@@ -108,7 +113,7 @@ public class DevServer {
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
-//    private PlatformPermissionManager platformPermissions;
+    //    private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
 
     private DevHubServer hub;
@@ -207,6 +212,10 @@ public class DevServer {
         }
         logger.info("Loaded {} facets.", i);
 
+        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+        Terraform.init(terraformEventNode, null);
+        TerraformCompat.init(terraformEventNode, null);
+
         // End phase 3
         FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
                 .then(unused -> logger.info("Phase 3 complete."))
@@ -258,6 +267,8 @@ public class DevServer {
         if (!event.isFirstSpawn()) return;
 
         var player = event.getPlayer();
+        player.setGameMode(GameMode.CREATIVE);
+        player.setAllowFlying(true);
         player.sendMessage(Component.text("Hello, ").append(new PlayerServiceImpl().getDisplayName(player.getUuid().toString()).toCompletableFuture().join().result()));
         player.setPermissionLevel(4);
 
@@ -269,6 +280,8 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+
+
     }
 
 }

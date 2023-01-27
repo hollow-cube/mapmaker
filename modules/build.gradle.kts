@@ -25,6 +25,7 @@ subprojects {
 
         errorprone("com.google.errorprone:error_prone_core:2.14.0")
         errorprone("com.uber.nullaway:nullaway:0.9.8")
+        implementation("com.google.errorprone:error_prone_annotations:2.14.0")
 
         // Auto service (SPI)
         annotationProcessor("com.google.auto.service:auto-service:1.0.1")

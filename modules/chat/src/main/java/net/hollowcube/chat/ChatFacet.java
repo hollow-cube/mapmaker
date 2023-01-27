@@ -1,6 +1,5 @@
 package net.hollowcube.chat;
 
-import com.google.auto.service.AutoService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import net.hollowcube.chat.command.LogCommand;
@@ -28,7 +27,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
-@AutoService(Facet.class)
+//@AutoService(Facet.class)
 public class ChatFacet implements Facet {
     private static final System.Logger logger = System.getLogger(ChatFacet.class.getName());
     private static final ServerRuntime runtime = ServerRuntime.getRuntime();
