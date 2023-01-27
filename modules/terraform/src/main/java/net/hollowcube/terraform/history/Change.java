@@ -1,14 +1,30 @@
 package net.hollowcube.terraform.history;
 
-import net.minestom.server.instance.Instance;
+import net.hollowcube.terraform.instance.Schematic;
+import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.util.schem.Rotation;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 public interface Change {
 
-    @NotNull CompletableFuture<Void> undo(@NotNull Instance instance);
+    static @NotNull Change of(@NotNull Schematic undo, @NotNull Schematic redo) {
+        return new Change() {
+            @Override
+            public void undo(@NotNull LocalSession session) {
+                undo.build(Rotation.NONE, null).apply(session.instance(), () -> {
+                    System.out.println("DONE!!");
+                });
+            }
 
-    @NotNull CompletableFuture<Void> redo(@NotNull Instance instance);
+            @Override
+            public void redo() {
+
+            }
+        };
+    }
+
+    void undo(@NotNull LocalSession session);
+
+    void redo();
 
 }

@@ -11,23 +11,25 @@ public final class ExtraTags {
     private ExtraTags() {
     }
 
+    private static final TagSerializer<Object> EMPTY_SERIALIZER = new TagSerializer<>() {
+        @Override
+        public @Nullable Object read(@NotNull TagReadable reader) {
+            return null; // noop
+        }
+
+        @Override
+        public void write(@NotNull TagWritable writer, @NotNull Object value) {
+            // noop
+        }
+    };
+
     /**
      * Returns a tag which does not serialize or deserialize.
      * <p>
      * Useful for storing transient references which would never need to be saved
      */
     public static <T> Tag<T> Transient(String name) {
-        return Tag.Structure(name, new TagSerializer<>() {
-            @Override
-            public @Nullable T read(@NotNull TagReadable reader) {
-                return null; // noop
-            }
-
-            @Override
-            public void write(@NotNull TagWritable writer, @NotNull T value) {
-                // noop
-            }
-        });
+        return (Tag<T>) Tag.Structure(name, EMPTY_SERIALIZER);
     }
 
 }

@@ -1,32 +1,50 @@
 package net.hollowcube.terraform.compat.worldedit;
 
-import net.hollowcube.terraform.compat.worldedit.command.ClipboardCommands;
-import net.hollowcube.terraform.compat.worldedit.command.HistoryCommands;
+import net.hollowcube.terraform.compat.worldedit.command.GeneralCommands;
 import net.hollowcube.terraform.compat.worldedit.command.RegionCommands;
-import net.hollowcube.terraform.compat.worldedit.command.SelectionCommands;
-import net.hollowcube.terraform.compat.worldedit.wand.WandHandler;
+import net.hollowcube.terraform.util.AliasCommand;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TerraformWorldEdit {
+public final class TerraformWorldEdit {
+    private TerraformWorldEdit() {}
 
-    public static void init() {
-        init(MinecraftServer.getGlobalEventHandler(), null);
-        var eventHandler = MinecraftServer.getGlobalEventHandler();
-        eventHandler.addChild(WandHandler.EVENT_NODE);
-    }
-
-    public static void init(@NotNull EventNode<? super InstanceEvent> eventNode, @Nullable CommandCondition commandCondition) {
+    public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         var commands = MinecraftServer.getCommandManager();
-        new SelectionCommands(commands, commandCondition);
-        new RegionCommands(commands, commandCondition);
-        new HistoryCommands(commands, commandCondition);
-        new ClipboardCommands(commands, commandCondition);
 
-        eventNode.addChild(WandHandler.EVENT_NODE);
+        // General
+        commands.register(new GeneralCommands.Undo());
+        commands.register(new GeneralCommands.Redo());
+
+        // Selection
+        commands.register(new AliasCommand("tf:pos1", "/pos1")
+                .addSyntax(ArgumentType.RelativeVec3("coordinates")));
+        commands.register(new AliasCommand("tf:pos2", "/pos2")
+                .addSyntax(ArgumentType.RelativeVec3("coordinates")));
+        commands.register(new AliasCommand("tf:hpos1", "/hpos1"));
+        commands.register(new AliasCommand("tf:hpos2", "/hpos2"));
+
+        // Region
+        commands.register(new RegionCommands.Set(condition));
+
+        // Generation
+
+        // Schematic/Clipboard
+
+        // Tool
+
+        // Brush
+
+        // Biome
+
+        // Chunk
+
+        // Utility
     }
+
 }

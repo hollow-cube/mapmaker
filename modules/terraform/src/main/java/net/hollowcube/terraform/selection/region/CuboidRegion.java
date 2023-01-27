@@ -1,16 +1,17 @@
-package net.hollowcube.terraform.region;
+package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * A cube region from pos1 (inclusive) to pos2 (exclusive). For example, a region from 1,1,1 to 1,1,1 is empty.
+ */
 public record CuboidRegion(
-        @NotNull Instance instance,
         @NotNull Point pos1,
         @NotNull Point pos2
 ) implements Region {
@@ -47,18 +48,21 @@ public record CuboidRegion(
 
         @Override
         public boolean hasNext() {
-            return x <= maxX && y <= maxY && z <= maxZ;
+            return x < maxX && y < maxY && z < maxZ;
         }
 
         @Override
         public @NotNull Point next() {
-            // Iterate over cuboid
+            if (!hasNext()) throw new NoSuchElementException();
+
             Point point = new Vec(x, y, z);
-            if (++x > maxX) {
+            if (++x == maxX) {
                 x = min().blockX();
-                if (++y > maxY) {
-                    if (++z > maxZ) throw new NoSuchElementException();
+                if (++y == maxY) {
                     y = min().blockY();
+                    if (++z == maxZ) {
+                        return point;
+                    }
                 }
             }
             return point;
