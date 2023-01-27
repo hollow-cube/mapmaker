@@ -2,6 +2,8 @@ package net.hollowcube.terraform.action;
 
 import net.hollowcube.terraform.history.Change;
 import net.hollowcube.terraform.instance.SchemBlockBatch;
+import net.hollowcube.terraform.instance.Schematic;
+import net.hollowcube.terraform.instance.SchematicBuilder;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
@@ -15,6 +17,7 @@ public class ActionBuilder {
     private final LocalSession session;
 
     private Iterable<Point> source;
+    private Point at;
     private Block block;
 
     public ActionBuilder(@NotNull LocalSession session) {
@@ -22,6 +25,11 @@ public class ActionBuilder {
     }
 
     // Sources
+
+    public @NotNull ActionBuilder at(@NotNull Point point) {
+        this.at = point;
+        return this;
+    }
 
     @Contract(value = "_ -> this", mutates = "this")
     public @NotNull ActionBuilder from(@NotNull Iterable<Point> source) {
@@ -43,6 +51,18 @@ public class ActionBuilder {
 
 
     // Executions
+
+    public void toSchematic(@NotNull Consumer<Schematic> callback) {
+        Check.notNull(source, "Source must be set");
+
+        var builder = new SchematicBuilder();
+        for (var point : source) {
+            builder.addBlock(point, session.instance().getBlock(point));
+        }
+
+        builder.setOffset(at.mul(-1));
+        callback.accept(builder.toSchematic());
+    }
 
     public void execute(@NotNull Consumer<ActionSummary> callback) {
         Check.notNull(source, "Source must be set");

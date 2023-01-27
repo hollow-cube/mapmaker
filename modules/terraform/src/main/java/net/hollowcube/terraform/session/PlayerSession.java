@@ -1,9 +1,11 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.terraform.instance.Schematic;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a player's Terraform session, responsible for holding all "global" state.
@@ -11,12 +13,19 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerSession {
     public static final Tag<PlayerSession> TAG = ExtraTags.Transient("terraform:player_session");
 
-    public static @NotNull PlayerSession fromPlayer(@NotNull Player player) {
-        return new PlayerSession(player);
+    private static PlayerSession instanceBadThisIsNotGood = null;
+
+    public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
+        if (instanceBadThisIsNotGood == null) {
+            instanceBadThisIsNotGood = new PlayerSession(player);
+        }
+        return instanceBadThisIsNotGood;
 //        return player.getTag(TAG);
     }
 
     private final Player player;
+
+    private Schematic clipboard = null; // todo need to serialize this
 
     public PlayerSession(@NotNull Player player) {
         this.player = player;
@@ -24,6 +33,16 @@ public class PlayerSession {
 
     public @NotNull Player player() {
         return player;
+    }
+
+    // Clipboard
+
+    public void setClipboard(@NotNull Schematic schematic) {
+        this.clipboard = schematic;
+    }
+
+    public @Nullable Schematic clipboard() {
+        return clipboard;
     }
 
 }

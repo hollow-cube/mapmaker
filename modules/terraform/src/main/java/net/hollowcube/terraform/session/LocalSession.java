@@ -23,7 +23,7 @@ public class LocalSession {
         var instance = player.getInstance();
 //        var tag = ExtraTags.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
         if (temp == null) {
-            temp = new LocalSession(PlayerSession.fromPlayer(player), instance);
+            temp = new LocalSession(PlayerSession.forPlayer(player), instance);
         }
 //        var session = instance.getTag(tag);
 //        if (session == null) {

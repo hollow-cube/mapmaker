@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public final class SelectionCommands {
     private SelectionCommands() {}
 
-    public static class Pos1 extends Command {
+    public static final class Pos1 extends Command {
         private final Argument<RelativeVec> posArg = ArgumentType.RelativeVec3("pos");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
 
@@ -63,7 +63,7 @@ public final class SelectionCommands {
         }
     }
 
-    public static class Pos2 extends Command {
+    public static final class Pos2 extends Command {
         private final Argument<RelativeVec> posArg = ArgumentType.RelativeVec3("pos");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
 
@@ -107,7 +107,7 @@ public final class SelectionCommands {
         }
     }
 
-    public static class HPos1 extends Command {
+    public static final class HPos1 extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
 
         public HPos1(@Nullable CommandCondition condition) {
@@ -155,7 +155,7 @@ public final class SelectionCommands {
         }
     }
 
-    public static class HPos2 extends Command {
+    public static final class HPos2 extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
 
         public HPos2(@Nullable CommandCondition condition) {
@@ -199,6 +199,45 @@ public final class SelectionCommands {
             var changed = selection.selectSecondary(targetBlock, true);
             if (!changed) {
                 player.sendMessage(Component.translatable("command.terraform.pos2.already_set"));
+            }
+        }
+    }
+
+    public static final class Sel extends Command {
+        public Sel(@Nullable CommandCondition condition) {
+            super("sel", "tf:sel");
+            setCondition(condition);
+
+            addSubcommand(new Clear());
+
+        }
+
+        public static final class Clear extends Command {
+            private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
+            public Clear() {
+                super("clear");
+
+                setDefaultExecutor(this::handleClear);
+                addSyntax(this::handleClear, selectionArg);
+            }
+
+            private void handleClear(@NotNull CommandSender sender, @NotNull CommandContext context) {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    return;
+                }
+
+                // Determine the target selection
+                var session = LocalSession.forPlayer(player);
+                Selection selection;
+                if (context.has(selectionArg)) {
+                    selection = session.selection(context.get(selectionArg));
+                } else {
+                    selection = session.selection(Selection.DEFAULT);
+                }
+
+                selection.clear();
             }
         }
     }
