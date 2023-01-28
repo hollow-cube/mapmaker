@@ -42,10 +42,6 @@ public class MapStorageMongo implements MapStorage {
         this.config = config;
     }
 
-    public @NotNull FutureResult<Void> init() {
-        return FutureResult.ofNull();
-    }
-
     @Override
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
         return FutureResult.supply(() -> {

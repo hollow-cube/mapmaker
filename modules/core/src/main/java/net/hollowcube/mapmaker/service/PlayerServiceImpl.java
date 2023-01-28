@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.service;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.result.FutureResult;
 import net.kyori.adventure.text.Component;
@@ -11,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerServiceImpl implements PlayerService, Facet {
 
     @Override
-    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
-        return FutureResult.ofNull();
+    public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
+        return Futures.immediateVoidFuture();
     }
 
     @Override

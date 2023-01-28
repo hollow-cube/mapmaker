@@ -5,6 +5,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,8 +13,9 @@ import org.jetbrains.annotations.Nullable;
 public class AliasCommand extends Command {
     private final String target;
 
-    public AliasCommand(@NotNull String target, @NotNull String name, @Nullable String... aliases) {
+    public AliasCommand(@Nullable CommandCondition condition, @NotNull String target, @NotNull String name, @Nullable String... aliases) {
         super(name, aliases);
+        setCondition(condition);
         this.target = target;
 
         setDefaultExecutor((sender, context) -> MinecraftServer.getCommandManager().execute(sender, target));

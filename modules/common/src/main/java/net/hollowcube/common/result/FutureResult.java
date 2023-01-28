@@ -1,5 +1,8 @@
 package net.hollowcube.common.result;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -83,6 +86,22 @@ public sealed interface FutureResult<T> permits FutureResults.CF {
         return new FutureResults.CF<>(future
                 .thenApply(Result::of)
                 .exceptionally(e -> Result.error(Error.of(e))));
+    }
+
+    static <T> @NotNull FutureResult<T> wrap(@NotNull ListenableFuture<T> future) {
+        var cf = new CompletableFuture<Result<T>>();
+        Futures.addCallback(future, new FutureCallback<T>() {
+            @Override
+            public void onSuccess(T result) {
+                cf.complete(Result.of(result));
+            }
+
+            @Override
+            public void onFailure(@NotNull Throwable t) {
+                cf.complete(Result.error(Error.of(t)));
+            }
+        }, Runnable::run);
+        return new FutureResults.CF<>(cf);
     }
 
     @NotNull CompletableFuture<Result<T>> toCompletableFuture();

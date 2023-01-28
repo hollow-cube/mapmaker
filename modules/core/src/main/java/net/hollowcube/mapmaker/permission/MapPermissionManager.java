@@ -1,60 +1,59 @@
 package net.hollowcube.mapmaker.permission;
 
-import com.authzed.api.v1.Core.Relationship;
-import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
-import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import net.hollowcube.common.result.Error;
-import net.hollowcube.common.result.FutureResult;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import net.hollowcube.common.config.SpiceDBConfig;
 import net.hollowcube.mapmaker.model.MapData;
-import org.intellij.lang.annotations.MagicConstant;
+import net.hollowcube.mapmaker.permission.client.SpiceDBClientFactory;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("UnstableApiUsage")
+public interface MapPermissionManager {
 
-/**
- * Represents a manager for all map permissions
- */
-public class MapPermissionManager extends ZPermissionManager {
-    public static final Error ERR_NO_PERMISSION = ZPermissionManager.ERR_NO_PERMISSION;
-
-    public MapPermissionManager(@NotNull PermissionsServiceFutureStub permissionService) {
-        super(permissionService);
+    /**
+     * Returns a permission manager that does nothing and always reports positive permission results.
+     * <p>
+     * Obviously it is very unsafe for this to be used in production and should be prevented at all costs.
+     */
+    static @NotNull MapPermissionManager noop() {
+        return new MapPermissionManagerNoop();
     }
 
-    public @NotNull FutureResult<Void> addMapOwner(@NotNull String mapId, @NotNull String playerId) {
-        var relationship = Relationship.newBuilder()
-                .setResource(createMapObject(mapId))
-                .setRelation("owner")
-                .setSubject(createPlayerSubject(playerId))
-                .build();
-        return createRelationship(relationship);
+    /**
+     * Returns a permission manager that uses SpiceDB as the backend.
+     * <p>
+     * This is the default permission manager used by MapMaker.
+     */
+    static @NotNull ListenableFuture<@NotNull MapPermissionManagerSpiceDB> spicedb(@NotNull SpiceDBConfig config) {
+        var clientFactory = SpiceDBClientFactory.get();
+        return Futures.transform(
+                clientFactory.newPermissionClient(config),
+                MapPermissionManagerSpiceDB::new,
+                Runnable::run
+        );
     }
 
-    public @NotNull FutureResult<Void> deleteMap(@NotNull String mapId) {
-        var filter = Relationship.newBuilder()
-                .setResource(createMapObject(mapId))
-                .build();
-        return deleteRelationship(filter);
-    }
+    /**
+     * Adds the given player as an owner of a particular map.
+     *
+     * @return A future containing an updated offset token
+     */
+    @NotNull ListenableFuture<@NotNull String> addMapOwner(@NotNull String mapId, @NotNull String playerId);
 
-    public @NotNull FutureResult<Void> makeMapPublic(@NotNull String mapId) {
-        var relationship = Relationship.newBuilder()
-                .setResource(createMapObject(mapId))
-                .setRelation("viewer")
-                .setSubject(createPlayerSubject("*"))
-                .build();
-        return createRelationship(relationship);
-    }
+    /**
+     * Makes the given map public. This means that anybody has
+     * {@link net.hollowcube.mapmaker.model.MapData.Permission#READ}
+     * permission on the map (eg can play the map, but of course not edit it).
+     *
+     * @return A future containing an updated offset token for the map.
+     */
+    @NotNull ListenableFuture<@NotNull String> makeMapPublic(@NotNull String mapId);
 
-    public @NotNull FutureResult<Void> checkPermission(
-            @NotNull String mapId, @NotNull String playerId,
-            @NotNull @MagicConstant(valuesFromClass = MapData.class) String permission
-    ) {
-        var req = CheckPermissionRequest.newBuilder()
-                .setResource(createMapObject(mapId))
-                .setPermission(permission)
-                .setSubject(createPlayerSubject(playerId))
-                .build();
-        return checkPermission(req);
-    }
+    /** Deletes the given map from the permission manager. */
+    @NotNull ListenableFuture<Void> deleteMap(@NotNull String mapId);
+
+    /** Checks if the given player has the given permission on the given map. */
+    @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String mapId, @NotNull String playerId,
+                                                       @NotNull MapData.Permission permission);
 
 }

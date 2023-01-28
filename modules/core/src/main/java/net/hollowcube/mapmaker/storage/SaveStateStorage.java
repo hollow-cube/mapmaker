@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
@@ -19,10 +21,13 @@ public interface SaveStateStorage {
         return new SaveStateStorageMemory();
     }
 
-    static @NotNull FutureResult<SaveStateStorage> mongo(@NotNull MongoConfig config) {
+    static @NotNull ListenableFuture<@NotNull SaveStateStorage> mongo(@NotNull MongoConfig config) {
         var clientFactory = MongoClientFactory.get();
-        return clientFactory.newClient(config)
-                .map(client -> new SaveStateStorageMongo(client, config));
+        return Futures.transform(
+                clientFactory.newClient(config),
+                client -> new SaveStateStorageMongo(client, config),
+                Runnable::run
+        );
     }
 
     @NotNull FutureResult<@NotNull SaveState> createSaveState(@NotNull SaveState saveState);

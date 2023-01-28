@@ -1,9 +1,12 @@
 package net.hollowcube.map;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.map.command.BaseMapCommand;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.SetSpawnCommand;
@@ -13,6 +16,8 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -51,11 +56,12 @@ public abstract class MapServerBase implements MapServer {
         this.bridge = bridge;
     }
 
-    public @NotNull FutureResult<Void> init() {
+    public @NotNull ListenableFuture<Void> init() {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
 
+        // Placement rules
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
             if (event instanceof InstanceEvent instanceEvent)
                 return instanceEvent.getInstance().hasTag(MapWorld.MAP_ID);
@@ -64,17 +70,20 @@ public abstract class MapServerBase implements MapServer {
         MinecraftServer.getGlobalEventHandler().addChild(blockEvents);
         HCPlacementRules.init(blockEvents);
 
+        // Terraform initialization
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> instance.hasTag(MapWorld.MAP_ID));
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-//        TerraformWorldEdit.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 
+        // Register commands
         var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand(bridge));
         commandManager.register(new GiveCommand());
         commandManager.register(new SetSpawnCommand());
 
-        return FutureResult.ofNull();
+        return Futures.immediateVoidFuture();
     }
 
     public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {

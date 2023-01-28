@@ -1,6 +1,6 @@
 package net.hollowcube.common.facet;
 
-import net.hollowcube.common.result.FutureResult;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,5 +11,5 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Facet {
-    FutureResult<Void> hook(@NotNull ServerProcess server);
+    @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server);
 }
