@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DevServer (mongo)" type="Application" factoryName="Application">
+  <configuration default="false" name="DevServer (local)" type="Application" factoryName="Application">
     <envs>
       <env name="MAPMAKER_SPICEDB_ADDRESS" value="grpc.authzed.com:443" />
       <env name="MAPMAKER_SPICEDB_SECRETKEY" value="tc_mapmaker_dev_k8s_feb473a28a9f019649d29a209406219203c6619cbc878465af9065ae95001e70b9444eabf84c19130a8ad3ae9a8c9e28fa0ce492b32b13f44f102a6d23ea6ee6" />

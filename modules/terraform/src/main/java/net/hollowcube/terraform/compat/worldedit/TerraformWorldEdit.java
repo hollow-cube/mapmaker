@@ -18,16 +18,16 @@ public final class TerraformWorldEdit {
         var commands = MinecraftServer.getCommandManager();
 
         // General
-        commands.register(new GeneralCommands.Undo());
-        commands.register(new GeneralCommands.Redo());
+        commands.register(new GeneralCommands.Undo(condition));
+        commands.register(new GeneralCommands.Redo(condition));
 
         // Selection
-        commands.register(new AliasCommand("tf:pos1", "/pos1")
+        commands.register(new AliasCommand(condition, "tf:pos1", "/pos1")
                 .addSyntax(ArgumentType.RelativeVec3("coordinates")));
-        commands.register(new AliasCommand("tf:pos2", "/pos2")
+        commands.register(new AliasCommand(condition, "tf:pos2", "/pos2")
                 .addSyntax(ArgumentType.RelativeVec3("coordinates")));
-        commands.register(new AliasCommand("tf:hpos1", "/hpos1"));
-        commands.register(new AliasCommand("tf:hpos2", "/hpos2"));
+        commands.register(new AliasCommand(condition, "tf:hpos1", "/hpos1"));
+        commands.register(new AliasCommand(condition, "tf:hpos2", "/hpos2"));
 
         // Region
         commands.register(new RegionCommands.Set(condition));

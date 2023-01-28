@@ -1,6 +1,7 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.command.ClipboardCommands;
+import net.hollowcube.terraform.command.SchematicCommand;
 import net.hollowcube.terraform.command.SelectionCommands;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -26,6 +27,9 @@ public final class Terraform {
         commands.register(new ClipboardCommands.Copy(condition));
         commands.register(new ClipboardCommands.Cut(condition));
         commands.register(new ClipboardCommands.Paste(condition));
+
+        // Schematic
+        commands.register(new SchematicCommand(condition));
 
     }
 }

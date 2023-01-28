@@ -2,6 +2,7 @@ package net.hollowcube.chat;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.chat.command.LogCommand;
 import net.hollowcube.chat.command.MessageCommand;
 import net.hollowcube.chat.command.ReplyCommand;
@@ -9,7 +10,6 @@ import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
-import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -82,12 +82,12 @@ public class ChatFacet implements Facet {
     }
 
     @Override
-    public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
+    public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));
         server.command().register(new ReplyCommand(this));
-        return FutureResult.ofNull();
+        return Futures.immediateVoidFuture();
     }
 
     public EventNode<Event> eventNode() {
