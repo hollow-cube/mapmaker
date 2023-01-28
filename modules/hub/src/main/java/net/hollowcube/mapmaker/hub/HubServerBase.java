@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.hub;
 
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class HubServerBase implements HubServer { //todo one readiness check should be ensuring the world is loaded
     private final Logger logger = LoggerFactory.getLogger(HubServer.class);
 
@@ -34,7 +36,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
         return bridge;
     }
 
-    public @NotNull FutureResult<Void> init() {
+    public @NotNull ListenableFuture<Void> init() {
         this.mapHandler = new Handler(this);
 
         this.guiContext = Map.of(
@@ -45,13 +47,12 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
         );
 
         this.world = new HubWorld(this);
-        var worldResult = FutureResult.wrap(this.world.loadWorld());
+        var worldResult = this.world.loadWorld();
 
         var commands = MinecraftServer.getCommandManager();
         commands.register(new MapCommand(this, mapHandler));
 
-        return FutureResult.allOf(worldResult)
-                .then(unused -> logger.info("Hub server initialized"));
+        return JdkFutureAdapters.listenInPoolThread(worldResult);
     }
 
     @Override

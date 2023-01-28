@@ -79,7 +79,7 @@ public class Handler {
         map.setPublishedAt(null); // Sanity check
         return server.mapStorage().createMap(map)
                 // Add permissions
-                .flatMap(map1 -> server.mapPermissions().addMapOwner(map1.getId(), map1.getOwner())
+                .flatMap(map1 -> FutureResult.wrap(server.mapPermissions().addMapOwner(map1.getId(), map1.getOwner()))
                         .mapErr(err -> Result.error(err.wrap("failed to add owner to map permissions: {}")))
                         .map(unused -> map1))
                 // Retry on failure + wrap error
@@ -138,7 +138,7 @@ public class Handler {
         //todo there is a missing permission check here, you could delete any map if you knew the ID
         return server.mapStorage().deleteMap(mapId)
                 // Delete all associated permissions
-                .flatMap(map -> server.mapPermissions().deleteMap(mapId)
+                .flatMap(map -> FutureResult.wrap(server.mapPermissions().deleteMap(mapId))
                         .mapErr(err -> Result.error(err.wrap("failed to delete map permissions: {}")))
                         .map(unused -> map))
                 // Delete from mongo
@@ -170,7 +170,7 @@ public class Handler {
 
         return server.mapStorage().getMapById(mapId)
                 // Check admin permissions
-                .flatAlso(map -> server.mapPermissions().checkPermission(map.getId(), playerId, MapData.ADMIN)
+                .flatAlso(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.ADMIN))
                         .wrapErr("failed to check admin permission: {}"))
                 // Fetch next short id & update map
                 .flatMap(map -> server.mapStorage().getNextId()
@@ -183,7 +183,7 @@ public class Handler {
                 .flatAlso(map -> server.playerStorage().unlinkMap(mapId)
                         .wrapErr("failed to unlink map from players: {}"))
                 // Add all players as viewers
-                .flatAlso(map -> server.mapPermissions().makeMapPublic(mapId)
+                .flatAlso(map -> FutureResult.wrap(server.mapPermissions().makeMapPublic(mapId))
                         .wrapErr("failed to make map public: {}"))
                 // Save map
                 .flatAlso(map -> server.mapStorage().updateMap(map)
@@ -205,7 +205,7 @@ public class Handler {
                     if (!map.isPublished())
                         return FutureResult.error(ERR_MAP_NOT_PUBLISHED);
 
-                    return server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.READ)
+                    return FutureResult.wrap(server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.READ))
                             .wrapErr("failed to check read permission: {}")
                             .map(unused -> map);
                 })
@@ -224,7 +224,7 @@ public class Handler {
                     if (map.isPublished())
                         return FutureResult.error(ERR_MAP_IS_PUBLISHED);
 
-                    return server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.WRITE)
+                    return FutureResult.wrap(server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.WRITE))
                             .wrapErr("failed to check write permission: {}")
                             .map(unused -> map);
                 })

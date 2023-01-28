@@ -12,6 +12,22 @@ import java.util.*;
 
 public class MapData {
     // Permission keys
+
+    public enum Permission {
+        READ("read"),
+        WRITE("write"),
+        ADMIN("admin");
+
+        private final String key;
+
+        Permission(String key) {
+            this.key = key;
+        }
+
+        public String key() {
+            return key;
+        }
+    }
     public static final String READ = "read";
     public static final String WRITE = "write";
     public static final String ADMIN = "admin";

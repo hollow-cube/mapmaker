@@ -1,8 +1,9 @@
 package net.hollowcube.map.block;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.facet.Facet;
-import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
@@ -38,8 +39,8 @@ public interface MapBlock {
     class Loader implements Facet {
 
         @Override
-        public @NotNull FutureResult<Void> hook(@NotNull ServerProcess server) {
-            return FutureResult.ofNull();
+        public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
+            return Futures.immediateVoidFuture();
         }
 
     }

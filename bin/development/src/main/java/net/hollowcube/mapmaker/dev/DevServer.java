@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.dev;
 
-import com.authzed.api.v1.PermissionsServiceGrpc;
-import com.authzed.grpcutil.BearerToken;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -15,14 +13,13 @@ import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.dev.config.Config;
+import net.hollowcube.mapmaker.dev.temp.FileStorageMemory;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.terraform.Terraform;
-import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
@@ -32,8 +29,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -41,8 +36,6 @@ import net.minestom.server.extras.MojangAuth;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
@@ -52,8 +45,9 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DevServer {
-    private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
+    private static final System.Logger logger = System.getLogger(DevServer.class.getName());
 
     public static void main(String[] args) {
         long start = System.nanoTime();
@@ -74,7 +68,7 @@ public class DevServer {
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
         MinecraftServer.getExceptionManager().setExceptionHandler(t ->
-                logger.error("An uncaught exception has been handled", t));
+                logger.log(System.Logger.Level.ERROR, "An uncaught exception has been handled", t));
         var server = new DevServer();
 
         // Add health check & metrics web server.
@@ -93,8 +87,8 @@ public class DevServer {
                         .register(PrometheusSupport.create())
                         .build())
                 .build();
-        webServer.start()
-                .thenAccept(ws -> logger.info("Web server is running at " + config.http().host() + ":" + ws.port()));
+        webServer.start().thenAccept(ws -> logger.log(System.Logger.Level.INFO,
+                "Web server is running at " + config.http().host() + ":" + ws.port()));
 
         // Finish server initialization
         server.start(config);
@@ -106,14 +100,13 @@ public class DevServer {
             ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
         });
 
-        logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
+        logger.log(System.Logger.Level.INFO, "Server started in {0}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
-    //    private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
 
     private DevHubServer hub;
@@ -126,54 +119,83 @@ public class DevServer {
     public void start(@NotNull Config config) {
         MojangAuth.init();
 
-        List<FutureResult<Void>> startupTasks = new ArrayList<>();
+        var startupTasks = new ArrayList<ListenableFuture<Void>>();
 
         // Start phase 1
+        // Connect to low level services
 
-        var mongoUri = System.getenv("MM_MONGO_URI");
-        if (mongoUri == null) {
+        if (System.getenv("MM_PLAYER_STORAGE_DEV") != null) {
             this.playerStorage = PlayerStorage.memory();
-            this.mapStorage = MapStorage.memory();
-            this.saveStateStorage = SaveStateStorage.memory();
         } else {
-            //todo all remote services should have health checks
-            startupTasks.add(PlayerStorage.mongo(config.mongo())
-                    .then(playerStorage -> this.playerStorage = playerStorage));
-            startupTasks.add(MapStorage.mongo(config.mongo())
-                    .then(mapStorage -> this.mapStorage = mapStorage));
-            startupTasks.add(SaveStateStorage.mongo(config.mongo())
-                    .then(saveStateStorage -> this.saveStateStorage = saveStateStorage)
-                    .thenErr(err -> {
-                        logger.error("Failed to connect to mongo: {}", err);
-                        System.exit(1);
-                    }));
+            startupTasks.add(Futures.transform(
+                    PlayerStorage.mongo(config.mongo()),
+                    playerStorage -> {
+                        this.playerStorage = playerStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
         }
 
-        var worldManager = new WorldManager(FileStorageS3.connect(config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
+        if (System.getenv("MM_MAP_STORAGE_DEV") != null) {
+            this.mapStorage = MapStorage.memory();
+        } else {
+            startupTasks.add(Futures.transform(
+                    MapStorage.mongo(config.mongo()),
+                    mapStorage -> {
+                        this.mapStorage = mapStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
+
+        if (System.getenv("MM_SAVESTATE_DEV") != null) {
+            this.saveStateStorage = SaveStateStorage.memory();
+        } else {
+            startupTasks.add(Futures.transform(
+                    SaveStateStorage.mongo(config.mongo()),
+                    saveStateStorage -> {
+                        this.saveStateStorage = saveStateStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
+
+        WorldManager worldManager;
+        if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
+            worldManager = new WorldManager(new FileStorageMemory());
+        } else {
+            worldManager = new WorldManager(FileStorageS3.connect(
+                    config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
+        }
 
         // SpiceDB
-        var channelBuilder = ManagedChannelBuilder
-                .forTarget(config.spicedb().address());
-        if (config.spicedb().tls())
-            channelBuilder.useTransportSecurity();
-        else channelBuilder.usePlaintext();
-        ManagedChannel channel = channelBuilder.build();
-        BearerToken bearerToken = new BearerToken(config.spicedb().secretKey());
-        PermissionsServiceGrpc.PermissionsServiceFutureStub permissionsService = PermissionsServiceGrpc.newFutureStub(channel)
-                .withCallCredentials(bearerToken);
-//        this.platformPermissions = new PlatformPermissionManager(permissionsService);
-        this.mapPermissions = new MapPermissionManager(permissionsService);
+        if (System.getenv("MM_MAP_PERMISSIONS_DEV") != null)
+            this.mapPermissions = MapPermissionManager.noop();
+        else {
+            startupTasks.add(Futures.transform(
+                    MapPermissionManager.spicedb(config.spicedb()),
+                    mapPermissions -> {
+                        this.mapPermissions = mapPermissions;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
 
-        // End phase 1
-        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
-                .then(unused -> logger.info("Phase 1 complete."))
-                .thenErr(err -> {
-                    logger.error("failed during startup: {}", err);
-                    System.exit(1);
-                })
-                .toCompletableFuture().join();
+        try {
+            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "failed during startup", e);
+            System.exit(1);
+        }
+
 
         // Start phase 2
+        // Start hub and map server and bridge them.
+
         startupTasks.clear();
 
         var bridge = new DevServerBridge();
@@ -185,16 +207,16 @@ public class DevServer {
         startupTasks.add(this.hub.init());
         startupTasks.add(this.maps.init());
 
-        // End phase 2
-        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
-                .then(unused -> logger.info("Phase 2 complete."))
-                .thenErr(err -> {
-                    logger.error("failed during startup: {}", err);
-                    System.exit(1);
-                })
-                .toCompletableFuture().join();
+        try {
+            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "failed during startup", e);
+            System.exit(1);
+        }
 
-        // Start phase 3 (other misc tasks)
+
+        // Start phase 3
+        // Load all facets & other misc startup tasks like setting up some events & minestom properties
         startupTasks.clear();
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
@@ -210,20 +232,14 @@ public class DevServer {
             startupTasks.add(facet.hook(MinecraftServer.process()));
             i++;
         }
-        logger.info("Loaded {} facets.", i);
+        logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
 
-        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
-        Terraform.init(terraformEventNode, null);
-        TerraformCompat.init(terraformEventNode, null);
-
-        // End phase 3
-        FutureResult.allOf(startupTasks.toArray(FutureResult[]::new))
-                .then(unused -> logger.info("Phase 3 complete."))
-                .thenErr(err -> {
-                    logger.error("failed during startup: {}", err);
-                    System.exit(1);
-                })
-                .toCompletableFuture().join();
+        try {
+            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "failed during startup", e);
+            System.exit(1);
+        }
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {
@@ -280,8 +296,6 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-
-
     }
 
 }

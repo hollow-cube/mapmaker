@@ -8,18 +8,15 @@ import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
 import com.authzed.api.v1.PermissionService.CheckPermissionResponse;
 import com.authzed.api.v1.PermissionService.WriteRelationshipsRequest;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import net.hollowcube.common.result.Error;
-import net.hollowcube.common.result.FutureResult;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Contains a number of utilities for removing boilerplate and builder hell from the spicedb api.
  */
+@SuppressWarnings("UnstableApiUsage")
 class ZPermissionManager {
-    public static final Error ERR_NO_PERMISSION = Error.of("no permission");
-
     private final PermissionsServiceFutureStub permissionService;
 
     ZPermissionManager(PermissionsServiceFutureStub permissionService) {
@@ -42,7 +39,7 @@ class ZPermissionManager {
                 .build();
     }
 
-    protected @NotNull FutureResult<Void> createRelationship(@NotNull Relationship relationship) {
+    protected @NotNull ListenableFuture<@NotNull String> createRelationship(@NotNull Relationship relationship) {
         var update = RelationshipUpdate.newBuilder()
                 .setOperation(RelationshipUpdate.Operation.OPERATION_CREATE)
                 .setRelationship(relationship)
@@ -50,53 +47,35 @@ class ZPermissionManager {
         return writeRelationshipUpdate(update);
     }
 
-    protected @NotNull FutureResult<Void> deleteRelationship(@NotNull Relationship relationship) {
+    protected @NotNull ListenableFuture<Void> deleteRelationship(@NotNull Relationship relationship) {
         var update = RelationshipUpdate.newBuilder()
                 .setOperation(RelationshipUpdate.Operation.OPERATION_DELETE)
                 .setRelationship(relationship)
                 .build();
-        return writeRelationshipUpdate(update);
+        return Futures.transform(
+                writeRelationshipUpdate(update),
+                res -> null,
+                Runnable::run
+        );
     }
 
-    protected @NotNull FutureResult<Void> writeRelationshipUpdate(@NotNull RelationshipUpdate update) {
+    protected @NotNull ListenableFuture<@NotNull String> writeRelationshipUpdate(@NotNull RelationshipUpdate update) {
         var req = WriteRelationshipsRequest.newBuilder()
                 .addUpdates(update)
                 .build();
-        var asyncRes = permissionService.writeRelationships(req);
-        var future = new CompletableFuture<Void>();
-        asyncRes.addListener(() -> {
-            try {
-                asyncRes.get();
-                //todo check response
-                future.complete(null);
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-                if (t instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, Runnable::run);
-        return FutureResult.wrap(future);
+        return Futures.transform(
+                permissionService.writeRelationships(req),
+                res -> res.getWrittenAt().getToken(),
+                Runnable::run
+        );
     }
 
-    public @NotNull FutureResult<Void> checkPermission(@NotNull CheckPermissionRequest req) {
-        var asyncRes = permissionService.checkPermission(req);
-        var future = new CompletableFuture<CheckPermissionResponse>();
-        asyncRes.addListener(() -> {
-            try {
-                future.complete(asyncRes.get());
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-                if (t instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, Runnable::run);
-        return FutureResult.wrap(future).flatMap(res -> {
-            if (res.getPermissionship() == CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION)
-                return FutureResult.ofNull();
-            return FutureResult.error(ERR_NO_PERMISSION);
-        });
+    public @NotNull ListenableFuture<Boolean> checkPermission(@NotNull CheckPermissionRequest req) {
+        return Futures.transform(
+                permissionService.checkPermission(req),
+                res -> res.getPermissionship() == CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION,
+                Runnable::run
+        );
     }
 
 }

@@ -4,16 +4,19 @@ import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class GeneralCommands {
     private GeneralCommands() {}
 
     public static final class Undo extends Command {
 
-        public Undo() {
+        public Undo(@Nullable CommandCondition condition) {
             super("/undo");
+            setCondition(condition);
 
             setDefaultExecutor(this::undoblah);
         }
@@ -31,8 +34,9 @@ public final class GeneralCommands {
 
     public static final class Redo extends Command {
 
-        public Redo() {
+        public Redo(@Nullable CommandCondition condition) {
             super("/redo");
+            setCondition(condition);
 
             setDefaultExecutor(this::redoblah);
         }
@@ -50,8 +54,9 @@ public final class GeneralCommands {
 
     public static final class ClearHistory extends Command {
 
-        public ClearHistory() {
+        public ClearHistory(@Nullable CommandCondition condition) {
             super("/clearhistory");
+            setCondition(condition);
 
             setDefaultExecutor(this::clearHistory);
         }

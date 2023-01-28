@@ -7,11 +7,8 @@ import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.map.CreateMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -75,24 +72,25 @@ public class MapCommand extends BaseHubCommand {
             if (mapId == null) return;
 
             var playerId = PlayerData.fromPlayer(player).getId();
-            server.mapStorage().getMapById(mapId)
-                    .flatMap(map -> server.mapPermissions().checkPermission(map.getId(), playerId, MapData.READ)
-                            .map(unused -> map))
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.info.info",
-                                Component.text(map.getId()).clickEvent(ClickEvent.copyToClipboard(map.getId())).hoverEvent(HoverEvent.showText(Component.text("Click to copy"))),
-                                Component.text(map.getName()))
-                                .forEach(sender::sendMessage); //todo other info bits
-                    })
-                    .thenErr(err -> {
-                        if (err.is(MapStorage.ERR_NOT_FOUND) || err.is(MapPermissionManager.ERR_NO_PERMISSION)) {
-                            sender.sendMessage(Component.translatable("command.map.info.not_found"));
-                            return;
-                        }
-
-                        logger.error("Failed to get map info for {}: {}", mapId, err);
-                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
-                    });
+            //todo
+//            server.mapStorage().getMapById(mapId)
+//                    .flatMap(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.READ))
+//                            .map(unused -> map))
+//                    .then(map -> {
+//                        LanguageProvider.createMultiTranslatable("command.map.info.info",
+//                                Component.text(map.getId()).clickEvent(ClickEvent.copyToClipboard(map.getId())).hoverEvent(HoverEvent.showText(Component.text("Click to copy"))),
+//                                Component.text(map.getName()))
+//                                .forEach(sender::sendMessage); //todo other info bits
+//                    })
+//                    .thenErr(err -> {
+//                        if (err.is(MapStorage.ERR_NOT_FOUND) || err.is(MapPermissionManagerSpiceDB.ERR_NO_PERMISSION)) {
+//                            sender.sendMessage(Component.translatable("command.map.info.not_found"));
+//                            return;
+//                        }
+//
+//                        logger.error("Failed to get map info for {}: {}", mapId, err);
+//                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
+//                    });
         }
     }
 
@@ -130,10 +128,11 @@ public class MapCommand extends BaseHubCommand {
                             return;
                         }
 
-                        if (err.is(MapPermissionManager.ERR_NO_PERMISSION)) {
-                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
-                            return;
-                        }
+                        //todo
+//                        if (err.is(MapPermissionManagerSpiceDB.ERR_NO_PERMISSION)) {
+//                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
+//                            return;
+//                        }
 
                         logger.error("failed to play map {}: {}", shortOrLongId, err);
                         sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
@@ -267,10 +266,11 @@ public class MapCommand extends BaseHubCommand {
                             return;
                         }
 
-                        if (err.is(MapPermissionManager.ERR_NO_PERMISSION)) {
-                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
-                            return;
-                        }
+                        //todo
+//                        if (err.is(MapPermissionManagerSpiceDB.ERR_NO_PERMISSION)) {
+//                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
+//                            return;
+//                        }
 
                         logger.error("failed to edit map {}: {}", longIdOrSlot, err);
                         sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
