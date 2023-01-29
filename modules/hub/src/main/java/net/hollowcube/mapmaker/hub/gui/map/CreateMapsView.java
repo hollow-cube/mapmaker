@@ -6,10 +6,12 @@ import net.hollowcube.mapmaker.hub.gui.common.InfoButton;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMapsView extends ParentSection {
+    private PlayerData playerData = null;
+
     public CreateMapsView() {
         super(9, 3);
 
@@ -17,9 +19,7 @@ public class CreateMapsView extends ParentSection {
 //        add(0, 2, new BackOrCloseButton());
         add(8, 0, new InfoButton("gui.create_maps.info", false));
 
-        // Map selector
-        var temp = MinecraftServer.getConnectionManager().getPlayer("notmattw").getTag(PlayerData.DATA);
-        add(0, 1, new MapSlotsView(temp));
+        // Map selector added in mount
 
         // Other buttons
         //todo
@@ -29,6 +29,11 @@ public class CreateMapsView extends ParentSection {
     @Override
     protected void mount() {
         super.mount();
+
+        if (playerData == null) {
+            playerData = PlayerData.fromPlayer(getContext(Player.class));
+            add(0, 1, new MapSlotsView(playerData));
+        }
 
         find(RootSection.class).setTitle(buildTitle());
     }

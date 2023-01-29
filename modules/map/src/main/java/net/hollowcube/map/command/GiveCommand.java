@@ -13,7 +13,7 @@ public class GiveCommand extends BaseMapCommand {
     private final Argument<ItemStack> itemArgument = ItemManager.ARGUMENT;
 
     public GiveCommand() {
-        super("give");
+        super(true, "give");
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /give <item>"));
 
