@@ -2,6 +2,7 @@ package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
@@ -65,6 +66,8 @@ public class CheckpointFeature implements MapFeature {
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
+            if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
+
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
 
