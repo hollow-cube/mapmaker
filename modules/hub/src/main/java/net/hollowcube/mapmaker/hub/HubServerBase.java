@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -62,6 +63,8 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
 
     @Override
     public void openGUIForPlayer(@NotNull Player player, @NotNull Section gui) {
-        new RouterSection(gui, guiContext).showToPlayer(player);
+        var context = new HashMap<>(guiContext);
+        context.put(Player.class, player);
+        new RouterSection(gui, context).showToPlayer(player);
     }
 }

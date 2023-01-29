@@ -146,7 +146,11 @@ public class MapSlotView extends ParentSection {
         }
 
         private boolean handleEditMap(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-            //todo
+            player.closeInventory();
+
+            var handler = getContext(Handler.class);
+            handler.editMap(player, map.getId());
+
             return ClickHandler.DENY;
         }
 
