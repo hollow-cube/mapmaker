@@ -1,15 +1,24 @@
 package net.hollowcube.map.world;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.event.MapWorldRegisterEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
+import net.hollowcube.map.util.StringUtil;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.BaseWorld;
+import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.generation.MapGenerators;
@@ -18,15 +27,20 @@ import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class MapWorld extends BaseWorld {
     private static final Logger logger = LoggerFactory.getLogger(MapWorld.class);
 
@@ -39,13 +53,11 @@ public abstract class MapWorld extends BaseWorld {
         return Objects.requireNonNull(instance.getTag(THIS_TAG));
     }
 
-    public static final int FLAG_EDIT = 1; //todo remove me
-
     protected MapServer mapServer;
     protected final MapData map;
 
     public MapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
-        super(mapServer.worldManager(), map.getId());
+        super(mapServer.worldManager(), map.getId(), new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT));
         this.mapServer = mapServer;
         this.map = map;
 
@@ -72,19 +84,17 @@ public abstract class MapWorld extends BaseWorld {
         return mapServer;
     }
 
-    /**
-     * Called when a player joins the map.
-     * <p>
-     * The player is held at the map spawn with a loading indicator until the future returns.
-     * <p>
-     * todo hold the player duing loading
-     */
-    protected abstract @NotNull FutureResult<Void> initPlayer(@NotNull Player player);
+
+    protected void initSaveState(@NotNull SaveState saveState) {
+    }
+
+    protected void initPlayerFromSaveState(@NotNull Player player, @NotNull SaveState saveState) {
+    }
 
     /**
      * Called to save the player. If `remove` is set, the player is leaving the map and all state should be cleared as well
      */
-    protected abstract @NotNull FutureResult<Void> savePlayer(@NotNull Player player, boolean remove);
+    protected void updateSaveStateForPlayer(@NotNull Player player, @NotNull SaveState saveState, boolean remove) {}
 
     /**
      * Called to close this world, whatever that means for the world type (eg save the world for editing)
@@ -121,6 +131,7 @@ public abstract class MapWorld extends BaseWorld {
 
     private void initPlayer(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
+        player.getInventory().clear();
 
         // Teleport the player to spawn and show loading.
         player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
@@ -128,29 +139,73 @@ public abstract class MapWorld extends BaseWorld {
                 Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(10000), Duration.ofSeconds(0))));
         //todo while loading they should not be able to do anything.
 
-        initPlayer(player)
-                .then(unused -> {
-                    // Stop loading
-                    player.clearTitle();
-                })
-                .thenErr(err -> {
-                    //todo probably should not kick in the future
-                    logger.error("Failed to load map for player {}: {}", player.getUsername(), err);
-                    player.kick(Component.text("Failed to load map: " + err.message()));
-                });
+        var playerId = PlayerData.fromPlayer(player).getId();
+        var saveStates = mapServer.saveStateStorage();
+        FluentFuture.from(saveStates.getLatestSaveState(playerId, map.getId()))
+                .catchingAsync(SaveStateStorage.NotFoundError.class, unused -> {
+                    // Create savestate if not exists
+                    var saveState = new SaveState();
+                    saveState.setId(UUID.randomUUID().toString());
+                    saveState.setPlayerId(playerId);
+                    saveState.setMapId(map.getId());
+                    saveState.setStartTime(Instant.now());
+                    saveState.setPos(map.getSpawnPoint());
+                    initSaveState(saveState);
+                    return saveStates.createSaveState(saveState);
+                }, Runnable::run)
+                .transform(saveState -> {
+                    player.setTag(MapHooks.PLAYING, true);
+                    player.setTag(SaveState.TAG, saveState);
+
+                    initPlayerFromSaveState(player, saveState);
+
+                    EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
+                    return null;
+                }, Runnable::run)
+                .catching(Throwable.class, err -> {
+                    logger.error("Failed to load save state for player {} in map {}: {}", playerId, map.getId(), err);
+                    player.kick("failed to load save state: " + err.getMessage());
+                    return null;
+                }, Runnable::run)
+                .addCallback(new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Object result) {
+                        // Stop loading
+                        player.clearTitle();
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        //todo probably should not kick in the future
+                        logger.error("Failed to load map for player {}", player.getUsername(), t);
+                        player.kick(Component.text("Failed to load map: " + t.getMessage()));
+                    }
+                }, Runnable::run);
     }
 
     private void handlePlayerLeave(@NotNull PlayerInstanceLeaveEvent event) {
         // Save the player who is leaving
         var player = event.getPlayer();
-        player.removeTag(MapHooks.PLAYING);
-        savePlayer(player, true)
-                .thenErr(err -> {
-                    //todo should maybe hold the player for this or convey it somehow.
-                    // maybe tell the proxy to tell the player
-                    logger.error("Failed to save save state for player {} in map {}: {}",
-                            PlayerData.fromPlayer(player).getId(), map.getId(), err);
-                });
+        var saveState = SaveState.fromPlayer(player);
+
+        updateSaveStateForPlayer(player, saveState, true);
+        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+        player.tagHandler().updateContent(new NBTCompound()); // Clear the player tag
+
+        var saveStateStorage = mapServer.saveStateStorage();
+        Futures.addCallback(saveStateStorage.updateSaveState(saveState), new FutureCallback<>() {
+            @Override
+            public void onSuccess(Void result) {
+            }
+
+            @Override
+            public void onFailure(@NotNull Throwable t) {
+                //todo should maybe hold the player for this or convey it somehow.
+                // maybe tell the proxy to tell the player
+                logger.error("Failed to save save state for player {} in map {}: {}",
+                        PlayerData.fromPlayer(player).getId(), map.getId(), t);
+            }
+        }, Runnable::run);
 
         // Handle unloading the world when the last player leaves
         //todo need to immediately unregister the world from the world manager so that no players are added.

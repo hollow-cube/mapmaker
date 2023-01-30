@@ -1,15 +1,16 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.ItemStack;
+import org.bson.BsonBinary;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
@@ -19,12 +20,18 @@ import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.nbt.NBTReader;
+import org.jglrxavpok.hephaistos.nbt.NBTWriter;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
@@ -39,31 +46,30 @@ public class SaveStateStorageMongo implements SaveStateStorage {
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull SaveState> createSaveState(@NotNull SaveState saveState) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<@NotNull SaveState> createSaveState(@NotNull SaveState saveState) {
+        return Futures.submit(() -> {
             try {
                 collection().insertOne(saveState);
+                return saveState;
             } catch (DuplicateKeyException ignored) {
-                return Result.error(ERR_DUPLICATE_ENTRY);
+                throw new SaveStateStorage.NotFoundError();
             }
-            return Result.of(saveState);
-        });
+        }, ForkJoinPool.commonPool());
     }
 
     @Override
-    public @NotNull FutureResult<Void> updateSaveState(@NotNull SaveState saveState) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<Void> updateSaveState(@NotNull SaveState saveState) {
+        return Futures.submit(() -> {
             var filter = eq("_id", saveState.getId());
             var result = collection().replaceOne(filter, saveState);
             if (result.getModifiedCount() == 0)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.ofNull();
-        });
+                throw new NotFoundError();
+        }, ForkJoinPool.commonPool());
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId) {
+        return Futures.submit(() -> {
             var filter = and(
                     eq("playerId", playerId),
                     eq("mapId", mapId),
@@ -71,9 +77,9 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             var sort = descending("startTime");
             var result = collection().find(filter, SaveState.class).sort(sort).limit(1).first();
             if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
-        });
+                throw new NotFoundError();
+            return result;
+        }, ForkJoinPool.commonPool());
     }
 
     private @NotNull MongoCollection<SaveState> collection() {
@@ -91,6 +97,7 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                     case "_id" -> value.setId(reader.readString());
                     case "playerId" -> value.setPlayerId(reader.readString());
                     case "mapId" -> value.setMapId(reader.readString());
+                    case "editing" -> value.setEditing(true);
                     case "completed" -> value.setCompleted(reader.readBoolean());
                     case "startTime" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
                     case "playtime" -> value.setPlaytime(reader.readInt64());
@@ -133,6 +140,15 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                         value.setInventory(inv);
                         reader.readEndArray();
                     }
+                    case "nbt" -> {
+                        var data = reader.readBinaryData().getData();
+                        try (var nbtReader = new NBTReader(new ByteArrayInputStream(data))) {
+                            value.setNbt((NBTCompound) nbtReader.read());
+                        } catch (IOException | NBTException e) {
+                            // Will not throw reading from a byte array
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
             reader.readEndDocument();
@@ -145,6 +161,8 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             writer.writeString("_id", value.getId());
             writer.writeString("playerId", value.getPlayerId());
             writer.writeString("mapId", value.getMapId());
+            if (value.isEditing())
+                writer.writeBoolean("editing", true);
             if (value.isCompleted())
                 writer.writeBoolean("completed", true);
             writer.writeDateTime("startTime", value.getStartTime().toEpochMilli());
@@ -161,7 +179,7 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             if (value.getCheckpoint() != null) {
                 writer.writeString("checkpoint", value.getCheckpoint());
             }
-            if (value.getInventory() != null) {
+            if (value.getInventory() != null && !value.getInventory().isEmpty()) {
                 writer.writeStartArray("inventory");
                 for (var item : value.getInventory()) {
                     if (item == ItemStack.AIR) {
@@ -171,6 +189,16 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                     }
                 }
                 writer.writeEndArray();
+            }
+            if (value.getNbt() != null) {
+                var bos = new ByteArrayOutputStream();
+                try (var nbtWriter = new NBTWriter(bos)){
+                    nbtWriter.writeRaw(value.getNbt());
+                } catch (IOException e) {
+                    // Will not throw for writing to a byte array
+                    throw new RuntimeException(e);
+                }
+                writer.writeBinaryData("nbt", new BsonBinary(bos.toByteArray()));
             }
             writer.writeEndDocument();
         }
