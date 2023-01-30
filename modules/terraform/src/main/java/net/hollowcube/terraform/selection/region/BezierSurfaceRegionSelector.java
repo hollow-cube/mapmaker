@@ -1,12 +1,17 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.selection.cui.SelectionRenderer;
+import net.hollowcube.terraform.util.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +62,27 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
                     Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
         }
         return true;
+    }
+
+    @Override
+    public @NotNull NBTCompound toNBT() {
+        var nbt = new MutableNBTCompound();
+        var curvesNBT = new ArrayList<NBTList<NBTCompound>>();
+        for (var curve : curves) {
+            curvesNBT.add(curve.toNBT());
+        }
+        nbt.set("curves", new NBTList<>(NBTType.TAG_List, curvesNBT));
+        return nbt.toCompound();
+    }
+
+    @Override
+    public void fromNBT(@NotNull NBTCompound nbt) {
+        var curvesNBT = nbt.getList("curves");
+        curves.clear();
+        for (var curveNBT : curvesNBT) {
+            curves.add(Curve.fromNBT((NBTList<NBTCompound>) curveNBT));
+        }
+        updateRender();
     }
 
     @Override
@@ -233,6 +259,22 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         public Curve(@NotNull List<Point> points) {
             this.points = new ArrayList<>(points);
             computePoints();
+        }
+
+        public @NotNull NBTList<NBTCompound> toNBT() {
+            var points = new ArrayList<NBTCompound>();
+            for (var point : this.points) {
+                points.add(CoordinateUtil.toNBT(point));
+            }
+            return new NBTList<>(NBTType.TAG_Compound, points);
+        }
+
+        public static @NotNull Curve fromNBT(@NotNull NBTList<NBTCompound> nbt) {
+            var points = new ArrayList<Point>();
+            for (var point : nbt) {
+                points.add(CoordinateUtil.fromNBT(point));
+            }
+            return new Curve(points);
         }
 
         public @NotNull Point get(int index) {

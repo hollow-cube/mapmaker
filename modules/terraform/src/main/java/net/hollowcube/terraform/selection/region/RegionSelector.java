@@ -3,6 +3,7 @@ package net.hollowcube.terraform.selection.region;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public interface RegionSelector {
 
@@ -32,4 +33,7 @@ public interface RegionSelector {
     /** Returns the current region, or null if the selection is incomplete. */
     @Nullable Region region();
 
+    @NotNull NBTCompound toNBT();
+
+    void fromNBT(@NotNull NBTCompound nbt);
 }

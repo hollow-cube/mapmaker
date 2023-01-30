@@ -3,8 +3,6 @@ package net.hollowcube.mapmaker.storage;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.Error;
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +12,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface SaveStateStorage {
 
-    Error ERR_NOT_FOUND = Error.of("savestate not found");
-    Error ERR_DUPLICATE_ENTRY = Error.of("savestate already exists");
+    class NotFoundError extends RuntimeException { }
 
     static @NotNull SaveStateStorage memory() {
         return new SaveStateStorageMemory();
@@ -30,10 +27,10 @@ public interface SaveStateStorage {
         );
     }
 
-    @NotNull FutureResult<@NotNull SaveState> createSaveState(@NotNull SaveState saveState);
+    @NotNull ListenableFuture<@NotNull SaveState> createSaveState(@NotNull SaveState saveState);
 
-    @NotNull FutureResult<Void> updateSaveState(@NotNull SaveState saveState);
+    @NotNull ListenableFuture<Void> updateSaveState(@NotNull SaveState saveState);
 
-    @NotNull FutureResult<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId);
+    @NotNull ListenableFuture<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId);
 
 }

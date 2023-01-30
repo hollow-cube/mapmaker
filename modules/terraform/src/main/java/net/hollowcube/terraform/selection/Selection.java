@@ -10,6 +10,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public class Selection {
     public static final @NotNull String DEFAULT = "default";
@@ -36,6 +38,10 @@ public class Selection {
 
         this.renderer = new DebugRendererSelectionRenderer(player, ColorScheme.DEFAULT, name);
         this.selector = regionType.newSelector(player, renderer);
+    }
+
+    public String name() {
+        return name;
     }
 
     public @NotNull Region.Type type() {
@@ -80,6 +86,23 @@ public class Selection {
             cachedRegion = selector.region();
         }
         return cachedRegion;
+    }
+
+    public @NotNull NBTCompound toNBT() {
+        var root = new MutableNBTCompound();
+        root.setString("name", name);
+        root.setString("type", regionType.name());
+        root.set("selector", selector.toNBT());
+        return root.toCompound();
+    }
+
+    public static @NotNull Selection fromNBT(@NotNull Player player, @NotNull NBTCompound nbt) {
+        var selection = new Selection(player, nbt.getString("name"));
+
+        selection.setType(Region.Type.valueOf(nbt.getString("type")));
+        selection.selector().fromNBT(nbt.getCompound("selector"));
+
+        return selection;
     }
 
 }
