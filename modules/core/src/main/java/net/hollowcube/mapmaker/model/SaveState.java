@@ -6,6 +6,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,6 +26,7 @@ public class SaveState {
     private String id;
     private String playerId;
     private String mapId;
+    private boolean editing = false;
     private boolean completed = false;
 
     // The time this save state was created.
@@ -35,6 +38,7 @@ public class SaveState {
     private Pos pos;                    // Used when `save_exact_pos=on`
     private String checkpoint;          // Used when a checkpoint is present
     private List<ItemStack> inventory;  // Used in build mode & when `save_inventory=on`
+    private NBTCompound nbt;            // Present for editing savestates, otherwise not.
 
     public String getId() {
         return id;
@@ -58,6 +62,14 @@ public class SaveState {
 
     public void setMapId(String mapId) {
         this.mapId = mapId;
+    }
+
+    public boolean isEditing() {
+        return editing;
+    }
+
+    public void setEditing(boolean editing) {
+        this.editing = editing;
     }
 
     public Instant getStartTime() {
@@ -109,10 +121,20 @@ public class SaveState {
     }
 
     public List<ItemStack> getInventory() {
+        if (this.inventory == null)
+            return List.of();
         return inventory;
     }
 
     public void setInventory(List<ItemStack> inventory) {
         this.inventory = inventory;
+    }
+
+    public @Nullable NBTCompound getNbt() {
+        return nbt;
+    }
+
+    public void setNbt(@Nullable NBTCompound nbt) {
+        this.nbt = nbt;
     }
 }

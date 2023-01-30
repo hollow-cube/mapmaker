@@ -7,6 +7,8 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public class CuboidRegionSelector implements RegionSelector {
     private final Player player;
@@ -71,5 +73,20 @@ public class CuboidRegionSelector implements RegionSelector {
             );
         }
         renderer.end();
+    }
+
+    @Override
+    public @NotNull NBTCompound toNBT() {
+        var root = new MutableNBTCompound();
+        if (pos1 != null) root.set("pos1", CoordinateUtil.toNBT(pos1));
+        if (pos2 != null) root.set("pos2", CoordinateUtil.toNBT(pos2));
+        return root.toCompound();
+    }
+
+    @Override
+    public void fromNBT(@NotNull NBTCompound nbt) {
+        pos1 = nbt.contains("pos1") ? CoordinateUtil.fromNBT(nbt.getCompound("pos1")) : null;
+        pos2 = nbt.contains("pos2") ? CoordinateUtil.fromNBT(nbt.getCompound("pos2")) : null;
+        updateRender();
     }
 }
