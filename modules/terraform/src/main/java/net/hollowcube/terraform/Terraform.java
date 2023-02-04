@@ -1,8 +1,6 @@
 package net.hollowcube.terraform;
 
-import net.hollowcube.terraform.command.ClipboardCommands;
-import net.hollowcube.terraform.command.SchematicCommand;
-import net.hollowcube.terraform.command.SelectionCommands;
+import net.hollowcube.terraform.command.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.EventNode;
@@ -22,6 +20,15 @@ public final class Terraform {
         commands.register(new SelectionCommands.HPos1(condition));
         commands.register(new SelectionCommands.HPos2(condition));
         commands.register(new SelectionCommands.Sel(condition));
+
+        // Region
+        commands.register(new RegionCommands.Set(condition));
+        commands.register(new RegionCommands.Replace(condition));
+
+        // History
+        commands.register(new HistoryCommands.Undo(condition));
+        commands.register(new HistoryCommands.Redo(condition));
+        commands.register(new HistoryCommands.ClearHistory(condition));
 
         // Clipboard
         commands.register(new ClipboardCommands.Copy(condition));

@@ -61,7 +61,6 @@ public abstract class MapWorld extends BaseWorld {
         this.mapServer = mapServer;
         this.map = map;
 
-        instance().getWorldBorder().setDiameter(100); //todo
         instance().setGenerator(MapGenerators.flatWorld());
 
         instance().setTag(THIS_TAG, this);

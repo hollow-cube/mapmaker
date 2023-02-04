@@ -6,7 +6,6 @@ import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.map.command.BaseMapCommand;
 import net.hollowcube.map.command.GiveCommand;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.SetSpawnCommand;
@@ -74,8 +73,10 @@ public abstract class MapServerBase implements MapServer {
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> instance.hasTag(MapWorld.MAP_ID));
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
-        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+//        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+//        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
+        Terraform.init(terraformEvents, null);
+        TerraformCompat.init(terraformEvents, null);
 
         // Register commands
         var commandManager = MinecraftServer.getCommandManager();
