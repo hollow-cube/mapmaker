@@ -1,7 +1,9 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.command.*;
+import net.hollowcube.terraform.mask.script.MaskArgument;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -37,6 +39,13 @@ public final class Terraform {
 
         // Schematic
         commands.register(new SchematicCommand(condition));
+
+        // Testing
+        var mask = new Command("mask");
+        mask.addSyntax((sender, context) -> {
+            sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
+        }, MaskArgument.MASK);
+        commands.register(mask);
 
     }
 }
