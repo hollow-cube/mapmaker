@@ -74,16 +74,21 @@ public record Schematic(
      * @param applicator The function to call for each block in the schematic.
      */
     public void apply(@NotNull Rotation rotation, @NotNull BiConsumer<Point, Block> applicator) {
-        ByteBuffer blocks = ByteBuffer.wrap(this.blocks);
+        ByteBuffer blocks = ByteBuffer.wrap(Arrays.copyOf(this.blocks, this.blocks.length));
         for (int y = 0; y < size().y(); y++) {
-            for (int z = 0; z < size.z(); z++) {
-                for (int x = 0; x < size.x(); x++) {
+            for (int z = 0; z < size().z(); z++) {
+                for (int x = 0; x < size().x(); x++) {
                     int blockVal = Utils.readVarInt(blocks);
                     Block b = palette[blockVal];
 
+                    if (b.isAir()) {
+//                        System.out.println("AIR BLOCK AT " + x + " " + y + " " + z);
+                    }
+
                     if (b == null) {
+                        throw new RuntimeException("GOAJWOUGHAW");
                         //todo should be a warning
-                        continue;
+//                        continue;
                     }
 
                     Vec blockPos = new Vec(x + offset.x(), y + offset.y(), z + offset.z());

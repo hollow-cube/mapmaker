@@ -40,6 +40,7 @@ public class SchemBlockBatch implements Block.Setter {
     }
 
     public @NotNull CompletableFuture<@NotNull Schematic> apply(@NotNull Instance instance) {
+        System.out.println(chunkBatchesMap);
         var schematic = new SchematicBuilder();
         CompletableFuture<Void>[] cfs = new CompletableFuture[chunkBatchesMap.size()];
         synchronized (chunkBatchesMap) {
