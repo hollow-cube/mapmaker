@@ -2,6 +2,7 @@ package net.hollowcube.terraform.command;
 
 import net.hollowcube.terraform.command.argument.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -208,7 +209,55 @@ public final class SelectionCommands {
             super("sel", "tf:sel");
             setCondition(condition);
 
+            addSubcommand(new Type());
             addSubcommand(new Clear());
+
+        }
+
+        public static final class Type extends Command {
+            public Type() {
+                super("type");
+
+                setDefaultExecutor((sender, context) -> sender.sendMessage("Usage blah blah")); //todo
+
+                for (var type : Region.Type.values()) {
+                    addSubcommand(new Simple(type));
+                }
+            }
+
+            private static final class Simple extends Command {
+                private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
+                private final Region.Type regionType;
+
+                public Simple(@NotNull Region.Type regionType) {
+                    super(regionType.name().toLowerCase());
+                    this.regionType = regionType;
+
+                    setDefaultExecutor(this::handleSelectRegionType);
+                    addSyntax(this::handleSelectRegionType, selectionArg);
+                }
+
+                private void handleSelectRegionType(@NotNull CommandSender sender, @NotNull CommandContext context) {
+                    if (!(sender instanceof Player player)) {
+                        sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                        return;
+                    }
+
+                    // Determine the target selection
+                    var session = LocalSession.forPlayer(player);
+                    Selection selection;
+                    if (context.has(selectionArg)) {
+                        selection = session.selection(context.get(selectionArg));
+                    } else {
+                        selection = session.selection(Selection.DEFAULT);
+                    }
+
+                    // Update the selection
+                    selection.setType(regionType);
+                    sender.sendMessage(Component.translatable("command.terraform.sel.type.set", Component.text(regionType.name().toLowerCase())));
+                }
+            }
 
         }
 

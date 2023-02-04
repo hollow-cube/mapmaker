@@ -6,11 +6,16 @@ import net.hollowcube.terraform.instance.Schematic;
 import net.hollowcube.terraform.instance.SchematicBuilder;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.snapshot.InstanceSnapshot;
+import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 public class ActionBuilder {
@@ -19,6 +24,8 @@ public class ActionBuilder {
     private Iterable<Point> source;
     private Point at;
     private Block block;
+
+    private BiPredicate<Point, Block> blockPredicate = null;
 
     public ActionBuilder(@NotNull LocalSession session) {
         this.session = session;
@@ -39,6 +46,14 @@ public class ActionBuilder {
 
 
     //todo masks
+
+    // Masks
+
+    @Contract(value = "_ -> this", mutates = "this")
+    public @NotNull ActionBuilder matching(@NotNull BiPredicate<Point, Block> predicate) {
+        this.blockPredicate = predicate;
+        return this;
+    }
 
 
     // Actions
@@ -68,16 +83,28 @@ public class ActionBuilder {
         Check.notNull(source, "Source must be set");
         Check.notNull(block, "No action specified");
 
+        InstanceSnapshot instance = SnapshotUpdater.update(session.instance());
+        ForkJoinPool.commonPool().submit(() -> executeInternal(session.instance(), instance, callback));
+    }
+
+    private void executeInternal(@NotNull Instance realInstance, @NotNull InstanceSnapshot instance, @NotNull Consumer<ActionSummary> callback) {
         int i = 0;
         var applyBatch = new SchemBlockBatch();
         for (var point : source) {
+            var oldBlock = instance.getBlock(point);
+            if (blockPredicate != null && !blockPredicate.test(point, oldBlock)) {
+                System.out.println("skipping " + oldBlock);
+                continue;
+            }
             applyBatch.setBlock(point, block);
             i++;
         }
 
+
         var updates = i;
+        //todo chunk batch should lock the chunk to do its work, the advantage is that we process different chunks in different threads.
         var redoSchematic = applyBatch.getSchematic();
-        applyBatch.apply(session.instance())
+        applyBatch.apply(realInstance)
                 .thenAccept(undoSchematic -> {
                     session.remember(Change.of(undoSchematic, redoSchematic));
                     callback.accept(new ActionSummary(updates));

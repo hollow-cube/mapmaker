@@ -1,6 +1,5 @@
 package net.hollowcube.terraform.compat.worldedit;
 
-import net.hollowcube.terraform.compat.worldedit.command.GeneralCommands;
 import net.hollowcube.terraform.compat.worldedit.command.RegionCommands;
 import net.hollowcube.terraform.util.AliasCommand;
 import net.minestom.server.MinecraftServer;
@@ -18,8 +17,11 @@ public final class TerraformWorldEdit {
         var commands = MinecraftServer.getCommandManager();
 
         // General
-        commands.register(new GeneralCommands.Undo(condition));
-        commands.register(new GeneralCommands.Redo(condition));
+        commands.register(new AliasCommand(condition, "tf:undo", "/undo")
+                .addSyntax(ArgumentType.Integer("count").min(1).setDefaultValue(1)));
+        commands.register(new AliasCommand(condition, "tf:redo", "/redo")
+                .addSyntax(ArgumentType.Integer("count").min(1).setDefaultValue(1)));
+        commands.register(new AliasCommand(condition, "tf:clearhistory", "/clearhistory"));
 
         // Selection
         commands.register(new AliasCommand(condition, "tf:pos1", "/pos1")
@@ -35,6 +37,8 @@ public final class TerraformWorldEdit {
         // Generation
 
         // Schematic/Clipboard
+        commands.register(new AliasCommand(condition, "tf:copy", "/copy"));
+        commands.register(new AliasCommand(condition, "tf:paste", "/paste"));
 
         // Tool
 

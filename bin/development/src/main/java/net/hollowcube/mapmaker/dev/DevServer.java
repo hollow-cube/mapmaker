@@ -30,6 +30,7 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
@@ -223,6 +224,14 @@ public class DevServer {
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
+        eventHandler.addListener(PlayerChatEvent.class, event -> {
+            event.setChatFormat(e -> {
+                var player = event.getPlayer();
+                var username = player.getUsername();
+                return Component.translatable("chat.type.text")
+                        .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5")));
+            });
+        });
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);

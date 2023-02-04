@@ -3,12 +3,33 @@
 A comprehensive list of worledit commands which will be supported.
 https://worldedit.enginehub.org/en/latest/commands/
 
-Commands are not supported for the following reasons (at least):
-
-- Deprecated
-- Unrelated to world building/manipulation
-- Does vanilla-like world generation or related
-- Uses CraftScript or whatever the expression syntax is 
+### Tamto Commands
+- /rotate
+  - Clipboard modifications need to be stored in a stack/with a parent, so i will do the following
+    - Multiple clipboard types
+      - Raw from world
+      - rotated
+      - flipped
+    - ones like rotated can have a parent
+    - when doing //place it will walk up the parent tree until it reaches a root one like raw from world and paste that
+- /flip
+- /move
+- /stack (and smear?)
+- /shift
+- /outset
+- /inset
+- /sel fuzzy
+- /sel convex
+- /gmask
+- /typereplace
+- Patterns
+  - #arcangle
+  - #voronoi
+  - #fractal
+  - `>`
+  - `<`
+  - `~`
+  - #offset
 
 Statuses are as follows:
 
@@ -16,7 +37,6 @@ Statuses are as follows:
 - 🚧: Incomplete/in progress
 - ⚠️: Partially supported
 - ❌: Not supported
-- 📝: Dont really want to support, but might for completeness
 
 ### GENERAL
 
@@ -77,7 +97,7 @@ Statuses are as follows:
 - 🚧 //replace
 - 🚧 //overlay
 - 🚧 //center
-- 📝 //naturalize
+- 🚧 //naturalize
 - 🚧 //walls
 - 🚧 //faces
 - 🚧 //smooth
@@ -113,9 +133,9 @@ lost their saved schematics when they leave the world but if you pay for extra w
 - 🚧 //schem load
 - 🚧 //schem delete
 - 🚧 //schem save
-- 🚧 //copy
+- ✅ //copy
 - 🚧 //cut
-- 🚧 //paste
+- ✅ //paste
 - 🚧 //rotate
 - 🚧 //flip
 - 🚧 //clearclipboard
