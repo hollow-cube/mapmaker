@@ -1,15 +1,15 @@
 package net.hollowcube.terraform.action;
 
+import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.history.Change;
 import net.hollowcube.terraform.instance.SchemBlockBatch;
 import net.hollowcube.terraform.instance.Schematic;
 import net.hollowcube.terraform.instance.SchematicBuilder;
+import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.snapshot.InstanceSnapshot;
-import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public class ActionBuilder {
     private Point at;
     private Block block;
 
-    private BiPredicate<Point, Block> blockPredicate = null;
+    private Mask mask = null;
 
     public ActionBuilder(@NotNull LocalSession session) {
         this.session = session;
@@ -44,14 +44,17 @@ public class ActionBuilder {
         return this;
     }
 
-
-    //todo masks
-
     // Masks
 
     @Contract(value = "_ -> this", mutates = "this")
     public @NotNull ActionBuilder matching(@NotNull BiPredicate<Point, Block> predicate) {
-        this.blockPredicate = predicate;
+        this.mask = (world, point, block) -> predicate.test(point, block);
+        return this;
+    }
+
+    @Contract(value = "_ -> this", mutates = "this")
+    public @NotNull ActionBuilder mask(@NotNull Mask mask) {
+        this.mask = mask;
         return this;
     }
 
@@ -83,23 +86,20 @@ public class ActionBuilder {
         Check.notNull(source, "Source must be set");
         Check.notNull(block, "No action specified");
 
-        InstanceSnapshot instance = SnapshotUpdater.update(session.instance());
-        ForkJoinPool.commonPool().submit(() -> executeInternal(session.instance(), instance, callback));
+        WorldView world = WorldView.snapshot(session.instance());
+        ForkJoinPool.commonPool().submit(() -> executeInternal(session.instance(), world, callback));
     }
 
-    private void executeInternal(@NotNull Instance realInstance, @NotNull InstanceSnapshot instance, @NotNull Consumer<ActionSummary> callback) {
+    private void executeInternal(@NotNull Instance realInstance, @NotNull WorldView world, @NotNull Consumer<ActionSummary> callback) {
         int i = 0;
         var applyBatch = new SchemBlockBatch();
         for (var point : source) {
-            var oldBlock = instance.getBlock(point);
-            if (blockPredicate != null && !blockPredicate.test(point, oldBlock)) {
-                System.out.println("skipping " + oldBlock);
+            if (mask != null && !mask.test(world, point, world.getBlock(point))) {
                 continue;
             }
             applyBatch.setBlock(point, block);
             i++;
         }
-
 
         var updates = i;
         //todo chunk batch should lock the chunk to do its work, the advantage is that we process different chunks in different threads.

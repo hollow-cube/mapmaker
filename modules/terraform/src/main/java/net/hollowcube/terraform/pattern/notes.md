@@ -24,6 +24,48 @@ maybe need to have some context in the current execution to set some state, eg f
 
 `func matches(x, y, z, currentBlock, ...) -> boolean`
 
+## Mask "scripting"
+
+`/` can be used to OR masks together
+`|` is a pipe operator, eg takes the input from left and feeds it to right (aka AND)
+`!` is a not operator, eg inverts the following mask
+`()` can be used to group masks
+space is allowed but not required, and it is ignored.
+
+Basic masks:
+- Single block: `stone`, `minecraft:stone`, `stone_stairs[facing=east]`
+  - block states are fuzzy matched, eg they do not care about unspecified states. 
+    If the given state does not exist, the mask will match nothing.
+- Any matching state: TODO
+- Random noise: `%50`
+- Over/underlay: `>`, `<`
+- named: `#name[args]`
+  - `#existing`
+  - `#solid`
+  - `#surface`
+  - Arguments can be either given in order or by name, eg `#arcangle[0,90,10]` or `#arcangle[minAngle=0,maxAngle=90,range=10]`
+    - Named and ordered may not be mixed
+    - In both cases it is valid to leave out optional args
+
+Examples:
+- `stone/grass_block` - matches stone or grass
+- `!stone` - matches anything but stone
+- `!(stone/grass_block)` - matches anything but stone or grass
+  - May change the precedence here so that `!` is higher than `/`, meaning `!stone/grass_block` would match anything but stone or grass
+- `%50|>grass_block` - matches 50% of blocks above grass
+
+Parsing notes:
+- LHS can be...
+  - a prefix operator (!, >, <)
+  - a block (with state)
+  - a named mask (with args)
+  - %50 is syntax sugar for #rand(.5)
+- Infix
+  - `/` or `|`
+
+
+
+
 # Other
 
 Actions should be prompted by the region

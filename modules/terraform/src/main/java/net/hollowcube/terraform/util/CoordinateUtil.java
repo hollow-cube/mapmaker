@@ -54,4 +54,5 @@ public final class CoordinateUtil {
             return new Vec(x, y, z);
         }
     }
+
 }
