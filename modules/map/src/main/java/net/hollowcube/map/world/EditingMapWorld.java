@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.feature.experimental.marker.MarkerFeature;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.entity.GameMode;
@@ -18,6 +19,11 @@ public class EditingMapWorld extends MapWorld {
 
     public EditingMapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
         super(mapServer, map);
+
+        var eventNode = instance().eventNode();
+
+        eventNode.addChild(new MarkerFeature().eventNode()); //todo auto registration with selector
+
     }
 
     @Override
