@@ -8,10 +8,7 @@ import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.map.event.MapWorldRegisterEvent;
-import net.hollowcube.map.event.MapWorldUnregisterEvent;
+import net.hollowcube.map.event.*;
 import net.hollowcube.map.util.StringUtil;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -30,7 +27,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +101,8 @@ public abstract class MapWorld extends BaseWorld {
 
     @Override
     public @NotNull CompletableFuture<Void> loadWorld() {
-        return super.loadWorld();
+        return super.loadWorld()
+                .thenAccept(unused -> EventDispatcher.call(new MapWorldLoadEvent(this)));
     }
 
     @Override
@@ -124,6 +121,7 @@ public abstract class MapWorld extends BaseWorld {
 
     @Override
     public @NotNull CompletableFuture<Void> unloadWorld() {
+        EventDispatcher.call(new MapWorldUnloadEvent(this));
         return super.unloadWorld()
                 .thenRun(() -> EventDispatcher.call(new MapWorldUnregisterEvent(this)));
     }
@@ -189,7 +187,7 @@ public abstract class MapWorld extends BaseWorld {
 
         updateSaveStateForPlayer(player, saveState, true);
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
-        player.tagHandler().updateContent(new NBTCompound()); // Clear the player tag
+//        player.tagHandler().updateContent(new NBTCompound()); // Clear the player tag
 
         var saveStateStorage = mapServer.saveStateStorage();
         Futures.addCallback(saveStateStorage.updateSaveState(saveState), new FutureCallback<>() {
