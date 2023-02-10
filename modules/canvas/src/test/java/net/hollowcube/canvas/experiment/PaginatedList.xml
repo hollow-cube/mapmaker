@@ -1,0 +1,19 @@
+<component width="9" height="6" align="ttb">
+    <spacer height="1" />
+
+    <box align="ltr" width="9" height="5">
+        <spacer />
+        <box align="ttb" width="7" height="5">
+
+            <pagination width="7" height="4" />
+
+            <box align="ltr" width="7" height="1">
+                <button width="3" translationKey="gui.example.next_page" />
+                <label translationKey="gui.example.page" />
+                <button width="3" translationKey="gui.example.prev_page" />
+            </box>
+
+        </box>
+        <spacer />
+    </box>
+</component>
