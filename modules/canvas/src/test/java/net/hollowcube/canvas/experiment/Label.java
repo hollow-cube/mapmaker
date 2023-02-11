@@ -7,4 +7,7 @@ public interface Label {
 
     void setArgs(@NotNull Component... args);
 
+    //todo move me to a separate interface (eg Element, but that is the impl)
+    void setLoading(boolean loading);
+
 }
