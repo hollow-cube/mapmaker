@@ -13,7 +13,7 @@ public class Counter extends View {
     private @Outlet("count") Label label;
 
     public Counter() {
-        System.out.println(label);
+        label.setArgs(Component.text(count));
     }
 
     @Action("incr")
@@ -24,11 +24,6 @@ public class Counter extends View {
     @Action("decr")
     private void decrement() {
         label.setArgs(Component.text(--count));
-    }
-
-    public static void main(String[] args) {
-
-        new Counter();
     }
 
 }
