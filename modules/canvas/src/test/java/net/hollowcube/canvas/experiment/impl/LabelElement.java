@@ -15,6 +15,9 @@ public class LabelElement extends ItemSection implements Element, Label {
     private final String id;
     private final String translationKey;
 
+    private boolean loading = false;
+    private ItemStack cachedItem = null;
+
     public LabelElement(@Nullable String id, int width, int height,
                         @NotNull String translationKey, @NotNull Component... args) {
         super(width, height);
@@ -34,12 +37,24 @@ public class LabelElement extends ItemSection implements Element, Label {
         updateItem(args);
     }
 
+    @Override
+    public void setLoading(boolean loading) {
+        this.loading = loading;
+        if (loading) {
+            setItem(ItemStack.of(Material.BARRIER));
+        } else {
+            setItem(cachedItem);
+        }
+    }
+
     private void updateItem(@NotNull Component... args) {
-        var itemStack = ItemStack.builder(Material.PAPER)
+        cachedItem = ItemStack.builder(Material.PAPER)
                 .displayName(Component.translatable(translationKey + ".name", args))
                 .lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", List.of(args)))
                 .build();
-        setItem(itemStack);
+        if (!loading) {
+            setItem(cachedItem);
+        }
     }
 
     private void setItem(@NotNull ItemStack itemStack) {

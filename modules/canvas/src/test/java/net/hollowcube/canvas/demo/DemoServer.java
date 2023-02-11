@@ -4,6 +4,7 @@ import net.hollowcube.canvas.ItemSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.experiment.demo.Counter;
+import net.hollowcube.canvas.experiment.demo.LoadingDemo;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.common.lang.LanguageProvider;
@@ -53,13 +54,9 @@ public class DemoServer {
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);
         guis.put("anvil", AnvilInputDemo::new);
-        guis.put("new", () -> {
-            try {
-                return new RouterSection(new Counter());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+
+        guis.put("ncounter", () -> new RouterSection(new Counter()));
+        guis.put("nloading", () -> new RouterSection(new LoadingDemo()));
     }
 
     public static void main(String[] args) {
