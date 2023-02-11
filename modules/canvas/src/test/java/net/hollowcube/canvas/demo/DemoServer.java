@@ -3,9 +3,15 @@ package net.hollowcube.canvas.demo;
 import net.hollowcube.canvas.ItemSection;
 import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.experiment.demo.Counter;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
+import net.hollowcube.common.lang.LanguageProvider;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.coordinate.Pos;
@@ -47,10 +53,19 @@ public class DemoServer {
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);
         guis.put("anvil", AnvilInputDemo::new);
+        guis.put("new", () -> {
+            try {
+                return new RouterSection(new Counter());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public static void main(String[] args) {
         var server = MinecraftServer.init();
+        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+        MinestomAdventure.COMPONENT_TRANSLATOR = (comp, locale) -> LanguageProvider.get2(comp);
 
         var instanceManager = MinecraftServer.getInstanceManager();
         var instance = instanceManager.createInstanceContainer();
@@ -68,6 +83,15 @@ public class DemoServer {
             for (int i = 0; i < PlayerInventory.INVENTORY_SIZE; i++) {
                 player.getInventory().setItemStack(i, ItemStack.of(Material.STICK));
             }
+
+            player.sendMessage(Component.text("\uEff4\uF822", TextColor.color(78, 92, 36))
+                    .append(Component.text("notmattw", TextColor.color(172, 75, 255)))
+                    .append(Component.text(" » ", NamedTextColor.DARK_GRAY))
+                    .append(Component.text("Seth is a weirdo", NamedTextColor.WHITE)));
+            player.sendMessage(Component.text("\uEff3\uF822", TextColor.color(78, 92, 36))
+                    .append(Component.text("Seth28", TextColor.color(255, 45, 45)))
+                    .append(Component.text(" » ", NamedTextColor.DARK_GRAY))
+                    .append(Component.text("ILL BAN YOU", NamedTextColor.WHITE)));
         });
 
         var command = new Command("gui");

@@ -1,5 +1,7 @@
-package net.hollowcube.canvas.experiment;
+package net.hollowcube.canvas.experiment.demo;
 
+import net.hollowcube.canvas.experiment.Pagination;
+import net.hollowcube.canvas.experiment.View;
 import net.hollowcube.canvas.experiment.annotation.Action;
 import net.hollowcube.canvas.experiment.annotation.Outlet;
 import org.jetbrains.annotations.NotNull;
@@ -8,9 +10,9 @@ import java.util.stream.IntStream;
 
 public class PaginatedList extends View {
 
-    private @Outlet Pagination pagination;
+    private @Outlet("pagination") Pagination pagination;
 
-    @Action
+    @Action("abc")
     private void fetchPage(@NotNull Pagination.PageRequest request) {
         int pageSize = request.width() * request.height();
         var view = IntStream.range(0, pageSize)

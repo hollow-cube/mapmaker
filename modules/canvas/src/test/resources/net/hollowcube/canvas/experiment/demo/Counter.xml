@@ -1,0 +1,5 @@
+<component width="9" height="1" align="ltr">
+    <button id="decr" width="4" translationKey="gui.example.decrement" />
+    <label id="count" translationKey="gui.example.count" />
+    <button id="incr" width="4" translationKey="gui.example.increment" />
+</component>

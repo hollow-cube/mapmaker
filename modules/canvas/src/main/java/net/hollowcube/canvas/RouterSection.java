@@ -14,11 +14,15 @@ public final class RouterSection extends RootSection {
     private final Deque<Section> history = new ArrayDeque<>();
     private Section current;
 
-    public RouterSection(@NotNull Section section) {
+    public RouterSection(@NotNull SectionLike section) {
         this(section, Map.of());
     }
 
-    public RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
+    public RouterSection(@NotNull SectionLike section, @NotNull Map<Class<?>, Object> context) {
+        this(section.section(), context);
+    }
+
+    private RouterSection(@NotNull Section section, @NotNull Map<Class<?>, Object> context) {
         super(section, context);
         history.addLast(section);
         current = section;
