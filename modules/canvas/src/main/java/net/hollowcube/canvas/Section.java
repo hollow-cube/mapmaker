@@ -6,7 +6,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
-public sealed abstract class Section permits ItemSection, ParentSection {
+public sealed abstract class Section implements SectionLike permits ItemSection, ParentSection {
     private final int width, height;
 
     private ParentSection parent = null;
@@ -56,6 +56,11 @@ public sealed abstract class Section permits ItemSection, ParentSection {
 
     protected int getIndexInParent(int index) {
         return offset() + (index % width()) + (parent().width() * (index / width()));
+    }
+
+    @Override
+    public @NotNull Section section() {
+        return this;
     }
 
     // Implementation details
