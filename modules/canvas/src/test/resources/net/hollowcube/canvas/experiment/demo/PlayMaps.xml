@@ -29,7 +29,7 @@
     <!-- Controls -->
     <box width="9" height="3" align="ttb">
         <box width="9" height="2">
-            <button width="3" height="2" translationKey="gui.play_maps.basic.parkour" />
+            <button width="3" height="2" translationKey="gui.play_maps.basic.parkour" sprite="gui/play_maps/parkour_active" />
             <button width="3" height="2" translationKey="gui.play_maps.basic.building" />
             <button width="3" height="2" translationKey="gui.play_maps.basic.adventure" />
         </box>

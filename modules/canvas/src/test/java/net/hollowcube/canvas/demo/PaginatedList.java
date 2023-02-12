@@ -1,10 +1,9 @@
-package net.hollowcube.canvas.experiment.demo;
+package net.hollowcube.canvas.demo;
 
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.experiment.impl.AutoLayoutBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;

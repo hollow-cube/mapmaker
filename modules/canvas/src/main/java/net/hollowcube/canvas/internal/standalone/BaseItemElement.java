@@ -71,7 +71,28 @@ abstract class BaseItemElement extends ItemSection implements BaseElement {
 
     private Sprite sprite = null;
 
+    public void setSprite(@Nullable Sprite sprite) {
+        this.sprite = sprite;
+    }
+
     // Impl
+
+    @Override
+    protected void mount() {
+        super.mount();
+
+        // Draw sprite if present
+        if (sprite != null) {
+            find(RootElement.class).addSprite(this, sprite, 0);
+        }
+    }
+
+    @Override
+    protected void unmount() {
+        super.unmount();
+
+        find(RootElement.class).removeSprites(this);
+    }
 
     @Override
     protected void setItem(int index, @NotNull ItemStack item) {

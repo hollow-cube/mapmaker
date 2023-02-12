@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.canvas.section.ClickHandler;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-class ItemLabelElement extends BaseItemElement implements Label, DepthAware {
+class ItemLabelElement extends BaseItemElement implements Label, DepthAware, SpriteHolder {
     private final String translationKey;
 
     public ItemLabelElement(@Nullable String id, int width, int height,
