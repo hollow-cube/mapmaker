@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.std;
+package net.hollowcube.canvas.section.std;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RootSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RootSection;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.player.PlayerPacketEvent;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A section which allows the player to input text using the anvil GUI.
  * <p>
- * This section should _only_ be used as the top level section within a {@link net.hollowcube.canvas.RootSection}.
+ * This section should _only_ be used as the top level section within a {@link RootSection}.
  * It will not work correctly in other cases.
  * <p>
  * Anvil sections always have a width of 9, however only slot indices 0-2 are usable (the rest will be an error).

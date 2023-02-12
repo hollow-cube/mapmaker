@@ -1,10 +1,10 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.std.ButtonSection;
-import net.hollowcube.canvas.std.IconSection;
-import net.hollowcube.canvas.std.PaginationSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.std.ButtonSection;
+import net.hollowcube.canvas.section.std.IconSection;
+import net.hollowcube.canvas.section.std.PaginationSection;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;

@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemStack;

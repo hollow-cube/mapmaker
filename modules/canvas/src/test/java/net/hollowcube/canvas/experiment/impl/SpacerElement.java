@@ -1,6 +1,6 @@
 package net.hollowcube.canvas.experiment.impl;
 
-import net.hollowcube.canvas.ParentSection;
+import net.hollowcube.canvas.section.ParentSection;
 import org.jetbrains.annotations.Nullable;
 
 public class SpacerElement extends ParentSection implements Element {
@@ -14,4 +14,8 @@ public class SpacerElement extends ParentSection implements Element {
         return null;
     }
 
+    @Override
+    public int zIndex() {
+        return 0;
+    }
 }

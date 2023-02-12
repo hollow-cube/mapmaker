@@ -1,4 +1,4 @@
-package net.hollowcube.canvas;
+package net.hollowcube.canvas.section;
 
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.validate.Check;

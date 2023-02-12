@@ -1,6 +1,6 @@
 package net.hollowcube.map;
 
-import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.section.Section;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;

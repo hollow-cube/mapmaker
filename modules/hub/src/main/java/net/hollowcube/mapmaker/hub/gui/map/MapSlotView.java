@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.gui.map;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RootSection;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RootSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;

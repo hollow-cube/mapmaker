@@ -1,11 +1,11 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.std.ButtonSection;
-import net.hollowcube.canvas.std.GroupSection;
-import net.hollowcube.canvas.std.PaginationSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.std.ButtonSection;
+import net.hollowcube.canvas.section.std.GroupSection;
+import net.hollowcube.canvas.section.std.PaginationSection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;

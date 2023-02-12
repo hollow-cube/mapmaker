@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.search;
 
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;

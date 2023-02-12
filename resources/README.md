@@ -7,3 +7,4 @@ Contains some metadata for client & server, the processing step will be used to 
   - Metadata about images
 
 `_client` is a resource pack structure, used as the base for the resource pack (anything static can go there)
+
