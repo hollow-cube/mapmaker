@@ -1,8 +1,5 @@
-package net.hollowcube.canvas.demo;
+package net.hollowcube.canvas.section;
 
-import net.hollowcube.canvas.section.ParentSection;
-import net.hollowcube.canvas.section.RouterSection;
-import net.hollowcube.canvas.section.Section;
 import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.canvas.section.std.GroupSection;
 import net.hollowcube.canvas.section.std.PaginationSection;

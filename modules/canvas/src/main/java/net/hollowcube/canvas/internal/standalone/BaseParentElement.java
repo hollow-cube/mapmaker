@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.section.ParentSection;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.canvas.section.std.ButtonSection;
@@ -85,9 +86,31 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
     }
 
     // TRAIT: SpriteHolder
-    //todo spites
+
+    private Sprite sprite = null;
+
+    public void setSprite(@Nullable Sprite sprite) {
+        this.sprite = sprite;
+    }
 
     // Impl
+
+    @Override
+    protected void mount() {
+        super.mount();
+
+        // Draw sprite if present
+        if (sprite != null) {
+            find(RootElement.class).addSprite(this, sprite, 0);
+        }
+    }
+
+    @Override
+    protected void unmount() {
+        super.unmount();
+
+        find(RootElement.class).removeSprites(this);
+    }
 
     @Override
     protected @Nullable Section get(int index) {

@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.demo;
+package net.hollowcube.canvas.section;
 
 import net.hollowcube.canvas.section.std.AnvilSection;
 import net.hollowcube.canvas.section.std.ButtonSection;

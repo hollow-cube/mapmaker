@@ -1,6 +1,8 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,6 +115,13 @@ public class XmlElementReader {
     private @NotNull BaseElement applyTraits(@NotNull Node node, @NotNull BaseElement elem) {
         if (elem instanceof DepthAware trait) {
             trait.setZIndex(depth);
+        }
+        if (elem instanceof SpriteHolder trair) {
+            var sprite = getString(node, "sprite", null);
+            if (sprite != null) {
+                //todo error if sprite does not exist
+                trair.setSprite(Sprite.SPRITE_MAP.get(sprite));
+            }
         }
 
         return elem;

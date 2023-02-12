@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.experiment.demo;
+package net.hollowcube.canvas.demo;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
