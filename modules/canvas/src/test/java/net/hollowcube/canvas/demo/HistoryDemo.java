@@ -1,8 +1,8 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 

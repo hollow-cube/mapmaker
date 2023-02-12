@@ -1,13 +1,14 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.ItemSection;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.experiment.demo.Counter;
 import net.hollowcube.canvas.experiment.demo.LoadingDemo;
 import net.hollowcube.canvas.experiment.demo.PaginatedList;
-import net.hollowcube.canvas.std.ButtonSection;
-import net.hollowcube.canvas.std.GroupSection;
+import net.hollowcube.canvas.experiment.demo.PlayMaps;
+import net.hollowcube.canvas.section.ItemSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.std.ButtonSection;
+import net.hollowcube.canvas.section.std.GroupSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -60,7 +61,7 @@ public class DemoServer {
         guis.put("ncounter", () -> new RouterSection(new Counter()));
         guis.put("nloading", () -> new RouterSection(new LoadingDemo()));
         guis.put("npagination", () -> new RouterSection(new PaginatedList()));
-
+        guis.put("nplaymaps", () -> new RouterSection(new PlayMaps()));
     }
 
     public static void main(String[] args) {

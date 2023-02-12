@@ -1,9 +1,9 @@
-package net.hollowcube.canvas.experiment;
+package net.hollowcube.canvas;
 
-import net.hollowcube.canvas.SectionLike;
+import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
 
-public interface Pagination {
+public interface Pagination extends Element {
 
     void nextPage();
 

@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.std;
+package net.hollowcube.canvas.section.std;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.SectionLike;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
 
 public class GroupSection extends ParentSection {

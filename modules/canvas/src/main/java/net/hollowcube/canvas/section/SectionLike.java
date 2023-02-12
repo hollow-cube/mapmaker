@@ -1,4 +1,4 @@
-package net.hollowcube.canvas;
+package net.hollowcube.canvas.section;
 
 import org.jetbrains.annotations.NotNull;
 

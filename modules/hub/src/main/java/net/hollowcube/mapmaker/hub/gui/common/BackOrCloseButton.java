@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;

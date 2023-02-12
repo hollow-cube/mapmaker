@@ -1,8 +1,8 @@
 package net.hollowcube.canvas.experiment.impl;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.SectionLike;
-import net.hollowcube.canvas.experiment.Pagination;
+import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 public class PaginationElement extends ParentSection implements Element, Pagination {
 
     private final String id;
+    private int zIndex = 0;
 
     private Consumer<PageRequest> pageHandler = null;
 
@@ -29,6 +30,21 @@ public class PaginationElement extends ParentSection implements Element, Paginat
     @Override
     public @Nullable String id() {
         return id;
+    }
+
+    @Override
+    public void setLoading(boolean loading) {
+
+    }
+
+
+    @Override
+    public int zIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
     }
 
     public void setPageHandler(@NotNull Consumer<PageRequest> pageHandler) {

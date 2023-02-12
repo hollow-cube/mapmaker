@@ -1,7 +1,7 @@
 package net.hollowcube.canvas.experiment.impl;
 
-import net.hollowcube.canvas.ItemSection;
-import net.hollowcube.canvas.experiment.Label;
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.section.ItemSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
@@ -13,6 +13,7 @@ import java.util.List;
 
 public class LabelElement extends ItemSection implements Element, Label {
     private final String id;
+    private int zIndex = 0;
     private final String translationKey;
 
     private boolean loading = false;
@@ -30,6 +31,15 @@ public class LabelElement extends ItemSection implements Element, Label {
     @Override
     public @Nullable String id() {
         return id;
+    }
+
+    @Override
+    public int zIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
     }
 
     @Override

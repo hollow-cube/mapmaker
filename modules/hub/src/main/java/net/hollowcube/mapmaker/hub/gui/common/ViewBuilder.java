@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.Section;
 import org.jetbrains.annotations.NotNull;
 
 public class ViewBuilder extends ParentSection {

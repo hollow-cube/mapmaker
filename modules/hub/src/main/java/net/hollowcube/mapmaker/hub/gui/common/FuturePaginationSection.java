@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.common;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.kyori.adventure.text.Component;

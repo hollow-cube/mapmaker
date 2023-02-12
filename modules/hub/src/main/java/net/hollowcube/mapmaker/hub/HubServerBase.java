@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.hub;
 
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.Section;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;

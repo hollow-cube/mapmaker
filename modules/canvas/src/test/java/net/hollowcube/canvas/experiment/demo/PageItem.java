@@ -1,8 +1,8 @@
 package net.hollowcube.canvas.experiment.demo;
 
-import net.hollowcube.canvas.experiment.Label;
-import net.hollowcube.canvas.experiment.View;
-import net.hollowcube.canvas.experiment.annotation.Outlet;
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Outlet;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 

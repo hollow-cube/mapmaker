@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.map;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RootSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RootSection;
 import net.hollowcube.mapmaker.hub.gui.common.InfoButton;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;

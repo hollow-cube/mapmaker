@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.map;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RouterSection;
-import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RouterSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.map.component.MapSlotButton;
 import net.hollowcube.mapmaker.model.PlayerData;
