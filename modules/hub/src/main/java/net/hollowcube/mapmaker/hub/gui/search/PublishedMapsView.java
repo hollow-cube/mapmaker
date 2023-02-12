@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.search;
 
-import net.hollowcube.canvas.ParentSection;
+import net.hollowcube.canvas.section.ParentSection;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.model.MapData;

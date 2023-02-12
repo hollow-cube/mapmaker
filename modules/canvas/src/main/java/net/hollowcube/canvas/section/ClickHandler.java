@@ -1,4 +1,4 @@
-package net.hollowcube.canvas;
+package net.hollowcube.canvas.section;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;

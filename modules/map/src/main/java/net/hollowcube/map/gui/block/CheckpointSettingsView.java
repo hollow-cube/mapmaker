@@ -1,8 +1,8 @@
 package net.hollowcube.map.gui.block;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.map.gui.common.TranslatedButtonSection;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;

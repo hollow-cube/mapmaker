@@ -1,6 +1,6 @@
-package net.hollowcube.canvas.std;
+package net.hollowcube.canvas.section.std;
 
-import net.hollowcube.canvas.ItemSection;
+import net.hollowcube.canvas.section.ItemSection;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 

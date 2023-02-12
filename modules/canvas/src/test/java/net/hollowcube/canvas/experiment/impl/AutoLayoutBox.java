@@ -1,8 +1,9 @@
 package net.hollowcube.canvas.experiment.impl;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.SectionLike;
+import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,10 @@ public class AutoLayoutBox extends ParentSection implements Element {
     }
 
     private final String id;
+    private int zIndex;
     private final Align align;
+    private Sprite sprite = null;
+
     private final List<Section> children = new ArrayList<>();
 
     public AutoLayoutBox(@Nullable String id, int width, int height, Align align) {
@@ -31,6 +35,19 @@ public class AutoLayoutBox extends ParentSection implements Element {
     @Override
     public @Nullable String id() {
         return id;
+    }
+
+    @Override
+    public int zIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
+    }
+
+    public void setSprite(@Nullable Sprite sprite) {
+        this.sprite = sprite;
     }
 
     @Override
@@ -52,6 +69,13 @@ public class AutoLayoutBox extends ParentSection implements Element {
     @Override
     protected void mount() {
         super.mount();
+
+        // Draw sprite if present
+        if (sprite != null) {
+            find(RootElement.class).addSprite(this, sprite, 0);
+        }
+
+        // Place entries
         clear();
 
         if (align == Align.LTR) {
@@ -67,5 +91,12 @@ public class AutoLayoutBox extends ParentSection implements Element {
                 y += child.height();
             }
         }
+    }
+
+    @Override
+    protected void unmount() {
+        super.unmount();
+
+        find(RootElement.class).removeSprites(this);
     }
 }

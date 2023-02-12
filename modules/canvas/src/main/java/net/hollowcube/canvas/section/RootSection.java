@@ -1,6 +1,6 @@
-package net.hollowcube.canvas;
+package net.hollowcube.canvas.section;
 
-import net.hollowcube.canvas.std.AnvilSection;
+import net.hollowcube.canvas.section.std.AnvilSection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;

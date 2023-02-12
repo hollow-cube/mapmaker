@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.section.Section;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;

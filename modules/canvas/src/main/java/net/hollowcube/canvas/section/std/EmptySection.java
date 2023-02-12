@@ -1,6 +1,6 @@
-package net.hollowcube.canvas.std;
+package net.hollowcube.canvas.section.std;
 
-import net.hollowcube.canvas.ItemSection;
+import net.hollowcube.canvas.section.ItemSection;
 
 public class EmptySection extends ItemSection {
     public EmptySection(int width, int height) {

@@ -1,4 +1,4 @@
-package net.hollowcube.canvas;
+package net.hollowcube.canvas.section;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -87,7 +87,7 @@ public non-sealed class ParentSection extends Section {
 
     /** Unmounts and removes all children **/
     protected void clear() {
-        for (int i = 0; i < childMap.length; i++) {
+        for (int i = 0; i < width() * height(); i++) {
             unmountChild(i);
         }
     }

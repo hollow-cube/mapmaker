@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.search;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.gui.common.BackOrCloseButton;
 import net.hollowcube.mapmaker.hub.gui.common.TranslatedButtonSection;

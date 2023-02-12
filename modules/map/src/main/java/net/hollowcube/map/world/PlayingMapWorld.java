@@ -1,6 +1,6 @@
 package net.hollowcube.map.world;
 
-import net.hollowcube.canvas.RouterSection;
+import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;

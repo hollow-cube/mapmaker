@@ -1,8 +1,8 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.ParentSection;
-import net.hollowcube.canvas.RootSection;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RootSection;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

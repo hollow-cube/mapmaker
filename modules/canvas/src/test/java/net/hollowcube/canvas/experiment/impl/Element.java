@@ -11,6 +11,8 @@ public interface Element {
 
     int height();
 
+    int zIndex();
+
     default @Nullable Element findById(@NotNull String id) {
         if (id.equals(id())) return this;
         return null;

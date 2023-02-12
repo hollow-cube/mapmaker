@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.std;
+package net.hollowcube.canvas.section.std;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.ItemSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.ItemSection;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;

@@ -1,7 +1,7 @@
 package net.hollowcube.map.gui.common;
 
-import net.hollowcube.canvas.ClickHandler;
-import net.hollowcube.canvas.std.ButtonSection;
+import net.hollowcube.canvas.section.ClickHandler;
+import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;

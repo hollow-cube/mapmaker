@@ -3,5 +3,7 @@
   // The particular character will be exported as part of the server metadata.
   "type": "sprite",
   // Add an empty 125 pixel space above the sprite
+  // todo this could be determined by looking at the guis which use it and
+  //      computing the Y offset for them (could result in duplicates though)
   "shift_y": 125
 }
