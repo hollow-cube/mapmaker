@@ -15,7 +15,7 @@ public abstract class View implements SectionLike {
 
     protected View() {
         var viewFile = getClass().getResource(String.format("/%s.xml", getClass().getName().replace(".", "/")));
-        Check.notNull(viewFile, "View file not found");
+        Check.notNull(viewFile, "View file not found: " + getClass().getName() + ".xml");
 
         root = XmlElementReader.load(viewFile.toString(), true);
         wireOutlets();
@@ -25,6 +25,10 @@ public abstract class View implements SectionLike {
     @Override
     public @NotNull Section section() {
         return root.section();
+    }
+
+    public BaseElement getRoot() {
+        return root;
     }
 
     protected void mount() {
