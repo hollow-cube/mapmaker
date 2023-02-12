@@ -7,6 +7,7 @@ import net.hollowcube.canvas.experiment.annotation.Action;
 import net.hollowcube.canvas.experiment.annotation.Outlet;
 import net.hollowcube.canvas.experiment.impl.ButtonElement;
 import net.hollowcube.canvas.experiment.impl.Element;
+import net.hollowcube.canvas.experiment.impl.PaginationElement;
 import net.hollowcube.canvas.experiment.impl.parse.XmlComponentLoader;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -55,17 +56,26 @@ public abstract class View implements SectionLike {
                 var name = action.value();
                 var element = root.findById(name);
                 Check.notNull(element, "Action not found: " + name);
-                Check.stateCondition(!(element instanceof ButtonElement), "Element is not a button: " + name);
 
                 method.setAccessible(true);
-                ((ButtonElement) element).addHandler((unused1, unused2, unused3) -> {
-                    try {
-                        method.invoke(this);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return ClickHandler.DENY;
-                });
+                if (element instanceof ButtonElement button) {
+                    button.addHandler((unused1, unused2, unused3) -> {
+                        try {
+                            method.invoke(this);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return ClickHandler.DENY;
+                    });
+                } else if (element instanceof PaginationElement pagination) {
+                    pagination.setPageHandler(request -> {
+                        try {
+                            method.invoke(this, request);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
             }
 
             this.section = (Section) root;

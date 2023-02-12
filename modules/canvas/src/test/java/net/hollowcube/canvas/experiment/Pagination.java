@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.experiment;
 
+import net.hollowcube.canvas.SectionLike;
 import org.jetbrains.annotations.NotNull;
 
 public interface Pagination {
@@ -18,7 +19,7 @@ public interface Pagination {
          * <p>
          * Implementations must be thread-safe.
          */
-        void respond(@NotNull View view, boolean nextPage);
+        void respond(@NotNull SectionLike view, boolean nextPage);
     }
 
 }

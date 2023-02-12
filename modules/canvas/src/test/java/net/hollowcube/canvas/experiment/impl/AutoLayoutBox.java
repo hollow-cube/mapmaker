@@ -2,6 +2,7 @@ package net.hollowcube.canvas.experiment.impl;
 
 import net.hollowcube.canvas.ParentSection;
 import net.hollowcube.canvas.Section;
+import net.hollowcube.canvas.SectionLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,14 +13,19 @@ public class AutoLayoutBox extends ParentSection implements Element {
 
     public enum Align {
         LTR,
+//        RTL,
+        TTB,
+//        BTT,
     }
 
     private final String id;
+    private final Align align;
     private final List<Section> children = new ArrayList<>();
 
-    public AutoLayoutBox(@Nullable String id, int width, int height) {
+    public AutoLayoutBox(@Nullable String id, int width, int height, Align align) {
         super(width, height);
         this.id = id;
+        this.align = align;
     }
 
     @Override
@@ -39,8 +45,8 @@ public class AutoLayoutBox extends ParentSection implements Element {
         return null;
     }
 
-    public void addChild(@NotNull Section child) {
-        children.add(child);
+    public void addChild(@NotNull SectionLike child) {
+        children.add(child.section());
     }
 
     @Override
@@ -48,10 +54,18 @@ public class AutoLayoutBox extends ParentSection implements Element {
         super.mount();
         clear();
 
-        int x = 0;
-        for (Section child : children) {
-            mountChild(x, 0, child);
-            x += child.width();
+        if (align == Align.LTR) {
+            int x = 0;
+            for (Section child : children) {
+                mountChild(x, 0, child);
+                x += child.width();
+            }
+        } else if (align == Align.TTB) {
+            int y = 0;
+            for (Section child : children) {
+                mountChild(0, y, child);
+                y += child.height();
+            }
         }
     }
 }

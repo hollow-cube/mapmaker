@@ -5,6 +5,7 @@ import net.hollowcube.canvas.RouterSection;
 import net.hollowcube.canvas.Section;
 import net.hollowcube.canvas.experiment.demo.Counter;
 import net.hollowcube.canvas.experiment.demo.LoadingDemo;
+import net.hollowcube.canvas.experiment.demo.PaginatedList;
 import net.hollowcube.canvas.std.ButtonSection;
 import net.hollowcube.canvas.std.GroupSection;
 import net.hollowcube.common.lang.LanguageProvider;
@@ -57,6 +58,7 @@ public class DemoServer {
 
         guis.put("ncounter", () -> new RouterSection(new Counter()));
         guis.put("nloading", () -> new RouterSection(new LoadingDemo()));
+        guis.put("npagination", () -> new RouterSection(new PaginatedList()));
     }
 
     public static void main(String[] args) {

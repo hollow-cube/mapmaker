@@ -1,9 +1,7 @@
 package net.hollowcube.canvas.experiment.impl.parse;
 
 import net.hollowcube.canvas.Section;
-import net.hollowcube.canvas.experiment.impl.AutoLayoutBox;
-import net.hollowcube.canvas.experiment.impl.ButtonElement;
-import net.hollowcube.canvas.experiment.impl.LabelElement;
+import net.hollowcube.canvas.experiment.impl.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.testcontainers.shaded.org.apache.commons.io.input.ReaderInputStream;
@@ -14,6 +12,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 public class XmlComponentLoader {
 
@@ -27,15 +26,34 @@ public class XmlComponentLoader {
 
     private static @NotNull Section loadSection(@NotNull Node node) {
         return switch (node.getNodeName()) {
-            case "component" -> loadComponent(node);
+            case "component" -> loadBox(node);
+            case "box" -> loadBox(node);
             case "label" -> loadLabel(node);
             case "button" -> loadButton(node);
+            case "spacer" -> loadSpacer(node);
+            case "pagination" -> loadPagination(node);
             default -> throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
         };
     }
 
-    private static @NotNull Section loadComponent(@NotNull Node node) {
-        var section = new AutoLayoutBox(getId(node), getWidth(node), getHeight(node));
+//    private static @NotNull Section loadComponent(@NotNull Node node) {
+//        var alignAttr = node.getAttributes().getNamedItem("align");
+//        var align = alignAttr == null ? AutoLayoutBox.Align.LTR :
+//                AutoLayoutBox.Align.valueOf(alignAttr.getNodeValue().toUpperCase(Locale.ROOT));
+//        var section = new AutoLayoutBox(getId(node), getWidth(node), getHeight(node), align);
+//        for (int i = 0; i < node.getChildNodes().getLength(); i++) {
+//            var child = node.getChildNodes().item(i);
+//            if (child.getNodeType() != Node.ELEMENT_NODE) continue;
+//            section.addChild(loadSection(child));
+//        }
+//        return section;
+//    }
+
+    private static @NotNull Section loadBox(@NotNull Node node) {
+        var alignAttr = node.getAttributes().getNamedItem("align");
+        var align = alignAttr == null ? AutoLayoutBox.Align.LTR :
+                AutoLayoutBox.Align.valueOf(alignAttr.getNodeValue().toUpperCase(Locale.ROOT));
+        var section = new AutoLayoutBox(getId(node), getWidth(node), getHeight(node), align);
         for (int i = 0; i < node.getChildNodes().getLength(); i++) {
             var child = node.getChildNodes().item(i);
             if (child.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -56,6 +74,14 @@ public class XmlComponentLoader {
         if (translationKeyAttr == null) throw new IllegalArgumentException("Button must have a translationKey attribute");
         var translationKey = translationKeyAttr.getNodeValue();
         return new ButtonElement(getId(node), getWidth(node), getHeight(node), translationKey);
+    }
+
+    private static @NotNull Section loadSpacer(@NotNull Node node) {
+        return new SpacerElement(getWidth(node), getHeight(node));
+    }
+
+    private static @NotNull Section loadPagination(@NotNull Node node) {
+        return new PaginationElement(getId(node), getWidth(node), getHeight(node));
     }
 
     private static @Nullable String getId(@NotNull Node node) {

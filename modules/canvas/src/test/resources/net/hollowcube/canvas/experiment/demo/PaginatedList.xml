@@ -5,12 +5,12 @@
         <spacer />
         <box align="ttb" width="7" height="5">
 
-            <pagination width="7" height="4" />
+            <pagination id="pagination" width="7" height="4" />
 
             <box align="ltr" width="7" height="1">
-                <button width="3" translationKey="gui.example.next_page" />
+                <button id="prev" width="3" translationKey="gui.example.prev_page" />
                 <label translationKey="gui.example.page" />
-                <button width="3" translationKey="gui.example.prev_page" />
+                <button id="next" width="3" translationKey="gui.example.next_page" />
             </box>
 
         </box>
