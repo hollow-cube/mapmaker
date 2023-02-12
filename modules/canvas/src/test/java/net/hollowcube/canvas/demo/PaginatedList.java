@@ -4,6 +4,7 @@ import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.standalone.BoxElement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;
@@ -28,7 +29,7 @@ public class PaginatedList extends View {
 //        var view = IntStream.range(0, pageSize)
 //                .mapToObj(i -> new PageItem("Item " + (request.page() * pageSize + i + 1)))
 //                .collect(View.autoLayout(request.width(), request.height()));
-        var view = new AutoLayoutBox(null, request.width(), request.height(), AutoLayoutBox.Align.LTR);
+        var view = new BoxElement(null, request.width(), request.height(), BoxElement.Align.LTR);
         IntStream.range(0, pageSize)
                 .mapToObj(i -> new PageItem("Item " + (request.page() * pageSize + i)))
                 .forEach(view::addChild);

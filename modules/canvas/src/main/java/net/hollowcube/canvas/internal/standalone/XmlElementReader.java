@@ -108,7 +108,7 @@ public class XmlElementReader {
 
     private @NotNull BaseElement loadPagination(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("pagination"), "Node must be `pagination`");
-        var elem = new BoxElement(getId(node), getWidth(node), getHeight(node), BoxElement.Align.LTR);
+        var elem = new PaginationElement(getId(node), getWidth(node), getHeight(node));
         return applyTraits(node, elem);
     }
 
