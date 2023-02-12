@@ -23,12 +23,12 @@ public non-sealed class ParentSection extends Section {
 
     // Public API
 
-    protected <C extends Section> C add(int index, @NotNull C comp) {
+    protected <C extends SectionLike> C add(int index, @NotNull C comp) {
         return add(index % width(), index / width(), comp);
     }
 
-    protected <C extends Section> C add(int x, int y, @NotNull C comp) {
-        mountChild(x, y, comp);
+    protected <C extends SectionLike> C add(int x, int y, @NotNull C comp) {
+        mountChild(x, y, comp.section());
         return comp;
     }
 
