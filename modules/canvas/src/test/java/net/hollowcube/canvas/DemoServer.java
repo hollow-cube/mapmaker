@@ -1,12 +1,10 @@
-package net.hollowcube.canvas.demo;
+package net.hollowcube.canvas;
 
-import net.hollowcube.canvas.experiment.demo.Counter;
-import net.hollowcube.canvas.experiment.demo.LoadingDemo;
-import net.hollowcube.canvas.experiment.demo.PaginatedList;
-import net.hollowcube.canvas.experiment.demo.PlayMaps;
-import net.hollowcube.canvas.section.ItemSection;
-import net.hollowcube.canvas.section.RouterSection;
-import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.demo.Counter;
+import net.hollowcube.canvas.demo.LoadingDemo;
+import net.hollowcube.canvas.demo.PaginatedList;
+import net.hollowcube.canvas.demo.PlayMaps;
+import net.hollowcube.canvas.section.*;
 import net.hollowcube.canvas.section.std.ButtonSection;
 import net.hollowcube.canvas.section.std.GroupSection;
 import net.hollowcube.common.lang.LanguageProvider;

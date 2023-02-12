@@ -2,13 +2,14 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoxElement extends BaseParentElement implements DepthAware {
+public class BoxElement extends BaseParentElement implements DepthAware, SpriteHolder {
 
     public enum Align {
         LTR,
