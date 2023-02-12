@@ -55,10 +55,12 @@ public class DemoServer {
         guis.put("big", BigInventoryDemo::new);
         guis.put("search", SearchDemo::new);
         guis.put("anvil", AnvilInputDemo::new);
+        guis.put("toggle", () -> new RouterSection(new ToggleButtonDemo()));
 
         guis.put("ncounter", () -> new RouterSection(new Counter()));
         guis.put("nloading", () -> new RouterSection(new LoadingDemo()));
         guis.put("npagination", () -> new RouterSection(new PaginatedList()));
+
     }
 
     public static void main(String[] args) {
