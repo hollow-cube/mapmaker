@@ -13,4 +13,9 @@ public class GroupSection extends ParentSection {
     public <C extends SectionLike> C add(int x, int y, @NotNull C comp) {
         return super.add(x, y, comp);
     }
+
+    @Override
+    public <C extends SectionLike> C add(int index, @NotNull C comp) {
+        return super.add(index, comp);
+    }
 }

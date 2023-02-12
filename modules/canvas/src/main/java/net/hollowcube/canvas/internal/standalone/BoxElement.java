@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Element;
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+//todo make me package private again
 public class BoxElement extends BaseParentElement implements DepthAware, SpriteHolder {
 
     public enum Align {
@@ -34,6 +36,11 @@ public class BoxElement extends BaseParentElement implements DepthAware, SpriteH
         }
         return null;
     }
+
+    public void addChild(@NotNull View child) {
+        children.add(child.getRoot());
+    }
+
 
     public void addChild(@NotNull BaseElement child) {
         children.add(child);
