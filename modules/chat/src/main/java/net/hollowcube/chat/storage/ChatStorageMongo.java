@@ -22,7 +22,6 @@ import static com.mongodb.client.model.Sorts.descending;
 class ChatStorageMongo implements ChatStorage {
     static final String CHAT_COLLECTION = "chat";
 
-    //todo should be config value
     private static final int CHAT_QUERY_MAX_RESULT_WINDOW = 15;
 
     private final MongoClient client;

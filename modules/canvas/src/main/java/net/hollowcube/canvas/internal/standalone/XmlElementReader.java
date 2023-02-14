@@ -2,7 +2,10 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -116,11 +119,32 @@ public class XmlElementReader {
         if (elem instanceof DepthAware trait) {
             trait.setZIndex(depth);
         }
-        if (elem instanceof SpriteHolder trair) {
-            var sprite = getString(node, "sprite", null);
+        // Sprites
+        var spriteName = getString(node, "sprite", null);
+        if (spriteName != null) {
+            var sprite = Sprite.SPRITE_MAP.get(spriteName);
             if (sprite != null) {
-                //todo error if sprite does not exist
-                trair.setSprite(Sprite.SPRITE_MAP.get(sprite));
+                if (elem instanceof SpriteHolder trait) {
+                    trait.setSprite(sprite);
+                } else {
+                    throw new IllegalArgumentException("Element does not support sprites: " + elem.getClass().getSimpleName());
+                }
+            } else {
+                // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
+                var split = spriteName.split("@");
+                var material = Material.fromNamespaceId(split[0]);
+                if (material == null) {
+                    throw new IllegalArgumentException("Unknown sprite: " + spriteName);
+                }
+                var builder = ItemStack.builder(material);
+                if (split.length > 1) {
+                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split[1])));
+                }
+                if (elem instanceof ItemSpriteHolder trait) {
+                    trait.setItemSprite(builder.build());
+                } else {
+                    throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
+                }
             }
         }
 

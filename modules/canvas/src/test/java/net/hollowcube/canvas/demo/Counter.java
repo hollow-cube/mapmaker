@@ -7,10 +7,9 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.kyori.adventure.text.Component;
 
 public class Counter extends View {
+    private @Outlet("count") Label label;
 
     private int count = 0;
-
-    private @Outlet("count") Label label;
 
     public Counter() {
         label.setArgs(Component.text(count));

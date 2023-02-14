@@ -1,5 +1,5 @@
 <component width="9" height="1" align="ltr">
-    <button id="decr" width="4" translationKey="gui.example.decrement" />
-    <label id="count" translationKey="gui.example.count" />
-    <button id="incr" width="4" translationKey="gui.example.increment" />
+    <button id="decr" width="4" translationKey="gui.example.decrement" sprite="red_stained_glass_pane"/>
+    <label id="count" translationKey="gui.example.count" sprite="paper"/>
+    <button id="incr" width="4" translationKey="gui.example.increment" sprite="green_stained_glass_pane"/>
 </component>

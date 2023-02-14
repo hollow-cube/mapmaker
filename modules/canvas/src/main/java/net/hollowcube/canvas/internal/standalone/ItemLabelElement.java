@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.canvas.section.ClickHandler;
 import net.hollowcube.common.lang.LanguageProvider;
@@ -15,8 +16,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-class ItemLabelElement extends BaseItemElement implements Label, DepthAware, SpriteHolder {
+class ItemLabelElement extends BaseItemElement implements Label, DepthAware, SpriteHolder, ItemSpriteHolder {
+    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
+            .meta(meta -> meta.customModelData(1000))
+            .build();
+
     private final String translationKey;
+    private ItemStack itemSprite = BLANK_ITEM;
 
     public ItemLabelElement(@Nullable String id, int width, int height,
                             @NotNull String translationKey, @NotNull Component... args) {
@@ -31,12 +37,16 @@ class ItemLabelElement extends BaseItemElement implements Label, DepthAware, Spr
         updateItem(args);
     }
 
+    @Override
+    public void setItemSprite(@Nullable ItemStack itemStack) {
+        itemSprite = itemStack == null ? BLANK_ITEM : itemStack;
+        updateItem();
+    }
+
     private void updateItem(@NotNull Component... args) {
-        var itemStack = ItemStack.builder(Material.PAPER)
+        setItem(itemSprite.with(builder -> builder
                 .displayName(Component.translatable(translationKey + ".name", args))
-                .lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", List.of(args)))
-                .build();
-        setItem(itemStack);
+                .lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", List.of(args)))));
     }
 
     @Override

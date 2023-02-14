@@ -4,7 +4,7 @@ import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.gui.map.CreateMapView;
+import net.hollowcube.mapmaker.hub.guiold.map.CreateMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
