@@ -20,10 +20,12 @@ public interface Tree {
 
     default @NotNull Mask toMask() throws MaskParseException {
         //todo more descriptive error but basically this cannot turn into a mask
-        throw new MaskParseException("Not implemented");
+        throw new MaskParseException(start(), end(), "Not implemented");
     }
 
     // Primitives
+
+    record Error(int start, int end) implements Tree {}
 
     record BlockState(
             int start, int end,
@@ -118,6 +120,7 @@ public interface Tree {
             @Nullable Tree rhs
     ) implements Tree {
         public enum Type {
+            ERROR,
             OR, AND
         }
 
@@ -128,8 +131,25 @@ public interface Tree {
             return switch (type()) {
                 case OR -> Mask.or(lhs.toMask(), rhs().toMask());
                 case AND -> Mask.and(lhs.toMask(), rhs().toMask());
+                case ERROR -> throw new MaskParseException(start, end, "Expected operator");
             };
         }
+    }
+
+    record Named(
+            int start, int end,
+            int openBracket, int closeBracket,
+            @Nullable String name,
+            @Nullable List<Argument> args
+    ) implements Tree {
+
+        record Argument(
+                int start, int end,
+                @Nullable String name,
+                int equals,
+                @Nullable Tree value
+        ) implements Tree { }
+
     }
 
 

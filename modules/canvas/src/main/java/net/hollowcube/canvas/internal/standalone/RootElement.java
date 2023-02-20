@@ -1,9 +1,9 @@
 package net.hollowcube.canvas.internal.standalone;
 
-import net.hollowcube.canvas.internal.standalone.sprite.FontUtil;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.section.RootSection;
+import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
