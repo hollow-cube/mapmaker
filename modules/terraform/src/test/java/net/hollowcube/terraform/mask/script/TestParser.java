@@ -199,6 +199,119 @@ public class TestParser {
             assertEquals("dirt", assertInstanceOf(Tree.BlockState.class, lhs.rhs()).block());
             assertEquals("grass", assertInstanceOf(Tree.BlockState.class, or.rhs()).block());
         }
+
+        @Test
+        public void testInfixInvalidOperator() {
+            var parser = new Parser("stone#dirt");
+            var tree = assertDoesNotThrow(parser::parse);
+            var or = assertInstanceOf(Tree.Infix.class, tree);
+            assertEquals(0, or.start());
+            assertEquals(10, or.end());
+            assertEquals(Tree.Infix.Type.ERROR, or.type());
+        }
+    }
+
+    public static class TestNamed {
+
+        @Test
+        public void testHashAlone() {
+            var parser = new Parser("#");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(1, named.end());
+            assertNull(named.name());
+        }
+
+        @Test
+        public void testNamedNoArgs() {
+            var parser = new Parser("#foo");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(4, named.end());
+            assertEquals("foo", named.name());
+        }
+
+        @Test
+        public void testNamedOpenBracketOnly() {
+            var parser = new Parser("#foo[");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(5, named.end());
+            assertEquals(4, named.openBracket());
+            assertEquals("foo", named.name());
+        }
+
+        @Test
+        public void testNamedOpenCloseBracket() {
+            var parser = new Parser("#foo[]");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(6, named.end());
+            assertEquals(4, named.openBracket());
+            assertEquals(5, named.closeBracket());
+            assertEquals("foo", named.name());
+        }
+
+        @Test
+        public void testNamedSinglePositionArg() {
+            var parser = new Parser("#foo[1]");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(7, named.end());
+            assertEquals(4, named.openBracket());
+            assertEquals(6, named.closeBracket());
+            assertEquals("foo", named.name());
+            assertEquals(1, named.args().size());
+            var arg1 = named.args().get(0);
+            assertEquals(5, arg1.start());
+            assertEquals(6, arg1.end());
+            var arg1Num = assertInstanceOf(Tree.Number.class, arg1.value());
+            assertEquals(1, arg1Num.value());
+        }
+
+        @Test
+        public void testNamedMultiPositionArg() {
+            var parser = new Parser("#foo[1,2,3]");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(11, named.end());
+            assertEquals(4, named.openBracket());
+            assertEquals(10, named.closeBracket());
+            assertEquals("foo", named.name());
+            assertEquals(3, named.args().size());
+            for (int i = 1; i <= 3; i++) {
+                var arg1 = named.args().get(i - 1);
+                assertEquals(5 + ((i - 1) * 2), arg1.start());
+                assertEquals(6 + ((i - 1) * 2), arg1.end());
+                var arg1Num = assertInstanceOf(Tree.Number.class, arg1.value());
+                assertEquals(i, arg1Num.value());
+            }
+        }
+
+        @Test
+        public void testNamedSinglePositionArgNamed() {
+            var parser = new Parser("#foo[#bar]");
+            var tree = assertDoesNotThrow(parser::parse);
+            var named = assertInstanceOf(Tree.Named.class, tree);
+            assertEquals(0, named.start());
+            assertEquals(10, named.end());
+            assertEquals(4, named.openBracket());
+            assertEquals(9, named.closeBracket());
+            assertEquals("foo", named.name());
+            assertEquals(1, named.args().size());
+            var arg1 = named.args().get(0);
+            assertEquals(5, arg1.start());
+            assertEquals(9, arg1.end());
+            var arg1Named = assertInstanceOf(Tree.Named.class, arg1.value());
+            assertEquals("bar", arg1Named.name());
+        }
+
     }
 
 }
