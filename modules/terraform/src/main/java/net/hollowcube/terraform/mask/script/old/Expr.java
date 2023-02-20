@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.mask.script;
+package net.hollowcube.terraform.mask.script.old;
 
 import net.minestom.server.instance.block.Block;
 

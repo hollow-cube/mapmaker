@@ -1,7 +1,7 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.command.*;
-import net.hollowcube.terraform.mask.script.MaskArgument;
+import net.hollowcube.terraform.command.argument.ExtraArguments;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -44,7 +44,7 @@ public final class Terraform {
         var mask = new Command("mask");
         mask.addSyntax((sender, context) -> {
             sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
-        }, MaskArgument.MASK);
+        }, ExtraArguments.Mask("mask"));
         commands.register(mask);
 
     }

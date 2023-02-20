@@ -12,9 +12,9 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @param chance the chance of matching, from 0 to 1
  */
-public record RandomNoiseMask(float chance) implements Mask {
+public record RandomNoiseMask(double chance) implements Mask {
     @Override
     public boolean test(@NotNull WorldView world, @NotNull Point point, @NotNull Block block) {
-        return ThreadLocalRandom.current().nextFloat() < chance;
+        return ThreadLocalRandom.current().nextDouble() < chance;
     }
 }

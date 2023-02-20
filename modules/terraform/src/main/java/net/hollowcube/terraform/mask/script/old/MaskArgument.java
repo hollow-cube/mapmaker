@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.mask.script;
+package net.hollowcube.terraform.mask.script.old;
 
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
