@@ -24,6 +24,7 @@ import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -229,7 +230,7 @@ public class DevServer {
                 var player = event.getPlayer();
                 var username = player.getUsername();
                 return Component.translatable("chat.type.text")
-                        .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5")));
+                        .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
             });
         });
 

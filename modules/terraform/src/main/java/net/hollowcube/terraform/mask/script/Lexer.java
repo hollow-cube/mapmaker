@@ -82,7 +82,16 @@ public class Lexer {
     private Token symbol(char c) {
         return switch (c) {
             case '!' -> new Token(Token.Type.BANG, start, cursor);
+            case '%' -> new Token(Token.Type.PERCENT, start, cursor);
+            case '#' -> new Token(Token.Type.HASH, start, cursor);
+            case ',' -> new Token(Token.Type.COMMA, start, cursor);
             case '|' -> new Token(Token.Type.PIPE, start, cursor);
+            case '&' -> new Token(Token.Type.AMP, start, cursor);
+            case '=' -> new Token(Token.Type.EQUALS, start, cursor);
+            case '(' -> new Token(Token.Type.LPAREN, start, cursor);
+            case ')' -> new Token(Token.Type.RPAREN, start, cursor);
+            case '[' -> new Token(Token.Type.LBRACKET, start, cursor);
+            case ']' -> new Token(Token.Type.RBRACKET, start, cursor);
             default -> throw new RuntimeException("Unexpected symbol: " + c);
         };
     }
@@ -112,7 +121,7 @@ public class Lexer {
     }
 
     private boolean isIdent(char c) {
-        return isDigit(c) || isAlpha(c) || c == '-' || c == '_';
+        return isDigit(c) || isAlpha(c) || c == ':' || c == '_';
     }
 
     private boolean isAlpha(char c) {
