@@ -2,6 +2,7 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.command.*;
 import net.hollowcube.terraform.command.argument.ExtraArguments;
+import net.hollowcube.terraform.mask.script.MaybeMask;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -42,9 +43,25 @@ public final class Terraform {
 
         // Testing
         var mask = new Command("mask");
+        var maskArg = ExtraArguments.Mask("mask");
         mask.addSyntax((sender, context) -> {
-            sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
-        }, ExtraArguments.Mask("mask"));
+            var maybeMask = context.get(maskArg);
+            if (maybeMask instanceof MaybeMask.Error error) {
+                var rawText = context.getRaw(maskArg);
+                if (rawText.startsWith("\""))
+                    rawText = rawText.substring(1);
+                if (rawText.endsWith("\""))
+                    rawText = rawText.substring(0, rawText.length() - 1);
+
+                var msg = error.error().toFriendlyMessage(rawText);
+                for (var line : msg) {
+                    sender.sendMessage(line);
+                }
+            } else {
+                sender.sendMessage("Mask is ok");
+            }
+//            sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
+        }, maskArg);
         commands.register(mask);
 
     }

@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone.sprite;
 
+import net.hollowcube.common.util.FontUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
