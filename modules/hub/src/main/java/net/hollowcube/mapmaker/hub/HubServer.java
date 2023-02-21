@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.SectionLike;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -18,6 +18,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface HubServer {
 
+    class StaticAbuse {
+        //todo delete me when gui has a better way to access these
+        public static HubServer instance;
+
+    }
+
     @NotNull HubToMapBridge bridge();
 
     @NotNull PlayerStorage playerStorage();
@@ -28,6 +34,6 @@ public interface HubServer {
 
     @NotNull HubWorld world();
 
-    void openGUIForPlayer(@NotNull Player player, @NotNull Section gui);
+    void openGUIForPlayer(@NotNull Player player, @NotNull SectionLike gui);
 
 }
