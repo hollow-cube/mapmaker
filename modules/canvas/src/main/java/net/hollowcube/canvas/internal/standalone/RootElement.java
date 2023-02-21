@@ -15,12 +15,17 @@ import java.util.List;
 
 public class RootElement extends BoxElement {
 
-
     private record SpriteInfo(BaseElement owner, Sprite sprite, int offset) { }
     private final List<SpriteInfo> sprites = new ArrayList<>();
 
+    private Runnable mountHandler = null;
+
     public RootElement(@Nullable String id, int width, int height, @NotNull Align align) {
         super(id, width, height, align);
+    }
+
+    public void addMountHandler(@NotNull Runnable runnable) {
+        mountHandler = runnable;
     }
 
     public void addSprite(@NotNull BaseElement owner, @NotNull Sprite sprite, int offset) {
@@ -31,6 +36,14 @@ public class RootElement extends BoxElement {
     public void removeSprites(@NotNull BaseElement owner) {
         sprites.removeIf(info -> info.owner == owner);
         updateTitle();
+    }
+
+    @Override
+    protected void mount() {
+        super.mount();
+        if (mountHandler != null) {
+            mountHandler.run();
+        }
     }
 
     private void updateTitle() {
