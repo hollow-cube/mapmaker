@@ -3,6 +3,7 @@ package net.hollowcube.canvas;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
+import net.hollowcube.canvas.internal.standalone.RootElement;
 import net.hollowcube.canvas.internal.standalone.XmlElementReader;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.canvas.section.SectionLike;
@@ -20,6 +21,12 @@ public abstract class View implements SectionLike {
         root = XmlElementReader.load(viewFile.toString(), true);
         wireOutlets();
         wireActions();
+
+        if (root instanceof RootElement elem) {
+            elem.addMountHandler(this::mount);
+        } else {
+            throw new RuntimeException("Root is not a RootElement");
+        }
     }
 
     @Override
@@ -32,7 +39,7 @@ public abstract class View implements SectionLike {
     }
 
     protected void mount() {
-        //todo implement me
+
     }
 
     private void wireOutlets() {

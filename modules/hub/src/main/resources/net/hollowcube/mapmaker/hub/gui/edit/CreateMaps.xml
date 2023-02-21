@@ -1,3 +1,11 @@
-<component>
-
+<component width="9" height="3" align="ttb">
+    <spacer width="9" height="1" />
+    <box width="9" height="1" align="ltr">
+        <button id="slot0" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+        <button id="slot1" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+        <button id="slot2" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+        <button id="slot3" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+        <button id="slot4" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+    </box>
+    <spacer width="9" height="1" />
 </component>

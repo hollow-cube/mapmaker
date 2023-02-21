@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.canvas.section.RouterSection;
-import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.section.SectionLike;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -38,6 +38,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     }
 
     public @NotNull ListenableFuture<Void> init() {
+        StaticAbuse.instance = this;
         this.mapHandler = new Handler(this);
 
         this.guiContext = Map.of(
@@ -62,7 +63,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     }
 
     @Override
-    public void openGUIForPlayer(@NotNull Player player, @NotNull Section gui) {
+    public void openGUIForPlayer(@NotNull Player player, @NotNull SectionLike gui) {
         var context = new HashMap<>(guiContext);
         context.put(Player.class, player);
         new RouterSection(gui, context).showToPlayer(player);
