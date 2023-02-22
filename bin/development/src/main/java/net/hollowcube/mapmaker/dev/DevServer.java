@@ -14,10 +14,12 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.temp.FileStorageMemory;
+import net.hollowcube.mapmaker.metrics.MetricsHelper;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;
@@ -108,6 +110,7 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
+    private MetricStorage metricStorage;
 
     private MapPermissionManager mapPermissions;
 
@@ -165,6 +168,20 @@ public class DevServer {
             ));
         }
 
+        if (System.getenv("MM_METRIC_STORAGE_DEV") != null) {
+            this.metricStorage = MetricStorage.memory();
+        } else {
+            startupTasks.add(Futures.transform(
+                    MetricStorage.mongo(config.mongo()),
+                    metricStorage -> {
+                        this.metricStorage = metricStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
+        new MetricsHelper(this.metricStorage);
+
         WorldManager worldManager;
         if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
             worldManager = new WorldManager(new FileStorageMemory());
@@ -202,8 +219,8 @@ public class DevServer {
 
         var bridge = new DevServerBridge();
 
-        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager, mapPermissions);
-        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager);
+        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, mapPermissions);
+        this.maps = new DevMapServer(bridge, mapStorage, metricStorage, saveStateStorage, worldManager);
         bridge.setHubServer(hub);
         bridge.setMapServer(maps);
         startupTasks.add(this.hub.init());
@@ -307,6 +324,7 @@ public class DevServer {
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
+        MetricsHelper.recordMetricFirstJoinTime(player.getUuid().toString());
     }
 
 }

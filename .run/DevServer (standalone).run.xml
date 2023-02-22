@@ -4,6 +4,7 @@
       <env name="MM_MAP_PERMISSIONS_DEV" value="true" />
       <env name="MM_MAP_STORAGE_DEV" value="true" />
       <env name="MM_PLAYER_STORAGE_DEV" value="true" />
+      <env name="MM_METRICS_STORAGE_DEV" value="true" />
       <env name="MM_SAVESTATE_DEV" value="true" />
       <env name="MM_WORLD_MANAGER_DEV" value="true" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
