@@ -20,11 +20,13 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
+import net.hollowcube.mapmaker.metrics.MetricsHelper;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.mapmaker.storage.WhitelistStorage;
@@ -134,6 +136,7 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
+    private MetricStorage metricStorage;
     private WhitelistStorage whitelistStorage;
 
     private PlatformPermissionManager platformPermissions;
@@ -207,6 +210,21 @@ public class DevServer {
         }
 
 
+        if (System.getenv("MM_METRICS_STORAGE_DEV") != null) {
+            this.metricStorage = MetricStorage.memory();
+            MetricsHelper.init(metricStorage);
+        } else {
+            startupTasks.add(Futures.transform(
+                    MetricStorage.mongo(config.mongo()),
+                    metricStorage -> {
+                        this.metricStorage = metricStorage;
+                        MetricsHelper.init(metricStorage);
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
+
         WorldManager worldManager;
         if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
             worldManager = new WorldManager(new FileStorageMemory());
@@ -253,8 +271,8 @@ public class DevServer {
 
         var bridge = new DevServerBridge();
 
-        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager, platformPermissions, mapPermissions);
-        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager, platformPermissions);
+        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions);
+        this.maps = new DevMapServer(bridge, mapStorage, metricStorage, saveStateStorage, worldManager, platformPermissions);
         bridge.setHubServer(hub);
         bridge.setMapServer(maps);
         startupTasks.add(this.hub.init());
@@ -340,6 +358,7 @@ public class DevServer {
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
+                        MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
                         return playerStorage.createPlayer(data);
                     }, Runnable::run)
                     .transform(data -> {
@@ -404,6 +423,9 @@ public class DevServer {
                 .thenAccept(unused -> logger.log(System.Logger.Level.INFO, "Saved player data for {0}", playerData.getId()))
                 .exceptionally(FutureUtil::handleException);
         //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
+
+        //TODO handle on proxy, along with other relevant methods to make more accurate as well (rounding isn't accurate)
+        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
