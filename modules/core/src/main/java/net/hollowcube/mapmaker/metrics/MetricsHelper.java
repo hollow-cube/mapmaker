@@ -4,7 +4,7 @@ import net.hollowcube.mapmaker.storage.MetricStorage;
 
 import java.time.Instant;
 
-public final class MetricsHelper {
+public class MetricsHelper {
     private enum MetricsEnum {
         USER_SESSION_PLAY_TIME_MS("USER_SESSION_PLAY_TIME_MS"),
         USER_FIRST_JOIN_TIME_MS("USER_FIRST_JOIN_TIME_MS"),
@@ -21,13 +21,23 @@ public final class MetricsHelper {
         }
     }
 
-    static private MetricStorage storage;
+    private static MetricsHelper instance = null;
+    private static MetricStorage storage = null;
 
-    public MetricsHelper(MetricStorage storage) {
-        this.storage = storage;
+    public static MetricsHelper init(MetricStorage metricStorage) {
+        if (instance != null) {
+            return instance;
+        }
+        instance = new MetricsHelper();
+        storage = metricStorage;
+        return instance;
     }
 
-    public static String getMetricName(int tag) {
+    public static MetricsHelper get() {
+        return instance;
+    }
+
+    public String getMetricName(int tag) {
         if (tag < MetricsEnum.values().length) {
             return MetricsEnum.values()[tag].name;
         }
@@ -36,7 +46,7 @@ public final class MetricsHelper {
         }
     }
 
-    public static int getMetricTag(String name) {
+    public int getMetricTag(String name) {
         try {
             var metricEnum = MetricsEnum.valueOf(name);
             return metricEnum.ordinal();
@@ -53,9 +63,9 @@ public final class MetricsHelper {
      * Records a new metric for a player's first join time
      * @param uuid Player UUID
      */
-    public static void recordMetricFirstJoinTime(String uuid) {
+    public void recordMetricFirstJoinTime(String uuid) {
         Metric metric = new Metric(
-                MetricsEnum.USER_FIRST_JOIN_TIME_MS.ordinal(),
+                MetricsEnum.USER_FIRST_JOIN_TIME_MS.name,
                 Instant.now().toEpochMilli(),
                 uuid,
                 Instant.now().toEpochMilli()
@@ -68,9 +78,9 @@ public final class MetricsHelper {
      * @param uuid Player UUID
      * @param timestamp_ms Time since epoch in milliseconds
      */
-    public static void recordMetricSessionPlayTimeMs(String uuid, long timestamp_ms) {
+    public void recordMetricSessionPlayTimeMs(String uuid, long timestamp_ms) {
         Metric metric = new Metric(
-                MetricsEnum.USER_SESSION_PLAY_TIME_MS.ordinal(),
+                MetricsEnum.USER_SESSION_PLAY_TIME_MS.name,
                 Instant.now().toEpochMilli(),
                 uuid,
                 timestamp_ms
