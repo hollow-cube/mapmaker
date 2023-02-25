@@ -21,4 +21,6 @@ is running as outlined above, and then create a mapmaker bucket in minio by foll
 - Click `Create Bucket` in the top right.
 - Name the bucket `mapmaker` and leave all other settings default.
 
+For monitoring mongo and current objects, you can download MongoDB Compass at https://www.mongodb.com/try/download/compass
+
 Finally, start the dev server using the `DevServer (mongo)` run configuration provided in the repository (under `.run`).

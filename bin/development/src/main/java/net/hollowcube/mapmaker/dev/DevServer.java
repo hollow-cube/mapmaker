@@ -168,19 +168,20 @@ public class DevServer {
             ));
         }
 
-        if (System.getenv("MM_METRIC_STORAGE_DEV") != null) {
+        if (System.getenv("MM_METRICS_STORAGE_DEV") != null) {
             this.metricStorage = MetricStorage.memory();
+            MetricsHelper.init(metricStorage);
         } else {
             startupTasks.add(Futures.transform(
                     MetricStorage.mongo(config.mongo()),
                     metricStorage -> {
                         this.metricStorage = metricStorage;
+                        MetricsHelper.init(metricStorage);
                         return null;
                     },
                     Runnable::run
             ));
         }
-        new MetricsHelper(this.metricStorage);
 
         WorldManager worldManager;
         if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
@@ -285,6 +286,7 @@ public class DevServer {
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
+                        MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
                         return playerStorage.createPlayer(data);
                     }
                     return FutureResult.error(err);
@@ -323,8 +325,6 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-
-        MetricsHelper.recordMetricFirstJoinTime(player.getUuid().toString());
     }
 
 }

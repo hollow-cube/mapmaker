@@ -1,47 +1,39 @@
 package net.hollowcube.mapmaker.metrics;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 public class Metric<T> {
+    /**
+     * Supported value types
+     */
+    public enum ValueType {
+        DOUBLE,
+        STRING,
+        BOOLEAN,
+        INT32,
+        INT64,
+    }
 
-    private int tag;
+    private String tag;
     private long timestamp;
-    private ArrayList values = new ArrayList();
+    private HashMap<Object, ValueType> values = new HashMap<>();
 
-    public Metric(int tag, long timestamp, ArrayList values) {
+    public Metric(String tag, long timestamp, ArrayList values) {
         this.tag = tag;
         this.timestamp = timestamp;
-        this.values = values;
+        setValues(values);
     }
 
-    public Metric(int tag, long timestamp, T ... values) {
+    public Metric(String tag, long timestamp, T ... values) {
         this.tag = tag;
         this.timestamp = timestamp;
-        Collections.addAll(this.values, values);
-    }
-
-    public Metric(int tag, long timestamp) {
-        this.tag = tag;
-        this.timestamp = timestamp;
-    }
-
-    public Metric(int tag) {
-        this.tag = tag;
+        setValues(new ArrayList(List.of(values)));
     }
 
     public Metric() { }
 
-    public void setTag(int tag) {
-        this.tag = tag;
-    }
-
-    public int getTag() {
+    public String getTag() {
         return this.tag;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public long getTimestamp() {
@@ -49,21 +41,38 @@ public class Metric<T> {
     }
 
     public void setValues(ArrayList values) {
-        this.values = values;
+        for (var value : values) {
+            if (value instanceof Integer) {
+                this.values.put(value, ValueType.INT32);
+            }
+            else if (value instanceof Double) {
+                this.values.put(value, ValueType.DOUBLE);
+            }
+            else if (value instanceof Long) {
+                this.values.put(value, ValueType.INT64);
+            }
+            else if (value instanceof String) {
+                this.values.put(value, ValueType.STRING);
+            }
+            else if (value instanceof Boolean) {
+                this.values.put(value, ValueType.BOOLEAN);
+            }
+            else {
+                System.out.println("Tried to pass unsupported type " +
+                        value.getClass().toString() + " to Metric class, skipping.");
+            }
+        }
     }
 
-    public void setValue(int index, T value) {
-        this.values.set(index, value);
-    }
-
-    public ArrayList getValues() {
+    public HashMap<Object, ValueType> getValues() {
         return this.values;
     }
 
     public String asString() {
         String metricPrintOut = "[" + timestamp + " " + tag + "] ";
-        for (Object value : values) {
-            metricPrintOut += value.toString() + ", ";
+        for (Object o : values.entrySet()) {
+            var hashValue = (Map.Entry) o;
+            metricPrintOut += hashValue.getKey() + ", ";
         }
         return metricPrintOut.substring(0, metricPrintOut.length() - 2);
     }
