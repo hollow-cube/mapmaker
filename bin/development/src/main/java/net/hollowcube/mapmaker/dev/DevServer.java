@@ -287,6 +287,7 @@ public class DevServer {
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
+                        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
                         return playerStorage.createPlayer(data);
                     }
                     return FutureResult.error(err);
@@ -325,6 +326,7 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+
     }
 
 }
