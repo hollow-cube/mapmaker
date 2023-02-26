@@ -315,7 +315,6 @@ public class DevServer {
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
-                        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
                         return playerStorage.createPlayer(data);
                     }, Runnable::run)
                     .transform(data -> {
@@ -380,6 +379,8 @@ public class DevServer {
                 .thenAccept(unused -> logger.log(System.Logger.Level.INFO, "Saved player data for {0}", playerData.getId()))
                 .exceptionally(FutureUtil::handleException);
         //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
+
+        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
