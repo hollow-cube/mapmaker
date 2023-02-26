@@ -32,10 +32,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -243,6 +240,7 @@ public class DevServer {
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
+        eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
         eventHandler.addListener(PlayerChatEvent.class, event -> {
             event.setChatFormat(e -> {
                 var player = event.getPlayer();
@@ -287,7 +285,6 @@ public class DevServer {
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
-                        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
                         return playerStorage.createPlayer(data);
                     }
                     return FutureResult.error(err);
@@ -307,6 +304,12 @@ public class DevServer {
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
         event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
+    }
+
+    private void handleDisconnect(PlayerDisconnectEvent event) {
+        var player = event.getPlayer();
+        //TODO handle on proxy, along with other relevant methods to make more accurate as well (rounding isn't accurate)
+        MetricsHelper.get().recordMetricSessionPlayTimeMs(player.getUuid().toString(), player.getAliveTicks()*50);
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
