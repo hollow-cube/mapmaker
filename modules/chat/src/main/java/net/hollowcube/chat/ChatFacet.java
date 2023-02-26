@@ -1,11 +1,10 @@
 package net.hollowcube.chat;
 
+import com.google.auto.service.AutoService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import net.hollowcube.chat.command.LogCommand;
-import net.hollowcube.chat.command.MessageCommand;
-import net.hollowcube.chat.command.ReplyCommand;
+import net.hollowcube.chat.command.*;
 import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
@@ -27,12 +26,13 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
-//@AutoService(Facet.class)
+@AutoService(Facet.class)
 public class ChatFacet implements Facet {
     private static final System.Logger logger = System.getLogger(ChatFacet.class.getName());
     private static final ServerRuntime runtime = ServerRuntime.getRuntime();
 
     public static final Tag<UUID> REPLY_TO = Tag.UUID("chat:reply_to");
+    public boolean isStaffChatChannel = false;
 
     private final EventNode<Event> eventNode = EventNode.event("hollowcube:chat", EventFilter.ALL, event -> {
                 if (event instanceof CancellableEvent cancellableEvent)
@@ -83,10 +83,13 @@ public class ChatFacet implements Facet {
 
     @Override
     public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
+        System.out.println("TEST");
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));
         server.command().register(new ReplyCommand(this));
+        server.command().register(new StaffChatCommand(this));
+        server.command().register(new ChatChannelCommand(this));
         return Futures.immediateVoidFuture();
     }
 
@@ -144,6 +147,61 @@ public class ChatFacet implements Facet {
                     @Override
                     public void onFailure(@NotNull Throwable t) {
                         logger.log(Level.ERROR, "Error recording chat message", t);
+                    }
+                },
+                ForkJoinPool.commonPool()
+        );
+    }
+
+    //TODO chat channels that switch
+//I SUCK AT CODING I SUCK AT CODING I SUCK AT CODING - Seth
+//    private void staffChatEvent(PlayerChatEvent event, @NotNull Player from, @NotNull Player target, @NotNull String message) {
+//        var chatMessage = new ChatMessage(
+//                Instant.now(),
+//                runtime.workerId(),
+//                ChatMessage.STAFF_CONTEXT,
+//                event.getPlayer().getUuid().toString(),
+//                event.getMessage()
+//        );
+//        Futures.addCallback(
+//                storage.recordChatMessage(chatMessage),
+//                new FutureCallback<>() {
+//                    @Override
+//                    public void onSuccess(Void result) {
+//                        target.sendMessage("[STAFF] " + from.getUsername() + ": " + message);
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NotNull Throwable t) {
+//                        logger.log(Level.ERROR, "Error recording chat message", t);
+//                    }
+//                },
+//                ForkJoinPool.commonPool()
+//        );
+//    }
+
+    public void sendStaffChatMessage(@NotNull Player from, @NotNull Player target, @NotNull String message) {
+        var chatMessage = new ChatMessage(
+                Instant.now(),
+                runtime.workerId(),
+                //todo these should be using the players data id, not uuid
+                String.join("%s:%s", from.getUuid().toString(), target.getUuid().toString()),
+                from.getUuid().toString(),
+                message
+        );
+
+        Futures.addCallback(
+                storage.recordChatMessage(chatMessage),
+                new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        target.sendMessage("[STAFF] " + from.getUsername() + ": " + message);
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        logger.log(Level.ERROR, "Error sending staff chat message", t);
+                        from.sendMessage("Error sending staff chat message");
                     }
                 },
                 ForkJoinPool.commonPool()
