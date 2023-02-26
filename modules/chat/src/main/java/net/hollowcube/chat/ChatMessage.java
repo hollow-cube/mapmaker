@@ -13,5 +13,6 @@ public record ChatMessage(
 ) {
     public static final String DEFAULT_CONTEXT = "global";
     public static final String COMMAND_CONTEXT = "command";
+    public static final String STAFF_CONTEXT = "staff";
 
 }

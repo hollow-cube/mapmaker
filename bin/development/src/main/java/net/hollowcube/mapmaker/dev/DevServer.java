@@ -239,6 +239,7 @@ public class DevServer {
 
         int i = 0;
         for (var facet : ServiceLoader.load(Facet.class)) {
+            System.out.println(facet);
             startupTasks.add(facet.hook(MinecraftServer.process()));
             i++;
         }
