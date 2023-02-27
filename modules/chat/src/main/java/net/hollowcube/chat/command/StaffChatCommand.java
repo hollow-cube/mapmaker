@@ -42,12 +42,6 @@ public class StaffChatCommand extends Command {
             return;
         }
 
-        // Loop through all online players and send the message to those with the "staff" permission
-        var targets = MinecraftServer.getConnectionManager().getOnlinePlayers();
-        for (Player target : targets) {
-            //if (target.hasPermission("staff")) {
-                chat.sendStaffChatMessage(player, target, message);
-            //}
-        }
+        chat.sendStaffChatMessage(player, message);
     }
 }
