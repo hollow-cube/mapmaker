@@ -19,7 +19,7 @@ public class Selection {
     private final Player player;
     private final String name;
 
-    private SelectionRenderer renderer;
+    private final SelectionRenderer renderer;
     private RegionSelector selector;
     private Region.Type regionType = Region.Type.CUBOID;
     private Region cachedRegion = null;
@@ -87,7 +87,7 @@ public class Selection {
         }
         return cachedRegion;
     }
-
+    
     public @NotNull NBTCompound toNBT() {
         var root = new MutableNBTCompound();
         root.setString("name", name);
@@ -105,4 +105,53 @@ public class Selection {
         return selection;
     }
 
+    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
+        if (changeVertical) {
+            Region region = region();
+            if (region != null) {
+                int yMin = region.min().blockY();
+                int yMax = region.max().blockY();
+                yMin -= delta; // We subtract from yMin and add to yMax. Positive numbers will expand, negative numbers will shrink
+                yMax += delta;
+                if (yMin >= yMax) {
+                    // If we shrink beyond appropriate bounds, what do we do?
+                    // Clamp to midpoint
+                    yMax = (region.min().blockY() + region.max().blockY()) / 2;
+                    yMin = yMax - 1;
+                }
+                // Clamp to world bounds
+                yMax = Math.min(yMax, player.getInstance().getDimensionType().getMaxY());
+                yMin = Math.max(yMin, player.getInstance().getDimensionType().getMinY());
+                selectPrimary(region.min().withY(yMin), false);
+                selectSecondary(region.max().withY(yMax), false);
+            }
+        }
+        // TODO: If both are true, there's some optimization to be done with not recalculating the region, but that is for later
+        if (changeHorizontal) {
+            Region region = region();
+            if (region != null) {
+                int xMin = region.min().blockX();
+                int xMax = region.max().blockX();
+                int zMin = region.min().blockZ();
+                int zMax = region.max().blockZ();
+                xMin -= delta;
+                xMax += delta;
+                zMin -= delta;
+                zMax += delta;
+                if (xMin >= xMax) {
+                    // Clamp to midpoint
+                    xMax = (region.min().blockX() + region.max().blockX()) / 2;
+                    xMin = xMax - 1;
+                }
+                if (zMin >= zMax) {
+                    // Clamp to midpoint
+                    zMax = (region.min().blockZ() + region.max().blockZ()) / 2;
+                    zMin = zMax - 1;
+                }
+                // TODO: Clamp inside world border
+                selectPrimary(region.min().withX(xMin).withZ(zMin), false);
+                selectSecondary(region.max().withX(xMax).withZ(zMax), false);
+            }
+        }
+    }
 }
