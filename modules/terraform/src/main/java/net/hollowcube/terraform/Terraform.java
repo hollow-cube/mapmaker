@@ -23,11 +23,11 @@ public final class Terraform {
         commands.register(new SelectionCommands.Sel(condition));
         commands.register(new SelectionCommands.Outset(condition));
         commands.register(new SelectionCommands.Inset(condition));
+        commands.register(new SelectionCommands.Chunk(condition));
 
         // Clipboard
         commands.register(new ClipboardCommands.Copy(condition));
         commands.register(new ClipboardCommands.Cut(condition));
         commands.register(new ClipboardCommands.Paste(condition));
-
     }
 }

@@ -11,7 +11,9 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.utils.location.RelativeVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -363,6 +365,43 @@ public final class SelectionCommands {
                 }
             }
             selection.changeSize(-amount, true, true);
+        }
+    }
+
+    public static final class Chunk extends Command {
+
+        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+        public Chunk(@Nullable CommandCondition condition) {
+            super("chunk", "tf:chunk");
+            setCondition(condition);
+
+            setDefaultExecutor(this::handleChunk);
+            addSyntax(this::handleChunk, selectionArg);
+        }
+
+        private void handleChunk(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                return;
+            }
+
+            // Determine the target selection
+            var session = LocalSession.forPlayer(player);
+            Selection selection;
+            if (context.has(selectionArg)) {
+                selection = session.selection(context.get(selectionArg));
+            } else {
+                selection = session.selection(Selection.DEFAULT);
+            }
+
+            int yMin = player.getInstance().getDimensionType().getMinY();
+            int yMax = player.getInstance().getDimensionType().getMaxY();
+            int x1 = player.getPosition().chunkX() << 4; // Multiply by 16
+            int x2 = x1 + net.minestom.server.instance.Chunk.CHUNK_SIZE_X;
+            int z1 = player.getPosition().chunkZ() << 4; // Multiply by 16
+            int z2 = z1 + net.minestom.server.instance.Chunk.CHUNK_SIZE_Z;
+            selection.selectPrimary(new Pos(x1, yMin, z1), true);
+            selection.selectSecondary(new Pos(x2, yMax, x2), true);
         }
     }
 }
