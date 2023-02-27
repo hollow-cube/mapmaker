@@ -21,6 +21,8 @@ public final class Terraform {
         commands.register(new SelectionCommands.HPos1(condition));
         commands.register(new SelectionCommands.HPos2(condition));
         commands.register(new SelectionCommands.Sel(condition));
+        commands.register(new SelectionCommands.Outset(condition));
+        commands.register(new SelectionCommands.Inset(condition));
 
         // Clipboard
         commands.register(new ClipboardCommands.Copy(condition));

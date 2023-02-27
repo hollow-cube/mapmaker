@@ -209,7 +209,6 @@ public final class SelectionCommands {
             setCondition(condition);
 
             addSubcommand(new Clear());
-
         }
 
         public static final class Clear extends Command {
@@ -242,4 +241,128 @@ public final class SelectionCommands {
         }
     }
 
+    public static final class Outset extends Command {
+
+        private final Argument<String> directionModArg = ArgumentType.String("direction-mod");
+        private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
+        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+        public Outset(@Nullable CommandCondition condition) {
+            super("outset", "tf:outset");
+            setCondition(condition);
+
+            setDefaultExecutor(this::handleOutset);
+            addSyntax(this::handleOutset, amountArg);
+            addSyntax(this::handleOutset, amountArg, selectionArg);
+            addSyntax(this::handleOutset, directionModArg, amountArg);
+            addSyntax(this::handleOutset, directionModArg, amountArg, selectionArg);
+            directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
+                // TODO: Suggest -h/-v
+            });
+        }
+
+        private void handleOutset(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                return;
+            }
+
+            int amount;
+            if (context.has(amountArg)) {
+                amount = context.get(amountArg);
+            } else {
+                // TODO: Display syntax of command
+                return;
+            }
+
+            // Determine the target selection
+            var session = LocalSession.forPlayer(player);
+            Selection selection;
+            if (context.has(selectionArg)) {
+                selection = session.selection(context.get(selectionArg));
+            } else {
+                selection = session.selection(Selection.DEFAULT);
+            }
+
+            if (context.has(directionModArg)) {
+                String mod = context.get(directionModArg);
+                if (mod.length() != 2) {
+                    // TODO: send invalid mod argument
+                    return;
+                }
+                if (mod.charAt(0) == '-') {
+                    if (mod.charAt(1) == 'h') {
+                        selection.changeSize(amount, false, true);
+                    } else if (mod.charAt(1) == 'v') {
+                        selection.changeSize(amount, true, false);
+                    } else {
+                        // TODO: send invalid mod argument
+                    }
+                    return;
+                }
+            }
+            selection.changeSize(amount, true, true);
+        }
+    }
+    public static final class Inset extends Command {
+
+        private final Argument<String> directionModArg = ArgumentType.String("direction-mod");
+        private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
+        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+        public Inset(@Nullable CommandCondition condition) {
+            super("inset", "tf:inset");
+            setCondition(condition);
+
+            setDefaultExecutor(this::handleInset);
+            addSyntax(this::handleInset, amountArg);
+            addSyntax(this::handleInset, amountArg, selectionArg);
+            addSyntax(this::handleInset, directionModArg, amountArg);
+            addSyntax(this::handleInset, directionModArg, amountArg, selectionArg);
+            directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
+                // TODO: Suggest -h/-v
+            });
+        }
+
+        private void handleInset(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                return;
+            }
+
+            int amount;
+            if (context.has(amountArg)) {
+                amount = context.get(amountArg);
+            } else {
+                // TODO: Display syntax of command
+                return;
+            }
+
+            // Determine the target selection
+            var session = LocalSession.forPlayer(player);
+            Selection selection;
+            if (context.has(selectionArg)) {
+                selection = session.selection(context.get(selectionArg));
+            } else {
+                selection = session.selection(Selection.DEFAULT);
+            }
+
+            if (context.has(directionModArg)) {
+                String mod = context.get(directionModArg);
+                if (mod.length() != 2) {
+                    // TODO: send invalid mod argument
+                    return;
+                }
+                if (mod.charAt(0) == '-') {
+                    if (mod.charAt(1) == 'h') {
+                        selection.changeSize(-amount, false, true);
+                    } else if (mod.charAt(1) == 'v') {
+                        selection.changeSize(-amount, true, false);
+                    } else {
+                        // TODO: send invalid mod argument
+                    }
+                    return;
+                }
+            }
+            selection.changeSize(-amount, true, true);
+        }
+    }
 }
