@@ -7,6 +7,8 @@ import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,10 +127,24 @@ public class Selection {
                     zMax = (region.min().blockZ() + region.max().blockZ()) / 2;
                     zMin = zMax - 1;
                 }
-                // TODO: Clamp inside world border
-                selectPrimary(region.min().withX(xMin).withZ(zMin), false);
-                selectSecondary(region.max().withX(xMax).withZ(zMax), false);
+                Point primary = boundToWorldBorder(region.min().withX(xMin).withZ(zMin), player.getInstance());
+                Point secondary = boundToWorldBorder(region.max().withX(xMax).withZ(zMax), player.getInstance());
+                selectPrimary(primary, false);
+                selectSecondary(secondary, false);
             }
         }
+    }
+
+    private Point boundToWorldBorder(Point point, Instance world) {
+        var border = world.getWorldBorder();
+        double maxLimitX = border.getCenterX() + border.getDiameter() / 2;
+        double minLimitX = border.getCenterX() - border.getDiameter() / 2;
+        double newX = Math.max(minLimitX, Math.min(maxLimitX, point.x()));
+
+        double maxLimitZ = border.getCenterZ() + border.getDiameter() / 2;
+        double minLimitZ = border.getCenterZ() - border.getDiameter() / 2;
+        double newZ = Math.max(minLimitZ, Math.min(maxLimitZ, point.z()));
+
+        return point.withX(newX).withZ(newZ);
     }
 }

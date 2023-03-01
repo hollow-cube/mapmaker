@@ -47,23 +47,4 @@ public final class GeneralCommands {
         }
 
     }
-
-    public static final class ClearHistory extends Command {
-
-        public ClearHistory() {
-            super("/clearhistory");
-
-            setDefaultExecutor(this::clearHistory);
-        }
-
-        private void clearHistory(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player))
-                throw new UnsupportedOperationException("only implemented for players");
-
-            var session = LocalSession.forPlayer(player);
-            session.clearHistory();
-            player.sendMessage("Cleared history");
-        }
-
-    }
 }

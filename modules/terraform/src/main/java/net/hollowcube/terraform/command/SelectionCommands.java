@@ -10,6 +10,7 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -258,7 +259,8 @@ public final class SelectionCommands {
             addSyntax(this::handleOutset, directionModArg, amountArg);
             addSyntax(this::handleOutset, directionModArg, amountArg, selectionArg);
             directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
-                // TODO: Suggest -h/-v
+                suggestion.addEntry(new SuggestionEntry("-h", Component.text("Expands selection horizontally")));
+                suggestion.addEntry(new SuggestionEntry("-v", Component.text("Expands selection vertically")));
             });
         }
 
@@ -288,7 +290,7 @@ public final class SelectionCommands {
             if (context.has(directionModArg)) {
                 String mod = context.get(directionModArg);
                 if (mod.length() != 2) {
-                    // TODO: send invalid mod argument
+                    sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                     return;
                 }
                 if (mod.charAt(0) == '-') {
@@ -297,7 +299,7 @@ public final class SelectionCommands {
                     } else if (mod.charAt(1) == 'v') {
                         selection.changeSize(amount, true, false);
                     } else {
-                        // TODO: send invalid mod argument
+                        sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                     }
                     return;
                 }
@@ -320,7 +322,8 @@ public final class SelectionCommands {
             addSyntax(this::handleInset, directionModArg, amountArg);
             addSyntax(this::handleInset, directionModArg, amountArg, selectionArg);
             directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
-                // TODO: Suggest -h/-v
+                suggestion.addEntry(new SuggestionEntry("-h", Component.text("Shrinks selection horizontally")));
+                suggestion.addEntry(new SuggestionEntry("-v", Component.text("Shrinks selection vertically")));
             });
         }
 
@@ -350,7 +353,7 @@ public final class SelectionCommands {
             if (context.has(directionModArg)) {
                 String mod = context.get(directionModArg);
                 if (mod.length() != 2) {
-                    // TODO: send invalid mod argument
+                    sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                     return;
                 }
                 if (mod.charAt(0) == '-') {
@@ -359,7 +362,7 @@ public final class SelectionCommands {
                     } else if (mod.charAt(1) == 'v') {
                         selection.changeSize(-amount, true, false);
                     } else {
-                        // TODO: send invalid mod argument
+                        sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                     }
                     return;
                 }
