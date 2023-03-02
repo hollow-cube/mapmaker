@@ -19,6 +19,8 @@ import net.minestom.server.utils.location.RelativeVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 public final class SelectionCommands {
     private SelectionCommands() {}
 
@@ -245,8 +247,7 @@ public final class SelectionCommands {
     }
 
     public static final class Outset extends Command {
-
-        private final Argument<String> directionModArg = ArgumentType.String("direction-mod");
+        private final Argument<String> directionModArg = ArgumentType.Word("direction-mod").from("all", "horizontal", "vertical");
         private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
         public Outset(@Nullable CommandCondition condition) {
@@ -258,10 +259,6 @@ public final class SelectionCommands {
             addSyntax(this::handleOutset, amountArg, selectionArg);
             addSyntax(this::handleOutset, directionModArg, amountArg);
             addSyntax(this::handleOutset, directionModArg, amountArg, selectionArg);
-            directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
-                suggestion.addEntry(new SuggestionEntry("-h", Component.text("Expands selection horizontally")));
-                suggestion.addEntry(new SuggestionEntry("-v", Component.text("Expands selection vertically")));
-            });
         }
 
         private void handleOutset(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -288,28 +285,20 @@ public final class SelectionCommands {
             }
 
             if (context.has(directionModArg)) {
-                String mod = context.get(directionModArg);
-                if (mod.length() != 2) {
-                    sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
-                    return;
+                String mod = context.get(directionModArg).toLowerCase(Locale.ROOT);
+                switch (mod) {
+                    case "all" -> selection.changeSize(amount, true, true);
+                    case "horizontal" -> selection.changeSize(amount, false, true);
+                    case "vertical" -> selection.changeSize(amount, true, false);
+                    default -> sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                 }
-                if (mod.charAt(0) == '-') {
-                    if (mod.charAt(1) == 'h') {
-                        selection.changeSize(amount, false, true);
-                    } else if (mod.charAt(1) == 'v') {
-                        selection.changeSize(amount, true, false);
-                    } else {
-                        sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
-                    }
-                    return;
-                }
+            } else {
+                selection.changeSize(amount, true, true);
             }
-            selection.changeSize(amount, true, true);
         }
     }
     public static final class Inset extends Command {
-
-        private final Argument<String> directionModArg = ArgumentType.String("direction-mod");
+        private final Argument<String> directionModArg = ArgumentType.Word("direction-mod").from("all", "horizontal", "vertical");
         private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
         public Inset(@Nullable CommandCondition condition) {
@@ -321,10 +310,6 @@ public final class SelectionCommands {
             addSyntax(this::handleInset, amountArg, selectionArg);
             addSyntax(this::handleInset, directionModArg, amountArg);
             addSyntax(this::handleInset, directionModArg, amountArg, selectionArg);
-            directionModArg.setSuggestionCallback((sender, context, suggestion) -> {
-                suggestion.addEntry(new SuggestionEntry("-h", Component.text("Shrinks selection horizontally")));
-                suggestion.addEntry(new SuggestionEntry("-v", Component.text("Shrinks selection vertically")));
-            });
         }
 
         private void handleInset(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -351,28 +336,20 @@ public final class SelectionCommands {
             }
 
             if (context.has(directionModArg)) {
-                String mod = context.get(directionModArg);
-                if (mod.length() != 2) {
-                    sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
-                    return;
+                String mod = context.get(directionModArg).toLowerCase(Locale.ROOT);
+                switch (mod) {
+                    case "all" -> selection.changeSize(amount, true, true);
+                    case "horizontal" -> selection.changeSize(amount, false, true);
+                    case "vertical" -> selection.changeSize(amount, true, false);
+                    default -> sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                 }
-                if (mod.charAt(0) == '-') {
-                    if (mod.charAt(1) == 'h') {
-                        selection.changeSize(-amount, false, true);
-                    } else if (mod.charAt(1) == 'v') {
-                        selection.changeSize(-amount, true, false);
-                    } else {
-                        sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
-                    }
-                    return;
-                }
+            } else {
+                selection.changeSize(amount, true, true);
             }
-            selection.changeSize(-amount, true, true);
         }
     }
 
     public static final class Chunk extends Command {
-
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
         public Chunk(@Nullable CommandCondition condition) {
             super("chunk", "tf:chunk");

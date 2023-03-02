@@ -70,6 +70,11 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         return new BezierSurfaceRegion(List.copyOf(curves));
     }
 
+    @Override
+    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
+        throw new UnsupportedOperationException();
+    }
+
 
     // Exposed details used by //loft remove
     public @NotNull List<Curve> curves() {
