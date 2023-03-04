@@ -24,6 +24,7 @@ public final class Terraform {
         commands.register(new SelectionCommands.Outset(condition));
         commands.register(new SelectionCommands.Inset(condition));
         commands.register(new SelectionCommands.Chunk(condition));
+        commands.register(new SelectionCommands.Size(condition));
 
         // Clipboard
         commands.register(new ClipboardCommands.Copy(condition));
