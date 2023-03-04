@@ -26,6 +26,7 @@ public final class Terraform {
         commands.register(new SelectionCommands.Outset(condition));
         commands.register(new SelectionCommands.Inset(condition));
         commands.register(new SelectionCommands.Chunk(condition));
+        commands.register(new SelectionCommands.Size(condition));
 
         // Region
         commands.register(new RegionCommands.Set(condition));

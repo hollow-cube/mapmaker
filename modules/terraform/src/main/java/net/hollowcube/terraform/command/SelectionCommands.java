@@ -4,12 +4,14 @@ import net.hollowcube.terraform.command.argument.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.coordinate.Point;
@@ -431,6 +433,48 @@ public final class SelectionCommands {
             int z2 = z1 + net.minestom.server.instance.Chunk.CHUNK_SIZE_Z;
             selection.selectPrimary(new Pos(x1, yMin, z1), true);
             selection.selectSecondary(new Pos(x2, yMax, x2), true);
+        }
+    }
+
+    public static final class Size extends Command {
+        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+        private final ArgumentWord clipboardArg = ArgumentType.Word("clipboard").from("clipboard");
+        public Size(@Nullable CommandCondition condition) {
+            super("size", "tf:size");
+            setCondition(condition);
+
+            setDefaultExecutor(this::handleSize);
+            addSyntax(this::handleSize, selectionArg);
+            addSyntax(this::handleSize, clipboardArg); // TODO: Might not be the best practice, but I would have to add a suggestion entry to selectionArg with "clipboard" somehow
+        }
+
+        private void handleSize(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                return;
+            }
+
+            if (context.has(clipboardArg)) {
+                if (context.get(clipboardArg).toLowerCase(Locale.ROOT).equals("clipboard")) {
+                    var playerSession = PlayerSession.forPlayer(player);
+                    int count = playerSession.clipboard().blocks().length;
+                    sender.sendMessage(Component.translatable("command.terraform.selection.count", Component.text("clipboard"), Component.text(count)));
+                }
+                return;
+            }
+
+            // Determine the target selection
+            var session = LocalSession.forPlayer(player);
+            Selection selection;
+            if (context.has(selectionArg)) {
+                selection = session.selection(context.get(selectionArg));
+            } else {
+                selection = session.selection(Selection.DEFAULT);
+            }
+            Region region = selection.region();
+            if (region != null) {
+                sender.sendMessage(Component.translatable("command.terraform.selection.count", Component.text("selection"), Component.text(region.volume())));
+            }
         }
     }
 }
