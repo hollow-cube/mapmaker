@@ -76,6 +76,32 @@ public class TestCuboidRegionSelector {
         assertNull(selector.region());
     }
 
+    @Test
+    public void testSizeChange() {
+        var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
+        selector.selectPrimary(new Vec(5, 0, 5), false);
+        selector.selectSecondary(new Vec(15, 10, 15), false);
+        selector.changeSize(-3, false, true);
+
+        assertEquals(8, selector.region().min().x());
+        assertEquals(13, selector.region().max().x());
+        assertEquals(0, selector.region().min().y());
+        assertEquals(11, selector.region().max().y());
+    }
+
+    @Test
+    public void testSizeChangeOver() {
+        var selector = new CuboidRegionSelector(mockPlayer, new MockSelectionRenderer());
+        selector.selectPrimary(new Vec(5, 0, 5), false);
+        selector.selectSecondary(new Vec(15, 10, 15), false);
+        selector.changeSize(-20, true, true);
+
+        assertEquals(10, selector.region().min().x());
+        assertEquals(11, selector.region().max().x());
+        assertEquals(5, selector.region().min().y());
+        assertEquals(6, selector.region().max().y());
+    }
+
 
     // Renderer/CUI
 
