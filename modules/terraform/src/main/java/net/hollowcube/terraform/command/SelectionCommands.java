@@ -301,6 +301,7 @@ public final class SelectionCommands {
         private final Argument<String> directionModArg = ArgumentType.Word("direction-mod").from("all", "horizontal", "vertical");
         private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
         public Outset(@Nullable CommandCondition condition) {
             super("outset", "tf:outset");
             setCondition(condition);
@@ -348,10 +349,12 @@ public final class SelectionCommands {
             }
         }
     }
+
     public static final class Inset extends Command {
         private final Argument<String> directionModArg = ArgumentType.Word("direction-mod").from("all", "horizontal", "vertical");
         private final Argument<Integer> amountArg = ArgumentType.Integer("amount");
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
         public Inset(@Nullable CommandCondition condition) {
             super("inset", "tf:inset");
             setCondition(condition);
@@ -402,6 +405,7 @@ public final class SelectionCommands {
 
     public static final class Chunk extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
         public Chunk(@Nullable CommandCondition condition) {
             super("chunk", "tf:chunk");
             setCondition(condition);
@@ -439,6 +443,7 @@ public final class SelectionCommands {
     public static final class Size extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
         private final ArgumentWord clipboardArg = ArgumentType.Word("clipboard").from("clipboard");
+        
         public Size(@Nullable CommandCondition condition) {
             super("size", "tf:size");
             setCondition(condition);
