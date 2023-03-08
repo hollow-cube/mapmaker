@@ -388,7 +388,7 @@ public final class SelectionCommands {
             int z1 = player.getPosition().chunkZ() << 4; // Multiply by 16
             int z2 = z1 + net.minestom.server.instance.Chunk.CHUNK_SIZE_Z;
             selection.selectPrimary(new Pos(x1, yMin, z1), true);
-            selection.selectSecondary(new Pos(x2, yMax, x2), true);
+            selection.selectSecondary(new Pos(x2, yMax, z2), true);
         }
     }
 
