@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SuppressWarnings("JUnitMalformedDeclaration")
@@ -23,7 +22,7 @@ public class TestSchemChunkBatchIntegration {
         batch.setBlock(0, 0, 0, Block.TNT);
 
         var instance = env.createFlatInstance();
-        assertThrows(Exception.class, () -> batch.apply(instance, 0, 0).get());
+        assertTrue(batch.apply(instance, 0, 0).isCompletedExceptionally());
     }
 
     @Test

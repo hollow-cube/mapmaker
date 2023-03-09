@@ -23,6 +23,10 @@ public final class Terraform {
         commands.register(new SelectionCommands.HPos1(condition));
         commands.register(new SelectionCommands.HPos2(condition));
         commands.register(new SelectionCommands.Sel(condition));
+        commands.register(new SelectionCommands.Outset(condition));
+        commands.register(new SelectionCommands.Inset(condition));
+        commands.register(new SelectionCommands.Chunk(condition));
+        commands.register(new SelectionCommands.Size(condition));
 
         // Region
         commands.register(new RegionCommands.Set(condition));
@@ -63,6 +67,5 @@ public final class Terraform {
 //            sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
         }, maskArg);
         commands.register(mask);
-
     }
 }
