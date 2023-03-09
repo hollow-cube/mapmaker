@@ -76,13 +76,13 @@ Statuses are as follows:
 - ✅ //pos2
 - ✅ //hpos1
 - ✅ //hpos2
-- 🚧 //chunk - sets primary in min corner, secondary in max corner. Thats all.
+- ✅ //chunk - sets primary in min corner, secondary in max corner. Thats all.
 - 🚧 //wand - Really just an alias for the wand tool
 - ❌ //toggleeditwand - Terraform tools are locked to a specific instance of an item, not all items of the type.
 - 🚧 //contract
 - 🚧 //shift
-- 🚧 //outset
-- 🚧 //inset
+- ✅ //outset
+- ✅ //inset
 - 🚧 //size
 - 🚧 //count
 - 🚧 //distr

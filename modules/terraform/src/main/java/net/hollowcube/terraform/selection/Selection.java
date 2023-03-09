@@ -7,6 +7,8 @@ import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +21,7 @@ public class Selection {
     private final Player player;
     private final String name;
 
-    private SelectionRenderer renderer;
+    private final SelectionRenderer renderer;
     private RegionSelector selector;
     private Region.Type regionType = Region.Type.CUBOID;
     private Region cachedRegion = null;
@@ -87,7 +89,7 @@ public class Selection {
         }
         return cachedRegion;
     }
-
+    
     public @NotNull NBTCompound toNBT() {
         var root = new MutableNBTCompound();
         root.setString("name", name);
@@ -105,4 +107,7 @@ public class Selection {
         return selection;
     }
 
+    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
+        selector.changeSize(delta, changeVertical, changeHorizontal);
+    }
 }
