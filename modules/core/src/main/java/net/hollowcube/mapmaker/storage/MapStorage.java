@@ -14,6 +14,8 @@ import java.util.List;
 
 public interface MapStorage {
 
+    class NotFoundError extends RuntimeException { }
+
     Error ERR_NOT_FOUND = Error.of("map not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
 
@@ -36,7 +38,7 @@ public interface MapStorage {
      */
     @NotNull FutureResult<MapData> createMap(@NotNull MapData map);
 
-    @NotNull FutureResult<MapData> getMapById(@NotNull String mapId);
+    @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId);
 
     @NotNull FutureResult<Void> updateMap(@NotNull MapData map);
 

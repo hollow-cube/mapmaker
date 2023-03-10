@@ -20,6 +20,10 @@ public class ItemButtonElement extends ItemLabelElement {
         super(id, width, height, translationKey, args);
     }
 
+    public ItemButtonElement(@NotNull ItemButtonElement other) {
+        super(other);
+    }
+
     @Override
     public void wireAction(@NotNull View owner, @NotNull Method method) {
         method.setAccessible(true);
@@ -39,5 +43,10 @@ public class ItemButtonElement extends ItemLabelElement {
             handler.handleClick(player, slot, clickType);
         }
         return ClickHandler.DENY;
+    }
+
+    @Override
+    public BaseElement clone() {
+        return new ItemButtonElement(this);
     }
 }

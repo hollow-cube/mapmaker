@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
@@ -26,6 +28,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ForkJoinPool;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
@@ -63,14 +66,14 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<MapData> getMapById(@NotNull String mapId) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId) {
+        return Futures.submit(() -> {
             var filter = eq("_id", mapId);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
-        });
+                throw new NotFoundError();
+            return result;
+        }, ForkJoinPool.commonPool());
     }
 
     @Override

@@ -15,6 +15,10 @@ public interface BaseElement extends Element, SectionLike  {
         return null;
     }
 
+    void setAssociatedView(@NotNull View view);
+
+    @Nullable View getAssociatedView();
+
     BaseElement clone();
 
     default void wireAction(@NotNull View view, @NotNull Method method) {

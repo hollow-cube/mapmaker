@@ -3,7 +3,6 @@ package net.hollowcube.canvas;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
-import net.hollowcube.canvas.internal.standalone.RootElement;
 import net.hollowcube.canvas.internal.standalone.XmlElementReader;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.canvas.section.SectionLike;
@@ -18,15 +17,12 @@ public abstract class View implements SectionLike {
         var viewFile = getClass().getResource(String.format("/%s.xml", getClass().getName().replace(".", "/")));
         Check.notNull(viewFile, "View file not found: " + getClass().getName() + ".xml");
 
-        root = XmlElementReader.load(viewFile.toString(), true);
+        //todo cache/clone has a lot of issues right now
+        root = XmlElementReader.load(viewFile.toString(), false);
         wireOutlets();
         wireActions();
 
-        if (root instanceof RootElement elem) {
-            elem.addMountHandler(this::mount);
-        } else {
-            throw new RuntimeException("Root is not a RootElement");
-        }
+        root.setAssociatedView(this);
     }
 
     @Override
@@ -38,7 +34,11 @@ public abstract class View implements SectionLike {
         return root;
     }
 
-    protected void mount() {
+    public void setLoading(boolean loading) {
+        root.setLoading(loading);
+    }
+
+    public void mount() {
 
     }
 
@@ -52,12 +52,16 @@ public abstract class View implements SectionLike {
                 var element = root.findById(name);
                 Check.notNull(element, "Outlet not found: " + name);
 
-                if (!field.getType().isAssignableFrom(element.getClass())) {
+                field.setAccessible(true);
+
+                var associatedView = ((BaseElement) element).getAssociatedView();
+                if (field.getType().isAssignableFrom(element.getClass())) {
+                    field.set(this, element);
+                } else if (associatedView != null && field.getType().isAssignableFrom(associatedView.getClass())) {
+                    field.set(this, associatedView);
+                } else {
                     throw new RuntimeException("Outlet type mismatch: " + name);
                 }
-
-                field.setAccessible(true);
-                field.set(this, element);
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);

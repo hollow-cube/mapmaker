@@ -1,11 +1,13 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.hub.gui.edit ?>
 <component width="9" height="3" align="ttb">
     <spacer width="9" height="1" />
     <box width="9" height="1" align="ltr">
-        <button id="slot0" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
-        <button id="slot1" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
-        <button id="slot2" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
-        <button id="slot3" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
-        <button id="slot4" translationKey="gui.create_maps.slot" sprite="minecraft:red_concrete" />
+        <EditMapIcon id="slot0" />
+        <EditMapIcon id="slot1" />
+        <EditMapIcon id="slot2" />
+        <EditMapIcon id="slot3" />
+        <EditMapIcon id="slot4" />
     </box>
     <spacer width="9" height="1" />
 </component>
