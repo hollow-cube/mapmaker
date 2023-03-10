@@ -168,7 +168,7 @@ public class Handler {
     public @NotNull FutureResult<MapData> publishMap(@NotNull String playerId, @NotNull String mapId) {
         var timer = publishMapTime.startTimer();
 
-        return server.mapStorage().getMapById(mapId)
+        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
                 // Check admin permissions
                 .flatAlso(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.ADMIN))
                         .wrapErr("failed to check admin permission: {}"))
@@ -199,7 +199,7 @@ public class Handler {
     public @NotNull FutureResult<Void> playMap(@NotNull Player player, @NotNull String mapId) {
         var timer = playMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
-        return server.mapStorage().getMapById(mapId)
+        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
                 // Ensure map is published and check permission
                 .flatMap(map -> {
                     if (!map.isPublished())
@@ -218,7 +218,7 @@ public class Handler {
     public @NotNull FutureResult<Void> editMap(@NotNull Player player, @NotNull String mapId) {
         var timer = editMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
-        return server.mapStorage().getMapById(mapId)
+        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
                 // Ensure map is not published and check write permission
                 .flatMap(map -> {
                     if (map.isPublished())

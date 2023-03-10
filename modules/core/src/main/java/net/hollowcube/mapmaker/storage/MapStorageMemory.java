@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
@@ -24,11 +26,11 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<MapData> getMapById(@NotNull String mapId) {
+    public @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId) {
         var map = mapsById.get(mapId);
         if (map == null)
-            return FutureResult.error(ERR_NOT_FOUND);
-        return FutureResult.of(map);
+            return Futures.immediateFailedFuture(new NotFoundError());
+        return Futures.immediateFuture(map);
     }
 
     @Override

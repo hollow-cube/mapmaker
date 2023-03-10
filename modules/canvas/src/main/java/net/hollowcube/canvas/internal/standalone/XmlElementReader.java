@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
@@ -15,15 +16,21 @@ import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class XmlElementReader {
+    private static final System.Logger logger = System.getLogger(XmlElementReader.class.getName());
+
     private static final Map<String, BaseElement> xmlCache = new ConcurrentHashMap<>();
 
     public static @NotNull BaseElement load(@NotNull String viewPath, boolean cache) {
         if (cache && xmlCache.containsKey(viewPath)) {
+            logger.log(System.Logger.Level.DEBUG, "Cache hit for '{0}'", viewPath);
             return xmlCache.get(viewPath).clone();
         }
 
@@ -37,13 +44,32 @@ public class XmlElementReader {
     private final Document doc;
     private int depth = 0;
 
+    private List<String> imports = new ArrayList<>();
+
     public XmlElementReader(@NotNull String viewPath) {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             doc = builder.parse(viewPath);
             doc.getDocumentElement().normalize();
+            parseImports();
         } catch (Exception e) {
             throw new RuntimeException("Failed to load document", e);
+        }
+    }
+
+    private void parseImports() {
+        var children = doc.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            var child = children.item(i);
+            if (child.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE)
+                continue;
+
+            String name = child.getNodeName(), value = child.getNodeValue();
+            if (!name.equals("import")) continue;
+
+            value = value.trim();
+            logger.log(System.Logger.Level.DEBUG, "Importing '" + value + "'");
+            imports.add(value);
         }
     }
 
@@ -66,7 +92,8 @@ public class XmlElementReader {
             case "label" -> loadLabel(node);
             case "button" -> loadButton(node);
             case "pagination" -> loadPagination(node);
-            default -> throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
+            case "switch" -> loadSwitch(node);
+            default -> loadImportedElement(node);
         };
     }
 
@@ -76,17 +103,6 @@ public class XmlElementReader {
                 getEnum(node, "align", BoxElement.Align.LTR));
 
         return applyTraits(node, loadChildren(node, elem));
-    }
-
-    private @NotNull BaseElement loadChildren(@NotNull Node node, @NotNull BoxElement elem) {
-        depth++;
-        for (int i = 0; i < node.getChildNodes().getLength(); i++) {
-            var child = node.getChildNodes().item(i);
-            if (child.getNodeType() != Node.ELEMENT_NODE) continue;
-            elem.addChild(loadElement(child));
-        }
-        depth--;
-        return elem;
     }
 
     private @NotNull BaseElement loadSpacer(@NotNull Node node) {
@@ -113,6 +129,23 @@ public class XmlElementReader {
         Check.argCondition(!node.getNodeName().equals("pagination"), "Node must be `pagination`");
         var elem = new PaginationElement(getId(node), getWidth(node), getHeight(node));
         return applyTraits(node, elem);
+    }
+
+    private @NotNull BaseElement loadSwitch(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("switch"), "Node must be `switch`");
+        var elem = new SwitchElement(getId(node), getWidth(node), getHeight(node));
+        return applyTraits(node, loadChildren(node, elem));
+    }
+
+    private @NotNull BaseParentWithChildrenElement loadChildren(@NotNull Node node, @NotNull BaseParentWithChildrenElement elem) {
+        depth++;
+        for (int i = 0; i < node.getChildNodes().getLength(); i++) {
+            var child = node.getChildNodes().item(i);
+            if (child.getNodeType() != Node.ELEMENT_NODE) continue;
+            elem.addChild(loadElement(child));
+        }
+        depth--;
+        return elem;
     }
 
     private @NotNull BaseElement applyTraits(@NotNull Node node, @NotNull BaseElement elem) {
@@ -149,6 +182,35 @@ public class XmlElementReader {
         }
 
         return elem;
+    }
+
+    private @NotNull BaseElement loadImportedElement(@NotNull Node node) {
+        for (var importPath : imports) {
+            var path = importPath + "." + node.getNodeName();
+            try {
+                var clazz = Class.forName(path);
+                if (!View.class.isAssignableFrom(clazz)) {
+                    throw new IllegalArgumentException("Class must extend View: " + path);
+                }
+
+                var constructor = clazz.getConstructor();
+                var importedElement = ((View) constructor.newInstance()).getRoot();
+                if (importedElement instanceof RootElement importedRoot) {
+                    importedRoot.setId(getId(node));
+                } else {
+                    //todo this is probably not a great requirement, but maybe doesnt matter.
+                    // generally i am not a fan of the concept of a setId method.
+                    throw new IllegalArgumentException("Imported element must be a root: " + path);
+                }
+                return importedElement;
+            } catch (ClassNotFoundException ignored) {
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("View class must have a no-args constructor: " + path);
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                throw new IllegalArgumentException("View class constructor threw an exception: " + path, e);
+            }
+        }
+        throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
     }
 
     // Helpers

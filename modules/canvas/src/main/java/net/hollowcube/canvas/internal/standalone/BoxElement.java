@@ -1,49 +1,28 @@
 package net.hollowcube.canvas.internal.standalone;
 
-import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 //todo make me package private again
-public class BoxElement extends BaseParentElement implements DepthAware, SpriteHolder {
+public class BoxElement extends BaseParentWithChildrenElement implements DepthAware, SpriteHolder {
 
     public enum Align {
         LTR,
         TTB,
     }
 
-    private final Align align;
-
-    private final List<BaseElement> children = new ArrayList<>();
+    protected final Align align;
 
     public BoxElement(@Nullable String id, int width, int height, @NotNull Align align) {
         super(id, width, height);
         this.align = align;
     }
 
-    @Override
-    public @Nullable Element findById(@NotNull String id) {
-        if (id.equals(id())) return this;
-        for (var child : children) {
-            var found = child.findById(id);
-            if (found != null) return found;
-        }
-        return null;
-    }
-
     public void addChild(@NotNull View child) {
         children.add(child.getRoot());
-    }
-
-
-    public void addChild(@NotNull BaseElement child) {
-        children.add(child);
     }
 
     @Override

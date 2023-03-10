@@ -21,7 +21,7 @@ class ItemLabelElement extends BaseItemElement implements Label, DepthAware, Spr
             .meta(meta -> meta.customModelData(1000))
             .build();
 
-    private final String translationKey;
+    protected final String translationKey;
     private ItemStack itemSprite = BLANK_ITEM;
 
     public ItemLabelElement(@Nullable String id, int width, int height,
@@ -30,6 +30,14 @@ class ItemLabelElement extends BaseItemElement implements Label, DepthAware, Spr
         this.translationKey = translationKey;
 
         updateItem(args);
+    }
+
+    protected ItemLabelElement(@NotNull ItemLabelElement other) {
+        super(other);
+        this.translationKey = other.translationKey;
+        this.itemSprite = other.itemSprite;
+
+        setItem(itemSprite);
     }
 
     @Override
@@ -56,6 +64,6 @@ class ItemLabelElement extends BaseItemElement implements Label, DepthAware, Spr
 
     @Override
     public BaseElement clone() {
-        return new ItemLabelElement(id(), width(), height(), translationKey);
+        return new ItemLabelElement(this);
     }
 }

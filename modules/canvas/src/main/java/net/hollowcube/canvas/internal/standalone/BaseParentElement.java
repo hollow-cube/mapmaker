@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.section.ParentSection;
 import net.hollowcube.canvas.section.Section;
@@ -19,10 +20,14 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
     private final Map<Integer, Section> children = new HashMap<>();
     private final @Nullable Section[] childMap;
 
-    private final String id;
+    //todo this is non final because RootElement has a setter for it which is used to preserve ID
+    // when instantiating an imported element. This is a pretty yikes hack that should be improved
+    // sometime in the future (eg when rewriting not to be built on top of the old section gui impl)
+    protected String id;
     private boolean loading = false;
     private ButtonSection loadingButton;
 
+    private View associatedView = null;
 
     public BaseParentElement(@Nullable String id, int width, int height) {
         super(width, height);
@@ -69,6 +74,16 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
     }
 
     @Override
+    public void setAssociatedView(@Nullable View associatedView) {
+        this.associatedView = associatedView;
+    }
+
+    @Override
+    public @Nullable View getAssociatedView() {
+        return associatedView;
+    }
+
+    @Override
     public @NotNull Section section() {
         return this;
     }
@@ -102,6 +117,10 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
         // Draw sprite if present
         if (sprite != null) {
             find(RootElement.class).addSprite(this, sprite, 0);
+        }
+
+        if (associatedView != null) {
+            associatedView.mount();
         }
     }
 

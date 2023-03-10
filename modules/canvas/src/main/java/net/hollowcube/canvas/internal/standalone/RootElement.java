@@ -15,17 +15,13 @@ import java.util.List;
 
 public class RootElement extends BoxElement {
 
-    private record SpriteInfo(BaseElement owner, Sprite sprite, int offset) { }
-    private final List<SpriteInfo> sprites = new ArrayList<>();
+    private record SpriteInfo(BaseElement owner, Sprite sprite, int offset) {
+    }
 
-    private Runnable mountHandler = null;
+    private final List<SpriteInfo> sprites = new ArrayList<>();
 
     public RootElement(@Nullable String id, int width, int height, @NotNull Align align) {
         super(id, width, height, align);
-    }
-
-    public void addMountHandler(@NotNull Runnable runnable) {
-        mountHandler = runnable;
     }
 
     public void addSprite(@NotNull BaseElement owner, @NotNull Sprite sprite, int offset) {
@@ -38,12 +34,8 @@ public class RootElement extends BoxElement {
         updateTitle();
     }
 
-    @Override
-    protected void mount() {
-        super.mount();
-        if (mountHandler != null) {
-            mountHandler.run();
-        }
+    void setId(@Nullable String id) {
+        this.id = id;
     }
 
     private void updateTitle() {
@@ -62,5 +54,14 @@ public class RootElement extends BoxElement {
         }
 
         find(RootSection.class).setTitle(Component.text(sb.toString(), NamedTextColor.WHITE));
+    }
+
+    @Override
+    public BaseElement clone() {
+        var root = new RootElement(id(), width(), height(), align);
+        for (var child : children) {
+            root.children.add(child.clone());
+        }
+        return root;
     }
 }
