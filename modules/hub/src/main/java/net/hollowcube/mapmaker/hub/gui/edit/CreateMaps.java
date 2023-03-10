@@ -31,19 +31,19 @@ public class CreateMaps extends View {
 
             // If the slot is locked, show the lock icon
             if (i >= playerData.getUnlockedMapSlots()) {
-                slot.setState(EditMapIcon.State.LOCKED, null);
+                slot.setState(EditMapIcon.State.LOCKED, i, null);
                 continue;
             }
 
             var mapId = playerData.getMapSlot(i);
             // If there is no map here, show the empty icon
             if (mapId == null) {
-                slot.setState(EditMapIcon.State.EMPTY, null);
+                slot.setState(EditMapIcon.State.EMPTY, i, null);
                 continue;
             }
 
             // There is a map, show the full icon
-            slot.setState(EditMapIcon.State.FULL, mapId);
+            slot.setState(EditMapIcon.State.FULL, i, mapId);
         }
 
     }

@@ -65,7 +65,7 @@ public class CreateMapView extends ParentSection {
         var playerData = PlayerData.fromPlayer(player);
         protoMap.setOwner(playerData.getId());
 
-        // Dispatch request to create the map with a short random name for now
+        // Dispatch request to create the map
         var mapHandler = getContext(Handler.class);
         mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot)
                 .then(map -> {

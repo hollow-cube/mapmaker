@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Element;
+import net.hollowcube.canvas.HistoryStack;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,8 @@ public interface BaseElement extends Element, SectionLike  {
     void setAssociatedView(@NotNull View view);
 
     @Nullable View getAssociatedView();
+
+    @NotNull HistoryStack history();
 
     BaseElement clone();
 
