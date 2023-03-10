@@ -21,6 +21,7 @@ public interface HubServer {
     class StaticAbuse {
         //todo delete me when gui has a better way to access these
         public static HubServer instance;
+        public static Handler handler;
 
     }
 

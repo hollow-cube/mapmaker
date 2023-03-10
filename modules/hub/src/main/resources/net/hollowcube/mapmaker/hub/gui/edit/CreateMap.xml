@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<component width="9" height="3">
+    <button id="submit" translationKey="gui.create_map.submit" sprite="green_stained_glass_pane" />
+</component>

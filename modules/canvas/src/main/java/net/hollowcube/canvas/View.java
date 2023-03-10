@@ -30,6 +30,10 @@ public abstract class View implements SectionLike {
         return root.section();
     }
 
+    public @NotNull HistoryStack history() {
+        return root.history();
+    }
+
     public BaseElement getRoot() {
         return root;
     }

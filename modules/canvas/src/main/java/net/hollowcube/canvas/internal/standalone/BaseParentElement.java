@@ -1,8 +1,11 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.HistoryStack;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.canvas.internal.standalone.util.RouterSectionHistoryStack;
 import net.hollowcube.canvas.section.ParentSection;
+import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.canvas.section.std.ButtonSection;
 import net.minestom.server.item.ItemStack;
@@ -71,6 +74,11 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
                 super.mountChild(x, y, entry.getValue());
             }
         }
+    }
+
+    @Override
+    public @NotNull HistoryStack history() {
+        return new RouterSectionHistoryStack(find(RouterSection.class));
     }
 
     @Override
