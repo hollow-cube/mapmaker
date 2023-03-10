@@ -29,7 +29,10 @@ public class ItemButtonElement extends ItemLabelElement {
         method.setAccessible(true);
         handlers.add((player, slot, clickType) -> {
             try {
-                method.invoke(owner);
+                var args = new ArrayList<>();
+                if (method.getParameterCount() > 0)
+                    args.add(player);
+                method.invoke(owner, args.toArray());
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke action method " + method, e);
             }

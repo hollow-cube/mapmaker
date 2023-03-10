@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.HistoryStack;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.section.ParentSection;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,11 @@ public class SpacerElement extends ParentSection implements BaseElement {
     @Override
     public void setLoading(boolean loading) {
         throw new UnsupportedOperationException("Spacer does not have a loading state.");
+    }
+
+    @Override
+    public @NotNull HistoryStack history() {
+        throw new UnsupportedOperationException("Spacer does not have a history.");
     }
 
     @Override

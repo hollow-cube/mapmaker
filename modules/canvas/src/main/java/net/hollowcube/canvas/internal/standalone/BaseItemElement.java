@@ -1,8 +1,11 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.HistoryStack;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.canvas.internal.standalone.util.RouterSectionHistoryStack;
 import net.hollowcube.canvas.section.ItemSection;
+import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.Section;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -63,6 +66,11 @@ abstract class BaseItemElement extends ItemSection implements BaseElement {
                 super.setItem(i, items[i]);
             }
         }
+    }
+
+    @Override
+    public @NotNull HistoryStack history() {
+        return new RouterSectionHistoryStack(find(RouterSection.class));
     }
 
     @Override

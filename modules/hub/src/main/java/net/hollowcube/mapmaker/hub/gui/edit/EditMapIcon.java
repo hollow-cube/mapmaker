@@ -25,6 +25,7 @@ public class EditMapIcon extends View {
     private @Outlet("state") Switch stateSwitch;
     private @Outlet("full") Label full;
 
+    private int slot = -1;
     private String mapId = null; // Set if state is FULL
 
     public EditMapIcon() {
@@ -33,8 +34,9 @@ public class EditMapIcon extends View {
     }
 
     @Contract
-    public void setState(@NotNull State state, @Nullable String mapId) {
+    public void setState(@NotNull State state, int slot, @Nullable String mapId) {
         Check.argCondition(state == State.FULL && mapId == null, "mapId cannot be null if state is FULL");
+        this.slot = slot;
         this.mapId = mapId;
         stateSwitch.setState(state.ordinal());
 
@@ -67,6 +69,7 @@ public class EditMapIcon extends View {
 
     @Action("empty")
     private void handleEmptyClick() {
+        history().push(new CreateMap(slot));
         //todo open create map menu
         System.out.println("Handle empty click");
     }

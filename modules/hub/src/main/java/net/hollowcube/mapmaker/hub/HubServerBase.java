@@ -40,6 +40,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     public @NotNull ListenableFuture<Void> init() {
         StaticAbuse.instance = this;
         this.mapHandler = new Handler(this);
+        StaticAbuse.handler = mapHandler;
 
         this.guiContext = Map.of(
                 HubServer.class, this,
