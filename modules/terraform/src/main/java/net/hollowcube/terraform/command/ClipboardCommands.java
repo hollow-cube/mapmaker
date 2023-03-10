@@ -10,6 +10,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -122,4 +123,44 @@ public final class ClipboardCommands {
         }
     }
 
+    public static final class Rotate extends Command {
+        // TODO support over other axes
+        private final Argument<Double> angleArg = ArgumentType.Double("angle");
+
+        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+
+        public Rotate(@Nullable CommandCondition condition) {
+            super("rotate", "tf:rotate");
+            setCondition(condition);
+
+            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: //rotate <angle>"));
+            addSyntax(this::rotateWithAngle, angleArg);
+            addSyntax(this::rotateWithAngle, angleArg, selectionArg);
+        }
+
+        public void rotateWithAngle(@NotNull CommandSender sender, @NotNull CommandContext context) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                return;
+            }
+
+            // Determine the target selection
+            var session = LocalSession.forPlayer(player);
+            Selection selection;
+            if (context.has(selectionArg)) {
+                selection = session.selection(context.get(selectionArg));
+            } else {
+                selection = session.selection(Selection.DEFAULT);
+            }
+
+            var playerSession = PlayerSession.forPlayer(player);
+
+            // Apply rotation to player's clipboard schematic
+            if (!(playerSession.clipboard() == null)) {
+                // TODO Rotation takes any value
+                session.action()
+                        .to
+            }
+        }
+    }
 }

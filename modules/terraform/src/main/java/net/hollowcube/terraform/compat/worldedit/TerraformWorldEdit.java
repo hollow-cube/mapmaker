@@ -39,6 +39,7 @@ public final class TerraformWorldEdit {
         // Schematic/Clipboard
         commands.register(new AliasCommand(condition, "tf:copy", "/copy"));
         commands.register(new AliasCommand(condition, "tf:paste", "/paste"));
+        commands.register(new AliasCommand(condition, "tf:rotate", "/rotate"));
 
         // Tool
 
