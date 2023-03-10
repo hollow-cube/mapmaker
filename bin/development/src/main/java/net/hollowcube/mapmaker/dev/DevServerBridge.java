@@ -27,7 +27,7 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
 
     @Override
     public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull String mapId, boolean edit) {
-        return map.mapStorage().getMapById(mapId)
+        return FutureResult.wrap(map.mapStorage().getMapById(mapId))
                 .flatMap(map -> ((MapServerBase) this.map).joinMap(player, map, edit));
     }
 

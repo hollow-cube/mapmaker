@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.section.ItemSection;
 import net.hollowcube.canvas.section.Section;
@@ -19,12 +20,26 @@ abstract class BaseItemElement extends ItemSection implements BaseElement {
     private final String id;
     private boolean loading = false;
 
+    private View associatedView = null;
+
     public BaseItemElement(@Nullable String id, int width, int height) {
         super(width, height);
         this.id = id;
 
         this.items = new ItemStack[width() * height()];
         Arrays.fill(items, ItemStack.AIR);
+    }
+
+    protected BaseItemElement(@NotNull BaseItemElement other) {
+        super(other.width(), other.height());
+        this.id = other.id;
+        this.loading = other.loading;
+        this.associatedView = null;
+        this.items = new ItemStack[width() * height()];
+        Arrays.fill(items, ItemStack.AIR);
+
+        this.zIndex = other.zIndex;
+        this.sprite = other.sprite;
     }
 
     @Override
@@ -48,6 +63,16 @@ abstract class BaseItemElement extends ItemSection implements BaseElement {
                 super.setItem(i, items[i]);
             }
         }
+    }
+
+    @Override
+    public void setAssociatedView(@Nullable View associatedView) {
+        this.associatedView = associatedView;
+    }
+
+    @Override
+    public @Nullable View getAssociatedView() {
+        return associatedView;
     }
 
     @Override
@@ -84,6 +109,10 @@ abstract class BaseItemElement extends ItemSection implements BaseElement {
         // Draw sprite if present
         if (sprite != null) {
             find(RootElement.class).addSprite(this, sprite, 0);
+        }
+
+        if (associatedView != null) {
+            associatedView.mount();
         }
     }
 
