@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
@@ -11,7 +12,9 @@ public class EditMap extends View {
 
     private MapData map;
 
-    public EditMap() {
+    public EditMap(@NotNull Context context) {
+        super(context);
+
         setLoading(true);
     }
 

@@ -2,17 +2,23 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 subprojects {
-    apply(plugin = "java")
-    apply(plugin = "net.ltgt.errorprone")
-    apply(plugin = "maven-publish")
-
     group = "net.hollowcube.mapmaker"
+
+    val isStandalone = project.path.replace(":modules", "") in setOf(
+        ":canvas"
+    )
+    if (isStandalone) {
+        return@subprojects
+    }
+
+    apply(plugin = "net.ltgt.errorprone")
+    apply(plugin = "java")
+    apply(plugin = "maven-publish")
 
     repositories {
         mavenCentral()
         maven(url = "https://jitpack.io")
     }
-
 
     dependencies {
         // A bug with kotlin dsl

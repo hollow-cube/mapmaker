@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.hub.guiold.hotbar;
 
+import net.hollowcube.canvas.internal.standalone.BaseElement;
+import net.hollowcube.canvas.internal.standalone.internal.ContextImpl;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.guiold.search.MapSearchView;
@@ -64,7 +66,7 @@ public final class HubHotbar {
         switch (customModelData) {
             case PLAY_ITEM_CMD -> server.openGUIForPlayer(player, new MapSearchView());
 //            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
-            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMaps(player));
+            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, (BaseElement) new CreateMaps(new ContextImpl(), player).element());
         }
     }
 
