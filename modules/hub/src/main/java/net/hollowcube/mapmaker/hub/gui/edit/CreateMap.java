@@ -4,6 +4,7 @@ import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -21,7 +22,8 @@ public class CreateMap extends View {
 
     private BiConsumer<Integer, MapData> onCreate;
 
-    public CreateMap() {
+    public CreateMap(@NotNull Context context) {
+        super(context);
     }
 
     public void setCallbacks(@NotNull BiConsumer<Integer, MapData> onCreate) {
