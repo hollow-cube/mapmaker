@@ -63,6 +63,7 @@ public final class HubHotbar {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         switch (customModelData) {
             case PLAY_ITEM_CMD -> server.openGUIForPlayer(player, new MapSearchView());
+//            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
             case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMaps(player));
         }
     }

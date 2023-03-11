@@ -10,21 +10,34 @@ import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiConsumer;
+
 public class CreateMap extends View {
 
     private @Outlet("submit") Label submitButton;
 
-    private final int slot;
+    private int slot;
     private MapData protoMap;
 
-    public CreateMap(int slot) {
-        this.slot = slot;
+    private BiConsumer<Integer, MapData> onCreate;
+
+    public CreateMap() {
+    }
+
+    public void setCallbacks(@NotNull BiConsumer<Integer, MapData> onCreate) {
+        this.onCreate = onCreate;
     }
 
     @Override
     public void mount() {
         super.mount();
 
+        protoMap = new MapData();
+        submitButton.setLoading(false);
+    }
+
+    public void setSlot(int slot) {
+        this.slot = slot;
         protoMap = new MapData();
         submitButton.setLoading(false);
     }
@@ -39,9 +52,7 @@ public class CreateMap extends View {
         // Dispatch request to create the map
         var mapHandler = HubServer.StaticAbuse.handler;
         mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot)
-                .then(map -> {
-                    System.out.println("CREATED MAP!!!!!");
-                })
+                .then(map -> onCreate.accept(slot, map))
                 .thenErr(e -> {
                     throw new RuntimeException(e.message()); //todo
                 });

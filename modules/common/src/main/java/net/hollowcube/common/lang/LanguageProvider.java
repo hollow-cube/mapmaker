@@ -118,6 +118,7 @@ public class LanguageProvider {
         if (!(component instanceof TranslatableComponent translatable)) {
             return component;
         }
+
         var raw = properties.getProperty(translatable.key());
         if (raw == null) return Component.text(translatable.key());
 
@@ -133,7 +134,17 @@ public class LanguageProvider {
      * Eventually will be replaced with proxy translation, which will support newlines.
      */
     public static List<Component> createMultiTranslatable(@NotNull String key, Component... args) {
-        var entries = properties.stringPropertyNames().stream()
+        var entries = optionalMultiTranslatable(key, List.of(args));
+        if (entries.isEmpty()) return List.of(Component.text(key));
+        return entries;
+    }
+
+    /**
+     * A workaround to having variable length translations (eg lore lines, description lines).
+     * Eventually will be replaced with proxy translation, which will support newlines.
+     */
+    public static List<Component> optionalMultiTranslatable(@NotNull String key, @NotNull List<Component> args) {
+        return properties.stringPropertyNames().stream()
                 .filter(k -> {
                     if (!k.startsWith(key)) return false;
                     var rest = k.substring(key.length());
@@ -146,27 +157,10 @@ public class LanguageProvider {
                 })
                 .map(k -> (Component) Component.translatable(k, args))
                 .toList();
-        if (entries.isEmpty()) return List.of(Component.text(key));
-        return entries;
-    }
-
-    /**
-     * A workaround to having variable length translations (eg lore lines, description lines).
-     * Eventually will be replaced with proxy translation, which will support newlines.
-     */
-    public static List<Component> optionalMultiTranslatable(@NotNull String key, @NotNull List<Component> args) {
-        var entries = properties.stringPropertyNames().stream()
-                .filter(k -> {
-                    if (!k.startsWith(key)) return false;
-                    var rest = k.substring(key.length());
-                    return rest.length() == 0 || rest.matches("\\.[0-9]+");
-                })
-                .map(k -> (Component) Component.translatable(k, args))
-                .toList();
-        return entries;
     }
 
     private static @NotNull Component fromStringSafe(@NotNull String text) {
-        return Component.text(text, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
+        return Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                .append(MiniMessage.miniMessage().deserialize(text));
     }
 }
