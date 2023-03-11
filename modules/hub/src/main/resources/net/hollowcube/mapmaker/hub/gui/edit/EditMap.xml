@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<component width="9" height="7" align="ttb">
+
+    <spacer width="9" height="4" />
+
+    <box width="9" align="ltr">
+        <spacer />
+        <label id="info" translationKey="gui.slot_view.tab.info" sprite="book" />
+        <spacer />
+        <label id="build_stats" translationKey="gui.slot_view.tab.build_stats" sprite="filled_map" />
+        <spacer />
+        <label id="settings" translationKey="gui.slot_view.tab.settings" sprite="comparator" />
+        <spacer />
+        <label id="actions" translationKey="gui.slot_view.tab.actions" sprite="string" />
+        <spacer />
+    </box>
+
+    <box width="9" height="2" align="ltr">
+        <spacer height="2" />
+        <button id="edit_in_world" width="3" height="2" translationKey="gui.slot_view.edit" sprite="diamond_pickaxe" />
+        <spacer height="2" />
+        <button id="publish" width="3" height="2" translationKey="gui.slot_view.publish" sprite="diamond_boots" />
+        <spacer height="2" />
+    </box>
+
+</component>
