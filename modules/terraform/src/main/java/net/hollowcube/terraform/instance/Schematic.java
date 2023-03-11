@@ -23,8 +23,7 @@ public record Schematic(
         Point size,
         Point offset,
         Block[] palette,
-        byte[] blocks,
-        Rotation rotation
+        byte[] blocks
 ) {
     public Schematic {
         palette = Arrays.copyOf(palette, palette.length);

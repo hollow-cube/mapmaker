@@ -110,12 +110,13 @@ public final class ClipboardCommands {
 
             var playerSession = PlayerSession.forPlayer(player);
             var schem = playerSession.clipboard();
+            var rotation = playerSession.clipboard_rotation();
             if (schem == null) {
                 player.sendMessage("Blah blah no clipboard");
                 return;
             }
 
-            schem.build(Rotation.NONE, null).apply(player.getInstance(), player.getPosition(), () -> {
+            schem.build(rotation, null).apply(player.getInstance(), player.getPosition(), () -> {
                 player.sendMessage("Done!");
             });
 
@@ -125,9 +126,7 @@ public final class ClipboardCommands {
 
     public static final class Rotate extends Command {
         // TODO support over other axes
-        private final Argument<Double> angleArg = ArgumentType.Double("angle");
-
-        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
+        private final Argument<Integer> angleArg = ArgumentType.Integer("angle");
 
         public Rotate(@Nullable CommandCondition condition) {
             super("rotate", "tf:rotate");
@@ -135,7 +134,6 @@ public final class ClipboardCommands {
 
             setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: //rotate <angle>"));
             addSyntax(this::rotateWithAngle, angleArg);
-            addSyntax(this::rotateWithAngle, angleArg, selectionArg);
         }
 
         public void rotateWithAngle(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -144,22 +142,15 @@ public final class ClipboardCommands {
                 return;
             }
 
-            // Determine the target selection
-            var session = LocalSession.forPlayer(player);
-            Selection selection;
-            if (context.has(selectionArg)) {
-                selection = session.selection(context.get(selectionArg));
-            } else {
-                selection = session.selection(Selection.DEFAULT);
-            }
-
             var playerSession = PlayerSession.forPlayer(player);
 
             // Apply rotation to player's clipboard schematic
             if (!(playerSession.clipboard() == null)) {
-                // TODO Rotation takes any value
-                session.action()
-                        .to
+                playerSession.rotate_clipboard(context.get(angleArg));
+                sender.sendMessage("Rotated clipboard!");
+            }
+            else {
+                sender.sendMessage("You don't have anything in your clipboard!");
             }
         }
     }

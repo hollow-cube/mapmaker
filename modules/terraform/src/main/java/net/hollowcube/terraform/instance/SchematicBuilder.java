@@ -18,7 +18,6 @@ public class SchematicBuilder {
     private final Map<Point, Block> blockSet = new ConcurrentHashMap<>();
 
     private Point offset = Vec.ZERO;
-    private Rotation rotation = Rotation.NONE;
 
 
     public void addBlock(@NotNull Point point, @NotNull Block block) {
@@ -27,10 +26,6 @@ public class SchematicBuilder {
 
     public void setOffset(@NotNull Point point) {
         this.offset = point;
-    }
-
-    public void setRotation(@NotNull Rotation rotation) {
-        this.rotation = rotation;
     }
 
     public Schematic toSchematic() {
@@ -116,8 +111,7 @@ public class SchematicBuilder {
                 size,
                 offset,
                 palette,
-                blockBytes.array(),
-                rotation
+                blockBytes.array()
         );
     }
 }
