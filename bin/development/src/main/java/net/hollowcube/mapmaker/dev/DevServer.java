@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.temp.FileStorageMemory;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
+import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -110,6 +111,7 @@ public class DevServer {
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
 
+    private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
 
     private DevHubServer hub;
@@ -175,9 +177,18 @@ public class DevServer {
         }
 
         // SpiceDB
-        if (System.getenv("MM_MAP_PERMISSIONS_DEV") != null)
+        if (System.getenv("MM_MAP_PERMISSIONS_DEV") != null) {
+            this.platformPermissions = PlatformPermissionManager.noop();
             this.mapPermissions = MapPermissionManager.noop();
-        else {
+        } else {
+            startupTasks.add(Futures.transform(
+                    PlatformPermissionManager.spicedb(config.spicedb()),
+                    platformPermissions -> {
+                        this.platformPermissions = platformPermissions;
+                        return null;
+                    },
+                    Runnable::run
+            ));
             startupTasks.add(Futures.transform(
                     MapPermissionManager.spicedb(config.spicedb()),
                     mapPermissions -> {
@@ -203,8 +214,8 @@ public class DevServer {
 
         var bridge = new DevServerBridge();
 
-        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager, mapPermissions);
-        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager);
+        this.hub = new DevHubServer(bridge, mapStorage, playerStorage, worldManager, platformPermissions, mapPermissions);
+        this.maps = new DevMapServer(bridge, mapStorage, saveStateStorage, worldManager, platformPermissions);
         bridge.setHubServer(hub);
         bridge.setMapServer(maps);
         startupTasks.add(this.hub.init());

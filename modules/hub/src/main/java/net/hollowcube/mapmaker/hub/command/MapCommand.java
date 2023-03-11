@@ -47,6 +47,9 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new PublishCommand());
         addSubcommand(new DeleteCommand());
 
+        // Admin
+        addSubcommand(new MapAdminCommand(server, handler));
+
         setDefaultExecutor(generateUsage());
     }
 

@@ -12,15 +12,12 @@ import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class HubServerBase implements HubServer { //todo one readiness check should be ensuring the world is loaded
-    private final Logger logger = LoggerFactory.getLogger(HubServer.class);
 
     private final HubToMapBridge bridge;
     private Handler mapHandler;
