@@ -1,12 +1,18 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
+import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMaps extends View {
+
+    private @Outlet("switch") Switch switcher;
+    private @Outlet("editor") EditMap editor;
+    private @Outlet("creator") CreateMap creator;
 
     private @Outlet("slot0") EditMapIcon slot0;
     private @Outlet("slot1") EditMapIcon slot1;
@@ -19,7 +25,10 @@ public class CreateMaps extends View {
 
     public CreateMaps(@NotNull Player player) {
         playerData = PlayerData.fromPlayer(player);
+
         slots = new EditMapIcon[]{slot0, slot1, slot2, slot3, slot4};
+
+        creator.setCallbacks(this::mapCreated);
     }
 
     @Override
@@ -28,6 +37,13 @@ public class CreateMaps extends View {
 
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
+            slot.setCallbacks(m -> {
+                editor.showMap(m);
+                switcher.setState(0);
+            }, s -> {
+                creator.setSlot(s);
+                switcher.setState(1);
+            });
 
             // If the slot is locked, show the lock icon
             if (i >= playerData.getUnlockedMapSlots()) {
@@ -47,4 +63,11 @@ public class CreateMaps extends View {
         }
 
     }
+
+    public void mapCreated(int slot, @NotNull MapData map) {
+        slots[slot].setState(EditMapIcon.State.FULL, slot, map.getId());
+        editor.showMap(map);
+        switcher.setState(0);
+    }
+
 }
