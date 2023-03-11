@@ -4,6 +4,7 @@ import net.hollowcube.canvas.section.SectionLike;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
+import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
@@ -31,6 +32,7 @@ public interface HubServer {
     @NotNull MapStorage mapStorage();
     @NotNull WorldManager worldManager();
 
+    @NotNull PlatformPermissionManager platformPermissions();
     @NotNull MapPermissionManager mapPermissions();
 
     @NotNull HubWorld world();

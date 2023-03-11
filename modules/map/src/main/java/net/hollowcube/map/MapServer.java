@@ -1,6 +1,7 @@
 package net.hollowcube.map;
 
 import net.hollowcube.canvas.section.Section;
+import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;
@@ -14,6 +15,8 @@ public interface MapServer {
     @NotNull MapStorage mapStorage();
 
     @NotNull SaveStateStorage saveStateStorage();
+
+    @NotNull PlatformPermissionManager platformPermissions();
 
     void openGUIForPlayer(@NotNull Player player, @NotNull Section gui);
 
