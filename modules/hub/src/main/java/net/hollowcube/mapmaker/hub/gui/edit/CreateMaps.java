@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
@@ -23,7 +24,8 @@ public class CreateMaps extends View {
     private final PlayerData playerData;
     private final EditMapIcon[] slots;
 
-    public CreateMaps(@NotNull Player player) {
+    public CreateMaps(@NotNull Context context, @NotNull Player player) {
+        super(context);
         playerData = PlayerData.fromPlayer(player);
 
         slots = new EditMapIcon[]{slot0, slot1, slot2, slot3, slot4};

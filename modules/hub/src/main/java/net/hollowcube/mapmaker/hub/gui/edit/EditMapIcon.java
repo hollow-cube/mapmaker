@@ -8,6 +8,7 @@ import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
@@ -38,7 +39,9 @@ public class EditMapIcon extends View {
     private Consumer<MapData> selectMap;
     private IntConsumer createMap;
 
-    public EditMapIcon() {
+    public EditMapIcon(@NotNull Context context) {
+        super(context);
+
         // Immediately start loading, we will wait until the state is set using #setState
         setLoading(true);
     }
