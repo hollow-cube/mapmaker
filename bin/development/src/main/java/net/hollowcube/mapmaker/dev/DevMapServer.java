@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;
@@ -13,16 +14,20 @@ public class DevMapServer extends MapServerBase {
 
     private final WorldManager worldManager;
 
+    private final PlatformPermissionManager platformPermissions;
+
     public DevMapServer(
             @NotNull MapToHubBridge bridge,
             @NotNull MapStorage mapStorage,
             @NotNull SaveStateStorage saveStateStorage,
-            @NotNull WorldManager worldManager
+            @NotNull WorldManager worldManager,
+            @NotNull PlatformPermissionManager platformPermissions
     ) {
         super(bridge);
         this.mapStorage = mapStorage;
         this.saveStateStorage = saveStateStorage;
         this.worldManager = worldManager;
+        this.platformPermissions = platformPermissions;
     }
 
     @Override
@@ -38,6 +43,11 @@ public class DevMapServer extends MapServerBase {
     @Override
     public @NotNull WorldManager worldManager() {
         return worldManager;
+    }
+
+    @Override
+    public @NotNull PlatformPermissionManager platformPermissions() {
+        return platformPermissions;
     }
 
 }
