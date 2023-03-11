@@ -55,6 +55,7 @@ public class DevServer {
         long start = System.nanoTime();
 
         System.setProperty("minestom.terminal.disabled", "true");
+        System.setProperty("minestom.async-commands", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
         // Convert JUL messages to SLF4J
