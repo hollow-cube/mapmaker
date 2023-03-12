@@ -91,6 +91,7 @@ public class ChatFacet implements Facet {
         server.command().register(new ReplyCommand(this));
         server.command().register(new StaffChatCommand(this));
         server.command().register(new ChatChannelCommand(this));
+        server.command().register(new EmoteCommand(this));
         return Futures.immediateVoidFuture();
     }
 
@@ -137,6 +138,11 @@ public class ChatFacet implements Facet {
                 event.getPlayer().getUuid().toString(),
                 event.getMessage()
         );
+        if (event.getMessage().equals(":skull:")) {
+            event.setMessage("\uEff5");
+        } else if (event.getMessage().equals(":joy:")) {
+            event.setMessage("\uEff4");
+        } //TODO NOT LAZY IF ELSE IF XD!
         switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
             case ChatMessage.STAFF_CONTEXT:
                 sendStaffChatMessage(event.getPlayer(), message.message());
@@ -216,5 +222,35 @@ public class ChatFacet implements Facet {
                 },
                 ForkJoinPool.commonPool()
         );
+    }
+
+    public void sendEmojiChatMessage(@NotNull Player from, @NotNull String emote) {
+        for (Player target : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            var chatMessage = new ChatMessage(
+                    Instant.now(),
+                    runtime.workerId(),
+                    //todo these should be using the players data id, not uuid
+                    String.join("%s:%s", from.getUuid().toString(), target.getUuid().toString()),
+                    from.getUuid().toString(),
+                    emote
+            );
+
+            Futures.addCallback(
+                    storage.recordChatMessage(chatMessage),
+                    new FutureCallback<>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            target.sendMessage(from.getUsername() + ": " + emote);
+                        }
+
+                        @Override
+                        public void onFailure(@NotNull Throwable t) {
+                            logger.log(Level.ERROR, "Error sending emote", t);
+                            from.sendMessage("Error sending emote");
+                        }
+                    },
+                    ForkJoinPool.commonPool()
+            );
+        }
     }
 }

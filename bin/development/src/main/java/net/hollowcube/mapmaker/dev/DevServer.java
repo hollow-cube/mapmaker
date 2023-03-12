@@ -242,7 +242,7 @@ public class DevServer {
                 var player = event.getPlayer();
                 var username = player.getUsername();
                 return Component.translatable("chat.type.text")
-                        .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
+                        .args(Component.text(username), Component.text(event.getMessage()));
             });
         });
 
