@@ -245,5 +245,4 @@ public class XmlElementReader {
         return Enum.valueOf(def.getDeclaringClass(), value.toUpperCase());
     }
 
-
 }
