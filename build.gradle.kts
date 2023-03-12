@@ -8,8 +8,8 @@ sonarqube{
     properties{
         property("sonar.host.url", "https://sonarqube.hollowcube.net")
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.projectName", "MapMaker")
-        property("sonar.projectKey", "MapMaker")
+        property("sonar.projectName", "mapmaker")
+        property("sonar.projectKey", "mapmaker")
     }
 }
 

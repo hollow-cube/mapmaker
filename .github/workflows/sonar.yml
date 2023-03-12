@@ -3,13 +3,21 @@ name: Sonar Analysis
 on:
   push:
     branches:
-      - main-neve
+      - main
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Import Secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://secrets.hollowcube.dev
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            staging/data/sonarqube token | SONAR_TOKEN ;
+            staging/data/sonarqube url | SONAR_HOST_URL
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
@@ -32,6 +40,4 @@ jobs:
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: ./gradlew build sonar --info
