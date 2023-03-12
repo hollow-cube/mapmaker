@@ -16,8 +16,8 @@ jobs:
           url: https://secrets.hollowcube.dev
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            staging/data/sonarqube token | SONAR_TOKEN ;
-            staging/data/sonarqube url | SONAR_HOST_URL
+            global/data/sonarqube token | SONAR_TOKEN ;
+            global/data/sonarqube url | SONAR_HOST_URL
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
