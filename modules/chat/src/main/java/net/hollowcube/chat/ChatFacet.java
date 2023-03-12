@@ -138,11 +138,14 @@ public class ChatFacet implements Facet {
                 event.getPlayer().getUuid().toString(),
                 event.getMessage()
         );
-        if (event.getMessage().equals(":skull:")) {
-            event.setMessage("\uEff5");
-        } else if (event.getMessage().equals(":joy:")) {
-            event.setMessage("\uEff4");
-        } //TODO NOT LAZY IF ELSE IF XD!
+        switch (event.getMessage()) {
+            case Emote.SKULL_EMOTE:
+                event.setMessage(Emote.SKULL_UNICODE);
+            case Emote.JOY_EMOTE:
+                event.setMessage(Emote.JOY_UNICODE);
+            default:
+                break;
+        }
         switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
             case ChatMessage.STAFF_CONTEXT:
                 sendStaffChatMessage(event.getPlayer(), message.message());

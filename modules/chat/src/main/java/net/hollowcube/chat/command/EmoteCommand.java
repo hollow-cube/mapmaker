@@ -15,8 +15,6 @@ public class EmoteCommand extends Command {
     private final Argument<String> emoteArg = ArgumentType.String("emote");
 
     private final ChatFacet chat;
-
-    public String selectedEmote;
     public String emoteUnicode;
 
     public EmoteCommand(@NotNull ChatFacet chat) {
@@ -32,29 +30,17 @@ public class EmoteCommand extends Command {
 
         Player player = (Player) sender;
 
-        // Check if the player has the "staff" permission
-//        if (!player.hasPermission("staff")) {
-//            player.sendMessage(Component.translatable("command.generic.no_permission"));
-//            return;
-//        }
-
-        // Ensure the staff chat message has content
-        var emote = emoteUnicode;
-
         switch (context.get(emoteArg).toLowerCase()) {
-            case "skull":
-                selectedEmote = Emote.SKULL;
+            case Emote.SKULL_CMD:
                 emoteUnicode = Emote.SKULL_UNICODE;
                 break;
-            case "joy":
-                selectedEmote = Emote.JOY;
+            case Emote.JOY_CMD:
                 emoteUnicode = Emote.JOY_UNICODE;
                 break;
             default:
                 player.sendMessage("Unknown emote. Valid emotes are 'skull' or 'joy'.");
                 return;
         }
-        emote = emoteUnicode;
-        chat.sendEmojiChatMessage(player, emote);
+        chat.sendEmojiChatMessage(player, emoteUnicode);
     }
 }
