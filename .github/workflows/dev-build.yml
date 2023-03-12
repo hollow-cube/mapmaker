@@ -82,8 +82,8 @@ jobs:
           url: https://secrets.hollowcube.dev
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            global/data/helm user | HELM_USER ;
-            global/data/helm pass | HELM_PASS ;
+            global/data/docker user | DOCKER_USER ;
+            global/data/docker pass | DOCKER_PASS ;
             global/data/kubernetes kubeconfig | KUBECONFIG_FILE
       - uses: azure/setup-helm@v3
         with:
@@ -91,8 +91,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add hollowcube repo
         run: |
-          helm repo add hollowcube https://registry.hollowcube.dev --username ${{ env.HELM_USER }} --password ${{ env.HELM_PASS }}
+          helm repo add hollowcube https://registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
       - name: Run upgrade
         run: |
           echo $KUBECONFIG_FILE > ./kubeconfig
-          helm upgrade --install mapmaker-dev hollowcube/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig
+          helm upgrade --install mapmaker-dev hollowcube/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig
