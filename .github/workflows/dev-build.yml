@@ -3,7 +3,7 @@ name: deploy-test2
 on:
   push:
     branches:
-      - "main"
+      - main-never
 
 jobs:
   docker-build:

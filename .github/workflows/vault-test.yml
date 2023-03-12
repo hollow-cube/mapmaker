@@ -1,0 +1,23 @@
+name: vault-test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Import Secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://secrets.hollowcube.dev
+          token: ${{ secrets.VAULT_TOKEN }}
+#          caCertificate: ${{ secrets.VAULT_CA_CERT }}
+          secrets: |
+            secrets/staging/mapmaker/mongo uri | MONGO_URI
+      - name: Secret tests
+        run: |
+          echo "Mongo is: $MONGO_URI"
