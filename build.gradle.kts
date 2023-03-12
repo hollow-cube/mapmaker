@@ -6,7 +6,7 @@ plugins {
 
 sonarqube{
     properties{
-        property("sonar.host.url", "https://sonarqube.hollowcube.net")
+        property("sonar.host.url", "https://sonarqube.hollowcube.dev")
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.projectName", "mapmaker")
         property("sonar.projectKey", "mapmaker")
