@@ -50,7 +50,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            registry.hollowcube.dev/mapmaker-dev:latest
             registry.hollowcube.dev/mapmaker-dev:${{ github.sha }}
   helm-build:
     runs-on: ubuntu-latest
