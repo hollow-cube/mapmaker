@@ -17,7 +17,7 @@ jobs:
           token: ${{ secrets.VAULT_TOKEN }}
 #          caCertificate: ${{ secrets.VAULT_CA_CERT }}
           secrets: |
-            secret/staging/mapmaker/mongo uri | MONGO_URI
+            staging/mapmaker/mongo uri | MONGO_URI
       - name: Secret tests
         run: |
           echo "Mongo is: $MONGO_URI"
