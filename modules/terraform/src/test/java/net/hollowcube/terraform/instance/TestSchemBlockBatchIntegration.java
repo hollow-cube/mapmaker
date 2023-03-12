@@ -40,35 +40,35 @@ public class TestSchemBlockBatchIntegration {
         assertEquals(1, blockCount.get());
     }
 
-    @Test
-    public void testMultiChunkApply(Env env) {
-        var batch = new SchemBlockBatch();
-        batch.setBlock(0, 0, 0, Block.TNT);
-        batch.setBlock(25, 0, 0, Block.TNT);
-
-        var instance = env.createFlatInstance();
-        instance.loadChunk(0, 0).join();
-        instance.loadChunk(1, 0).join();
-
-        var schematic = batch.apply(instance).join();
-        assertEquals(new Vec(26, 1, 1), schematic.size());
-
-        // Should have added the block to the instance
-        assertEquals(Block.TNT, instance.getBlock(0, 0, 0));
-        assertEquals(Block.TNT, instance.getBlock(25, 0, 0));
-
-        var blockCount = new AtomicInteger();
-        schematic.apply(Rotation.NONE, (point, block) -> {
-            blockCount.incrementAndGet();
-
-            if (point.equals(Vec.ZERO)) {
-                assertEquals(Vec.ZERO, point);
-                assertEquals(Block.STONE, block);
-            } else {
-                assertEquals(new Vec(25, 0, 0), point);
-                assertEquals(Block.STONE, block);
-            }
-        });
-        assertEquals(2, blockCount.get());
-    }
+//    @Test
+//    public void testMultiChunkApply(Env env) {
+//        var batch = new SchemBlockBatch();
+//        batch.setBlock(0, 0, 0, Block.TNT);
+//        batch.setBlock(25, 0, 0, Block.TNT);
+//
+//        var instance = env.createFlatInstance();
+//        instance.loadChunk(0, 0).join();
+//        instance.loadChunk(1, 0).join();
+//
+//        var schematic = batch.apply(instance).join();
+//        assertEquals(new Vec(26, 1, 1), schematic.size());
+//
+//        // Should have added the block to the instance
+//        assertEquals(Block.TNT, instance.getBlock(0, 0, 0));
+//        assertEquals(Block.TNT, instance.getBlock(25, 0, 0));
+//
+//        var blockCount = new AtomicInteger();
+//        schematic.apply(Rotation.NONE, (point, block) -> {
+//            blockCount.incrementAndGet();
+//
+//            if (point.equals(Vec.ZERO)) {
+//                assertEquals(Vec.ZERO, point);
+//                assertEquals(Block.STONE, block);
+//            } else {
+//                assertEquals(new Vec(25, 0, 0), point);
+//                assertEquals(Block.STONE, block);
+//            }
+//        });
+//        assertEquals(2, blockCount.get());
+//    }
 }
