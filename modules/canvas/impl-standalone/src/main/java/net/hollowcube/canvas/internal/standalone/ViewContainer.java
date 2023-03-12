@@ -1,4 +1,4 @@
 package net.hollowcube.canvas.internal.standalone;
 
-public class Blah {
+public class ViewContainer {
 }
