@@ -90,6 +90,8 @@ jobs:
           version: v3.10.2
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Upgrade/install helm chart
+        env:
+          KUBECONFIG_FILE: ${{ secrets.KUBECONFIG_FILE }}
         run: |
           echo $KUBECONFIG_FILE > ./kubeconfig
           helm upgrade --install mapmaker-dev oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
