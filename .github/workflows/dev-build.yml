@@ -91,8 +91,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add hollowcube repo
         run: |
-          helm repo add hollowcube https://registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
+          helm repo add hollowcube oci://registry.hollowcube.dev/helm-charts --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
       - name: Run upgrade
         run: |
           echo $KUBECONFIG_FILE > ./kubeconfig
-          helm upgrade --install mapmaker-dev hollowcube/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig
+          helm upgrade --install mapmaker-dev hollowcube/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig
