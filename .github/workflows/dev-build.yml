@@ -82,8 +82,8 @@ jobs:
           url: https://secrets.hollowcube.dev
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            global/data/helm user | DOCKER_USER ;
-            global/data/helm pass | DOCKER_PASS ;
+            global/data/helm user | HELM_USER ;
+            global/data/helm pass | HELM_PASS ;
             global/data/kubernetes kubeconfig | KUBECONFIG_FILE
       - uses: azure/setup-helm@v3
         with:
