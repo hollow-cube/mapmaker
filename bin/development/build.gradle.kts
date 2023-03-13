@@ -7,7 +7,7 @@ plugins {
 
 val minestomVersion = rootProject.property("minestomVersion")
 dependencies {
-    implementation("com.github.minestommmo:Minestom:${minestomVersion}")
+    implementation("com.github.hollow-cube:Minestom:${minestomVersion}")
 
     val commonVersion = rootProject.property("commonVersion")
     implementation("com.github.hollow-cube.common:common:${commonVersion}")
