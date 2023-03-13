@@ -10,5 +10,6 @@
 /modules/map/build/
 /modules/terraform/build/
 /modules/*/build
+/modules/canvas/*/build
 
 profile.jfr
