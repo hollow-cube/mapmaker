@@ -90,6 +90,7 @@ class PlayerStorageMongo implements PlayerStorage {
                 switch (reader.readName()) {
                     case "_id" -> player.setId(reader.readString());
                     case "uuid" -> player.setUuid(reader.readString());
+                    case "displayName" -> player.setDisplayName(reader.readString());
                     case "unlockedMapSlots" -> player.setUnlockedMapSlots(reader.readInt32());
                     case "mapSlots" -> {
                         reader.readStartArray();
@@ -113,6 +114,7 @@ class PlayerStorageMongo implements PlayerStorage {
             writer.writeStartDocument();
             writer.writeString("_id", value.getId());
             writer.writeString("uuid", value.getUuid());
+            writer.writeString("displayName", value.getDisplayName());
             writer.writeInt32("unlockedMapSlots", value.getUnlockedMapSlots());
             writer.writeStartArray("mapSlots");
             for (var mapId : value.getMapSlots()) {

@@ -6,7 +6,10 @@ import org.jetbrains.annotations.NotNull;
  * Matches the platform permissions as defined in `zed/mapmaker.zed`.
  */
 public enum PlatformPermission {
-    MAP_ADMIN("map_admin");
+    MAP_ADMIN("map_admin"),
+    STAFF("staff"),
+    VERIFIED("verified"),
+    ;
 
     private final String key;
 

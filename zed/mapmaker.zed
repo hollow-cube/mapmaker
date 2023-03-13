@@ -3,8 +3,13 @@
 definition mapmaker/platform {
     // Platform admin, implicitly grants write permission on all resources
     relation admin: mapmaker/player
-
     permission map_admin = admin
+
+    relation staff: mapmaker/player
+    permission staff = staff
+
+    relation verified: mapmaker/player
+    permission verified = verified
 }
 
 definition mapmaker/player {}

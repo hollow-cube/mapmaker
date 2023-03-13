@@ -30,6 +30,7 @@ public class PlayerData {
 
     private String id;
     private String uuid;
+    private String displayName;
 
     private int unlockedMapSlots;
     private String[] mapSlots = new String[MAX_MAP_SLOTS];
@@ -48,6 +49,14 @@ public class PlayerData {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public int getUnlockedMapSlots() {
