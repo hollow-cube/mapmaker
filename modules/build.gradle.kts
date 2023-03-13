@@ -37,7 +37,8 @@ subprojects {
         implementation("io.prometheus:simpleclient:${prometheusVersion}")
 
         // Minestom
-        implementation("com.github.hollow-cube:Minestom:${rootProject.property("minestomVersion")}")
+        compileOnly("com.github.hollow-cube.Minestom:Minestom:${rootProject.property("minestomVersion")}")
+        testImplementation("com.github.hollow-cube.Minestom:Minestom:${rootProject.property("minestomVersion")}")
 
         if (project.name != "common") {
             implementation(project(":modules:common"))

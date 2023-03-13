@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     application
     id("net.kyori.blossom") version "1.2.0"
@@ -7,7 +5,6 @@ plugins {
 
 val minestomVersion = rootProject.property("minestomVersion")
 dependencies {
-    implementation("com.github.hollow-cube:Minestom:${minestomVersion}")
 
     val commonVersion = rootProject.property("commonVersion")
     implementation("com.github.hollow-cube.common:common:${commonVersion}")
@@ -43,14 +40,12 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.4.5")
     implementation("org.slf4j:jul-to-slf4j:2.0.6")
+
+    implementation("com.github.hollow-cube.Minestom:Minestom:${minestomVersion}")
 }
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
-}
-
-tasks.withType<ShadowJar> {
-    isZip64 = true
 }
 
 blossom {
