@@ -21,9 +21,10 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
-          arguments: :test
+          arguments: test
   docker-build:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Import Secrets
         uses: hashicorp/vault-action@v2
@@ -67,6 +68,7 @@ jobs:
             registry.hollowcube.dev/mapmaker-dev:${{ github.sha }}
   helm-build:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Import Secrets
         uses: hashicorp/vault-action@v2
