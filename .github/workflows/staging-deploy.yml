@@ -2,7 +2,7 @@ name: Staging Build & Deploy
 
 on:
   workflow_run:
-    workflows: ['PR Tests']
+    workflows: ['Quality']
     types:
       - completed
 
