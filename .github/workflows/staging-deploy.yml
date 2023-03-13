@@ -1,4 +1,4 @@
-name: build-deploy
+name: Staging Build & Deploy
 
 on:
   push:
@@ -94,5 +94,4 @@ jobs:
           echo ${{ env.KUBECONFIG }} | base64 -d > ./kubeconfig
           helm registry login registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
           helm pull oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}"
-          helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz --kubeconfig ./kubeconfig
-#          helm upgrade --install mapmaker-dev oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}" --kubeconfig ./kubeconfig --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
+          helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --kubeconfig ./kubeconfig
