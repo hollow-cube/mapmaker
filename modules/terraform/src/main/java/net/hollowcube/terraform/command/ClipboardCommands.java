@@ -4,7 +4,6 @@ import net.hollowcube.terraform.command.argument.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
-import net.hollowcube.util.schem.Rotation;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -99,13 +98,12 @@ public final class ClipboardCommands {
             session.action()
                     .at(player.getPosition())
                     .from(region)
-                    .set(Block.AIR)
-                    //I think this is out of order, but I'm not sure, can't run this branch because of some errors I don't know how to fix
                     .toSchematic(schem -> {
                         playerSession.setClipboard(schem);
-                        sender.sendMessage(Component.translatable("command.terraform.cut.success"));
+                        session.action().from(region).set(Block.AIR).execute(actionSummary -> {
+                            sender.sendMessage(Component.translatable("command.terraform.cut.success"));
+                        });
                     });
-            }
         }
     }
 
