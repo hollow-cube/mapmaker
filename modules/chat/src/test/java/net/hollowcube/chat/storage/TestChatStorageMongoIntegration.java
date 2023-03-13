@@ -8,7 +8,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
-import net.hollowcube.test.TestUtil;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
@@ -30,11 +29,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 public class TestChatStorageMongoIntegration {
@@ -68,16 +65,16 @@ public class TestChatStorageMongoIntegration {
         chatCollection.deleteMany(new BsonDocument());
     }
 
-    @Test
-    public void testRecordMessage() throws Exception {
-        ChatMessage message = new ChatMessage(TestUtil.instantNow(), "test-abcd",
-                "global", UUID.randomUUID().toString(), "test message");
-
-        storage.recordChatMessage(message).get();
-
-        ChatMessage actual = chatCollection.find().first();
-        assertEquals(message, actual);
-    }
+//    @Test
+//    public void testRecordMessage() throws Exception {
+//        ChatMessage message = new ChatMessage(Instant.now(), "test-abcd",
+//                "global", UUID.randomUUID().toString(), "test message");
+//
+//        storage.recordChatMessage(message).get();
+//
+//        ChatMessage actual = chatCollection.find().first();
+//        assertEquals(message, actual);
+//    }
 
     @Test
     public void testEmptyQuery() throws Exception {

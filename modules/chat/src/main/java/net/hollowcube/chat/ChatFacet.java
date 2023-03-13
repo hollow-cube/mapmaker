@@ -84,7 +84,6 @@ public class ChatFacet implements Facet {
 
     @Override
     public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
-        System.out.println("TEST");
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));

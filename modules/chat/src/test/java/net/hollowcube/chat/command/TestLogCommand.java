@@ -1,8 +1,8 @@
 package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatQuery;
+import net.hollowcube.chat.TestChatFacet;
 import net.hollowcube.chat.storage.MockChatStorage;
-import net.hollowcube.test.TestUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandDispatcher;
 import net.minestom.server.command.builder.CommandResult;
@@ -19,7 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestLogCommand {
     private final CommandDispatcher dispatcher = new CommandDispatcher();
     // Fine to use headless player since this command does not affect the world or anything
-    private final Player player = TestUtil.headlessPlayer();
+    private final Player player = TestChatFacet.player;
     private final MockChatStorage storage = new MockChatStorage();
 
     @BeforeEach
