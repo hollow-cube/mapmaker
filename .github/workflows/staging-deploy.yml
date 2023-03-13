@@ -84,14 +84,22 @@ jobs:
           secrets: |
             global/data/docker user | DOCKER_USER ;
             global/data/docker pass | DOCKER_PASS ;
-            global/data/kubernetes kubeconfig_b64 | KUBECONFIG
+            global/data/kubernetes kubeconfig_b64 | KUBECONFIG ;
+            staging/data/mongo uri | MONGO_URI ;
+            staging/data/r2 address | R2_S3_ADDRESS ;
+            staging/data/r2 access_key | R2_ACCESS_KEY ;
+            staging/data/r2 secret_key | R2_SECRET_KEY ;
+            staging/data/spicedb_hosted address | SPICEDB_ADDRESS ;
+            staging/data/spicedb_hosted secret_key | SPICEDB_SECRET_KEY
       - uses: azure/setup-helm@v3
         with:
           version: v3.10.2
           token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
       - name: Upgrade/install helm chart
         run: |
           echo ${{ env.KUBECONFIG }} | base64 -d > ./kubeconfig
           helm registry login registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
           helm pull oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}"
-          helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --kubeconfig ./kubeconfig
+          cat bin/development/deploy/mapmaker-dev/values-staging.yaml | envsubst > ./values-override.yaml
+          helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --reset-values -f ./values-override.yaml --kubeconfig ./kubeconfig
