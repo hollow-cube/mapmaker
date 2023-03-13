@@ -1,15 +1,33 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.selection.cui.MockSelectionRenderer;
-import net.hollowcube.test.TestUtil;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.player.PlayerConnection;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TestCuboidRegionSelector {
-    private final Player mockPlayer = TestUtil.headlessPlayer();
+    private final Player mockPlayer = new Player(UUID.randomUUID(), "test", new PlayerConnection() {
+        //todo replace me with common headless player
+        @Override
+        public void sendPacket(@NotNull SendablePacket packet) {
+
+        }
+
+        @Override
+        public @NotNull SocketAddress getRemoteAddress() {
+            return new InetSocketAddress("localhost", 25565);
+        }
+    });
 
 //    @Test
 //    public void testTwoPointSel() {

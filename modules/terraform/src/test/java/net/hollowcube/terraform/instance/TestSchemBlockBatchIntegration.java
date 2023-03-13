@@ -3,8 +3,8 @@ package net.hollowcube.terraform.instance;
 import net.hollowcube.util.schem.Rotation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.test.Env;
-import net.minestom.server.test.EnvTest;
+import net.minestom.testing.Env;
+import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

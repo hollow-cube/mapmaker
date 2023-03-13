@@ -1,6 +1,7 @@
 name: PR Tests
 
 on:
+  push:
   pull_request:
 
 jobs:
