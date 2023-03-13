@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: registry.hollowcube.net/mapmaker-dev
+  repository: registry.hollowcube.dev/mapmaker-dev
   pullPolicy: Always
 
 env:
