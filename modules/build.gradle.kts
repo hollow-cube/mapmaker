@@ -13,7 +13,6 @@ subprojects {
         maven(url = "https://jitpack.io")
     }
 
-
     dependencies {
         // A bug with kotlin dsl
         val compileOnly by configurations
@@ -44,7 +43,7 @@ subprojects {
             implementation(project(":modules:common"))
         }
 //        implementation("com.github.hollow-cube.common:common:${rootProject.property("commonVersion")}")
-        testImplementation("com.github.hollow-cube.common:test:${rootProject.property("commonVersion")}")
+//        testImplementation("com.github.hollow-cube.common:test:${rootProject.property("commonVersion")}")
     }
 
     tasks.getByName<Test>("test") {
