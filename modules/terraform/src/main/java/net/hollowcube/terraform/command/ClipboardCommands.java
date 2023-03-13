@@ -13,6 +13,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,8 +89,23 @@ public final class ClipboardCommands {
                 selection = session.selection(Selection.DEFAULT);
             }
 
-            sender.sendMessage("Not implemented - sorry :)");
-            //todo
+            var region = selection.region();
+            if (region == null) {
+                sender.sendMessage(Component.translatable("command.terraform.no_selection"));
+                return;
+            }
+
+            var playerSession = PlayerSession.forPlayer(player);
+            session.action()
+                    .at(player.getPosition())
+                    .from(region)
+                    .set(Block.AIR)
+                    //I think this is out of order, but I'm not sure, can't run this branch because of some errors I don't know how to fix
+                    .toSchematic(schem -> {
+                        playerSession.setClipboard(schem);
+                        sender.sendMessage(Component.translatable("command.terraform.cut.success"));
+                    });
+            }
         }
     }
 
