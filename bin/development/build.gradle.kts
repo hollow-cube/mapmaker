@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     application
     id("net.kyori.blossom") version "1.2.0"
@@ -43,6 +45,10 @@ dependencies {
     implementation("org.slf4j:jul-to-slf4j:2.0.6")
 
     implementation("com.github.hollow-cube.Minestom:Minestom:${minestomVersion}")
+}
+
+tasks.withType<ShadowJar> {
+    mergeServiceFiles()
 }
 
 application {
