@@ -92,8 +92,8 @@ jobs:
             staging/data/r2 address | R2_S3_ADDRESS ;
             staging/data/r2 access_key | R2_ACCESS_KEY ;
             staging/data/r2 secret_key | R2_SECRET_KEY ;
-            staging/data/spicedb_hosted address | SPICEDB_ADDRESS ;
-            staging/data/spicedb_hosted secret_key | SPICEDB_SECRET_KEY
+            staging/data/spicedb address | SPICEDB_ADDRESS ;
+            staging/data/spicedb secret_key | SPICEDB_SECRET_KEY
       - uses: azure/setup-helm@v3
         with:
           version: v3.10.2
