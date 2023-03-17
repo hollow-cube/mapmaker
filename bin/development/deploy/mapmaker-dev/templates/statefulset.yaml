@@ -36,6 +36,11 @@ spec:
             httpGet:
               path: /ready
               port: 9124
+          env:
+          {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+          {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
