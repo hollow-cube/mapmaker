@@ -7,13 +7,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: nginx # has to match .spec.template.metadata.labels
-  serviceName: "nginx"
+      {{- include "mapmaker-dev.selectorLabels" . | nindent 6 }}
   minReadySeconds: 10 # by default is 0
   template:
     metadata:
       labels:
-        app: nginx # has to match .spec.selector.matchLabels
+        {{- include "mapmaker-dev.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
