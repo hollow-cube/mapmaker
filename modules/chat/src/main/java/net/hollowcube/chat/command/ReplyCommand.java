@@ -1,7 +1,7 @@
 package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatFacet;
-import net.kyori.adventure.text.Component;
+import net.hollowcube.common.lang.GenericMessages;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -27,7 +27,7 @@ public class ReplyCommand extends Command {
 
     private void sendReplyMessage(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
 

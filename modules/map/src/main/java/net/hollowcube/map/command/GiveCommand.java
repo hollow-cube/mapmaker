@@ -1,5 +1,6 @@
 package net.hollowcube.map.command;
 
+import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.item.ItemManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -10,7 +11,7 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class GiveCommand extends BaseMapCommand {
-    private final Argument<ItemStack> itemArgument = ItemManager.ARGUMENT;
+    private static final Argument<ItemStack> itemArgument = ItemManager.ARGUMENT;
 
     public GiveCommand() {
         super(true, "give");
@@ -22,7 +23,7 @@ public class GiveCommand extends BaseMapCommand {
 
     private void giveItem(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
 

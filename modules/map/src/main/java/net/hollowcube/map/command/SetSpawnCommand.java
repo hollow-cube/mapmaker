@@ -1,5 +1,6 @@
 package net.hollowcube.map.command;
 
+import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,7 +27,7 @@ public class SetSpawnCommand extends BaseMapCommand {
 
     private void setSpawn(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
 
@@ -35,7 +36,7 @@ public class SetSpawnCommand extends BaseMapCommand {
 
     private void setSpawnWithPos(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
 
@@ -46,7 +47,7 @@ public class SetSpawnCommand extends BaseMapCommand {
 
     private void setSpawnWithPosAndRot(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
 

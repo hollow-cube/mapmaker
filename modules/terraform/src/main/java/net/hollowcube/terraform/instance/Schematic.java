@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -80,10 +81,6 @@ public record Schematic(
                 for (int x = 0; x < size().x(); x++) {
                     int blockVal = Utils.readVarInt(blocks);
                     Block b = palette[blockVal];
-
-                    if (b.isAir()) {
-//                        System.out.println("AIR BLOCK AT " + x + " " + y + " " + z);
-                    }
 
                     if (b == null) {
                         throw new RuntimeException("GOAJWOUGHAW");
@@ -170,5 +167,31 @@ public record Schematic(
             case "south" -> "west";
             default -> "north";
         };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Schematic schematic = (Schematic) o;
+        return size.equals(schematic.size) && offset.equals(schematic.offset) && Arrays.equals(palette, schematic.palette) && Arrays.equals(blocks, schematic.blocks);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(size, offset);
+        result = 31 * result + Arrays.hashCode(palette);
+        result = 31 * result + Arrays.hashCode(blocks);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Schematic{" +
+                "size=" + size +
+                ", offset=" + offset +
+                ", palette=" + Arrays.toString(palette) +
+                ", blocks=" + Arrays.toString(blocks) +
+                '}';
     }
 }

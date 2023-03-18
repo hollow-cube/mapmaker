@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.command;
 
+import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
@@ -66,7 +67,7 @@ public class MapCommand extends BaseHubCommand {
         public void showMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 // In the future this could support console sending if we needed (eg specify a player)
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -109,7 +110,7 @@ public class MapCommand extends BaseHubCommand {
 
         public void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -168,7 +169,7 @@ public class MapCommand extends BaseHubCommand {
         public void createMapInGui(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 // In the future this could support console sending if we needed (eg specify a player)
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -180,7 +181,7 @@ public class MapCommand extends BaseHubCommand {
         public void createMapWithDefault(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 // In the future this could support console sending if we needed (eg specify a player)
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -193,7 +194,7 @@ public class MapCommand extends BaseHubCommand {
         public void createMapWithOptions(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 // In the future this could support console sending if we needed (eg specify a player)
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -218,11 +219,9 @@ public class MapCommand extends BaseHubCommand {
             protoMap.setOwner(playerData.getId());
 
             handler.createMapForPlayerInSlot(playerData, protoMap, slot)
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.create.success",
-                                        Component.text(slot), Component.text(map.getName()))
-                                .forEach(player::sendMessage);
-                    })
+                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.create.success",
+                                    Component.text(slot), Component.text(map.getName()))
+                            .forEach(player::sendMessage))
                     .thenErr(err -> {
                         if (err.is(Handler.ERR_SLOT_LOCKED)) {
                             player.sendMessage(Component.translatable("command.map.create.slot_locked"));
@@ -254,7 +253,7 @@ public class MapCommand extends BaseHubCommand {
 
         public void editMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -293,7 +292,7 @@ public class MapCommand extends BaseHubCommand {
 
         public void publishMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -302,10 +301,8 @@ public class MapCommand extends BaseHubCommand {
             if (mapId == null) return;
 
             handler.publishMap(PlayerData.fromPlayer(player).getId(), mapId)
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
-                                .forEach(player::sendMessage);
-                    })
+                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
+                            .forEach(player::sendMessage))
                     .thenErr(err -> {
                         if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
                             player.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(mapId)));
@@ -331,7 +328,7 @@ public class MapCommand extends BaseHubCommand {
         public void deleteMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 // In the future this could support console sending if we needed (eg specify a player)
-                sender.sendMessage(Component.translatable("command.generic.player_only"));
+                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
@@ -340,10 +337,8 @@ public class MapCommand extends BaseHubCommand {
             if (mapId == null) return;
 
             handler.deleteMap(mapId)
-                    .then(map -> {
-                        LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getId()), Component.text(map.getName()))
-                                .forEach(player::sendMessage);
-                    })
+                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getId()), Component.text(map.getName()))
+                            .forEach(player::sendMessage))
                     .thenErr(err -> {
                         if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
                             player.sendMessage(Component.translatable("command.map.delete.not_found", Component.text(mapId)));

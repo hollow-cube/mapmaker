@@ -16,4 +16,8 @@ public interface WorldView extends Block.Getter {
         return new WorldViewInstanceSnapshot(SnapshotUpdater.update(instance));
     }
 
+    static @NotNull WorldView instance(@NotNull Instance instance) {
+        return new WorldViewInstance(instance);
+    }
+
 }
