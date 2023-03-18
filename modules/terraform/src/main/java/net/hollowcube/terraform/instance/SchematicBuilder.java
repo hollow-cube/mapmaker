@@ -68,14 +68,14 @@ public class SchematicBuilder {
 
         // Determine if we have air in our palette
         // If the number of blocks in our blockset is equal to our size, we know we shouldn't fill in air as default since we have taken up every space
-        if(xSize * ySize * zSize > blockSet.size()) {
+        if (xSize * ySize * zSize > blockSet.size()) {
             paletteMap.put(Block.AIR, 0);
         }
 
         ByteBuffer blockBytes = ByteBuffer.allocate(1024);
-        for (int x = xMin; x <= xMax; x++) {
-            for (int y = yMin; y <= yMax; y++) {
-                for (int z = zMin; z <= zMax; z++) {
+        for (int y = yMin; y <= yMax; y++) {
+            for (int z = zMin; z <= zMax; z++) {
+                for (int x = xMin; x <= xMax; x++) {
                     if (blockBytes.remaining() <= 3) {
                         byte[] oldBytes = blockBytes.array();
                         blockBytes = ByteBuffer.allocate(blockBytes.capacity() * 2);
