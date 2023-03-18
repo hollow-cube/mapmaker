@@ -57,6 +57,7 @@ public class DevServer {
 
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("minestom.async-commands", "true");
+        System.setProperty("minestom.event.multiple-parents", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
 
         // Convert JUL messages to SLF4J
