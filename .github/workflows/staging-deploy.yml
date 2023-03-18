@@ -105,4 +105,4 @@ jobs:
           helm registry login registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
           helm pull oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}"
           cat bin/development/deploy/mapmaker-dev/values-staging.yaml | envsubst > ./values-override.yaml
-          helm upgrade --install --atomic mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --reset-values -f ./values-override.yaml --kubeconfig ./kubeconfig
+          helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --reset-values -f ./values-override.yaml --kubeconfig ./kubeconfig

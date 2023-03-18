@@ -90,15 +90,16 @@ public record FileStorageS3(
         }, ForkJoinPool.commonPool());
     }
 
-    private static Map<String, String> splitQuery(URI uri) {
+    private static @NotNull Map<String, String> splitQuery(URI uri) {
         Map<String, String> queryPairs = new HashMap<>();
         String query = uri.getQuery();
+        if (query == null) return Map.of();
         String[] pairs = query.split("&");
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
             queryPairs.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8),
                     URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));
         }
-        return queryPairs;
+        return Map.copyOf(queryPairs);
     }
 }
