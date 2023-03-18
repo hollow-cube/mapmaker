@@ -58,7 +58,7 @@ public class PlayerData {
         this.unlockedMapSlots = unlockedMapSlots;
     }
 
-    public void setMapSlots(@NotNull String[] mapSlots) {
+    public void setMapSlots(String @NotNull [] mapSlots) {
         this.mapSlots = mapSlots;
     }
 

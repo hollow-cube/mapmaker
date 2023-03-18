@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.storage;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.PlayerData;
 import org.jetbrains.annotations.NotNull;
@@ -15,12 +17,12 @@ class PlayerStorageMemory implements PlayerStorage {
     private final Map<String, PlayerData> playersById = new HashMap<>();
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
+    public @NotNull ListenableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
         logger.info("Creating player {}", player.getId());
         var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
-            return FutureResult.error(ERR_DUPLICATE_ENTRY);
-        return FutureResult.of(player);
+            return Futures.immediateFailedFuture(new DuplicateEntryError());
+        return Futures.immediateFuture(player);
     }
 
     @Override
@@ -34,14 +36,14 @@ class PlayerStorageMemory implements PlayerStorage {
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
+    public @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
         logger.info("Getting player by uuid {}", uuid);
         for (var entry : playersById.entrySet()) {
             if (entry.getValue().getId().equals(uuid)) {
-                return FutureResult.of(entry.getValue());
+                return Futures.immediateFuture(entry.getValue());
             }
         }
-        return FutureResult.error(ERR_NOT_FOUND);
+        return Futures.immediateFailedFuture(new NotFoundError(uuid));
     }
 
     @Override

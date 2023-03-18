@@ -4,9 +4,7 @@ import com.authzed.api.v1.Core.ObjectReference;
 import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.Core.RelationshipUpdate;
 import com.authzed.api.v1.Core.SubjectReference;
-import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
-import com.authzed.api.v1.PermissionService.CheckPermissionResponse;
-import com.authzed.api.v1.PermissionService.WriteRelationshipsRequest;
+import com.authzed.api.v1.PermissionService.*;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -47,14 +45,13 @@ class ZPermissionManager {
         return writeRelationshipUpdate(update);
     }
 
-    protected @NotNull ListenableFuture<Void> deleteRelationship(@NotNull Relationship relationship) {
-        var update = RelationshipUpdate.newBuilder()
-                .setOperation(RelationshipUpdate.Operation.OPERATION_DELETE)
-                .setRelationship(relationship)
+    protected @NotNull ListenableFuture<String> deleteRelationships(@NotNull RelationshipFilter filter) {
+        var req = DeleteRelationshipsRequest.newBuilder()
+                .setRelationshipFilter(filter)
                 .build();
         return Futures.transform(
-                writeRelationshipUpdate(update),
-                res -> null,
+                permissionService.deleteRelationships(req),
+                res -> res.getDeletedAt().getToken(),
                 Runnable::run
         );
     }

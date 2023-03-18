@@ -17,8 +17,8 @@ public class MapPermissionManagerNoop implements MapPermissionManager {
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> deleteMap(@NotNull String mapId) {
-        return Futures.immediateFuture(null);
+    public @NotNull ListenableFuture<String> deleteMap(@NotNull String mapId) {
+        return Futures.immediateFuture("");
     }
 
     @Override

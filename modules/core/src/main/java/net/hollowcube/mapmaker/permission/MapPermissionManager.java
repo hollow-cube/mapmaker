@@ -49,8 +49,13 @@ public interface MapPermissionManager {
      */
     @NotNull ListenableFuture<@NotNull String> makeMapPublic(@NotNull String mapId);
 
-    /** Deletes the given map from the permission manager. */
-    @NotNull ListenableFuture<Void> deleteMap(@NotNull String mapId);
+    /**
+     * Deletes the given map from the permission manager.
+     *
+     * @param mapId The map id to delete
+     * @return A future that contains the resulting zed token if successful
+     */
+    @NotNull ListenableFuture<@NotNull String> deleteMap(@NotNull String mapId);
 
     /** Checks if the given player has the given permission on the given map. */
     @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String mapId, @NotNull String playerId,

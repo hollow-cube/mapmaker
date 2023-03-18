@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.helidon.health.HealthSupport;
@@ -10,8 +11,7 @@ import io.prometheus.client.hotspot.DefaultExports;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
+import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -233,6 +233,8 @@ public class DevServer {
         // Load all facets & other misc startup tasks like setting up some events & minestom properties
         startupTasks.clear();
 
+        MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
+
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
@@ -274,27 +276,26 @@ public class DevServer {
 
     private void handlePreLogin(AsyncPlayerPreLoginEvent event) {
         var player = event.getPlayer();
-        playerStorage.getPlayerByUuid(event.getPlayerUuid().toString())
-                .flatMapErr(err -> {
-                    if (err.is(PlayerStorage.ERR_NOT_FOUND)) {
+
+        try {
+            FluentFuture.from(playerStorage.getPlayerByUuid(event.getPlayerUuid().toString()))
+                    .catchingAsync(PlayerStorage.NotFoundError.class, err -> {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         return playerStorage.createPlayer(data);
-                    }
-                    return FutureResult.error(err);
-                })
-                .then(data -> {
-                    player.setTag(PlayerData.PLAYER_ID, data.getId());
-                    player.setTag(PlayerData.DATA, data);
-                })
-                .mapErr(err -> {
-                    System.out.println("Failed to load player data for " + player.getUsername() + ": " + err);
-                    player.kick(Component.text("Failed to load data"));
-                    return Result.ofNull();
-                });
-        //todo need to hold player until this finishes
+                    }, Runnable::run)
+                    .transform(data -> {
+                        player.setTag(PlayerData.PLAYER_ID, data.getId());
+                        player.setTag(PlayerData.DATA, data);
+                        return null;
+                    }, Runnable::run)
+                    .get();
+        } catch (Throwable e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to load player data for " + event.getUsername(), e);
+            player.kick(Component.text("Failed to load player data! Please try again later."));
+        }
     }
 
     private void handleLogin(PlayerLoginEvent event) {

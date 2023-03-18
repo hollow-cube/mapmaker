@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
@@ -32,15 +35,15 @@ class PlayerStorageMongo implements PlayerStorage {
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
+        return Futures.submit(() -> {
             try {
                 collection().insertOne(player);
             } catch (DuplicateKeyException ignored) {
-                return Result.error(ERR_DUPLICATE_ENTRY);
+                throw new DuplicateEntryError();
             }
-            return Result.of(player);
-        });
+            return player;
+        }, ForkJoinPool.commonPool());
     }
 
     @Override
@@ -55,14 +58,14 @@ class PlayerStorageMongo implements PlayerStorage {
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
-        return FutureResult.supply(() -> {
+    public @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
+        return Futures.submit(() -> {
             var filter = eq("uuid", uuid);
             var result = collection().find(filter).limit(1).first();
             if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
-        });
+                throw new NotFoundError(uuid);
+            return result;
+        }, ForkJoinPool.commonPool());
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.permission;
 
 import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
+import com.authzed.api.v1.PermissionService.RelationshipFilter;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.mapmaker.model.MapData;
@@ -38,11 +39,12 @@ public class MapPermissionManagerSpiceDB extends ZPermissionManager implements M
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> deleteMap(@NotNull String mapId) {
-        var filter = Relationship.newBuilder()
-                .setResource(createMapObject(mapId))
+    public @NotNull ListenableFuture<String> deleteMap(@NotNull String mapId) {
+        var filter = RelationshipFilter.newBuilder()
+                .setResourceType("mapmaker/map")
+                .setOptionalResourceId(mapId)
                 .build();
-        return deleteRelationship(filter);
+        return deleteRelationships(filter);
     }
 
     @Override

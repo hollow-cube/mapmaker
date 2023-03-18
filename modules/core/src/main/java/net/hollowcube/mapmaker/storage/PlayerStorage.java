@@ -14,6 +14,15 @@ public interface PlayerStorage {
     Error ERR_NOT_FOUND = Error.of("player not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("player already exists");
 
+    class NotFoundError extends RuntimeException {
+        public NotFoundError(@NotNull String playerId) {
+            super(String.format("Player %s not found", playerId));
+        }
+    }
+
+    class DuplicateEntryError extends RuntimeException {
+    }
+
     static @NotNull PlayerStorage memory() {
         return new PlayerStorageMemory();
     }
@@ -27,11 +36,11 @@ public interface PlayerStorage {
         );
     }
 
-    @NotNull FutureResult<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);
+    @NotNull ListenableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player);
 
     @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id);
 
-    @NotNull FutureResult<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
+    @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
 
     @NotNull FutureResult<Void> updatePlayer(@NotNull PlayerData player);
 
