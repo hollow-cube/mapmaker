@@ -79,6 +79,8 @@ subprojects {
         options.errorprone.disableWarningsInGeneratedCode.set(true)
         options.errorprone {
             check("NullAway", CheckSeverity.ERROR)
+            check("UnusedMethod", CheckSeverity.OFF) // Does not play well with canvas
+            check("UnusedVariable", CheckSeverity.OFF) // Does not play well with canvas, has a bug with records
             option("NullAway:AnnotatedPackages", "com.uber")
         }
     }

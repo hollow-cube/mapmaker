@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 
 public interface Region extends Iterable<@NotNull Point> {
 
+    @SuppressWarnings("Immutable") // I dont know how to make BiFunction immutable... seems like it should be
     enum Type {
         CUBOID(CuboidRegionSelector::new),
         BEZIER_SURFACE(BezierSurfaceRegionSelector::new);

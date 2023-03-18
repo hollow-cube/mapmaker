@@ -73,7 +73,7 @@ public class WorldDecompressor {
             bis.close();
             //catch IO Exception that might happen here
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
         //return the final list of decompressed region data
         return decompressedRegionData;

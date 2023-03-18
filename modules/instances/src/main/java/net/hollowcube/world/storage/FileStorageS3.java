@@ -6,6 +6,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.google.common.base.Splitter;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +26,7 @@ public record FileStorageS3(
 ) implements FileStorage {
 
     /**
+     * Connects to an S3 compatible service.
      * @param uri A URI in the format of s3://accessKey:secretKey@address/bucket.
      *            Currently, must follow this exact format.
      */
@@ -34,9 +36,9 @@ public record FileStorageS3(
             var query = splitQuery(parsed);
             Check.argCondition(!parsed.getScheme().equals("s3"), "URI scheme must be s3");
 
-            var userInfo = parsed.getUserInfo().split(":");
-            Check.argCondition(userInfo.length != 2, "URI user info must be in the format of accessKey:secretKey");
-            String accessKey = userInfo[0], secretKey = userInfo[1];
+            var userInfo = Splitter.on(':').splitToList(parsed.getUserInfo());
+            Check.argCondition(userInfo.size() != 2, "URI user info must be in the format of accessKey:secretKey");
+            String accessKey = userInfo.get(0), secretKey = userInfo.get(1);
 
             var address = parsed.getHost();
             Check.argCondition(address == null, "URI host must be specified");
@@ -94,8 +96,7 @@ public record FileStorageS3(
         Map<String, String> queryPairs = new HashMap<>();
         String query = uri.getQuery();
         if (query == null) return Map.of();
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
+        for (String pair : Splitter.on('&').split(query)) {
             int idx = pair.indexOf("=");
             queryPairs.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8),
                     URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));

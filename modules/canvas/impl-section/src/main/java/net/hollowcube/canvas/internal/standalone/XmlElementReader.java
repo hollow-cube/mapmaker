@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import com.google.common.base.Splitter;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
@@ -164,14 +165,14 @@ public class XmlElementReader {
                 }
             } else {
                 // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
-                var split = spriteName.split("@");
-                var material = Material.fromNamespaceId(split[0]);
+                var split = Splitter.on('@').splitToList(spriteName);
+                var material = Material.fromNamespaceId(split.get(0));
                 if (material == null) {
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
                 var builder = ItemStack.builder(material);
-                if (split.length > 1) {
-                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split[1])));
+                if (split.size() > 1) {
+                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split.get(1))));
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build());
@@ -204,6 +205,7 @@ public class XmlElementReader {
                 }
                 return importedElement;
             } catch (ClassNotFoundException ignored) {
+                // No such class is fine, try the next import
             } catch (NoSuchMethodException e) {
                 throw new IllegalArgumentException("View class must have a no-args constructor: " + path);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {

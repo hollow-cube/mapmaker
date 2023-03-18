@@ -1,5 +1,6 @@
 package net.hollowcube.world;
 
+import com.google.common.base.Splitter;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -14,11 +15,11 @@ public class TestUriParse {
 
         assertEquals("s3", uri.getScheme());
 
-        var userInfo = uri.getUserInfo().split(":");
-        assertEquals(2, userInfo.length);
-        var accessKey = userInfo[0];
+        var userInfo = Splitter.on(':').splitToList(uri.getUserInfo());
+        assertEquals(2, userInfo.size());
+        var accessKey = userInfo.get(0);
         assertEquals("accessKey", accessKey);
-        var secretKey = userInfo[1];
+        var secretKey = userInfo.get(1);
         assertEquals("secretKey", secretKey);
 
         var host = uri.getHost();

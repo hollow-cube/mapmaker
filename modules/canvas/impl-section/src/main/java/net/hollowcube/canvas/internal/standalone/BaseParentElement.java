@@ -147,6 +147,7 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
         return childMap[index];
     }
 
+    @Override
     protected void mountChild(int x, int y, @NotNull Section comp) {
         // Always add the child to local cache to handle loading
         var offset = x + width() * y;
@@ -163,6 +164,7 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
         }
     }
 
+    @Override
     protected void unmountChild(int x, int y, @NotNull Section comp) {
         // Always remove from local cache to handle loading
         var offset = x + width() * y;
@@ -179,6 +181,7 @@ abstract class BaseParentElement extends ParentSection implements BaseElement {
         }
     }
 
+    @Override
     protected void unmountChild(int index) {
         checkBounds(index);
         var section = childMap[index];

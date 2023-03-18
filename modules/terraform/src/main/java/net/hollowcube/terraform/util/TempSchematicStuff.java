@@ -45,7 +45,7 @@ public class TempSchematicStuff {
                 schematics.add(path.getFileName().toString());
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

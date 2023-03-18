@@ -36,8 +36,9 @@ public interface RegionSelector {
     @NotNull NBTCompound toNBT();
 
     void fromNBT(@NotNull NBTCompound nbt);
+
     /**
-     *
+     * Changes the size of the region by the specified amount.
      * @param delta The amount to change the size of the region by. If the number is negative, it will shrink, if it is positive, the region will grow
      * @param changeVertical If the size change should modify the selection in the vertical direction (+/- y coordinate). True to modify, false to not
      * @param changeHorizontal If the size change should modify the selection in the horizontal directions (+/- x and z coordinates). True to modify, false to not

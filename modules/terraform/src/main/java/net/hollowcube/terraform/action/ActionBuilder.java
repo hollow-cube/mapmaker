@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.action;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.history.Change;
 import net.hollowcube.terraform.instance.SchemBlockBatch;
@@ -14,6 +15,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -87,7 +89,10 @@ public class ActionBuilder {
         Check.notNull(block, "No action specified");
 
         WorldView world = WorldView.snapshot(session.instance());
-        ForkJoinPool.commonPool().submit(() -> executeInternal(session.instance(), world, callback));
+        CompletableFuture.runAsync(
+                () -> executeInternal(session.instance(), world, callback),
+                ForkJoinPool.commonPool()
+        ).exceptionally(FutureUtil::handleException);
     }
 
     private void executeInternal(@NotNull Instance realInstance, @NotNull WorldView world, @NotNull Consumer<ActionSummary> callback) {
@@ -108,7 +113,8 @@ public class ActionBuilder {
                 .thenAccept(undoSchematic -> {
                     session.remember(Change.of(undoSchematic, redoSchematic));
                     callback.accept(new ActionSummary(updates));
-                });
+                })
+                .exceptionally(FutureUtil::handleException);
     }
 
 }

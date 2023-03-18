@@ -45,6 +45,7 @@ subprojects {
         options.errorprone.disableWarningsInGeneratedCode.set(true)
         options.errorprone {
             check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+            check("UnusedVariable", net.ltgt.gradle.errorprone.CheckSeverity.OFF)
             option("NullAway:AnnotatedPackages", "com.uber")
         }
     }

@@ -76,7 +76,7 @@ public class WorldCompressor {
             // close ByteArrayOutputStream
             bos.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
         // placeholder value
         int zippedSize = zippedData.length;

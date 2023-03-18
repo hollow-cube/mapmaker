@@ -4,9 +4,10 @@ import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.FutureUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.CompletableFuture;
 
 public class LoadingDemo extends View {
 
@@ -16,14 +17,14 @@ public class LoadingDemo extends View {
         super(context);
 
         label.setLoading(true);
-        ForkJoinPool.commonPool().submit(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
             label.setLoading(false);
-        });
+        }).exceptionally(FutureUtil::handleException);
     }
 
 }
