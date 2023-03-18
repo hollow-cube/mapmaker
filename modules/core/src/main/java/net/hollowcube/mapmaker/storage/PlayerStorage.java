@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 public interface PlayerStorage {
 
     Error ERR_NOT_FOUND = Error.of("player not found");
-    Error ERR_DUPLICATE_ENTRY = Error.of("player already exists");
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String playerId) {
@@ -43,10 +42,5 @@ public interface PlayerStorage {
     @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid);
 
     @NotNull FutureResult<Void> updatePlayer(@NotNull PlayerData player);
-
-    /**
-     * Removes the given map from every player with an association.
-     */
-    @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId);
 
 }

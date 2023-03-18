@@ -4,10 +4,12 @@ import io.prometheus.client.Histogram;
 import net.hollowcube.common.result.Error;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.result.Result;
+import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -141,10 +143,11 @@ public class Handler {
                 .flatMap(map -> FutureResult.wrap(server.mapPermissions().deleteMap(mapId))
                         .mapErr(err -> Result.error(err.wrap("failed to delete map permissions: {}")))
                         .map(unused -> map))
-                // Delete from mongo
-                .flatMap(map -> server.playerStorage().unlinkMap(mapId)
-                        .mapErr(err -> Result.error(err.wrap("failed to unlink map from players: {}")))
-                        .map(unused -> map))
+                // Call delete event to remove from online players
+                .map(map -> {
+                    EventDispatcher.call(new MapDeletedEvent(map.getId()));
+                    return map;
+                })
                 .mapErr(err -> {
                     if (err.is(MapStorage.ERR_NOT_FOUND))
                         return Result.error(ERR_MAP_NOT_FOUND);
@@ -180,8 +183,11 @@ public class Handler {
                             return map;
                         }))
                 // Unlink map from all players
-                .flatAlso(map -> server.playerStorage().unlinkMap(mapId)
-                        .wrapErr("failed to unlink map from players: {}"))
+                .map(map -> {
+                    //todo delete is a deceptive name, it actually just marks a map as gone from slot
+                    EventDispatcher.call(new MapDeletedEvent(map.getId()));
+                    return map;
+                })
                 // Add all players as viewers
                 .flatAlso(map -> FutureResult.wrap(server.mapPermissions().makeMapPublic(mapId))
                         .wrapErr("failed to make map public: {}"))

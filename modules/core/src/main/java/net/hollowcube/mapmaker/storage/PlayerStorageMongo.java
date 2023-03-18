@@ -18,12 +18,9 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.in;
 
 class PlayerStorageMongo implements PlayerStorage {
     private final MongoClient client;
@@ -77,27 +74,6 @@ class PlayerStorageMongo implements PlayerStorage {
                 return Result.error(ERR_NOT_FOUND);
             return Result.ofNull();
         });
-    }
-
-    @Override
-    public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
-        List<FutureResult<Void>> futures = new ArrayList<>();
-        return FutureResult.supply(() -> {
-            var filter = in("mapSlots", mapId);
-            collection().find(filter).forEach(player -> {
-                for (int i = 0; i < player.getUnlockedMapSlots(); i++) {
-                    if (mapId.equals(player.getMapSlot(i))) {
-                        player.setMapSlot(i, null);
-                    }
-                }
-
-                //todo update as a transaction
-                //todo updating a player like this is not really valid. We need to tell the server that this player was updated so that it may update its cached copy of the player data.
-                //     currently we do this and then if a player looks in that gui again it will still contain this map (unless they rejoin)
-                futures.add(updatePlayer(player));
-            });
-            return Result.ofNull();
-        }).flatMap(unused -> FutureResult.allOf(futures.toArray(FutureResult[]::new)));
     }
 
     private @NotNull MongoCollection<PlayerData> collection() {

@@ -55,16 +55,4 @@ class PlayerStorageMemory implements PlayerStorage {
         return FutureResult.ofNull();
     }
 
-    @Override
-    public @NotNull FutureResult<Void> unlinkMap(@NotNull String mapId) {
-        logger.info("Unlinking map {}", mapId);
-        playersById.values().forEach(playerData -> {
-            for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
-                if (mapId.equals(playerData.getMapSlot(i))) {
-                    playerData.setMapSlot(i, null);
-                }
-            }
-        });
-        return FutureResult.ofNull();
-    }
 }

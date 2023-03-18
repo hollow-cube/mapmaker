@@ -20,9 +20,7 @@ public class DebugCommand extends Command {
         this.playerStorage = playerStorage;
         this.mapStorage = mapStorage;
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("Debug command :O");
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
         addSyntax(this::handlePlayerReset, ArgumentType.Literal("reset-self"));
     }

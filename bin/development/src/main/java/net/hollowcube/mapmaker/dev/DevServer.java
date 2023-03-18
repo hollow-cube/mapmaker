@@ -11,8 +11,10 @@ import io.prometheus.client.hotspot.DefaultExports;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
+import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -31,10 +33,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -239,13 +238,24 @@ public class DevServer {
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
         eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
         eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
-        eventHandler.addListener(PlayerChatEvent.class, event -> {
-            event.setChatFormat(e -> {
-                var player = event.getPlayer();
-                var username = player.getUsername();
-                return Component.translatable("chat.type.text")
-                        .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
-            });
+        eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
+        eventHandler.addListener(PlayerChatEvent.class, event -> event.setChatFormat(e -> {
+            var player = event.getPlayer();
+            var username = player.getUsername();
+            return Component.translatable("chat.type.text")
+                    .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
+        }));
+        eventHandler.addListener(MapDeletedEvent.class, event -> {
+            for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                var playerData = PlayerData.fromPlayer(player);
+                for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
+                    var map = playerData.getMapSlot(i);
+                    if (map != null && map.equals(event.mapId())) {
+                        logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was deleted.", event.mapId(), playerData.getId());
+                        playerData.setMapSlot(i, null);
+                    }
+                }
+            }
         });
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -289,10 +299,48 @@ public class DevServer {
                     .transform(data -> {
                         player.setTag(PlayerData.PLAYER_ID, data.getId());
                         player.setTag(PlayerData.DATA, data);
+
+                        // todo this cleanup step should probably be moved
+                        // Cleanup maps which are actually gone
+                        boolean changed = false;
+                        for (int i = 0; i < data.getUnlockedMapSlots(); i++) {
+                            var mapId = data.getMapSlot(i);
+                            if (mapId != null) {
+                                try {
+                                    var map = mapStorage.getMapById(mapId).get();
+                                    if (map.isPublished()) {
+                                        // Map is published, delete from slots.
+                                        changed = true;
+                                        data.setMapSlot(i, null);
+                                        logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was published.", mapId, data.getId());
+                                    }
+                                } catch (Exception e) {
+                                    if (e instanceof InterruptedException)
+                                        Thread.currentThread().interrupt();
+                                    if (e instanceof MapStorage.NotFoundError) {
+                                        // Map is gone, delete from slots
+                                        changed = true;
+                                        data.setMapSlot(i, null);
+                                        logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was deleted.", mapId, data.getId());
+                                    }
+
+                                    logger.log(System.Logger.Level.ERROR, "Failed to load map data for " + event.getUsername(), e);
+                                    player.kick(Component.text("Failed to load map data! Please try again later."));
+                                    return null;
+                                }
+                            }
+                        }
+                        if (changed) {
+                            playerStorage.updatePlayer(data).toCompletableFuture().join();
+                        }
+
                         return null;
-                    }, Runnable::run)
+                    }, ForkJoinPool.commonPool())
                     .get();
-        } catch (Throwable e) {
+        } catch (Exception e) {
+            if (e instanceof InterruptedException)
+                Thread.currentThread().interrupt();
+
             logger.log(System.Logger.Level.ERROR, "Failed to load player data for " + event.getUsername(), e);
             player.kick(Component.text("Failed to load player data! Please try again later."));
         }
@@ -301,6 +349,15 @@ public class DevServer {
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
         event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
+    }
+
+    private void handleDisconnect(PlayerDisconnectEvent event) {
+        var player = event.getPlayer();
+        var playerData = PlayerData.fromPlayer(player);
+        playerStorage.updatePlayer(playerData).toCompletableFuture()
+                .thenAccept(unused -> logger.log(System.Logger.Level.INFO, "Saved player data for {0}", playerData.getId()))
+                .exceptionally(FutureUtil::handleException);
+        //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
