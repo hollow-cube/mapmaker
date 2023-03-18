@@ -172,8 +172,7 @@ public class DevServer {
         if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
             worldManager = new WorldManager(new FileStorageMemory());
         } else {
-            worldManager = new WorldManager(FileStorageS3.connect(
-                    config.s3().address(), config.s3().accessKey(), config.s3().secretKey()));
+            worldManager = new WorldManager(FileStorageS3.connect(config.s3().uri()));
         }
 
         // SpiceDB

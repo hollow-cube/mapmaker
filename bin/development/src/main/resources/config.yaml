@@ -14,10 +14,7 @@ mongo:
   useTransactions: false
 
 s3:
-  address: http://localhost:9000
-  region: us-east-1 # Unused for minio
-  accessKey: mapmaker
-  secretKey: mapmaker
+  uri: s3://mapmaker:mapmaker@localhost:9000/mapmaker?insecure=true
 
 spicedb:
   address: localhost:50051

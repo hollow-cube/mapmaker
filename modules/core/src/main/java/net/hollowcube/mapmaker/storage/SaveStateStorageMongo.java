@@ -10,7 +10,6 @@ import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.ItemStack;
-import org.bson.BsonBinary;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
@@ -20,13 +19,8 @@ import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
-import org.jglrxavpok.hephaistos.nbt.NBTReader;
-import org.jglrxavpok.hephaistos.nbt.NBTWriter;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -97,7 +91,7 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                     case "_id" -> value.setId(reader.readString());
                     case "playerId" -> value.setPlayerId(reader.readString());
                     case "mapId" -> value.setMapId(reader.readString());
-                    case "editing" -> value.setEditing(true);
+                    case "editing" -> value.setEditing(reader.readBoolean());
                     case "completed" -> value.setCompleted(reader.readBoolean());
                     case "startTime" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
                     case "playtime" -> value.setPlaytime(reader.readInt64());
@@ -125,8 +119,10 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                     case "inventory" -> {
                         reader.readStartArray();
                         List<ItemStack> inv = new ArrayList<>();
-                        while (reader.readBsonType() != BsonType.NULL && reader.readBsonType() != BsonType.STRING) {
-                            if (reader.readBsonType() == null) {
+                        var type = reader.readBsonType();
+                        while (type == BsonType.NULL || type == BsonType.STRING) {
+                            if (type == BsonType.NULL) {
+                                reader.readNull();
                                 inv.add(ItemStack.AIR);
                             } else {
                                 try {
@@ -136,19 +132,20 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                                     throw new RuntimeException(e);
                                 }
                             }
+                            type = reader.readBsonType();
                         }
                         value.setInventory(inv);
                         reader.readEndArray();
                     }
-                    case "nbt" -> {
-                        var data = reader.readBinaryData().getData();
-                        try (var nbtReader = new NBTReader(new ByteArrayInputStream(data))) {
-                            value.setNbt((NBTCompound) nbtReader.read());
-                        } catch (IOException | NBTException e) {
-                            // Will not throw reading from a byte array
-                            throw new RuntimeException(e);
-                        }
-                    }
+//                    case "nbt" -> {
+//                        var data = reader.readBinaryData().getData();
+//                        try (var nbtReader = new NBTReader(new ByteArrayInputStream(data))) {
+//                            value.setNbt((NBTCompound) nbtReader.read());
+//                        } catch (IOException | NBTException e) {
+//                            // Will not throw reading from a byte array
+//                            throw new RuntimeException(e);
+//                        }
+//                    }
                 }
             }
             reader.readEndDocument();
@@ -166,7 +163,8 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             if (value.isCompleted())
                 writer.writeBoolean("completed", true);
             writer.writeDateTime("startTime", value.getStartTime().toEpochMilli());
-            writer.writeInt64("playtime", value.getPlaytime());
+            if (value.getPlaytime() != 0)
+                writer.writeInt64("playtime", value.getPlaytime());
             if (value.getPos() != null) {
                 writer.writeStartDocument("pos");
                 writer.writeDouble("x", value.getPos().x());
@@ -190,16 +188,16 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                 }
                 writer.writeEndArray();
             }
-            if (value.getNbt() != null) {
-                var bos = new ByteArrayOutputStream();
-                try (var nbtWriter = new NBTWriter(bos)){
-                    nbtWriter.writeRaw(value.getNbt());
-                } catch (IOException e) {
-                    // Will not throw for writing to a byte array
-                    throw new RuntimeException(e);
-                }
-                writer.writeBinaryData("nbt", new BsonBinary(bos.toByteArray()));
-            }
+//            if (value.getNbt() != null) {
+//                var bos = new ByteArrayOutputStream();
+//                try (var nbtWriter = new NBTWriter(bos)){
+//                    nbtWriter.writeRaw(value.getNbt());
+//                } catch (IOException e) {
+//                    // Will not throw for writing to a byte array
+//                    throw new RuntimeException(e);
+//                }
+//                writer.writeBinaryData("nbt", new BsonBinary(bos.toByteArray()));
+//            }
             writer.writeEndDocument();
         }
 
