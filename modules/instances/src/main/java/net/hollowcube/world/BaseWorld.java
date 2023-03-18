@@ -14,6 +14,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -79,14 +81,19 @@ public class BaseWorld implements World {
 
     protected @NotNull CompletableFuture<Void> loadWorld() {
         return worldManager.fileStorage().downloadFile(id)
-                .thenApply(is -> {
-                    try (is) {
-                        var data = new byte[is.available()];
-                        is.read(data);
+                .thenApply(file -> {
+                    try (var is = file.data()) {
+                        var data = new byte[(int) file.size()];
+                        var bytesRead = is.read(data);
+                        Check.stateCondition(bytesRead != data.length, "Failed to read world data, expected " + data.length + " bytes, got " + bytesRead + " bytes");
 
                         var regionDir = worldDir().resolve("region");
                         Files.createDirectories(regionDir);
-                        for (var region : WorldDecompressor.decompressWorldRegionFiles(data, 1024 * 1024 * 10)) {
+
+                        var unzippedSize = Integer.parseInt(file.metadata().get("size"));
+                        var regions = WorldDecompressor.decompressWorldRegionFiles(data, unzippedSize);
+                        Check.notNull(regions, "Failed to decompress world regions");
+                        for (var region : regions) {
                             Files.write(regionDir.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
                         }
                     } catch (Exception e) {
@@ -103,7 +110,8 @@ public class BaseWorld implements World {
                     var compressed = WorldCompressor.compressWorldRegionFiles(worldDir().toAbsolutePath().toString(), null);
                     return worldManager.fileStorage().uploadFile(id,
                             new ByteArrayInputStream(compressed.getCompressedData()),
-                            compressed.getCompressedData().length);
+                            compressed.getCompressedData().length,
+                            Map.of("size", String.valueOf(compressed.getOriginalSize())));
                 });
     }
 

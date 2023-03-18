@@ -1,11 +1,13 @@
 package net.hollowcube.world.decompression;
 
 import com.github.luben.zstd.Zstd;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -19,7 +21,7 @@ public class WorldDecompressor {
      * @param zippedSize     The original zipped data archive size, needed for decompression
      * @return A list of decompressed RegionFileData objects
      */
-    public static ArrayList<RegionFileData> decompressWorldRegionFiles(byte[] compressedData, int zippedSize) {
+    public static @Nullable List<RegionFileData> decompressWorldRegionFiles(byte[] compressedData, int zippedSize) {
         //decompress the data back to the zipped archive
         byte[] zippedData;
         try {

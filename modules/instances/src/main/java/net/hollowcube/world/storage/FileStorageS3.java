@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 
 public record FileStorageS3(
         @NotNull AmazonS3 s3,
@@ -67,17 +68,26 @@ public record FileStorageS3(
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull String> uploadFile(@NotNull String path, @NotNull InputStream data, int size) {
-        var metadata = new ObjectMetadata();
-        metadata.setContentLength(size);
-        s3.putObject(bucket, path, data, metadata);
-        return CompletableFuture.completedFuture(path); //todo do this properly (in the future, handle errors)
+    public @NotNull CompletableFuture<@NotNull String> uploadFile(@NotNull String path, @NotNull InputStream data, long size, @NotNull Map<String, String> userMetadata) {
+        return CompletableFuture.supplyAsync(() -> {
+            //todo what errors need to be handled here?
+            var metadata = new ObjectMetadata();
+            metadata.setUserMetadata(userMetadata);
+            metadata.setContentType("application/octet-stream");
+            metadata.setContentLength(size);
+            s3.putObject(bucket, path, data, metadata);
+            return path;
+        }, ForkJoinPool.commonPool());
     }
 
     @Override
-    public @NotNull CompletableFuture<InputStream> downloadFile(@NotNull String path) {
-        var object = s3.getObject(bucket, path);
-        return CompletableFuture.completedFuture(object.getObjectContent()); //todo make async
+    public @NotNull CompletableFuture<@NotNull StoredFile> downloadFile(@NotNull String path) {
+        return CompletableFuture.supplyAsync(() -> {
+            var object = s3.getObject(bucket, path);
+            return new StoredFile(object.getObjectContent(),
+                    object.getObjectMetadata().getContentLength(),
+                    object.getObjectMetadata().getUserMetadata());
+        }, ForkJoinPool.commonPool());
     }
 
     private static Map<String, String> splitQuery(URI uri) {
