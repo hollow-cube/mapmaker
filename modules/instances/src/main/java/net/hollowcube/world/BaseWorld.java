@@ -83,9 +83,7 @@ public class BaseWorld implements World {
         return worldManager.fileStorage().downloadFile(id)
                 .thenApply(file -> {
                     try (var is = file.data()) {
-                        var data = new byte[(int) file.size()];
-                        var bytesRead = is.read(data);
-                        Check.stateCondition(bytesRead != data.length, "Failed to read world data, expected " + data.length + " bytes, got " + bytesRead + " bytes");
+                        var data = is.readAllBytes();
 
                         var regionDir = worldDir().resolve("region");
                         Files.createDirectories(regionDir);
