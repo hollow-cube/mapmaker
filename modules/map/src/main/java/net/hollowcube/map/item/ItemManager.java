@@ -47,7 +47,7 @@ public class ItemManager {
         }
 
         items.keySet().stream()
-                .filter(name -> name.namespace().startsWith(input) || name.path().startsWith(input))
+                .filter(name -> name.asString().startsWith(input) || name.path().startsWith(input))
                 .limit(20)
                 .forEach(name -> suggestion.addEntry(new SuggestionEntry(name.toString())));
     }
