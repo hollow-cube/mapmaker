@@ -5,5 +5,6 @@ dependencies {
     implementation(project(":modules:canvas:impl-section"))
 
     val commonVersion = rootProject.property("commonVersion")
-    implementation("com.github.hollow-cube.common:instances:${commonVersion}")
+    implementation(project(":modules:instances"))
+//    implementation("com.github.hollow-cube.common:instances:${commonVersion}")
 }

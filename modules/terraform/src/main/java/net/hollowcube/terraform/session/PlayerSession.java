@@ -1,6 +1,5 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.terraform.instance.Schematic;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
@@ -11,16 +10,15 @@ import org.jetbrains.annotations.Nullable;
  * Represents a player's Terraform session, responsible for holding all "global" state.
  */
 public class PlayerSession {
-    public static final Tag<PlayerSession> TAG = ExtraTags.Transient("terraform:player_session");
-
-    private static PlayerSession instanceBadThisIsNotGood = null;
+    public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
 
     public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
-        if (instanceBadThisIsNotGood == null) {
-            instanceBadThisIsNotGood = new PlayerSession(player);
+        var session = player.getTag(TAG);
+        if (session == null) {
+            session = new PlayerSession(player);
+            player.setTag(TAG, session);
         }
-        return instanceBadThisIsNotGood;
-//        return player.getTag(TAG);
+        return session;
     }
 
     private final Player player;

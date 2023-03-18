@@ -25,21 +25,16 @@ import java.util.*;
  * @implNote {@link LocalSession}s will be stored with editing world savestates.
  */
 public class LocalSession {
-    private static final Tag<LocalSession> TAG = Tag.Structure("terraform:session", new Serializer());
-    private static LocalSession temp = null;
 
     public static @NotNull LocalSession forPlayer(@NotNull Player player) {
         var instance = player.getInstance();
-//        var tag = ExtraTags.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
-        if (temp == null) {
-            temp = new LocalSession(PlayerSession.forPlayer(player), instance);
+        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
+        var session = instance.getTag(tag);
+        if (session == null) {
+            session = new LocalSession(PlayerSession.forPlayer(player), instance);
+            instance.setTag(tag, session);
         }
-//        var session = instance.getTag(tag);
-//        if (session == null) {
-//            session = new LocalSession(PlayerSession.fromPlayer(player), instance);
-//            instance.setTag(tag, session);
-//        }
-        return temp;
+        return session;
     }
 
     private final PlayerSession playerSession;
@@ -107,6 +102,14 @@ public class LocalSession {
             redone++;
         }
         return redone;
+    }
+
+    public int undoCount() {
+        return historyPointer;
+    }
+
+    public int redoCount() {
+        return history.size() - historyPointer;
     }
 
     public void clearHistory() {

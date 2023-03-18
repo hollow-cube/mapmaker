@@ -17,6 +17,9 @@ public final class Terraform {
     public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         var commands = MinecraftServer.getCommandManager();
 
+        // Root/Debug
+        commands.register(new TerraformCommand());
+
         // Selection
         commands.register(new SelectionCommands.Pos1(condition));
         commands.register(new SelectionCommands.Pos2(condition));
