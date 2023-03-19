@@ -83,7 +83,7 @@ Statuses are as follows:
 - 🚧 //shift
 - ✅ //outset
 - ✅ //inset
-- 🚧 //size
+- ✅ //size
 - 🚧 //count
 - 🚧 //distr
 - 🚧 //sel
@@ -134,11 +134,11 @@ lost their saved schematics when they leave the world but if you pay for extra w
 - 🚧 //schem delete
 - 🚧 //schem save
 - ✅ //copy
-- 🚧 //cut
+- ✅ //cut
 - ✅ //paste
 - 🚧 //rotate
 - 🚧 //flip
-- 🚧 //clearclipboard
+- ✅ //clearclipboard
 
 ### TOOL
 
