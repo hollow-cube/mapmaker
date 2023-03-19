@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.terraform.instance.Schematic;
+import net.hollowcube.util.schem.Rotation;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +25,9 @@ public class PlayerSession {
     private final Player player;
 
     private Schematic clipboard = null; // todo need to serialize this
+    // Since I don't see any obvious way to rotate and store the Schematic, store the rotation separately
+    // Also, this should be better since we don't recalculate the schematic every time we rotate
+    private Rotation rotation = Rotation.NONE;
 
     public PlayerSession(@NotNull Player player) {
         this.player = player;
@@ -39,8 +43,18 @@ public class PlayerSession {
         this.clipboard = schematic;
     }
 
+    public void setRotation(@NotNull Rotation rotation) {
+        this.rotation = rotation;
+    }
+
     public @Nullable Schematic clipboard() {
         return clipboard;
+    }
+
+    public @NotNull Rotation rotation() { return rotation; }
+
+    public void clearClipboard() {
+        clipboard = null;
     }
 
 }
