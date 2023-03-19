@@ -9,6 +9,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
+import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.*;
@@ -97,6 +98,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new FlySpeedCommand());
         commandManager.register(new TeleportCommand());
         commandManager.register(new MultiBuildCommand());
+        commandManager.register(new TestModeCommand(this));
+        commandManager.register(new BuildModeCommand(this));
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
