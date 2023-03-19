@@ -58,14 +58,16 @@ public class CheckpointSettingsView extends ParentSection {
         }
 
         private void setToMin() {
-            System.out.println("Not implemented");
+            setResetHeight(-64);
         }
 
         private boolean stepDown(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-            if (clickType == ClickType.LEFT_CLICK) {
+            if (clickType == ClickType.LEFT_CLICK && (getResetHeight() - 1) >= -64) {
                 setResetHeight(getResetHeight() - 1);
-            } else if (clickType == ClickType.SHIFT_CLICK) {
+            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() - 5) >= -64) {
                 setResetHeight(getResetHeight() - 5);
+            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() - 5) <= -64) {
+                setResetHeight(-64);
             }
             return ClickHandler.DENY;
         }
@@ -75,16 +77,18 @@ public class CheckpointSettingsView extends ParentSection {
         }
 
         private boolean stepUp(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-            if (clickType == ClickType.LEFT_CLICK) {
+            if (clickType == ClickType.LEFT_CLICK && (getResetHeight() + 1) <= poi.getPos().blockY()) {
                 setResetHeight(getResetHeight() + 1);
-            } else if (clickType == ClickType.SHIFT_CLICK) {
+            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() + 5) <= poi.getPos().blockY()) {
                 setResetHeight(getResetHeight() + 5);
+            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() + 5) >= poi.getPos().blockY()) {
+                setResetHeight(poi.getPos().blockY());
             }
             return ClickHandler.DENY;
         }
 
         private void setToMax() {
-            System.out.println("Not implemented");
+            setResetHeight(poi.getPos().blockY());
         }
 
         private ItemStack getIndicatorItem() {

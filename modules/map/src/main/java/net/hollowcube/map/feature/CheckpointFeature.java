@@ -71,7 +71,7 @@ public class CheckpointFeature implements MapFeature {
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
 
-            if (player.getPosition().y() < resetHeight) {
+            if (player.getPosition().y() < resetHeight || player.getPosition().y() < -64) {
                 // Player has fallen below their reset height, return them to their latest checkpoint
                 var saveState = SaveState.fromPlayer(player);
                 var checkpoint = saveState.getCheckpoint();

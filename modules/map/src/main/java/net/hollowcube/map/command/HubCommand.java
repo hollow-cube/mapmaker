@@ -15,7 +15,7 @@ public class HubCommand extends BaseMapCommand {
     private final MapToHubBridge bridge;
 
     public HubCommand(@NotNull MapToHubBridge bridge) {
-        super("hub");
+        super("hub", "leave", "l", "lobby");
         this.bridge = bridge;
 
         setDefaultExecutor(this::returnToHub);
