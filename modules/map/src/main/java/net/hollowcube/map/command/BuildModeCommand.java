@@ -8,6 +8,7 @@ import net.hollowcube.map.world.TestingMapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,8 @@ public class BuildModeCommand extends BaseMapCommand {
         Player player = (Player) sender;
         player.sendMessage("Entering build mode");
 
+        Pos pos = player.getPosition();
+
         var curr_world = MapWorld.fromInstance(player.getInstance());
 
         MapWorld world = new EditingMapWorld(mapServer, curr_world.map());
@@ -41,7 +44,7 @@ public class BuildModeCommand extends BaseMapCommand {
         CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
         future = world.loadWorld();
         FutureResult.wrap(future.thenCompose(unused ->
-                player.setInstance(world.instance(), player.getPosition())));
+                player.setInstance(world.instance(), pos)));
         player.setAllowFlying(true);
         player.setFlying(true);
         player.setGameMode(GameMode.CREATIVE);
