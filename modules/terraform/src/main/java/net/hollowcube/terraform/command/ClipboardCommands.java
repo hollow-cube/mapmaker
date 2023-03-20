@@ -11,6 +11,8 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentEnum;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -141,11 +143,14 @@ public final class ClipboardCommands {
 
     public static final class Rotate extends Command {
 
+        private final ArgumentEnum<Rotation> rotationArg = ArgumentType.Enum("rotation", Rotation.class);
+
         public Rotate(@Nullable CommandCondition condition) {
             super("rotate", "tf:rotate");
             setCondition(condition);
 
             setDefaultExecutor(this::handleRotate);
+            addSyntax(this::handleRotate, rotationArg);
         }
 
         private void handleRotate(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -154,7 +159,20 @@ public final class ClipboardCommands {
                 return;
             }
 
-            sender.sendMessage("Not implemented :(");
+            var playerSession = PlayerSession.forPlayer(player);
+            var rotation = playerSession.rotation();
+
+            if (context.has(rotationArg)) {
+                playerSession.setRotation(context.get(rotationArg));
+            } else {
+                // Advance rotation 1 stage
+                playerSession.setRotation( switch (rotation) {
+                    case NONE -> Rotation.CLOCKWISE_90;
+                    case CLOCKWISE_90 -> Rotation.CLOCKWISE_180;
+                    case CLOCKWISE_180 -> Rotation.CLOCKWISE_270;
+                    case CLOCKWISE_270 -> Rotation.NONE;
+                });
+            }
         }
     }
 
