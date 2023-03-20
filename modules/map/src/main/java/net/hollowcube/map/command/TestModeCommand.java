@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,8 @@ public class TestModeCommand extends BaseMapCommand {
         Player player = (Player) sender;
         player.sendMessage("Entering test mode");
 
+        Pos pos = player.getPosition();
+
         // Create playing map world and send user to it
         var curr_world = MapWorld.fromInstance(player.getInstance());
         String world_file_id = String.valueOf(curr_world.saveWorld());
@@ -44,7 +47,7 @@ public class TestModeCommand extends BaseMapCommand {
         CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
         future = world.loadWorld();
         FutureResult.wrap(future.thenCompose(unused ->
-                player.setInstance(world.instance(), player.getPosition())));
+                player.setInstance(world.instance(), pos)));
         player.setAllowFlying(false);
         player.setFlying(false);
         player.setGameMode(GameMode.ADVENTURE);
