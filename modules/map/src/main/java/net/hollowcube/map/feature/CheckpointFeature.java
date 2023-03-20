@@ -30,6 +30,7 @@ public class CheckpointFeature implements MapFeature {
 
     // Marks the current reset height of a player. If they fall below it they will be returned to their latest checkpoint, or the map spawn point.
     private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
+    public static final int MINIMUM_RESET_HEIGHT = -64;
 
     @Override
     public @NotNull EventNode<InstanceEvent> eventNode() {
@@ -71,7 +72,7 @@ public class CheckpointFeature implements MapFeature {
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
 
-            if (player.getPosition().y() < resetHeight || player.getPosition().y() < -64) {
+            if (player.getPosition().y() < resetHeight || player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
                 // Player has fallen below their reset height, return them to their latest checkpoint
                 var saveState = SaveState.fromPlayer(player);
                 var checkpoint = saveState.getCheckpoint();
@@ -97,7 +98,7 @@ public class CheckpointFeature implements MapFeature {
 
         // No reset height or its disabled, return the default reset height (min)
         //todo should be map height - 50 when map height is implemented
-        return -64 - 50;
+        return MINIMUM_RESET_HEIGHT - 50;
     }
 
 }
