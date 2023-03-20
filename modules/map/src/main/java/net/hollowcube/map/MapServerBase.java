@@ -6,9 +6,7 @@ import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.map.command.GiveCommand;
-import net.hollowcube.map.command.HubCommand;
-import net.hollowcube.map.command.SetSpawnCommand;
+import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -83,6 +81,9 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new HubCommand(bridge));
         commandManager.register(new GiveCommand());
         commandManager.register(new SetSpawnCommand());
+        commandManager.register(new ClearInventoryCommand());
+        commandManager.register(new FlyCommand());
+        commandManager.register(new FlySpeedCommand());
 
         return Futures.immediateVoidFuture();
     }
