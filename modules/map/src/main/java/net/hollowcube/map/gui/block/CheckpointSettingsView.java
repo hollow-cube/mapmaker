@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static net.hollowcube.map.feature.CheckpointFeature.MINIMUM_RESET_HEIGHT;
+
 public class CheckpointSettingsView extends ParentSection {
     private final MapData.POI poi;
 
@@ -58,17 +60,17 @@ public class CheckpointSettingsView extends ParentSection {
         }
 
         private void setToMin() {
-            setResetHeight(-64);
+            setResetHeight(MINIMUM_RESET_HEIGHT);
         }
 
         private boolean stepDown(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-            if (clickType == ClickType.LEFT_CLICK && (getResetHeight() - 1) >= -64) {
-                setResetHeight(getResetHeight() - 1);
-            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() - 5) >= -64) {
-                setResetHeight(getResetHeight() - 5);
-            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() - 5) <= -64) {
-                setResetHeight(-64);
-            }
+            int delta = switch (clickType) {
+                case LEFT_CLICK -> 1;
+                case START_SHIFT_CLICK, SHIFT_CLICK -> 5;
+                default -> 0;
+            };
+            int newHeight = Math.max(getResetHeight() - delta, MINIMUM_RESET_HEIGHT);
+            setResetHeight(newHeight);
             return ClickHandler.DENY;
         }
 
@@ -77,13 +79,13 @@ public class CheckpointSettingsView extends ParentSection {
         }
 
         private boolean stepUp(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-            if (clickType == ClickType.LEFT_CLICK && (getResetHeight() + 1) <= poi.getPos().blockY()) {
-                setResetHeight(getResetHeight() + 1);
-            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() + 5) <= poi.getPos().blockY()) {
-                setResetHeight(getResetHeight() + 5);
-            } else if (clickType == ClickType.RIGHT_CLICK && (getResetHeight() + 5) >= poi.getPos().blockY()) {
-                setResetHeight(poi.getPos().blockY());
-            }
+            int delta = switch (clickType) {
+                case LEFT_CLICK -> 1;
+                case START_SHIFT_CLICK, SHIFT_CLICK -> 5;
+                default -> 0;
+            };
+            int newHeight = Math.min(getResetHeight() + delta, poi.getPos().blockY());
+            setResetHeight(newHeight);
             return ClickHandler.DENY;
         }
 
