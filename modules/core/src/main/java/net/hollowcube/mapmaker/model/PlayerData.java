@@ -62,6 +62,14 @@ public class PlayerData {
         this.mapSlots = mapSlots;
     }
 
+    private int multibuild;
+
+    public int getMultibuild() {
+        return this.multibuild;
+    }
+
+    public void setMultibuild(int multibuild) { this.multibuild = multibuild; }
+
     // This type definition is disgusting, but means that the array itself is never null, but entries inside it may be.
     public @Nullable String @NotNull [] getMapSlots() {
         return Arrays.copyOf(mapSlots, mapSlots.length);

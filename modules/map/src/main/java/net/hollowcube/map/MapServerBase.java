@@ -7,6 +7,7 @@ import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.Section;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.*;
+import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -22,6 +23,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +59,7 @@ public abstract class MapServerBase implements MapServer {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
+        eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
 
         // Placement rules
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
@@ -84,6 +87,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new ClearInventoryCommand());
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
+        commandManager.register(new TeleportCommand());
+        commandManager.register(new MultiBuildCommand());
 
         return Futures.immediateVoidFuture();
     }
