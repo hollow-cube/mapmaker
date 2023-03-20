@@ -27,6 +27,7 @@ public class TeleportCommand extends BaseMapCommand {
 
         if (target == sender) {
             sender.sendMessage("You can't teleport to yourself!");
+            return;
         }
 
         if (target == null) {
