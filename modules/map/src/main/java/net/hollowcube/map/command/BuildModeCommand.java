@@ -48,7 +48,7 @@ public class BuildModeCommand extends BaseMapCommand {
     }
 
     private boolean isInTestingMap(@Nullable CommandSender sender, @Nullable String unused) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player player) || player.getInstance() == null) {
             return false;
         }
 
