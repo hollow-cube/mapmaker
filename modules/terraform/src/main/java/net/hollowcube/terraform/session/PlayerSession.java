@@ -43,10 +43,27 @@ public class PlayerSession {
 
     public void setClipboard(@NotNull Schematic schematic) {
         this.clipboard = schematic;
+        // Reset rotation
+        rotation = Rotation.NONE;
     }
 
     public void setRotation(@NotNull Rotation rotation) {
         this.rotation = rotation;
+    }
+
+    public void advanceRotationHorizontal() {
+        Rotation[] values = Rotation.values();
+        int index = (rotation.ordinal() + 1) % values.length;
+        rotation = values[index];
+    }
+
+    public void flipRotationHorizontal() {
+        rotation = switch (rotation) {
+            case NONE -> Rotation.CLOCKWISE_180;
+            case CLOCKWISE_90 -> Rotation.CLOCKWISE_270;
+            case CLOCKWISE_180 -> Rotation.NONE;
+            case CLOCKWISE_270 -> Rotation.CLOCKWISE_90;
+        };
     }
 
     public @Nullable Schematic clipboard() {

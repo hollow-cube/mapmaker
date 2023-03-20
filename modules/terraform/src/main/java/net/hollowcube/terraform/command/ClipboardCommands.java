@@ -160,18 +160,12 @@ public final class ClipboardCommands {
             }
 
             var playerSession = PlayerSession.forPlayer(player);
-            var rotation = playerSession.rotation();
 
             if (context.has(rotationArg)) {
                 playerSession.setRotation(context.get(rotationArg));
             } else {
                 // Advance rotation 1 stage
-                playerSession.setRotation( switch (rotation) {
-                    case NONE -> Rotation.CLOCKWISE_90;
-                    case CLOCKWISE_90 -> Rotation.CLOCKWISE_180;
-                    case CLOCKWISE_180 -> Rotation.CLOCKWISE_270;
-                    case CLOCKWISE_270 -> Rotation.NONE;
-                });
+               playerSession.advanceRotationHorizontal();
             }
         }
     }
@@ -192,14 +186,7 @@ public final class ClipboardCommands {
             }
 
             // TODO: Worldedit supports rotation in all directions (x, y, z), and I don't believe we do as well
-            var playerSession = PlayerSession.forPlayer(player);
-            var rot = playerSession.rotation(); // Not the cipher :)
-            playerSession.setRotation( switch (rot) {
-                case NONE -> Rotation.CLOCKWISE_180;
-                case CLOCKWISE_90 -> Rotation.CLOCKWISE_270;
-                case CLOCKWISE_180 -> Rotation.NONE;
-                case CLOCKWISE_270 -> Rotation.CLOCKWISE_90;
-            });
+            PlayerSession.forPlayer(player).flipRotationHorizontal();
         }
     }
 
