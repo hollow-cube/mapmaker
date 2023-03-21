@@ -57,7 +57,7 @@ public abstract class MapWorld extends BaseWorld {
         this.mapServer = mapServer;
         this.map = map;
 
-        instance().setGenerator(MapGenerators.flatWorld());
+        instance().setGenerator(MapGenerators.voidWorld());
 
         instance().setTag(THIS_TAG, this);
         instance().setTag(MAP_ID, map.getId());
