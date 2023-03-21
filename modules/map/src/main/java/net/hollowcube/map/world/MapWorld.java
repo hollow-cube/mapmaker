@@ -82,7 +82,7 @@ public abstract class MapWorld extends BaseWorld {
         var eventNode = instance().eventNode();
         eventNode.addChild(scopedNode);
         eventNode.addChild(itemRegistry.eventNode());
-        eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::initPlayer);
+        eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn);
         eventNode.addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave);
 
         for (var feature : mapServer.features()) {
@@ -184,7 +184,7 @@ public abstract class MapWorld extends BaseWorld {
                 .thenRun(() -> EventDispatcher.call(new MapWorldUnregisterEvent(this)));
     }
 
-    private void initPlayer(@NotNull PlayerSpawnInInstanceEvent event) {
+    private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
         player.getInventory().clear();
 
