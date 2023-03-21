@@ -16,6 +16,7 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
+import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -29,6 +30,7 @@ import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.mapmaker.storage.WhitelistStorage;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageMemory;
@@ -291,6 +293,7 @@ public class DevServer {
         startupTasks.clear();
 
         MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
+        MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -325,6 +328,9 @@ public class DevServer {
             i++;
         }
         logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
+
+        Scoreboards.init();
+
         try {
             Futures.whenAllSucceed(startupTasks).call(() -> null, Runnable::run).get();
         } catch (Exception e) {
@@ -414,6 +420,7 @@ public class DevServer {
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
         event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
+        //TODO whitelist logic
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -446,6 +453,7 @@ public class DevServer {
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString)
                 .color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
+        Scoreboards.showPlayerLobbyScoreboard(player);
+        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
     }
-
 }

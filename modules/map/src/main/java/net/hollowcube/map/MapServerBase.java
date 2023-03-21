@@ -11,12 +11,11 @@ import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.world.EditingMapWorld;
-import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.*;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
@@ -150,6 +149,12 @@ public abstract class MapServerBase implements MapServer {
 
         var player = event.getPlayer();
         player.refreshCommands();
+
+        if (MapWorld.fromInstance(event.getSpawnInstance()).map().isPublished()) {
+            Scoreboards.showPlayerPlayingScoreboard(player, MapWorld.fromInstance(event.getSpawnInstance()).map());
+        } else {
+            Scoreboards.showPlayerEditingScoreboard(player, MapWorld.fromInstance(event.getSpawnInstance()).map());
+        }
     }
 
     private void handleMapUnregister(@NotNull MapWorldUnregisterEvent event) {
