@@ -10,6 +10,7 @@ import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.util.ScoreboardUtil;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -143,6 +144,12 @@ public abstract class MapServerBase implements MapServer {
 
         var player = event.getPlayer();
         player.refreshCommands();
+
+        if (MapWorld.fromInstance(event.getSpawnInstance()).map().isPublished()) {
+            ScoreboardUtil.sendPlayingScoreboard(player);
+            return;
+        }
+            ScoreboardUtil.sendEditingScoreboard(player);
     }
 
     private void handleMapUnregister(@NotNull MapWorldUnregisterEvent event) {

@@ -32,7 +32,7 @@ public class CheckpointSettingsView extends ParentSection {
         public ResetHeightSetting() {
             super(7, 1);
 
-            indicator = add(0, 0, new ButtonSection(1, 1, getIndicatorItem(), this::toggleActive));
+            indicator = add(0, 0, new ButtonSection(1, 1, getIndicatorItemResetHeight(), this::toggleActive));
 
             add(2, 0, new TranslatedButtonSection("gui.checkpoint.reset_height.min", List.of(), Material.RED_CONCRETE, this::setToMin));
             add(3, 0, new TranslatedButtonSection("gui.checkpoint.reset_height.step_down", List.of(), Material.RED_CONCRETE, this::stepDown));
@@ -42,7 +42,7 @@ public class CheckpointSettingsView extends ParentSection {
         }
 
         private void updateIndicator() {
-            indicator.setItem(getIndicatorItem());
+            indicator.setItem(getIndicatorItemResetHeight());
         }
 
         private void toggleActive() {
@@ -93,7 +93,7 @@ public class CheckpointSettingsView extends ParentSection {
             setResetHeight(poi.getPos().blockY());
         }
 
-        private ItemStack getIndicatorItem() {
+        private ItemStack getIndicatorItemResetHeight() {
             return ItemStack.builder(poi.getOrDefault("active", false) ? Material.GREEN_CONCRETE : Material.RED_CONCRETE)
                     .displayName(Component.text("Reset Height"))
                     .lore(Component.text("current: " + getResetHeight()), Component.text("active: " + poi.getOrDefault("active", false)))
