@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.gui.hotbar.EditMapHotbar;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.entity.GameMode;
@@ -39,6 +40,11 @@ public class EditingMapWorld extends MapWorld {
         }
 
         player.sendMessage("Now editing " + map.getName());
+    }
+
+    @Override
+    protected void initHotbar(@NotNull Player player) {
+        EditMapHotbar.applyToPlayer(player);
     }
 
     @Override

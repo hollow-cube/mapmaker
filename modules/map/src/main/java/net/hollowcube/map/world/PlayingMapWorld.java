@@ -57,6 +57,11 @@ public class PlayingMapWorld extends MapWorld {
     }
 
     @Override
+    protected void initHotbar(@NotNull Player player) {
+
+    }
+
+    @Override
     protected void updateSaveStateForPlayer(@NotNull Player player, @NotNull SaveState saveState, boolean remove) {
         // Update relevant fields
         //todo should be based on a map setting

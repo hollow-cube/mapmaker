@@ -125,6 +125,8 @@ public abstract class MapWorld extends BaseWorld {
     protected void initPlayerFromSaveState(@NotNull Player player, @NotNull SaveState saveState) {
     }
 
+    protected abstract void initHotbar(@NotNull Player player);
+
     /**
      * Called to save the player. If `remove` is set, the player is leaving the map and all state should be cleared as well
      */
@@ -187,6 +189,7 @@ public abstract class MapWorld extends BaseWorld {
     private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
         player.getInventory().clear();
+        initHotbar(player);
 
         // Teleport the player to spawn and show loading.
         player.teleport(map.getSpawnPoint()).exceptionally(FutureUtil::handleException);
