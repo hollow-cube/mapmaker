@@ -1,13 +1,12 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -33,7 +32,27 @@ public class TestModeCommand extends BaseMapCommand {
     }
 
     private void enterTestMode(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        Player player = (Player) sender;
+        // Stupid amount of checks to verify they're actually in a world otherwise nullptr exception
+        // Probably better way to structure instantiation of this command so it doesn't have this issue
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command!");
+            return;
+        }
+        enterTestMode(player, mapServer);
+    }
+
+    private boolean isInEditingMap(@Nullable CommandSender sender, @Nullable String unused) {
+        if (!(sender instanceof Player player) ||
+            player.getInstance() == null ||
+            !(player.getInstance().hasTag(MapWorld.MAP_ID))) {
+                return false;
+        }
+
+        var world = MapWorld.fromInstance(player.getInstance());
+        return world instanceof EditingMapWorld;
+    }
+
+    public static void enterTestMode(@NotNull Player player, @NotNull MapServer mapServer) {
         player.sendMessage("Entering test mode");
 
         Pos pos = player.getPosition();
@@ -51,14 +70,5 @@ public class TestModeCommand extends BaseMapCommand {
         player.setAllowFlying(false);
         player.setFlying(false);
         player.setGameMode(GameMode.ADVENTURE);
-    }
-
-    private boolean isInEditingMap(@Nullable CommandSender sender, @Nullable String unused) {
-        if (!(sender instanceof Player player) || player.getInstance() == null) {
-            return false;
-        }
-
-        var world = MapWorld.fromInstance(player.getInstance());
-        return world instanceof EditingMapWorld;
     }
 }
