@@ -51,7 +51,7 @@ public class MapData {
     private String mapFileId;
     // ItemStack Icon to display the map as
     private ItemStack icon;
-    private Pos spawnPoint = new Pos(0, 40, 0);
+    private Pos spawnPoint = new Pos(0, 60, 0);
     private final List<POI> pois = new ArrayList<>();
 
     private final int MAX_COMPLETION_TIMES = 10;

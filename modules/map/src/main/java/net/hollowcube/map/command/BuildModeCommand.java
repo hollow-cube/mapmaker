@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -32,7 +33,27 @@ public class BuildModeCommand extends BaseMapCommand {
     }
 
     private void enterBuildMode(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command!");
+            return;
+        }
+        enterBuildMode(player, mapServer);
+    }
+
+    private boolean isInTestingMap(@Nullable CommandSender sender, @Nullable String unused) {
+        // Stupid amount of checks to verify they're actually in a world otherwise nullptr exception
+        // Probably better way to structure instantiation of this command so it doesn't have this issue
+        if (!(sender instanceof Player player) ||
+            player.getInstance() == null ||
+            !(player.getInstance().hasTag(MapWorld.MAP_ID))) {
+                return false;
+        }
+
+        var world = MapWorld.fromInstance(player.getInstance());
+        return world instanceof TestingMapWorld;
+    }
+
+    public static void enterBuildMode(@NotNull Player player, @NotNull MapServer mapServer) {
         player.sendMessage("Entering build mode");
 
         Pos pos = player.getPosition();
@@ -48,14 +69,5 @@ public class BuildModeCommand extends BaseMapCommand {
         player.setAllowFlying(true);
         player.setFlying(true);
         player.setGameMode(GameMode.CREATIVE);
-    }
-
-    private boolean isInTestingMap(@Nullable CommandSender sender, @Nullable String unused) {
-        if (!(sender instanceof Player player) || player.getInstance() == null) {
-            return false;
-        }
-
-        var world = MapWorld.fromInstance(player.getInstance());
-        return world instanceof TestingMapWorld;
     }
 }
