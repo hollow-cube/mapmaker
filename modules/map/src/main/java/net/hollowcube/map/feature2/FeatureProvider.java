@@ -3,6 +3,7 @@ package net.hollowcube.map.feature2;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.config.ConfigProvider;
 import org.jetbrains.annotations.NotNull;
 
 public interface FeatureProvider {
@@ -10,7 +11,7 @@ public interface FeatureProvider {
     /**
      * Global feature init when a server starts.
      */
-    default @NotNull ListenableFuture<Void> init() {
+    default @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
         return Futures.immediateVoidFuture();
     }
 

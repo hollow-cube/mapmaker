@@ -14,6 +14,7 @@ import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.TerraformCompat;
@@ -61,7 +62,7 @@ public abstract class MapServerBase implements MapServer {
         this.bridge = bridge;
     }
 
-    public @NotNull ListenableFuture<Void> init() {
+    public @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
@@ -101,7 +102,7 @@ public abstract class MapServerBase implements MapServer {
         var featureInitFutures = new ArrayList<ListenableFuture<Void>>();
         for (var feature : ServiceLoader.load(FeatureProvider.class)) {
             features.add(feature);
-            featureInitFutures.add(feature.init());
+            featureInitFutures.add(feature.init(config));
         }
         this.features = List.copyOf(features);
 

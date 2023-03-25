@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.dev.config;
 
+import net.hollowcube.mapmaker.config.ConfigPath;
+import net.hollowcube.mapmaker.config.ConfigProvider;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationVisitor;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.BufferedReader;
@@ -17,20 +17,13 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 
-@ConfigSerializable
-public record Config(
-        HttpConf http,
-        MinestomConf minestom,
-        MongoConf mongo,
-        S3Conf s3,
-        SpiceDBConf spicedb
-) {
-    private static final Logger logger = LoggerFactory.getLogger(Config.class);
+public class NewConfigProvider implements ConfigProvider {
+    private static final String ENV_PREFIX = "MAPMAKER";
 
-    /**
-     * Loads the config from the given path, or loads the packaged one if the path does not exist.
-     */
-    public static @NotNull Config loadFromFile(@NotNull Path path) {
+    private static final System.Logger logger = System.getLogger(NewConfigProvider.class.getName());
+
+
+    public static @NotNull NewConfigProvider loadFromFile(@NotNull Path path) {
         BufferedReader input = null;
         try {
             if (Files.exists(path)) {
@@ -47,9 +40,9 @@ public record Config(
 
             var rootNode = loader.load();
             rootNode.visit(new EnvVarOverrideVisitor());
-            return Objects.requireNonNull(rootNode.get(Config.class));
+            return new NewConfigProvider(rootNode);
         } catch (Exception e) {
-            logger.error("failed to load config file", e);
+            logger.log(System.Logger.Level.ERROR, "failed to load config file", e);
 
             // Probably should shutdown gracefully, but this is in theory the first thing that runs so it doesnt matter that much.
             System.exit(1);
@@ -59,8 +52,28 @@ public record Config(
                 if (input != null)
                     input.close();
             } catch (IOException e) {
-                logger.error("failed to close config file", e);
+                logger.log(System.Logger.Level.ERROR, "failed to close config file", e);
             }
+        }
+    }
+
+    private final ConfigurationNode root;
+
+    private NewConfigProvider(@NotNull ConfigurationNode root) {
+        this.root = root;
+    }
+
+    @Override
+    public <C extends Record> @NotNull C get(@NotNull Class<C> clazz) {
+        var path = "";
+        var anno = clazz.getAnnotation(ConfigPath.class);
+        if (anno != null) path = anno.value();
+
+        try {
+            return Objects.requireNonNull(root.node(path).get(clazz));
+        } catch (SerializationException e) {
+            //todo
+            throw new RuntimeException(e);
         }
     }
 
@@ -71,7 +84,7 @@ public record Config(
             // Do not care about non-leaf nodes
             if (node.childrenMap().size() != 0) return;
 
-            var path = new StringBuilder().append("MAPMAKER");
+            var path = new StringBuilder().append(ENV_PREFIX);
             for (int i = 0; i < node.path().size(); i++)
                 path.append("_").append(node.path().get(i).toString().toUpperCase(Locale.ROOT));
             if (path.isEmpty()) return;
@@ -82,4 +95,5 @@ public record Config(
             node.raw(value);
         }
     }
+
 }

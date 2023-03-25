@@ -14,6 +14,8 @@ import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
+import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
+import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -68,6 +70,7 @@ public class DevServer {
 
         // Load config
         var config = Config.loadFromFile(Path.of("config.yaml"));
+        var configProvider = NewConfigProvider.loadFromFile(Path.of("config.yaml"));
 
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
@@ -76,9 +79,10 @@ public class DevServer {
         var server = new DevServer();
 
         // Add health check & metrics web server.
+        var httpConfig = configProvider.get(HttpConfig.class);
         WebServer webServer = WebServer.builder()
-                .host(config.http().host())
-                .port(config.http().port())
+                .host(httpConfig.host())
+                .port(httpConfig.port())
                 .addRouting(Routing.builder()
                         .register(HealthSupport.builder()
                                 .webContext("alive")
@@ -95,7 +99,7 @@ public class DevServer {
                 "Web server is running at " + config.http().host() + ":" + ws.port()));
 
         // Finish server initialization
-        server.start(config);
+        server.start(config, configProvider);
         minecraftServer.start(config.minestom().host(), config.minestom().port());
 
         // Add shutdown hook for graceful shutdown
@@ -121,7 +125,7 @@ public class DevServer {
 
     }
 
-    public void start(@NotNull Config config) {
+    public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         MojangAuth.init();
 
         var startupTasks = new ArrayList<ListenableFuture<Void>>();
@@ -218,7 +222,7 @@ public class DevServer {
         bridge.setHubServer(hub);
         bridge.setMapServer(maps);
         startupTasks.add(this.hub.init());
-        startupTasks.add(this.maps.init());
+        startupTasks.add(this.maps.init(configProvider));
 
         try {
             Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
@@ -263,7 +267,6 @@ public class DevServer {
 
         int i = 0;
         for (var facet : ServiceLoader.load(Facet.class)) {
-            System.out.println(facet);
             startupTasks.add(facet.hook(MinecraftServer.process()));
             i++;
         }

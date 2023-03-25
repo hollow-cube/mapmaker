@@ -20,3 +20,6 @@ spicedb:
   address: localhost:50051
   secretKey: foobar
   tls: false
+
+kafka:
+  bootstrap_servers: localhost:29092

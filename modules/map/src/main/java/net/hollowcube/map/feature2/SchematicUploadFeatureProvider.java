@@ -1,13 +1,16 @@
 package net.hollowcube.map.feature2;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
+import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.model.kafka.SchematicMgmt;
 import net.hollowcube.terraform.instance.Schematic;
 import net.hollowcube.terraform.instance.SchematicReader;
@@ -33,13 +36,14 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
     private FriendlyProducer producer = null;
 
     @Override
-    public @NotNull ListenableFuture<Void> init() {
+    public @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
         logger.log(System.Logger.Level.INFO, "(not) Initializing schematic upload provider...");
 
-//        consumer = new SchematicUploadConsumer("localhost:29092");
-//        producer = new FriendlyProducer("localhost:29092");
+        var kafkaConfig = config.get(KafkaConfig.class);
+        consumer = new SchematicUploadConsumer(kafkaConfig.bootstrapServersStr());
+        producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
 
-        return FeatureProvider.super.init();
+        return Futures.immediateVoidFuture();
     }
 
     @Override
