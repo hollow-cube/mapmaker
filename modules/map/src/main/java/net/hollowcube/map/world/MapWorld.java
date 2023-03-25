@@ -50,7 +50,8 @@ public abstract class MapWorld extends BaseWorld {
         return Objects.requireNonNull(instance.getTag(THIS_TAG));
     }
 
-    public static @Nullable MapWorld optionalFromInstance(@NotNull Instance instance) {
+    public static @Nullable MapWorld optionalFromInstance(@Nullable Instance instance) {
+        if (instance == null) return null;
         return instance.getTag(THIS_TAG);
     }
 

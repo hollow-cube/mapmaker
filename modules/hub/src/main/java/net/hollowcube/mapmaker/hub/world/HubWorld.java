@@ -12,17 +12,24 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class HubWorld extends BaseWorld {
     private static final String WORLD_NAME = "hub";
 
     public static final Tag<Boolean> MARKER = Tag.Boolean("mapmaker:hub/marker"); //todo unnecessary
-    private static final Tag<HubWorld> THIS = ExtraTags.Transient("mapmaker:hub/world");
+    private static final Tag<HubWorld> THIS_TAG = ExtraTags.Transient("mapmaker:hub/world");
 
     public static @NotNull HubWorld fromInstance(@NotNull Instance instance) {
-        return instance.getTag(THIS);
+        return Objects.requireNonNull(optionalFromInstance(instance));
+    }
+
+    public static @Nullable HubWorld optionalFromInstance(@Nullable Instance instance) {
+        if (instance == null) return null;
+        return instance.getTag(THIS_TAG);
     }
 
     private final HubServer server;
@@ -32,7 +39,7 @@ public class HubWorld extends BaseWorld {
         this.server = server;
 
         instance().setTag(MARKER, true);
-        instance().setTag(THIS, this);
+        instance().setTag(THIS_TAG, this);
         instance().setGenerator(HubGenerators.stoneWorld());
 
         var eventNode = instance().eventNode();
