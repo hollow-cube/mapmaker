@@ -6,6 +6,7 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.gui.CompletedMapView;
+import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
@@ -31,6 +32,8 @@ public class PlayingMapWorld extends MapWorld {
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
         eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+
+        eventNode.addChild(PlayingMapHotbar.eventNode());
 
         if (MapHooks.isCompletable(map)) {
             eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);
@@ -58,7 +61,7 @@ public class PlayingMapWorld extends MapWorld {
 
     @Override
     protected void initHotbar(@NotNull Player player) {
-
+        PlayingMapHotbar.applyToPlayer(player);
     }
 
     @Override
