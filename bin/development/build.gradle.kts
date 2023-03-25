@@ -33,7 +33,6 @@ dependencies {
 
     implementation ("com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220")
 
-
     // Helidon
     implementation(platform("io.helidon:helidon-dependencies:3.0.2"))
     implementation("io.helidon.health:helidon-health")

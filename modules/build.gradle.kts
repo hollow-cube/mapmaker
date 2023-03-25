@@ -40,6 +40,8 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
         testImplementation("com.google.truth:truth:1.1.3")
 
+        implementation("com.google.code.gson:gson:2.10.1")
+
         // TestContainers
         fun testContainersApi(name: String) {
             testImplementation("org.testcontainers:$name:1.17.3") {

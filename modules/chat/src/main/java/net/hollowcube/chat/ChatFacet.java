@@ -100,7 +100,7 @@ public class ChatFacet implements Facet {
     public void sendPrivateMessage(@NotNull Player from, @NotNull Player to, @NotNull String message) {
         var chatMessage = new ChatMessage(
                 Instant.now(),
-                runtime.workerId(),
+                runtime.hostname(),
                 //todo these should be using the players data id, not uuid
                 String.join("%s:%s", from.getUuid().toString(), to.getUuid().toString()),
                 from.getUuid().toString(),
@@ -131,7 +131,7 @@ public class ChatFacet implements Facet {
     private void handleChatEvent(PlayerChatEvent event) {
         var message = new ChatMessage(
                 Instant.now(),
-                runtime.workerId(),
+                runtime.hostname(),
                 ChatMessage.DEFAULT_CONTEXT,
                 event.getPlayer().getUuid().toString(),
                 event.getMessage()
@@ -166,7 +166,7 @@ public class ChatFacet implements Facet {
         for (Player target : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             var chatMessage = new ChatMessage(
                     Instant.now(),
-                    runtime.workerId(),
+                    runtime.hostname(),
                     //todo these should be using the players data id, not uuid
                     String.join("%s:%s", from.getUuid().toString(), target.getUuid().toString()),
                     from.getUuid().toString(),
@@ -195,7 +195,7 @@ public class ChatFacet implements Facet {
     private void handleCommandEvent(PlayerCommandEvent event) {
         var message = new ChatMessage(
                 Instant.now(),
-                runtime.workerId(),
+                runtime.hostname(),
                 ChatMessage.COMMAND_CONTEXT,
                 event.getPlayer().getUuid().toString(),
                 event.getCommand()

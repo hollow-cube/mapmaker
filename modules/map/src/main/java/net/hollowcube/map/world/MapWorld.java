@@ -27,6 +27,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,10 @@ public abstract class MapWorld extends BaseWorld {
 
     public static @NotNull MapWorld fromInstance(@NotNull Instance instance) {
         return Objects.requireNonNull(instance.getTag(THIS_TAG));
+    }
+
+    public static @Nullable MapWorld optionalFromInstance(@NotNull Instance instance) {
+        return instance.getTag(THIS_TAG);
     }
 
     protected MapServer mapServer;

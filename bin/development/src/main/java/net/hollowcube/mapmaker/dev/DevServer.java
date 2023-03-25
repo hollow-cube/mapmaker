@@ -268,7 +268,6 @@ public class DevServer {
             i++;
         }
         logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
-
         try {
             Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
         } catch (Exception e) {

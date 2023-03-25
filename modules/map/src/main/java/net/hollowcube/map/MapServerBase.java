@@ -9,6 +9,7 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
+import net.hollowcube.map.feature2.FeatureProvider;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -30,7 +31,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +44,8 @@ public abstract class MapServerBase implements MapServer {
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
 
     private final MapToHubBridge bridge;
+
+    private List<FeatureProvider> features;
 
 
     // map id -> play|edit -> world
@@ -90,7 +96,23 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new TeleportCommand());
         commandManager.register(new MultiBuildCommand());
 
-        return Futures.immediateVoidFuture();
+        // Register features
+        var features = new ArrayList<FeatureProvider>();
+        var featureInitFutures = new ArrayList<ListenableFuture<Void>>();
+        for (var feature : ServiceLoader.load(FeatureProvider.class)) {
+            features.add(feature);
+            featureInitFutures.add(feature.init());
+        }
+        this.features = List.copyOf(features);
+
+        return Futures.transform(
+                Futures.allAsList(featureInitFutures),
+                unused -> null, Runnable::run);
+    }
+
+    @Override
+    public @NotNull List<FeatureProvider> features() {
+        return features;
     }
 
     public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
