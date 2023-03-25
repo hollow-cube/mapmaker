@@ -203,7 +203,8 @@ public class DevServer {
         }
 
         try {
-            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+            //todo this is wrong, it is not showing exceptions.
+            Futures.whenAllSucceed(startupTasks).call(() -> null, Runnable::run).get();
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "failed during startup", e);
             System.exit(1);
@@ -225,7 +226,7 @@ public class DevServer {
         startupTasks.add(this.maps.init(configProvider));
 
         try {
-            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+            Futures.whenAllSucceed(startupTasks).call(() -> null, Runnable::run).get();
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "failed during startup", e);
             System.exit(1);
@@ -272,7 +273,7 @@ public class DevServer {
         }
         logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
         try {
-            Futures.whenAllComplete(startupTasks).call(() -> null, Runnable::run).get();
+            Futures.whenAllSucceed(startupTasks).call(() -> null, Runnable::run).get();
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "failed during startup", e);
             System.exit(1);
