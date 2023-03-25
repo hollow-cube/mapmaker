@@ -9,6 +9,8 @@ import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class DevHubServer extends HubServerBase {
     private final PlayerStorage playerStorage;
     private final MapStorage mapStorage;
@@ -25,11 +27,11 @@ public class DevHubServer extends HubServerBase {
             @NotNull PlatformPermissionManager platformPermissions,
             @NotNull MapPermissionManager mapPermissions) {
         super(bridge);
-        this.playerStorage = playerStorage;
-        this.mapStorage = mapStorage;
-        this.worldManager = worldManager;
-        this.platformPermissions = platformPermissions;
-        this.mapPermissions = mapPermissions;
+        this.playerStorage = Objects.requireNonNull(playerStorage);
+        this.mapStorage = Objects.requireNonNull(mapStorage);
+        this.worldManager = Objects.requireNonNull(worldManager);
+        this.platformPermissions = Objects.requireNonNull(platformPermissions);
+        this.mapPermissions = Objects.requireNonNull(mapPermissions);
     }
 
     @Override
