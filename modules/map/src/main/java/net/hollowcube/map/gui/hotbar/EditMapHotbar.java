@@ -24,7 +24,7 @@ public final class EditMapHotbar {
             .addListener(PlayerUseItemEvent.class, EditMapHotbar::handleUseItem)
             .addListener(PlayerUseItemOnBlockEvent.class, EditMapHotbar::handleUseItemOnBlock);
 
-    private static final int TEST_MODE_CMD = 500;
+    private static final int TEST_MODE_CMD = 508;
 
     private static final ItemStack TEST_MODE_ITEM = ItemStack.builder(Material.FEATHER)
             .displayName(Component.translatable("gui.map.hotbar.test_mode.name"))
@@ -37,9 +37,8 @@ public final class EditMapHotbar {
     }
 
     public static void applyToPlayer(@NotNull Player player) {
-        player.getInventory().setItemStack(9, TEST_MODE_ITEM);
+        player.getInventory().setItemStack(8, TEST_MODE_ITEM);
     }
-
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
