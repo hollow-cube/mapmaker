@@ -1,10 +1,11 @@
-package net.hollowcube.map.feature2;
+package net.hollowcube.map.feature;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface FeatureProvider {
 
@@ -28,10 +29,12 @@ public interface FeatureProvider {
      * A map will not be considered "ready" until this feature completes.
      *
      * @param world The {@link MapWorld} being initialized.
-     * @return A future which completes when this feature is initialized.
+     * @return A null future indicates that a feature is not enabled, so a cleanup callback will not be sent
+     *         A non-null future indicates that a feature is enabled, and the map will wait for the future before
+     *         being considered ready for players.
      */
-    default @NotNull ListenableFuture<Void> initMap(@NotNull MapWorld world) {
-        return Futures.immediateVoidFuture();
+    default @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
+        return null;
     }
 
     /**

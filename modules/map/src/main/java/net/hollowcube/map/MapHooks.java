@@ -1,6 +1,6 @@
 package net.hollowcube.map;
 
-import net.hollowcube.map.block.FinishPlateBlock;
+import net.hollowcube.map.feature.checkpoint.FinishPlateBlock;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;

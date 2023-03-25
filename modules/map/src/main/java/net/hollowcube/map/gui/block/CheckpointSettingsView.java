@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static net.hollowcube.map.feature.CheckpointFeature.MINIMUM_RESET_HEIGHT;
+import static net.hollowcube.map.feature.checkpoint.CheckpointFeatureProvider.MINIMUM_RESET_HEIGHT;
 
 public class CheckpointSettingsView extends ParentSection {
     private final MapData.POI poi;

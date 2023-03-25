@@ -3,12 +3,15 @@ package net.hollowcube.map.world;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.*;
+import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.util.StringUtil;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -23,6 +26,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
@@ -33,8 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -54,9 +59,14 @@ public abstract class MapWorld extends BaseWorld {
         if (instance == null) return null;
         return instance.getTag(THIS_TAG);
     }
+    private final EventNode<InstanceEvent> scopedNode = EventNode.type("mapmaker:map/scoped", EventFilter.INSTANCE);
+    private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
+    private final ItemRegistry itemRegistry = new ItemRegistry();
 
     protected MapServer mapServer;
     protected final MapData map;
+
+
 
     public MapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
         super(mapServer.worldManager(), map.getId(), new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT));
@@ -70,11 +80,34 @@ public abstract class MapWorld extends BaseWorld {
         instance().setTag(MAP_DATA, map);
 
         var eventNode = instance().eventNode();
+        eventNode.addChild(scopedNode);
+        eventNode.addChild(itemRegistry.eventNode());
         eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::initPlayer);
         eventNode.addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave);
 
+        for (var feature : mapServer.features()) {
+            feature.initMap(this);
+        }
+
         // Mark the map as registered
         EventDispatcher.call(new MapWorldRegisterEvent(this));
+    }
+
+    public @NotNull ListenableFuture<Void> initFeatures() {
+        var futures = new ArrayList<ListenableFuture<Void>>();
+        for (var feature : mapServer.features()) {
+            var future = feature.initMap(this);
+            if (future == null) continue;
+
+            futures.add(future);
+            enabledFeatures.add(feature);
+        }
+
+        return Futures.whenAllComplete(futures).call(() -> null, Runnable::run);
+    }
+
+    public @NotNull ItemRegistry itemRegistry() {
+        return itemRegistry;
     }
 
     public @NotNull MapData map() {
@@ -95,12 +128,22 @@ public abstract class MapWorld extends BaseWorld {
     /**
      * Called to save the player. If `remove` is set, the player is leaving the map and all state should be cleared as well
      */
-    protected void updateSaveStateForPlayer(@NotNull Player player, @NotNull SaveState saveState, boolean remove) {}
+    protected void updateSaveStateForPlayer(@NotNull Player player, @NotNull SaveState saveState, boolean remove) {
+    }
 
     /**
      * Called to close this world, whatever that means for the world type (eg save the world for editing)
      */
     protected abstract @NotNull FutureResult<Void> closeWorld();
+
+    // Feature utilities
+
+    /**
+     * Adds an eventNode which will be removed when the world is unloaded.
+     */
+    public void addScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
+        scopedNode.addChild(eventNode);
+    }
 
 
     // Implementation
@@ -128,7 +171,16 @@ public abstract class MapWorld extends BaseWorld {
     @Override
     public @NotNull CompletableFuture<Void> unloadWorld() {
         EventDispatcher.call(new MapWorldUnloadEvent(this));
-        return super.unloadWorld()
+        for (var child : Set.copyOf(scopedNode.getChildren())) {
+            scopedNode.removeChild(child);
+        }
+
+        var featureCleanup = Futures.whenAllComplete(enabledFeatures.stream()
+                .map(feature -> feature.cleanupMap(this))
+                .toList()).call(() -> null, Runnable::run);
+
+        return FutureUtil.wrap(featureCleanup)
+                .thenCompose(unused -> super.unloadWorld())
                 .thenRun(() -> EventDispatcher.call(new MapWorldUnregisterEvent(this)));
     }
 

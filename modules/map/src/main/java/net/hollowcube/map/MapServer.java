@@ -1,7 +1,7 @@
 package net.hollowcube.map;
 
 import net.hollowcube.canvas.section.Section;
-import net.hollowcube.map.feature2.FeatureProvider;
+import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;

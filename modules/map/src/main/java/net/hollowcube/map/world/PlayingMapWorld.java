@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
-import net.hollowcube.map.feature.CheckpointFeature;
 import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -33,8 +32,6 @@ public class PlayingMapWorld extends MapWorld {
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
         eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
-
-        eventNode.addChild(new CheckpointFeature().eventNode()); //todo auto registration with selector
 
         if (MapHooks.isCompletable(map)) {
             eventNode.addListener(InstanceTickEvent.class, this::tickPlayers);

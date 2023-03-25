@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.instance;
 
 
+import net.minestom.server.command.ServerSender;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -17,7 +18,9 @@ import java.nio.file.Path;
 /**
  * Simple schematic file reader.
  */
-public class SchematicReader {
+public final class SchematicReader {
+
+    private SchematicReader() {}
 
     public static @NotNull Schematic read(@NotNull InputStream stream) throws IOException {
         try (var reader = new NBTReader(stream, CompressedProcesser.GZIP)) {
@@ -66,7 +69,7 @@ public class SchematicReader {
             ArgumentBlockState state = new ArgumentBlockState("");
             palette.forEach((key, value) -> {
                 int assigned = ((NBTInt) value).getValue();
-                Block block = state.parse(key);
+                Block block = state.parse(new ServerSender(), key);
                 paletteBlocks[assigned] = block;
             });
 

@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature2;
+package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
 import com.google.common.util.concurrent.Futures;

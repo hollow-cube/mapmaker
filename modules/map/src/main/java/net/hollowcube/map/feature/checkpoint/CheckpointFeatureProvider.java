@@ -1,41 +1,78 @@
-package net.hollowcube.map.feature;
+package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.item.BlockItemHandler;
+import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-@AutoService(MapFeature.class)
-public class CheckpointFeature implements MapFeature {
-    private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:feature/checkpoint", EventFilter.INSTANCE)
+@AutoService(FeatureProvider.class)
+public class CheckpointFeatureProvider implements FeatureProvider {
+    private static final CheckpointPlateBlock CHECKPOINT_PLATE_BLOCK = new CheckpointPlateBlock();
+    private static final ItemHandler CHECKPOINT_PLATE_ITEM = new BlockItemHandler(
+            CHECKPOINT_PLATE_BLOCK, Block.HEAVY_WEIGHTED_PRESSURE_PLATE);
+
+    private static final FinishPlateBlock FINISH_PLATE_BLOCK = new FinishPlateBlock();
+    private static final ItemHandler FINISH_PLATE_ITEM = new BlockItemHandler(
+            FINISH_PLATE_BLOCK, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
+
+    // Marks the current reset height of a player. If they fall below it, they will be returned to their latest checkpoint, or the map spawn point.
+    private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
+    public static final int MINIMUM_RESET_HEIGHT = -64;
+
+    private final EventNode<InstanceEvent> resetManagementNode = EventNode.type("mapmaker:feature/checkpoint", EventFilter.INSTANCE)
             .addListener(MapWorldPlayerStartPlayingEvent.class, this::acceptPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer)
             .addListener(MapWorldCheckpointReachedEvent.class, this::handleCheckpointUpdate)
             .addListener(InstanceTickEvent.class, this::tick);
 
-    // Marks the current reset height of a player. If they fall below it they will be returned to their latest checkpoint, or the map spawn point.
-    private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
-    public static final int MINIMUM_RESET_HEIGHT = -64;
+    @Override
+    public @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
+        MinecraftServer.getBlockManager().registerHandler(CHECKPOINT_PLATE_BLOCK.getNamespaceId(), () -> CHECKPOINT_PLATE_BLOCK);
+        MinecraftServer.getBlockManager().registerHandler(FINISH_PLATE_BLOCK.getNamespaceId(), () -> FINISH_PLATE_BLOCK);
+
+        return Futures.immediateVoidFuture();
+    }
 
     @Override
-    public @NotNull EventNode<InstanceEvent> eventNode() {
-        return eventNode;
+    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
+        if (world instanceof EditingMapWorld) {
+            world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
+            world.itemRegistry().register(FINISH_PLATE_ITEM);
+        }
+
+        if (world instanceof PlayingMapWorld) {
+            world.addScopedEventNode(resetManagementNode);
+        }
+
+        return Futures.immediateVoidFuture();
     }
+
 
     private void acceptPlayer(@NotNull MapWorldPlayerStartPlayingEvent event) {
         var player = event.getPlayer();
@@ -100,5 +137,4 @@ public class CheckpointFeature implements MapFeature {
         //todo should be map height - 50 when map height is implemented
         return MINIMUM_RESET_HEIGHT - 50;
     }
-
 }
