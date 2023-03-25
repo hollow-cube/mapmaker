@@ -241,26 +241,29 @@ public abstract class MapWorld extends BaseWorld {
     private void handlePlayerLeave(@NotNull PlayerInstanceLeaveEvent event) {
         // Save the player who is leaving
         var player = event.getPlayer();
-        var saveState = SaveState.fromPlayer(player);
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState != null) {
 
-        updateSaveStateForPlayer(player, saveState, true);
-        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+            updateSaveStateForPlayer(player, saveState, true);
+            EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 //        player.tagHandler().updateContent(new NBTCompound()); // Clear the player tag
 
-        var saveStateStorage = mapServer.saveStateStorage();
-        Futures.addCallback(saveStateStorage.updateSaveState(saveState), new FutureCallback<>() {
-            @Override
-            public void onSuccess(Void result) {
-            }
+            var saveStateStorage = mapServer.saveStateStorage();
+            Futures.addCallback(saveStateStorage.updateSaveState(saveState), new FutureCallback<>() {
+                @Override
+                public void onSuccess(Void result) {
+                }
 
-            @Override
-            public void onFailure(@NotNull Throwable t) {
-                //todo should maybe hold the player for this or convey it somehow.
-                // maybe tell the proxy to tell the player
-                logger.error("Failed to save save state for player {} in map {}: {}",
-                        PlayerData.fromPlayer(player).getId(), map.getId(), t);
-            }
-        }, Runnable::run);
+                @Override
+                public void onFailure(@NotNull Throwable t) {
+                    //todo should maybe hold the player for this or convey it somehow.
+                    // maybe tell the proxy to tell the player
+                    logger.error("Failed to save save state for player {} in map {}: {}",
+                            PlayerData.fromPlayer(player).getId(), map.getId(), t);
+                }
+            }, Runnable::run);
+
+        }
 
         // Handle unloading the world when the last player leaves
         //todo need to immediately unregister the world from the world manager so that no players are added.

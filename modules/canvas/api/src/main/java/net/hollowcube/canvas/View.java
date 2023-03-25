@@ -6,14 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class View implements Element {
 
-    // Exposed api is the following:
-    // - loading state
-    // - mount
-    // - outlets
-    // - actions
-    // - injections
-    // - parsing
-
     private final Element delegate;
 
     protected View(@NotNull Context context) {

@@ -20,7 +20,11 @@ public class SaveState {
     public static final Tag<SaveState> TAG = ExtraTags.Transient("mapmaker:map/save_state");
 
     public static @NotNull SaveState fromPlayer(@NotNull Player player) {
-        return Objects.requireNonNull(player.getTag(TAG));
+        return Objects.requireNonNull(optionalFromPlayer(player));
+    }
+
+    public static @Nullable SaveState optionalFromPlayer(@NotNull Player player) {
+        return player.getTag(TAG);
     }
 
     private String id;
