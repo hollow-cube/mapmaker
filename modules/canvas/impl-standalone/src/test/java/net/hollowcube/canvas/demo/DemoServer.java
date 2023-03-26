@@ -34,6 +34,7 @@ public class DemoServer {
         guis.put("loading", LoadingDemo::new);
 //        guis.put("npagination", () -> new RouterSection(sectionFrom(new PaginatedList(baseContext))));
         guis.put("playmaps", PlayMaps::new);
+        guis.put("context", ContextObjectDemo::new);
     }
 
     public static void main(String[] args) {
@@ -72,7 +73,9 @@ public class DemoServer {
                     .append(Component.text("ILL BAN YOU", NamedTextColor.WHITE)));
         });
 
-        var controller = Controller.make();
+        var controller = Controller.make(Map.of(
+                "myContext", "Hello, ContextObject!"
+        ));
 
         var command = new Command("gui");
         command.addSyntax((sender, context) -> {

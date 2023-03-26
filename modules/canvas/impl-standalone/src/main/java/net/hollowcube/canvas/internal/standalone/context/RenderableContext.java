@@ -5,9 +5,12 @@ import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.provider.InventoryViewHost;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public record RenderableContext(
         @NotNull Context parent,
-        @NotNull InventoryViewHost inventory
+        @NotNull InventoryViewHost inventory,
+        @NotNull Map<String, Object> contextObjects
 ) implements Context, ElementContext {
 
     @Override

@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.ServiceLoader;
 
 final class Globals {
@@ -21,7 +22,7 @@ final class Globals {
 
     public static @NotNull Controller controller() {
         if (controller == null) {
-            controller = factory().create();
+            controller = factory().create(Map.of());
         }
         return controller;
     }

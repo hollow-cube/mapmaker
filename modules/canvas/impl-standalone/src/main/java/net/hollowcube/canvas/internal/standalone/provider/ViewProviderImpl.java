@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
@@ -12,6 +13,8 @@ import net.hollowcube.canvas.internal.standalone.context.RenderableContext;
 import net.hollowcube.canvas.internal.standalone.reader.XmlElementReader;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public class ViewProviderImpl implements ViewProvider {
 
@@ -29,10 +32,36 @@ public class ViewProviderImpl implements ViewProvider {
         Check.notNull(viewFile, "View file not found: " + viewClass.getName() + ".xml");
 
         var rootElement = XmlElementReader.load(renderContext, viewFile.toString(), true);
+        wireContextObjects(viewClass, view, renderContext);
         wireOutlets(viewClass, view, rootElement);
         wireActions(viewClass, view, rootElement);
 
         return rootElement;
+    }
+
+    private <T extends View> void wireContextObjects(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull RenderableContext context) {
+        try {
+            for (var field : viewClass.getDeclaredFields()) {
+                var annotation = field.getAnnotation(ContextObject.class);
+                if (annotation == null) continue;
+
+                var name = field.getName();
+                if (!annotation.value().isBlank())
+                    name = annotation.value();
+
+                var contextObject = context.contextObjects().get(name.toLowerCase(Locale.ROOT));
+                Check.notNull(contextObject, "Context object not found: " + name);
+
+                field.setAccessible(true); // NOSONAR
+                if (field.getType().isAssignableFrom(contextObject.getClass())) {
+                    field.set(view, contextObject); // NOSONAR
+                } else {
+                    throw new RuntimeException("Context object type mismatch: " + name);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private <T extends View> void wireOutlets(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull BaseElement root) {
