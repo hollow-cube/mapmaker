@@ -10,6 +10,7 @@ include(":modules:canvas:api")
 include(":modules:instances")
 include(":modules:canvas:impl-standalone")
 include(":modules:canvas:impl-section")
+//include(":modules:canvas:impl-mock")
 
 // Mapmaker modules
 include(":modules:core")

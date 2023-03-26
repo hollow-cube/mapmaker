@@ -29,6 +29,8 @@ public class BoxContainer extends ContainerElement {
 
     @Override
     public @Nullable ItemStack @NotNull [] getContents() {
+        if (isLoading()) return super.getContents();
+
         var items = new ItemStack[width() * height()];
 
         if (align == Align.LTR) {
@@ -56,6 +58,8 @@ public class BoxContainer extends ContainerElement {
 
     @Override
     public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (isLoading()) return CLICK_DENY;
+
         int x = slot % width(), y = slot / width();
         if (align == Align.LTR) {
             for (var child : children()) {

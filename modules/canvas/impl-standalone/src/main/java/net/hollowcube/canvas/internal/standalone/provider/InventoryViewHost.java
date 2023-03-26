@@ -56,6 +56,7 @@ public class InventoryViewHost {
         this.element = newElement;
 
         // Mount the contents in this inventory
+        deferredDirty = false;
         drawCurrentElement();
 
         if (oldInv != null) {
@@ -114,12 +115,18 @@ public class InventoryViewHost {
 
         top = new ItemStack[9 * (height - playerInventoryRows)];
         Arrays.fill(top, ItemStack.AIR);
-        System.arraycopy(contents, 0, top, 0, 9 * (height - playerInventoryRows));
+        for (int i = 0; i < top.length; i++) {
+            if (contents[i] == null) continue;
+            top[i] = contents[i];
+        }
 
         if (playerInventoryRows > 0) {
             bottom = new ItemStack[9 * playerInventoryRows];
             Arrays.fill(bottom, ItemStack.AIR);
-            System.arraycopy(contents, 9 * (height - playerInventoryRows), bottom, 0, 9 * playerInventoryRows);
+            for (int i = 0; i < bottom.length; i++) {
+                if (contents[9 * (height - playerInventoryRows) + i] == null) continue;
+                bottom[i] = contents[9 * (height - playerInventoryRows) + i];
+            }
         }
 
         inventory.replaceInventories(top, bottom);
@@ -159,7 +166,7 @@ public class InventoryViewHost {
             return result;
         }
 
-        public void replaceInventories(@NotNull ItemStack[] top, @Nullable ItemStack[] bottom) {
+        public void replaceInventories(@NotNull ItemStack @NotNull [] top, @NotNull ItemStack @Nullable [] bottom) {
             // Replace the top inventory
             Arrays.fill(itemStacks, ItemStack.AIR);
             System.arraycopy(top, 0, itemStacks, 0, Math.min(top.length, itemStacks.length));
