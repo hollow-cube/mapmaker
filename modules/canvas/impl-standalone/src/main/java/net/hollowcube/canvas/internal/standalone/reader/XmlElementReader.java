@@ -1,6 +1,8 @@
 package net.hollowcube.canvas.internal.standalone.reader;
 
 import com.google.common.base.Splitter;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.*;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
@@ -19,6 +21,7 @@ import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +87,7 @@ public class XmlElementReader {
             case "button" -> loadButton(node);
             case "spacer" -> loadSpacer(node);
             case "switch" -> loadSwitch(node);
-            default -> throw new IllegalStateException("Unknown element type: " + node.getNodeName());
+            default -> loadImportedElement(node);
         };
     }
 
@@ -118,6 +121,30 @@ public class XmlElementReader {
         Check.argCondition(!node.getNodeName().equals("switch"), "Node must be `switch`");
         var elem = new SwitchElement(context, getId(node), getWidth(node), getHeight(node));
         return applyTraits(node, loadChildren(node, elem));
+    }
+
+    private @NotNull BaseElement loadImportedElement(@NotNull Node node) {
+        for (var importPath : imports) {
+            var path = importPath + "." + node.getNodeName();
+            try {
+                var clazz = Class.forName(path);
+                if (!View.class.isAssignableFrom(clazz)) {
+                    throw new IllegalArgumentException("Class must extend View: " + path);
+                }
+
+                var constructor = clazz.getConstructor(Context.class);
+                var importedElement = (ViewContainer) ((View) constructor.newInstance(context)).element();
+                importedElement.setId(getId(node));
+                return importedElement;
+            } catch (ClassNotFoundException ignored) {
+                // No such class is fine, try the next import
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("View class must have a no-args constructor: " + path);
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                throw new IllegalArgumentException("View class constructor threw an exception: " + path, e);
+            }
+        }
+        throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
     }
 
     // Container loading

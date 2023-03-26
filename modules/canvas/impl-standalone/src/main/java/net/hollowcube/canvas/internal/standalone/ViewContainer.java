@@ -24,6 +24,10 @@ public class ViewContainer extends BoxContainer {
         this.associatedView = null;
     }
 
+    public void setId(@Nullable String id) {
+        this.id = id;
+    }
+
     public @NotNull View getAssociatedView() {
         return Objects.requireNonNull(associatedView,
                 "ViewContainer has no associated view. Something went wrong...");
