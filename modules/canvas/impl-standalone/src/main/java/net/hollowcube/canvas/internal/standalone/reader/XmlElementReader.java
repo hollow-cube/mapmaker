@@ -83,6 +83,7 @@ public class XmlElementReader {
             case "label" -> loadLabel(node);
             case "button" -> loadButton(node);
             case "spacer" -> loadSpacer(node);
+            case "switch" -> loadSwitch(node);
             default -> throw new IllegalStateException("Unknown element type: " + node.getNodeName());
         };
     }
@@ -111,6 +112,12 @@ public class XmlElementReader {
     private @NotNull BaseElement loadSpacer(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("spacer"), "Node must be `spacer`");
         return new SpacerElement(context, getWidth(node), getHeight(node));
+    }
+
+    private @NotNull BaseElement loadSwitch(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("switch"), "Node must be `switch`");
+        var elem = new SwitchElement(context, getId(node), getWidth(node), getHeight(node));
+        return applyTraits(node, loadChildren(node, elem));
     }
 
     // Container loading

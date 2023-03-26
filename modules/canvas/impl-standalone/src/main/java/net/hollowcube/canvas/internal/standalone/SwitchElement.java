@@ -1,0 +1,47 @@
+package net.hollowcube.canvas.internal.standalone;
+
+import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class SwitchElement extends ContainerElement implements Switch {
+    private int state = 0;
+
+    public SwitchElement(@NotNull ElementContext context, @Nullable String id, int width, int height) {
+        super(context, id, width, height);
+    }
+
+    protected SwitchElement(@NotNull ElementContext context, @NotNull SwitchElement other) {
+        super(context, other);
+    }
+
+    @Override
+    public void setState(int state) {
+        Check.argCondition(state < 0 || state >= children().size(), "Invalid state: " + state);
+        this.state = state;
+        context.markDirty();
+    }
+
+    @Override
+    public @Nullable ItemStack @NotNull [] getContents() {
+        if (shouldDelegateDraw()) return super.getContents();
+        return children().get(state).getContents();
+    }
+
+    @Override
+    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (shouldIgnoreInput()) return CLICK_DENY;
+
+        return children().get(state).handleClick(player, slot, clickType);
+    }
+
+    @Override
+    public @NotNull SwitchElement clone(@NotNull ElementContext context) {
+        return new SwitchElement(context, this);
+    }
+}
