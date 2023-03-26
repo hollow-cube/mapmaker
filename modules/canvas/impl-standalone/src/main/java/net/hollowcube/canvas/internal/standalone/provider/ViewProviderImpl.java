@@ -32,6 +32,7 @@ public class ViewProviderImpl implements ViewProvider {
         Check.notNull(viewFile, "View file not found: " + viewClass.getName() + ".xml");
 
         var rootElement = XmlElementReader.load(renderContext, viewFile.toString(), true);
+        rootElement.setAssociatedView(view);
         wireContextObjects(viewClass, view, renderContext);
         wireOutlets(viewClass, view, rootElement);
         wireActions(viewClass, view, rootElement);

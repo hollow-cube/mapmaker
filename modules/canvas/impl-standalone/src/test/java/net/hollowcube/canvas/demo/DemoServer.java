@@ -36,6 +36,7 @@ public class DemoServer {
         guis.put("playmaps", PlayMaps::new);
         guis.put("context", ContextObjectDemo::new);
         guis.put("switch", SwitchDemo::new);
+        guis.put("import", ImportDemo::new);
     }
 
     public static void main(String[] args) {
