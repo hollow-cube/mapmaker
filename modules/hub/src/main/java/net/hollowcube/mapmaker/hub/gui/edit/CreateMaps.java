@@ -31,11 +31,6 @@ public class CreateMaps extends View {
         slots = new EditMapIcon[]{slot0, slot1, slot2, slot3, slot4};
 
         creator.setCallbacks(this::mapCreated);
-    }
-
-    @Override
-    public void mount() {
-        super.mount();
 
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
@@ -63,7 +58,6 @@ public class CreateMaps extends View {
             // There is a map, show the full icon
             slot.setState(EditMapIcon.State.FULL, i, mapId);
         }
-
     }
 
     public void mapCreated(int slot, @NotNull MapData map) {

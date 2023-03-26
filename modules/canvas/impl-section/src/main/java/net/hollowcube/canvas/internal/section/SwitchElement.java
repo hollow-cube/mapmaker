@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
 import net.hollowcube.canvas.Switch;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone.trait;
+package net.hollowcube.canvas.internal.section.trait;
 
 public interface DepthAware {
 

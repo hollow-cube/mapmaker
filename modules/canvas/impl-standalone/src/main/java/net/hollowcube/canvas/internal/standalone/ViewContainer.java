@@ -1,10 +1,12 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /**
@@ -39,7 +41,20 @@ public class ViewContainer extends BoxContainer {
 
     @Override
     public @NotNull ViewContainer clone(@NotNull ElementContext context) {
-        return new ViewContainer(context, this);
+        if (associatedView == null)
+            return new ViewContainer(context, this);
+
+        // This is pretty yikes, but the problem is that when we duplicate a view, the associatedView is reset, so we need to instantiate a new one.
+
+        try {
+            var constructor = associatedView.getClass().getConstructor(Context.class);
+            constructor.setAccessible(true);
+            var other = ((ViewContainer) constructor.newInstance(context).element());
+            other.setId(id);
+            return other;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

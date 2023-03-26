@@ -1,11 +1,11 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
 import com.google.common.base.Splitter;
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
-import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
-import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
-import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.hollowcube.canvas.internal.section.sprite.Sprite;
+import net.hollowcube.canvas.internal.section.trait.DepthAware;
+import net.hollowcube.canvas.internal.section.trait.ItemSpriteHolder;
+import net.hollowcube.canvas.internal.section.trait.SpriteHolder;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;

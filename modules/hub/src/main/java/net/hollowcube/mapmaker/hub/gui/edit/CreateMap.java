@@ -35,18 +35,18 @@ public class CreateMap extends View {
         super.mount();
 
         protoMap = new MapData();
-        submitButton.setLoading(false);
+        submitButton.setState(State.ACTIVE);
     }
 
     public void setSlot(int slot) {
         this.slot = slot;
         protoMap = new MapData();
-        submitButton.setLoading(false);
+        setState(State.ACTIVE);
     }
 
     @Action("submit")
     private void handleSubmit(@NotNull Player player) {
-        submitButton.setLoading(true);
+        submitButton.setState(State.LOADING);
 
         var playerData = PlayerData.fromPlayer(player);
         protoMap.setOwner(playerData.getId());

@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
-import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
-import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.hollowcube.canvas.internal.section.trait.DepthAware;
+import net.hollowcube.canvas.internal.section.trait.SpriteHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

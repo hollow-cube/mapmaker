@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
-import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
-import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.section.sprite.Sprite;
+import net.hollowcube.canvas.internal.section.trait.DepthAware;
 import net.hollowcube.canvas.section.RootSection;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;

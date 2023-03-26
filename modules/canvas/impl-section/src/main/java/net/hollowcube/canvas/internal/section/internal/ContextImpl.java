@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone.internal;
+package net.hollowcube.canvas.internal.section.internal;
 
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;

@@ -1,8 +1,8 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.section.trait.DepthAware;
 import net.hollowcube.canvas.section.SectionLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
