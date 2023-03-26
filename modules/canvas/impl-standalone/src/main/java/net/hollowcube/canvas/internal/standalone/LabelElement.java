@@ -40,6 +40,8 @@ public class LabelElement extends BaseElement implements Label, ItemSpriteHolder
 
     @Override
     public @Nullable ItemStack @NotNull [] getContents() {
+        if (isLoading()) return super.getContents();
+
         var contents = new ItemStack[width() * height()];
         Arrays.fill(contents, itemSprite);
         return contents;

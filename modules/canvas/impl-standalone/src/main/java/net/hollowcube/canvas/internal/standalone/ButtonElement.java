@@ -30,6 +30,8 @@ public class ButtonElement extends LabelElement {
 
     @Override
     public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (isLoading()) return CLICK_DENY;
+
         for (var handler : handlers) {
             handler.handleClick(player, slot, clickType);
         }

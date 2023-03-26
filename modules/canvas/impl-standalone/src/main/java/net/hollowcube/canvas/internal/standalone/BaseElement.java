@@ -7,17 +7,23 @@ import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public abstract class BaseElement implements Element {
+    public static final ItemStack LOADING_ITEM = ItemStack.of(Material.BARRIER);
+
 
     protected final ElementContext context;
     protected @Nullable String id;
     private final int width;
     private final int height;
+
+    private boolean isLoading = false;
 
     protected BaseElement(@NotNull ElementContext context, @Nullable String id, int width, int height) {
         this.context = context;
@@ -46,9 +52,16 @@ public abstract class BaseElement implements Element {
         return height;
     }
 
+    public boolean isLoading() {
+        return isLoading;
+    }
+
     @Override
     public void setLoading(boolean loading) {
-        throw new UnsupportedOperationException("todo not implemented");
+        if (this.isLoading == loading) return;
+        this.isLoading = loading;
+
+        context.markDirty();
     }
 
     /**
@@ -57,7 +70,13 @@ public abstract class BaseElement implements Element {
      * The result array is a flat 2d array of all the items in the slot, or null if an item is not set.
      * The length of the array _must_ be {@link #width()} * {@link #height()}.
      */
-    public abstract @Nullable ItemStack @NotNull [] getContents();
+    public @Nullable ItemStack @NotNull [] getContents() {
+        var items = new ItemStack[width * height];
+        if (isLoading) {
+            Arrays.fill(items, LOADING_ITEM);
+        }
+        return items;
+    }
 
     public @Nullable BaseElement findById(@NotNull String id) {
         if (id.equals(this.id))
