@@ -35,6 +35,7 @@ public class DemoServer {
 //        guis.put("npagination", () -> new RouterSection(sectionFrom(new PaginatedList(baseContext))));
         guis.put("playmaps", PlayMaps::new);
         guis.put("context", ContextObjectDemo::new);
+        guis.put("switch", SwitchDemo::new);
     }
 
     public static void main(String[] args) {
