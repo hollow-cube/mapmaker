@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class BoxContainer extends ContainerElement {
+public class BoxContainer extends ContainerElement implements SpriteHolder {
 
     public enum Align {
         LTR, TTB
@@ -29,7 +30,7 @@ public class BoxContainer extends ContainerElement {
 
     @Override
     public @Nullable ItemStack @NotNull [] getContents() {
-        if (isLoading()) return super.getContents();
+        if (shouldDelegateDraw()) return super.getContents();
 
         var items = new ItemStack[width() * height()];
 
@@ -58,7 +59,7 @@ public class BoxContainer extends ContainerElement {
 
     @Override
     public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (isLoading()) return CLICK_DENY;
+        if (shouldIgnoreInput()) return CLICK_DENY;
 
         int x = slot % width(), y = slot / width();
         if (align == Align.LTR) {

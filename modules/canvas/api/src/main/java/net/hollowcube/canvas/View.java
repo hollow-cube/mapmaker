@@ -28,6 +28,16 @@ public abstract class View implements Element {
         delegate.setLoading(true);
     }
 
+    @Override
+    public @NotNull State getState() {
+        return delegate.getState();
+    }
+
+    @Override
+    public void setState(@NotNull State state) {
+        delegate.setState(state);
+    }
+
     /**
      * Called when this view is mounted (shown to a player).
      * <p>

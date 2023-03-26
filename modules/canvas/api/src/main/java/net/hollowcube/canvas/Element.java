@@ -11,9 +11,21 @@ public interface Element extends ElementLike {
     boolean CLICK_ALLOW = true;
     boolean CLICK_DENY = false;
 
+    enum State {
+        ACTIVE,
+        LOADING,
+        HIDDEN,
+        DISABLED
+    }
+
     @Nullable String id();
 
+    @Deprecated
     void setLoading(boolean loading);
+
+    @NotNull State getState();
+
+    void setState(@NotNull State state);
 
     @Override
     default @NotNull Element element() {

@@ -23,6 +23,14 @@ public abstract class ContainerElement extends BaseElement {
     }
 
     @Override
+    public void buildTitle(@NotNull StringBuilder sb) {
+        super.buildTitle(sb);
+        for (var child : children) {
+            child.buildTitle(sb);
+        }
+    }
+
+    @Override
     public @Nullable BaseElement findById(@NotNull String id) {
         var found = super.findById(id);
         if (found != null) return found;

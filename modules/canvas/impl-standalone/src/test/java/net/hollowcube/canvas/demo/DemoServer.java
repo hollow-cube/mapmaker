@@ -33,7 +33,7 @@ public class DemoServer {
         guis.put("counter", Counter::new);
         guis.put("loading", LoadingDemo::new);
 //        guis.put("npagination", () -> new RouterSection(sectionFrom(new PaginatedList(baseContext))));
-//        guis.put("nplaymaps", () -> new RouterSection(sectionFrom(new PlayMaps(baseContext))));
+        guis.put("playmaps", PlayMaps::new);
     }
 
     public static void main(String[] args) {

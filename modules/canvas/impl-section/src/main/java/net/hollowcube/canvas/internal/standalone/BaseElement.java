@@ -24,6 +24,16 @@ public interface BaseElement extends Element, SectionLike  {
 
     BaseElement clone();
 
+    @Override
+    default @NotNull State getState() {
+        throw new UnsupportedOperationException("impl-section does not support new state system");
+    }
+
+    @Override
+    default void setState(@NotNull State state) {
+        throw new UnsupportedOperationException("impl-section does not support new state system");
+    }
+
     default void wireAction(@NotNull View view, @NotNull Method method) {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support actions.");
     }

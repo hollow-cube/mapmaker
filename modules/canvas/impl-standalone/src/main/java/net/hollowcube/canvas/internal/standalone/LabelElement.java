@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class LabelElement extends BaseElement implements Label, ItemSpriteHolder {
+public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
             .meta(meta -> meta.customModelData(1000))
             .build();
@@ -25,12 +26,14 @@ public class LabelElement extends BaseElement implements Label, ItemSpriteHolder
     public LabelElement(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull String translationKey) {
         super(context, id, width, height);
         this.translationKey = translationKey;
+        updateItem();
     }
 
     protected LabelElement(@NotNull ElementContext context, @NotNull LabelElement other) {
         super(context, other);
         this.translationKey = other.translationKey;
         this.itemSprite = other.itemSprite;
+        updateItem();
     }
 
     @Override
@@ -40,7 +43,7 @@ public class LabelElement extends BaseElement implements Label, ItemSpriteHolder
 
     @Override
     public @Nullable ItemStack @NotNull [] getContents() {
-        if (isLoading()) return super.getContents();
+        if (shouldDelegateDraw()) return super.getContents();
 
         var contents = new ItemStack[width() * height()];
         Arrays.fill(contents, itemSprite);

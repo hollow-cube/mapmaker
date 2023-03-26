@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
@@ -129,7 +130,12 @@ public class InventoryViewHost {
             }
         }
 
+        // Build the title string
+        var titleBuilder = new StringBuilder();
+        element.buildTitle(titleBuilder);
+
         inventory.replaceInventories(top, bottom);
+        inventory.setTitle(Component.text(titleBuilder.toString(), NamedTextColor.WHITE));
         dirty = false;
     }
 
@@ -144,6 +150,10 @@ public class InventoryViewHost {
             update();
 
             addInventoryCondition(this::openedInvClick);
+        }
+
+        public boolean needsPlayerInventory() {
+            return playerInventoryRows > 0;
         }
 
         @Override
@@ -271,6 +281,13 @@ public class InventoryViewHost {
 
         @Override
         public void update() {
+            // In case we are in an InventoryWrapper (a canvas managed inventory), and it needs player inventory updates,
+            // forward the update there and do not call the super method.
+            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
+                wrapper.updatePlayerInventory();
+                return;
+            }
+
             super.update();
         }
     }
