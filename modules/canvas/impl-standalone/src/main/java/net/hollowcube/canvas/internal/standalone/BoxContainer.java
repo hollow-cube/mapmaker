@@ -1,5 +1,8 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,13 +17,13 @@ public class BoxContainer extends ContainerElement {
 
     private final Align align;
 
-    public BoxContainer(@Nullable String id, int width, int height, @NotNull Align align) {
-        super(id, width, height);
+    public BoxContainer(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull Align align) {
+        super(context, id, width, height);
         this.align = Objects.requireNonNull(align, "alignment must be specified on BoxContainer");
     }
 
-    protected BoxContainer(@NotNull BoxContainer other) {
-        super(other);
+    protected BoxContainer(@NotNull ElementContext context, @NotNull BoxContainer other) {
+        super(context, other);
         this.align = other.align;
     }
 
@@ -52,8 +55,35 @@ public class BoxContainer extends ContainerElement {
     }
 
     @Override
-    public @NotNull BoxContainer dup() {
-        return new BoxContainer(this);
+    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        int x = slot % width(), y = slot / width();
+        if (align == Align.LTR) {
+            for (var child : children()) {
+                if (x < child.width()) {
+                    if (y >= child.height()) return CLICK_DENY;
+                    return child.handleClick(player, y * child.width() + x, clickType);
+                }
+
+                x -= child.width();
+            }
+        } else if (align == Align.TTB) {
+            for (var child : children()) {
+                if (y < child.height()) {
+                    if (x >= child.width()) return CLICK_DENY;
+                    return child.handleClick(player, y * child.width() + x, clickType);
+                }
+
+                y -= child.height();
+            }
+        } else {
+            throw new IllegalStateException("Unsupported alignment: " + align);
+        }
+        return CLICK_DENY;
+    }
+
+    @Override
+    public @NotNull BoxContainer clone(@NotNull ElementContext context) {
+        return new BoxContainer(context, this);
     }
 
     static void patchItemArray(

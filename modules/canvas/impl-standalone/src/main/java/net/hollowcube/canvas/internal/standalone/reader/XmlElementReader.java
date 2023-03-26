@@ -1,6 +1,14 @@
 package net.hollowcube.canvas.internal.standalone.reader;
 
+import com.google.common.base.Splitter;
 import net.hollowcube.canvas.internal.standalone.*;
+import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
+import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,29 +29,31 @@ public class XmlElementReader {
 
     private static final Map<String, ViewContainer> xmlCache = new ConcurrentHashMap<>();
 
-    public static @NotNull ViewContainer load(@NotNull String viewPath, boolean cache) {
+    public static @NotNull ViewContainer load(@NotNull ElementContext context, @NotNull String viewPath, boolean cache) {
         if (cache && xmlCache.containsKey(viewPath)) {
             logger.log(System.Logger.Level.DEBUG, "Cache hit for '{0}'", viewPath);
             return xmlCache.get(viewPath);
         }
 
-        var reader = new XmlElementReader(viewPath);
+        var reader = new XmlElementReader(context, viewPath);
         var root = reader.readRoot();
 
         if (cache) {
             // If caching, we re clone the root to normalize to always using cloned versions.
             xmlCache.put(viewPath, root);
-            root = root.dup();
+            root = root.clone(context);
         }
         return root;
     }
 
+    private final ElementContext context;
     private final Document doc;
     private int depth = 0;
 
     private List<String> imports = new ArrayList<>();
 
-    public XmlElementReader(@NotNull String viewPath) {
+    public XmlElementReader(@NotNull ElementContext context, @NotNull String viewPath) {
+        this.context = context;
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             doc = builder.parse(viewPath);
@@ -60,7 +70,7 @@ public class XmlElementReader {
 
     private @NotNull ViewContainer loadRoot(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("component"), "Root node must be 'component'");
-        var elem = new ViewContainer(getId(node), getWidth(node), getHeight(node),
+        var elem = new ViewContainer(context, getId(node), getWidth(node), getHeight(node),
                 getEnum(node, "align", BoxContainer.Align.LTR));
         return applyTraits(node, loadChildren(node, elem));
     }
@@ -77,7 +87,7 @@ public class XmlElementReader {
 
     private @NotNull BaseElement loadBox(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("box"), "Node must be `box`");
-        var elem = new BoxContainer(getId(node), getWidth(node), getHeight(node),
+        var elem = new BoxContainer(context, getId(node), getWidth(node), getHeight(node),
                 getEnum(node, "align", BoxContainer.Align.LTR));
         return applyTraits(node, loadChildren(node, elem));
     }
@@ -85,14 +95,14 @@ public class XmlElementReader {
     private @NotNull BaseElement loadLabel(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("label"), "Node must be `label`");
         var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
-        var elem = new LabelElement(getId(node), getWidth(node), getHeight(node), translationKey);
+        var elem = new LabelElement(context, getId(node), getWidth(node), getHeight(node), translationKey);
         return applyTraits(node, elem);
     }
 
     private @NotNull BaseElement loadButton(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("button"), "Node must be `button`");
         var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
-        var elem = new ButtonElement(getId(node), getWidth(node), getHeight(node), translationKey);
+        var elem = new ButtonElement(context, getId(node), getWidth(node), getHeight(node), translationKey);
         return applyTraits(node, elem);
     }
 
@@ -114,6 +124,39 @@ public class XmlElementReader {
     // Traits
 
     private <T extends BaseElement> T applyTraits(@NotNull Node node, @NotNull T elem) {
+        if (elem instanceof DepthAware trait) {
+            trait.setZIndex(depth);
+        }
+
+        // Sprites
+        var spriteName = getString(node, "sprite", null);
+        if (spriteName != null) {
+            var sprite = Sprite.SPRITE_MAP.get(spriteName);
+            if (sprite != null) {
+                if (elem instanceof SpriteHolder trait) {
+                    trait.setSprite(sprite);
+                } else {
+                    throw new IllegalArgumentException("Element does not support sprites: " + elem.getClass().getSimpleName());
+                }
+            } else {
+                // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
+                var split = Splitter.on('@').splitToList(spriteName);
+                var material = Material.fromNamespaceId(split.get(0));
+                if (material == null) {
+                    throw new IllegalArgumentException("Unknown sprite: " + spriteName);
+                }
+                var builder = ItemStack.builder(material);
+                if (split.size() > 1) {
+                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split.get(1))));
+                }
+                if (elem instanceof ItemSpriteHolder trait) {
+                    trait.setItemSprite(builder.build());
+                } else {
+                    throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
+                }
+            }
+        }
+
         return elem;
     }
 

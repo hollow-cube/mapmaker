@@ -4,7 +4,8 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
 import org.jetbrains.annotations.NotNull;
 
-public record TempContext(
+public record RootContext(
         @NotNull ViewProvider viewProvider
 ) implements Context {
+
 }
