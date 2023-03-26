@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.hollowcube.canvas.internal.standalone.util.Debugger;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -38,7 +39,7 @@ public class XmlElementReader {
         var reader = new XmlElementReader(context, viewPath);
         var root = reader.readRoot();
 
-        if (cache) {
+        if (cache && !Debugger.isEnabled()) { // Never cache when debugging
             // If caching, we re clone the root to normalize to always using cloned versions.
             xmlCache.put(viewPath, root);
             root = root.clone(context);
@@ -81,6 +82,7 @@ public class XmlElementReader {
             case "box" -> loadBox(node);
             case "label" -> loadLabel(node);
             case "button" -> loadButton(node);
+            case "spacer" -> loadSpacer(node);
             default -> throw new IllegalStateException("Unknown element type: " + node.getNodeName());
         };
     }
@@ -104,6 +106,11 @@ public class XmlElementReader {
         var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
         var elem = new ButtonElement(context, getId(node), getWidth(node), getHeight(node), translationKey);
         return applyTraits(node, elem);
+    }
+
+    private @NotNull BaseElement loadSpacer(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("spacer"), "Node must be `spacer`");
+        return new SpacerElement(context, getWidth(node), getHeight(node));
     }
 
     // Container loading

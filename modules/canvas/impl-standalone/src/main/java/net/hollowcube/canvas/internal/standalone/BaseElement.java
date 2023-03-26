@@ -4,6 +4,7 @@ import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.common.util.FontUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -23,7 +24,7 @@ public abstract class BaseElement implements Element {
     private final int width;
     private final int height;
 
-    private boolean isLoading = false;
+    private State state = State.ACTIVE;
 
     protected BaseElement(@NotNull ElementContext context, @Nullable String id, int width, int height) {
         this.context = context;
@@ -37,6 +38,9 @@ public abstract class BaseElement implements Element {
         this.id = other.id;
         this.width = other.width;
         this.height = other.height;
+
+        this.zIndex = other.zIndex;
+        this.sprite = other.sprite;
     }
 
     @Override
@@ -52,15 +56,28 @@ public abstract class BaseElement implements Element {
         return height;
     }
 
-    public boolean isLoading() {
-        return isLoading;
+    public boolean shouldDelegateDraw() {
+        return state == State.LOADING || state == State.DISABLED;
+    }
+
+    public boolean shouldIgnoreInput() {
+        return state == State.LOADING || state == State.DISABLED;
     }
 
     @Override
     public void setLoading(boolean loading) {
-        if (this.isLoading == loading) return;
-        this.isLoading = loading;
+        setState(loading ? State.LOADING : State.ACTIVE);
+    }
 
+    @Override
+    public @NotNull State getState() {
+        return state;
+    }
+
+    @Override
+    public void setState(@NotNull State state) {
+        if (this.state == state) return;
+        this.state = state;
         context.markDirty();
     }
 
@@ -72,10 +89,18 @@ public abstract class BaseElement implements Element {
      */
     public @Nullable ItemStack @NotNull [] getContents() {
         var items = new ItemStack[width * height];
-        if (isLoading) {
+        if (state == State.LOADING) {
             Arrays.fill(items, LOADING_ITEM);
         }
         return items;
+    }
+
+    public void buildTitle(@NotNull StringBuilder sb) {
+        if (sprite == null || state != State.ACTIVE) return;
+
+        sb.append(FontUtil.computeOffset(sprite.offsetX()));
+        sb.append(sprite.fontChar());
+        sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width())));
     }
 
     public @Nullable BaseElement findById(@NotNull String id) {
@@ -119,6 +144,7 @@ public abstract class BaseElement implements Element {
 
     public void setSprite(@Nullable Sprite sprite) {
         this.sprite = sprite;
+        context.markDirty();
     }
 
 
