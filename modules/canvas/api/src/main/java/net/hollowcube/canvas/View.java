@@ -14,27 +14,27 @@ public abstract class View implements Element {
     }
 
     @Override
-    public @NotNull Element element() {
+    public final @NotNull Element element() {
         return delegate;
     }
 
     @Override
-    public @Nullable String id() {
+    public final @Nullable String id() {
         return delegate.id();
     }
 
     @Override
-    public void setLoading(boolean loading) {
+    public final void setLoading(boolean loading) {
         delegate.setLoading(true);
     }
 
     @Override
-    public @NotNull State getState() {
+    public final @NotNull State getState() {
         return delegate.getState();
     }
 
     @Override
-    public void setState(@NotNull State state) {
+    public final void setState(@NotNull State state) {
         delegate.setState(state);
     }
 
