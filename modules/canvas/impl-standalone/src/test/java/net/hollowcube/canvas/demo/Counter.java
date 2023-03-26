@@ -15,7 +15,7 @@ public class Counter extends View {
 
     public Counter(@NotNull Context context) {
         super(context);
-//        label.setArgs(Component.text(count));
+        label.setArgs(Component.text(count));
     }
 
     @Action("incr")

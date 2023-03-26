@@ -15,6 +15,7 @@ import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,16 +24,19 @@ public class InventoryViewHost {
     private static final System.Logger logger = System.getLogger(InventoryViewHost.class.getName());
 
     private int width, height;
-    private InventoryWrapper inventory;
+    private InventoryWrapper inventory = null;
 
-    private BaseElement element;
+    private BaseElement element = null;
+
+    private boolean dirty = false;
+    // Start in deferred mode in case the view is marked dirty immediately (eg during constructor)
+    private boolean deferredDirty = true;
 
     // The number of rows of the player inventory currently in use.
     private int playerInventoryRows = 0;
 
-    public InventoryViewHost(@NotNull View initialView) {
-
-        replaceInventory((BaseElement) initialView.element());
+    public void pushView(@NotNull View view) {
+        replaceInventory((BaseElement) view.element());
     }
 
     public @NotNull Inventory getHandle() {
@@ -52,12 +56,7 @@ public class InventoryViewHost {
         this.element = newElement;
 
         // Mount the contents in this inventory
-        var contents = element.getContents();
-        for (int i = 0; i < 9; i++) {
-            //todo
-            if (contents[i] == null) continue;
-            inventory.setItemStack(i, contents[i]);
-        }
+        drawCurrentElement();
 
         if (oldInv != null) {
             // Migrate the viewers to the new inventory
@@ -96,10 +95,35 @@ public class InventoryViewHost {
         };
     }
 
-    // Click handling
+    // Rendering
 
-    private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
-        return false;
+    public void markDirty() {
+        dirty = true;
+
+        // If not deferred, redraw immediately.
+        if (!deferredDirty) {
+            drawCurrentElement();
+        }
+    }
+
+    private void drawCurrentElement() {
+        // This depends on the fact that we only accept 9-width inventories currently
+
+        var contents = element.getContents();
+        ItemStack[] top, bottom = null;
+
+        top = new ItemStack[9 * (height - playerInventoryRows)];
+        Arrays.fill(top, ItemStack.AIR);
+        System.arraycopy(contents, 0, top, 0, 9 * (height - playerInventoryRows));
+
+        if (playerInventoryRows > 0) {
+            bottom = new ItemStack[9 * playerInventoryRows];
+            Arrays.fill(bottom, ItemStack.AIR);
+            System.arraycopy(contents, 9 * (height - playerInventoryRows), bottom, 0, 9 * playerInventoryRows);
+        }
+
+        inventory.replaceInventories(top, bottom);
+        dirty = false;
     }
 
     private class InventoryWrapper extends Inventory {
@@ -135,9 +159,18 @@ public class InventoryViewHost {
             return result;
         }
 
-        // Takes slot as a player inventory slot (eg 0-35 from top to bottom)
-        public void setPlayerItemStack(int slot, @NotNull ItemStack itemStack) {
-            playerInv[slot] = itemStack;
+        public void replaceInventories(@NotNull ItemStack[] top, @Nullable ItemStack[] bottom) {
+            // Replace the top inventory
+            Arrays.fill(itemStacks, ItemStack.AIR);
+            System.arraycopy(top, 0, itemStacks, 0, Math.min(top.length, itemStacks.length));
+
+            // Replace the player inventory if present
+            if (bottom != null) {
+                Arrays.fill(playerInv, ItemStack.AIR);
+                System.arraycopy(bottom, 0, playerInv, 0, Math.min(bottom.length, playerInv.length));
+            }
+
+            update();
             updatePlayerInventory();
         }
 
@@ -158,6 +191,16 @@ public class InventoryViewHost {
 
             var allow = tryHandleClick(slot, player, clickType);
             result.setCancel(!allow);
+        }
+
+        private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
+            if (element == null) return false;
+
+            deferredDirty = true;
+            var result = element.handleClick(player, index, clickType);
+            deferredDirty = false;
+            if (dirty) drawCurrentElement();
+            return result;
         }
 
         private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {
