@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone.sprite;
+package net.hollowcube.canvas.internal.section.sprite;
 
 import java.util.Map;
 

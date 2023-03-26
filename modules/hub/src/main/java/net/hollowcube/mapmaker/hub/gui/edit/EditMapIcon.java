@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
@@ -43,7 +44,7 @@ public class EditMapIcon extends View {
         super(context);
 
         // Immediately start loading, we will wait until the state is set using #setState
-        setLoading(true);
+        setState(Element.State.LOADING);
     }
 
     public void setCallbacks(@NotNull Consumer<MapData> onSelect, @NotNull IntConsumer onCreate) {
@@ -68,7 +69,7 @@ public class EditMapIcon extends View {
                             Component.text(slot + 1),
                             Component.text(result.getName())
                     );
-                    setLoading(false);
+                    setState(Element.State.ACTIVE);
                 }
 
                 @Override
@@ -81,7 +82,7 @@ public class EditMapIcon extends View {
             var slotArg = Component.text(slot + 1);
             locked.setArgs(slotArg);
             empty.setArgs(slotArg);
-            setLoading(false);
+            setState(Element.State.ACTIVE);
         }
     }
 

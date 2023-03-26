@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone.trait;
+package net.hollowcube.canvas.internal.section.trait;
 
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.Nullable;

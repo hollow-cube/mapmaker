@@ -1,9 +1,9 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
 import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
-import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
-import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
+import net.hollowcube.canvas.internal.section.trait.DepthAware;
+import net.hollowcube.canvas.internal.section.trait.ItemSpriteHolder;
+import net.hollowcube.canvas.internal.section.trait.SpriteHolder;
 import net.hollowcube.canvas.section.ClickHandler;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;

@@ -1,8 +1,8 @@
-package net.hollowcube.canvas.internal.standalone;
+package net.hollowcube.canvas.internal.section;
 
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
-import net.hollowcube.canvas.internal.standalone.util.RouterSectionHistoryStack;
+import net.hollowcube.canvas.internal.section.sprite.Sprite;
+import net.hollowcube.canvas.internal.section.util.RouterSectionHistoryStack;
 import net.hollowcube.canvas.section.ItemSection;
 import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.Section;

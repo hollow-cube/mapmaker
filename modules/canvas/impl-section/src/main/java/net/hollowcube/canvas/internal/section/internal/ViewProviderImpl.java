@@ -1,4 +1,4 @@
-package net.hollowcube.canvas.internal.standalone.internal;
+package net.hollowcube.canvas.internal.section.internal;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
@@ -6,8 +6,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
-import net.hollowcube.canvas.internal.standalone.BaseElement;
-import net.hollowcube.canvas.internal.standalone.XmlElementReader;
+import net.hollowcube.canvas.internal.section.BaseElement;
+import net.hollowcube.canvas.internal.section.XmlElementReader;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 

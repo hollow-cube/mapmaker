@@ -15,13 +15,13 @@ public class EditMap extends View {
     public EditMap(@NotNull Context context) {
         super(context);
 
-        setLoading(true);
+        setState(State.LOADING);
     }
 
     public void showMap(@NotNull MapData map) {
         this.map = map;
 
-        setLoading(false);
+        setState(State.ACTIVE);
     }
 
     @Action("edit_in_world")

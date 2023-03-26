@@ -1,10 +1,8 @@
 package net.hollowcube.mapmaker.hub.guiold.hotbar;
 
-import net.hollowcube.canvas.internal.standalone.BaseElement;
-import net.hollowcube.canvas.internal.standalone.internal.ContextImpl;
+import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
-import net.hollowcube.mapmaker.hub.guiold.map.CreateMapsView;
 import net.hollowcube.mapmaker.hub.guiold.search.MapSearchView;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
@@ -27,6 +25,8 @@ public final class HubHotbar {
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub/hotbar", EventFilter.INSTANCE)
             .addListener(PlayerUseItemEvent.class, HubHotbar::handleUseItem)
             .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock);
+
+    private static final Controller controller = Controller.make();
 
     private static final int PLAY_ITEM_CMD = 500;
     private static final int CREATE_ITEM_CMD = 501;
@@ -66,7 +66,8 @@ public final class HubHotbar {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         switch (customModelData) {
             case PLAY_ITEM_CMD -> server.openGUIForPlayer(player, new MapSearchView());
-            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
+//            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, new CreateMapsView());
+            case CREATE_ITEM_CMD -> controller.show(player, c -> new CreateMaps(c, player));
 //            case CREATE_ITEM_CMD -> server.openGUIForPlayer(player, (BaseElement) new CreateMaps(new ContextImpl(), player).element());
         }
     }

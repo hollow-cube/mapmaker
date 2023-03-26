@@ -1,7 +1,7 @@
-package net.hollowcube.canvas.internal.standalone.util;
+package net.hollowcube.canvas.internal.section.util;
 
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.standalone.BaseElement;
+import net.hollowcube.canvas.internal.section.BaseElement;
 import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.util.HistoryStack;
 import org.jetbrains.annotations.NotNull;
