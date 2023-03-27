@@ -29,7 +29,11 @@ public class ControllerImpl implements Controller {
     @Override
     public void show(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
         var inventory = new InventoryViewHost();
-        var context = new RenderableContext(rootContext, inventory, contextObjects);
+
+        var newContextObjects = new HashMap<>(contextObjects);
+        newContextObjects.put("player", player);
+
+        var context = new RenderableContext(rootContext, inventory, newContextObjects);
         inventory.pushView(viewProvider.apply(context));
         player.openInventory(inventory.getHandle());
     }

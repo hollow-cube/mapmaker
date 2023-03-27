@@ -8,4 +8,8 @@ public record RootContext(
         @NotNull ViewProvider viewProvider
 ) implements Context {
 
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        throw new UnsupportedOperationException("Cannot perform signal on root context");
+    }
 }

@@ -37,6 +37,7 @@ public class DemoServer {
         guis.put("context", ContextObjectDemo::new);
         guis.put("switch", SwitchDemo::new);
         guis.put("import", ImportDemo::new);
+        guis.put("signal", SignalDemo::new);
     }
 
     public static void main(String[] args) {

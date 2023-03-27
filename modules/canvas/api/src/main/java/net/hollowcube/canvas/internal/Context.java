@@ -11,4 +11,6 @@ public interface Context {
 
     @NotNull ViewProvider viewProvider();
 
+    void performSignal(@NotNull String name, @NotNull Object... args);
+
 }

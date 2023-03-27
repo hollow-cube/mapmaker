@@ -2,13 +2,16 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class EditMap extends View {
+
+    private @ContextObject("handler") Handler mapHandler;
 
     private MapData map;
 
@@ -26,8 +29,6 @@ public class EditMap extends View {
 
     @Action("edit_in_world")
     private void editMap(@NotNull Player player) {
-        var mapHandler = HubServer.StaticAbuse.handler;
-
         mapHandler.editMap(player, map.getId())
                 .then(unused -> player.closeInventory());
     }

@@ -5,6 +5,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
@@ -36,6 +37,7 @@ public class ViewProviderImpl implements ViewProvider {
         wireContextObjects(viewClass, view, renderContext);
         wireOutlets(viewClass, view, rootElement);
         wireActions(viewClass, view, rootElement);
+        wireSignals(viewClass, view, rootElement);
 
         return rootElement;
     }
@@ -100,6 +102,23 @@ public class ViewProviderImpl implements ViewProvider {
             Check.notNull(element, "Action not found: " + name);
 
             element.wireAction(view, method);
+        }
+    }
+
+    private <T extends View> void wireSignals(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull ViewContainer root) {
+        for (var method : viewClass.getDeclaredMethods()) {
+            var action = method.getAnnotation(Signal.class);
+            if (action == null) continue;
+
+            var name = action.value();
+            root.addSignal(name.toLowerCase(Locale.ROOT), args -> {
+                try {
+                    method.setAccessible(true);
+                    method.invoke(view, args);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 

@@ -9,4 +9,9 @@ public class ContextImpl implements Context {
     public @NotNull ViewProvider viewProvider() {
         return ViewProviderImpl.INSTANCE;
     }
+
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        throw new UnsupportedOperationException("Cannot perform signal in section context");
+    }
 }

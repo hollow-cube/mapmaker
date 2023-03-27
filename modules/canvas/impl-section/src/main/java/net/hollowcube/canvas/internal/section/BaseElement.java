@@ -38,4 +38,8 @@ public interface BaseElement extends Element, SectionLike  {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support actions.");
     }
 
+    default void performSignal(@NotNull String name, @NotNull Object... args) {
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support signals.");
+    }
+
 }
