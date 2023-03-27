@@ -31,6 +31,13 @@ public abstract class ContainerElement extends BaseElement {
     }
 
     @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        for (var child : children) {
+            child.performSignal(name, args);
+        }
+    }
+
+    @Override
     public @Nullable BaseElement findById(@NotNull String id) {
         var found = super.findById(id);
         if (found != null) return found;

@@ -6,9 +6,12 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class View implements Element {
 
+    private final Context context;
     private final Element delegate;
 
     protected View(@NotNull Context context) {
+        this.context = context;
+
         var viewProvider = context.viewProvider();
         delegate = viewProvider.viewFor(context, getClass(), this, this::mount, this::unmount);
     }
@@ -37,6 +40,14 @@ public abstract class View implements Element {
     public final void setState(@NotNull State state) {
         delegate.setState(state);
     }
+
+    // Slot/Signal
+
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        context.performSignal(name, args);
+    }
+
 
     /**
      * Called when this view is mounted (shown to a player).

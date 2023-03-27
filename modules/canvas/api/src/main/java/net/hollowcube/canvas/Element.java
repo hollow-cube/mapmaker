@@ -27,6 +27,8 @@ public interface Element extends ElementLike {
 
     void setState(@NotNull State state);
 
+    void performSignal(@NotNull String name, @NotNull Object... args);
+
     @Override
     default @NotNull Element element() {
         return this;

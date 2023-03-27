@@ -2,6 +2,9 @@ package net.hollowcube.mapmaker.hub;
 
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.canvas.section.SectionLike;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
@@ -15,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class HubServerBase implements HubServer { //todo one readiness check should be ensuring the world is loaded
@@ -23,6 +27,7 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     private Handler mapHandler;
     private HubWorld world;
 
+    private Controller guiController;
     private Map<Class<?>, Object> guiContext;
 
     public HubServerBase(@NotNull HubToMapBridge bridge) {
@@ -35,10 +40,14 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     }
 
     public @NotNull ListenableFuture<Void> init() {
-        StaticAbuse.instance = this;
         this.mapHandler = new Handler(this);
-        StaticAbuse.handler = mapHandler;
 
+        this.guiController = Controller.make(Map.of(
+                "hubServer", this,
+                "playerStorage", playerStorage(),
+                "mapStorage", mapStorage(),
+                "handler", mapHandler
+        ));
         this.guiContext = Map.of(
                 HubServer.class, this,
                 PlayerStorage.class, playerStorage(),
@@ -58,6 +67,11 @@ public abstract class HubServerBase implements HubServer { //todo one readiness 
     @Override
     public @NotNull HubWorld world() {
         return world;
+    }
+
+    @Override
+    public void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
+        guiController.show(player, viewProvider);
     }
 
     @Override

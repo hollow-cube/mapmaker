@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * ViewContainer is the {@link net.hollowcube.canvas.Element} which is represented by a {@link net.hollowcube.canvas.View}.
@@ -15,6 +16,8 @@ import java.util.Objects;
 public class ViewContainer extends BoxContainer {
 
     private View associatedView;
+
+    private Map<String, List<Consumer<Object[]>>> signals = new HashMap<>();
 
     public ViewContainer(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull Align align) {
         super(context, id, width, height, align);
@@ -37,6 +40,22 @@ public class ViewContainer extends BoxContainer {
 
     public void setAssociatedView(@NotNull View associatedView) {
         this.associatedView = associatedView;
+    }
+
+    public void addSignal(@NotNull String name, @NotNull Consumer<Object[]> signal) {
+        signals.computeIfAbsent(name, k -> new ArrayList<>()).add(signal);
+    }
+
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        var signals = this.signals.get(name);
+        if (signals != null) {
+            for (var signal : signals) {
+                signal.accept(args);
+            }
+        }
+
+        super.performSignal(name, args);
     }
 
     @Override

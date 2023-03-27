@@ -81,6 +81,9 @@ public abstract class BaseElement implements Element {
         context.markDirty();
     }
 
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+    }
+
     /**
      * getContents gets the items within the element.
      * <p>

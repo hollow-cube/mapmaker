@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.provider.InventoryViewHost;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.Map;
 
 public record RenderableContext(
@@ -16,6 +17,11 @@ public record RenderableContext(
     @Override
     public @NotNull ViewProvider viewProvider() {
         return parent.viewProvider();
+    }
+
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        inventory.performSignal(name.toLowerCase(Locale.ROOT), args);
     }
 
     @Override

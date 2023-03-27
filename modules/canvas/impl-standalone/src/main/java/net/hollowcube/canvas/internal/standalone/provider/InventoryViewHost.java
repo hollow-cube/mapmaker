@@ -97,6 +97,10 @@ public class InventoryViewHost {
         };
     }
 
+    public void performSignal(@NotNull String signal, @NotNull Object... args) {
+        element.performSignal(signal, args);
+    }
+
     // Rendering
 
     public void markDirty() {
