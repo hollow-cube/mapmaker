@@ -87,6 +87,7 @@ public class XmlElementReader {
             case "button" -> loadButton(node);
             case "spacer" -> loadSpacer(node);
             case "switch" -> loadSwitch(node);
+            case "pagination" -> loadPagination(node);
             default -> loadImportedElement(node);
         };
     }
@@ -123,7 +124,29 @@ public class XmlElementReader {
         return applyTraits(node, loadChildren(node, elem));
     }
 
+    private @NotNull BaseElement loadPagination(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("pagination"), "Node must be `pagination`");
+
+        var itemClass = findImportedClass(node);
+        var elem = new PaginationElement(context, getId(node), getWidth(node), getHeight(node), itemClass);
+        return applyTraits(node, loadChildren(node, elem));
+    }
+
     private @NotNull BaseElement loadImportedElement(@NotNull Node node) {
+        var clazz = findImportedClass(node);
+        try {
+            var constructor = clazz.getConstructor(Context.class);
+            var importedElement = (ViewContainer) constructor.newInstance(context).element();
+            importedElement.setId(getId(node));
+            return importedElement;
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("View class must have a no-args constructor: " + clazz);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException("View class constructor threw an exception: " + clazz, e);
+        }
+    }
+
+    private @NotNull Class<? extends View> findImportedClass(@NotNull Node node) {
         for (var importPath : imports) {
             var path = importPath + "." + node.getNodeName();
             try {
@@ -132,16 +155,10 @@ public class XmlElementReader {
                     throw new IllegalArgumentException("Class must extend View: " + path);
                 }
 
-                var constructor = clazz.getConstructor(Context.class);
-                var importedElement = (ViewContainer) ((View) constructor.newInstance(context)).element();
-                importedElement.setId(getId(node));
-                return importedElement;
+                //noinspection unchecked
+                return (Class<? extends View>) clazz;
             } catch (ClassNotFoundException ignored) {
                 // No such class is fine, try the next import
-            } catch (NoSuchMethodException e) {
-                throw new IllegalArgumentException("View class must have a no-args constructor: " + path);
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                throw new IllegalArgumentException("View class constructor threw an exception: " + path, e);
             }
         }
         throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
@@ -250,6 +267,5 @@ public class XmlElementReader {
         if (value == null) return def;
         return Enum.valueOf(def.getDeclaringClass(), value.toUpperCase());
     }
-
 
 }

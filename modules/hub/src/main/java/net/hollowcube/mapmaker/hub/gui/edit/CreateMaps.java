@@ -25,15 +25,14 @@ public class CreateMaps extends View {
     private @Outlet("slot3") EditMapIcon slot3;
     private @Outlet("slot4") EditMapIcon slot4;
 
-    private final PlayerData playerData;
     private final EditMapIcon[] slots;
 
     public CreateMaps(@NotNull Context context) {
         super(context);
-        playerData = PlayerData.fromPlayer(player);
 
         slots = new EditMapIcon[]{slot0, slot1, slot2, slot3, slot4};
 
+        var playerData = PlayerData.fromPlayer(player);
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
 
