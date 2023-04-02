@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
  * Lowest form of a serverside UI element.
  */
 public interface Element extends ElementLike {
+    //todo add a builtin signal for handling show and hide
+
     boolean CLICK_ALLOW = true;
     boolean CLICK_DENY = false;
 
