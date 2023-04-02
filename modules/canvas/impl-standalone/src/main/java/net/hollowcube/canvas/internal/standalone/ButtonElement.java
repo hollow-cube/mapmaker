@@ -52,6 +52,7 @@ public class ButtonElement extends LabelElement {
                     args.add(slot);
                 if (method.getParameterCount() > 2)
                     args.add(clickType);
+                System.out.println("sending" + clickType);
                 method.invoke(owner, args.toArray());
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke action method " + method, e);

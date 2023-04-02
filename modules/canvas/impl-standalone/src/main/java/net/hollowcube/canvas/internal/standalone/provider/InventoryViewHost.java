@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone.provider;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
 import net.kyori.adventure.text.Component;
@@ -48,6 +49,7 @@ public class InventoryViewHost {
         // Unmount old component if relevant
         Inventory oldInv = this.inventory;
         if (this.element != null) {
+            this.element.performSignal(Element.SIG_UNMOUNT);
             // Remove inventory condition immediately, do not want ghost clicks or anything
             this.inventory.getInventoryConditions().clear();
         }
@@ -57,6 +59,7 @@ public class InventoryViewHost {
         this.element = newElement;
 
         // Mount the contents in this inventory
+        this.element.performSignal(Element.SIG_MOUNT);
         deferredDirty = false;
         drawCurrentElement();
 

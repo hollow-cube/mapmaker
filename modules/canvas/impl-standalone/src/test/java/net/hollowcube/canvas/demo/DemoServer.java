@@ -32,7 +32,7 @@ public class DemoServer {
     static {
         guis.put("counter", Counter::new);
         guis.put("loading", LoadingDemo::new);
-//        guis.put("npagination", () -> new RouterSection(sectionFrom(new PaginatedList(baseContext))));
+        guis.put("pagination", PaginatedList::new);
         guis.put("playmaps", PlayMaps::new);
         guis.put("context", ContextObjectDemo::new);
         guis.put("switch", SwitchDemo::new);

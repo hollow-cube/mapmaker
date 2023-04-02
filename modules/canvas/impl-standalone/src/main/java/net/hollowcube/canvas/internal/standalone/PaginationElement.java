@@ -5,6 +5,9 @@ import net.hollowcube.canvas.Pagination2;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class PaginationElement<T extends View> extends ContainerElement implements Pagination2 {
+public class PaginationElement<T extends View> extends BaseElement implements Pagination2 {
     private final Class<T> itemClass;
 
-    private List<Element> pageCache = new ArrayList<>();
+    private List<BaseElement> pageCache = new ArrayList<>();
     private Consumer<PageRequest<T>> pageHandler = null;
     private int maxPage = 0;
     private int page = 0;
@@ -59,6 +62,44 @@ public class PaginationElement<T extends View> extends ContainerElement implemen
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        if (SIG_MOUNT.equals(name)) mount();
+        if (page >= pageCache.size()) return;
+        pageCache.get(page).performSignal(name, args);
+    }
+
+    private void mount() {
+        // Reset
+        page = 0;
+        pageCache.clear();
+
+        if (pageHandler == null) return;
+        //todo need some local "request id" to ensure an old request is not used multiple times
+        pageHandler.accept(new PageFetchRequest(0));
+    }
+
+    @Override
+    public @Nullable ItemStack @NotNull [] getContents() {
+        if (super.shouldDelegateDraw() || page >= pageCache.size())
+            return super.getContents();
+        return pageCache.get(page).getContents();
+    }
+
+    @Override
+    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (super.shouldIgnoreInput() || page >= pageCache.size())
+            return CLICK_DENY;
+        return pageCache.get(page).handleClick(player, slot, clickType);
+    }
+
+    @Override
+    public @Nullable BaseElement findById(@NotNull String id) {
+        var found = super.findById(id);
+        if (found != null || page >= pageCache.size()) return found;
+        return pageCache.get(page).findById(id);
     }
 
     @Override
