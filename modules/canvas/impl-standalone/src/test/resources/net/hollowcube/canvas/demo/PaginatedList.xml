@@ -10,9 +10,9 @@
             <pagination id="pagination" width="7" height="4" child="PageItem" />
 
             <box align="ltr" width="7" height="1">
-                <button id="prev" width="3" translationKey="gui.example.prev_page" />
-                <label translationKey="gui.example.page" />
-                <button id="next" width="3" translationKey="gui.example.next_page" />
+                <button id="prev" width="3" translationKey="gui.example.prev_page" sprite="arrow" />
+                <label translationKey="gui.example.page" sprite="paper" />
+                <button id="next" width="3" translationKey="gui.example.next_page" sprite="arrow" />
             </box>
 
         </box>

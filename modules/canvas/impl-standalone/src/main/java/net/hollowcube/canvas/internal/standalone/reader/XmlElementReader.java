@@ -127,13 +127,15 @@ public class XmlElementReader {
     private @NotNull BaseElement loadPagination(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("pagination"), "Node must be `pagination`");
 
-        var itemClass = findImportedClass(node);
-        var elem = new PaginationElement(context, getId(node), getWidth(node), getHeight(node), itemClass);
-        return applyTraits(node, loadChildren(node, elem));
+        var itemClassName = getString(node, "child", null);
+        Check.argCondition(itemClassName == null, "Pagination must have a child class");
+        var itemClass = findImportedClass(itemClassName); // NOSONAR - sonarqube doesnt understand contracts
+        var elem = new PaginationElement<>(context, getId(node), getWidth(node), getHeight(node), itemClass);
+        return applyTraits(node, elem);
     }
 
     private @NotNull BaseElement loadImportedElement(@NotNull Node node) {
-        var clazz = findImportedClass(node);
+        var clazz = findImportedClass(node.getNodeName());
         try {
             var constructor = clazz.getConstructor(Context.class);
             var importedElement = (ViewContainer) constructor.newInstance(context).element();
@@ -146,9 +148,9 @@ public class XmlElementReader {
         }
     }
 
-    private @NotNull Class<? extends View> findImportedClass(@NotNull Node node) {
+    private @NotNull Class<? extends View> findImportedClass(@NotNull String name) {
         for (var importPath : imports) {
-            var path = importPath + "." + node.getNodeName();
+            var path = importPath + "." + name;
             try {
                 var clazz = Class.forName(path);
                 if (!View.class.isAssignableFrom(clazz)) {
@@ -161,7 +163,7 @@ public class XmlElementReader {
                 // No such class is fine, try the next import
             }
         }
-        throw new IllegalArgumentException("Unknown node type: " + node.getNodeName());
+        throw new IllegalArgumentException("Unknown node type: " + name);
     }
 
     // Container loading

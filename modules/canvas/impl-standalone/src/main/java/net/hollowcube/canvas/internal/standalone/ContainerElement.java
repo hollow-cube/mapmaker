@@ -50,7 +50,7 @@ public class ContainerElement extends BaseElement {
             x += child.width();
             nextY = Math.max(nextY, y + child.height());
         }
-        return super.getContents();
+        return items;
     }
 
     @Override
