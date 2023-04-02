@@ -194,7 +194,7 @@ public class DevServer {
         }
 
         if (System.getenv("MM_WHITELIST_DEV") != null) {
-            this.whitelistStorage = SaveStateStorage.memory();
+            this.whitelistStorage = WhitelistStorage.memory();
         } else {
             startupTasks.add(Futures.transform(
                     WhitelistStorage.mongo(config.mongo()),
