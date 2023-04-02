@@ -91,20 +91,4 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         return new BoxContainer(context, this);
     }
 
-    static void patchItemArray(
-            @Nullable ItemStack @NotNull[] items,
-            int itemsWidth, int itemsHeight,
-            @Nullable ItemStack @NotNull[] patch,
-            int patchX, int patchY,
-            int patchWidth, int patchHeight
-    ) {
-        for (int y = 0; y < patchHeight; y++) {
-            for (int x = 0; x < patchWidth; x++) {
-                var item = patch[y * patchWidth + x]; // NOSONAR - it doesnt understand nullable here
-                if (item != null) {
-                    items[(patchY + y) * itemsWidth + (patchX + x)] = item; // NOSONAR - see above
-                }
-            }
-        }
-    }
 }
