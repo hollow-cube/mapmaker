@@ -27,6 +27,7 @@ import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.mapmaker.storage.WhitelistStorage;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageMemory;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -133,6 +134,7 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
+    private WhitelistStorage whitelistStorage;
 
     private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
@@ -190,6 +192,20 @@ public class DevServer {
                     Runnable::run
             ));
         }
+
+        if (System.getenv("MM_WHITELIST_DEV") != null) {
+            this.whitelistStorage = SaveStateStorage.memory();
+        } else {
+            startupTasks.add(Futures.transform(
+                    WhitelistStorage.mongo(config.mongo()),
+                    whitelistStorage -> {
+                        this.whitelistStorage = whitelistStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
+
 
         WorldManager worldManager;
         if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
@@ -310,6 +326,14 @@ public class DevServer {
         var player = event.getPlayer();
 
         try {
+            // Whitelist check
+            boolean whitelisted = whitelistStorage.isPlayerWhitelisted(player)
+                            .get();
+            if (!whitelisted) {
+                player.kick(Component.text("You are not whitelisted on this server!", NamedTextColor.RED));
+                return;
+            }
+
             FluentFuture.from(playerStorage.getPlayerByUuid(event.getPlayerUuid().toString()))
                     .catchingAsync(PlayerStorage.NotFoundError.class, err -> {
                         var data = new PlayerData();
