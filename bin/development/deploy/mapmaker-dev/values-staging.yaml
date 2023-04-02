@@ -9,3 +9,4 @@ env:
   MAPMAKER_SPICEDB_SECRETKEY: "${SPICEDB_SECRET_KEY}"
   MAPMAKER_SPICEDB_TLS: "false"
   MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "default-kafka-bootstrap:9092"
+  MAPMAKER_PYROSCOPE_ENDPOINT: "http://pyroscope.mgmt.svc.cluster.local:4040"

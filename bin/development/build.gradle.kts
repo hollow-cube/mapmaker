@@ -45,6 +45,8 @@ dependencies {
     implementation("org.slf4j:jul-to-slf4j:2.0.6")
 
     implementation("com.github.hollow-cube.Minestom:Minestom:${minestomVersion}")
+
+    implementation("io.pyroscope:agent:0.11.1")
 }
 
 tasks.withType<ShadowJar> {

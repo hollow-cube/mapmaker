@@ -8,6 +8,9 @@ import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import io.prometheus.client.hotspot.DefaultExports;
+import io.pyroscope.http.Format;
+import io.pyroscope.javaagent.EventType;
+import io.pyroscope.javaagent.PyroscopeAgent;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
@@ -64,6 +67,22 @@ public class DevServer {
         // Convert JUL messages to SLF4J
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
+
+        // Setup pyroscope profiler
+        var pyroscopeEndpoint = System.getenv("MAPMAKER_PYROSCOPE_ENDPOINT");
+        if (pyroscopeEndpoint != null) {
+            logger.log(System.Logger.Level.INFO, "Enabling pyroscope profiling...");
+            PyroscopeAgent.start(
+                    new io.pyroscope.javaagent.config.Config.Builder()
+                            .setApplicationName("mapmaker")
+                            .setProfilingEvent(EventType.ITIMER)
+                            .setFormat(Format.JFR)
+                            .setServerAddress(pyroscopeEndpoint)
+                            .build()
+            );
+        } else {
+            logger.log(System.Logger.Level.INFO, "Skipping profiler...");
+        }
 
         // Prometheus JVM exporters
         DefaultExports.initialize();
