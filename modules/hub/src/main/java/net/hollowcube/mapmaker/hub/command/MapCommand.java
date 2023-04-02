@@ -5,7 +5,7 @@ import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.guiold.map.CreateMapView;
+import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
@@ -175,7 +175,11 @@ public class MapCommand extends BaseHubCommand {
 
             var slot = context.get(mapSlot);
 
-            server.openGUIForPlayer(player, new CreateMapView(slot));
+            server.newOpenGUI(player, ctx -> {
+                var view = new CreateMaps(ctx);
+                view.createMapInSlot(slot);
+                return view;
+            });
         }
 
         public void createMapWithDefault(@NotNull CommandSender sender, @NotNull CommandContext context) {

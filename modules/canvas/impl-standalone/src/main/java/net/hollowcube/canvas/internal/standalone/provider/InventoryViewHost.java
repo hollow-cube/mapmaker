@@ -101,7 +101,11 @@ public class InventoryViewHost {
     }
 
     public void performSignal(@NotNull String signal, @NotNull Object... args) {
-        element.performSignal(signal, args);
+        try {
+            element.performSignal(signal, args);
+        } catch (Exception e) {
+            throw new RuntimeException("failed to perform signal", e);
+        }
     }
 
     // Rendering

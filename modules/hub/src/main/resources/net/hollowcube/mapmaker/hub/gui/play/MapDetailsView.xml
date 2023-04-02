@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.hub.gui.play ?>
+<component width="9" height="10" align="ttb">
+    <!-- Top bar -->
+    <box width="9" align="ltr">
+        <label translationKey="gui.generic.back" />
+        <label translationKey="gui.map_details.info" />
+        <spacer />
+        <button translationKey="gui.map_details.creator" sprite="player_head" />
+        <spacer />
+        <button translationKey="gui.map_details.add_to_playlist" sprite="gray_dye" />
+        <button translationKey="gui.map_details.report" sprite="anvil" />
+    </box>
+
+    <!-- Map list -->
+    <spacer width="9" height="4" />
+
+    <!-- Controls -->
+    <bax width="9">
+        <spacer />
+        <button translationKey="gui.map_details.tab.info" sprite="book" />
+        <spacer />
+        <button translationKey="gui.map_details.tab.stats" sprite="filled_map" />
+        <spacer />
+        <button translationKey="gui.map_details.tab.times" sprite="clock" />
+        <spacer />
+        <button translationKey="gui.map_details.tab.reviews" sprite="writable_book" />
+        <spacer />
+    </bax>
+
+    <!-- More Controls -->
+    <box width="9" height="2">
+        <button width="3" height="2" translationKey="gui.map_details.boost" sprite="gold_block" />
+        <button width="3" height="2" translationKey="gui.map_details.play" sprite="emerald_block" />
+        <button width="3" height="2" translationKey="gui.map_details.suggest" sprite="diamond_block" />
+    </box>
+</component>

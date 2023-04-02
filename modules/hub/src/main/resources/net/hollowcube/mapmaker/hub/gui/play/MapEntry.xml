@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<component>
+    <button id="btn" translationKey="blah.blah.blah" sprite="paper" />
+</component>
