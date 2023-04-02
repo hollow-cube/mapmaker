@@ -62,7 +62,7 @@ public class CreateMaps extends View {
     }
 
     @Signal(EditMapIcon.SIG_CREATE_MAP_IN_SLOT)
-    public void createMapInSlot(@NotNull EditMapIcon sender, int slot) {
+    public void createMapInSlot(int slot) {
         creator.setSlot(slot);
         switcher.setState(1);
     }
