@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.history;
 
-import net.hollowcube.terraform.instance.Schematic;
-import net.hollowcube.terraform.instance.SchematicWriter;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicWriter;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.util.schem.Rotation;
 import org.jetbrains.annotations.NotNull;

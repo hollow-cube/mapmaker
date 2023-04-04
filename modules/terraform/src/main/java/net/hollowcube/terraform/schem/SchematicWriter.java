@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.instance;
+package net.hollowcube.terraform.schem;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;

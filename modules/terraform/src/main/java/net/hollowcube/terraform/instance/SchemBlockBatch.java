@@ -4,6 +4,8 @@ package net.hollowcube.terraform.instance;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.hollowcube.util.schem.Rotation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
@@ -63,12 +65,12 @@ public class SchemBlockBatch implements Block.Setter {
                         // FIXME: put method in Instance instead
                         ((InstanceContainer) instance).refreshLastBlockChangeTime();
                     }
-                    return schematic.toSchematic();
+                    return schematic.build();
                 });
     }
 
     public @NotNull Schematic getSchematic() {
-        return schematicBuilder.toSchematic();
+        return schematicBuilder.build();
     }
 
 }

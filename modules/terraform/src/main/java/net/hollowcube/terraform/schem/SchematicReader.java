@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.instance;
+package net.hollowcube.terraform.schem;
 
 
 import net.minestom.server.command.ServerSender;
@@ -6,12 +6,10 @@ import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockStat
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray;
 import org.jglrxavpok.hephaistos.nbt.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -22,20 +20,23 @@ public final class SchematicReader {
 
     private SchematicReader() {}
 
-    public static @NotNull Schematic read(@NotNull InputStream stream) throws IOException {
+    public static @NotNull Schematic read(@NotNull InputStream stream) {
         try (var reader = new NBTReader(stream, CompressedProcesser.GZIP)) {
             return read(reader);
+        } catch (Exception e) {
+            throw new SchematicReadException("failed to read schematic NBT", e);
         }
     }
 
-    public static @NotNull Schematic read(@NotNull Path path) throws IOException {
+    public static @NotNull Schematic read(@NotNull Path path) {
         try (var reader = new NBTReader(path, CompressedProcesser.GZIP)) {
             return read(reader);
+        } catch (Exception e) {
+            throw new SchematicReadException("failed to read schematic NBT", e);
         }
     }
 
-    @ApiStatus.Internal
-    public static @NotNull Schematic read(@NotNull NBTReader reader) throws IOException {
+    public static @NotNull Schematic read(@NotNull NBTReader reader) {
         try {
             NBTCompound tag = (NBTCompound) reader.read();
 
@@ -79,8 +80,8 @@ public final class SchematicReader {
                     paletteBlocks,
                     blockArray.copyArray()
             );
-        } catch (NullPointerException | NBTException e) {
-            throw new RuntimeException("Invalid schematic file", e);
+        } catch (Exception e) {
+            throw new SchematicReadException("Invalid schematic file", e);
         }
     }
 

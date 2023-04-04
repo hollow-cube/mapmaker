@@ -4,8 +4,8 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.history.Change;
 import net.hollowcube.terraform.instance.SchemBlockBatch;
-import net.hollowcube.terraform.instance.Schematic;
-import net.hollowcube.terraform.instance.SchematicBuilder;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
@@ -81,7 +81,7 @@ public class ActionBuilder {
         }
 
         builder.setOffset(at.mul(-1));
-        callback.accept(builder.toSchematic());
+        callback.accept(builder.build());
     }
 
     public void execute(@NotNull Consumer<ActionSummary> callback) {

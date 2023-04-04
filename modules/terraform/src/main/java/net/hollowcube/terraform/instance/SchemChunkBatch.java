@@ -4,6 +4,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -48,7 +50,7 @@ public class SchemChunkBatch implements Block.Setter {
 
             if (blocks.isEmpty()) {
                 // Nothing to flush
-                return inverse.toSchematic();
+                return inverse.build();
             }
 
             final IntSet sections = new IntArraySet();
@@ -65,7 +67,7 @@ public class SchemChunkBatch implements Block.Setter {
             }
 
             updateChunk(instance, chunk, sections);
-            return inverse.toSchematic();
+            return inverse.build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

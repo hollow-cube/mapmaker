@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.history;
 
-import net.hollowcube.terraform.instance.Schematic;
-import net.hollowcube.terraform.instance.SchematicReader;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicReader;
 import net.hollowcube.terraform.session.LocalSession;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -16,15 +16,10 @@ public interface Change {
     }
 
     static @NotNull Change fromNBT(@NotNull NBTCompound nbt) {
-        try {
-            return new SchematicChange(
-                    SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("undo").copyArray())),
-                    SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("redo").copyArray()))
-            );
-        } catch (IOException e) {
-            // No exception
-            throw new RuntimeException(e);
-        }
+        return new SchematicChange(
+                SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("undo").copyArray())),
+                SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("redo").copyArray()))
+        );
     }
 
     void undo(@NotNull LocalSession session);

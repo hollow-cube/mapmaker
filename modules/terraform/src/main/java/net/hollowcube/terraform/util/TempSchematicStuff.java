@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.util;
 
-import net.hollowcube.terraform.instance.Schematic;
+import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.util.schem.SchematicReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
