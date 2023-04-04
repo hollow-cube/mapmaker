@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.model.kafka.SchematicMgmt;
 import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicReadException;
 import net.hollowcube.terraform.schem.SchematicReader;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
@@ -85,7 +86,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
             Schematic schem;
             try {
                 schem = SchematicReader.read(new ByteArrayInputStream(msg.dataArray()));
-            } catch (IOException e) {
+            } catch (SchematicReadException e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to read schematic from message: {0}", msg);
                 respondAndForget(msg, e.getMessage().getBytes(StandardCharsets.UTF_8));
                 return;
