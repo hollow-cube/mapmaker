@@ -29,7 +29,7 @@ public class WhitelistStorageMongo implements WhitelistStorage {
     @Override
     public @NotNull Future<Boolean> isUUIDWhitelisted(@NotNull UUID uuid) {
         return Futures.submit(() -> {
-            FindIterable<Document> documents = collection().find(Filters.eq("uuid", uuid));
+            FindIterable<Document> documents = collection().find(Filters.eq("uuid", uuid.toString()));
             return documents.first() != null;
         }, ForkJoinPool.commonPool());
     }
@@ -39,7 +39,7 @@ public class WhitelistStorageMongo implements WhitelistStorage {
         return Futures.submit(() -> {
             try {
                 Document id = new Document();
-                id.append("uuid", uuid);
+                id.append("uuid", uuid.toString());
                 collection().insertOne(id);
             } catch (DuplicateKeyException ignored) {
 
@@ -50,12 +50,12 @@ public class WhitelistStorageMongo implements WhitelistStorage {
     @Override
     public @NotNull Future<Void> removeFromWhitelist(@NotNull UUID uuid) {
         return Futures.submit(() -> {
-            collection().deleteOne(Filters.eq("uuid", uuid));
+            collection().deleteOne(Filters.eq("uuid", uuid.toString()));
         }, ForkJoinPool.commonPool());
     }
 
     private @NotNull MongoCollection<Document> collection() {
-        return client.getDatabase(config.database()).getCollection("uuids");
+        return client.getDatabase(config.database()).getCollection("whitelist");
     }
 
 
