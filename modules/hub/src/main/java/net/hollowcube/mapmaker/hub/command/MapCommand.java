@@ -118,7 +118,7 @@ public class MapCommand extends BaseHubCommand {
             FutureResult<String> mapIdFuture;
             if (shortOrLongId.length() < 36) {
                 // Assume short ID
-                mapIdFuture = server.mapStorage().lookupShortId(shortOrLongId)
+                mapIdFuture = server.mapStorage().lookupPublishedId(shortOrLongId)
                         .wrapErr("failed to lookup shortId for " + shortOrLongId + ": {}");
             } else {
                 mapIdFuture = FutureResult.of(shortOrLongId);
@@ -305,7 +305,7 @@ public class MapCommand extends BaseHubCommand {
             if (mapId == null) return;
 
             handler.publishMap(PlayerData.fromPlayer(player).getId(), mapId)
-                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
+                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getPublishedId()), Component.text(map.getName()))
                             .forEach(player::sendMessage))
                     .thenErr(err -> {
                         if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
@@ -341,7 +341,7 @@ public class MapCommand extends BaseHubCommand {
             if (mapId == null) return;
 
             handler.deleteMap(mapId)
-                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getId()), Component.text(map.getName()))
+                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getPublishedId()), Component.text(map.getName()))
                             .forEach(player::sendMessage))
                     .thenErr(err -> {
                         if (err.is(Handler.ERR_MAP_NOT_FOUND)) {

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MapData {
     // Permission keys
@@ -44,6 +46,11 @@ public class MapData {
     // This ID is assigned when a map is published and not guaranteed to be consistent. It should never be stored
     // internally as a reference to a map. Use the ID instead.
     private String publishedId;
+
+    // Alias id is a 3 to 16 character unique ID allowing [0-9A-Z] all caps no spaces no symbols
+    // that can be referenced in place of the publishedId. This is optional for maps and will only
+    // be acquired by purchase or special circumstance.
+    private String aliasId = null;
 
     // The following is unqueryable data, may be stored in serialized form.
 
@@ -93,12 +100,20 @@ public class MapData {
         return publishedAt != null;
     }
 
+    public boolean hasAlias() {
+        return aliasId != null;
+    }
+
     public @UnknownNullability Instant getPublishedAt() {
         return publishedAt;
     }
 
     public void setPublishedAt(Instant publishedAt) {
         this.publishedAt = publishedAt;
+    }
+
+    public String getDisplayedId() {
+        return (hasAlias()) ? getAliasId() : getPublishedId();
     }
 
     public String getPublishedId() {
@@ -109,6 +124,31 @@ public class MapData {
         this.publishedId = publishedId;
     }
 
+    public String getAliasId() {
+        return aliasId;
+    }
+
+    public static Boolean isValidAlias(String aliasId) {
+        if (aliasId.length() < 3 || aliasId.length() > 16)
+            return false;
+
+        // Conditions:
+        //  Allowed characters: A-Z, 0-9, _
+        //  Must contain at least one: A-Z
+        Pattern pattern = Pattern.compile("^[A-Z0-9_]*[A-Z]+[A-Z0-9_]*$");
+        Matcher matcher = pattern.matcher(aliasId);
+
+        return matcher.matches();
+    }
+
+    public Boolean setAliasId(String aliasId) {
+        if (isValidAlias(aliasId)) {
+            this.aliasId = aliasId;
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public String getMapFileId() {
         return mapFileId;

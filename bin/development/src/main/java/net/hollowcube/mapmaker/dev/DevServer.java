@@ -15,6 +15,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.dev.command.AliasMapCommand;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
@@ -295,6 +296,7 @@ public class DevServer {
 
         MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
         MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
+        MinecraftServer.getCommandManager().register(new AliasMapCommand(mapStorage));
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

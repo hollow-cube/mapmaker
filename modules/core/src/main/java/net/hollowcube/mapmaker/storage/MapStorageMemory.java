@@ -49,9 +49,19 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
+    public @NotNull FutureResult<String> lookupPublishedId(@NotNull String publishedId) {
         return mapsById.values().stream()
-                .filter(map -> map.getPublishedId().equalsIgnoreCase(shortMapId))
+                .filter(map -> map.getPublishedId().equalsIgnoreCase(publishedId))
+                .findFirst()
+                .map(MapData::getId)
+                .map(FutureResult::of)
+                .orElse(FutureResult.error(ERR_NOT_FOUND));
+    }
+
+    @Override
+    public @NotNull FutureResult<String> lookupAliasId(@NotNull String aliasId) {
+        return mapsById.values().stream()
+                .filter(map -> map.getAliasId().equalsIgnoreCase(aliasId))
                 .findFirst()
                 .map(MapData::getId)
                 .map(FutureResult::of)
@@ -88,7 +98,7 @@ class MapStorageMemory implements MapStorage {
     @Override
     public @NotNull FutureResult<String> getNextId() {
         var n = nextId.getAndIncrement();
-        var id = "00000" + Integer.toString(n, 36);
-        return FutureResult.of(id.substring(id.length() - 5));
+        var id = getFormattedId(n);
+        return FutureResult.of(id);
     }
 }

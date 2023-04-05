@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
@@ -49,6 +50,7 @@ public class MapStorageMongo implements MapStorage {
     public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
         return FutureResult.supply(() -> {
             try {
+                //TODO if maps can have aliases assigned before creation we need to check duplicates here
                 collection().insertOne(map);
             } catch (MongoWriteException err) {
                 if (err.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
@@ -99,9 +101,21 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
+    public @NotNull FutureResult<String> lookupPublishedId(@NotNull String publishedId) {
         return FutureResult.supply(() -> {
-            var filter = eq("publishedId", shortMapId);
+            var filter = eq("publishedId", publishedId);
+            var projection = include("_id");
+            var result = collection().find(filter).projection(projection).limit(1).first();
+            if (result == null)
+                return Result.error(ERR_NOT_FOUND);
+            return Result.of(result.getId());
+        });
+    }
+
+    @Override
+    public @NotNull FutureResult<String> lookupAliasId(@NotNull String aliasId) {
+        return FutureResult.supply(() -> {
+            var filter = eq("aliasId", aliasId);
             var projection = include("_id");
             var result = collection().find(filter).projection(projection).limit(1).first();
             if (result == null)
@@ -144,11 +158,11 @@ public class MapStorageMongo implements MapStorage {
             if (result == null) {
                 // Document does not exist
                 shortIdCollection().insertOne(new Document("nextId", 1));
-                return Result.of("00001");
+                return Result.of(getFormattedId(1));
             }
             var n = result.getInteger("nextId");
-            var id = "00000" + Integer.toString(n, 36);
-            return Result.of(id.substring(id.length() - 5));
+            var id = getFormattedId(n);
+            return Result.of(id);
         });
     }
 
@@ -226,6 +240,7 @@ public class MapStorageMongo implements MapStorage {
                     }
                     case "publishedAt" -> value.setPublishedAt(Instant.ofEpochMilli(reader.readDateTime()));
                     case "publishedId" -> value.setPublishedId(reader.readString());
+                    case "aliasId" -> value.setAliasId(reader.readString());
                     case "icon" -> {
                         Material material = Material.fromNamespaceId(reader.readString());
                         if (material != null) {
@@ -280,6 +295,9 @@ public class MapStorageMongo implements MapStorage {
             if (value.isPublished()) {
                 writer.writeDateTime("publishedAt", value.getPublishedAt().toEpochMilli());
                 writer.writeString("publishedId", value.getPublishedId());
+            }
+            if (value.hasAlias()) {
+                writer.writeString("aliasId", value.getAliasId());
             }
             if (value.getIcon() != null) {
                 writer.writeString("icon", value.getIcon().material().namespace().toString());

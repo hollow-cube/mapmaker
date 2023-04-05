@@ -68,7 +68,7 @@ public class Scoreboards {
         var mapName = map.getName();
         var mapCreator = DisplayNameBuilder.getDisplayName(map.getOwner());
         // TODO show alias here instead if exists for map when implemented
-        var mapId = map.getPublishedId();
+        var mapId = map.getDisplayedId();
 
         playingSidebar.setTitle(Component.translatable("scoreboard.title"));
         playingSidebar.createLine(new Sidebar.ScoreboardLine("playing_one", Component.translatable("scoreboard.line"), -1));
