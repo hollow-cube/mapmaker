@@ -68,7 +68,12 @@ public class Scoreboards {
     }
 
     public static void showPlayerLobbyScoreboard(Player player) {
+        if (player.getTag(activeScoreboard) != null) {
+            // If it no longer has any viewers does it auto free due to out of scope?
+            player.getTag(activeScoreboard).removeViewer(player);
+        }
         lobbyScoreboard.addViewer(player);
+        player.setTag(activeScoreboard, lobbyScoreboard);
     }
 
     public static void showPlayerPlayingScoreboard(@NotNull Player player, @NotNull MapData map) {
@@ -78,6 +83,7 @@ public class Scoreboards {
         }
         var playingScoreboard = createPlayingScoreboard(map);
         playingScoreboard.addViewer(player);
+        player.setTag(activeScoreboard, playingScoreboard);
     }
 
     public static void showPlayerEditingScoreboard(@NotNull Player player, @NotNull MapData map) {
@@ -87,10 +93,15 @@ public class Scoreboards {
         }
         var editingScoreboard = createEditingScoreboard(player, map);
         editingScoreboard.addViewer(player);
+        player.setTag(activeScoreboard, editingScoreboard);
     }
 
     public static void hidePlayerScoreboard(@NotNull Player player) {
-        player.getTag(activeScoreboard).removeViewer(player);
+        if (player.getTag(activeScoreboard) != null) {
+            // If it no longer has any viewers does it auto free due to out of scope?
+            player.getTag(activeScoreboard).removeViewer(player);
+        }
+        player.setTag(activeScoreboard, null);
     }
 
     //TODO update scoreboards that need frequent updating every tick(?) async
