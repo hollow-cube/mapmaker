@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.dev.command;
 import net.hollowcube.map.util.ScoreboardUtil;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -26,21 +27,18 @@ public class ToggleScoreboardCommand extends Command {
             String parseArg = context.get("on/off");
             switch (parseArg) {
                 case "on" -> {
-                    player.setTag(NoScoreboards, false);
+                    var map = MapWorld.fromInstance(player.getInstance()).map();
                     sender.sendMessage("You have toggled scoreboards on!");
-                    if (!(HubWorld.fromInstance(player.getInstance()) == null)) { //need to check if the player is in the lobby first
-                        ScoreboardUtil.sendLobbyScoreboard(player);
-                    } else if (MapWorld.fromInstance(player.getInstance()).map().isPublished()) {
-                        ScoreboardUtil.sendPlayingScoreboard(player);
-                    } else if (!MapWorld.fromInstance(player.getInstance()).map().isPublished()) {
-                        ScoreboardUtil.sendEditingScoreboard(player);
-                    } else { //just in case something goes wrong, default to the lobby scoreboard
-                        ScoreboardUtil.sendLobbyScoreboard(player);
+                    if (map.isPublished()) {
+                        Scoreboards.showPlayerPlayingScoreboard(player, map);
+                    } else if (!map.isPublished()) {
+                        Scoreboards.showPlayerEditingScoreboard(player, map);
+                    } else { // Default to lobby scoreboard
+                        Scoreboards.showPlayerLobbyScoreboard(player);
                     }
                 }
                 case "off" -> {
-                    player.setTag(NoScoreboards, true);
-                    ScoreboardUtil.removeScoreboard(player);
+                    Scoreboards.hidePlayerScoreboard(player);
                     sender.sendMessage("You have toggled scoreboards off!");
                 }
             }

@@ -3,6 +3,7 @@ package net.hollowcube.map.command;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.map.util.ScoreboardUtil;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
@@ -35,6 +36,6 @@ public class HubCommand extends BaseMapCommand {
                             .forEach(player::sendMessage);
                 });
 
-        ScoreboardUtil.sendLobbyScoreboard(player);
+        Scoreboards.showPlayerLobbyScoreboard(player);
     }
 }
