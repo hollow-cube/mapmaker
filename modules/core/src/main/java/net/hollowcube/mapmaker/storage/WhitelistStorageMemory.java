@@ -9,20 +9,18 @@ import java.util.concurrent.Future;
 
 public class WhitelistStorageMemory implements WhitelistStorage {
 
-    private final HashSet<UUID> whitelistedIds = new HashSet<>();
-
     @Override
     public @NotNull Future<Boolean> isUUIDWhitelisted(@NotNull UUID uuid) {
-        return CompletableFuture.completedFuture(whitelistedIds.contains(uuid));
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
     public @NotNull Future<Void> addToWhitelist(@NotNull UUID uuid) {
-        return CompletableFuture.runAsync(() -> whitelistedIds.add(uuid));
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public @NotNull Future<Void> removeFromWhitelist(@NotNull UUID uuid) {
-        return CompletableFuture.runAsync(() -> whitelistedIds.remove(uuid));
+        return CompletableFuture.completedFuture(null);
     }
 }

@@ -34,6 +34,11 @@ public class SwitchElement extends ContainerElement implements Switch {
     }
 
     @Override
+    public void buildTitle(@NotNull StringBuilder sb) {
+        children().get(state).buildTitle(sb);
+    }
+
+    @Override
     public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (shouldIgnoreInput()) return CLICK_DENY;
 

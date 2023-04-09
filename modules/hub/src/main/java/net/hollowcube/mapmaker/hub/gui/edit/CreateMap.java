@@ -50,7 +50,10 @@ public class CreateMap extends View {
 
         // Dispatch request to create the map
         mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot)
-                .then(map -> performSignal(SIG_MAP_CREATED, slot, map))
+                .then(map -> {
+                    performSignal(SIG_MAP_CREATED, slot, map);
+                    submitButton.setState(State.ACTIVE);
+                })
                 .thenErr(e -> {
                     throw new RuntimeException(e.message()); //todo
                 });

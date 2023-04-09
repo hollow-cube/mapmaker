@@ -41,6 +41,7 @@ public abstract class BaseElement implements Element {
 
         this.zIndex = other.zIndex;
         this.sprite = other.sprite;
+        this.loadingSprite = other.loadingSprite;
     }
 
     @Override
@@ -92,18 +93,24 @@ public abstract class BaseElement implements Element {
      */
     public @Nullable ItemStack @NotNull [] getContents() {
         var items = new ItemStack[width * height];
-        if (state == State.LOADING) {
+        if (state == State.LOADING && loadingSprite == null) {
             Arrays.fill(items, LOADING_ITEM);
         }
         return items;
     }
 
     public void buildTitle(@NotNull StringBuilder sb) {
-        if (sprite == null || state != State.ACTIVE) return;
+        if (state == State.ACTIVE && sprite != null) {
+            sb.append(FontUtil.computeOffset(sprite.offsetX()));
+            sb.append(sprite.fontChar());
+            sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width())));
+        }
 
-        sb.append(FontUtil.computeOffset(sprite.offsetX()));
-        sb.append(sprite.fontChar());
-        sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width())));
+        if (state == State.LOADING && loadingSprite != null) {
+            sb.append(FontUtil.computeOffset(loadingSprite.offsetX()));
+            sb.append(loadingSprite.fontChar());
+            sb.append(FontUtil.computeOffset(-(loadingSprite.offsetX() + loadingSprite.width())));
+        }
     }
 
     public @Nullable BaseElement findById(@NotNull String id) {
@@ -143,10 +150,19 @@ public abstract class BaseElement implements Element {
 
     // TRAIT: SpriteHolder
 
-    private Sprite sprite = null; //todo draw sprite
+    private Sprite sprite = null;
 
     public void setSprite(@Nullable Sprite sprite) {
         this.sprite = sprite;
+        context.markDirty();
+    }
+
+    // TRAIT: LoadingSpriteHolder
+
+    private Sprite loadingSprite = null;
+
+    public void setLoadingSprite(@Nullable Sprite sprite) {
+        this.loadingSprite = sprite;
         context.markDirty();
     }
 

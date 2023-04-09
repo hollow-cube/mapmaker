@@ -216,6 +216,13 @@ public class XmlElementReader {
                 }
             }
         }
+        var loadingSpriteName = getString(node, "loadingSprite", null);
+        if (loadingSpriteName != null) {
+            var sprite = Sprite.SPRITE_MAP.get(loadingSpriteName);
+            if (sprite != null) {
+                elem.setLoadingSprite(sprite);
+            }
+        }
 
         return elem;
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="gui/build_maps/details">
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton />
@@ -9,8 +9,8 @@
         <spacer />
         <button width="3" translationKey="gui.map_details.creator" sprite="player_head" />
         <spacer />
-        <button translationKey="gui.map_details.add_to_playlist" sprite="gray_dye" />
-        <button translationKey="gui.map_details.report" sprite="anvil" />
+        <button translationKey="gui.map_details.add_to_playlist" />
+        <button translationKey="gui.map_details.report" />
     </box>
 
     <!-- Map list -->
@@ -19,20 +19,20 @@
     <!-- Controls -->
     <box width="9">
         <spacer />
-        <button translationKey="gui.map_details.tab.info" sprite="book" />
+        <button translationKey="gui.map_details.tab.info" />
         <spacer />
-        <button translationKey="gui.map_details.tab.stats" sprite="filled_map" />
+        <button translationKey="gui.map_details.tab.stats" />
         <spacer />
-        <button translationKey="gui.map_details.tab.times" sprite="clock" />
+        <button translationKey="gui.map_details.tab.times" />
         <spacer />
-        <button translationKey="gui.map_details.tab.reviews" sprite="writable_book" />
+        <button translationKey="gui.map_details.tab.reviews" />
         <spacer />
     </box>
 
     <!-- More Controls -->
-    <box width="9" height="2">
-        <button width="3" height="2" translationKey="gui.map_details.boost" sprite="gold_block" />
-        <button id="play_map" width="3" height="2" translationKey="gui.map_details.play" sprite="emerald_block" />
-        <button width="3" height="2" translationKey="gui.map_details.suggest" sprite="diamond_block" />
+    <box width="9" height="3">
+        <button width="3" height="3" translationKey="gui.map_details.boost" />
+        <button id="play_map" width="3" height="2" translationKey="gui.map_details.play" />
+        <button width="3" height="3" translationKey="gui.map_details.suggest" />
     </box>
 </component>
