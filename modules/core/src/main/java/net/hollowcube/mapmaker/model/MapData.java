@@ -224,7 +224,7 @@ public class MapData {
             return data;
         }
 
-        public <T> T getOrDefault(@NotNull String key, T def) {
+        public <T> @NotNull  T getOrDefault(@NotNull String key, T def) {
             //noinspection unchecked
             return (T) data.getOrDefault(key, def);
         }

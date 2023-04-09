@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":modules:hub"))
     implementation(project(":modules:map"))
     implementation(project(":modules:canvas:api"))
-    implementation(project(":modules:canvas:impl-section"))
+    runtimeOnly(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:chat"))
     implementation(project(":modules:terraform"))
 

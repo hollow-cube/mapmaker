@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.canvas.section.SectionLike;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -38,7 +37,5 @@ public interface HubServer {
 
 
     void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
-
-    void openGUIForPlayer(@NotNull Player player, @NotNull SectionLike gui);
 
 }

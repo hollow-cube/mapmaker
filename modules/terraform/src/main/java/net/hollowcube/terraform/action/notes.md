@@ -8,6 +8,11 @@ Use cases:
 ActionBuilder
         .from(region)
         .set(block)
+        
+
+var cmd = new CommandBuffer()
+cmd.Set(block)
+session().execute(cmd, region)
 ```
 
 ### Set a region to a pattern (//set ...)
@@ -24,6 +29,10 @@ ActionBuilder
     .pushMask(mask)
     .set(pattern) 
     .popMask()
+    
+cmd.MaskPush(mask)
+cmd.Set(pattern)
+cmd.MaskPop()
 ```
 
 ### Copy all but air
@@ -32,6 +41,9 @@ ActionBuilder
     .from(region)
     .mask(Mask.NO_AIR))
     .toClipboard()
+
+cmd.MaskPush(Mask.NO_AIR)
+cmd.CopyTo(clipboard)
 ```
 
 ### Rotation
@@ -40,6 +52,9 @@ session.action()
     .from(clipboard)
     .rotate(Transform.rotate(90, 0, 0))
     .paste(world, pos)
+
+cmd.Transform(transform.Rotate())
+
 ```
 
 ### Offset (move)
@@ -55,6 +70,10 @@ session.action()
     .set(Block.AIR)
     .offset(10, 0, 0)
     .paste()
+
+cmd.Cut()
+cmd.Transform(transform.Offset(10, 0, 0))
+cmd.Paste()
 
 ```
 

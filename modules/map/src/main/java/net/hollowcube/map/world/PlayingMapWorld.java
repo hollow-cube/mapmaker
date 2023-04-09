@@ -1,6 +1,5 @@
 package net.hollowcube.map.world;
 
-import net.hollowcube.canvas.section.RouterSection;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
@@ -103,7 +102,7 @@ public class PlayingMapWorld extends MapWorld {
         FutureResult.wrap(mapServer.saveStateStorage().updateSaveState(saveState))
                 .thenErr(err -> logger.error("failed to save save state for player {}: {}", playerData.getId(), err));
 
-        player.openInventory(new RouterSection(new CompletedMapView()).getInventory()); //todo method in MapServer to open gui with appropriate context
+        server().newOpenGUI(player, CompletedMapView::new);
     }
 
     private void updatePlayer(@NotNull Player player, long time) {

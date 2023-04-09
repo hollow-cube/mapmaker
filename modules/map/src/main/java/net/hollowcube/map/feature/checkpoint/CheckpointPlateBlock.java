@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.checkpoint;
 
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
-import net.hollowcube.map.gui.block.CheckpointSettingsView;
+import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.MapData;
@@ -11,6 +11,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class CheckpointPlateBlock extends AbstractPlateHandler {
@@ -46,7 +47,7 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 
         // Open checkpoint settings GUI
         var checkpoint = world.map().getPoi(interaction.getBlockPosition());
-        world.server().openGUIForPlayer(player, new CheckpointSettingsView(checkpoint));
+        world.server().newOpenGUI(player, c -> new CheckpointSettingsView(c.with(Map.of("poi", checkpoint))));
 
         return true;
     }
