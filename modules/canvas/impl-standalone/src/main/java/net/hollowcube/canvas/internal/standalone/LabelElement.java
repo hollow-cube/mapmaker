@@ -26,18 +26,23 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     public LabelElement(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull String translationKey) {
         super(context, id, width, height);
         this.translationKey = translationKey;
-        updateItem();
+        updateItem(List.of());
     }
 
     protected LabelElement(@NotNull ElementContext context, @NotNull LabelElement other) {
         super(context, other);
         this.translationKey = other.translationKey;
         this.itemSprite = other.itemSprite;
-        updateItem();
+        updateItem(List.of());
     }
 
     @Override
     public void setArgs(@NotNull Component... args) {
+        updateItem(List.of(args));
+    }
+
+    @Override
+    public void setArgs(@NotNull List<Component> args) {
         updateItem(args);
     }
 
@@ -53,13 +58,13 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     @Override
     public void setItemSprite(@Nullable ItemStack itemStack) {
         this.itemSprite = itemStack == null ? BLANK_ITEM : itemStack;
-        updateItem();
+        updateItem(List.of());
     }
 
-    private void updateItem(@NotNull Component... args) {
+    private void updateItem(@NotNull List<Component> args) {
         itemSprite = itemSprite.with(builder -> {
             builder.displayName(Component.translatable(translationKey + ".name", args));
-            builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", List.of(args)));
+            builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
         });
         context.markDirty();
     }

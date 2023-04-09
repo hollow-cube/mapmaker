@@ -19,7 +19,9 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 
 public class InventoryViewHost {
@@ -37,8 +39,22 @@ public class InventoryViewHost {
     // The number of rows of the player inventory currently in use.
     private int playerInventoryRows = 0;
 
+    private final Deque<View> history = new ArrayDeque<>();
+
     public void pushView(@NotNull View view) {
+        history.addLast(view);
         replaceInventory((BaseElement) view.element());
+    }
+
+    public void popView() {
+        if (history.size() == 0) {
+            inventory.getViewers().forEach(Player::closeInventory);
+            return;
+        }
+
+        history.removeLast();
+        replaceInventory((BaseElement) history.getLast().element());
+
     }
 
     public @NotNull Inventory getHandle() {

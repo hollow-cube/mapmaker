@@ -1,6 +1,7 @@
 package net.hollowcube.map;
 
-import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MapStorage;
@@ -10,6 +11,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Function;
 
 public interface MapServer {
 
@@ -23,6 +25,6 @@ public interface MapServer {
 
     @NotNull List<FeatureProvider> features();
 
-    void openGUIForPlayer(@NotNull Player player, @NotNull Section gui);
+    void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
 
 }

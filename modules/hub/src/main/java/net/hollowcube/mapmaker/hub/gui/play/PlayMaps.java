@@ -35,7 +35,7 @@ public class PlayMaps extends View {
 
                     var result = new ArrayList<MapEntry>();
                     for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
-                        result.add(new MapEntry(request.context()));
+                        result.add(new MapEntry(request.context(), entries.get(i)));
                     }
                     request.respond(result, entries.size() == request.pageSize() + 1);
                 })

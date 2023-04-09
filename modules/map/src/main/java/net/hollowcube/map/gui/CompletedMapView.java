@@ -1,16 +1,13 @@
 package net.hollowcube.map.gui;
 
-import net.hollowcube.canvas.section.ParentSection;
-import net.hollowcube.canvas.section.std.ButtonSection;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
+import org.jetbrains.annotations.NotNull;
 
-public class CompletedMapView extends ParentSection {
+public class CompletedMapView extends View {
 
-    public CompletedMapView() {
-        super(9, 1);
-
-        add(0, new ButtonSection(1, 1, ItemStack.of(Material.PAPER).withDisplayName(Component.text("Map complete"))));
+    public CompletedMapView(@NotNull Context context) {
+        super(context);
     }
+
 }

@@ -8,13 +8,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapEntry extends View {
 
-    public MapEntry(@NotNull Context context) {
+    private final MapData map;
+
+    public MapEntry(@NotNull Context context, @NotNull MapData map) {
         super(context);
+        this.map = map;
     }
 
     @Action("btn")
     private void handleClick() {
-
+        pushView(c -> new MapDetailsView(c, map));
     }
 
 }

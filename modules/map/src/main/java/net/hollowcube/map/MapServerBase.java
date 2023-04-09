@@ -3,8 +3,9 @@ package net.hollowcube.map;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.block.placement.HCPlacementRules;
-import net.hollowcube.canvas.section.RouterSection;
-import net.hollowcube.canvas.section.Section;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
@@ -29,8 +30,6 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +37,18 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public abstract class MapServerBase implements MapServer {
-    public static final Logger logger = LoggerFactory.getLogger(MapServer.class);
+    private static final System.Logger logger = System.getLogger(MapServerBase.class.getName());
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
 
     private final MapToHubBridge bridge;
 
     private List<FeatureProvider> features;
+
+    private Controller guiController;
 
 
     // map id -> play|edit -> world
@@ -106,6 +108,11 @@ public abstract class MapServerBase implements MapServer {
         }
         this.features = List.copyOf(features);
 
+        this.guiController = Controller.make(Map.of(
+                "mapServer", this,
+                "mapStorage", mapStorage()
+        ));
+
         return Futures.transform(
                 Futures.allAsList(featureInitFutures),
                 unused -> null, Runnable::run);
@@ -149,20 +156,20 @@ public abstract class MapServerBase implements MapServer {
         var activeMaps = maps.get(event.getMap().getId());
         if (activeMaps == null) {
             // Something went wrong and the instance is not registered
-            logger.error("Attempted to unregister {}, but it was not registered.", event.getMap().getId());
+            logger.log(System.Logger.Level.ERROR, "Attempted to unregister {}, but it was not registered.", event.getMap().getId());
             return;
         }
 
         var removed = activeMaps.remove(event.mapWorld().getClass());
         if (removed == null) {
             // Something went wrong and the instance is not registered
-            logger.error("Attempted to unregister {}, but it was not registered.", event.getMap().getId());
+            logger.log(System.Logger.Level.ERROR, "Attempted to unregister {}, but it was not registered.", event.getMap().getId());
         }
     }
 
     @Override
-    public void openGUIForPlayer(@NotNull Player player, @NotNull Section gui) {
-        //todo context
-        new RouterSection(gui).showToPlayer(player);
+    public void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
+        guiController.show(player, viewProvider);
     }
+
 }

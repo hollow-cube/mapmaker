@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,12 +31,20 @@ public class EditMap extends View {
     @Action("edit_in_world")
     private void editMap(@NotNull Player player) {
         mapHandler.editMap(player, map.getId())
-                .then(unused -> player.closeInventory());
+                .then(unused -> player.closeInventory())
+                .thenErr(err -> {
+                    throw new RuntimeException(err.message());
+                });
     }
 
     @Action("publish")
-    private void publishMap() {
-        System.out.println("Publishing map... maybe :D");
+    private void publishMap(@NotNull Player player) {
+        var playerData = PlayerData.fromPlayer(player);
+        mapHandler.publishMap(playerData.getId(), map.getId())
+                .then(unused -> player.closeInventory())
+                .thenErr(err -> {
+                    throw new RuntimeException(err.message());
+                });
     }
 
 }

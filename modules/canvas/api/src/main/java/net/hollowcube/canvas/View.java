@@ -4,6 +4,8 @@ import net.hollowcube.canvas.internal.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public abstract class View implements Element {
 
     private final Context context;
@@ -46,6 +48,20 @@ public abstract class View implements Element {
     @Override
     public void performSignal(@NotNull String name, @NotNull Object... args) {
         context.performSignal(name, args);
+    }
+
+    // Routing
+
+    public void pushView(@NotNull Function<Context, View> viewProvider) {
+        context.pushView(viewProvider.apply(context));
+    }
+
+    public void pushView(@NotNull View view) {
+        context.pushView(view);
+    }
+
+    public void popView() {
+        context.popView();
     }
 
 

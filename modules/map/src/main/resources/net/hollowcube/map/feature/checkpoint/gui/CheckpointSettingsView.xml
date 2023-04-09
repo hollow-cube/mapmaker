@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.map.feature.checkpoint.gui ?>
+<component width="9" height="6" align="ttb">
+    <box width="9" align="ltr">
+        <spacer />
+        <ResetHeightSetting />
+        <spacer />
+    </box>
+</component>
