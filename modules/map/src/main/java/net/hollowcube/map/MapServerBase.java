@@ -9,7 +9,6 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
-import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.*;

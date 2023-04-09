@@ -27,6 +27,7 @@ public class PlayingMapWorld extends MapWorld {
 
     public PlayingMapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
         super(mapServer, map);
+        flags |= FLAG_PLAYING;
 
         var eventNode = instance().eventNode();
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings

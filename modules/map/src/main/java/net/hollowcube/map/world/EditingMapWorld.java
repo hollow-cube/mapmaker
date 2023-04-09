@@ -17,8 +17,11 @@ import java.util.List;
 public class EditingMapWorld extends MapWorld {
     private static final Logger logger = LoggerFactory.getLogger(EditingMapWorld.class);
 
+    private TestingMapWorld testWorld = null;
+
     public EditingMapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
         super(mapServer, map);
+        flags |= FLAG_EDITING;
     }
 
     @Override

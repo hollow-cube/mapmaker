@@ -3,12 +3,14 @@ package net.hollowcube.map.command;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.item.ItemUtils;
+import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.TransactionOption;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +33,7 @@ public class GiveCommand extends BaseMapCommand {
 
         var itemName = context.get(itemArg);
         if (itemName == null) {
-            player.sendMessage("No such item: " + context.getRaw(itemArg));
+            player.sendMessage(MapMessages.COMMAND_GIVE_UNKNOWN_ITEM.with(context.getRaw(itemArg)));
             return;
         }
 
@@ -39,14 +41,17 @@ public class GiveCommand extends BaseMapCommand {
         var itemStack = itemRegistry.getItemStack(itemName, null);
         // argument would return null if item not present, so safe to assume not null
 
-        boolean result = player.getInventory().addItemStack(itemStack);
+        boolean result = player.getInventory().addItemStack(itemStack, TransactionOption.ALL_OR_NOTHING);
         if (!result) {
-            sender.sendMessage("You do not have enough space in your inventory to receive this item");
+            sender.sendMessage(MapMessages.COMMAND_GIVE_NOT_ENOUGH_SPACE);
+            return;
         }
 
         var itemComponent = itemStack.getDisplayName() != null
                 ? itemStack.getDisplayName()
                 : ItemUtils.translation(itemStack.material());
-        sender.sendMessage(Component.text("Gave one ").append(itemComponent.hoverEvent(itemStack.asHoverEvent())));
+        sender.sendMessage(MapMessages.COMMAND_GIVE_SUCCESS.with(
+                itemComponent.hoverEvent(itemStack.asHoverEvent())
+        ));
     }
 }

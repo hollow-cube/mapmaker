@@ -77,7 +77,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
 
             // Get the current world of the player, if it is not an editing world then do nothing.
             var world = MapWorld.optionalFromInstance(player.getInstance());
-            if (!(world instanceof EditingMapWorld)) {
+            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) {
                 logger.log(System.Logger.Level.INFO, "Player {0} is not editing a map, ignoring schematic upload.", player.getUuid());
                 respondAndForget(msg, ERR_NOT_EDITING);
                 return;

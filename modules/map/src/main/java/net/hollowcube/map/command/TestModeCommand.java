@@ -49,7 +49,7 @@ public class TestModeCommand extends BaseMapCommand {
         }
 
         var world = MapWorld.fromInstance(player.getInstance());
-        return world instanceof EditingMapWorld;
+        return (world.flags() & MapWorld.FLAG_EDITING) != 0;
     }
 
     public static void enterTestMode(@NotNull Player player, @NotNull MapServer mapServer) {

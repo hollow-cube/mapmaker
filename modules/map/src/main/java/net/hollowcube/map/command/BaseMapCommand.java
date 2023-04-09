@@ -37,7 +37,7 @@ public class BaseMapCommand extends Command {
             if (!editOnly) return true;
 
             var mapWorld = MapWorld.fromInstance(instance);
-            return mapWorld instanceof EditingMapWorld;
+            return (mapWorld.flags() & MapWorld.FLAG_EDITING) != 0;
         };
     }
 }
