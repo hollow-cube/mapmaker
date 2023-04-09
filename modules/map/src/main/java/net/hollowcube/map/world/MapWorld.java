@@ -102,7 +102,7 @@ public abstract class MapWorld extends BaseWorld {
         eventNode.addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave);
 
         for (var feature : mapServer.features()) {
-            feature.initMap(this);
+//            feature.initMap(this);
         }
 
         // Mark the map as registered
@@ -111,13 +111,13 @@ public abstract class MapWorld extends BaseWorld {
 
     public @NotNull ListenableFuture<Void> initFeatures() {
         var futures = new ArrayList<ListenableFuture<Void>>();
-        for (var feature : mapServer.features()) {
-            var future = feature.initMap(this);
-            if (future == null) continue;
-
-            futures.add(future);
-            enabledFeatures.add(feature);
-        }
+//        for (var feature : mapServer.features()) {
+//            var future = feature.initMap(this);
+//            if (future == null) continue;
+//
+//            futures.add(future);
+//            enabledFeatures.add(feature);
+//        }
 
         return Futures.whenAllComplete(futures).call(() -> null, Runnable::run);
     }
@@ -178,6 +178,8 @@ public abstract class MapWorld extends BaseWorld {
     @Override
     public @NotNull CompletableFuture<@NotNull String> saveWorld() {
         //todo handle failure here (probably write to disk and keep trying to save or write somewhere else or something)
+        // OR - write to kafka (as a dead letter basically) with some new version tag, and have another server pick it up and try to save.
+        //      it should ONLY save if we know another version has not been saved (eg if the version is the same), and if we can aquire a lock on it.
         return super.saveWorld()
                 .thenCompose(fileId -> {
                     map.setMapFileId(fileId);
@@ -196,9 +198,11 @@ public abstract class MapWorld extends BaseWorld {
             scopedNode.removeChild(child);
         }
 
-        var featureCleanup = Futures.whenAllComplete(enabledFeatures.stream()
-                .map(feature -> feature.cleanupMap(this))
-                .toList()).call(() -> null, Runnable::run);
+        var featureCleanup = Futures.whenAllComplete(List.of())
+                .call(() -> null, Runnable::run);
+//        var featureCleanup = Futures.whenAllComplete(enabledFeatures.stream()
+//                .map(feature -> feature.cleanupMap(this))
+//                .toList()).call(() -> null, Runnable::run);
 
         return FutureUtil.wrap(featureCleanup)
                 .thenCompose(unused -> super.unloadWorld())

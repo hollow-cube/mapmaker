@@ -3,6 +3,7 @@ package net.hollowcube.map.feature;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.hollowcube.mapmaker.config.ConfigProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ public interface FeatureProvider {
      *         A non-null future indicates that a feature is enabled, and the map will wait for the future before
      *         being considered ready for players.
      */
-    default @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
+    default @Nullable ListenableFuture<Void> initMap(@NotNull MapWorldNew world) {
         return null;
     }
 
@@ -47,7 +48,7 @@ public interface FeatureProvider {
      * @param world The {@link MapWorld} being cleaned up
      * @return A future which completes when the map is cleaned up.
      */
-    default @NotNull ListenableFuture<Void> cleanupMap(@NotNull MapWorld world) {
+    default @NotNull ListenableFuture<Void> cleanupMap(@NotNull MapWorldNew world) {
         return Futures.immediateVoidFuture();
     }
 

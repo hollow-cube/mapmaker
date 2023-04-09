@@ -2,10 +2,18 @@ package net.hollowcube.map.world;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.mapmaker.model.SaveState;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 interface InternalMapWorldNew extends MapWorldNew {
+
+    Tag<InternalMapWorldNew> SELF_TAG = Tag.Transient("mapworld");
+
+    @NotNull Instance instance();
+    @NotNull Point spawnPoint();
 
     /**
      * Loads the world. The world will not be marked active/ready for players until this future completes.
@@ -13,6 +21,15 @@ interface InternalMapWorldNew extends MapWorldNew {
      * @return A future which completes when the world is ready for players.
      */
     @NotNull ListenableFuture<Void> load();
+
+    /**
+     * Closes thr world, including saving if relevant. When this method is called, the world is guaranteed not to have any new players added.
+     * <p>
+     * All players are guaranteed to be removed before calling this method.
+     *
+     * @return A future which completes when the world is closed.
+     */
+    @NotNull ListenableFuture<Void> close();
 
     /**
      * Called as a player is entering the world, but before the player is added to the {@link net.minestom.server.instance.Instance}.
