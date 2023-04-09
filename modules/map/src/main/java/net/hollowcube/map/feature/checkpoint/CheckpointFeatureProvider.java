@@ -12,13 +12,10 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.EditingMapWorld;
-import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
@@ -61,13 +58,13 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     }
 
     @Override
-    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
+    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorldNew world) {
+        if ((world.flags() & MapWorldNew.FLAG_EDITING) != 0) {
             world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
             world.itemRegistry().register(FINISH_PLATE_ITEM);
         }
 
-        if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {
+        if ((world.flags() & MapWorldNew.FLAG_PLAYING) != 0) {
             world.addScopedEventNode(resetManagementNode);
         }
 
@@ -101,7 +98,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     private void tick(@NotNull InstanceTickEvent event) {
         var instance = event.getInstance();
-        var map = MapWorld.fromInstance(instance).map();
+        var map = MapWorldNew.fromInstance(instance).map();
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {

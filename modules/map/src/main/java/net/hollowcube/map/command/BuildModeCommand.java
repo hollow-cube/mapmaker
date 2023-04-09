@@ -51,7 +51,7 @@ public class BuildModeCommand extends BaseMapCommand {
         }
 
         var world = MapWorld.fromInstance(player.getInstance());
-        return world instanceof TestingMapWorld;
+        return (world.flags() & MapWorld.FLAG_TESTING) != 0;
     }
 
     public static void enterBuildMode(@NotNull Player player, @NotNull MapServer mapServer) {

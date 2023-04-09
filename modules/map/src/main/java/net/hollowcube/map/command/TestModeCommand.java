@@ -61,14 +61,14 @@ public class TestModeCommand extends BaseMapCommand {
         var curr_world = MapWorld.fromInstance(player.getInstance());
         String world_file_id = String.valueOf(curr_world.saveWorld());
 
-        MapWorld world = new TestingMapWorld(mapServer, curr_world.map());
+//        MapWorld world = new TestingMapWorld(mapServer, curr_world.map());
 
-        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
-        future = world.loadWorld();
-        FutureResult.wrap(future.thenCompose(unused ->
-                player.setInstance(world.instance(), pos)));
-        player.setAllowFlying(false);
-        player.setFlying(false);
-        player.setGameMode(GameMode.ADVENTURE);
+//        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+//        future = world.loadWorld();
+//        FutureResult.wrap(future.thenCompose(unused ->
+//                player.setInstance(world.instance(), pos)));
+//        player.setAllowFlying(false);
+//        player.setFlying(false);
+//        player.setGameMode(GameMode.ADVENTURE);
     }
 }

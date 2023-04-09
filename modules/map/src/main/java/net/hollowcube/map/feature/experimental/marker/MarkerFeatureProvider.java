@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemHandler;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,9 +15,9 @@ public class MarkerFeatureProvider implements FeatureProvider {
     private static final ItemHandler MARKER_ITEM = new MarkerItemHandler();
 
     @Override
-    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
+    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorldNew world) {
         // Only enabled in editing worlds.
-        if ((world.flags() & MapWorld.FLAG_EDITING) == 0)
+        if ((world.flags() & MapWorldNew.FLAG_EDITING) == 0)
             return null;
 
         world.itemRegistry().register(MARKER_ITEM);

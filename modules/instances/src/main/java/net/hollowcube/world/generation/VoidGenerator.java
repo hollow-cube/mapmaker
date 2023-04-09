@@ -10,6 +10,6 @@ public class VoidGenerator implements Generator {
     public void generate(@NotNull GenerationUnit unit) {
         // Minestom worlds are void by default, so don't do anything except place one block
         if (unit.absoluteStart().chunkX() == 0 && unit.absoluteStart().chunkZ() == 0)
-            unit.modifier().setBlock(0, 30, 0, Block.BEDROCK);
+            unit.modifier().setBlock(0, 39, 0, Block.STONE);
     }
 }

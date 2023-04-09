@@ -4,8 +4,7 @@ import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.item.ItemUtils;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.MapWorld;
-import net.kyori.adventure.text.Component;
+import net.hollowcube.map.world.MapWorldNew;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -37,7 +36,7 @@ public class GiveCommand extends BaseMapCommand {
             return;
         }
 
-        var itemRegistry = MapWorld.fromInstance(player.getInstance()).itemRegistry();
+        var itemRegistry = MapWorldNew.fromInstance(player.getInstance()).itemRegistry();
         var itemStack = itemRegistry.getItemStack(itemName, null);
         // argument would return null if item not present, so safe to assume not null
 
