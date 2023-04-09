@@ -40,7 +40,7 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
         var world = MapWorld.fromInstance(interaction.getInstance());
-        if (!(world instanceof EditingMapWorld)) return false;
+        if ((world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
 
         var player = interaction.getPlayer();
         if (player.isSneaking()) return false;

@@ -11,6 +11,7 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -61,12 +62,12 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     @Override
     public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorld world) {
-        if (world instanceof EditingMapWorld) {
+        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
             world.itemRegistry().register(FINISH_PLATE_ITEM);
         }
 
-        if (world instanceof PlayingMapWorld) {
+        if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {
             world.addScopedEventNode(resetManagementNode);
         }
 
@@ -95,7 +96,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         // Reached a new checkpoint
         saveState.setCheckpoint(event.getCheckpoint().getId());
         player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.getCheckpoint()));
-        player.sendMessage(Component.translatable("play.checkpoint.reached"));
+        player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 
     private void tick(@NotNull InstanceTickEvent event) {

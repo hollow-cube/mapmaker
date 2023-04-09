@@ -1,5 +1,7 @@
 package net.hollowcube.map.command;
 
+import net.hollowcube.common.lang.GenericMessages;
+import net.hollowcube.map.lang.MapMessages;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
@@ -14,10 +16,10 @@ public class ClearInventoryCommand extends BaseMapCommand {
 
     private void clearInventory(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command!");
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
         ((Player) sender).getInventory().clear();
-        sender.sendMessage("Your inventory has been cleared.");
+        sender.sendMessage(MapMessages.COMMAND_CLEAR_INVENTORY_SUCCESS);
     }
 }

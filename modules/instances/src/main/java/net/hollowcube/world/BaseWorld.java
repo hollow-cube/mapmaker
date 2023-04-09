@@ -79,7 +79,7 @@ public class BaseWorld implements World {
         return WORLD_DIR.resolve(id);
     }
 
-    protected @NotNull CompletableFuture<Void> loadWorld() {
+    public @NotNull CompletableFuture<Void> loadWorld() {
         return worldManager.fileStorage().downloadFile(id)
                 .thenApply(file -> {
                     try (var is = file.data()) {
@@ -124,12 +124,6 @@ public class BaseWorld implements World {
                 throw new RuntimeException(e);
             }
         }, ForkJoinPool.commonPool());
-    }
-
-    private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
-        if (event.getSpawnInstance().getUniqueId().equals(instance.getUniqueId())) {
-            EventDispatcher.call(new PlayerSpawnInInstanceEvent(event.getPlayer()));
-        }
     }
 
     private void handleEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {

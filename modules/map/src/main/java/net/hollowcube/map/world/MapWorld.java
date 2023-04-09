@@ -42,8 +42,20 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "PointlessBitwiseExpression"})
 public abstract class MapWorld extends BaseWorld {
+
+    /*
+
+    Base MapWorld
+    PlayingMapWorld
+    EditingMapWorld
+    TestingMapWorld
+
+    Testing worlds use the same underlying instance as the editing world, but are tagged as playing and features registered independently.
+
+     */
+
     private static final Logger logger = LoggerFactory.getLogger(MapWorld.class);
 
     public static final Tag<String> MAP_ID = Tag.String("mapmaker:map/id");
@@ -59,16 +71,20 @@ public abstract class MapWorld extends BaseWorld {
         if (instance == null) return null;
         return instance.getTag(THIS_TAG);
     }
+
+    public static final int FLAG_EDITING = 1 << 0;
+    public static final int FLAG_PLAYING = 1 << 1;
+    public static final int FLAG_TESTING = 1 << 2;
+
     private final EventNode<InstanceEvent> scopedNode = EventNode.type("mapmaker:map/scoped", EventFilter.INSTANCE);
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry = new ItemRegistry();
 
-    protected MapServer mapServer;
+    protected final MapServer mapServer;
     protected final MapData map;
+    protected int flags = 0;
 
-
-
-    public MapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
+    protected MapWorld(@NotNull MapServer mapServer, @NotNull MapData map) {
         super(mapServer.worldManager(), map.getId(), new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT));
         this.mapServer = mapServer;
         this.map = map;
@@ -118,6 +134,9 @@ public abstract class MapWorld extends BaseWorld {
         return mapServer;
     }
 
+    public int flags() {
+        return flags;
+    }
 
     protected void initSaveState(@NotNull SaveState saveState) {
     }

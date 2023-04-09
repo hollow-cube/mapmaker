@@ -1,5 +1,6 @@
 package net.hollowcube.map.command;
 
+import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
@@ -34,7 +35,7 @@ public class BuildModeCommand extends BaseMapCommand {
 
     private void enterBuildMode(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command!");
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
         enterBuildMode(player, mapServer);

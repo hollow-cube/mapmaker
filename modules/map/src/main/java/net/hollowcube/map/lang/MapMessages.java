@@ -4,6 +4,22 @@ import net.hollowcube.common.lang.MessagesBase;
 import org.jetbrains.annotations.NotNull;
 
 public enum MapMessages implements MessagesBase {
+    // Checkpoints
+    CHECKPOINT_REACHED("play.checkpoint.reached"),
+
+    // Commands
+    COMMAND_CLEAR_INVENTORY_SUCCESS("command.clearinventory.success"),
+    COMMAND_FLY_ENABLED("command.fly.enabled"),
+    COMMAND_FLY_DISABLED("command.fly.disabled"),
+    COMMAND_FLY_SPEED_CHANGED("command.flyspeed.changed"),
+
+    COMMAND_GIVE_UNKNOWN_ITEM("command.give.unknown_item"),
+    COMMAND_GIVE_NOT_ENOUGH_SPACE("command.give.not_enough_space"),
+    COMMAND_GIVE_SUCCESS("command.give.success"),
+
+    COMMAND_SETSPAWN_SUCCESS("command.setspawn.success"),
+
+    // Misc
     SCHEMATIC_UPLOAD_SUCCESS("map.schematic.upload.success"),
     ;
 
