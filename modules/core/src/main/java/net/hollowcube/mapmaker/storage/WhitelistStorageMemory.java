@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.storage;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;

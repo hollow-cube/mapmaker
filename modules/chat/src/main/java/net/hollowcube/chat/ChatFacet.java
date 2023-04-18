@@ -9,6 +9,7 @@ import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
+import net.hollowcube.mapmaker.storage.MuteStorage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
@@ -25,7 +26,9 @@ import org.jetbrains.annotations.TestOnly;
 import java.lang.System.Logger.Level;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 @AutoService(Facet.class)
 public class ChatFacet implements Facet {
@@ -46,6 +49,7 @@ public class ChatFacet implements Facet {
             .addListener(PlayerCommandEvent.class, this::handleCommandEvent);
 
     private final ChatStorage storage;
+    private final MuteStorage muteStorage;
 
     public ChatFacet() {
         //todo need to have futureresult init for this
@@ -69,17 +73,35 @@ public class ChatFacet implements Facet {
                         return false;
                     }
                 }).get();
+                muteStorage = MuteStorage.mongo(new MongoConfig() {
+                    @Override
+                    public @NotNull String uri() {
+                        return mongoUri;
+                    }
+
+                    @Override
+                    public @NotNull String database() {
+                        return "mapmaker";
+                    }
+
+                    @Override
+                    public boolean useTransactions() {
+                        return false;
+                    }
+                }).get();
             } catch (Throwable t) {
                 throw new RuntimeException(t);
             }
         } else {
             storage = ChatStorage.memory();
+            muteStorage = MuteStorage.memory();
         }
     }
 
     @TestOnly
     ChatFacet(@NotNull ChatStorage storage) {
         this.storage = storage;
+        this.muteStorage = null;
     }
 
     @Override
@@ -90,6 +112,8 @@ public class ChatFacet implements Facet {
         server.command().register(new ReplyCommand(this));
         server.command().register(new StaffChatCommand(this));
         server.command().register(new ChatChannelCommand(this));
+        server.command().register(new MuteCommand(this));
+        server.command().register(new UnmuteCommand(this));
         return Futures.immediateVoidFuture();
     }
 
@@ -98,6 +122,14 @@ public class ChatFacet implements Facet {
     }
 
     public void sendPrivateMessage(@NotNull Player from, @NotNull Player to, @NotNull String message) {
+        try {
+            if (muteStorage != null && muteStorage.isPlayerMuted(from).get()) {
+                return;
+                // TODO Warn player that they are muted, and record sent message elsewhere for moderation purposes
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         var chatMessage = new ChatMessage(
                 Instant.now(),
                 runtime.hostname(),
@@ -129,6 +161,14 @@ public class ChatFacet implements Facet {
     }
 
     private void handleChatEvent(PlayerChatEvent event) {
+        try {
+            if (muteStorage != null && muteStorage.isPlayerMuted(event.getPlayer()).get()) {
+                return;
+                // TODO Warn player that they are muted, and record sent message elsewhere for moderation purposes
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         var message = new ChatMessage(
                 Instant.now(),
                 runtime.hostname(),
@@ -137,13 +177,12 @@ public class ChatFacet implements Facet {
                 event.getMessage()
         );
         switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
-            case ChatMessage.STAFF_CONTEXT:
+            case ChatMessage.STAFF_CONTEXT -> {
                 sendStaffChatMessage(event.getPlayer(), message.message());
                 event.setCancelled(true);
-                break;
-            case ChatMessage.DEFAULT_CONTEXT:
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         Futures.addCallback(
                 storage.recordChatMessage(message),
@@ -215,5 +254,13 @@ public class ChatFacet implements Facet {
                 },
                 ForkJoinPool.commonPool()
         );
+    }
+
+    public void handlePlayerMute(Player player) {
+        muteStorage.mutePlayer(player);
+    }
+
+    public void handlePlayerUnmute(Player player) {
+        muteStorage.ummutePlayer(player);
     }
 }

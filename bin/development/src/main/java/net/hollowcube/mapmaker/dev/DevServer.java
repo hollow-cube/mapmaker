@@ -15,8 +15,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
+import net.hollowcube.mapmaker.dev.command.*;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -26,12 +25,8 @@ import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
-import net.hollowcube.mapmaker.storage.MapStorage;
-import net.hollowcube.mapmaker.storage.MetricStorage;
-import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.mapmaker.storage.*;
 import net.hollowcube.mapmaker.ui.Scoreboards;
-import net.hollowcube.mapmaker.storage.WhitelistStorage;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageMemory;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -140,6 +135,7 @@ public class DevServer {
     private SaveStateStorage saveStateStorage;
     private MetricStorage metricStorage;
     private WhitelistStorage whitelistStorage;
+    private BanStorage banStorage;
 
     private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
@@ -211,6 +207,18 @@ public class DevServer {
             ));
         }
 
+        if (System.getenv("MM_BANS_DEV") != null) {
+            this.banStorage = BanStorage.memory();
+        } else {
+            startupTasks.add(Futures.transform(
+                    BanStorage.mongo(config.mongo()),
+                    banStorage -> {
+                        this.banStorage = banStorage;
+                        return null;
+                    },
+                    Runnable::run
+            ));
+        }
 
         if (System.getenv("MM_METRICS_STORAGE_DEV") != null) {
             this.metricStorage = MetricStorage.memory();
@@ -294,6 +302,9 @@ public class DevServer {
 
         MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
         MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
+        MinecraftServer.getCommandManager().register(new BanCommand(banStorage));
+        MinecraftServer.getCommandManager().register(new UnbanCommand(banStorage));
+        MinecraftServer.getCommandManager().register(new KickCommand());
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -351,11 +362,14 @@ public class DevServer {
 
         try {
             // Whitelist check
-            boolean whitelisted = whitelistStorage.isPlayerWhitelisted(player)
-                            .get();
+            boolean whitelisted = whitelistStorage.isPlayerWhitelisted(player).get();
+            boolean banned = banStorage.isPlayerBanned(player).get();
             if (!whitelisted) {
                 player.kick(Component.text("You are not whitelisted on this server!", NamedTextColor.RED));
                 return;
+            }
+            if (banned) {
+                player.kick(Component.text("You are banned from this server!", NamedTextColor.RED));
             }
 
             FluentFuture.from(playerStorage.getPlayerByUuid(event.getPlayerUuid().toString()))
