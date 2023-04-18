@@ -28,14 +28,17 @@ public class DisplayNameBuilder {
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-        return null;
+        return uuid;
     }
 
+    // This might be totally useless
     public static String getDisplayName(Player player) {
         String name;
         if ((name = PlayerData.fromPlayer(player).getDisplayName()) != null)
             return name;
-        return getDisplayName(player.getUuid().toString());
+        if ((name = getDisplayName(player.getUuid().toString())) != player.getUuid().toString())
+            return name;
+        return player.getUsername();
     }
 
     public static String playerToDisplayName(Player player, PlatformPermissionManager permissionManager) {

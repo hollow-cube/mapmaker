@@ -445,9 +445,7 @@ public class DevServer {
         var player = event.getPlayer();
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
-        String name = DisplayNameBuilder.getDisplayName(player);
-        if (name == null)
-            name = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
+        String name = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
         player.sendMessage(Component.text("Hello, ").append(Component.text(name)));
         player.setPermissionLevel(4);
 
