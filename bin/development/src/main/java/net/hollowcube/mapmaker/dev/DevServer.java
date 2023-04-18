@@ -445,7 +445,10 @@ public class DevServer {
         var player = event.getPlayer();
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
-        player.sendMessage(Component.text("Hello, ").append(new PlayerServiceImpl().getDisplayName(player.getUuid().toString()).toCompletableFuture().join().result()));
+        String name = DisplayNameBuilder.getDisplayName(player);
+        if (name == null)
+            name = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
+        player.sendMessage(Component.text("Hello, ").append(Component.text(name)));
         player.setPermissionLevel(4);
 
         //todo temp. PLAYER_ID is the players network ID (not necessarily their uuid, for bedrock or other users)

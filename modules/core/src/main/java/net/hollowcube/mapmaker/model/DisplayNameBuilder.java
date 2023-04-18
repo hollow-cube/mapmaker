@@ -1,14 +1,16 @@
 package net.hollowcube.mapmaker.model;
 
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.permission.PlatformPermission;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.minestom.server.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutionException;
 
 public class DisplayNameBuilder {
+    private static final Logger logger = LoggerFactory.getLogger(DisplayNameBuilder.class);
     private static PlayerStorage playerStorage;
 
     public static void init(PlayerStorage playerStorage) {
@@ -18,32 +20,40 @@ public class DisplayNameBuilder {
     //TODO move to a better class with diff name
     public static String getDisplayName(String uuid) {
         try {
-            return playerStorage.getPlayerByUuid(uuid).get().getDisplayName();
-        } catch (Exception e) {
-            return uuid;
+            String name;
+            if ((name = playerStorage.getPlayerByUuid(uuid).get().getDisplayName()) != null)
+                return name;
+        } catch (PlayerStorage.NotFoundError e) {
+            logger.info("Tried to get display name for player not in storage" + uuid);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     public static String getDisplayName(Player player) {
-        return PlayerData.fromPlayer(player).getDisplayName();
+        String name;
+        if ((name = PlayerData.fromPlayer(player).getDisplayName()) != null)
+            return name;
+        return getDisplayName(player.getUuid().toString());
     }
 
     public static String playerToDisplayName(Player player, PlatformPermissionManager permissionManager) {
-        String display_name = "";
+        StringBuilder displayName = new StringBuilder();
         String uuid = player.getUuid().toString();
 
         try {
             for (PlatformPermission permission : PlatformPermission.values()) {
                 if (permissionManager.checkPermission(uuid, permission).get()) {
-                    display_name += Prefix.getDisplayFromPerm(permission);
+                    displayName.append(Prefix.getDisplayFromPerm(permission));
                 }
             }
         } catch (Exception e) {
-            display_name = "";
+            displayName = new StringBuilder();
         }
 
-        display_name += " " + player.getUsername();
+        displayName.append(" ").append(player.getUsername());
 
-        return display_name;
+        return displayName.toString();
     }
 }
