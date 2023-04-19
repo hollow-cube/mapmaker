@@ -13,6 +13,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
+import net.hollowcube.mapmaker.dev.command.FakePlayerCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
@@ -27,6 +28,7 @@ import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.*;
 import net.hollowcube.mapmaker.ui.Scoreboards;
+import net.hollowcube.mapmaker.ui.TabLists;
 import net.hollowcube.world.WorldManager;
 import net.hollowcube.world.storage.FileStorageMemory;
 import net.hollowcube.world.storage.FileStorageS3;
@@ -38,6 +40,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.fakeplayer.FakePlayer;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import org.eclipse.microprofile.health.HealthCheck;
@@ -50,8 +53,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
+import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
@@ -253,6 +258,7 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
             MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
+            MinecraftServer.getCommandManager().register(new FakePlayerCommand());
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -288,6 +294,7 @@ public class DevServer {
             logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
 
             Scoreboards.init();
+            TabLists.init();
 
             scope.join();
         } catch (Exception e) {
@@ -412,5 +419,6 @@ public class DevServer {
 
         Scoreboards.showPlayerLobbyScoreboard(player);
         Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
+        TabLists.showPlayerGlobalTabList(player);
     }
 }
