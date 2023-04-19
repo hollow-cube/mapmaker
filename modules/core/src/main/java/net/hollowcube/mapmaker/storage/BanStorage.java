@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.concurrent.Future;
 
 public interface BanStorage {
@@ -31,5 +32,8 @@ public interface BanStorage {
     Future<Void> banPlayer(@NotNull Player player);
 
     @NotNull
-    Future<Void> unbanPlayer(@NotNull Player player);
+    Future<Void> unbanPlayer(@NotNull String username);
+
+    @NotNull
+    Future<Collection<String>> getUnbannedUsernames();
 }
