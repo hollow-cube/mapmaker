@@ -10,6 +10,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.mapmaker.storage.MuteStorage;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
@@ -146,8 +147,8 @@ public class ChatFacet implements Facet {
                     public void onSuccess(Void result) {
                         to.setTag(REPLY_TO, from.getUuid());
                         from.setTag(REPLY_TO, to.getUuid());
-                        from.sendMessage("to " + to.getUsername() + ": " + message);
-                        to.sendMessage("from " + from.getUsername() + ": " + message);
+                        from.sendMessage("to " + PlayerData.fromPlayer(to).getDisplayName() + ": " + message);
+                        to.sendMessage("from " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
                     }
 
                     @Override
@@ -173,7 +174,7 @@ public class ChatFacet implements Facet {
                 Instant.now(),
                 runtime.hostname(),
                 ChatMessage.DEFAULT_CONTEXT,
-                event.getPlayer().getUuid().toString(),
+                PlayerData.fromPlayer(event.getPlayer()).getDisplayName(),
                 event.getMessage()
         );
         switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
@@ -217,7 +218,7 @@ public class ChatFacet implements Facet {
                     new FutureCallback<>() {
                         @Override
                         public void onSuccess(Void result) {
-                            target.sendMessage("[STAFF] " + from.getUsername() + ": " + message);
+                            target.sendMessage("[STAFF] " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
                         }
 
                         @Override

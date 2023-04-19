@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
+import net.hollowcube.mapmaker.model.DisplayNameBuilder;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -313,7 +314,7 @@ public class DevServer {
         eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
         eventHandler.addListener(PlayerChatEvent.class, event -> event.setChatFormat(e -> {
             var player = event.getPlayer();
-            var username = player.getUsername();
+            var username = PlayerData.fromPlayer(event.getPlayer()).getDisplayName();
             return Component.translatable("chat.type.text")
                     .args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
         }));
@@ -341,6 +342,7 @@ public class DevServer {
         logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
 
         Scoreboards.init();
+        DisplayNameBuilder.init(playerStorage);
 
         try {
             Futures.whenAllSucceed(startupTasks).call(() -> null, Runnable::run).get();
@@ -377,6 +379,8 @@ public class DevServer {
                         var data = new PlayerData();
                         data.setId(event.getPlayerUuid().toString());
                         data.setUuid(event.getPlayerUuid().toString());
+                        data.setDisplayName(
+                                DisplayNameBuilder.playerToDisplayName(event.getPlayer(), this.platformPermissions));
                         data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
                         MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
                         return playerStorage.createPlayer(data);
@@ -455,7 +459,8 @@ public class DevServer {
         var player = event.getPlayer();
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
-        player.sendMessage(Component.text("Hello, ").append(new PlayerServiceImpl().getDisplayName(player.getUuid().toString()).toCompletableFuture().join().result()));
+        String name = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
+        player.sendMessage(Component.text("Hello, ").append(Component.text(name)));
         player.setPermissionLevel(4);
 
         //todo temp. PLAYER_ID is the players network ID (not necessarily their uuid, for bedrock or other users)
