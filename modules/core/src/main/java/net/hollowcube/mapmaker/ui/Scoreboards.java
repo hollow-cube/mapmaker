@@ -3,9 +3,12 @@ package net.hollowcube.mapmaker.ui;
 import net.hollowcube.mapmaker.model.DisplayNameBuilder;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
 public class Scoreboards {
@@ -18,6 +21,13 @@ public class Scoreboards {
 
     public static void init() {
         lobbyScoreboard = createLobbyScoreboard();
+
+        //TODO this can probably be triggered by player join/leave but it's already a lightweight call
+        MinecraftServer.getSchedulerManager()
+                .buildTask(Scoreboards::tick)
+                .executionType(ExecutionType.ASYNC)
+                .repeat(TaskSchedule.seconds(1))
+                .schedule();
     }
 
     public static void setScoreboardVisibility(Player player, Boolean visible) {
@@ -44,7 +54,8 @@ public class Scoreboards {
 
         lobbySidebar.setTitle(Component.translatable("scoreboard.title"));
         lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_one", Component.translatable("scoreboard.line"), -1));
-        lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_two", Component.translatable("scoreboard.lobby.info"), -2));
+        lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_two",
+                Component.translatable("scoreboard.lobby.info", Component.text("HUB1")), -2)); //TODO get server id
         lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_three", Component.translatable("scoreboard.lobby.online"), -3));
         lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_four", Component.translatable("scoreboard.line"), -4));
         lobbySidebar.createLine(new Sidebar.ScoreboardLine("lobby_five", Component.translatable("scoreboard.IP"), -5));
@@ -123,14 +134,14 @@ public class Scoreboards {
         }
     }
 
-    //TODO update scoreboards that need frequent updating every tick(?) async
-    private void tick() {
-        updateLobbyScoreboard();
+    private static void updateLobbyScoreboard() {
+        // TODO get players across server, we don't have method for that yet afaik
+        var online = MinecraftServer.getConnectionManager().getOnlinePlayers().size();
+        lobbyScoreboard.updateLineContent("lobby_three",
+                Component.translatable("scoreboard.lobby.online", Component.text(online)));
     }
 
-    private void updateLobbyScoreboard() {
-        // TODO get players across server, we don't have method for that yet afaik
-        lobbyScoreboard.updateLineContent("lobby_three", Component.translatable("scoreboard.lobby.online")
-                .append(Component.text("0")));
+    private static void tick() {
+        updateLobbyScoreboard();
     }
 }
