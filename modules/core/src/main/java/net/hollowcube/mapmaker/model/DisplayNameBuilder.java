@@ -56,7 +56,8 @@ public class DisplayNameBuilder {
         }
 
         if (!displayName.isEmpty())
-            displayName.append(" ").append(player.getUsername());
+            displayName.append(" ");
+        displayName.append(player.getUsername());
 
         return displayName.toString();
     }

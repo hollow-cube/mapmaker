@@ -375,9 +375,17 @@ public class DevServer {
                         player.setTag(PlayerData.PLAYER_ID, data.getId());
                         player.setTag(PlayerData.DATA, data);
 
+                        boolean changed = false;
+
+                        // Update their display name (move to be callback whenever their perms change)
+                        var newDisplayName = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
+                        if (data.getDisplayName() != newDisplayName) {
+                            changed = true;
+                            data.setDisplayName(newDisplayName);
+                        }
+
                         // todo this cleanup step should probably be moved
                         // Cleanup maps which are actually gone
-                        boolean changed = false;
                         for (int i = 0; i < data.getUnlockedMapSlots(); i++) {
                             var mapId = data.getMapSlot(i);
                             if (mapId != null) {
