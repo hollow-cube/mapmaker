@@ -1,12 +1,9 @@
 package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.EditingMapWorld;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.hollowcube.mapmaker.config.ConfigProvider;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -23,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,14 +33,12 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
     private FriendlyProducer producer = null;
 
     @Override
-    public @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
+    public void init(@NotNull ConfigProvider config) {
         logger.log(System.Logger.Level.INFO, "(not) Initializing schematic upload provider...");
 
         var kafkaConfig = config.get(KafkaConfig.class);
         consumer = new SchematicUploadConsumer(kafkaConfig.bootstrapServersStr());
         producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
-
-        return Futures.immediateVoidFuture();
     }
 
     @Override
@@ -76,8 +70,8 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
             if (player == null) return;
 
             // Get the current world of the player, if it is not an editing world then do nothing.
-            var world = MapWorld.optionalFromInstance(player.getInstance());
-            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) {
+            var world = MapWorldNew.optionalFromInstance(player.getInstance());
+            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) {
                 logger.log(System.Logger.Level.INFO, "Player {0} is not editing a map, ignoring schematic upload.", player.getUuid());
                 respondAndForget(msg, ERR_NOT_EDITING);
                 return;

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 public class EditMapIcon extends View {
     public static final String SIG_CREATE_MAP_IN_SLOT = "create_map_in_slot";
@@ -57,7 +58,7 @@ public class EditMapIcon extends View {
 
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
         if (state == State.FULL) {
-            mapDataFuture = mapStorage.getMapById(mapId);
+            mapDataFuture = Futures.submit(() -> mapStorage.getMapById(mapId), ForkJoinPool.commonPool());
             Futures.addCallback(mapDataFuture, new FutureCallback<>() {
                 @Override
                 public void onSuccess(MapData result) {

@@ -18,19 +18,19 @@ public class FileStorageMemory implements FileStorage {
     private final Map<String, MemoryFile> files = new ConcurrentHashMap<>();
 
     @Override
-    public @NotNull CompletableFuture<@NotNull String> uploadFile(@NotNull String path, @NotNull InputStream data, long size, @NotNull Map<String, String> userMetadata) {
+    public @NotNull String uploadFile(@NotNull String path, @NotNull InputStream data, long size, @NotNull Map<String, String> userMetadata) {
         try {
             files.put(path, new MemoryFile(data.readAllBytes(), size, userMetadata));
-            return CompletableFuture.completedFuture(path);
+            return path;
         } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull StoredFile> downloadFile(@NotNull String path) {
+    public @NotNull StoredFile downloadFile(@NotNull String path) {
         if (!files.containsKey(path))
-            return CompletableFuture.failedFuture(new Exception("File not found"));
-        return CompletableFuture.completedFuture(files.get(path).toStoredFile());
+            throw new RuntimeException("File not found");
+        return files.get(path).toStoredFile();
     }
 }

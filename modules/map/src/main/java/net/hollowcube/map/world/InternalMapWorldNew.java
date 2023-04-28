@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 interface InternalMapWorldNew extends MapWorldNew {
@@ -20,7 +21,7 @@ interface InternalMapWorldNew extends MapWorldNew {
      *
      * @return A future which completes when the world is ready for players.
      */
-    @NotNull ListenableFuture<Void> load();
+    @Blocking void load();
 
     /**
      * Closes thr world, including saving if relevant. When this method is called, the world is guaranteed not to have any new players added.
@@ -29,7 +30,7 @@ interface InternalMapWorldNew extends MapWorldNew {
      *
      * @return A future which completes when the world is closed.
      */
-    @NotNull ListenableFuture<Void> close();
+    @Blocking void close();
 
     /**
      * Called as a player is entering the world, but before the player is added to the {@link net.minestom.server.instance.Instance}.
@@ -39,7 +40,7 @@ interface InternalMapWorldNew extends MapWorldNew {
      * @param player The player being added to the world
      * @return A future that completes when the player may begin interacting with the world.
      */
-    @NotNull ListenableFuture<@NotNull SaveState> acceptPlayer(@NotNull Player player);
+    @Blocking void acceptPlayer(@NotNull Player player);
 
     /**
      * Called as a player is leaving the world, but before the player is removed from the {@link net.minestom.server.instance.Instance}.
@@ -49,6 +50,6 @@ interface InternalMapWorldNew extends MapWorldNew {
      * @param player The player being removed from the world
      * @return A future that completes when the player has been completely removed from the world.
      */
-    @NotNull ListenableFuture<Void> removePlayer(@NotNull Player player);
+    @Blocking void removePlayer(@NotNull Player player);
 
 }

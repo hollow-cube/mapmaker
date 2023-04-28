@@ -17,42 +17,31 @@ class PlayerStorageMemory implements PlayerStorage {
     private final Map<String, PlayerData> playersById = new HashMap<>();
 
     @Override
-    public @NotNull ListenableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
+    public @NotNull PlayerData createPlayer(@NotNull PlayerData player) {
         logger.info("Creating player {}", player.getId());
         var existing = playersById.putIfAbsent(player.getId(), player);
         if (existing != null)
-            return Futures.immediateFailedFuture(new DuplicateEntryError());
-        return Futures.immediateFuture(player);
+            throw new DuplicateEntryError();
+        return player;
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id) {
-        logger.info("Getting player by id {}", id);
-        var player = playersById.get(id);
-        if (player == null) {
-            return FutureResult.error(ERR_NOT_FOUND);
-        }
-        return FutureResult.of(player);
-    }
-
-    @Override
-    public @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
+    public @NotNull PlayerData getPlayerByUuid(@NotNull String uuid) {
         logger.info("Getting player by uuid {}", uuid);
         for (var entry : playersById.entrySet()) {
             if (entry.getValue().getId().equals(uuid)) {
-                return Futures.immediateFuture(entry.getValue());
+                return entry.getValue();
             }
         }
-        return Futures.immediateFailedFuture(new NotFoundError(uuid));
+        throw new NotFoundError(uuid);
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player) {
+    public void updatePlayer(@NotNull PlayerData player) {
         logger.info("Updating player {}", player.getId());
         if (!playersById.containsKey(player.getId()))
-            return FutureResult.error(ERR_NOT_FOUND);
+            throw new NotFoundError(player.getId());
         playersById.put(player.getId(), player);
-        return FutureResult.ofNull();
     }
 
 }

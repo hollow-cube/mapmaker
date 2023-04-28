@@ -85,6 +85,12 @@ subprojects {
             check("UnusedVariable", CheckSeverity.OFF) // Does not play well with canvas, has a bug with records
             option("NullAway:AnnotatedPackages", "com.uber")
         }
+
+        options.compilerArgs.addAll(listOf(
+                "--release", "19",
+                "--enable-preview",
+                "--add-modules", "jdk.incubator.concurrent",
+        ))
     }
 
     configure<JavaPluginExtension> {

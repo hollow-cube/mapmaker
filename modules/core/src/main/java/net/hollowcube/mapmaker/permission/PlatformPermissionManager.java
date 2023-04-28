@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.permission;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.SpiceDBConfig;
 import net.hollowcube.mapmaker.permission.client.SpiceDBClientFactory;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 public interface PlatformPermissionManager {
@@ -22,13 +22,10 @@ public interface PlatformPermissionManager {
      * <p>
      * This is the default permission manager used by MapMaker.
      */
-    static @NotNull ListenableFuture<@NotNull PlatformPermissionManager> spicedb(@NotNull SpiceDBConfig config) {
-        var clientFactory = SpiceDBClientFactory.get();
-        return Futures.transform(
-                clientFactory.newPermissionClient(config),
-                PlatformPermissionManagerSpiceDB::new,
-                Runnable::run
-        );
+    @Blocking
+    static @NotNull PlatformPermissionManager spicedb(@NotNull SpiceDBConfig config) {
+        var client = SpiceDBClientFactory.get().newPermissionClient(config);
+        return new PlatformPermissionManagerSpiceDB(client);
     }
 
     @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission);

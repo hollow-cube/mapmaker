@@ -48,6 +48,12 @@ subprojects {
             check("UnusedVariable", net.ltgt.gradle.errorprone.CheckSeverity.OFF)
             option("NullAway:AnnotatedPackages", "com.uber")
         }
+
+        options.compilerArgs.addAll(listOf(
+                "--release", "19",
+                "--enable-preview",
+                "--add-modules", "jdk.incubator.concurrent",
+        ))
     }
 
     tasks.withType<Tar> {

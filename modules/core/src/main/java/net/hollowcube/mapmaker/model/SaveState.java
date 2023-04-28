@@ -27,10 +27,14 @@ public class SaveState {
         return player.getTag(TAG);
     }
 
+    public enum Type {
+        PLAYING, EDITING, TESTING
+    }
+
     private String id;
     private String playerId;
     private String mapId;
-    private boolean editing = false;
+    private Type type = Type.PLAYING;
     private boolean completed = false;
 
     // The time this save state was created.
@@ -68,12 +72,12 @@ public class SaveState {
         this.mapId = mapId;
     }
 
-    public boolean isEditing() {
-        return editing;
+    public Type getType() {
+        return type;
     }
 
-    public void setEditing(boolean editing) {
-        this.editing = editing;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Instant getStartTime() {

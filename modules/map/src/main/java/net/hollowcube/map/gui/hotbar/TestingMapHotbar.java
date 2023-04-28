@@ -1,8 +1,7 @@
 package net.hollowcube.map.gui.hotbar;
 
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.map.command.BuildModeCommand;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -67,11 +66,11 @@ public final class TestingMapHotbar {
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
-        var server = MapWorld.fromInstance(player.getInstance()).server();
+        var server = MapWorldNew.fromInstance(player.getInstance()).server();
         switch (customModelData) {
             case RETURN_CHECKPOINT_CMD -> player.sendMessage("todo");
             case SPECTATOR_CMD -> player.sendMessage("todo");
-            case BUILD_MODE_CMD -> BuildModeCommand.enterBuildMode(player, server);
+//            case BUILD_MODE_CMD -> BuildModeCommand.enterBuildMode(player, server);
         }
     }
 }

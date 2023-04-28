@@ -2,7 +2,7 @@ package net.hollowcube.map.command;
 
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
@@ -59,7 +59,7 @@ public class SetSpawnCommand extends BaseMapCommand {
     }
 
     private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
-        var map = MapWorld.fromInstance(player.getInstance()).map();
+        var map = MapWorldNew.fromInstance(player.getInstance()).map();
         map.setSpawnPoint(newSpawnPoint);
         player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
                 Component.text(newSpawnPoint.blockX()).hoverEvent(Component.text(newSpawnPoint.x(), NamedTextColor.DARK_AQUA)),

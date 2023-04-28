@@ -1,15 +1,17 @@
 package net.hollowcube.map.world;
 
-import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
+import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.util.StringUtil;
 import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.generation.MapGenerators;
@@ -17,6 +19,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -24,13 +27,18 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Future;
 
-@SuppressWarnings("UnstableApiUsage")
-class EditingMapWorldNew implements InternalMapWorldNew {
+public class EditingMapWorldNew implements InternalMapWorldNew {
+    private static final System.Logger logger = System.getLogger(EditingMapWorldNew.class.getName());
+
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_EDITING = Tag.Boolean("editing").defaultValue(false);
 
@@ -39,7 +47,7 @@ class EditingMapWorldNew implements InternalMapWorldNew {
     private int flags = 0;
 
     private final BaseWorld baseWorld;
-    private TestingMapWorldNew testWorld;
+    private TestingMapWorldNew testWorld = null;
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
@@ -61,14 +69,6 @@ class EditingMapWorldNew implements InternalMapWorldNew {
         instance.setTag(SELF_TAG, this);
 
         this.itemRegistry = new ItemRegistry();
-
-        //todo how to move between editing and testing?
-        /*
-        Flow
-        - removePlayer in editing world (still in instance)
-        - acceptPlayer in testing world (still in instance)
-        - simulate player spawn in instance event for testing world to handle spawn logic?
-         */
     }
 
     @Override
@@ -107,56 +107,135 @@ class EditingMapWorldNew implements InternalMapWorldNew {
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> load() {
-        var loadFuture = Futures.immediateVoidFuture();
+    public @Blocking void load() {
+        // Load the map itself (eg blocks, if present)
         if (map.getMapFileId() != null) {
-            loadFuture = JdkFutureAdapters.listenInPoolThread(baseWorld.loadWorld());
+            baseWorld.loadWorld();
         }
-        return Futures.transformAsync(
-                // Load the map data (eg blocks)
-                loadFuture,
-                // Load the features. Notably after the map is loaded in case they depend on map data.
-                unused -> {
-                    var futures = new ArrayList<ListenableFuture<?>>();
-                    for (var feature : server.features()) {
-                        var future = feature.initMap(this);
-                        if (future == null) continue;
 
-                        futures.add(future);
-                        enabledFeatures.add(feature);
-                    }
-                    return Futures.whenAllSucceed(futures).call(() -> null, Runnable::run);
-                },
-                Runnable::run
-        );
+        // Load each of the features
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            // Load each feature in parallel
+            var features = server.features();
+            var enabledFutures = new Future[features.size()];
+            for (int i = 0; i < features.size(); i++) {
+                var feature = features.get(i);
+                enabledFutures[i] = scope.fork(() -> feature.initMap(this));
+            }
+
+            scope.join();
+
+            // Add each feature to the enabled list if it is enabled.
+            for (int i = 0; i < features.size(); i++) {
+                var feature = features.get(i);
+                if ((boolean) enabledFutures[i].resultNow()) {
+                    enabledFeatures.add(feature);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> close() {
-        //todo close testing world i guess
-        return FluentFuture.from(JdkFutureAdapters.listenInPoolThread(baseWorld.saveWorld()))
-                .transformAsync(fileId -> {
-                    map.setMapFileId(fileId);
-                    return JdkFutureAdapters.listenInPoolThread(server.mapStorage()
-                            .updateMap(map)
-                            .toCompletableFuture()
-                            .thenApply(unused -> null));
-                }, Runnable::run)
-                .transformAsync(unused -> JdkFutureAdapters.listenInPoolThread(baseWorld.unloadWorld()), Runnable::run);
+    public @Blocking void close() {
+        if (testWorld != null) {
+            testWorld.close();
+        }
+
+        // Save the backing world (blocks, etc)
+        var fileId = baseWorld.saveWorld();
+
+        // Update the map with the new file id & save it
+        map.setMapFileId(fileId);
+        server.mapStorage().updateMap(map);
+
+        // Unload the backing world
+        baseWorld.unloadWorld();
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull SaveState> acceptPlayer(@NotNull Player player) {
+    public @Blocking void acceptPlayer(@NotNull Player player) {
+        var playerData = PlayerData.fromPlayer(player);
+
         player.setTag(TAG_EDITING, true);
-        player.setGameMode(GameMode.CREATIVE); //todo
-        player.refreshCommands(); //todo this needs to happen after in the instance
-        return Futures.immediateFuture(null);
+        player.setGameMode(GameMode.CREATIVE); //todo based on setting
+        player.refreshCommands();
+
+        var saveStateStorage = server.saveStateStorage();
+        SaveState saveState;
+        try {
+            saveState = saveStateStorage.getLatestSaveState(playerData.getId(), map().getId(), SaveState.Type.EDITING);
+        } catch (SaveStateStorage.NotFoundError e) {
+            // common savestate creation logic todo move elsewhere
+            saveState = new SaveState();
+            saveState.setId(UUID.randomUUID().toString());
+            saveState.setPlayerId(playerData.getId());
+            saveState.setMapId(map().getId());
+            saveState.setStartTime(Instant.now());
+            saveState.setPos(map.getSpawnPoint());
+
+            saveState.setType(SaveState.Type.EDITING);
+
+            saveStateStorage.createSaveState(saveState);
+
+            player.setTag(MapHooks.PLAYING, true);
+            player.setTag(SaveState.TAG, saveState);
+        }
+
+        // formerly initPlayerFromSaveState
+        var inventory = saveState.getInventory();
+        for (int i = 0; i < inventory.size(); i++) {
+            player.getInventory().setItemStack(i, inventory.get(i));
+        }
+        player.setGameMode(GameMode.CREATIVE);
+        player.teleport(saveState.getPos()).join();
+        player.sendMessage("Now editing " + map.getName());
+
+        EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> removePlayer(@NotNull Player player) {
+    public @Blocking void removePlayer(@NotNull Player player) {
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState != null) {
+
+            // Formerly updateSaveStateForPlayer
+            saveState.setPos(player.getPosition());
+            saveState.setInventory(List.of(player.getInventory().getItemStacks()));
+
+            try {
+                var saveStateStorage = server.saveStateStorage();
+                saveStateStorage.updateSaveState(saveState);
+                logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+            }
+
+            EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+        }
+
         player.removeTag(TAG_EDITING);
-        return Futures.immediateVoidFuture();
+    }
+
+    private @NotNull TestingMapWorldNew getTestWorld() {
+        if (testWorld == null) {
+            testWorld = new TestingMapWorldNew(this);
+        }
+
+        return testWorld;
+    }
+
+    public void enterTestMode(@NotNull Player player) {
+        Thread.startVirtualThread(() -> movePlayerToTestWorld(player));
+    }
+
+    private @Blocking void movePlayerToTestWorld(@NotNull Player player) {
+        // remove from this map (leaving them in the Minestom instance)
+        removePlayer(player);
+
+        // add to the test world
+        getTestWorld().acceptPlayer(player);
     }
 
 }

@@ -1,6 +1,7 @@
 package net.hollowcube.world;
 
 import net.minestom.server.instance.Instance;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -13,12 +14,13 @@ public interface World {
 
     // Management
 
-    @NotNull CompletableFuture<@NotNull String> saveWorld();
+    @Blocking @NotNull String saveWorld();
 
-    @NotNull CompletableFuture<Void> unloadWorld();
+    @Blocking void unloadWorld();
 
-    default @NotNull CompletableFuture<Void> saveAndUnloadWorld() {
-        return saveWorld().thenCompose(unused -> unloadWorld());
+    default @Blocking void saveAndUnloadWorld() {
+        saveWorld();
+        unloadWorld();
     }
 
 }

@@ -28,6 +28,11 @@ public class FriendlyProducer implements AutoCloseable {
     private final KafkaProducer<String, String> producer;
 
     public FriendlyProducer(@NotNull String bootstrapServers) {
+        if (bootstrapServers.isEmpty()) {
+            producer = null;
+            return;
+        }
+
         producer = new KafkaProducer<>(Map.of(
                 "client.id", ServerRuntime.getRuntime().hostname(),
                 "bootstrap.servers", bootstrapServers
@@ -35,6 +40,8 @@ public class FriendlyProducer implements AutoCloseable {
     }
 
     public @NotNull ListenableFuture<Void> produce(@NotNull String topic, @NotNull String value) {
+        if (producer == null) return Futures.immediateVoidFuture();
+
         var future = SettableFuture.<Void>create();
         producer.send(new ProducerRecord<>(topic, value), (unused1, exception) -> {
             if (exception != null) {
@@ -47,6 +54,8 @@ public class FriendlyProducer implements AutoCloseable {
     }
 
     public void produceAndForget(@NotNull String topic, @NotNull String value) {
+        if (producer == null) return;
+
         Futures.addCallback(produce(topic, value), new FutureCallback<>() {
             @Override
             public void onSuccess(Void result) {
@@ -63,6 +72,6 @@ public class FriendlyProducer implements AutoCloseable {
 
     @Override
     public void close() {
-        producer.close();
+        if (producer != null) producer.close();
     }
 }

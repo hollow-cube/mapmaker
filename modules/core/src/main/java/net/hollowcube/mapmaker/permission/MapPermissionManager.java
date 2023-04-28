@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.SpiceDBConfig;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.permission.client.SpiceDBClientFactory;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -24,13 +25,10 @@ public interface MapPermissionManager {
      * <p>
      * This is the default permission manager used by MapMaker.
      */
-    static @NotNull ListenableFuture<@NotNull MapPermissionManagerSpiceDB> spicedb(@NotNull SpiceDBConfig config) {
-        var clientFactory = SpiceDBClientFactory.get();
-        return Futures.transform(
-                clientFactory.newPermissionClient(config),
-                MapPermissionManagerSpiceDB::new,
-                Runnable::run
-        );
+    @Blocking
+    static @NotNull MapPermissionManagerSpiceDB spicedb(@NotNull SpiceDBConfig config) {
+        var client = SpiceDBClientFactory.get().newPermissionClient(config);
+        return new MapPermissionManagerSpiceDB(client);
     }
 
     /**

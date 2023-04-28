@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
+@SuppressWarnings("UnstableApiUsage")
 @AutoService(Facet.class)
 public class ChatFacet implements Facet {
     private static final System.Logger logger = System.getLogger(ChatFacet.class.getName());
@@ -84,14 +85,13 @@ public class ChatFacet implements Facet {
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server) {
+    public void hook(@NotNull ServerProcess server) {
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));
         server.command().register(new ReplyCommand(this));
         server.command().register(new StaffChatCommand(this));
         server.command().register(new ChatChannelCommand(this));
-        return Futures.immediateVoidFuture();
     }
 
     public EventNode<Event> eventNode() {

@@ -118,7 +118,10 @@ public class Handler {
                 // Set the map in the given player slot & save player
                 .flatMap(map1 -> {
                     playerData.setMapSlot(slot, map1.getId());
-                    return server.playerStorage().updatePlayer(playerData)
+                    return FutureResult.supply(() -> {
+                                server.playerStorage().updatePlayer(playerData);
+                                return Result.ofNull();
+                            })
                             .mapErr(err -> Result.error(err.wrap("failed to update player: {}")))
                             .map(unused -> map1);
                 })
@@ -171,7 +174,7 @@ public class Handler {
     public @NotNull FutureResult<MapData> publishMap(@NotNull String playerId, @NotNull String mapId) {
         var timer = publishMapTime.startTimer();
 
-        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
+        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
                 // Check admin permissions
                 .flatAlso(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.ADMIN))
                         .wrapErr("failed to check admin permission: {}"))
@@ -192,7 +195,10 @@ public class Handler {
                 .flatAlso(map -> FutureResult.wrap(server.mapPermissions().makeMapPublic(mapId))
                         .wrapErr("failed to make map public: {}"))
                 // Save map
-                .flatAlso(map -> server.mapStorage().updateMap(map)
+                .flatAlso(map -> FutureResult.supply(() -> {
+                            server.mapStorage().updateMap(map);
+                            return Result.ofNull();
+                        })
                         .wrapErr("failed to update map: {}"))
                 .mapErr(err -> {
                     if (err.is(MapStorage.ERR_NOT_FOUND))
@@ -205,7 +211,7 @@ public class Handler {
     public @NotNull FutureResult<Void> playMap(@NotNull Player player, @NotNull String mapId) {
         var timer = playMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
-        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
+        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
                 // Ensure map is published and check permission
                 .flatMap(map -> {
                     if (!map.isPublished())
@@ -216,7 +222,10 @@ public class Handler {
                             .map(unused -> map);
                 })
                 // Send player to map instance
-                .flatMap(map -> server.bridge().joinMap(player, mapId, false)
+                .flatMap(map -> FutureResult.supply(() -> {
+                            server.bridge().joinMap(player, mapId, false);
+                            return Result.<Void>ofNull();
+                        })
                         .wrapErr("failed to join map: {}"))
                 .alsoRaw(unused -> timer.observeDuration());
     }
@@ -224,7 +233,7 @@ public class Handler {
     public @NotNull FutureResult<Void> editMap(@NotNull Player player, @NotNull String mapId) {
         var timer = editMapTime.startTimer();
         var playerData = PlayerData.fromPlayer(player);
-        return FutureResult.wrap(server.mapStorage().getMapById(mapId))
+        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
                 // Ensure map is not published and check write permission
                 .flatMap(map -> {
                     if (map.isPublished())
@@ -235,7 +244,10 @@ public class Handler {
                             .map(unused -> map);
                 })
                 // Send player to map instance
-                .flatMap(map -> server.bridge().joinMap(player, mapId, true)
+                .flatMap(map -> FutureResult.supply(() -> {
+                            server.bridge().joinMap(player, mapId, true);
+                            return Result.<Void>ofNull();
+                        })
                         .wrapErr("failed to join map: {}"))
                 .alsoRaw(unused -> timer.observeDuration());
     }

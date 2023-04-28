@@ -29,6 +29,13 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     protected BaseConsumer(@NotNull String topic, @NotNull String groupId,
                         @NotNull Function<String, T> deserializer,
                         @NotNull String bootstrapServers) {
+        if (bootstrapServers.isEmpty()) {
+            consumer = null;
+            valueDeserializer = null;
+            handle = null;
+            return;
+        }
+
         this.valueDeserializer = deserializer;
 
         var runtime = ServerRuntime.getRuntime();
@@ -68,7 +75,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
 
     @Override
     public void close() {
-        handle.cancel(false);
-        consumer.close();
+        if (handle != null) handle.cancel(false);
+        if (consumer != null) consumer.close();
     }
 }

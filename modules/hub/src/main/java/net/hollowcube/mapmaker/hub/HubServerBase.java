@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
 import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
@@ -10,6 +9,7 @@ import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -34,23 +34,16 @@ public abstract class HubServerBase implements HubServer {
         return bridge;
     }
 
-    public @NotNull ListenableFuture<Void> init() {
+    @Blocking public void init() {
         this.mapHandler = new Handler(this);
 
-        this.guiController = Controller.make(Map.of(
-                "hubServer", this,
-                "playerStorage", playerStorage(),
-                "mapStorage", mapStorage(),
-                "handler", mapHandler
-        ));
+        this.guiController = Controller.make(Map.of("hubServer", this, "playerStorage", playerStorage(), "mapStorage", mapStorage(), "handler", mapHandler));
 
         this.world = new HubWorld(this);
-        var worldResult = this.world.loadWorld();
+        this.world.loadWorld();
 
         var commands = MinecraftServer.getCommandManager();
         commands.register(new MapCommand(this, mapHandler));
-
-        return JdkFutureAdapters.listenInPoolThread(worldResult);
     }
 
     @Override

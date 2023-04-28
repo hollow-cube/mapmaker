@@ -15,14 +15,14 @@ public class MarkerFeatureProvider implements FeatureProvider {
     private static final ItemHandler MARKER_ITEM = new MarkerItemHandler();
 
     @Override
-    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorldNew world) {
+    public boolean initMap(@NotNull MapWorldNew world) {
         // Only enabled in editing worlds.
         if ((world.flags() & MapWorldNew.FLAG_EDITING) == 0)
-            return null;
+            return false;
 
         world.itemRegistry().register(MARKER_ITEM);
 
-        return Futures.immediateVoidFuture();
+        return true;
     }
 
 }

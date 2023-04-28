@@ -16,6 +16,7 @@ import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -40,40 +41,35 @@ public class SaveStateStorageMongo implements SaveStateStorage {
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull SaveState> createSaveState(@NotNull SaveState saveState) {
-        return Futures.submit(() -> {
-            try {
-                collection().insertOne(saveState);
-                return saveState;
-            } catch (DuplicateKeyException ignored) {
-                throw new SaveStateStorage.NotFoundError();
-            }
-        }, ForkJoinPool.commonPool());
+    public @NotNull SaveState createSaveState(@NotNull SaveState saveState) {
+        try {
+            collection().insertOne(saveState);
+            return saveState;
+        } catch (DuplicateKeyException ignored) {
+            throw new SaveStateStorage.NotFoundError();
+        }
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> updateSaveState(@NotNull SaveState saveState) {
-        return Futures.submit(() -> {
-            var filter = eq("_id", saveState.getId());
-            var result = collection().replaceOne(filter, saveState);
-            if (result.getModifiedCount() == 0)
-                throw new NotFoundError();
-        }, ForkJoinPool.commonPool());
+    public void updateSaveState(@NotNull SaveState saveState) {
+        var filter = eq("_id", saveState.getId());
+        var result = collection().replaceOne(filter, saveState);
+        if (result.getModifiedCount() == 0)
+            throw new NotFoundError();
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId) {
-        return Futures.submit(() -> {
-            var filter = and(
-                    eq("playerId", playerId),
-                    eq("mapId", mapId),
-                    or(eq("complete", false), not(exists("complete"))));
-            var sort = descending("startTime");
-            var result = collection().find(filter, SaveState.class).sort(sort).limit(1).first();
-            if (result == null)
-                throw new NotFoundError();
-            return result;
-        }, ForkJoinPool.commonPool());
+    public @NotNull SaveState getLatestSaveState(@NotNull String playerId, @NotNull String mapId, @NotNull SaveState.Type type) {
+        var filter = and(
+                eq("playerId", playerId),
+                eq("mapId", mapId),
+                eq("type", type.toString()),
+                or(eq("complete", false), not(exists("complete"))));
+        var sort = descending("startTime");
+        var result = collection().find(filter, SaveState.class).sort(sort).limit(1).first();
+        if (result == null)
+            throw new NotFoundError();
+        return result;
     }
 
     private @NotNull MongoCollection<SaveState> collection() {
@@ -91,7 +87,7 @@ public class SaveStateStorageMongo implements SaveStateStorage {
                     case "_id" -> value.setId(reader.readString());
                     case "playerId" -> value.setPlayerId(reader.readString());
                     case "mapId" -> value.setMapId(reader.readString());
-                    case "editing" -> value.setEditing(reader.readBoolean());
+                    case "type" -> value.setType(SaveState.Type.valueOf(reader.readString()));
                     case "completed" -> value.setCompleted(reader.readBoolean());
                     case "startTime" -> value.setStartTime(Instant.ofEpochMilli(reader.readDateTime()));
                     case "playtime" -> value.setPlaytime(reader.readInt64());
@@ -158,8 +154,7 @@ public class SaveStateStorageMongo implements SaveStateStorage {
             writer.writeString("_id", value.getId());
             writer.writeString("playerId", value.getPlayerId());
             writer.writeString("mapId", value.getMapId());
-            if (value.isEditing())
-                writer.writeBoolean("editing", true);
+            writer.writeString("type", value.getType().toString());
             if (value.isCompleted())
                 writer.writeBoolean("completed", true);
             writer.writeDateTime("startTime", value.getStartTime().toEpochMilli());

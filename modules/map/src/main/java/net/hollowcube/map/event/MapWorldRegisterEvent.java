@@ -1,15 +1,15 @@
 package net.hollowcube.map.event;
 
 import net.hollowcube.map.event.trait.MapWorldEvent;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import org.jetbrains.annotations.NotNull;
 
 public record MapWorldRegisterEvent(
-        @NotNull MapWorld mapWorld
+        @NotNull MapWorldNew mapWorld
 ) implements MapWorldEvent {
 
     @Override
-    public @NotNull MapWorld getMapWorld() {
+    public @NotNull MapWorldNew getMapWorld() {
         return mapWorld;
     }
 

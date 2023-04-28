@@ -7,18 +7,19 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     private HubServer hub = null;
-    private MapServer map = null;
+    private MapServer mapServer = null;
 
     public void setHubServer(@NotNull HubServer hub) {
         this.hub = hub;
     }
 
     public void setMapServer(@NotNull MapServer map) {
-        this.map = map;
+        this.mapServer = map;
     }
 
     //
@@ -26,9 +27,9 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     //
 
     @Override
-    public @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull String mapId, boolean edit) {
-        return FutureResult.wrap(map.mapStorage().getMapById(mapId))
-                .flatMap(map -> ((MapServerBase) this.map).joinMap(player, map, edit));
+    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit) {
+        var map = mapServer.mapStorage().getMapById(mapId);
+        ((MapServerBase) mapServer).joinMap(player, map, edit);
     }
 
 
@@ -37,7 +38,7 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     //
 
     @Override
-    public @NotNull FutureResult<Void> sendPlayerToHub(@NotNull Player player) {
-        return FutureResult.wrap(player.setInstance(hub.world().instance()));
+    public @Blocking void sendPlayerToHub(@NotNull Player player) {
+        player.setInstance(hub.world().instance()).join();
     }
 }

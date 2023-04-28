@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.common.base.Splitter;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
@@ -30,7 +31,7 @@ public record FileStorageS3(
      * @param uri A URI in the format of s3://accessKey:secretKey@address/bucket.
      *            Currently, must follow this exact format.
      */
-    public static @NotNull FileStorage connect(@NotNull String uri) {
+    public static @Blocking @NotNull FileStorage connect(@NotNull String uri) {
         try {
             var parsed = new URI(uri);
             var query = splitQuery(parsed);
@@ -70,26 +71,22 @@ public record FileStorageS3(
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull String> uploadFile(@NotNull String path, @NotNull InputStream data, long size, @NotNull Map<String, String> userMetadata) {
-        return CompletableFuture.supplyAsync(() -> {
-            //todo what errors need to be handled here?
-            var metadata = new ObjectMetadata();
-            metadata.setUserMetadata(userMetadata);
-            metadata.setContentType("application/octet-stream");
-            metadata.setContentLength(size);
-            s3.putObject(bucket, path, data, metadata);
-            return path;
-        }, ForkJoinPool.commonPool());
+    public @NotNull String uploadFile(@NotNull String path, @NotNull InputStream data, long size, @NotNull Map<String, String> userMetadata) {
+        //todo what errors need to be handled here?
+        var metadata = new ObjectMetadata();
+        metadata.setUserMetadata(userMetadata);
+        metadata.setContentType("application/octet-stream");
+        metadata.setContentLength(size);
+        s3.putObject(bucket, path, data, metadata);
+        return path;
     }
 
     @Override
-    public @NotNull CompletableFuture<@NotNull StoredFile> downloadFile(@NotNull String path) {
-        return CompletableFuture.supplyAsync(() -> {
-            var object = s3.getObject(bucket, path);
-            return new StoredFile(object.getObjectContent(),
-                    object.getObjectMetadata().getContentLength(),
-                    object.getObjectMetadata().getUserMetadata());
-        }, ForkJoinPool.commonPool());
+    public @NotNull StoredFile downloadFile(@NotNull String path) {
+        var object = s3.getObject(bucket, path);
+        return new StoredFile(object.getObjectContent(),
+                object.getObjectMetadata().getContentLength(),
+                object.getObjectMetadata().getUserMetadata());
     }
 
     private static @NotNull Map<String, String> splitQuery(URI uri) {

@@ -58,9 +58,8 @@ public class HubWorld extends BaseWorld {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> loadWorld() {
+    public void loadWorld() {
         //todo actually load the world
-        return CompletableFuture.completedFuture(null);
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {

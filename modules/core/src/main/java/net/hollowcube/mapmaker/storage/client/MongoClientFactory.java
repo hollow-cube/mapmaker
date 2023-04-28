@@ -20,7 +20,7 @@ import java.util.concurrent.ForkJoinPool;
 public interface MongoClientFactory {
 
     /** Creates a new MongoClient from the given config. */
-    @NotNull ListenableFuture<@NotNull MongoClient> newClient(@NotNull MongoConfig config);
+    @NotNull MongoClient newClient(@NotNull MongoConfig config);
 
 
     /** Returns the first registered factory, or the default factory if none are present. */
@@ -31,7 +31,7 @@ public interface MongoClientFactory {
         }
         if (Holder.instance == null) {
             Holder.instance = ServiceLoader.load(MongoClientFactory.class).findFirst()
-                    .orElseGet(() -> config -> Futures.submit(() -> {
+                    .orElseGet(() -> config -> {
                         var client = MongoClients.create(MongoClientSettings.builder(baseClientSettings())
                                 .applyConnectionString(new ConnectionString(config.uri()))
                                 .build());
@@ -44,7 +44,7 @@ public interface MongoClientFactory {
                             throw new RuntimeException(e);
                         }
                         return client;
-                    }, ForkJoinPool.commonPool()));
+                    });
         }
         return Holder.instance;
     }

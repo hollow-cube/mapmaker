@@ -50,15 +50,13 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             .addListener(InstanceTickEvent.class, this::tick);
 
     @Override
-    public @NotNull ListenableFuture<Void> init(@NotNull ConfigProvider config) {
+    public void init(@NotNull ConfigProvider config) {
         MinecraftServer.getBlockManager().registerHandler(CHECKPOINT_PLATE_BLOCK.getNamespaceId(), () -> CHECKPOINT_PLATE_BLOCK);
         MinecraftServer.getBlockManager().registerHandler(FINISH_PLATE_BLOCK.getNamespaceId(), () -> FINISH_PLATE_BLOCK);
-
-        return Futures.immediateVoidFuture();
     }
 
     @Override
-    public @Nullable ListenableFuture<Void> initMap(@NotNull MapWorldNew world) {
+    public boolean initMap(@NotNull MapWorldNew world) {
         if ((world.flags() & MapWorldNew.FLAG_EDITING) != 0) {
             world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
             world.itemRegistry().register(FINISH_PLATE_ITEM);
@@ -68,7 +66,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             world.addScopedEventNode(resetManagementNode);
         }
 
-        return Futures.immediateVoidFuture();
+        return true;
     }
 
 
