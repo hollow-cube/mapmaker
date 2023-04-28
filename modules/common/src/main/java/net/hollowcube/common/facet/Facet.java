@@ -1,7 +1,7 @@
 package net.hollowcube.common.facet;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import net.minestom.server.ServerProcess;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,5 +11,11 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Facet {
-    @NotNull ListenableFuture<Void> hook(@NotNull ServerProcess server);
+    /**
+     * Setup method called on server start. Called from within a virtual thread, so may block.
+     *
+     * @param server The minestom server
+     */
+    @Blocking
+    void hook(@NotNull ServerProcess server);
 }

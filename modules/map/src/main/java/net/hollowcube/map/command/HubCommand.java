@@ -1,6 +1,8 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.result.FutureResult;
+import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.minestom.server.command.CommandSender;
@@ -28,7 +30,10 @@ public class HubCommand extends BaseMapCommand {
         }
 
         sender.sendMessage("Returning to hub");
-        bridge.sendPlayerToHub(player)
+        FutureResult.supply(() -> {
+                    bridge.sendPlayerToHub(player);
+                    return Result.ofNull();
+                })
                 .thenErr(err -> {
                     logger.error("failed to send player {} to hub: {}", player.getUuid(), err.message());
                     LanguageProvider.createMultiTranslatable("command.generic.unknown_error")

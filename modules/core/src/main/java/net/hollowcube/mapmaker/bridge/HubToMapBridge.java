@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.bridge;
 
 import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,6 +21,6 @@ public interface HubToMapBridge {
      *       both within the same process. This method will be removed in the future to support something like a bid
      *       system, or an external allocator/matchmaker.
      */
-    @NotNull FutureResult<Void> joinMap(@NotNull Player player, @NotNull String mapId, boolean edit);
+    @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit);
 
 }

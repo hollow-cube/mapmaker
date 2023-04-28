@@ -66,25 +66,20 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId) {
-        return Futures.submit(() -> {
-            var filter = eq("_id", mapId);
-            var result = collection().find(filter).limit(1).first();
-            if (result == null)
-                throw new NotFoundError();
-            return result;
-        }, ForkJoinPool.commonPool());
+    public @NotNull MapData getMapById(@NotNull String mapId) {
+        var filter = eq("_id", mapId);
+        var result = collection().find(filter).limit(1).first();
+        if (result == null)
+            throw new NotFoundError();
+        return result;
     }
 
     @Override
-    public @NotNull FutureResult<Void> updateMap(@NotNull MapData map) {
-        return FutureResult.supply(() -> {
-            var filter = eq("_id", map.getId());
-            var result = collection().replaceOne(filter, map);
-            if (result.getModifiedCount() == 0)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.ofNull();
-        });
+    public void updateMap(@NotNull MapData map) {
+        var filter = eq("_id", map.getId());
+        var result = collection().replaceOne(filter, map);
+        if (result.getModifiedCount() == 0)
+            throw new NotFoundError();
     }
 
     @Override

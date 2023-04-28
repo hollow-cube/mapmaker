@@ -2,25 +2,22 @@ package net.hollowcube.mapmaker.storage;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class WhitelistStorageMemory implements WhitelistStorage {
 
     @Override
-    public @NotNull Future<Boolean> isUUIDWhitelisted(@NotNull UUID uuid) {
-        return CompletableFuture.completedFuture(true);
+    public boolean isWhitelisted(@NotNull String playerId) {
+        return true;
     }
 
     @Override
-    public @NotNull Future<Void> addToWhitelist(@NotNull UUID uuid) {
-        return CompletableFuture.completedFuture(null);
+    public void addToWhitelist(@NotNull String playerId) {
+        // memory whitelist always allows everyone
     }
 
     @Override
-    public @NotNull Future<Void> removeFromWhitelist(@NotNull UUID uuid) {
-        return CompletableFuture.completedFuture(null);
+    public void removeFromWhitelist(@NotNull String playerId) {
+        // memory whitelist always allows everyone
     }
 }

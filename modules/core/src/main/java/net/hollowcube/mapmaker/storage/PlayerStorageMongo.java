@@ -32,48 +32,30 @@ class PlayerStorageMongo implements PlayerStorage {
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull PlayerData> createPlayer(@NotNull PlayerData player) {
-        return Futures.submit(() -> {
-            try {
-                collection().insertOne(player);
-            } catch (DuplicateKeyException ignored) {
-                throw new DuplicateEntryError();
-            }
-            return player;
-        }, ForkJoinPool.commonPool());
+    public @NotNull PlayerData createPlayer(@NotNull PlayerData player) {
+        try {
+            collection().insertOne(player);
+        } catch (DuplicateKeyException ignored) {
+            throw new DuplicateEntryError();
+        }
+        return player;
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull PlayerData> getPlayerById(@NotNull String id) {
-        return FutureResult.supply(() -> {
-            var filter = eq("_id", id);
-            var result = collection().find(filter).limit(1).first();
-            if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
-        });
+    public @NotNull PlayerData getPlayerByUuid(@NotNull String uuid) {
+        var filter = eq("uuid", uuid);
+        var result = collection().find(filter).limit(1).first();
+        if (result == null)
+            throw new NotFoundError(uuid);
+        return result;
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull PlayerData> getPlayerByUuid(@NotNull String uuid) {
-        return Futures.submit(() -> {
-            var filter = eq("uuid", uuid);
-            var result = collection().find(filter).limit(1).first();
-            if (result == null)
-                throw new NotFoundError(uuid);
-            return result;
-        }, ForkJoinPool.commonPool());
-    }
-
-    @Override
-    public @NotNull FutureResult<@NotNull Void> updatePlayer(@NotNull PlayerData player) {
-        return FutureResult.supply(() -> {
-            var filter = eq("_id", player.getId());
-            var result = collection().replaceOne(filter, player);
-            if (result.getModifiedCount() == 0)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.ofNull();
-        });
+    public void updatePlayer(@NotNull PlayerData player) {
+        var filter = eq("_id", player.getId());
+        var result = collection().replaceOne(filter, player);
+        if (result.getModifiedCount() == 0)
+            throw new NotFoundError(player.getId());
     }
 
     private @NotNull MongoCollection<PlayerData> collection() {

@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 public interface ChatStorage {
     static @NotNull ChatStorage memory() {
@@ -18,7 +19,7 @@ public interface ChatStorage {
     static @NotNull ListenableFuture<ChatStorage> mongo(@NotNull MongoConfig config) {
         var clientFactory = MongoClientFactory.get();
         return Futures.transform(
-                clientFactory.newClient(config),
+                Futures.submit(() -> clientFactory.newClient(config), ForkJoinPool.commonPool()),
                 client -> new ChatStorageMongo(client, config),
                 Runnable::run
         );

@@ -26,19 +26,18 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId) {
+    public @NotNull MapData getMapById(@NotNull String mapId) {
         var map = mapsById.get(mapId);
         if (map == null)
-            return Futures.immediateFailedFuture(new NotFoundError());
-        return Futures.immediateFuture(map);
+            throw new NotFoundError();
+        return map;
     }
 
     @Override
-    public @NotNull FutureResult<Void> updateMap(@NotNull MapData map) {
+    public void updateMap(@NotNull MapData map) {
         if (!mapsById.containsKey(map.getId()))
-            return FutureResult.error(ERR_NOT_FOUND);
+            throw new NotFoundError();
         mapsById.put(map.getId(), map);
-        return FutureResult.ofNull();
     }
 
     @Override

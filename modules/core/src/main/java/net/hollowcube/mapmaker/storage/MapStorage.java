@@ -8,13 +8,12 @@ import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface MapStorage {
-
-    class NotFoundError extends RuntimeException { }
 
     Error ERR_NOT_FOUND = Error.of("map not found");
     Error ERR_DUPLICATE_ENTRY = Error.of("map already exists");
@@ -23,13 +22,10 @@ public interface MapStorage {
         return new MapStorageMemory();
     }
 
-    static @NotNull ListenableFuture<@NotNull MapStorage> mongo(@NotNull MongoConfig config) {
-        var clientFactory = MongoClientFactory.get();
-        return Futures.transform(
-                clientFactory.newClient(config),
-                client -> new MapStorageMongo(client, config),
-                Runnable::run
-        );
+    @Blocking
+    static @NotNull MapStorage mongo(@NotNull MongoConfig config) {
+        var client = MongoClientFactory.get().newClient(config);
+        return new MapStorageMongo(client, config);
     }
 
     /**
@@ -38,9 +34,9 @@ public interface MapStorage {
      */
     @NotNull FutureResult<MapData> createMap(@NotNull MapData map);
 
-    @NotNull ListenableFuture<MapData> getMapById(@NotNull String mapId);
+    @Blocking @NotNull MapData getMapById(@NotNull String mapId);
 
-    @NotNull FutureResult<Void> updateMap(@NotNull MapData map);
+    @Blocking void updateMap(@NotNull MapData map) throws NotFoundError;
 
     @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId);
 
@@ -59,5 +55,8 @@ public interface MapStorage {
     // Other utilities
 
     @NotNull FutureResult<String> getNextId();
+
+
+    class NotFoundError extends RuntimeException { }
 
 }

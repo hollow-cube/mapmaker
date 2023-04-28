@@ -15,6 +15,7 @@ import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -79,51 +80,44 @@ public class BaseWorld implements World {
         return WORLD_DIR.resolve(id);
     }
 
-    public @NotNull CompletableFuture<Void> loadWorld() {
-        return worldManager.fileStorage().downloadFile(id)
-                .thenApply(file -> {
-                    try (var is = file.data()) {
-                        var data = is.readAllBytes();
+    public @Blocking void loadWorld() {
+        var file = worldManager.fileStorage().downloadFile(id);
+        try (var is = file.data()) {
+            var data = is.readAllBytes();
 
-                        var regionDir = worldDir().resolve("region");
-                        Files.createDirectories(regionDir);
+            var regionDir = worldDir().resolve("region");
+            Files.createDirectories(regionDir);
 
-                        var unzippedSize = Integer.parseInt(file.metadata().get("size"));
-                        var regions = WorldDecompressor.decompressWorldRegionFiles(data, unzippedSize);
-                        Check.notNull(regions, "Failed to decompress world regions");
-                        for (var region : regions) {
-                            Files.write(regionDir.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    return null;
-                });
-    }
-
-    @Override
-    public @NotNull CompletableFuture<@NotNull String> saveWorld() {
-        return instance.saveChunksToStorage()
-                .thenCompose(result -> {
-                    var compressed = WorldCompressor.compressWorldRegionFiles(worldDir().toAbsolutePath().toString(), null);
-                    return worldManager.fileStorage().uploadFile(id,
-                            new ByteArrayInputStream(compressed.getCompressedData()),
-                            compressed.getCompressedData().length,
-                            Map.of("size", String.valueOf(compressed.getOriginalSize())));
-                });
-    }
-
-    @Override
-    public @NotNull CompletableFuture<Void> unloadWorld() {
-        MinecraftServer.getInstanceManager().unregisterInstance(instance);
-        return CompletableFuture.runAsync(() -> {
-            try {
-                if (Files.exists(worldDir()))
-                    FileUtil.deleteDirectory(worldDir());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            var unzippedSize = Integer.parseInt(file.metadata().get("size"));
+            var regions = WorldDecompressor.decompressWorldRegionFiles(data, unzippedSize);
+            Check.notNull(regions, "Failed to decompress world regions");
+            for (var region : regions) {
+                Files.write(regionDir.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
             }
-        }, ForkJoinPool.commonPool());
+        } catch (Exception e) {
+            throw new RuntimeException("failed to load world data", e);
+        }
+    }
+
+    @Override
+    public @Blocking @NotNull String saveWorld() {
+        instance.saveChunksToStorage();
+        var compressed = WorldCompressor.compressWorldRegionFiles(worldDir().toAbsolutePath().toString(), null);
+        return worldManager.fileStorage().uploadFile(id,
+                new ByteArrayInputStream(compressed.getCompressedData()),
+                compressed.getCompressedData().length,
+                Map.of("size", String.valueOf(compressed.getOriginalSize())));
+    }
+
+    @Override
+    public @Blocking void unloadWorld() {
+        MinecraftServer.getInstanceManager().unregisterInstance(instance);
+        try {
+            if (Files.exists(worldDir()))
+                FileUtil.deleteDirectory(worldDir());
+        } catch (Exception e) {
+            throw new RuntimeException("failed to delete world dir", e);
+        }
     }
 
     private void handleEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {

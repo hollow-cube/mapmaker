@@ -1,5 +1,6 @@
 package net.hollowcube.map.item;
 
+import net.hollowcube.map.world.old.MapWorld;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
 /**
  * Similar interface to {@link net.minestom.server.instance.block.BlockHandler}, but for items. Like block handlers,
  * implementations should be implemented as singletons, and registered to the appropriate {@link ItemRegistry} for
- * use within a {@link net.hollowcube.map.world.MapWorld}.
+ * use within a {@link MapWorld}.
  * <p>
  * Items are identified by their {@link #id()}, which is hashed to set the custom model data of the item stack.
  */

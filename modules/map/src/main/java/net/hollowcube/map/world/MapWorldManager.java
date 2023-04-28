@@ -1,86 +1,80 @@
 package net.hollowcube.map.world;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.*;
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MapWorldManager {
+    private static final System.Logger logger = System.getLogger(MapWorldManager.class.getName());
+    private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final Map<Pair<String, Boolean>, ListenableFuture<InternalMapWorldNew>> activeMaps = new ConcurrentHashMap<>();
+    private final Map<Pair<String, Boolean>, Future<InternalMapWorldNew>> activeMaps = new ConcurrentHashMap<>();
     private final MapServer server;
 
     public MapWorldManager(@NotNull MapServer server) {
         this.server = server;
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerInstanceLeaveEvent.class, event -> {
-            // Ignore if there are still players in the instance
-            if (event.getInstance().getPlayers().size() > 1) return;
-
             var world = MapWorldNew.optionalFromInstance(event.getInstance());
             if (world == null) return;
 
-            var removed = activeMaps.remove(new Pair<>(world.map().getId(), (world.flags() & MapWorldNew.FLAG_EDITING) != 0));
-            if (removed == null) return;
-            event.getInstance().scheduleNextTick(unused -> {
-                try {
-                    Futures.addCallback(removed.get().close(), new FutureCallback<>() {
-                        @Override
-                        public void onSuccess(Void result) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            t.printStackTrace();
-                        }
-                    }, Runnable::run);
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
+            // Orchestration for removing the player
+            Thread.startVirtualThread(() -> {
+                if (world instanceof InternalMapWorldNew internal) {
+                    internal.removePlayer(event.getPlayer());
                 }
             });
+
+            // Stop if there are still players in the instance
+            if (event.getInstance().getPlayers().size() > 1) return;
+
+            var removed = activeMaps.remove(new Pair<>(world.map().getId(), (world.flags() & MapWorldNew.FLAG_EDITING) != 0));
+            if (removed == null) return;
+            event.getInstance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
+                // ok to use resultNow because we cannot close a world that is not loaded
+                // and a loaded world will always have a completed future.
+                removed.resultNow().close();
+            }));
+
         });
     }
 
-    public @NotNull ListenableFuture<Void> joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
+    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
         var activeWorld = activeMaps.get(new Pair<>(map.getId(), isEditing));
 
+        // Create a new world if there is not one present
         if (activeWorld == null) {
-            // Create a new world
             var world = new EditingMapWorldNew(server, map);
-            activeWorld = Futures.transform(world.load(), unused -> world, Runnable::run);
+            activeWorld = VIRTUAL_EXECUTOR.submit(() -> {
+                world.load();
+                return world;
+            });
             activeMaps.put(new Pair<>(map.getId(), isEditing), activeWorld);
         }
 
-        // Spawn the player in the world.
-        return Futures.transformAsync(activeWorld, world -> {
-            // Start acceptPlayer future, which will load save state/etc
-            var f = world.acceptPlayer(player);
+        // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)
+        try {
+            var world = activeWorld.get(); // wait for the world to load
 
-            // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)
-            var spawnFuture = JdkFutureAdapters.listenInPoolThread(player.setInstance(world.instance(), world.spawnPoint()));
-            return Futures.transformAsync(spawnFuture, unused -> {
-//                if (!f.isDone()) {
-//                    player.showTitle(Title.title(Component.text("Loading..."), Component.text(""),
-//                            Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(10000), Duration.ofSeconds(0))));
-//                }
-                return Futures.transform(f, unused2 -> null, Runnable::run);
-            }, Runnable::run);
-        }, Runnable::run);
+            // spawn in minestom instance & then notify world
+            player.setInstance(world.instance(), world.spawnPoint()).join();
+            world.acceptPlayer(player);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to load world", e);
+            throw new RuntimeException(e);
+        }
     }
 }

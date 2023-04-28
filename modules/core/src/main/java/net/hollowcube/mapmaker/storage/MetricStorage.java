@@ -6,6 +6,7 @@ import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.metrics.Metric;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 public interface MetricStorage {
@@ -14,13 +15,10 @@ public interface MetricStorage {
         return new MetricStorageMemory();
     }
 
-    static @NotNull ListenableFuture<@NotNull MetricStorage> mongo(@NotNull MongoConfig config) {
-        var clientFactory = MongoClientFactory.get();
-        return Futures.transform(
-                clientFactory.newClient(config),
-                client -> new MetricStorageMongo(client, config),
-                Runnable::run
-        );
+    @Blocking
+    static @NotNull MetricStorage mongo(@NotNull MongoConfig config) {
+        var client = MongoClientFactory.get().newClient(config);
+        return new MetricStorageMongo(client, config);
     }
 
     @NotNull FutureResult<@NotNull Metric> addMetric(@NotNull Metric metric);

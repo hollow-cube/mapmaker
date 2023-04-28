@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.checkpoint;
 
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.MapWorldNew;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -24,18 +24,18 @@ public class FinishPlateBlock extends AbstractPlateHandler {
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         var instance = tick.getInstance();
-        EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.fromInstance(instance), player));
+        EventDispatcher.call(new MapWorldCompleteEvent(MapWorldNew.fromInstance(instance), player));
     }
 
     @Override
     public void onPlace(@NotNull Placement placement) {
-        var map = MapWorld.fromInstance(placement.getInstance()).map();
+        var map = MapWorldNew.fromInstance(placement.getInstance()).map();
         map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
     }
 
     @Override
     public void onDestroy(@NotNull Destroy destroy) {
-        var map = MapWorld.fromInstance(destroy.getInstance()).map();
+        var map = MapWorldNew.fromInstance(destroy.getInstance()).map();
         map.removePOI(destroy.getBlockPosition());
     }
 }

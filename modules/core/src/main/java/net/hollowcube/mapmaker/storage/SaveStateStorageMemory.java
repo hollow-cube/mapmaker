@@ -13,28 +13,29 @@ public class SaveStateStorageMemory implements SaveStateStorage {
     private final Map<String, SaveState> saveStatesById = new ConcurrentHashMap<>();
 
     @Override
-    public @NotNull ListenableFuture<@NotNull SaveState> createSaveState(@NotNull SaveState saveState) {
+    public @NotNull SaveState createSaveState(@NotNull SaveState saveState) {
         if (saveStatesById.containsKey(saveState.getId()))
-            return Futures.immediateFailedFuture(new NotFoundError());
+            throw new NotFoundError();
         saveStatesById.put(saveState.getId(), saveState);
-        return Futures.immediateFuture(saveState);
+        return saveState;
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> updateSaveState(@NotNull SaveState saveState) {
+    public void updateSaveState(@NotNull SaveState saveState) {
         if (!saveStatesById.containsKey(saveState.getId()))
-            return Futures.immediateFailedFuture(new NotFoundError());
+            throw new NotFoundError();
         saveStatesById.put(saveState.getId(), saveState);
-        return Futures.immediateVoidFuture();
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull SaveState> getLatestSaveState(@NotNull String playerId, @NotNull String mapId) {
+    public @NotNull SaveState getLatestSaveState(@NotNull String playerId, @NotNull String mapId, @NotNull SaveState.Type type) {
         return saveStatesById.values().stream()
-                .filter(saveState -> saveState.getPlayerId().equals(playerId) && saveState.getMapId().equals(mapId) && !saveState.isCompleted())
+                .filter(saveState -> saveState.getPlayerId().equals(playerId) &&
+                        saveState.getMapId().equals(mapId) &&
+                        saveState.getType() == type &&
+                        !saveState.isCompleted())
                 .max(Comparator.comparing(SaveState::getStartTime))
-                .map(Futures::immediateFuture)
-                .orElse(Futures.immediateFailedFuture(new NotFoundError()));
+                .orElseThrow(NotFoundError::new);
     }
 
 }

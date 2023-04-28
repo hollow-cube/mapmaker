@@ -30,6 +30,7 @@ public interface MapWorldNew {
     int FLAG_TESTING = 1 << 2;
 
     @NotNull MapServer server();
+    @NotNull Instance instance();
     @NotNull MapData map();
     int flags();
 
