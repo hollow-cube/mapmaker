@@ -1,8 +1,10 @@
 package net.hollowcube.map.world;
 
+import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
@@ -24,7 +26,10 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Future;
 
 class TestingMapWorldNew implements InternalMapWorldNew {
     private static final InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -35,6 +40,7 @@ class TestingMapWorldNew implements InternalMapWorldNew {
     private final EditingMapWorldNew parent;
     private final Instance instance;
 
+    private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
     private final EventNode<InstanceEvent> eventNode = EventNode.event("world-local-test", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
@@ -89,7 +95,7 @@ class TestingMapWorldNew implements InternalMapWorldNew {
 
     @Override
     public void load() {
-        // Do nothing, we are just using the parent instance.
+        this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
 
     @Override
@@ -103,35 +109,18 @@ class TestingMapWorldNew implements InternalMapWorldNew {
     public void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
 
-        player.setTag(TAG_TESTING, true);
-        player.setGameMode(GameMode.CREATIVE); //todo based on setting
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId(), SaveState.Type.TESTING);
+
+        var startingPos = player.getPosition();
+        player.setInstance(instance, startingPos).join();
         player.refreshCommands();
 
-        var saveStateStorage = server().saveStateStorage();
-        SaveState saveState;
-        try {
-            saveState = saveStateStorage.getLatestSaveState(playerData.getId(), map().getId(), SaveState.Type.TESTING);
-        } catch (SaveStateStorage.NotFoundError e) {
-            // common savestate creation logic todo move elsewhere
-            saveState = new SaveState();
-            saveState.setId(UUID.randomUUID().toString());
-            saveState.setPlayerId(playerData.getId());
-            saveState.setMapId(map().getId());
-            saveState.setStartTime(Instant.now());
-            saveState.setPos(map().getSpawnPoint());
+        player.setTag(TAG_TESTING, true);
+        player.setTag(MapHooks.PLAYING, true); // For compatibility
+        player.setTag(SaveState.TAG, saveState);
 
-            saveState.setType(SaveState.Type.TESTING);
-
-            saveStateStorage.createSaveState(saveState);
-
-            player.setTag(MapHooks.PLAYING, true);
-            player.setTag(SaveState.TAG, saveState);
-        }
-
-        // formerly initPlayerFromSaveState
         player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
-        player.teleport(saveState.getPos()).join();
         player.sendMessage("Now testing " + map().getName());
 
         EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
@@ -141,6 +130,6 @@ class TestingMapWorldNew implements InternalMapWorldNew {
     public void removePlayer(@NotNull Player player) {
         player.removeTag(TAG_TESTING);
 
-        //todo
+        // We do not currently save testing savestates, should we?
     }
 }

@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.model;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.ItemStack;
@@ -51,7 +54,7 @@ public class MapData {
     private String mapFileId;
     // ItemStack Icon to display the map as
     private ItemStack icon;
-    private Pos spawnPoint = new Pos(0, 60, 0);
+    private Pos spawnPoint = new Pos(0.5, 40, 0.5);
     private final List<POI> pois = new ArrayList<>();
 
     private final int MAX_COMPLETION_TIMES = 10;
@@ -79,6 +82,12 @@ public class MapData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public @NotNull Component getNameComponent() {
+        return Component.text(name)
+                .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))
+                .clickEvent(ClickEvent.copyToClipboard(id));
     }
 
     public ItemStack getIcon() {
