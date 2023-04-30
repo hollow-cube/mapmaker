@@ -1,13 +1,13 @@
 package net.hollowcube.map.world;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 interface InternalMapWorldNew extends MapWorldNew {
 
@@ -31,6 +31,9 @@ interface InternalMapWorldNew extends MapWorldNew {
      * @return A future which completes when the world is closed.
      */
     @Blocking void close();
+
+    @NonBlocking
+    @Nullable MapWorldNew getMapForPlayer(@NotNull Player player);
 
     /**
      * Called as a player is entering the world, but before the player is added to the {@link net.minestom.server.instance.Instance}.

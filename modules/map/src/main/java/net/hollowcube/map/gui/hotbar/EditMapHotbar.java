@@ -51,7 +51,7 @@ public final class EditMapHotbar {
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
-        var server = MapWorldNew.fromInstance(player.getInstance()).server();
+        var server = MapWorldNew.forPlayer(player).server();
         switch (customModelData) {
             case TEST_MODE_CMD -> TestModeCommand.enterTestMode(player, server);
         }

@@ -25,20 +25,28 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        var mapWorld = MapWorldNew.fromInstance(tick.getInstance());
+        var mapWorld = MapWorldNew.forPlayer(player);
         var checkpoint = mapWorld.map().getPoi(tick.getBlockPosition());
         EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
     }
 
     @Override
     public void onPlace(@NotNull Placement placement) {
-        var map = MapWorldNew.fromInstance(placement.getInstance()).map();
+        MapData map;
+        if (placement instanceof PlayerPlacement pp) {
+            map = MapWorldNew.forPlayer(pp.getPlayer()).map();
+        } else {
+            // OK to choose the first editing world, the block is only placed in editing world.
+            var world = MapWorldNew.unsafeFromInstance(placement.getInstance());
+            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            map = world.map();
+        }
         map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
     }
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        var world = MapWorldNew.fromInstance(interaction.getInstance());
+        var world = MapWorldNew.forPlayer(interaction.getPlayer());
         if ((world.flags() & MapWorldNew.FLAG_EDITING) == 0) return false;
 
         var player = interaction.getPlayer();
@@ -53,7 +61,15 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 
     @Override
     public void onDestroy(@NotNull Destroy destroy) {
-        var map = MapWorldNew.fromInstance(destroy.getInstance()).map();
+        MapData map;
+        if (destroy instanceof PlayerDestroy pd) {
+            map = MapWorldNew.forPlayer(pd.getPlayer()).map();
+        } else {
+            // OK to choose the first editing world, the block is only placed in editing world.
+            var world = MapWorldNew.unsafeFromInstance(destroy.getInstance());
+            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            map = world.map();
+        }
         map.removePOI(destroy.getBlockPosition());
     }
 }

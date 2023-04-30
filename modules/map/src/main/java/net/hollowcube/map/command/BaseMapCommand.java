@@ -29,7 +29,7 @@ public class BaseMapCommand extends Command {
             if (!(sender instanceof Player player)) {
                 return false;
             }
-            var mapWorld = MapWorldNew.optionalFromInstance(player.getInstance());
+            var mapWorld = MapWorldNew.forPlayerOptional(player);
             if (mapWorld == null) return false;
             // If not edit only we can return true immediately (allowed no matter the map mode)
             if (!editOnly) return true;

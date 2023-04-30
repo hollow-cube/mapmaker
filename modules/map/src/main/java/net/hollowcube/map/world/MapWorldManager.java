@@ -25,7 +25,7 @@ public class MapWorldManager {
         this.server = server;
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerInstanceLeaveEvent.class, event -> {
-            var world = MapWorldNew.optionalFromInstance(event.getInstance());
+            var world = MapWorldNew.forPlayerOptional(event.getPlayer());
             if (world == null) return;
 
             // Orchestration for removing the player

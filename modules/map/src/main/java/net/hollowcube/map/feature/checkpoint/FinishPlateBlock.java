@@ -24,18 +24,34 @@ public class FinishPlateBlock extends AbstractPlateHandler {
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         var instance = tick.getInstance();
-        EventDispatcher.call(new MapWorldCompleteEvent(MapWorldNew.fromInstance(instance), player));
+        EventDispatcher.call(new MapWorldCompleteEvent(MapWorldNew.forPlayer(player), player));
     }
 
     @Override
     public void onPlace(@NotNull Placement placement) {
-        var map = MapWorldNew.fromInstance(placement.getInstance()).map();
+        MapData map;
+        if (placement instanceof PlayerPlacement pp) {
+            map = MapWorldNew.forPlayer(pp.getPlayer()).map();
+        } else {
+            // OK to choose the first editing world, the block is only placed in editing world.
+            var world = MapWorldNew.unsafeFromInstance(placement.getInstance());
+            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            map = world.map();
+        }
         map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
     }
 
     @Override
     public void onDestroy(@NotNull Destroy destroy) {
-        var map = MapWorldNew.fromInstance(destroy.getInstance()).map();
+        MapData map;
+        if (destroy instanceof PlayerDestroy pd) {
+            map = MapWorldNew.forPlayer(pd.getPlayer()).map();
+        } else {
+            // OK to choose the first editing world, the block is only placed in editing world.
+            var world = MapWorldNew.unsafeFromInstance(destroy.getInstance());
+            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            map = world.map();
+        }
         map.removePOI(destroy.getBlockPosition());
     }
 }

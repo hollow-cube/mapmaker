@@ -24,8 +24,10 @@ public abstract class AbstractPlateHandler implements BlockHandler {
         // Check for collision with all players in instance
         var entities = instance.getNearbyEntities(pos, 2);
         for (var entity : entities) {
-            if (!(entity instanceof Player player) || !MapHooks.isPlayerPlaying(player)) continue;
-            if (!player.getBoundingBox().intersectBox(centerPos.sub(player.getPosition()), BOUNDING_BOX)) continue;
+            if (!(entity instanceof Player player) || !MapHooks.isPlayerPlaying(player))
+                continue;
+            if (!player.getBoundingBox().intersectBox(centerPos.sub(player.getPosition()), BOUNDING_BOX))
+                continue;
 
             // Player has stepped on the plate
             onPlatePressed(tick, player);
