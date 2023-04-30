@@ -30,6 +30,7 @@ public class DemoServer {
     public static final Map<String, Function<Context, View>> guis = new HashMap<>();
 
     static {
+        guis.put("anvil", AnvilDemo::new);
         guis.put("counter", Counter::new);
         guis.put("loading", LoadingDemo::new);
         guis.put("pagination", PaginatedList::new);
@@ -65,15 +66,6 @@ public class DemoServer {
             for (int i = 0; i < PlayerInventory.INVENTORY_SIZE; i++) {
                 player.getInventory().setItemStack(i, ItemStack.of(Material.STICK));
             }
-
-            player.sendMessage(Component.text("\uEff4\uF822", TextColor.color(78, 92, 36))
-                    .append(Component.text("notmattw", TextColor.color(172, 75, 255)))
-                    .append(Component.text(" » ", NamedTextColor.DARK_GRAY))
-                    .append(Component.text("Seth is a weirdo", NamedTextColor.WHITE)));
-            player.sendMessage(Component.text("\uEff3\uF822", TextColor.color(78, 92, 36))
-                    .append(Component.text("Seth28", TextColor.color(255, 45, 45)))
-                    .append(Component.text(" » ", NamedTextColor.DARK_GRAY))
-                    .append(Component.text("ILL BAN YOU", NamedTextColor.WHITE)));
         });
 
         var controller = Controller.make(Map.of(

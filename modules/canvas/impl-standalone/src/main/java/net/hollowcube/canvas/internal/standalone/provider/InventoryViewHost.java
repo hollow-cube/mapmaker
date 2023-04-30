@@ -89,17 +89,19 @@ public class InventoryViewHost {
 
     private @NotNull InventoryType updateSize(@NotNull BaseElement element) {
 //        Check.argCondition(section.width() > 9, "section width must be <= 9, was {}", section.width());
+        var id = element.id() != null ? element.id() : "chest";
+
+        // Special case for anvil GUIs
+        if (id.equals("anvil")) {
+            playerInventoryRows = element.height() - 1;
+            return InventoryType.ANVIL;
+        }
+
         //todo support for non-9 width inventories
         Check.argCondition(element.width() != 9, "section width must be 9");
         Check.argCondition(element.height() > 10, "section height must be <= 10, was {}", element.height());
         width = element.width();
         height = element.height();
-
-        // Special case for anvil GUIs
-//        if (element instanceof AnvilSection) {
-//            playerInventoryRows = section.height() - 1;
-//            return InventoryType.ANVIL;
-//        }
 
         return switch (element.height()) {
             case 1 -> InventoryType.CHEST_1_ROW;
@@ -136,12 +138,13 @@ public class InventoryViewHost {
     }
 
     private void drawCurrentElement() {
-        // This depends on the fact that we only accept 9-width inventories currently
-
         var contents = element.getContents();
         ItemStack[] top, bottom = null;
 
-        top = new ItemStack[9 * (height - playerInventoryRows)];
+        if (inventory.getInventoryType() == InventoryType.ANVIL)
+            top = new ItemStack[3];
+        else
+            top = new ItemStack[9 * (height - playerInventoryRows)];
         Arrays.fill(top, ItemStack.AIR);
         for (int i = 0; i < top.length; i++) {
             if (contents[i] == null) continue;
