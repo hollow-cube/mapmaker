@@ -51,7 +51,7 @@ public class TestModeCommand extends BaseMapCommand {
     public static void enterTestMode(@NotNull Player player, @NotNull MapServer mapServer) {
         player.sendMessage("Entering test mode");
 
-        var map = MapWorldNew.optionalFromInstance(player.getInstance());
+        var map = MapWorldNew.forPlayerOptional(player);
         if (map instanceof EditingMapWorldNew editingMap) {
             editingMap.enterTestMode(player);
             return;

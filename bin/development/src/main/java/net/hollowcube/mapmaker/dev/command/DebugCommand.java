@@ -47,7 +47,7 @@ public class DebugCommand extends Command {
             return;
         }
 
-        var world = MapWorldNew.optionalFromInstance(player.getInstance());
+        var world = MapWorldNew.forPlayerOptional(player);
         if (world == null) {
             player.sendMessage("You are not in a map world!");
             return;

@@ -22,9 +22,9 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EditingMapWorldNew implements InternalMapWorldNew {
@@ -39,6 +39,8 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
 
     private final BaseWorld baseWorld;
     private TestingMapWorldNew testWorld = null;
+
+    private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
@@ -128,11 +130,21 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
     }
 
     @Override
+    public @Nullable MapWorldNew getMapForPlayer(@NotNull Player player) {
+        if (activePlayers.contains(player))
+            return this;
+        if (testWorld != null)
+            return testWorld.getMapForPlayer(player);
+        return null;
+    }
+
+    @Override
     public @Blocking void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId(), SaveState.Type.EDITING);
 
+        activePlayers.add(player);
         player.setTag(TAG_EDITING, true);
         player.setTag(SaveState.TAG, saveState);
         player.refreshCommands();
@@ -167,11 +179,13 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
         }
 
         player.removeTag(TAG_EDITING);
+        activePlayers.remove(player);
     }
 
-    private @NotNull TestingMapWorldNew getTestWorld() {
+    private @Blocking @NotNull TestingMapWorldNew getTestWorld() {
         if (testWorld == null) {
             testWorld = new TestingMapWorldNew(this);
+            testWorld.load();
         }
 
         return testWorld;

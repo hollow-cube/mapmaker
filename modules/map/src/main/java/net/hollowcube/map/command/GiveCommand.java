@@ -10,6 +10,7 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.TransactionOption;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,9 +37,9 @@ public class GiveCommand extends BaseMapCommand {
             return;
         }
 
-        var itemRegistry = MapWorldNew.fromInstance(player.getInstance()).itemRegistry();
+        var itemRegistry = MapWorldNew.forPlayer(player).itemRegistry();
         var itemStack = itemRegistry.getItemStack(itemName, null);
-        // argument would return null if item not present, so safe to assume not null
+        Check.notNull(itemStack, "Item stack is null");
 
         boolean result = player.getInventory().addItemStack(itemStack, TransactionOption.ALL_OR_NOTHING);
         if (!result) {

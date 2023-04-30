@@ -36,7 +36,7 @@ public class ItemRegistry {
         return ArgumentType.ResourceLocation(id)
                 .setSuggestionCallback((sender, context, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
-                    var mapWorld = MapWorldNew.optionalFromInstance(player.getInstance());
+                    var mapWorld = MapWorldNew.forPlayerOptional(player);
                     if (mapWorld == null) return;
                     var itemRegistry = mapWorld.itemRegistry();
 

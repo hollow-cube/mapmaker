@@ -37,13 +37,13 @@ public class BuildModeCommand extends BaseMapCommand {
     private boolean isInTestingMap(@Nullable CommandSender sender, @Nullable String unused) {
         // Stupid amount of checks to verify they're actually in a world otherwise nullptr exception
         // Probably better way to structure instantiation of this command so it doesn't have this issue
-        if (!(sender instanceof Player player) ||
-                player.getInstance() == null ||
-                MapWorldNew.optionalFromInstance(player.getInstance()) == null) {
+        if (!(sender instanceof Player player)) {
             return false;
         }
 
-        var world = MapWorldNew.fromInstance(player.getInstance());
+        var world = MapWorldNew.forPlayerOptional(player);
+        if (world == null) return false;
+
         return (world.flags() & MapWorldNew.FLAG_TESTING) != 0;
     }
 

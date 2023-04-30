@@ -64,7 +64,7 @@ public abstract class MapServerBase implements MapServer {
         // Placement rules
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
             if (event instanceof InstanceEvent instanceEvent)
-                return MapWorldNew.optionalFromInstance(instanceEvent.getInstance()) != null;
+                return MapWorldNew.unsafeFromInstance(instanceEvent.getInstance()) != null;
             //todo: fix this
             return false;
         });
@@ -73,7 +73,7 @@ public abstract class MapServerBase implements MapServer {
 
         // Terraform initialization
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
-                instance -> MapWorldNew.optionalFromInstance(instance) != null);
+                instance -> MapWorldNew.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
 //        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 //        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
@@ -147,7 +147,7 @@ public abstract class MapServerBase implements MapServer {
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {
         // Spawn event is not an InstanceEvent, so we need to filter it.
-        if (MapWorldNew.optionalFromInstance(event.getSpawnInstance()) == null)
+        if (MapWorldNew.unsafeFromInstance(event.getSpawnInstance()) == null)
             return;
 
         var player = event.getPlayer();

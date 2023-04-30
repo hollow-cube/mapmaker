@@ -96,11 +96,11 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     private void tick(@NotNull InstanceTickEvent event) {
         var instance = event.getInstance();
-        var map = MapWorldNew.fromInstance(instance).map();
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
             if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
+            var map = MapWorldNew.forPlayer(player).map();
 
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
