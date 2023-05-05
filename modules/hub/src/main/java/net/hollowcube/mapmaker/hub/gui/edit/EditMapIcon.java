@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;

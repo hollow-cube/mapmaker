@@ -1,13 +1,11 @@
 package net.hollowcube.chat;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.chat.command.*;
 import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
-import net.hollowcube.common.config.MongoConfig;
+import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.common.config.MongoConfigNew;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.MinecraftServer;
@@ -20,17 +18,20 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerCommandEvent;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.lang.System.Logger.Level;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ForkJoinPool;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(Facet.class)
 public class ChatFacet implements Facet {
+    //todo the threading in this thing is all messed up. i think i need to make the chat event run async, which in theory should be fine.
+
     private static final System.Logger logger = System.getLogger(ChatFacet.class.getName());
     private static final ServerRuntime runtime = ServerRuntime.getRuntime();
 
@@ -47,37 +48,9 @@ public class ChatFacet implements Facet {
             .addListener(PlayerChatEvent.class, this::handleChatEvent)
             .addListener(PlayerCommandEvent.class, this::handleCommandEvent);
 
-    private final ChatStorage storage;
+    private ChatStorage storage;
 
-    public ChatFacet() {
-        //todo need to have futureresult init for this
-        //todo need to give access to MongoConfig somehow here
-        var mongoUri = System.getenv("MM_MONGO_URI");
-        if (mongoUri != null) {
-            try {
-                storage = ChatStorage.mongo(new MongoConfig() {
-                    @Override
-                    public @NotNull String uri() {
-                        return mongoUri;
-                    }
-
-                    @Override
-                    public @NotNull String database() {
-                        return "mapmaker";
-                    }
-
-                    @Override
-                    public boolean useTransactions() {
-                        return false;
-                    }
-                }).get();
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        } else {
-            storage = ChatStorage.memory();
-        }
-    }
+    public ChatFacet() {}
 
     @TestOnly
     ChatFacet(@NotNull ChatStorage storage) {
@@ -85,7 +58,14 @@ public class ChatFacet implements Facet {
     }
 
     @Override
-    public void hook(@NotNull ServerProcess server) {
+    public void hook(@NotNull ServerProcess server, @NotNull ConfigProvider config) {
+        if (System.getenv("MM_CHAT_STORAGE_DEV") != null) {
+            this.storage = ChatStorage.memory();
+        } else {
+            var mongoConf = config.get(MongoConfigNew.class);
+            this.storage = ChatStorage.mongo(mongoConf);
+        }
+
         server.eventHandler().addChild(eventNode);
         server.command().register(new LogCommand(storage));
         server.command().register(new MessageCommand(this));
@@ -98,7 +78,7 @@ public class ChatFacet implements Facet {
         return eventNode;
     }
 
-    public void sendPrivateMessage(@NotNull Player from, @NotNull Player to, @NotNull String message) {
+    public @Blocking void sendPrivateMessage(@NotNull Player from, @NotNull Player to, @NotNull String message) {
         var chatMessage = new ChatMessage(
                 Instant.now(),
                 runtime.hostname(),
@@ -108,28 +88,19 @@ public class ChatFacet implements Facet {
                 message
         );
 
-        Futures.addCallback(
-                storage.recordChatMessage(chatMessage),
-                new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        to.setTag(REPLY_TO, from.getUuid());
-                        from.setTag(REPLY_TO, to.getUuid());
-                        from.sendMessage("to " + PlayerData.fromPlayer(to).getDisplayName() + ": " + message);
-                        to.sendMessage("from " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Throwable t) {
-                        logger.log(Level.ERROR, "Error sending private message", t);
-                        from.sendMessage("Error sending private message");
-                    }
-                },
-                ForkJoinPool.commonPool()
-        );
+        try {
+            storage.recordChatMessage(chatMessage);
+            to.setTag(REPLY_TO, from.getUuid());
+            from.setTag(REPLY_TO, to.getUuid());
+            from.sendMessage("to " + PlayerData.fromPlayer(to).getDisplayName() + ": " + message);
+            to.sendMessage("from " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
+        } catch (Exception e) {
+            logger.log(Level.ERROR, "Error sending private message", e);
+            from.sendMessage("Error sending private message");
+        }
     }
 
-    private void handleChatEvent(PlayerChatEvent event) {
+    private @NonBlocking void handleChatEvent(PlayerChatEvent event) {
         var message = new ChatMessage(
                 Instant.now(),
                 runtime.hostname(),
@@ -146,24 +117,14 @@ public class ChatFacet implements Facet {
             default:
                 break;
         }
-        Futures.addCallback(
-                storage.recordChatMessage(message),
-                new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        //todo send to other servers
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Throwable t) {
-                        logger.log(Level.ERROR, "Error recording chat message", t);
-                    }
-                },
-                ForkJoinPool.commonPool()
-        );
+        try {
+            storage.recordChatMessage(message);
+        } catch (Exception e) {
+            logger.log(Level.ERROR, "Error recording chat message", e);
+        }
     }
 
-    public void sendStaffChatMessage(@NotNull Player from, @NotNull String message) {
+    public @Blocking void sendStaffChatMessage(@NotNull Player from, @NotNull String message) {
         for (Player target : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             var chatMessage = new ChatMessage(
                     Instant.now(),
@@ -174,22 +135,13 @@ public class ChatFacet implements Facet {
                     message
             );
 
-            Futures.addCallback(
-                    storage.recordChatMessage(chatMessage),
-                    new FutureCallback<>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            target.sendMessage("[STAFF] " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
-                        }
-
-                        @Override
-                        public void onFailure(@NotNull Throwable t) {
-                            logger.log(Level.ERROR, "Error sending staff chat message", t);
-                            from.sendMessage("Error sending staff chat message");
-                        }
-                    },
-                    ForkJoinPool.commonPool()
-            );
+            try {
+                storage.recordChatMessage(chatMessage);
+                target.sendMessage("[STAFF] " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
+            } catch (Exception e) {
+                logger.log(Level.ERROR, "Error sending staff chat message", e);
+                from.sendMessage("Error sending staff chat message");
+            }
         }
     }
 
@@ -201,20 +153,11 @@ public class ChatFacet implements Facet {
                 event.getPlayer().getUuid().toString(),
                 event.getCommand()
         );
-        Futures.addCallback(
-                storage.recordChatMessage(message),
-                new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        //todo send to other servers
-                    }
 
-                    @Override
-                    public void onFailure(@NotNull Throwable t) {
-                        logger.log(Level.ERROR, "Error recording command", t);
-                    }
-                },
-                ForkJoinPool.commonPool()
-        );
+        try {
+            storage.recordChatMessage(message);
+        } catch (Exception e) {
+            logger.log(Level.ERROR, "Error recording command", e);
+        }
     }
 }

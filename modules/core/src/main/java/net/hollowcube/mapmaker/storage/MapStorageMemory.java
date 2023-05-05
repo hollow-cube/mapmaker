@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.storage;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
 import org.jetbrains.annotations.NotNull;
@@ -18,11 +15,11 @@ class MapStorageMemory implements MapStorage {
     private final AtomicInteger nextId = new AtomicInteger(1);
 
     @Override
-    public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
+    public @NotNull MapData createMap(@NotNull MapData map) {
         var existing = mapsById.putIfAbsent(map.getId(), map);
         if (existing != null)
-            return FutureResult.error(ERR_DUPLICATE_ENTRY);
-        return FutureResult.of(map);
+            throw new DuplicateEntryError();
+        return map;
     }
 
     @Override
@@ -41,35 +38,34 @@ class MapStorageMemory implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
+    public @NotNull MapData deleteMap(@NotNull String mapId) {
         if (!mapsById.containsKey(mapId))
-            return FutureResult.error(ERR_NOT_FOUND);
-        return FutureResult.of(mapsById.remove(mapId));
+            throw new NotFoundError();
+        return mapsById.remove(mapId);
     }
 
     @Override
-    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
+    public @NotNull String lookupShortId(@NotNull String shortMapId) {
         return mapsById.values().stream()
                 .filter(map -> map.getPublishedId().equalsIgnoreCase(shortMapId))
                 .findFirst()
                 .map(MapData::getId)
-                .map(FutureResult::of)
-                .orElse(FutureResult.error(ERR_NOT_FOUND));
+                .orElseThrow(NotFoundError::new);
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
-        return FutureResult.of(mapsById.values().stream()
+    public @NotNull List<MapData> getLatestMaps(int offset, int size) {
+        return mapsById.values().stream()
                 .filter(MapData::isPublished)
                 .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
                 .skip(offset)
                 .limit(size)
-                .toList());
+                .toList();
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
-        return FutureResult.of(mapsById.values().stream()
+    public @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size) {
+        return mapsById.values().stream()
                 .filter(map -> {
                     if (query.author() != null && !query.author().equals(map.getOwner()))
                         return false;
@@ -81,13 +77,13 @@ class MapStorageMemory implements MapStorage {
                 .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
                 .skip(offset)
                 .limit(size)
-                .toList());
+                .toList();
     }
 
     @Override
-    public @NotNull FutureResult<String> getNextId() {
+    public @NotNull String getNextId() {
         var n = nextId.getAndIncrement();
         var id = "00000" + Integer.toString(n, 36);
-        return FutureResult.of(id.substring(id.length() - 5));
+        return id.substring(id.length() - 5);
     }
 }

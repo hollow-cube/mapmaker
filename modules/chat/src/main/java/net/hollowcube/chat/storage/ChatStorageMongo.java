@@ -1,7 +1,6 @@
 package net.hollowcube.chat.storage;
 
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.chat.ChatMessage;
@@ -33,23 +32,19 @@ class ChatStorageMongo implements ChatStorage {
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> recordChatMessage(@NotNull ChatMessage message) {
-        return Futures.submit(() -> {
-            collection().insertOne(message);
-        }, ForkJoinPool.commonPool());
+    public void recordChatMessage(@NotNull ChatMessage message) {
+        collection().insertOne(message);
     }
 
     @Override
-    public @NotNull ListenableFuture<List<ChatMessage>> queryChatMessages(@NotNull ChatQuery query) {
-        return Futures.submit(() -> {
-            List<ChatMessage> results = new ArrayList<>();
-            collection().find(chatQueryToBson(query))
-                    .projection(excludeId())
-                    .sort(descending("timestamp"))
-                    .limit(CHAT_QUERY_MAX_RESULT_WINDOW)
-                    .into(results);
-            return List.copyOf(results);
-        }, ForkJoinPool.commonPool());
+    public @NotNull List<@NotNull ChatMessage> queryChatMessages(@NotNull ChatQuery query) {
+        List<ChatMessage> results = new ArrayList<>();
+        collection().find(chatQueryToBson(query))
+                .projection(excludeId())
+                .sort(descending("timestamp"))
+                .limit(CHAT_QUERY_MAX_RESULT_WINDOW)
+                .into(results);
+        return List.copyOf(results);
     }
 
     /**

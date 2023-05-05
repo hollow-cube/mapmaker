@@ -1,13 +1,10 @@
 package net.hollowcube.map.feature.experimental.marker;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorldNew;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @AutoService(FeatureProvider.class)
 public class MarkerFeatureProvider implements FeatureProvider {

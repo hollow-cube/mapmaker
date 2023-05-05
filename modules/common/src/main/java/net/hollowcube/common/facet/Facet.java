@@ -1,5 +1,6 @@
 package net.hollowcube.common.facet;
 
+import net.hollowcube.common.config.ConfigProvider;
 import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,5 @@ public interface Facet {
      *
      * @param server The minestom server
      */
-    @Blocking
-    void hook(@NotNull ServerProcess server);
+    @Blocking void hook(@NotNull ServerProcess server, @NotNull ConfigProvider config);
 }

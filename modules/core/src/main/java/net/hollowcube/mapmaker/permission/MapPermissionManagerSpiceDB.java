@@ -3,8 +3,7 @@ package net.hollowcube.mapmaker.permission;
 import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
 import com.authzed.api.v1.PermissionService.RelationshipFilter;
-import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
 import net.hollowcube.mapmaker.model.MapData;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MapPermissionManagerSpiceDB extends ZPermissionManager implements MapPermissionManager {
 
-    public MapPermissionManagerSpiceDB(@NotNull PermissionsServiceFutureStub permissionService) {
+    public MapPermissionManagerSpiceDB(@NotNull PermissionsServiceBlockingStub permissionService) {
         super(permissionService);
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull String> addMapOwner(@NotNull String mapId, @NotNull String playerId) {
+    public @NotNull String addMapOwner(@NotNull String mapId, @NotNull String playerId) {
         var relationship = Relationship.newBuilder()
                 .setResource(createMapObject(mapId))
                 .setRelation("owner")
@@ -29,7 +28,7 @@ public class MapPermissionManagerSpiceDB extends ZPermissionManager implements M
     }
 
     @Override
-    public @NotNull ListenableFuture<@NotNull String> makeMapPublic(@NotNull String mapId) {
+    public @NotNull String makeMapPublic(@NotNull String mapId) {
         var relationship = Relationship.newBuilder()
                 .setResource(createMapObject(mapId))
                 .setRelation("viewer")
@@ -39,7 +38,7 @@ public class MapPermissionManagerSpiceDB extends ZPermissionManager implements M
     }
 
     @Override
-    public @NotNull ListenableFuture<String> deleteMap(@NotNull String mapId) {
+    public @NotNull String deleteMap(@NotNull String mapId) {
         var filter = RelationshipFilter.newBuilder()
                 .setResourceType("mapmaker/map")
                 .setOptionalResourceId(mapId)
@@ -48,7 +47,7 @@ public class MapPermissionManagerSpiceDB extends ZPermissionManager implements M
     }
 
     @Override
-    public @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String mapId, @NotNull String playerId, MapData.@NotNull Permission permission) {
+    public boolean checkPermission(@NotNull String mapId, @NotNull String playerId, MapData.@NotNull Permission permission) {
         var req = CheckPermissionRequest.newBuilder()
                 .setResource(createMapObject(mapId))
                 .setPermission(permission.key())

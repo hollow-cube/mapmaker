@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.dev.config;
 
-import net.hollowcube.mapmaker.config.ConfigPath;
-import net.hollowcube.mapmaker.config.ConfigProvider;
+import net.hollowcube.common.config.ConfigPath;
+import net.hollowcube.common.config.ConfigProvider;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationVisitor;

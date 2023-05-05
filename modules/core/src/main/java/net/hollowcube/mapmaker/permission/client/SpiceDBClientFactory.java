@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.permission.client;
 
 import com.authzed.api.v1.PermissionsServiceGrpc;
-import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
+import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
 import com.authzed.grpcutil.BearerToken;
 import io.grpc.ManagedChannelBuilder;
 import net.hollowcube.common.config.SpiceDBConfig;
@@ -11,7 +11,7 @@ import java.util.ServiceLoader;
 
 public interface SpiceDBClientFactory {
 
-    @NotNull PermissionsServiceFutureStub newPermissionClient(@NotNull SpiceDBConfig config);
+    @NotNull PermissionsServiceBlockingStub newPermissionClient(@NotNull SpiceDBConfig config);
 
     static @NotNull SpiceDBClientFactory get() {
         class Holder {
@@ -29,7 +29,7 @@ public interface SpiceDBClientFactory {
                         else channelBuilder.usePlaintext();
 
                         //todo should ping permission service to fail early
-                        return PermissionsServiceGrpc.newFutureStub(channelBuilder.build())
+                        return PermissionsServiceGrpc.newBlockingStub(channelBuilder.build())
                                 .withCallCredentials(new BearerToken(config.secretKey()));
                     });
         }

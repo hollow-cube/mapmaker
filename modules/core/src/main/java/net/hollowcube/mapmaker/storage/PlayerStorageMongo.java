@@ -1,14 +1,10 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.PlayerData;
 import org.bson.BsonReader;
 import org.bson.BsonType;

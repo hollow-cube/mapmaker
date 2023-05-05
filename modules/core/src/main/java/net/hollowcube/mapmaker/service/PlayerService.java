@@ -1,8 +1,7 @@
 package net.hollowcube.mapmaker.service;
 
-import net.hollowcube.common.result.Error;
-import net.hollowcube.common.result.FutureResult;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -12,14 +11,14 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface PlayerService {
 
-    Error ERR_NOT_FOUND = Error.of("player not found");
-
     /**
      * Returns the current display name of the player. The display name includes any prefixes and suffixes,
      * but will never include extra data such as a chat channel suffix or chat status color.
      *
      * @return The display name of the player, or {@link #ERR_NOT_FOUND} if the player is not online.
      */
-    @NotNull FutureResult<Component> getDisplayName(@NotNull String playerId);
+    @Blocking @NotNull Component getDisplayName(@NotNull String playerId);
+
+    class NotFoundError extends RuntimeException { }
 
 }

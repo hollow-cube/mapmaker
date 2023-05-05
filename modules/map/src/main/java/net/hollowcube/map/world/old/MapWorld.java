@@ -3,7 +3,6 @@ package net.hollowcube.map.world.old;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.FutureUtil;

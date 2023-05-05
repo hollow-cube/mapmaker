@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorldNew;
-import net.hollowcube.mapmaker.config.ConfigProvider;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
