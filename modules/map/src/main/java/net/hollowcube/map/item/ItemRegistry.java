@@ -24,6 +24,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ItemRegistry is a store of all enabled items in a map.
@@ -60,6 +62,7 @@ public class ItemRegistry {
             .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItemOnBlock)
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock);
 
+    private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> customModelDataToItemHandler = new Int2ObjectArrayMap<>();
 
@@ -77,9 +80,14 @@ public class ItemRegistry {
     }
 
     public void register(@NotNull ItemHandler itemHandler) {
-        idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-        customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler); // NOSONAR - It thinks put is deprecated
-        allItemNames.add(itemHandler.id());
+        try {
+            lock.lock();
+            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
+            customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler); // NOSONAR - It thinks put is deprecated
+            allItemNames.add(itemHandler.id());
+        } finally {
+            lock.unlock();
+        }
     }
 
     public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable NBTCompound nbt) {
