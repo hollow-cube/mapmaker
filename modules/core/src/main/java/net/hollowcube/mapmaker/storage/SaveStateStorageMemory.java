@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.storage;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.mapmaker.model.SaveState;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.permission;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.SpiceDBConfig;
 import net.hollowcube.mapmaker.permission.client.SpiceDBClientFactory;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-public interface PlatformPermissionManager {
+public @Blocking interface PlatformPermissionManager {
 
     /**
      * Returns a permission manager that does nothing and always reports positive permission results.
@@ -28,6 +27,6 @@ public interface PlatformPermissionManager {
         return new PlatformPermissionManagerSpiceDB(client);
     }
 
-    @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission);
+    @Blocking boolean checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission);
 
 }

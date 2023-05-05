@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.hub;
 
 import io.prometheus.client.Histogram;
-import net.hollowcube.common.result.Error;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import javax.management.RuntimeErrorException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -46,14 +45,6 @@ public class Handler {
             .help("Histogram for the time it takes to join a map for editing")
             .register();
 
-    public static final Error ERR_MAP_NOT_FOUND = Error.of("map not found");
-    public static final Error ERR_MAP_NOT_PUBLISHED = Error.of("map not published");
-    public static final Error ERR_MAP_IS_PUBLISHED = Error.of("map is published");
-    public static final Error ERR_SLOT_LOCKED = Error.of("slot locked");
-    public static final Error ERR_SLOT_IN_USE = Error.of("slot in use");
-    public static final Error ERR_MISSING_OWNER = Error.of("missing owner"); //todo doesnt need to be defined here, not meant to be handled
-    public static final Error ERR_INVALID_MAP_NAME = Error.of("invalid name");
-
     private final HubServer server;
 
     public Handler(@NotNull HubServer server) {
@@ -68,30 +59,22 @@ public class Handler {
      * The map ID is overwritten with a new UUID no matter the content.
      * The return value should be used to determine the ID.
      */
-    public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
-        var timer = createMapTime.startTimer();
+    public @Blocking @NotNull MapData createMap(@NotNull MapData map) {
+        try (var ignored = createMapTime.startTimer()) {
+            //todo actually lookup the owner and make sure they exist
+            if (map.getOwner() == null)
+                throw new MapMissingOwnerError();
+            if (!map.getName().matches(MapData.NAME_REGEX))
+                throw new InvalidMapNameError();
 
-        //todo actually lookup the owner and make sure they exist
-        if (map.getOwner() == null)
-            return FutureResult.error(ERR_MISSING_OWNER);
-        if (!map.getName().matches(MapData.NAME_REGEX))
-            return FutureResult.error(ERR_INVALID_MAP_NAME);
+            map.setId(UUID.randomUUID().toString()); // Create random ID
+            map.setPublishedAt(null); // Sanity check
 
-        map.setId(UUID.randomUUID().toString()); // Create random ID
-        map.setPublishedAt(null); // Sanity check
-        return server.mapStorage().createMap(map)
-                // Add permissions
-                .flatMap(map1 -> FutureResult.wrap(server.mapPermissions().addMapOwner(map1.getId(), map1.getOwner()))
-                        .mapErr(err -> Result.error(err.wrap("failed to add owner to map permissions: {}")))
-                        .map(unused -> map1))
-                // Retry on failure + wrap error
-                .flatMapErr(err -> {
-                    if (err.is(MapStorage.ERR_DUPLICATE_ENTRY))
-                        return createMap(map); // Try again w/ new ID
-
-                    return FutureResult.error(err.wrap("failed to create map: {}"));
-                })
-                .alsoRaw(unused -> timer.observeDuration());
+            // All of below has bad failure cases :(
+            map = server.mapStorage().createMap(map);
+            server.mapPermissions().addMapOwner(map.getId(), map.getOwner());
+            return map;
+        }
     }
 
     /**
@@ -101,31 +84,27 @@ public class Handler {
      * <p>
      * If the slot is in use, ERR_SLOT_IN_USE is returned.
      */
-    public @NotNull FutureResult<MapData> createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
-        var timer = createMapForPlayerInSlotTime.startTimer();
+    public @Blocking @NotNull MapData createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
+        try (var ignored = createMapForPlayerInSlotTime.startTimer()) {
 
-        // Ensure selected slot is available
-        var slotState = playerData.getSlotState(slot);
-        if (slotState == PlayerData.SLOT_STATE_LOCKED)
-            return FutureResult.error(ERR_SLOT_LOCKED);
-        if (slotState == PlayerData.SLOT_STATE_IN_USE)
-            return FutureResult.error(ERR_SLOT_IN_USE);
+            // Ensure selected slot is available
+            var slotState = playerData.getSlotState(slot);
+            if (slotState == PlayerData.SLOT_STATE_LOCKED)
+                throw new MapSlotLockedError();
+            if (slotState == PlayerData.SLOT_STATE_IN_USE)
+                throw new MapSlotInUseError();
 
-        map.setOwner(playerData.getId());
-        map.setPublishedAt(null); // Sanity check
+            map.setOwner(playerData.getId());
+            map.setPublishedAt(null); // Sanity check
 
-        return createMap(map)
-                // Set the map in the given player slot & save player
-                .flatMap(map1 -> {
-                    playerData.setMapSlot(slot, map1.getId());
-                    return FutureResult.supply(() -> {
-                                server.playerStorage().updatePlayer(playerData);
-                                return Result.ofNull();
-                            })
-                            .mapErr(err -> Result.error(err.wrap("failed to update player: {}")))
-                            .map(unused -> map1);
-                })
-                .alsoRaw(unused -> timer.observeDuration());
+            // More bad failure cases :(
+            map = createMap(map);
+
+            playerData.setMapSlot(slot, map.getId());
+            server.playerStorage().updatePlayer(playerData);
+
+            return map;
+        }
     }
 
     /**
@@ -137,26 +116,16 @@ public class Handler {
      * <li>Update each player individually (after removing the reference to the map)</li>
      * </ol>
      */
-    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
-        var timer = deleteMapTime.startTimer();
-
+    public @NotNull MapData deleteMap(@NotNull String mapId) {
         //todo there is a missing permission check here, you could delete any map if you knew the ID
-        return server.mapStorage().deleteMap(mapId)
-                // Delete all associated permissions
-                .flatMap(map -> FutureResult.wrap(server.mapPermissions().deleteMap(mapId))
-                        .mapErr(err -> Result.error(err.wrap("failed to delete map permissions: {}")))
-                        .map(unused -> map))
-                // Call delete event to remove from online players
-                .map(map -> {
-                    EventDispatcher.call(new MapDeletedEvent(map.getId()));
-                    return map;
-                })
-                .mapErr(err -> {
-                    if (err.is(MapStorage.ERR_NOT_FOUND))
-                        return Result.error(ERR_MAP_NOT_FOUND);
-                    return Result.error(err.wrap("failed to delete map: {}"));
-                })
-                .alsoRaw(unused -> timer.observeDuration());
+        try (var ignored = deleteMapTime.startTimer()) {
+            var map = server.mapStorage().deleteMap(mapId);
+            server.mapPermissions().deleteMap(mapId);
+
+            EventDispatcher.call(new MapDeletedEvent(map.getId()));
+
+            return map;
+        }
     }
 
     /**
@@ -171,85 +140,67 @@ public class Handler {
      *     <li>Save map</li>
      * </ul>
      */
-    public @NotNull FutureResult<MapData> publishMap(@NotNull String playerId, @NotNull String mapId) {
-        var timer = publishMapTime.startTimer();
+    public @NotNull MapData publishMap(@NotNull String playerId, @NotNull String mapId) {
+        try (var ignored = publishMapTime.startTimer()) {
+            var map = server.mapStorage().getMapById(mapId);
 
-        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
-                // Check admin permissions
-                .flatAlso(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.ADMIN))
-                        .wrapErr("failed to check admin permission: {}"))
-                // Fetch next short id & update map
-                .flatMap(map -> server.mapStorage().getNextId()
-                        .map(shortId -> {
-                            map.setPublishedAt(Instant.now());
-                            map.setPublishedId(shortId);
-                            return map;
-                        }))
-                // Unlink map from all players
-                .map(map -> {
-                    //todo delete is a deceptive name, it actually just marks a map as gone from slot
-                    EventDispatcher.call(new MapDeletedEvent(map.getId()));
-                    return map;
-                })
-                // Add all players as viewers
-                .flatAlso(map -> FutureResult.wrap(server.mapPermissions().makeMapPublic(mapId))
-                        .wrapErr("failed to make map public: {}"))
-                // Save map
-                .flatAlso(map -> FutureResult.supply(() -> {
-                            server.mapStorage().updateMap(map);
-                            return Result.ofNull();
-                        })
-                        .wrapErr("failed to update map: {}"))
-                .mapErr(err -> {
-                    if (err.is(MapStorage.ERR_NOT_FOUND))
-                        return Result.error(ERR_MAP_NOT_FOUND);
-                    return Result.error(err.wrap("failed to publish map: {}"));
-                })
-                .alsoRaw(unused -> timer.observeDuration());
+            var hasPermission = server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.ADMIN);
+            if (!hasPermission)
+                throw new RuntimeException("todo set a better error");
+
+            map.setPublishedId(server.mapStorage().getNextId());
+            map.setPublishedAt(Instant.now());
+
+            //todo delete is a deceptive name, it actually just marks a map as gone from slot
+            EventDispatcher.call(new MapDeletedEvent(map.getId()));
+
+            // Make the map public
+            server.mapPermissions().makeMapPublic(mapId);
+            server.mapStorage().updateMap(map);
+
+            return map;
+        }
     }
 
-    public @NotNull FutureResult<Void> playMap(@NotNull Player player, @NotNull String mapId) {
-        var timer = playMapTime.startTimer();
-        var playerData = PlayerData.fromPlayer(player);
-        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
-                // Ensure map is published and check permission
-                .flatMap(map -> {
-                    if (!map.isPublished())
-                        return FutureResult.error(ERR_MAP_NOT_PUBLISHED);
+    public void playMap(@NotNull Player player, @NotNull String mapId) {
+        try (var ignored = playMapTime.startTimer()) {
+            var playerData = PlayerData.fromPlayer(player);
+            var map = server.mapStorage().getMapById(mapId);
 
-                    return FutureResult.wrap(server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.READ))
-                            .wrapErr("failed to check read permission: {}")
-                            .map(unused -> map);
-                })
-                // Send player to map instance
-                .flatMap(map -> FutureResult.supply(() -> {
-                            server.bridge().joinMap(player, mapId, false);
-                            return Result.<Void>ofNull();
-                        })
-                        .wrapErr("failed to join map: {}"))
-                .alsoRaw(unused -> timer.observeDuration());
+            if (!map.isPublished())
+                throw new MapNotPublishedError();
+
+            var hasPermission = server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.READ);
+            if (!hasPermission) {
+                throw new RuntimeException("blah balh blah");
+            }
+
+            server.bridge().joinMap(player, mapId, false);
+        }
     }
 
-    public @NotNull FutureResult<Void> editMap(@NotNull Player player, @NotNull String mapId) {
-        var timer = editMapTime.startTimer();
-        var playerData = PlayerData.fromPlayer(player);
-        return FutureResult.supply(() -> Result.of(server.mapStorage().getMapById(mapId)))
-                // Ensure map is not published and check write permission
-                .flatMap(map -> {
-                    if (map.isPublished())
-                        return FutureResult.error(ERR_MAP_IS_PUBLISHED);
+    public void editMap(@NotNull Player player, @NotNull String mapId) {
+        try (var ignored = editMapTime.startTimer();) {
+            var playerData = PlayerData.fromPlayer(player);
+            var map = server.mapStorage().getMapById(mapId);
 
-                    return FutureResult.wrap(server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.WRITE))
-                            .wrapErr("failed to check write permission: {}")
-                            .map(unused -> map);
-                })
-                // Send player to map instance
-                .flatMap(map -> FutureResult.supply(() -> {
-                            server.bridge().joinMap(player, mapId, true);
-                            return Result.<Void>ofNull();
-                        })
-                        .wrapErr("failed to join map: {}"))
-                .alsoRaw(unused -> timer.observeDuration());
+            if (map.isPublished())
+                //todo you should perhaps just lose editing permission?
+                throw new MapIsPublishedError();
+
+            var hasPermission = server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.WRITE);
+            if (!hasPermission)
+                throw new RuntimeException("blah balh blah");
+
+            server.bridge().joinMap(player, mapId, true);
+        }
     }
+
+    public static class MapNotPublishedError extends RuntimeException { }
+    public static class MapIsPublishedError extends RuntimeException { }
+    public static class MapSlotLockedError extends RuntimeException { }
+    public static class MapSlotInUseError extends RuntimeException { }
+    public static class MapMissingOwnerError extends RuntimeException { }
+    public static class InvalidMapNameError extends RuntimeException { }
 
 }

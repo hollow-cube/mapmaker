@@ -1,8 +1,6 @@
 package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
@@ -13,7 +11,7 @@ import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorldNew;
-import net.hollowcube.mapmaker.config.ConfigProvider;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.MinecraftServer;
@@ -26,7 +24,6 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)

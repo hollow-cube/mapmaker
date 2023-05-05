@@ -2,16 +2,17 @@ package net.hollowcube.mapmaker.kafka;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.prometheus.client.Counter;
 import net.hollowcube.common.ServerRuntime;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class FriendlyProducer implements AutoCloseable {
     private static final System.Logger logger = System.getLogger(FriendlyProducer.class.getName());
@@ -39,35 +40,30 @@ public class FriendlyProducer implements AutoCloseable {
         ), new StringSerializer(), new StringSerializer());
     }
 
-    public @NotNull ListenableFuture<Void> produce(@NotNull String topic, @NotNull String value) {
-        if (producer == null) return Futures.immediateVoidFuture();
+    public @Blocking void produce(@NotNull String topic, @NotNull String value) {
+        if (producer == null) return;
 
-        var future = SettableFuture.<Void>create();
+        //todo somehow send the message synchronously
+        var future = new CompletableFuture<>();
         producer.send(new ProducerRecord<>(topic, value), (unused1, exception) -> {
             if (exception != null) {
-                future.setException(exception);
+                future.completeExceptionally(exception);
             } else {
-                future.set(null);
+                future.complete(null);
             }
         });
-        return future;
+        future.join();
     }
 
     public void produceAndForget(@NotNull String topic, @NotNull String value) {
         if (producer == null) return;
 
-        Futures.addCallback(produce(topic, value), new FutureCallback<>() {
-            @Override
-            public void onSuccess(Void result) {
-                producerMessagesSent.inc();
-            }
-
-            @Override
-            public void onFailure(@NotNull Throwable t) {
-                producerErrors.inc();
-                logger.log(System.Logger.Level.ERROR, "Failed to produce message to topic " + topic, t);
-            }
-        }, Runnable::run);
+        try {
+            produce(topic, value);
+        } catch (Exception e) {
+            producerErrors.inc();
+            logger.log(System.Logger.Level.ERROR, "Failed to produce message to topic " + topic, e);
+        }
     }
 
     @Override

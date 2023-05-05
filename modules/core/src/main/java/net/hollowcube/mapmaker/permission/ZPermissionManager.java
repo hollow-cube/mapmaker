@@ -5,9 +5,8 @@ import com.authzed.api.v1.Core.Relationship;
 import com.authzed.api.v1.Core.RelationshipUpdate;
 import com.authzed.api.v1.Core.SubjectReference;
 import com.authzed.api.v1.PermissionService.*;
-import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
+import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -15,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("UnstableApiUsage")
 class ZPermissionManager {
-    private final PermissionsServiceFutureStub permissionService;
+    private final PermissionsServiceBlockingStub permissionService;
 
-    ZPermissionManager(PermissionsServiceFutureStub permissionService) {
+    ZPermissionManager(PermissionsServiceBlockingStub permissionService) {
         this.permissionService = permissionService;
     }
 
@@ -37,7 +36,7 @@ class ZPermissionManager {
                 .build();
     }
 
-    protected @NotNull ListenableFuture<@NotNull String> createRelationship(@NotNull Relationship relationship) {
+    protected @NotNull String createRelationship(@NotNull Relationship relationship) {
         var update = RelationshipUpdate.newBuilder()
                 .setOperation(RelationshipUpdate.Operation.OPERATION_CREATE)
                 .setRelationship(relationship)
@@ -45,34 +44,26 @@ class ZPermissionManager {
         return writeRelationshipUpdate(update);
     }
 
-    protected @NotNull ListenableFuture<String> deleteRelationships(@NotNull RelationshipFilter filter) {
+    protected @NotNull String deleteRelationships(@NotNull RelationshipFilter filter) {
         var req = DeleteRelationshipsRequest.newBuilder()
                 .setRelationshipFilter(filter)
                 .build();
-        return Futures.transform(
-                permissionService.deleteRelationships(req),
-                res -> res.getDeletedAt().getToken(),
-                Runnable::run
-        );
+        return permissionService.deleteRelationships(req)
+                .getDeletedAt().getToken();
     }
 
-    protected @NotNull ListenableFuture<@NotNull String> writeRelationshipUpdate(@NotNull RelationshipUpdate update) {
+    protected @NotNull String writeRelationshipUpdate(@NotNull RelationshipUpdate update) {
         var req = WriteRelationshipsRequest.newBuilder()
                 .addUpdates(update)
                 .build();
-        return Futures.transform(
-                permissionService.writeRelationships(req),
-                res -> res.getWrittenAt().getToken(),
-                Runnable::run
-        );
+        return permissionService.writeRelationships(req)
+                .getWrittenAt().getToken();
     }
 
-    public @NotNull ListenableFuture<Boolean> checkPermission(@NotNull CheckPermissionRequest req) {
-        return Futures.transform(
-                permissionService.checkPermission(req),
-                res -> res.getPermissionship() == CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION,
-                Runnable::run
-        );
+    public boolean checkPermission(@NotNull CheckPermissionRequest req) {
+        var expected = CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION;
+        var actual = permissionService.checkPermission(req).getPermissionship();
+        return expected == actual;
     }
 
 }

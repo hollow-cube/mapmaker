@@ -1,15 +1,11 @@
 package net.hollowcube.mapmaker.storage;
 
 import com.google.auto.service.AutoService;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.MapQuery;
 import net.minestom.server.coordinate.Pos;
@@ -46,23 +42,15 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<MapData> createMap(@NotNull MapData map) {
-        return FutureResult.supply(() -> {
-            try {
-                collection().insertOne(map);
-            } catch (MongoWriteException err) {
-                if (err.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-//                    // This is a pretty cursed way to check for this error. Mongo does not seem to inform which key
-//                    // or index caused the error (in a raw form), so we just look for the index name in the error message.
-//                    if (err.getError().getMessage().contains(OWNER_NAME_INDEX_NAME))
-//                        return Result.error(ERR_DUPLICATE_NAME);
-
-                    // ID mismatch
-                    return Result.error(ERR_DUPLICATE_ENTRY);
-                }
+    public @NotNull MapData createMap(@NotNull MapData map) {
+        try {
+            collection().insertOne(map);
+        } catch (MongoWriteException err) {
+            if (err.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                throw new DuplicateEntryError();
             }
-            return Result.of(map);
-        });
+        }
+        return map;
     }
 
     @Override
@@ -83,68 +71,61 @@ public class MapStorageMongo implements MapStorage {
     }
 
     @Override
-    public @NotNull FutureResult<MapData> deleteMap(@NotNull String mapId) {
-        return FutureResult.supply(() -> {
-            var filter = eq("_id", mapId);
-            var result = collection().findOneAndDelete(filter);
-            if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result);
-        });
+    public @NotNull MapData deleteMap(@NotNull String mapId) {
+        var filter = eq("_id", mapId);
+        var result = collection().findOneAndDelete(filter);
+        if (result == null)
+            throw new NotFoundError();
+        return result;
     }
 
     @Override
-    public @NotNull FutureResult<String> lookupShortId(@NotNull String shortMapId) {
-        return FutureResult.supply(() -> {
-            var filter = eq("publishedId", shortMapId);
-            var projection = include("_id");
-            var result = collection().find(filter).projection(projection).limit(1).first();
-            if (result == null)
-                return Result.error(ERR_NOT_FOUND);
-            return Result.of(result.getId());
-        });
+    public @NotNull String lookupShortId(@NotNull String shortMapId) {
+        var filter = eq("publishedId", shortMapId);
+        var projection = include("_id");
+        var result = collection().find(filter).projection(projection).limit(1).first();
+        if (result == null)
+            throw new NotFoundError();
+        return result.getId();
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull List<MapData>> getLatestMaps(int offset, int size) {
-        return FutureResult.supply(() -> {
-            var filter = exists("publishedAt");
-            var sort = descending("publishedAt");
-            var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
-            return Result.of(result);
-        });
+    public @NotNull List<MapData> getLatestMaps(int offset, int size) {
+        var filter = exists("publishedAt");
+        var sort = descending("publishedAt");
+        var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
+        return result;
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull List<MapData>> queryMaps(@NotNull MapQuery query, int offset, int size) {
-        return FutureResult.supply(() -> {
-            var conditions = new ArrayList<Bson>();
-            if (query.author() != null)
-                conditions.add(eq("owner", query.author()));
-            if (query.publishedOnly() != null)
-                conditions.add(query.publishedOnly() ? exists("publishedAt") : not(exists("publishedAt")));
-            var filter = conditions.isEmpty() ? new BsonDocument() : and(conditions);
-            var sort = query.publishedOnly() != null && query.publishedOnly() ? descending("publishedAt") : descending("createdAt");
-            var result = collection().find(filter).sort(sort).skip(offset).limit(size).into(new ArrayList<>());
-            return Result.of(result);
-        });
+    public @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size) {
+        var conditions = new ArrayList<Bson>();
+        if (query.author() != null)
+            conditions.add(eq("owner", query.author()));
+        if (query.publishedOnly() != null)
+            conditions.add(query.publishedOnly() ? exists("publishedAt") : not(exists("publishedAt")));
+        var filter = conditions.isEmpty() ? new BsonDocument() : and(conditions);
+        var sort = query.publishedOnly() != null && query.publishedOnly() ? descending("publishedAt") : descending("createdAt");
+        return collection().find(filter)
+                .sort(sort)
+                .skip(offset)
+                .limit(size)
+                .into(new ArrayList<>());
     }
 
     @Override
-    public @NotNull FutureResult<String> getNextId() {
-        return FutureResult.supply(() -> {
-            var filter = new Document();
-            var update = inc("nextId", 1);
-            var result = shortIdCollection().findOneAndUpdate(filter, update);
-            if (result == null) {
-                // Document does not exist
-                shortIdCollection().insertOne(new Document("nextId", 1));
-                return Result.of("00001");
-            }
-            var n = result.getInteger("nextId");
-            var id = "00000" + Integer.toString(n, 36);
-            return Result.of(id.substring(id.length() - 5));
-        });
+    public @NotNull String getNextId() {
+        var filter = new Document();
+        var update = inc("nextId", 1);
+        var result = shortIdCollection().findOneAndUpdate(filter, update);
+        if (result == null) {
+            // Document does not exist
+            shortIdCollection().insertOne(new Document("nextId", 1));
+            return "00001";
+        }
+        var n = result.getInteger("nextId");
+        var id = "00000" + Integer.toString(n, 36);
+        return id.substring(id.length() - 5);
     }
 
     private @NotNull MongoCollection<MapData> collection() {

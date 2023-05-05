@@ -11,7 +11,7 @@ import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.*;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
-import net.hollowcube.mapmaker.config.ConfigProvider;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.terraform.Terraform;

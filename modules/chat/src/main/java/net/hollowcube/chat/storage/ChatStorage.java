@@ -1,28 +1,22 @@
 package net.hollowcube.chat.storage;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
 import net.hollowcube.common.config.MongoConfig;
 import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 
 public interface ChatStorage {
     static @NotNull ChatStorage memory() {
         return new ChatStorageMemory();
     }
 
-    static @NotNull ListenableFuture<ChatStorage> mongo(@NotNull MongoConfig config) {
-        var clientFactory = MongoClientFactory.get();
-        return Futures.transform(
-                Futures.submit(() -> clientFactory.newClient(config), ForkJoinPool.commonPool()),
-                client -> new ChatStorageMongo(client, config),
-                Runnable::run
-        );
+    static @Blocking @NotNull ChatStorage mongo(@NotNull MongoConfig config) {
+        var client = MongoClientFactory.get().newClient(config);
+        return new ChatStorageMongo(client, config);
     }
 
     /**
@@ -31,8 +25,8 @@ public interface ChatStorage {
      *
      * @param message The chat message to save
      */
-    @NotNull ListenableFuture<Void> recordChatMessage(@NotNull ChatMessage message);
+    @Blocking void recordChatMessage(@NotNull ChatMessage message);
 
-    @NotNull ListenableFuture<@NotNull List<ChatMessage>> queryChatMessages(@NotNull ChatQuery query);
+    @Blocking @NotNull List<ChatMessage> queryChatMessages(@NotNull ChatQuery query);
 
 }

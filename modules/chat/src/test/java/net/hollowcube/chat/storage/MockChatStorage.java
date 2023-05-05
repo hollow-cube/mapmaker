@@ -1,7 +1,6 @@
 package net.hollowcube.chat.storage;
 
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.chat.ChatMessage;
 import net.hollowcube.chat.ChatQuery;
 import org.jetbrains.annotations.NotNull;

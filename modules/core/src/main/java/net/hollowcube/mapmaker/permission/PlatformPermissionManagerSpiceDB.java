@@ -2,8 +2,7 @@ package net.hollowcube.mapmaker.permission;
 
 import com.authzed.api.v1.Core.ObjectReference;
 import com.authzed.api.v1.PermissionService.CheckPermissionRequest;
-import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceFutureStub;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
 import org.jetbrains.annotations.NotNull;
 
 public class PlatformPermissionManagerSpiceDB extends ZPermissionManager implements PlatformPermissionManager {
@@ -13,13 +12,13 @@ public class PlatformPermissionManagerSpiceDB extends ZPermissionManager impleme
             .build();
 
 
-    public PlatformPermissionManagerSpiceDB(@NotNull PermissionsServiceFutureStub permissionService) {
+    public PlatformPermissionManagerSpiceDB(@NotNull PermissionsServiceBlockingStub permissionService) {
         super(permissionService);
     }
 
 
     @Override
-    public @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission) {
+    public boolean checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission) {
         var req = CheckPermissionRequest.newBuilder()
                 .setResource(PLATFORM_OBJECT)
                 .setPermission(permission.key())

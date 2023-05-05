@@ -1,15 +1,12 @@
 package net.hollowcube.mapmaker.permission;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.hollowcube.common.config.SpiceDBConfig;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.permission.client.SpiceDBClientFactory;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
-public interface MapPermissionManager {
+public @Blocking interface MapPermissionManager {
 
     /**
      * Returns a permission manager that does nothing and always reports positive permission results.
@@ -36,7 +33,7 @@ public interface MapPermissionManager {
      *
      * @return A future containing an updated offset token
      */
-    @NotNull ListenableFuture<@NotNull String> addMapOwner(@NotNull String mapId, @NotNull String playerId);
+    @Blocking @NotNull String addMapOwner(@NotNull String mapId, @NotNull String playerId);
 
     /**
      * Makes the given map public. This means that anybody has
@@ -45,7 +42,7 @@ public interface MapPermissionManager {
      *
      * @return A future containing an updated offset token for the map.
      */
-    @NotNull ListenableFuture<@NotNull String> makeMapPublic(@NotNull String mapId);
+    @Blocking @NotNull String makeMapPublic(@NotNull String mapId);
 
     /**
      * Deletes the given map from the permission manager.
@@ -53,10 +50,10 @@ public interface MapPermissionManager {
      * @param mapId The map id to delete
      * @return A future that contains the resulting zed token if successful
      */
-    @NotNull ListenableFuture<@NotNull String> deleteMap(@NotNull String mapId);
+    @Blocking @NotNull String deleteMap(@NotNull String mapId);
 
     /** Checks if the given player has the given permission on the given map. */
-    @NotNull ListenableFuture<Boolean> checkPermission(@NotNull String mapId, @NotNull String playerId,
-                                                       @NotNull MapData.Permission permission);
+    @Blocking boolean checkPermission(@NotNull String mapId, @NotNull String playerId,
+                                      @NotNull MapData.Permission permission);
 
 }

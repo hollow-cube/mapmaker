@@ -5,8 +5,6 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import net.hollowcube.common.config.MongoConfig;
-import net.hollowcube.common.result.FutureResult;
-import net.hollowcube.common.result.Result;
 import net.hollowcube.mapmaker.metrics.Metric;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
@@ -26,17 +24,15 @@ class MetricStorageMongo implements MetricStorage {
     }
 
     @Override
-    public @NotNull FutureResult<@NotNull Metric> addMetric(@NotNull Metric metric) {
-        return FutureResult.supply(() -> {
-            try {
-                collection().insertOne(metric);
-            } catch (DuplicateKeyException ignored) {
+    public @NotNull Metric addMetric(@NotNull Metric metric) {
+        try {
+            collection().insertOne(metric);
+        } catch (DuplicateKeyException ignored) {
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return Result.of(metric);
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return metric;
     }
 
     private @NotNull MongoCollection<Metric> collection() {

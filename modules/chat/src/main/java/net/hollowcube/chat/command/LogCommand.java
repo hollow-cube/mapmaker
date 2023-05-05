@@ -84,30 +84,32 @@ public class LogCommand extends Command {
         ChatQuery.Builder query = ChatQuery.builder();
         parseFilters(query, context.get("filters"));
 
-        Futures.addCallback(
-                storage.queryChatMessages(query.build()),
-                new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(@NotNull List<ChatMessage> result) {
-                        if (result.isEmpty()) {
-                            sender.sendMessage(Component.translatable("command.chat.log.err_no_results"));
-                            return;
-                        }
+        throw new RuntimeException("fixme");
 
-                        for (var message : result) {
-                            //todo better message/translation/whatever
-                            sender.sendMessage(String.format("%s: %s", message.sender(), message.message()));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Throwable t) {
-                        sender.sendMessage(Component.translatable("command.generic.unknown_error"));
-                        logger.log(Level.ERROR, "failed querying chat messages", t);
-                    }
-                },
-                ForkJoinPool.commonPool()
-        );
+//        Futures.addCallback(
+//                storage.queryChatMessages(query.build()),
+//                new FutureCallback<>() {
+//                    @Override
+//                    public void onSuccess(@NotNull List<ChatMessage> result) {
+//                        if (result.isEmpty()) {
+//                            sender.sendMessage(Component.translatable("command.chat.log.err_no_results"));
+//                            return;
+//                        }
+//
+//                        for (var message : result) {
+//                            //todo better message/translation/whatever
+//                            sender.sendMessage(String.format("%s: %s", message.sender(), message.message()));
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NotNull Throwable t) {
+//                        sender.sendMessage(Component.translatable("command.generic.unknown_error"));
+//                        logger.log(Level.ERROR, "failed querying chat messages", t);
+//                    }
+//                },
+//                ForkJoinPool.commonPool()
+//        );
     }
 
     private void parseFilters(ChatQuery.Builder query, List<CommandContext> filters) {
