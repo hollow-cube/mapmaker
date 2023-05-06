@@ -19,10 +19,11 @@ import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
-import net.hollowcube.mapmaker.model.DisplayNameBuilder;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
+import net.hollowcube.mapmaker.service.PlayerService;
+import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.*;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.world.WorldManager;
@@ -117,6 +118,8 @@ public class DevServer {
     private PlatformPermissionManager platformPermissions;
     private MapPermissionManager mapPermissions;
 
+    private PlayerService playerService;
+
     private DevHubServer hub;
     private DevMapServer maps;
 
@@ -209,6 +212,7 @@ public class DevServer {
             System.exit(1);
         }
 
+        playerService = new PlayerServiceImpl(playerStorage, platformPermissions);
 
         // Start phase 2
         // Start hub and map server and bridge them.
@@ -216,7 +220,7 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions);
+            this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions, playerService);
             this.maps = new DevMapServer(bridge, mapStorage, metricStorage, saveStateStorage, worldManager, platformPermissions);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
@@ -273,7 +277,6 @@ public class DevServer {
             logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
 
             Scoreboards.init();
-            DisplayNameBuilder.init(playerStorage);
 
             scope.join();
         } catch (Exception e) {
@@ -303,10 +306,16 @@ public class DevServer {
         PlayerData playerData;
         try {
             playerData = playerStorage.getPlayerByUuid(playerId);
+
+            // We know the player exists so this call is safe
+            var displayName = playerService.getDisplayName(playerId);
+            playerData.setDisplayName(displayName);
         } catch (PlayerStorage.NotFoundError e) {
             var data = new PlayerData();
             data.setId(event.getPlayerUuid().toString());
             data.setUuid(event.getPlayerUuid().toString());
+            data.setUsername(event.getUsername());
+            data.setDisplayName(Component.text(event.getUsername()));
             data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
             MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
             playerData = playerStorage.createPlayer(data);
@@ -350,75 +359,6 @@ public class DevServer {
         }
     }
 
-    //FluentFuture.from(playerStorage.getPlayerByUuid(event.getPlayerUuid().toString()))
-    //                    .catchingAsync(PlayerStorage.NotFoundError.class, err -> {
-    //                        var data = new PlayerData();
-    //                        data.setId(event.getPlayerUuid().toString());
-    //                        data.setUuid(event.getPlayerUuid().toString());
-    //                        data.setDisplayName(
-    //                                DisplayNameBuilder.playerToDisplayName(event.getPlayer(), this.platformPermissions));
-    //                        data.setUnlockedMapSlots(PlayerData.DEFAULT_UNLOCKED_MAP_SLOTS);
-    //                        MetricsHelper.get().recordMetricFirstJoinTime(event.getPlayerUuid().toString());
-    //                        return playerStorage.createPlayer(data);
-    //                    }, Runnable::run)
-    //                    .transform(data -> {
-    //                        player.setTag(PlayerData.PLAYER_ID, data.getId());
-    //                        player.setTag(PlayerData.DATA, data);
-    //
-    //                        boolean changed = false;
-    //
-    //                        // Update their display name (move to be callback whenever their perms change)
-    //                        var newDisplayName = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
-    //                        if (data.getDisplayName() != newDisplayName) {
-    //                            changed = true;
-    //                            data.setDisplayName(newDisplayName);
-    //                        }
-    //
-    //                        // todo this cleanup step should probably be moved
-    //                        // Cleanup maps which are actually gone
-    //                        for (int i = 0; i < data.getUnlockedMapSlots(); i++) {
-    //                            var mapId = data.getMapSlot(i);
-    //                            if (mapId != null) {
-    //                                try {
-    //                                    var map = mapStorage.getMapById(mapId).get();
-    //                                    if (map.isPublished()) {
-    //                                        // Map is published, delete from slots.
-    //                                        changed = true;
-    //                                        data.setMapSlot(i, null);
-    //                                        logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was published.", mapId, data.getId());
-    //                                    }
-    //                                } catch (Exception e) {
-    //                                    if (e instanceof InterruptedException)
-    //                                        Thread.currentThread().interrupt();
-    //                                    if (e instanceof MapStorage.NotFoundError) {
-    //                                        // Map is gone, delete from slots
-    //                                        changed = true;
-    //                                        data.setMapSlot(i, null);
-    //                                        logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was deleted.", mapId, data.getId());
-    //                                    }
-    //
-    //                                    logger.log(System.Logger.Level.ERROR, "Failed to load map data for " + event.getUsername(), e);
-    //                                    player.kick(Component.text("Failed to load map data! Please try again later."));
-    //                                    return null;
-    //                                }
-    //                            }
-    //                        }
-    //                        if (changed) {
-    //                            playerStorage.updatePlayer(data).toCompletableFuture().join();
-    //                        }
-    //
-    //                        return null;
-    //                    }, ForkJoinPool.commonPool())
-    //                    .get();
-    //        } catch (Exception e) {
-    //            if (e instanceof InterruptedException)
-    //                Thread.currentThread().interrupt();
-    //
-    //            logger.log(System.Logger.Level.ERROR, "Failed to load player data for " + event.getUsername(), e);
-    //            player.kick(Component.text("Failed to load player data! Please try again later."));
-    //        }
-    //    }
-
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
         event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
@@ -452,8 +392,6 @@ public class DevServer {
         var player = event.getPlayer();
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
-        String name = DisplayNameBuilder.playerToDisplayName(player, platformPermissions);
-        player.sendMessage(Component.text("Hello, ").append(Component.text(name)));
         player.setPermissionLevel(4);
 
         // Alpha watermark

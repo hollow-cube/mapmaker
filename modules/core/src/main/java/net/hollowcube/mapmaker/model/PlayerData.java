@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.model;
 
 import net.hollowcube.common.util.ExtraTags;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
@@ -30,7 +31,8 @@ public class PlayerData {
 
     private String id;
     private String uuid;
-    private String displayName;
+    private String username;
+    private transient Component displayName;
 
     private int unlockedMapSlots;
     private String[] mapSlots = new String[MAX_MAP_SLOTS];
@@ -51,11 +53,19 @@ public class PlayerData {
         this.uuid = uuid;
     }
 
-    public String getDisplayName() {
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Component getDisplayName() {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(Component displayName) {
         this.displayName = displayName;
     }
 

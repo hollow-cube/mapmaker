@@ -24,8 +24,20 @@ public class DebugCommand extends Command {
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
+        addSyntax(this::handleDebugSelf, ArgumentType.Literal("self"));
         addSyntax(this::handlePlayerReset, ArgumentType.Literal("reset-self"));
         addSyntax(this::handleMapWorldDebug, ArgumentType.Literal("world"));
+    }
+
+    private void handleDebugSelf(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
+            return;
+        }
+
+        var playerData = PlayerData.fromPlayer(player);
+        player.sendMessage(Component.text(playerData.getId() + " (" + playerData.getUsername() + ")"));
+        player.sendMessage(Component.text("Display: ").append(playerData.getDisplayName()));
     }
 
     private void handlePlayerReset(@NotNull CommandSender sender, @NotNull CommandContext context) {

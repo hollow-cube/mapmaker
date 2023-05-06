@@ -102,11 +102,12 @@ public class ChatFacet implements Facet {
     }
 
     private @NonBlocking void handleChatEvent(PlayerChatEvent event) {
+        var senderData = PlayerData.fromPlayer(event.getPlayer());
         var message = new ChatMessage(
                 Instant.now(),
                 runtime.hostname(),
                 ChatMessage.DEFAULT_CONTEXT,
-                PlayerData.fromPlayer(event.getPlayer()).getDisplayName(),
+                senderData.getId(),
                 event.getMessage()
         );
         switch (event.getPlayer().getTag(CHAT_CHANNEL)) {

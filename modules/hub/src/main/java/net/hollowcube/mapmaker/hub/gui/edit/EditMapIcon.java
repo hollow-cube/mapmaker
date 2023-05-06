@@ -55,7 +55,7 @@ public class EditMapIcon extends View {
 
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
         if (state == State.FULL) {
-            mapDataFuture = VIRTUAL_EXECUTOR.submit(() -> {
+            mapDataFuture = async(() -> {
                 var map = mapStorage.getMapById(mapId);
                 full.setArgs(
                         Component.text(slot + 1),

@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.function.Function;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class HubServerBase implements HubServer {
     //todo one readiness check should be ensuring the world is loaded
 
@@ -37,7 +36,13 @@ public abstract class HubServerBase implements HubServer {
     public void init() {
         this.mapHandler = new Handler(this);
 
-        this.guiController = Controller.make(Map.of("hubServer", this, "playerStorage", playerStorage(), "mapStorage", mapStorage(), "handler", mapHandler));
+        this.guiController = Controller.make(Map.of(
+                "hubServer", this,
+                "playerStorage", playerStorage(),
+                "playerService", playerService(),
+                "mapStorage", mapStorage(),
+                "handler", mapHandler
+        ));
 
         this.world = new HubWorld(this);
         this.world.loadWorld();

@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubServerBase;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
+import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -21,6 +22,8 @@ public class DevHubServer extends HubServerBase {
     private final PlatformPermissionManager platformPermissions;
     private final MapPermissionManager mapPermissions;
 
+    private final @NotNull PlayerService playerService;
+
     public DevHubServer(
             @NotNull HubToMapBridge bridge,
             @NotNull MapStorage mapStorage,
@@ -28,7 +31,8 @@ public class DevHubServer extends HubServerBase {
             @NotNull MetricStorage metricStorage,
             @NotNull WorldManager worldManager,
             @NotNull PlatformPermissionManager platformPermissions,
-            @NotNull MapPermissionManager mapPermissions) {
+            @NotNull MapPermissionManager mapPermissions,
+            @NotNull PlayerService playerService) {
         super(bridge);
         this.playerStorage = Objects.requireNonNull(playerStorage);
         this.mapStorage = Objects.requireNonNull(mapStorage);
@@ -36,6 +40,7 @@ public class DevHubServer extends HubServerBase {
         this.worldManager = Objects.requireNonNull(worldManager);
         this.platformPermissions = Objects.requireNonNull(platformPermissions);
         this.mapPermissions = Objects.requireNonNull(mapPermissions);
+        this.playerService = Objects.requireNonNull(playerService);
     }
 
     @Override
@@ -66,5 +71,10 @@ public class DevHubServer extends HubServerBase {
     @Override
     public @NotNull MapPermissionManager mapPermissions() {
         return mapPermissions;
+    }
+
+    @Override
+    public @NotNull PlayerService playerService() {
+        return playerService;
     }
 }

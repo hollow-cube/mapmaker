@@ -4,12 +4,14 @@ import net.hollowcube.canvas.internal.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public abstract class View implements Element {
-    protected static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+    private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final Context context;
     private final Element delegate;
@@ -82,5 +84,13 @@ public abstract class View implements Element {
      * Can be used to unsubscribe from an event, etc.
      */
     protected void unmount() {
+    }
+
+    protected void async(@NotNull Runnable func) {
+        VIRTUAL_EXECUTOR.submit(func);
+    }
+
+    protected <T> @NotNull Future<T> async(@NotNull Callable<T> func) {
+        return VIRTUAL_EXECUTOR.submit(func);
     }
 }

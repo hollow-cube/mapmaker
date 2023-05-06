@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.ui;
 
-import net.hollowcube.mapmaker.model.DisplayNameBuilder;
 import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -66,7 +65,7 @@ public class Scoreboards {
         Sidebar playingSidebar = new Sidebar(Component.text("playing"));
 
         var mapName = map.getName();
-        var mapCreator = DisplayNameBuilder.getDisplayName(map.getOwner());
+        var mapCreator = "fixme";
         // TODO show alias here instead if exists for map when implemented
         var mapId = map.getPublishedId();
 
@@ -84,7 +83,7 @@ public class Scoreboards {
         Sidebar editingSidebar = new Sidebar(Component.text("editing"));
 
         var mapName = map.getName();
-        var mapCreator = DisplayNameBuilder.getDisplayName(map.getOwner());
+        var mapCreator = "fixme";
 
         editingSidebar.setTitle(Component.translatable("scoreboard.title"));
         editingSidebar.createLine(new Sidebar.ScoreboardLine("editing_one", Component.translatable("scoreboard.line"), -1));

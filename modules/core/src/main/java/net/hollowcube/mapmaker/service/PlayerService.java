@@ -15,7 +15,7 @@ public interface PlayerService {
      * Returns the current display name of the player. The display name includes any prefixes and suffixes,
      * but will never include extra data such as a chat channel suffix or chat status color.
      *
-     * @return The display name of the player, or {@link #ERR_NOT_FOUND} if the player is not online.
+     * @return The display name of the player, or {@link NotFoundError} if the player has never logged in.
      */
     @Blocking
     @NotNull Component getDisplayName(@NotNull String playerId);
