@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.bridge;
 
-import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;

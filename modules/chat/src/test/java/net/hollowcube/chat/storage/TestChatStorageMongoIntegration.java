@@ -77,11 +77,11 @@ public class TestChatStorageMongoIntegration {
 //    }
 
     @Test
-    public void testEmptyQuery() throws Exception {
+    void testEmptyQuery() {
         loadFixture("chat_messages");
 
         ChatQuery query = ChatQuery.builder().build();
-        List<ChatMessage> results = storage.queryChatMessages(query).get();
+        List<ChatMessage> results = storage.queryChatMessages(query);
 
         // Should reach max result window
         assertThat(results).hasSize(15);
@@ -96,13 +96,13 @@ public class TestChatStorageMongoIntegration {
     }
 
     @Test
-    public void testQueryServerId() throws Exception {
+    void testQueryServerId() {
         loadFixture("chat_messages");
 
         ChatQuery query = ChatQuery.builder()
                 .serverId("build")
                 .build();
-        List<ChatMessage> results = storage.queryChatMessages(query).get();
+        List<ChatMessage> results = storage.queryChatMessages(query);
 
         // There is one message on build_1 and one on build_2, we should match both of them.
         assertThat(results).containsExactly(
@@ -124,13 +124,13 @@ public class TestChatStorageMongoIntegration {
     }
 
     @Test
-    public void testQueryContext() throws Exception {
+    void testQueryContext() {
         loadFixture("chat_messages");
 
         ChatQuery query = ChatQuery.builder()
                 .context("test_channel")
                 .build();
-        List<ChatMessage> results = storage.queryChatMessages(query).get();
+        List<ChatMessage> results = storage.queryChatMessages(query);
 
         // There is one message in test_channel and another in test_channel_1
         // We should only match the one in test_channel
@@ -144,13 +144,13 @@ public class TestChatStorageMongoIntegration {
     }
 
     @Test
-    public void testQuerySender() throws Exception {
+    void testQuerySender() {
         loadFixture("chat_messages");
 
         ChatQuery query = ChatQuery.builder()
                 .sender("5c44635e-3fa6-40c0-b752-e8cb00aa8c4d")
                 .build();
-        List<ChatMessage> results = storage.queryChatMessages(query).get();
+        List<ChatMessage> results = storage.queryChatMessages(query);
 
         // Sender has sent two messages
         assertThat(results).hasSize(2);
@@ -160,14 +160,14 @@ public class TestChatStorageMongoIntegration {
     }
 
     @Test
-    public void testQueryMultipleSenders() throws Exception {
+    void testQueryMultipleSenders() {
         loadFixture("chat_messages");
 
         ChatQuery query = ChatQuery.builder()
                 .sender("5c44635e-3fa6-40c0-b752-e8cb00aa8c4d")
                 .sender("38c46b86-a34d-441f-b61d-61cb056f7c01")
                 .build();
-        List<ChatMessage> results = storage.queryChatMessages(query).get();
+        List<ChatMessage> results = storage.queryChatMessages(query);
 
         assertThat(results).hasSize(3);
     }
