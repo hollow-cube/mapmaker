@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
@@ -18,6 +17,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentLoop;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -108,39 +108,30 @@ public class MapCommand extends BaseHubCommand {
             setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map play [mapId]"));
         }
 
-        public void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        public @Blocking void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
                 return;
             }
 
             var shortOrLongId = context.get(shortOrLongIdArg);
-            FutureResult<String> mapIdFuture;
+            String mapId;
             if (shortOrLongId.length() < 36) {
                 // Assume short ID
-                mapIdFuture = server.mapStorage().lookupShortId(shortOrLongId)
-                        .wrapErr("failed to lookup shortId for " + shortOrLongId + ": {}");
+                mapId = server.mapStorage().lookupShortId(shortOrLongId);
             } else {
-                mapIdFuture = FutureResult.of(shortOrLongId);
+                // Long ID
+                mapId = shortOrLongId;
             }
 
-            mapIdFuture
-                    .flatMap(mapId -> handler.playMap(player, mapId))
-                    .thenErr(err -> {
-                        if (err.is(MapStorage.ERR_NOT_FOUND)) {
-                            sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(shortOrLongId)));
-                            return;
-                        }
-
-                        //todo
-//                        if (err.is(MapPermissionManagerSpiceDB.ERR_NO_PERMISSION)) {
-//                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
-//                            return;
-//                        }
-
-                        logger.error("failed to play map {}: {}", shortOrLongId, err);
-                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
-                    });
+            try {
+                handler.playMap(player, mapId);
+            } catch (MapStorage.NotFoundError e) {
+                sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(shortOrLongId)));
+            } catch (Exception e) {
+                logger.error("failed to play map {}", shortOrLongId, e);
+                sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(e.getMessage())));
+            }
         }
     }
 
@@ -222,26 +213,22 @@ public class MapCommand extends BaseHubCommand {
             var playerData = PlayerData.fromPlayer(player);
             protoMap.setOwner(playerData.getId());
 
-            handler.createMapForPlayerInSlot(playerData, protoMap, slot)
-                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.create.success",
-                                    Component.text(slot), Component.text(map.getName()))
-                            .forEach(player::sendMessage))
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_SLOT_LOCKED)) {
-                            player.sendMessage(Component.translatable("command.map.create.slot_locked"));
-                            return;
-                        } else if (err.is(Handler.ERR_SLOT_IN_USE)) {
-                            player.sendMessage(Component.translatable("command.map.create.slot_in_use"));
-                            return;
-                        } else if (err.is(Handler.ERR_INVALID_MAP_NAME)) {
-                            player.sendMessage(Component.translatable("command.map.create.invalid_name",
-                                    Component.text(protoMap.getName())));
-                            return;
-                        }
-
-                        player.sendMessage(Component.translatable("command.generic.unknown_error"));
-                        logger.error("failed to create map for {} in slot {}: {}", playerData.getId(), slot, err.message());
-                    });
+            try {
+                var map = handler.createMapForPlayerInSlot(playerData, protoMap, slot);
+                LanguageProvider.createMultiTranslatable("command.map.create.success",
+                        Component.text(slot), Component.text(map.getName()))
+                        .forEach(player::sendMessage);
+            } catch (Handler.MapSlotLockedError e) {
+                player.sendMessage(Component.translatable("command.map.create.slot_locked"));
+            } catch (Handler.MapSlotInUseError e) {
+                player.sendMessage(Component.translatable("command.map.create.slot_in_use"));
+            } catch (Handler.InvalidMapNameError e) {
+                player.sendMessage(Component.translatable("command.map.create.invalid_name",
+                        Component.text(protoMap.getName())));
+            } catch (Exception e) {
+                player.sendMessage(Component.translatable("command.generic.unknown_error"));
+                logger.error("failed to create map for {} in slot {}: {}", playerData.getId(), slot, e.getMessage());
+            }
         }
     }
 
@@ -265,22 +252,14 @@ public class MapCommand extends BaseHubCommand {
             var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
             if (mapId == null) return;
 
-            handler.editMap(player, mapId)
-                    .thenErr(err -> {
-                        if (err.is(MapStorage.ERR_NOT_FOUND)) {
-                            sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(longIdOrSlot)));
-                            return;
-                        }
-
-                        //todo
-//                        if (err.is(MapPermissionManagerSpiceDB.ERR_NO_PERMISSION)) {
-//                            sender.sendMessage(Component.translatable("command.map.generic.no_permission"));
-//                            return;
-//                        }
-
-                        logger.error("failed to edit map {}: {}", longIdOrSlot, err);
-                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
-                    });
+            try {
+                handler.editMap(player, mapId);
+            } catch (MapStorage.NotFoundError e) {
+                sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(longIdOrSlot)));
+            } catch (Exception e) {
+                logger.error("failed to edit map {}", longIdOrSlot, e);
+                sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(e.getMessage())));
+            }
         }
     }
 
@@ -304,18 +283,16 @@ public class MapCommand extends BaseHubCommand {
             var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
             if (mapId == null) return;
 
-            handler.publishMap(PlayerData.fromPlayer(player).getId(), mapId)
-                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
-                            .forEach(player::sendMessage))
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
-                            player.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(mapId)));
-                            return;
-                        }
-
-                        player.sendMessage(Component.translatable("command.generic.unknown_error"));
-                        logger.error("failed to publish map {}: {}", mapId, err.message());
-                    });
+            try {
+                var map = handler.publishMap(PlayerData.fromPlayer(player).getId(), mapId);
+                LanguageProvider.createMultiTranslatable("command.map.publish.success", Component.text(map.getId()), Component.text(map.getName()))
+                        .forEach(player::sendMessage);
+            } catch (MapStorage.NotFoundError e) {
+                player.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(mapId)));
+            } catch (Exception e) {
+                player.sendMessage(Component.translatable("command.generic.unknown_error"));
+                logger.error("failed to publish map {}: {}", mapId, e.getMessage());
+            }
         }
     }
 
@@ -340,18 +317,16 @@ public class MapCommand extends BaseHubCommand {
             var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
             if (mapId == null) return;
 
-            handler.deleteMap(mapId)
-                    .then(map -> LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getId()), Component.text(map.getName()))
-                            .forEach(player::sendMessage))
-                    .thenErr(err -> {
-                        if (err.is(Handler.ERR_MAP_NOT_FOUND)) {
-                            player.sendMessage(Component.translatable("command.map.delete.not_found", Component.text(mapId)));
-                            return;
-                        }
-
-                        player.sendMessage(Component.translatable("command.generic.unknown_error"));
-                        logger.error("failed to delete map {}: {}", mapId, err.message());
-                    });
+            try {
+                var map = handler.deleteMap(mapId);
+                LanguageProvider.createMultiTranslatable("command.map.delete.success", Component.text(map.getId()), Component.text(map.getName()))
+                        .forEach(player::sendMessage);
+            } catch (MapStorage.NotFoundError e) {
+                player.sendMessage(Component.translatable("command.map.delete.not_found", Component.text(mapId)));
+            } catch (Exception e) {
+                player.sendMessage(Component.translatable("command.generic.unknown_error"));
+                logger.error("failed to delete map {}: {}", mapId, e.getMessage());
+            }
         }
     }
 

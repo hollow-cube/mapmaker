@@ -22,11 +22,7 @@ public class MapAdminCommand extends BaseHubCommand {
         addCondition((sender, command) -> {
             if (!(sender instanceof Player player)) return false;
             var playerData = PlayerData.fromPlayer(player);
-            try {
-                return server.platformPermissions().checkPermission(playerData.getId(), PlatformPermission.MAP_ADMIN).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+            return server.platformPermissions().checkPermission(playerData.getId(), PlatformPermission.MAP_ADMIN);
         });
 
         setDefaultExecutor((sender, context) -> {

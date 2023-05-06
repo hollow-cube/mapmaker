@@ -13,6 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMap extends View {
+    private static final System.Logger logger = System.getLogger(CreateMap.class.getSimpleName());
 
     public static final String SIG_MAP_CREATED = "map_created";
 
@@ -41,7 +42,7 @@ public class CreateMap extends View {
         setState(State.ACTIVE);
     }
 
-    @Action("submit")
+    @Action(value = "submit", async = true)
     private void handleSubmit(@NotNull Player player) {
         submitButton.setState(State.LOADING);
 
@@ -49,14 +50,15 @@ public class CreateMap extends View {
         protoMap.setOwner(playerData.getId());
 
         // Dispatch request to create the map
-        mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot)
-                .then(map -> {
-                    performSignal(SIG_MAP_CREATED, slot, map);
-                    submitButton.setState(State.ACTIVE);
-                })
-                .thenErr(e -> {
-                    throw new RuntimeException(e.message()); //todo
-                });
+        try {
+            var map = mapHandler.createMapForPlayerInSlot(playerData, protoMap, slot);
+
+            performSignal(SIG_MAP_CREATED, slot, map);
+            submitButton.setState(State.ACTIVE);
+        } catch (Exception e) {
+            //todo record in sentry or something
+            logger.log(System.Logger.Level.ERROR, "Failed to create map", e);
+        }
     }
 
 }

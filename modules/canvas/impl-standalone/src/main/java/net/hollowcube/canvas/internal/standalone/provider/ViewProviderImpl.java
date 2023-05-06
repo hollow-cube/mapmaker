@@ -101,7 +101,7 @@ public class ViewProviderImpl implements ViewProvider {
             var element = root.findById(name);
             Check.notNull(element, "Action not found: " + name);
 
-            element.wireAction(view, method);
+            element.wireAction(view, method, action);
         }
     }
 

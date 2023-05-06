@@ -8,9 +8,11 @@ import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 public class EditMap extends View {
+    private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
     private @ContextObject("handler") Handler mapHandler;
 
@@ -28,23 +30,27 @@ public class EditMap extends View {
         setState(State.ACTIVE);
     }
 
-    @Action("edit_in_world")
-    private void editMap(@NotNull Player player) {
-        mapHandler.editMap(player, map.getId())
-                .then(unused -> player.closeInventory())
-                .thenErr(err -> {
-                    throw new RuntimeException(err.message());
-                });
+    @Action(value = "edit_in_world", async = true)
+    private @Blocking void editMap(@NotNull Player player) {
+        try {
+            mapHandler.editMap(player, map.getId());
+            player.closeInventory();
+        } catch (Exception e) {
+            //todo record this exception in sentry or something
+            logger.log(System.Logger.Level.ERROR, "Failed to edit map", e);
+        }
     }
 
-    @Action("publish")
-    private void publishMap(@NotNull Player player) {
+    @Action(value = "publish", async = true)
+    private @Blocking void publishMap(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
-        mapHandler.publishMap(playerData.getId(), map.getId())
-                .then(unused -> player.closeInventory())
-                .thenErr(err -> {
-                    throw new RuntimeException(err.message());
-                });
+        try {
+            mapHandler.publishMap(playerData.getId(), map.getId());
+            player.closeInventory();
+        } catch (Exception e) {
+            //todo record this exception in sentry or something
+            logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
+        }
     }
 
 }

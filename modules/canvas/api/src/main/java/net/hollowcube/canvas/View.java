@@ -4,9 +4,12 @@ import net.hollowcube.canvas.internal.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public abstract class View implements Element {
+    protected static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final Context context;
     private final Element delegate;

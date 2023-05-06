@@ -23,16 +23,17 @@ public class MapDetailsView extends View {
         this.map = map;
     }
 
-    @Action("play_map")
+    @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
-        player.closeInventory();
-        handler.playMap(player, map.getId())
-                .thenErr(err -> {
-                    // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
-                    logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
-                            map.getId(), PlayerData.fromPlayer(player).getId(), err.message());
-                    player.sendMessage(Component.translatable("command.generic.unknown_error"));
-                });
+        try {
+            handler.playMap(player, map.getId());
+            player.closeInventory();
+        } catch (Exception e) {
+            // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
+            logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
+                    map.getId(), PlayerData.fromPlayer(player).getId(), e.getMessage());
+            player.sendMessage(Component.translatable("command.generic.unknown_error"));
+        }
     }
 
 }

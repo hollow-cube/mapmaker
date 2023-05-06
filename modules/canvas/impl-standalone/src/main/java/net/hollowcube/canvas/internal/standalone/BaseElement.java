@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.common.util.FontUtil;
@@ -132,7 +133,7 @@ public abstract class BaseElement implements Element {
         return CLICK_DENY;
     }
 
-    public void wireAction(@NotNull View view, @NotNull Method method) {
+    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action action) {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support actions.");
     }
 

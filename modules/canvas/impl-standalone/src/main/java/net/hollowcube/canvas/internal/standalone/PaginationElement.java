@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Pagination2;
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.minestom.server.entity.Player;
@@ -53,7 +54,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
-    public void wireAction(@NotNull View view, @NotNull Method method) {
+    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action unused) {
         method.setAccessible(true); // NOSONAR
         pageHandler = req -> {
             try {
