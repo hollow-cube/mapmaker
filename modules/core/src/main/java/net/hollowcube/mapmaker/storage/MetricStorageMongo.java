@@ -12,6 +12,7 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
 
 class MetricStorageMongo implements MetricStorage {

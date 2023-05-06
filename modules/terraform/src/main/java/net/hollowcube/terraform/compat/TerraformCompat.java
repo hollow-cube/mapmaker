@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class TerraformCompat {
-    private TerraformCompat() {}
+    private TerraformCompat() {
+    }
 
     public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         TerraformWorldEdit.init(eventNode, condition);

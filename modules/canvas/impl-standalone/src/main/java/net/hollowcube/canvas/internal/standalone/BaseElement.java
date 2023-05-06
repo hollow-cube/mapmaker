@@ -124,8 +124,8 @@ public abstract class BaseElement implements Element {
      * Called when a player clicks on an item in the inventory. The slot is local to the element,
      * eg a 1x1 element will only ever have clicks on slot 0.
      *
-     * @param player The player who clicked the slot in the inventory.
-     * @param slot The slot they clicked, local to this element
+     * @param player    The player who clicked the slot in the inventory.
+     * @param slot      The slot they clicked, local to this element
      * @param clickType The type of click they did
      * @return {@link #CLICK_ALLOW} or {@link #CLICK_DENY}
      */

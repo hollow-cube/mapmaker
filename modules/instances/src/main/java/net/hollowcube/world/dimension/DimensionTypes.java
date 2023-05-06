@@ -5,7 +5,8 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 
 public final class DimensionTypes {
-    private DimensionTypes() {}
+    private DimensionTypes() {
+    }
 
     public static final DimensionType FULL_BRIGHT = DimensionType.builder(NamespaceID.from("bright_dim"))
             .ultrawarm(false)

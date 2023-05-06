@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
@@ -18,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 public class EditMapIcon extends View {

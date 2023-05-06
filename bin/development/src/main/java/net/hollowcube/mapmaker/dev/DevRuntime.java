@@ -18,7 +18,6 @@ public class DevRuntime implements ServerRuntime {
     }
 
 
-
     @Override
     public @NotNull String minestom() {
         return "{MINESTOM_VERSION}";

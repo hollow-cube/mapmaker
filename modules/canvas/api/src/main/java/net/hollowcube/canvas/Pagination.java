@@ -8,7 +8,9 @@ public interface Pagination extends Element {
 
     interface PageRequest {
         int page();
+
         int width();
+
         int height();
 //
 //        /**

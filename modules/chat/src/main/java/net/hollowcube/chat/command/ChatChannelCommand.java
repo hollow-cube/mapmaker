@@ -2,14 +2,12 @@ package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatFacet;
 import net.hollowcube.chat.ChatMessage;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 public class ChatChannelCommand extends Command {

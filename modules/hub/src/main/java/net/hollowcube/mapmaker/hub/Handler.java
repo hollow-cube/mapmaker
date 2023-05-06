@@ -4,13 +4,11 @@ import io.prometheus.client.Histogram;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import javax.management.RuntimeErrorException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -59,7 +57,8 @@ public class Handler {
      * The map ID is overwritten with a new UUID no matter the content.
      * The return value should be used to determine the ID.
      */
-    public @Blocking @NotNull MapData createMap(@NotNull MapData map) {
+    public @Blocking
+    @NotNull MapData createMap(@NotNull MapData map) {
         try (var ignored = createMapTime.startTimer()) {
             //todo actually lookup the owner and make sure they exist
             if (map.getOwner() == null)
@@ -84,7 +83,8 @@ public class Handler {
      * <p>
      * If the slot is in use, ERR_SLOT_IN_USE is returned.
      */
-    public @Blocking @NotNull MapData createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
+    public @Blocking
+    @NotNull MapData createMapForPlayerInSlot(@NotNull PlayerData playerData, @NotNull MapData map, int slot) {
         try (var ignored = createMapForPlayerInSlotTime.startTimer()) {
 
             // Ensure selected slot is available
@@ -180,7 +180,7 @@ public class Handler {
     }
 
     public void editMap(@NotNull Player player, @NotNull String mapId) {
-        try (var ignored = editMapTime.startTimer();) {
+        try (var ignored = editMapTime.startTimer()) {
             var playerData = PlayerData.fromPlayer(player);
             var map = server.mapStorage().getMapById(mapId);
 
@@ -196,11 +196,22 @@ public class Handler {
         }
     }
 
-    public static class MapNotPublishedError extends RuntimeException { }
-    public static class MapIsPublishedError extends RuntimeException { }
-    public static class MapSlotLockedError extends RuntimeException { }
-    public static class MapSlotInUseError extends RuntimeException { }
-    public static class MapMissingOwnerError extends RuntimeException { }
-    public static class InvalidMapNameError extends RuntimeException { }
+    public static class MapNotPublishedError extends RuntimeException {
+    }
+
+    public static class MapIsPublishedError extends RuntimeException {
+    }
+
+    public static class MapSlotLockedError extends RuntimeException {
+    }
+
+    public static class MapSlotInUseError extends RuntimeException {
+    }
+
+    public static class MapMissingOwnerError extends RuntimeException {
+    }
+
+    public static class InvalidMapNameError extends RuntimeException {
+    }
 
 }

@@ -5,8 +5,6 @@ import net.hollowcube.mapmaker.storage.client.MongoClientFactory;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 @Blocking
 public interface WhitelistStorage {
 
@@ -14,14 +12,18 @@ public interface WhitelistStorage {
         return new WhitelistStorageMemory();
     }
 
-    @Blocking static @NotNull WhitelistStorage mongo(@NotNull MongoConfig config) {
+    @Blocking
+    static @NotNull WhitelistStorage mongo(@NotNull MongoConfig config) {
         var client = MongoClientFactory.get().newClient(config);
         return new WhitelistStorageMongo(client, config);
     }
 
-    @Blocking boolean isWhitelisted(@NotNull String playerId);
+    @Blocking
+    boolean isWhitelisted(@NotNull String playerId);
 
-    @Blocking void addToWhitelist(@NotNull String playerId);
+    @Blocking
+    void addToWhitelist(@NotNull String playerId);
 
-    @Blocking void removeFromWhitelist(@NotNull String playerId);
+    @Blocking
+    void removeFromWhitelist(@NotNull String playerId);
 }

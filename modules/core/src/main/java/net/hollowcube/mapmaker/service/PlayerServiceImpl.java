@@ -15,7 +15,7 @@ public class PlayerServiceImpl implements PlayerService, Facet {
     }
 
     @Override
-    public @NotNull Component getDisplayName(@NotNull String playerId)  {
+    public @NotNull Component getDisplayName(@NotNull String playerId) {
         // Implementation Note:
         // This service should aggressively cache the results of this method as it is called very frequently.
         // As a base, all online players should be cached in every server (note: in the future this would likely

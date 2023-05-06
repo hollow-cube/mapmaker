@@ -5,7 +5,8 @@ import java.lang.management.RuntimeMXBean;
 import java.util.List;
 
 public final class Debugger {
-    private Debugger() {}
+    private Debugger() {
+    }
 
     private static final boolean ENABLED;
 

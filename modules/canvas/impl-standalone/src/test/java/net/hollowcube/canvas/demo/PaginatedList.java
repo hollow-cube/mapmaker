@@ -5,8 +5,6 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;

@@ -5,15 +5,14 @@ import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.map.world.*;
+import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.terraform.Terraform;
@@ -155,10 +154,11 @@ public abstract class MapServerBase implements MapServer {
         var player = event.getPlayer();
         player.refreshCommands();
 
-        if (MapWorld.fromInstance(event.getSpawnInstance()).map().isPublished()) {
-            Scoreboards.showPlayerPlayingScoreboard(player, MapWorld.fromInstance(event.getSpawnInstance()).map());
+        var map = MapWorld.forPlayer(event.getPlayer()).map();
+        if (map.isPublished()) {
+            Scoreboards.showPlayerPlayingScoreboard(player, map);
         } else {
-            Scoreboards.showPlayerEditingScoreboard(player, MapWorld.fromInstance(event.getSpawnInstance()).map());
+            Scoreboards.showPlayerEditingScoreboard(player, map);
         }
     }
 

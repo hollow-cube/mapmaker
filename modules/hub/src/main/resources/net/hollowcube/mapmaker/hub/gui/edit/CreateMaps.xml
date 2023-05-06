@@ -3,25 +3,25 @@
 <component width="9" height="10" align="ttb" sprite="gui/build_maps/container">
 
     <box width="9">
-        <label width="2" translationKey="todo" />
-        <spacer />
-        <label width="3" translationKey="todo" sprite="paper" />
-        <spacer />
-        <label width="2" translationKey="todo" />
+        <label width="2" translationKey="todo"/>
+        <spacer/>
+        <label width="3" translationKey="todo" sprite="paper"/>
+        <spacer/>
+        <label width="2" translationKey="todo"/>
     </box>
 
     <switch id="switch" width="9" height="7">
-        <EditMap id="editor" />
-        <CreateMap id="creator" />
+        <EditMap id="editor"/>
+        <CreateMap id="creator"/>
     </switch>
 
     <box width="9" height="1" align="ltr">
-        <spacer width="2" />
-        <EditMapIcon id="slot0" />
-        <EditMapIcon id="slot1" />
-        <EditMapIcon id="slot2" />
-        <EditMapIcon id="slot3" />
-        <EditMapIcon id="slot4" />
+        <spacer width="2"/>
+        <EditMapIcon id="slot0"/>
+        <EditMapIcon id="slot1"/>
+        <EditMapIcon id="slot2"/>
+        <EditMapIcon id="slot3"/>
+        <EditMapIcon id="slot4"/>
     </box>
 
 </component>

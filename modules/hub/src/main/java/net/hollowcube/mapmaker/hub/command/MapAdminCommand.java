@@ -7,8 +7,6 @@ import net.hollowcube.mapmaker.permission.PlatformPermission;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ExecutionException;
-
 public class MapAdminCommand extends BaseHubCommand {
 
     private final HubServer server;

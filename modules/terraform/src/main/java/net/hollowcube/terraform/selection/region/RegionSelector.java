@@ -27,10 +27,14 @@ public interface RegionSelector {
      */
     boolean selectSecondary(@NotNull Point point, boolean explain);
 
-    /** Completely wipes the selection, updates the rendering but does not send any message. */
+    /**
+     * Completely wipes the selection, updates the rendering but does not send any message.
+     */
     void clear();
 
-    /** Returns the current region, or null if the selection is incomplete. */
+    /**
+     * Returns the current region, or null if the selection is incomplete.
+     */
     @Nullable Region region();
 
     @NotNull NBTCompound toNBT();
@@ -39,8 +43,9 @@ public interface RegionSelector {
 
     /**
      * Changes the size of the region by the specified amount.
-     * @param delta The amount to change the size of the region by. If the number is negative, it will shrink, if it is positive, the region will grow
-     * @param changeVertical If the size change should modify the selection in the vertical direction (+/- y coordinate). True to modify, false to not
+     *
+     * @param delta            The amount to change the size of the region by. If the number is negative, it will shrink, if it is positive, the region will grow
+     * @param changeVertical   If the size change should modify the selection in the vertical direction (+/- y coordinate). True to modify, false to not
      * @param changeHorizontal If the size change should modify the selection in the horizontal directions (+/- x and z coordinates). True to modify, false to not
      */
     void changeSize(int delta, boolean changeVertical, boolean changeHorizontal);

@@ -43,7 +43,8 @@ class MapWorldHelpers {
         return enabledFeatures;
     }
 
-    public static @Blocking @NotNull SaveState getOrCreateSaveState(
+    public static @Blocking
+    @NotNull SaveState getOrCreateSaveState(
             @NotNull InternalMapWorld world,
             @NotNull String playerId,
             @NotNull SaveState.Type stateType

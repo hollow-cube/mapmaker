@@ -43,7 +43,8 @@ public record ChatQuery(
         private final List<String> senders = new ArrayList<>();
         private String message = null;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         @Contract("_ -> this")
         public @NotNull Builder context(String... context) {

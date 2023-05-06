@@ -14,6 +14,7 @@ public interface InternalMapWorld extends MapWorld {
     Tag<InternalMapWorld> SELF_TAG = Tag.Transient("mapworld");
 
     @NotNull Instance instance();
+
     @NotNull Point spawnPoint();
 
     /**
@@ -21,7 +22,8 @@ public interface InternalMapWorld extends MapWorld {
      *
      * @return A future which completes when the world is ready for players.
      */
-    @Blocking void load();
+    @Blocking
+    void load();
 
     /**
      * Closes thr world, including saving if relevant. When this method is called, the world is guaranteed not to have any new players added.
@@ -30,7 +32,8 @@ public interface InternalMapWorld extends MapWorld {
      *
      * @return A future which completes when the world is closed.
      */
-    @Blocking void close();
+    @Blocking
+    void close();
 
     @NonBlocking
     @Nullable MapWorld getMapForPlayer(@NotNull Player player);
@@ -43,7 +46,8 @@ public interface InternalMapWorld extends MapWorld {
      * @param player The player being added to the world
      * @return A future that completes when the player may begin interacting with the world.
      */
-    @Blocking void acceptPlayer(@NotNull Player player);
+    @Blocking
+    void acceptPlayer(@NotNull Player player);
 
     /**
      * Called as a player is leaving the world, but before the player is removed from the {@link net.minestom.server.instance.Instance}.
@@ -53,6 +57,7 @@ public interface InternalMapWorld extends MapWorld {
      * @param player The player being removed from the world
      * @return A future that completes when the player has been completely removed from the world.
      */
-    @Blocking void removePlayer(@NotNull Player player);
+    @Blocking
+    void removePlayer(@NotNull Player player);
 
 }

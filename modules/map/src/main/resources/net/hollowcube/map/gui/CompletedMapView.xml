@@ -1,4 +1,4 @@
 <?xml version="1.0" ?>
 <component width="9">
-    <label translationKey="map.completed" />
+    <label translationKey="map.completed"/>
 </component>

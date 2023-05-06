@@ -20,7 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ClipboardCommands {
-    private ClipboardCommands() {}
+    private ClipboardCommands() {
+    }
 
     public static final class Copy extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
@@ -165,7 +166,7 @@ public final class ClipboardCommands {
                 playerSession.setRotation(context.get(rotationArg));
             } else {
                 // Advance rotation 1 stage
-               playerSession.advanceRotationHorizontal();
+                playerSession.advanceRotationHorizontal();
             }
         }
     }

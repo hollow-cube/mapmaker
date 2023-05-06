@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <component width="1" height="1">
     <switch id="state">
-        <button id="locked" translationKey="gui.map_slot.locked" sprite="bedrock" />
-        <button id="empty" translationKey="gui.map_slot.empty" sprite="red_concrete" />
-        <button id="full" translationKey="gui.map_slot.map" sprite="green_concrete" />
+        <button id="locked" translationKey="gui.map_slot.locked" sprite="bedrock"/>
+        <button id="empty" translationKey="gui.map_slot.empty" sprite="red_concrete"/>
+        <button id="full" translationKey="gui.map_slot.map" sprite="green_concrete"/>
     </switch>
 </component>

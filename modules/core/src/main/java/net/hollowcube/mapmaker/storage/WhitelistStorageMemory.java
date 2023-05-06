@@ -2,8 +2,6 @@ package net.hollowcube.mapmaker.storage;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 public class WhitelistStorageMemory implements WhitelistStorage {
 
     @Override

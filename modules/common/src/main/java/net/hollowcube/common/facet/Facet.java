@@ -17,5 +17,6 @@ public interface Facet {
      *
      * @param server The minestom server
      */
-    @Blocking void hook(@NotNull ServerProcess server, @NotNull ConfigProvider config);
+    @Blocking
+    void hook(@NotNull ServerProcess server, @NotNull ConfigProvider config);
 }

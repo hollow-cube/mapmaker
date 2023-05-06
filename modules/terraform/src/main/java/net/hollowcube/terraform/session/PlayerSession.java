@@ -68,7 +68,9 @@ public class PlayerSession {
         return clipboard;
     }
 
-    public @NotNull Rotation rotation() { return rotation; }
+    public @NotNull Rotation rotation() {
+        return rotation;
+    }
 
     public void clearClipboard() {
         clipboard = null;

@@ -18,8 +18,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 
 public record FileStorageS3(
         @NotNull AmazonS3 s3,
@@ -28,10 +26,12 @@ public record FileStorageS3(
 
     /**
      * Connects to an S3 compatible service.
+     *
      * @param uri A URI in the format of s3://accessKey:secretKey@address/bucket.
      *            Currently, must follow this exact format.
      */
-    public static @Blocking @NotNull FileStorage connect(@NotNull String uri) {
+    public static @Blocking
+    @NotNull FileStorage connect(@NotNull String uri) {
         try {
             var parsed = new URI(uri);
             var query = splitQuery(parsed);

@@ -20,6 +20,7 @@ public interface MapToHubBridge {
      * The {@link Player} should be considered invalid after this call,
      * until/unless there is an exception
      */
-    @Blocking void sendPlayerToHub(@NotNull Player player);
+    @Blocking
+    void sendPlayerToHub(@NotNull Player player);
 
 }

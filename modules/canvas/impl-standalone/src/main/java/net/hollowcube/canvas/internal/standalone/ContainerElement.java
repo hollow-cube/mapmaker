@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ContainerElement extends BaseElement {
 
-    private List<BaseElement> children = new ArrayList<>();
+    private final List<BaseElement> children = new ArrayList<>();
 
     public ContainerElement(@NotNull ElementContext context, @Nullable String id, int width, int height) {
         super(context, id, width, height);
@@ -129,9 +129,9 @@ public class ContainerElement extends BaseElement {
     }
 
     static void patchItemArray(
-            @Nullable ItemStack @NotNull[] items,
+            @Nullable ItemStack @NotNull [] items,
             int itemsWidth, int itemsHeight,
-            @Nullable ItemStack @NotNull[] patch,
+            @Nullable ItemStack @NotNull [] patch,
             int patchX, int patchY,
             int patchWidth, int patchHeight
     ) {

@@ -50,7 +50,8 @@ public class ChatFacet implements Facet {
 
     private ChatStorage storage;
 
-    public ChatFacet() {}
+    public ChatFacet() {
+    }
 
     @TestOnly
     ChatFacet(@NotNull ChatStorage storage) {

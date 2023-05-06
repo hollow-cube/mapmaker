@@ -15,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class RegionCommands {
-    private RegionCommands() {}
+    private RegionCommands() {
+    }
 
     public static final class Set extends Command {
         Argument<Block> blockArg = ArgumentType.BlockState("block");

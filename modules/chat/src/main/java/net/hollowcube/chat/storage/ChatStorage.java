@@ -14,7 +14,8 @@ public interface ChatStorage {
         return new ChatStorageMemory();
     }
 
-    static @Blocking @NotNull ChatStorage mongo(@NotNull MongoConfig config) {
+    static @Blocking
+    @NotNull ChatStorage mongo(@NotNull MongoConfig config) {
         var client = MongoClientFactory.get().newClient(config);
         return new ChatStorageMongo(client, config);
     }
@@ -25,8 +26,10 @@ public interface ChatStorage {
      *
      * @param message The chat message to save
      */
-    @Blocking void recordChatMessage(@NotNull ChatMessage message);
+    @Blocking
+    void recordChatMessage(@NotNull ChatMessage message);
 
-    @Blocking @NotNull List<ChatMessage> queryChatMessages(@NotNull ChatQuery query);
+    @Blocking
+    @NotNull List<ChatMessage> queryChatMessages(@NotNull ChatQuery query);
 
 }

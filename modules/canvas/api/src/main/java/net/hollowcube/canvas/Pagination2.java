@@ -15,6 +15,7 @@ public interface Pagination2 extends Element {
         @NotNull Context context();
 
         int page();
+
         int pageSize();
 
         /**

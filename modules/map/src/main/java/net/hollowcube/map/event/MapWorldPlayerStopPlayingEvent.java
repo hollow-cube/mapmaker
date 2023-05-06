@@ -6,7 +6,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public record MapWorldPlayerStopPlayingEvent(@NotNull MapWorld mapWorld, @NotNull Player player) implements MapWorldEvent, PlayerEvent {
+public record MapWorldPlayerStopPlayingEvent(@NotNull MapWorld mapWorld,
+                                             @NotNull Player player) implements MapWorldEvent, PlayerEvent {
     @Override
     public @NotNull MapWorld getMapWorld() {
         return mapWorld;

@@ -23,7 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 
 public final class SelectionCommands {
-    private SelectionCommands() {}
+    private SelectionCommands() {
+    }
 
     public static final class Pos1 extends Command {
         private final Argument<RelativeVec> posArg = ArgumentType.RelativeVec3("pos");
@@ -340,7 +341,8 @@ public final class SelectionCommands {
                     case "all" -> selection.changeSize(amount, true, true);
                     case "horizontal" -> selection.changeSize(amount, false, true);
                     case "vertical" -> selection.changeSize(amount, true, false);
-                    default -> sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
+                    default ->
+                            sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                 }
             } else {
                 selection.changeSize(amount, true, true);
@@ -393,7 +395,8 @@ public final class SelectionCommands {
                     case "all" -> selection.changeSize(amount, true, true);
                     case "horizontal" -> selection.changeSize(amount, false, true);
                     case "vertical" -> selection.changeSize(amount, true, false);
-                    default -> sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
+                    default ->
+                            sender.sendMessage(Component.translatable("command.generic.invalid_argument", Component.text(directionModArg.getId())));
                 }
             } else {
                 selection.changeSize(amount, true, true);
@@ -441,7 +444,7 @@ public final class SelectionCommands {
     public static final class Size extends Command {
         private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
         private final ArgumentWord clipboardArg = ArgumentType.Word("clipboard").from("clipboard");
-        
+
         public Size(@Nullable CommandCondition condition) {
             super("size", "tf:size");
             setCondition(condition);

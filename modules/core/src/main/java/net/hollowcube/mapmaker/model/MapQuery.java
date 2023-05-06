@@ -16,7 +16,8 @@ public record MapQuery(
         private String author = null;
         private Boolean publishedOnly = null;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public @NotNull Builder author(@NotNull String authorId) {
             this.author = authorId;

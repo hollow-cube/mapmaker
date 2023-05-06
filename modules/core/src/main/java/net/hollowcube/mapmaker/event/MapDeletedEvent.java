@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Called when a map is deleted.
+ *
  * @param mapId The ID of the map that was deleted
  */
-public record MapDeletedEvent(@NotNull String mapId) implements Event { }
+public record MapDeletedEvent(@NotNull String mapId) implements Event {
+}

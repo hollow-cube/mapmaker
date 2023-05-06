@@ -17,7 +17,7 @@ public class ViewContainer extends BoxContainer {
 
     private View associatedView;
 
-    private Map<String, List<Consumer<Object[]>>> signals = new HashMap<>();
+    private final Map<String, List<Consumer<Object[]>>> signals = new HashMap<>();
 
     public ViewContainer(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull Align align) {
         super(context, id, width, height, align);
@@ -71,7 +71,8 @@ public class ViewContainer extends BoxContainer {
             var other = ((ViewContainer) constructor.newInstance(context).element());
             other.setId(id);
             return other;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+                 InstantiationException e) {
             throw new RuntimeException(e);
         }
     }

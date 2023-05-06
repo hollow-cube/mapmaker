@@ -229,7 +229,8 @@ public class Parser {
     }
 
 
-    private record InfixOp(int left, int right, Tree.Infix.Type type) {}
+    private record InfixOp(int left, int right, Tree.Infix.Type type) {
+    }
 
     private @Nullable InfixOp getBindingPower(@NotNull Token.Type type) {
         return switch (type) {

@@ -54,7 +54,7 @@ public class XmlElementReader {
     private final Document doc;
     private int depth = 0;
 
-    private List<String> imports = new ArrayList<>();
+    private final List<String> imports = new ArrayList<>();
 
     public XmlElementReader(@NotNull ElementContext context, @NotNull String viewPath) {
         this.context = context;

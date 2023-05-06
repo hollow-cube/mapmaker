@@ -4,8 +4,8 @@ plugins {
     id("org.sonarqube") version "3.5.0.2730"
 }
 
-sonarqube{
-    properties{
+sonarqube {
+    properties {
         property("sonar.host.url", "https://sonarqube.hollowcube.dev")
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.projectName", "mapmaker")
@@ -29,7 +29,7 @@ allprojects {
 }
 
 subprojects {
-    sonarqube{
+    sonarqube {
         properties {
             property("sonar.sources", "src/main/")
         }

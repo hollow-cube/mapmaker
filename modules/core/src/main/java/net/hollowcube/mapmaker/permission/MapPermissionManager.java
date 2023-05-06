@@ -33,7 +33,8 @@ public @Blocking interface MapPermissionManager {
      *
      * @return A future containing an updated offset token
      */
-    @Blocking @NotNull String addMapOwner(@NotNull String mapId, @NotNull String playerId);
+    @Blocking
+    @NotNull String addMapOwner(@NotNull String mapId, @NotNull String playerId);
 
     /**
      * Makes the given map public. This means that anybody has
@@ -42,7 +43,8 @@ public @Blocking interface MapPermissionManager {
      *
      * @return A future containing an updated offset token for the map.
      */
-    @Blocking @NotNull String makeMapPublic(@NotNull String mapId);
+    @Blocking
+    @NotNull String makeMapPublic(@NotNull String mapId);
 
     /**
      * Deletes the given map from the permission manager.
@@ -50,10 +52,14 @@ public @Blocking interface MapPermissionManager {
      * @param mapId The map id to delete
      * @return A future that contains the resulting zed token if successful
      */
-    @Blocking @NotNull String deleteMap(@NotNull String mapId);
+    @Blocking
+    @NotNull String deleteMap(@NotNull String mapId);
 
-    /** Checks if the given player has the given permission on the given map. */
-    @Blocking boolean checkPermission(@NotNull String mapId, @NotNull String playerId,
-                                      @NotNull MapData.Permission permission);
+    /**
+     * Checks if the given player has the given permission on the given map.
+     */
+    @Blocking
+    boolean checkPermission(@NotNull String mapId, @NotNull String playerId,
+                            @NotNull MapData.Permission permission);
 
 }

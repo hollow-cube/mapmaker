@@ -18,5 +18,6 @@ public interface MetricStorage {
         return new MetricStorageMongo(client, config);
     }
 
-    @Blocking @NotNull Metric addMetric(@NotNull Metric metric);
+    @Blocking
+    @NotNull Metric addMetric(@NotNull Metric metric);
 }

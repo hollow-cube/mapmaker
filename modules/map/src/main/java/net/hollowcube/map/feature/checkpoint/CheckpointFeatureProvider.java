@@ -1,6 +1,7 @@
 package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
@@ -11,7 +12,6 @@ import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.MinecraftServer;

@@ -182,7 +182,8 @@ public class EditingMapWorld implements InternalMapWorld {
         activePlayers.remove(player);
     }
 
-    private @Blocking @NotNull TestingMapWorld getTestWorld() {
+    private @Blocking
+    @NotNull TestingMapWorld getTestWorld() {
         if (testWorld == null) {
             testWorld = new TestingMapWorld(this);
             testWorld.load();

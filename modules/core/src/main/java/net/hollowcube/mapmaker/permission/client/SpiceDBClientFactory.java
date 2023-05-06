@@ -15,7 +15,7 @@ public interface SpiceDBClientFactory {
 
     static @NotNull SpiceDBClientFactory get() {
         class Holder {
-//            static final System.Logger logger = System.getLogger(SpiceDBClientFactory.class.getName());
+            //            static final System.Logger logger = System.getLogger(SpiceDBClientFactory.class.getName());
             static SpiceDBClientFactory instance = null;
         }
         if (Holder.instance == null) {

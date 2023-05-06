@@ -15,7 +15,8 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 public final class RegionCommands {
-    private RegionCommands() {}
+    private RegionCommands() {
+    }
 
     public static final class Set extends Command {
         private final Argument<Block> patternArg = ArgumentType.BlockState("pattern"); //todo replace with pattern system

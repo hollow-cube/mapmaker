@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class TerraformWorldEdit {
-    private TerraformWorldEdit() {}
+    private TerraformWorldEdit() {
+    }
 
     public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         var commands = MinecraftServer.getCommandManager();

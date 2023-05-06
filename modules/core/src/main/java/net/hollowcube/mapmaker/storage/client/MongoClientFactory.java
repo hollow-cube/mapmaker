@@ -13,15 +13,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.ForkJoinPool;
 
 public interface MongoClientFactory {
 
-    /** Creates a new MongoClient from the given config. */
+    /**
+     * Creates a new MongoClient from the given config.
+     */
     @NotNull MongoClient newClient(@NotNull MongoConfig config);
 
 
-    /** Returns the first registered factory, or the default factory if none are present. */
+    /**
+     * Returns the first registered factory, or the default factory if none are present.
+     */
     static @NotNull MongoClientFactory get() {
         class Holder {
             static final System.Logger logger = System.getLogger(MongoClientFactory.class.getName());
@@ -47,7 +50,9 @@ public interface MongoClientFactory {
         return Holder.instance;
     }
 
-    /** Returns the required base client settings for the currently registered codecs. */
+    /**
+     * Returns the required base client settings for the currently registered codecs.
+     */
     static @NotNull MongoClientSettings baseClientSettings() {
         class Holder {
             static MongoClientSettings instance = null;

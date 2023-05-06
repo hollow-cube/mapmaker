@@ -24,33 +24,43 @@ public @Blocking interface MapStorage {
     /**
      * Returns true the map data if created successfully, or throws if an error has occurred.
      */
-    @Blocking @NotNull MapData createMap(@NotNull MapData map);
+    @Blocking
+    @NotNull MapData createMap(@NotNull MapData map);
 
-    @Blocking @NotNull MapData getMapById(@NotNull String mapId);
+    @Blocking
+    @NotNull MapData getMapById(@NotNull String mapId);
 
-    @Blocking void updateMap(@NotNull MapData map) throws NotFoundError;
+    @Blocking
+    void updateMap(@NotNull MapData map) throws NotFoundError;
 
-    @Blocking @NotNull MapData deleteMap(@NotNull String mapId);
+    @Blocking
+    @NotNull MapData deleteMap(@NotNull String mapId);
 
-    @Blocking @NotNull String lookupShortId(@NotNull String shortMapId);
+    @Blocking
+    @NotNull String lookupShortId(@NotNull String shortMapId);
 
 
     /**
      * Fetches the latest maps with the given offset and size. Used for paginating the map list right now, but will
      * be replaced with a more complicated "MapQuery" builder/system later.
      */
-    @Blocking @NotNull List<MapData> getLatestMaps(int offset, int size);
+    @Blocking
+    @NotNull List<MapData> getLatestMaps(int offset, int size);
 
-    @Blocking @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size);
+    @Blocking
+    @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size);
 
 
     // Other utilities
 
-    @Blocking @NotNull String getNextId();
+    @Blocking
+    @NotNull String getNextId();
 
 
-    class NotFoundError extends RuntimeException { }
+    class NotFoundError extends RuntimeException {
+    }
 
-    class DuplicateEntryError extends RuntimeException { }
+    class DuplicateEntryError extends RuntimeException {
+    }
 
 }

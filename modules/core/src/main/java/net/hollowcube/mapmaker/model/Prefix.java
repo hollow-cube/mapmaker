@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.permission.PlatformPermission;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 public enum Prefix {
     STAFF("Staff", PlatformPermission.STAFF),
@@ -12,8 +11,8 @@ public enum Prefix {
     // The order from top to bottom is the order they will show up next to player's name if they inherit multiple
     ;
 
-    private String display;
-    private PlatformPermission permission;
+    private final String display;
+    private final PlatformPermission permission;
 
     Prefix(String display, PlatformPermission permission) {
         this.display = display;

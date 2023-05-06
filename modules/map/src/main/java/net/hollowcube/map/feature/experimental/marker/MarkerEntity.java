@@ -36,7 +36,9 @@ public class MarkerEntity extends Entity {
         ), this);
     }
 
-    /** Returns a readable ID for this marker. The internal ID is longer */
+    /**
+     * Returns a readable ID for this marker. The internal ID is longer
+     */
     public @NotNull String displayId() {
         return getUuid().toString().substring(0, 6);
     }
