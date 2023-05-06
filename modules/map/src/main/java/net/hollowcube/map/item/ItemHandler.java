@@ -1,6 +1,6 @@
 package net.hollowcube.map.item;
 
-import net.hollowcube.map.world.old.MapWorld;
+import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;

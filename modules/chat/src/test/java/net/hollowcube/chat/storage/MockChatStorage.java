@@ -20,15 +20,14 @@ public record MockChatStorage(
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> recordChatMessage(@NotNull ChatMessage message) {
+    public void recordChatMessage(@NotNull ChatMessage message) {
         messages.add(message);
-        return Futures.immediateVoidFuture();
     }
 
     @Override
-    public @NotNull ListenableFuture<List<ChatMessage>> queryChatMessages(@NotNull ChatQuery query) {
+    public @NotNull List<ChatMessage> queryChatMessages(@NotNull ChatQuery query) {
         queries.add(query);
-        return Futures.immediateFuture(List.of());
+        return List.of();
     }
 
     public ChatMessage assertOneMessage() {

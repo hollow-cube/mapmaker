@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.bridge;
 
-import net.hollowcube.common.result.FutureResult;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +17,8 @@ public interface MapToHubBridge {
      * Sends the given player back to a hub instance.
      * The chosen hub is implementation dependent and should not be used.
      * <p>
-     * The {@link Player} should be considered invalid after this call, until/unless the
-     * returned {@link FutureResult} completes with an error.
+     * The {@link Player} should be considered invalid after this call,
+     * until/unless there is an exception
      */
     @Blocking void sendPlayerToHub(@NotNull Player player);
 
