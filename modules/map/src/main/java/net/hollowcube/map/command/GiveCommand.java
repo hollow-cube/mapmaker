@@ -4,7 +4,7 @@ import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.item.ItemUtils;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -37,7 +37,7 @@ public class GiveCommand extends BaseMapCommand {
             return;
         }
 
-        var itemRegistry = MapWorldNew.forPlayer(player).itemRegistry();
+        var itemRegistry = MapWorld.forPlayer(player).itemRegistry();
         var itemStack = itemRegistry.getItemStack(itemName, null);
         Check.notNull(itemStack, "Item stack is null");
 

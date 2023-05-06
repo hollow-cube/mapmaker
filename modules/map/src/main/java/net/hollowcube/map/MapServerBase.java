@@ -9,6 +9,8 @@ import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.world.MapWorldManager;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.*;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.common.config.ConfigProvider;
@@ -64,7 +66,7 @@ public abstract class MapServerBase implements MapServer {
         // Placement rules
         var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
             if (event instanceof InstanceEvent instanceEvent)
-                return MapWorldNew.unsafeFromInstance(instanceEvent.getInstance()) != null;
+                return MapWorld.unsafeFromInstance(instanceEvent.getInstance()) != null;
             //todo: fix this
             return false;
         });
@@ -73,7 +75,7 @@ public abstract class MapServerBase implements MapServer {
 
         // Terraform initialization
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
-                instance -> MapWorldNew.unsafeFromInstance(instance) != null);
+                instance -> MapWorld.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
 //        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 //        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
@@ -147,7 +149,7 @@ public abstract class MapServerBase implements MapServer {
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {
         // Spawn event is not an InstanceEvent, so we need to filter it.
-        if (MapWorldNew.unsafeFromInstance(event.getSpawnInstance()) == null)
+        if (MapWorld.unsafeFromInstance(event.getSpawnInstance()) == null)
             return;
 
         var player = event.getPlayer();

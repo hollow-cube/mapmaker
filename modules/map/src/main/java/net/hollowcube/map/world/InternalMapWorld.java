@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-interface InternalMapWorldNew extends MapWorldNew {
+public interface InternalMapWorld extends MapWorld {
 
-    Tag<InternalMapWorldNew> SELF_TAG = Tag.Transient("mapworld");
+    Tag<InternalMapWorld> SELF_TAG = Tag.Transient("mapworld");
 
     @NotNull Instance instance();
     @NotNull Point spawnPoint();
@@ -33,7 +33,7 @@ interface InternalMapWorldNew extends MapWorldNew {
     @Blocking void close();
 
     @NonBlocking
-    @Nullable MapWorldNew getMapForPlayer(@NotNull Player player);
+    @Nullable MapWorld getMapForPlayer(@NotNull Player player);
 
     /**
      * Called as a player is entering the world, but before the player is added to the {@link net.minestom.server.instance.Instance}.

@@ -1,6 +1,5 @@
 package net.hollowcube.map.world;
 
-import com.google.common.util.concurrent.*;
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.model.MapData;
@@ -13,32 +12,25 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.concurrent.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class MapWorldManager {
     private static final System.Logger logger = System.getLogger(MapWorldManager.class.getName());
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final Map<Pair<String, Boolean>, Future<InternalMapWorldNew>> activeMaps = new ConcurrentHashMap<>();
+    private final Map<Pair<String, Boolean>, Future<InternalMapWorld>> activeMaps = new ConcurrentHashMap<>();
     private final MapServer server;
 
     public MapWorldManager(@NotNull MapServer server) {
         this.server = server;
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerInstanceLeaveEvent.class, event -> {
-            var world = MapWorldNew.forPlayerOptional(event.getPlayer());
+            // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
+            var world = MapWorld.unsafeFromInstance(event.getInstance());
             if (world == null) return;
-
-            // Orchestration for removing the player
-            Thread.startVirtualThread(() -> {
-                if (world instanceof InternalMapWorldNew internal) {
-                    internal.removePlayer(event.getPlayer());
-                }
-            });
 
             // Stop if there are still players in the instance
             if (event.getInstance().getPlayers().size() > 1) return;
 
-            var removed = activeMaps.remove(new Pair<>(world.map().getId(), (world.flags() & MapWorldNew.FLAG_EDITING) != 0));
+            var removed = activeMaps.remove(new Pair<>(world.map().getId(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
             if (removed == null) return;
             event.getInstance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
                 // ok to use resultNow because we cannot close a world that is not loaded
@@ -54,7 +46,7 @@ public class MapWorldManager {
 
         // Create a new world if there is not one present
         if (activeWorld == null) {
-            var world = new EditingMapWorldNew(server, map);
+            var world = isEditing ? new EditingMapWorld(server, map) : new PlayingMapWorld(server, map);
             activeWorld = VIRTUAL_EXECUTOR.submit(() -> {
                 world.load();
                 return world;

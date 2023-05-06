@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.model.MapData;
@@ -18,19 +19,20 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-class TestingMapWorldNew implements InternalMapWorldNew {
+public class TestingMapWorld implements InternalMapWorld {
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_TESTING = Tag.Boolean("editing").defaultValue(false);
 
     private int flags;
 
-    private final EditingMapWorldNew parent;
+    private final EditingMapWorld parent;
     private final Instance instance;
 
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
@@ -44,7 +46,7 @@ class TestingMapWorldNew implements InternalMapWorldNew {
         return true;
     });
 
-    public TestingMapWorldNew(@NotNull EditingMapWorldNew parent) {
+    TestingMapWorld(@NotNull EditingMapWorld parent) {
         this.flags |= FLAG_TESTING | FLAG_PLAYING;
 
         this.parent = parent;
@@ -103,7 +105,7 @@ class TestingMapWorldNew implements InternalMapWorldNew {
     }
 
     @Override
-    public @Nullable MapWorldNew getMapForPlayer(@NotNull Player player) {
+    public @Nullable MapWorld getMapForPlayer(@NotNull Player player) {
         return activePlayers.contains(player) ? this : null;
     }
 
@@ -114,7 +116,7 @@ class TestingMapWorldNew implements InternalMapWorldNew {
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId(), SaveState.Type.TESTING);
 
         var startingPos = player.getPosition();
-        player.teleport(startingPos); // No need to set instance, it is shared with the editing instance.
+        player.teleport(startingPos);
         player.refreshCommands();
 
         activePlayers.add(player);
@@ -131,9 +133,26 @@ class TestingMapWorldNew implements InternalMapWorldNew {
 
     @Override
     public void removePlayer(@NotNull Player player) {
+        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+
+        player.removeTag(MapHooks.PLAYING);
         player.removeTag(TAG_TESTING);
         activePlayers.remove(player);
 
         // We do not currently save testing savestates, should we?
+        player.removeTag(SaveState.TAG);
+    }
+
+
+    public void exitTestMode(@NotNull Player player) {
+        Thread.startVirtualThread(() -> movePlayerToBuildWorld(player));
+    }
+
+    private @Blocking void movePlayerToBuildWorld(@NotNull Player player) {
+        // remove from this map (leaving them in the Minestom instance)
+        removePlayer(player);
+
+        // add to the test world
+        parent.acceptPlayer(player);
     }
 }

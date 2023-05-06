@@ -13,25 +13,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-import static net.hollowcube.map.world.InternalMapWorldNew.SELF_TAG;
+import static net.hollowcube.map.world.InternalMapWorld.SELF_TAG;
 
 @SuppressWarnings({"PointlessBitwiseExpression"})
-public interface MapWorldNew {
+public interface MapWorld {
 
-    static @NonBlocking @NotNull MapWorldNew forPlayer(@NotNull Player player) {
+    static @NonBlocking @NotNull MapWorld forPlayer(@NotNull Player player) {
         return Objects.requireNonNull(forPlayerOptional(player));
     }
 
-    static @NonBlocking @Nullable MapWorldNew forPlayerOptional(@NotNull Player player) {
+    static @NonBlocking @Nullable MapWorld forPlayerOptional(@NotNull Player player) {
         if (player.getInstance() == null) return null;
         var world = unsafeFromInstance(player.getInstance());
-        if (world instanceof InternalMapWorldNew internalWorld) {
+        if (world instanceof InternalMapWorld internalWorld) {
             return internalWorld.getMapForPlayer(player);
         }
         return null;
     }
 
-    static @NonBlocking @Nullable MapWorldNew unsafeFromInstance(@Nullable Instance instance) {
+    static @NonBlocking @Nullable MapWorld unsafeFromInstance(@Nullable Instance instance) {
         if (instance == null) return null;
         return instance.getTag(SELF_TAG);
     }

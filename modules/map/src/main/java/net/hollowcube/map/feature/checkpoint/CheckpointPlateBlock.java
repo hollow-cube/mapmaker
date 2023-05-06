@@ -3,7 +3,7 @@ package net.hollowcube.map.feature.checkpoint;
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -25,7 +25,7 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        var mapWorld = MapWorldNew.forPlayer(player);
+        var mapWorld = MapWorld.forPlayer(player);
         var checkpoint = mapWorld.map().getPoi(tick.getBlockPosition());
         EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
     }
@@ -34,11 +34,11 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
     public void onPlace(@NotNull Placement placement) {
         MapData map;
         if (placement instanceof PlayerPlacement pp) {
-            map = MapWorldNew.forPlayer(pp.getPlayer()).map();
+            map = MapWorld.forPlayer(pp.getPlayer()).map();
         } else {
             // OK to choose the first editing world, the block is only placed in editing world.
-            var world = MapWorldNew.unsafeFromInstance(placement.getInstance());
-            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            var world = MapWorld.unsafeFromInstance(placement.getInstance());
+            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
             map = world.map();
         }
         map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
@@ -46,8 +46,8 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        var world = MapWorldNew.forPlayer(interaction.getPlayer());
-        if ((world.flags() & MapWorldNew.FLAG_EDITING) == 0) return false;
+        var world = MapWorld.forPlayer(interaction.getPlayer());
+        if ((world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
 
         var player = interaction.getPlayer();
         if (player.isSneaking()) return false;
@@ -63,11 +63,11 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
     public void onDestroy(@NotNull Destroy destroy) {
         MapData map;
         if (destroy instanceof PlayerDestroy pd) {
-            map = MapWorldNew.forPlayer(pd.getPlayer()).map();
+            map = MapWorld.forPlayer(pd.getPlayer()).map();
         } else {
             // OK to choose the first editing world, the block is only placed in editing world.
-            var world = MapWorldNew.unsafeFromInstance(destroy.getInstance());
-            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) return;
+            var world = MapWorld.unsafeFromInstance(destroy.getInstance());
+            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
             map = world.map();
         }
         map.removePOI(destroy.getBlockPosition());

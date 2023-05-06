@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DevServer (standalone)" type="Application" factoryName="Application">
     <envs>
-      <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="" />
+      <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="true" />
       <env name="MM_MAP_PERMISSIONS_DEV" value="true" />
       <env name="MM_MAP_STORAGE_DEV" value="true" />
       <env name="MM_METRICS_STORAGE_DEV" value="true" />
@@ -11,6 +11,7 @@
       <env name="MM_WHITELIST_DEV" value="true" />
       <env name="MM_WORLD_MANAGER_DEV" value="true" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
+      <env name="MM_CHAT_STORAGE_DEV" value="" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />

@@ -2,11 +2,11 @@ package net.hollowcube.map.command;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
-import net.hollowcube.map.world.EditingMapWorldNew;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,10 +51,11 @@ public class TestModeCommand extends BaseMapCommand {
     public static void enterTestMode(@NotNull Player player, @NotNull MapServer mapServer) {
         player.sendMessage("Entering test mode");
 
-        var map = MapWorldNew.forPlayerOptional(player);
-        if (map instanceof EditingMapWorldNew editingMap) {
+        var map = MapWorld.forPlayerOptional(player);
+        if (map instanceof EditingMapWorld editingMap) {
             editingMap.enterTestMode(player);
-            return;
+        } else if (map instanceof TestingMapWorld testingMap) {
+            testingMap.exitTestMode(player);
         }
 
 //        Pos pos = player.getPosition();

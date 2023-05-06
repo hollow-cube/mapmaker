@@ -3,7 +3,7 @@ package net.hollowcube.map.item;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -24,7 +24,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -38,7 +37,7 @@ public class ItemRegistry {
         return ArgumentType.ResourceLocation(id)
                 .setSuggestionCallback((sender, context, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
-                    var mapWorld = MapWorldNew.forPlayerOptional(player);
+                    var mapWorld = MapWorld.forPlayerOptional(player);
                     if (mapWorld == null) return;
                     var itemRegistry = mapWorld.itemRegistry();
 
