@@ -6,10 +6,11 @@
       <env name="MAPMAKER_SPICEDB_TLS" value="false" />
       <env name="MM_MONGO_URI" value="mongodb://localhost:27017" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
+      <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />
-    <option name="VM_PARAMETERS" value="-truffle -XX:+IgnoreUnrecognizedVMOptions" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="net.hollowcube.mapmaker.dev.*" />
