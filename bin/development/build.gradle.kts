@@ -12,7 +12,6 @@ dependencies {
     implementation("com.github.hollow-cube.common:common:${commonVersion}")
     implementation("com.github.hollow-cube.common:block-placement:${commonVersion}")
     implementation(project(":modules:instances"))
-//    implementation("com.github.hollow-cube.common:instances:${commonVersion}")
 
     implementation(project(":modules:common"))
     implementation(project(":modules:core"))
@@ -44,7 +43,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.5")
     implementation("org.slf4j:jul-to-slf4j:2.0.6")
 
-    implementation("com.github.hollow-cube.Minestom:Minestom:${minestomVersion}")
+    implementation(libs.minestom)
 
     implementation("io.pyroscope:agent:0.11.1")
 }

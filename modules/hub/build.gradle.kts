@@ -5,5 +5,4 @@ dependencies {
 
     val commonVersion = rootProject.property("commonVersion")
     implementation(project(":modules:instances"))
-//    implementation("com.github.hollow-cube.common:instances:${commonVersion}")
 }

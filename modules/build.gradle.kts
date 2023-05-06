@@ -2,6 +2,8 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 subprojects {
+    val libs = rootProject.libs
+
     group = "net.hollowcube.mapmaker"
 
     val isStandalone = project.path.replace(":modules", "") in setOf(
@@ -62,15 +64,13 @@ subprojects {
         implementation("io.prometheus:simpleclient:${prometheusVersion}")
 
         // Minestom
-        compileOnly("com.github.hollow-cube.Minestom:Minestom:${rootProject.property("minestomVersion")}")
-        testImplementation("com.github.hollow-cube.Minestom:Minestom:${rootProject.property("minestomVersion")}")
-        testImplementation("com.github.hollow-cube.Minestom:testing:${rootProject.property("minestomVersion")}")
+        compileOnly(libs.minestom)
+        testImplementation(libs.minestom)
+        testImplementation("com.github.hollow-cube.minestom-ce:testing:a7440639c8")
 
         if (project.name != "common") {
             implementation(project(":modules:common"))
         }
-//        implementation("com.github.hollow-cube.common:common:${rootProject.property("commonVersion")}")
-//        testImplementation("com.github.hollow-cube.common:test:${rootProject.property("commonVersion")}")
     }
 
     tasks.getByName<Test>("test") {
