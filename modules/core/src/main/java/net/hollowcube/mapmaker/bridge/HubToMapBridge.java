@@ -17,9 +17,10 @@ public interface HubToMapBridge {
      * Sends the given player to an instance of the given map.
      * <p>
      * Note: This is a very temporary method which is only valid for a dev server where there is a single map and hub
-     *       both within the same process. This method will be removed in the future to support something like a bid
-     *       system, or an external allocator/matchmaker.
+     * both within the same process. This method will be removed in the future to support something like a bid
+     * system, or an external allocator/matchmaker.
      */
-    @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit);
+    @Blocking
+    void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit);
 
 }

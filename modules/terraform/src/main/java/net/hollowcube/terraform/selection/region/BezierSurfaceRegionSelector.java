@@ -449,9 +449,9 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
                 ));
                 for (int n = n2 - 2; n >= 0; --n) {
                     this.segments[n].setControl1(new Vec(
-                            (this.segments[n].getSomeVec().x() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().x()) / (double) this.segments[n].getYVar(),
-                            (this.segments[n].getSomeVec().y() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().y()) / (double) this.segments[n].getYVar(),
-                            (this.segments[n].getSomeVec().z() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().z()) / (double) this.segments[n].getYVar()
+                            (this.segments[n].getSomeVec().x() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().x()) / this.segments[n].getYVar(),
+                            (this.segments[n].getSomeVec().y() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().y()) / this.segments[n].getYVar(),
+                            (this.segments[n].getSomeVec().z() - this.segments[n].getZVar() * this.segments[n + 1].getControl1().z()) / this.segments[n].getYVar()
                     ));
                 }
                 for (int n = 0; n < n2 - 1; ++n) {

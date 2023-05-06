@@ -8,7 +8,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class GeneralCommands {
-    private GeneralCommands() {}
+    private GeneralCommands() {
+    }
 
     public static final class Undo extends Command {
 

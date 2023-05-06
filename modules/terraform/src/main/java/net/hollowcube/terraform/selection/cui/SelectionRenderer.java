@@ -14,6 +14,7 @@ public interface SelectionRenderer {
     boolean hasFeature(@NotNull Feature feature);
 
     void begin();
+
     void end();
 
     /**
@@ -38,7 +39,6 @@ public interface SelectionRenderer {
 //    void bezierChain(@NotNull List<Point> points);
 
     void bezierCurve(@NotNull Point p1, @NotNull Point p2, @NotNull Point p3, @NotNull Point p4);
-
 
 
 }

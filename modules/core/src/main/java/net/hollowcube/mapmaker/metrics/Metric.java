@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.metrics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Metric<T> {
     /**
@@ -16,7 +19,7 @@ public class Metric<T> {
 
     private String tag;
     private long timestamp;
-    private HashMap<Object, ValueType> values = new HashMap<>();
+    private final HashMap<Object, ValueType> values = new HashMap<>();
 
     public Metric(String tag, long timestamp, ArrayList values) {
         this.tag = tag;
@@ -24,13 +27,14 @@ public class Metric<T> {
         setValues(values);
     }
 
-    public Metric(String tag, long timestamp, T ... values) {
+    public Metric(String tag, long timestamp, T... values) {
         this.tag = tag;
         this.timestamp = timestamp;
         setValues(new ArrayList(List.of(values)));
     }
 
-    public Metric() { }
+    public Metric() {
+    }
 
     public String getTag() {
         return this.tag;
@@ -44,20 +48,15 @@ public class Metric<T> {
         for (var value : values) {
             if (value instanceof Integer) {
                 this.values.put(value, ValueType.INT32);
-            }
-            else if (value instanceof Double) {
+            } else if (value instanceof Double) {
                 this.values.put(value, ValueType.DOUBLE);
-            }
-            else if (value instanceof Long) {
+            } else if (value instanceof Long) {
                 this.values.put(value, ValueType.INT64);
-            }
-            else if (value instanceof String) {
+            } else if (value instanceof String) {
                 this.values.put(value, ValueType.STRING);
-            }
-            else if (value instanceof Boolean) {
+            } else if (value instanceof Boolean) {
                 this.values.put(value, ValueType.BOOLEAN);
-            }
-            else {
+            } else {
                 System.out.println("Tried to pass unsupported type " +
                         value.getClass().toString() + " to Metric class, skipping.");
             }

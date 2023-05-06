@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature;
 
-import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.world.MapWorld;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 

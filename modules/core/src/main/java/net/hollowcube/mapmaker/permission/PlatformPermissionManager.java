@@ -27,6 +27,7 @@ public @Blocking interface PlatformPermissionManager {
         return new PlatformPermissionManagerSpiceDB(client);
     }
 
-    @Blocking boolean checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission);
+    @Blocking
+    boolean checkPermission(@NotNull String playerId, @NotNull PlatformPermission permission);
 
 }

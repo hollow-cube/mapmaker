@@ -11,15 +11,20 @@ public interface ServerRuntime {
 
     // Server info
 
-    default @NotNull String version() { return "unknown"; }
-    default @NotNull String commit() { return "dev"; }
+    default @NotNull String version() {
+        return "unknown";
+    }
+
+    default @NotNull String commit() {
+        return "dev";
+    }
 
     /**
      * Returns some identifier of the current instance.
      * For example in a Kubernetes environment the pod name would work.
      *
      * @implNote The default value is a consistent random string.
-     *           In a deployment it should be overridden with a real hostname value
+     * In a deployment it should be overridden with a real hostname value
      */
     default @NotNull String hostname() {
         class Holder {
@@ -39,9 +44,13 @@ public interface ServerRuntime {
 
     // Dependency info
 
-    default @NotNull String minestom() { return "unknown"; }
+    default @NotNull String minestom() {
+        return "unknown";
+    }
 
-    /** Gets the current runtime. Server binaries must implement this interface through the SPI mechanism. */
+    /**
+     * Gets the current runtime. Server binaries must implement this interface through the SPI mechanism.
+     */
     static @NotNull ServerRuntime getRuntime() {
         // Cursed yikes code, but it does work :)
         // I wanted an excuse to use this weird feature of classes inside methods, and it does make a clean api here.
@@ -50,7 +59,8 @@ public interface ServerRuntime {
         }
         if (Holder.runtime == null) {
             Holder.runtime = ServiceLoader.load(ServerRuntime.class)
-                    .findFirst().orElseGet(() -> new ServerRuntime(){});
+                    .findFirst().orElseGet(() -> new ServerRuntime() {
+                    });
         }
         return Holder.runtime;
     }

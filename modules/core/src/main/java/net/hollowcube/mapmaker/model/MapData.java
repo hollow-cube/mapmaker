@@ -31,6 +31,7 @@ public class MapData {
             return key;
         }
     }
+
     public static final String READ = "read";
     public static final String WRITE = "write";
     public static final String ADMIN = "admin";
@@ -233,7 +234,7 @@ public class MapData {
             return data;
         }
 
-        public <T> @NotNull  T getOrDefault(@NotNull String key, T def) {
+        public <T> @NotNull T getOrDefault(@NotNull String key, T def) {
             //noinspection unchecked
             return (T) data.getOrDefault(key, def);
         }
@@ -243,6 +244,7 @@ public class MapData {
         }
     }
 
-    public record CompletionTime(UUID playerUUID, long timeInMills) {}
+    public record CompletionTime(UUID playerUUID, long timeInMills) {
+    }
 
 }

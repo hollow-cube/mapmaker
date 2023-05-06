@@ -5,7 +5,8 @@ import net.minestom.server.instance.generator.Generator;
 import org.jetbrains.annotations.NotNull;
 
 public final class HubGenerators {
-    private HubGenerators() {}
+    private HubGenerators() {
+    }
 
     //todo move me to
     private static final Generator STONE = unit -> {

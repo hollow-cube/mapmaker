@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <component width="9" height="7" align="ttb" sprite="gui/build_maps/create">
-    <spacer width="9" height="5" />
+    <spacer width="9" height="5"/>
     <box width="9">
-        <spacer width="2" />
-        <button id="submit" width="5" translationKey="gui.create_map.submit" />
+        <spacer width="2"/>
+        <button id="submit" width="5" translationKey="gui.create_map.submit"/>
     </box>
 </component>

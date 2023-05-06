@@ -6,7 +6,6 @@ import com.authzed.api.v1.Core.RelationshipUpdate;
 import com.authzed.api.v1.Core.SubjectReference;
 import com.authzed.api.v1.PermissionService.*;
 import com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
-import com.google.common.util.concurrent.Futures;
 import org.jetbrains.annotations.NotNull;
 
 /**

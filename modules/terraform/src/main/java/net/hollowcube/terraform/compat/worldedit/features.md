@@ -1,4 +1,3 @@
-
 Statuses are as follows:
 
 - ✅: Supported
@@ -9,23 +8,23 @@ Statuses are as follows:
 ### Masks
 
 - ✅ Block
-  - 🚧 Parsing
+    - 🚧 Parsing
 - ✅ Not
     - 🚧 Parsing
 - 🚧 #existing
 - ✅ #solid
-  - 🚧 Parsing
+    - 🚧 Parsing
 - ✅ > (overlay)
-  - 🚧 Parsing
+    - 🚧 Parsing
 - ✅ < (underlay)
-  - 🚧 Parsing
+    - 🚧 Parsing
 - 🚧 Region
-- 🚧 Tags ("block categories") 
+- 🚧 Tags ("block categories")
 - ✅ Random noise
-  - 🚧 Parsing
+    - 🚧 Parsing
 - ✅ Block state
-  - 🚧 Parsing
+    - 🚧 Parsing
 - ❌ Expression - Expression language not supported
 - 🚧 Biome
 - ✅ #surface
-  - 🚧 Parsing
+    - 🚧 Parsing

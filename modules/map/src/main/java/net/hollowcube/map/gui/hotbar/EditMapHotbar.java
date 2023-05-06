@@ -18,7 +18,8 @@ import java.util.List;
 
 // TODO make Hotbar an interface on which hub/edit/play/test/etc implement
 public final class EditMapHotbar {
-    private EditMapHotbar() {}
+    private EditMapHotbar() {
+    }
 
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:map/editmaphotbar", EventFilter.INSTANCE)
             .addListener(PlayerUseItemEvent.class, EditMapHotbar::handleUseItem)
@@ -52,8 +53,8 @@ public final class EditMapHotbar {
 
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = MapWorld.forPlayer(player).server();
-        switch (customModelData) {
-            case TEST_MODE_CMD -> TestModeCommand.enterTestMode(player, server);
+        if (customModelData == TEST_MODE_CMD) {
+            TestModeCommand.enterTestMode(player, server);
         }
     }
 }

@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 final class CoordinateUtil {
-    private CoordinateUtil() {}
+    private CoordinateUtil() {
+    }
 
     public static @NotNull Point floor(@NotNull Point point) {
         return new Vec(point.blockX(), point.blockY(), point.blockZ());

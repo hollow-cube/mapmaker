@@ -13,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class HistoryCommands {
-    private HistoryCommands() {}
+    private HistoryCommands() {
+    }
 
     public static final class Undo extends Command {
         private final Argument<Integer> countArg = ArgumentType.Integer("count").min(1).setDefaultValue(1);

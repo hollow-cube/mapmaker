@@ -4,8 +4,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.CompletableFuture;
-
 public interface World {
 
     @NotNull String id();
@@ -14,9 +12,11 @@ public interface World {
 
     // Management
 
-    @Blocking @NotNull String saveWorld();
+    @Blocking
+    @NotNull String saveWorld();
 
-    @Blocking void unloadWorld();
+    @Blocking
+    void unloadWorld();
 
     default @Blocking void saveAndUnloadWorld() {
         saveWorld();

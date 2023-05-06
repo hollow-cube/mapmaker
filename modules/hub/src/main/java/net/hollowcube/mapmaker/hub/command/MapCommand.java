@@ -199,9 +199,9 @@ public class MapCommand extends BaseHubCommand {
             // Parse map options
             var options = context.get(createMapOptions);
             for (var option : options) {
-                switch (option.getCommandName()) {
-                    // Issues with name are caught later.
-                    case "name" -> protoMap.setName(option.get("mapName"));
+                // Issues with name are caught later.
+                if (option.getCommandName().equals("name")) {
+                    protoMap.setName(option.get("mapName"));
                     //todo others like preset
                 }
             }
@@ -216,7 +216,7 @@ public class MapCommand extends BaseHubCommand {
             try {
                 var map = handler.createMapForPlayerInSlot(playerData, protoMap, slot);
                 LanguageProvider.createMultiTranslatable("command.map.create.success",
-                        Component.text(slot), Component.text(map.getName()))
+                                Component.text(slot), Component.text(map.getName()))
                         .forEach(player::sendMessage);
             } catch (Handler.MapSlotLockedError e) {
                 player.sendMessage(Component.translatable("command.map.create.slot_locked"));

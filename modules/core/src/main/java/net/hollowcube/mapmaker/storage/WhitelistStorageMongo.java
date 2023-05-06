@@ -4,12 +4,9 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import net.hollowcube.common.config.MongoConfig;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.eq;
 

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class BuildModeCommand extends BaseMapCommand {
     private static final Logger logger = LoggerFactory.getLogger(BuildModeCommand.class);
 
-    private MapServerBase mapServer;
+    private final MapServerBase mapServer;
 
     public BuildModeCommand(MapServerBase mapServer) {
         super("build");

@@ -5,7 +5,7 @@ subprojects {
     group = "net.hollowcube.mapmaker"
 
     val isStandalone = project.path.replace(":modules", "") in setOf(
-        ":canvas"
+            ":canvas"
     )
     if (isStandalone) {
         return@subprojects

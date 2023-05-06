@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public class HubWorld extends BaseWorld {
     private static final String WORLD_NAME = "hub";

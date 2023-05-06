@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Called after a player has loaded (eg savestate is present) into a map and is starting playing.
  */
-public record MapWorldPlayerStartPlayingEvent(@NotNull MapWorld mapWorld, @NotNull Player player) implements MapWorldEvent, PlayerEvent {
+public record MapWorldPlayerStartPlayingEvent(@NotNull MapWorld mapWorld,
+                                              @NotNull Player player) implements MapWorldEvent, PlayerEvent {
     @Override
     public @NotNull MapWorld getMapWorld() {
         return mapWorld;

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class TestModeCommand extends BaseMapCommand {
     private static final Logger logger = LoggerFactory.getLogger(TestModeCommand.class);
 
-    private MapServerBase mapServer;
+    private final MapServerBase mapServer;
 
     public TestModeCommand(MapServerBase mapServer) {
         super("test");

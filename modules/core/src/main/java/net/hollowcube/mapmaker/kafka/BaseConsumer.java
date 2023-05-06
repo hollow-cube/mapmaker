@@ -27,8 +27,8 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     private boolean autocommit = true;
 
     protected BaseConsumer(@NotNull String topic, @NotNull String groupId,
-                        @NotNull Function<String, T> deserializer,
-                        @NotNull String bootstrapServers) {
+                           @NotNull Function<String, T> deserializer,
+                           @NotNull String bootstrapServers) {
         if (bootstrapServers.isEmpty()) {
             consumer = null;
             valueDeserializer = null;

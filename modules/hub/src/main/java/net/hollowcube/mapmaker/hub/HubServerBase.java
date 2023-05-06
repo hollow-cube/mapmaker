@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import com.google.common.util.concurrent.JdkFutureAdapters;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
@@ -34,7 +33,8 @@ public abstract class HubServerBase implements HubServer {
         return bridge;
     }
 
-    @Blocking public void init() {
+    @Blocking
+    public void init() {
         this.mapHandler = new Handler(this);
 
         this.guiController = Controller.make(Map.of("hubServer", this, "playerStorage", playerStorage(), "mapStorage", mapStorage(), "handler", mapHandler));

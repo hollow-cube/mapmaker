@@ -31,7 +31,7 @@ dependencies {
     implementation("io.grpc:grpc-netty:1.51.1")
     implementation("io.grpc:grpc-netty-shaded:1.51.1")
 
-    implementation ("com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220")
+    implementation("com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220")
 
     // Helidon
     implementation(platform("io.helidon:helidon-dependencies:3.0.2"))

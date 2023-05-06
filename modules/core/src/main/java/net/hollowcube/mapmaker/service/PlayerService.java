@@ -17,8 +17,10 @@ public interface PlayerService {
      *
      * @return The display name of the player, or {@link #ERR_NOT_FOUND} if the player is not online.
      */
-    @Blocking @NotNull Component getDisplayName(@NotNull String playerId);
+    @Blocking
+    @NotNull Component getDisplayName(@NotNull String playerId);
 
-    class NotFoundError extends RuntimeException { }
+    class NotFoundError extends RuntimeException {
+    }
 
 }

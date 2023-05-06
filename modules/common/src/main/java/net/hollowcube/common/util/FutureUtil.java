@@ -4,11 +4,11 @@ import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
-    private FutureUtil() {}
+    private FutureUtil() {
+    }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> @Nullable T handleException(@NotNull Throwable t) {

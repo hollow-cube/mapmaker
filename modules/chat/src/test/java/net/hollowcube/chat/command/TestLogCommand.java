@@ -1,21 +1,5 @@
 package net.hollowcube.chat.command;
 
-import net.hollowcube.chat.ChatQuery;
-import net.hollowcube.chat.TestChatFacet;
-import net.hollowcube.chat.storage.MockChatStorage;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.CommandDispatcher;
-import net.minestom.server.command.builder.CommandResult;
-import net.minestom.server.entity.Player;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
-
-import static com.google.common.truth.Truth.assertThat;
-
 public class TestLogCommand {
 //    private final CommandDispatcher dispatcher = new CommandDispatcher();
 //    // Fine to use headless player since this command does not affect the world or anything

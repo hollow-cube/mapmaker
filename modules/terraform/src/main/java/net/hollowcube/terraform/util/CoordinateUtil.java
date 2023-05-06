@@ -8,7 +8,8 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public final class CoordinateUtil {
-    private CoordinateUtil() {}
+    private CoordinateUtil() {
+    }
 
     public static @NotNull Point floor(@NotNull Point point) {
         return new Vec(point.blockX(), point.blockY(), point.blockZ());

@@ -2,9 +2,9 @@ package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;

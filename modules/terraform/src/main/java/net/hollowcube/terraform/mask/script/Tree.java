@@ -25,7 +25,8 @@ public interface Tree {
 
     // Primitives
 
-    record Error(int start, int end) implements Tree {}
+    record Error(int start, int end) implements Tree {
+    }
 
     record BlockState(
             int start, int end,
@@ -148,7 +149,8 @@ public interface Tree {
                 @Nullable String name,
                 int equals,
                 @Nullable Tree value
-        ) implements Tree { }
+        ) implements Tree {
+        }
 
     }
 

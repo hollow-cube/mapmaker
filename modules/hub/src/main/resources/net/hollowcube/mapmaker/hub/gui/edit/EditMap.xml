@@ -3,26 +3,26 @@
            sprite="gui/build_maps/edit"
            loadingSprite="gui/build_maps/empty">
 
-    <spacer width="9" height="4" />
+    <spacer width="9" height="4"/>
 
     <box width="9" align="ltr">
-        <spacer />
-        <label id="info" translationKey="gui.slot_view.tab.info" />
-        <spacer />
-        <label id="build_stats" translationKey="gui.slot_view.tab.build_stats" />
-        <spacer />
-        <label id="settings" translationKey="gui.slot_view.tab.settings" />
-        <spacer />
-        <label id="actions" translationKey="gui.slot_view.tab.actions" />
-        <spacer />
+        <spacer/>
+        <label id="info" translationKey="gui.slot_view.tab.info"/>
+        <spacer/>
+        <label id="build_stats" translationKey="gui.slot_view.tab.build_stats"/>
+        <spacer/>
+        <label id="settings" translationKey="gui.slot_view.tab.settings"/>
+        <spacer/>
+        <label id="actions" translationKey="gui.slot_view.tab.actions"/>
+        <spacer/>
     </box>
 
     <box width="9" height="2" align="ltr">
-        <spacer height="2" />
-        <button id="edit_in_world" width="3" height="2" translationKey="gui.slot_view.edit" />
-        <spacer height="2" />
-        <button id="publish" width="3" height="2" translationKey="gui.slot_view.publish" />
-        <spacer height="2" />
+        <spacer height="2"/>
+        <button id="edit_in_world" width="3" height="2" translationKey="gui.slot_view.edit"/>
+        <spacer height="2"/>
+        <button id="publish" width="3" height="2" translationKey="gui.slot_view.publish"/>
+        <spacer height="2"/>
     </box>
 
 </component>

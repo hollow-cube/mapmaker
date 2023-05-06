@@ -1,4 +1,3 @@
-
 dependencies {
     implementation(project(":modules:canvas:api"))
     implementation("org.junit.jupiter:junit-jupiter-api:5.8.1")

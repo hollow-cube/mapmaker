@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.canvas.demo ?>
 <component width="9" height="2" align="ttb">
-    <SwitchDemo id="switch" />
-    <button id="btn" translationKey="testbutton" sprite="orange_stained_glass_pane" />
+    <SwitchDemo id="switch"/>
+    <button id="btn" translationKey="testbutton" sprite="orange_stained_glass_pane"/>
 </component>

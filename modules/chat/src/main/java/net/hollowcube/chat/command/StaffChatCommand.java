@@ -2,7 +2,6 @@ package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatFacet;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -16,6 +15,7 @@ public class StaffChatCommand extends Command {
     private final Argument<String[]> messageArg = ArgumentType.StringArray("message");
 
     private final ChatFacet chat;
+
     public StaffChatCommand(@NotNull ChatFacet chat) {
         super("sc", "staffchat");
         this.chat = chat;

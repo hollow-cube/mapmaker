@@ -16,7 +16,7 @@ public class MapDetailsView extends View {
 
     private @ContextObject Handler handler;
 
-    private MapData map;
+    private final MapData map;
 
     public MapDetailsView(@NotNull Context context, @NotNull MapData map) {
         super(context);

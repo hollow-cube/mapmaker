@@ -28,14 +28,17 @@ public class MockSelectionRenderer implements SelectionRenderer {
     // Rendering state
 
     private final AtomicBoolean rendering = new AtomicBoolean(false);
+
     @Override
     public void begin() {
         assertFalse(rendering.getAndSet(true), "Already rendering");
     }
+
     @Override
     public void end() {
         assertTrue(rendering.getAndSet(false), "Not rendering");
     }
+
     public void assertNotRendering() {
         assertFalse(rendering.get());
     }

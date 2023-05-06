@@ -1,9 +1,11 @@
 {
-    "configurations": [
-        {
-            "type": "gradle",
-            "name": "Dev Server",
-            "tasks": [":bin:development:run"],
-        },
-    ]
+  "configurations": [
+    {
+      "type": "gradle",
+      "name": "Dev Server",
+      "tasks": [
+        ":bin:development:run"
+      ]
+    }
+  ]
 }

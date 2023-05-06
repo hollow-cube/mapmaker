@@ -25,10 +25,14 @@ public interface Region extends Iterable<@NotNull Point> {
         }
     }
 
-    /** Minimum rectangular bounding point (inclusive) */
+    /**
+     * Minimum rectangular bounding point (inclusive)
+     */
     @NotNull Point min();
 
-    /** Maximum rectangular bounding point (exclusive) */
+    /**
+     * Maximum rectangular bounding point (exclusive)
+     */
     @NotNull Point max();
 
     default int volume() {

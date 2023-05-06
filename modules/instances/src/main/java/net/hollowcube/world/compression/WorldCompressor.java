@@ -16,13 +16,14 @@ import java.util.zip.ZipOutputStream;
 public class WorldCompressor {
     // valid values: 0-22 (0 = no compression; 22 = highest compression)
     private static final int COMPRESSION_LEVEL = 22;
+
     /**
      * Compresses the region files of the given world using the Zstandard algorithm
      *
-     * @param worldname   The worlds name whose files you want to compress
+     * @param worldname     The worlds name whose files you want to compress
      * @param dimensionType The worlds dimension type
      * @return A CompressedWorldData object that contains the compressed world data
-     *         and original data size (needed for decompression)
+     * and original data size (needed for decompression)
      */
     public static CompressedWorldData compressWorldRegionFiles(final String worldname, final DimensionType dimensionType) {
         // get correct path to region files
@@ -55,7 +56,7 @@ public class WorldCompressor {
                 // create FileInputStream that reads in the region file
                 FileInputStream fis = new FileInputStream(file);
                 // get exact file path of the region file
-                String zipFilePath = file.getCanonicalPath().substring(folder.getCanonicalPath().length() + 1, file.getCanonicalPath().length());
+                String zipFilePath = file.getCanonicalPath().substring(folder.getCanonicalPath().length() + 1);
                 // put it into the zip archive
                 ZipEntry zipEntry = new ZipEntry(zipFilePath);
                 zipFile.putNextEntry(zipEntry);

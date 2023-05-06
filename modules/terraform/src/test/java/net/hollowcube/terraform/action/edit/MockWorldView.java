@@ -15,7 +15,9 @@ public class MockWorldView implements WorldView {
 
     public static @NotNull MockWorldView none() {
         return new MockWorldView(
-                (x, y, z, condition) -> {throw new AssertionError("No block should be accessed");}
+                (x, y, z, condition) -> {
+                    throw new AssertionError("No block should be accessed");
+                }
         );
     }
 

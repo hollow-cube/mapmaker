@@ -26,11 +26,15 @@ public interface HubServer {
     @NotNull HubToMapBridge bridge();
 
     @NotNull PlayerStorage playerStorage();
+
     @NotNull MapStorage mapStorage();
+
     @NotNull MetricStorage metricStorage();
+
     @NotNull WorldManager worldManager();
 
     @NotNull PlatformPermissionManager platformPermissions();
+
     @NotNull MapPermissionManager mapPermissions();
 
     @NotNull HubWorld world();

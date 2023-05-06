@@ -4,14 +4,16 @@ A comprehensive list of worledit commands which will be supported.
 https://worldedit.enginehub.org/en/latest/commands/
 
 ### Tamto Commands
+
 - /rotate
-  - Clipboard modifications need to be stored in a stack/with a parent, so i will do the following
-    - Multiple clipboard types
-      - Raw from world
-      - rotated
-      - flipped
-    - ones like rotated can have a parent
-    - when doing //place it will walk up the parent tree until it reaches a root one like raw from world and paste that
+    - Clipboard modifications need to be stored in a stack/with a parent, so i will do the following
+        - Multiple clipboard types
+            - Raw from world
+            - rotated
+            - flipped
+        - ones like rotated can have a parent
+        - when doing //place it will walk up the parent tree until it reaches a root one like raw from world and paste
+          that
 - /flip
 - /move
 - /stack (and smear?)
@@ -23,13 +25,13 @@ https://worldedit.enginehub.org/en/latest/commands/
 - /gmask
 - /typereplace
 - Patterns
-  - #arcangle
-  - #voronoi
-  - #fractal
-  - `>`
-  - `<`
-  - `~`
-  - #offset
+    - #arcangle
+    - #voronoi
+    - #fractal
+    - `>`
+    - `<`
+    - `~`
+    - #offset
 
 Statuses are as follows:
 
@@ -48,21 +50,21 @@ Statuses are as follows:
 - ❌ /we tz - No snapshot system
 - ❌ /we report - Either a separate in game report system or discord or something
 - ✅ //undo
-  - 🚧 //undo [player]
+    - 🚧 //undo [player]
 - ✅ //redo
-  - 🚧 //redo [player]
+    - 🚧 //redo [player]
 - ✅ //clearhistory
-  - 🚧 //clearhistory [player]
+    - 🚧 //clearhistory [player]
 - ❌ //limit - Perf/limits are not configurable via commands
 - ❌ //timeout - Perf/limits are not configurable via commands
 - ❌ //perf - Perf/limits are not configurable via commands
 - ❌ //reorder - Perf/limits are not configurable via commands
 - ❌ //drawsel - CUI will be autodetected (with a setting somewhere to toggle)
 - ❌ //world - Cross world operations are not supported
-  - caveat: eventually clipboard may be global
+    - caveat: eventually clipboard may be global
 - ❌ //watchdog - Watchdog not supported
 - 🚧 //gmask
-  - caveat: sets globally for a specific player
+    - caveat: sets globally for a specific player
 - ❌ //toggleplace - Will add if someone asks for it
 - ❌ //searchitem - Unrelated to world building
 
@@ -124,7 +126,7 @@ Statuses are as follows:
 
 ### SCHEMATIC
 
-Schematic commands are a bit up in the air. It is unclear how we will handle saving and loading. Eg, do we save 
+Schematic commands are a bit up in the air. It is unclear how we will handle saving and loading. Eg, do we save
 schematics so people can load them later, or are they locked to the current session? Or maybe both where most people
 lost their saved schematics when they leave the world but if you pay for extra worldedit then you get to keep them.
 
@@ -183,7 +185,8 @@ lost their saved schematics when they leave the world but if you pay for extra w
 - ❌ //brush deform - Expression language not supported
 - 🚧 //brush lower
 - ❌ //brush snow - World generation not supported
-  - Not sure this is really world generation. Not sure where the line is, because pumpkin patches for sure seems dumb but this may be fair enough.
+    - Not sure this is really world generation. Not sure where the line is, because pumpkin patches for sure seems dumb
+      but this may be fair enough.
 - 🚧 //brush biome
 
 ### BIOME

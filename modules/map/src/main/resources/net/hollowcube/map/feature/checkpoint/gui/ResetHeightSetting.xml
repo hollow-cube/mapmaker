@@ -3,17 +3,17 @@
     <switch id="toggle">
         <button id="indicator_off"
                 translationKey="gui.checkpoint.reset_height.indicator"
-                sprite="red_concrete" />
+                sprite="red_concrete"/>
         <button id="indicator_on"
                 translationKey="gui.checkpoint.reset_height.indicator"
-                sprite="green_concrete" />
+                sprite="green_concrete"/>
     </switch>
 
-    <spacer />
+    <spacer/>
 
-    <button id="min" translationKey="gui.checkpoint.reset_height.min" sprite="red_concrete" />
-    <button id="down" translationKey="gui.checkpoint.reset_height.down" sprite="red_concrete" />
-    <button id="reset" translationKey="gui.checkpoint.reset_height.reset" sprite="gray_concrete" />
-    <button id="up" translationKey="gui.checkpoint.reset_height.up" sprite="green_concrete" />
-    <button id="max" translationKey="gui.checkpoint.reset_height.max" sprite="green_concrete" />
+    <button id="min" translationKey="gui.checkpoint.reset_height.min" sprite="red_concrete"/>
+    <button id="down" translationKey="gui.checkpoint.reset_height.down" sprite="red_concrete"/>
+    <button id="reset" translationKey="gui.checkpoint.reset_height.reset" sprite="gray_concrete"/>
+    <button id="up" translationKey="gui.checkpoint.reset_height.up" sprite="green_concrete"/>
+    <button id="max" translationKey="gui.checkpoint.reset_height.max" sprite="green_concrete"/>
 </component>

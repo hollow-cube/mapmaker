@@ -4,13 +4,11 @@ import net.hollowcube.world.compression.WorldCompressor;
 import net.hollowcube.world.decompression.WorldDecompressor;
 import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
-import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.world.util.FileUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
@@ -25,8 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 
 @SuppressWarnings("UnstableApiUsage")
 public class BaseWorld implements World {
@@ -100,7 +96,8 @@ public class BaseWorld implements World {
     }
 
     @Override
-    public @Blocking @NotNull String saveWorld() {
+    public @Blocking
+    @NotNull String saveWorld() {
         instance.saveChunksToStorage();
         var compressed = WorldCompressor.compressWorldRegionFiles(worldDir().toAbsolutePath().toString(), null);
         return worldManager.fileStorage().uploadFile(id,

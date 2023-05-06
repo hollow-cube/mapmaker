@@ -1,1 +1,4837 @@
-{"textures":{"1":"block/stone_bricks","all0":"block/packed_mud","all1":"block/packed_mud","all2":"block/packed_mud","particle3":"block/dirt","bottom3":"block/dirt","top3":"block/grass_block_top","side3":"block/grass_block_side","overlay3":"block/grass_block_side_overlay","particle4":"block/dirt","bottom4":"block/dirt","top4":"block/grass_block_top","side4":"block/grass_block_side","overlay4":"block/grass_block_side_overlay","all5":"block/packed_mud","all6":"block/packed_mud","all7":"block/packed_mud","particle8":"block/dirt","bottom8":"block/dirt","top8":"block/grass_block_top","side8":"block/grass_block_side","overlay8":"block/grass_block_side_overlay","particle9":"block/dirt","bottom9":"block/dirt","top9":"block/grass_block_top","side9":"block/grass_block_side","overlay9":"block/grass_block_side_overlay","all10":"block/packed_mud","all11":"block/packed_mud","all12":"block/packed_mud","all13":"block/light_blue_stained_glass","all14":"block/light_blue_stained_glass","all15":"block/packed_mud","all16":"block/packed_mud","all17":"block/packed_mud","all18":"block/light_blue_stained_glass","particle19":"block/dirt","bottom19":"block/dirt","top19":"block/grass_block_top","side19":"block/grass_block_side","overlay19":"block/grass_block_side_overlay","all20":"block/packed_mud","all21":"block/packed_mud","all22":"block/packed_mud","particle23":"block/dirt","bottom23":"block/dirt","top23":"block/grass_block_top","side23":"block/grass_block_side","overlay23":"block/grass_block_side_overlay","particle24":"block/dirt","bottom24":"block/dirt","top24":"block/grass_block_top","side24":"block/grass_block_side","overlay24":"block/grass_block_side_overlay","texture25":"block/spruce_planks","bottom26":"block/mud_bricks","side26":"block/mud_bricks","top26":"block/mud_bricks","texture27":"block/oak_planks","bottom28":"block/oak_planks","side28":"block/oak_planks","top28":"block/oak_planks","texture29":"block/oak_planks","all30":"block/stone","all31":"block/stone","all32":"block/stone","all33":"block/stone","bottom34":"block/stone","side34":"block/stone","top34":"block/stone","all35":"block/stone","all36":"block/stone","bottom37":"block/bricks","side37":"block/bricks","top37":"block/bricks","bottom38":"block/bricks","side38":"block/bricks","top38":"block/bricks","bottom39":"block/bricks","side39":"block/bricks","top39":"block/bricks","bottom40":"block/jungle_planks","side40":"block/jungle_planks","top40":"block/jungle_planks","bottom41":"block/stone_bricks","side41":"block/stone_bricks","top41":"block/stone_bricks","bottom42":"block/stone_bricks","side42":"block/stone_bricks","top42":"block/stone_bricks","bottom43":"block/stone_bricks","side43":"block/stone_bricks","top43":"block/stone_bricks","bottom44":"block/stone_bricks","side44":"block/stone_bricks","top44":"block/stone_bricks"},"elements":[{"from":[-16,-16,-16],"to":[-8,-8,-8],"faces":{"down":{"texture":"#down0"},"up":{"texture":"#up0"},"north":{"texture":"#north0"},"south":{"texture":"#south0"},"west":{"texture":"#west0"},"east":{"texture":"#east0"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-16,-16],"to":[0,-8,-8],"faces":{"down":{"texture":"#down1"},"up":{"texture":"#up1"},"north":{"texture":"#north1"},"south":{"texture":"#south1"},"west":{"texture":"#west1"},"east":{"texture":"#east1"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,-16,-16],"to":[8,-8,-8],"faces":{"down":{"texture":"#down2"},"up":{"texture":"#up2"},"north":{"texture":"#north2"},"south":{"texture":"#south2"},"west":{"texture":"#west2"},"east":{"texture":"#east2"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,-16],"to":[16,-8,-8],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom3"},"up":{"uv":[0,0,16,16],"texture":"#top3","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side3"},"south":{"uv":[0,0,16,16],"texture":"#side3"},"west":{"uv":[0,0,16,16],"texture":"#side3"},"east":{"uv":[0,0,16,16],"texture":"#side3"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,-16],"to":[16,-8,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay3","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay3","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay3","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay3","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,-16],"to":[24,-8,-8],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom4"},"up":{"uv":[0,0,16,16],"texture":"#top4","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side4"},"south":{"uv":[0,0,16,16],"texture":"#side4"},"west":{"uv":[0,0,16,16],"texture":"#side4"},"east":{"uv":[0,0,16,16],"texture":"#side4"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,-16],"to":[24,-8,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay4","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay4","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay4","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay4","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-16,-8],"to":[-8,-8,0],"faces":{"down":{"texture":"#down5"},"up":{"texture":"#up5"},"north":{"texture":"#north5"},"south":{"texture":"#south5"},"west":{"texture":"#west5"},"east":{"texture":"#east5"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-16,-8],"to":[0,-8,0],"faces":{"down":{"texture":"#down6"},"up":{"texture":"#up6"},"north":{"texture":"#north6"},"south":{"texture":"#south6"},"west":{"texture":"#west6"},"east":{"texture":"#east6"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,-16,-8],"to":[8,-8,0],"faces":{"down":{"texture":"#down7"},"up":{"texture":"#up7"},"north":{"texture":"#north7"},"south":{"texture":"#south7"},"west":{"texture":"#west7"},"east":{"texture":"#east7"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,-8],"to":[16,-8,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom8"},"up":{"uv":[0,0,16,16],"texture":"#top8","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side8"},"south":{"uv":[0,0,16,16],"texture":"#side8"},"west":{"uv":[0,0,16,16],"texture":"#side8"},"east":{"uv":[0,0,16,16],"texture":"#side8"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,-8],"to":[16,-8,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay8","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay8","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay8","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay8","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,-8],"to":[24,-8,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom9"},"up":{"uv":[0,0,16,16],"texture":"#top9","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side9"},"south":{"uv":[0,0,16,16],"texture":"#side9"},"west":{"uv":[0,0,16,16],"texture":"#side9"},"east":{"uv":[0,0,16,16],"texture":"#side9"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,-8],"to":[24,-8,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay9","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay9","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay9","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay9","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-16,0],"to":[-8,-8,8],"faces":{"down":{"texture":"#down10"},"up":{"texture":"#up10"},"north":{"texture":"#north10"},"south":{"texture":"#south10"},"west":{"texture":"#west10"},"east":{"texture":"#east10"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-16,0],"to":[0,-8,8],"faces":{"down":{"texture":"#down11"},"up":{"texture":"#up11"},"north":{"texture":"#north11"},"south":{"texture":"#south11"},"west":{"texture":"#west11"},"east":{"texture":"#east11"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,-16,0],"to":[8,-8,8],"faces":{"down":{"texture":"#down12"},"up":{"texture":"#up12"},"north":{"texture":"#north12"},"south":{"texture":"#south12"},"west":{"texture":"#west12"},"east":{"texture":"#east12"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,0],"to":[16,-8,8],"faces":{"down":{"texture":"#down13"},"up":{"texture":"#up13"},"north":{"texture":"#north13"},"south":{"texture":"#south13"},"west":{"texture":"#west13"},"east":{"texture":"#east13"}},"_block":"minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,0],"to":[24,-8,8],"faces":{"down":{"texture":"#down14"},"up":{"texture":"#up14"},"north":{"texture":"#north14"},"south":{"texture":"#south14"},"west":{"texture":"#west14"},"east":{"texture":"#east14"}},"_block":"minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-16,8],"to":[-8,-8,16],"faces":{"down":{"texture":"#down15"},"up":{"texture":"#up15"},"north":{"texture":"#north15"},"south":{"texture":"#south15"},"west":{"texture":"#west15"},"east":{"texture":"#east15"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-16,8],"to":[0,-8,16],"faces":{"down":{"texture":"#down16"},"up":{"texture":"#up16"},"north":{"texture":"#north16"},"south":{"texture":"#south16"},"west":{"texture":"#west16"},"east":{"texture":"#east16"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,-16,8],"to":[8,-8,16],"faces":{"down":{"texture":"#down17"},"up":{"texture":"#up17"},"north":{"texture":"#north17"},"south":{"texture":"#south17"},"west":{"texture":"#west17"},"east":{"texture":"#east17"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,8],"to":[16,-8,16],"faces":{"down":{"texture":"#down18"},"up":{"texture":"#up18"},"north":{"texture":"#north18"},"south":{"texture":"#south18"},"west":{"texture":"#west18"},"east":{"texture":"#east18"}},"_block":"minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,8],"to":[24,-8,16],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom19"},"up":{"uv":[0,0,16,16],"texture":"#top19","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side19"},"south":{"uv":[0,0,16,16],"texture":"#side19"},"west":{"uv":[0,0,16,16],"texture":"#side19"},"east":{"uv":[0,0,16,16],"texture":"#side19"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,8],"to":[24,-8,16],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay19","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay19","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay19","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay19","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-16,16],"to":[-8,-8,24],"faces":{"down":{"texture":"#down20"},"up":{"texture":"#up20"},"north":{"texture":"#north20"},"south":{"texture":"#south20"},"west":{"texture":"#west20"},"east":{"texture":"#east20"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-16,16],"to":[0,-8,24],"faces":{"down":{"texture":"#down21"},"up":{"texture":"#up21"},"north":{"texture":"#north21"},"south":{"texture":"#south21"},"west":{"texture":"#west21"},"east":{"texture":"#east21"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,-16,16],"to":[8,-8,24],"faces":{"down":{"texture":"#down22"},"up":{"texture":"#up22"},"north":{"texture":"#north22"},"south":{"texture":"#south22"},"west":{"texture":"#west22"},"east":{"texture":"#east22"}},"_block":"minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,16],"to":[16,-8,24],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom23"},"up":{"uv":[0,0,16,16],"texture":"#top23","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side23"},"south":{"uv":[0,0,16,16],"texture":"#side23"},"west":{"uv":[0,0,16,16],"texture":"#side23"},"east":{"uv":[0,0,16,16],"texture":"#side23"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-16,16],"to":[16,-8,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay23","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay23","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay23","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay23","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,16],"to":[24,-8,24],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom24"},"up":{"uv":[0,0,16,16],"texture":"#top24","tintindex":0},"north":{"uv":[0,0,16,16],"texture":"#side24"},"south":{"uv":[0,0,16,16],"texture":"#side24"},"west":{"uv":[0,0,16,16],"texture":"#side24"},"east":{"uv":[0,0,16,16],"texture":"#side24"}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[16,-16,16],"to":[24,-8,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#overlay24","tintindex":0},"south":{"uv":[0,0,16,16],"texture":"#overlay24","tintindex":0},"west":{"uv":[0,0,16,16],"texture":"#overlay24","tintindex":0},"east":{"uv":[0,0,16,16],"texture":"#overlay24","tintindex":0}},"_block":"minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-8,-16],"to":[-8,0,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,-8,-16],"to":[0,0,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"__comment":"Left-hand post","from":[8,-6,-13],"to":[9,0,-12],"faces":{"down":{"uv":[0,7,2,9],"texture":"#texture25"},"up":{"uv":[0,7,2,9],"texture":"#texture25"},"north":{"uv":[0,0,2,11],"texture":"#texture25"},"south":{"uv":[0,0,2,11],"texture":"#texture25"},"west":{"uv":[7,0,9,11],"texture":"#texture25"},"east":{"uv":[7,0,9,11],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Right-hand post","from":[15,-6,-13],"to":[16,0,-12],"faces":{"down":{"uv":[14,7,16,9],"texture":"#texture25"},"up":{"uv":[14,7,16,9],"texture":"#texture25"},"north":{"uv":[14,0,16,11],"texture":"#texture25"},"south":{"uv":[14,0,16,11],"texture":"#texture25"},"west":{"uv":[7,0,9,11],"texture":"#texture25"},"east":{"uv":[7,0,9,11],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Inner vertical post of left-hand gate door","from":[8,-5,-10],"to":[9,-1,-9],"faces":{"down":{"uv":[0,13,2,15],"texture":"#texture25"},"up":{"uv":[0,13,2,15],"texture":"#texture25"},"north":{"uv":[0,1,2,10],"texture":"#texture25"},"south":{"uv":[0,1,2,10],"texture":"#texture25"},"west":{"uv":[13,1,15,10],"texture":"#texture25"},"east":{"uv":[13,1,15,10],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Inner vertical post of right-hand gate door","from":[15,-5,-10],"to":[16,-1,-9],"faces":{"down":{"uv":[14,13,16,15],"texture":"#texture25"},"up":{"uv":[14,13,16,15],"texture":"#texture25"},"north":{"uv":[14,1,16,10],"texture":"#texture25"},"south":{"uv":[14,1,16,10],"texture":"#texture25"},"west":{"uv":[13,1,15,10],"texture":"#texture25"},"east":{"uv":[13,1,15,10],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Lower horizontal bar of left-hand gate door","from":[8,-5,-12],"to":[9,-4,-10],"faces":{"down":{"uv":[0,9,2,13],"texture":"#texture25"},"up":{"uv":[0,9,2,13],"texture":"#texture25"},"west":{"uv":[13,7,15,10],"texture":"#texture25"},"east":{"uv":[13,7,15,10],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Upper horizontal bar of left-hand gate door","from":[8,-2,-12],"to":[9,-1,-10],"faces":{"down":{"uv":[0,9,2,13],"texture":"#texture25"},"up":{"uv":[0,9,2,13],"texture":"#texture25"},"west":{"uv":[13,1,15,4],"texture":"#texture25"},"east":{"uv":[13,1,15,4],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Lower horizontal bar of left-hand gate door","from":[15,-5,-12],"to":[16,-4,-10],"faces":{"down":{"uv":[14,9,16,13],"texture":"#texture25"},"up":{"uv":[14,9,16,13],"texture":"#texture25"},"west":{"uv":[13,7,15,10],"texture":"#texture25"},"east":{"uv":[13,7,15,10],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"__comment":"Upper horizontal bar of left-hand gate door","from":[15,-2,-12],"to":[16,-1,-10],"faces":{"down":{"uv":[14,9,16,13],"texture":"#texture25"},"up":{"uv":[14,9,16,13],"texture":"#texture25"},"west":{"uv":[13,1,15,4],"texture":"#texture25"},"east":{"uv":[13,1,15,4],"texture":"#texture25"}},"_block":"minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-8,-8],"to":[-8,0,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,-8,-8],"to":[0,-4,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom26"},"up":{"uv":[0,0,16,16],"texture":"#top26"},"north":{"uv":[0,8,16,16],"texture":"#side26"},"south":{"uv":[0,8,16,16],"texture":"#side26"},"west":{"uv":[0,8,16,16],"texture":"#side26"},"east":{"uv":[0,8,16,16],"texture":"#side26"}},"_block":"minecraft:mud_brick_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"},{"from":[-4,-4,-8],"to":[0,0,0],"faces":{"up":{"uv":[8,0,16,16],"texture":"#top26"},"north":{"uv":[0,0,8,8],"texture":"#side26"},"south":{"uv":[8,0,16,8],"texture":"#side26"},"west":{"uv":[0,0,16,8],"texture":"#side26"},"east":{"uv":[0,0,16,8],"texture":"#side26"}},"_block":"minecraft:mud_brick_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"},{"from":[2,-8,-5],"to":[5,-7,-3],"faces":{"down":{"uv":[5,6,11,10],"texture":"#texture27"},"up":{"uv":[5,10,11,6],"texture":"#texture27"},"north":{"uv":[5,14,11,16],"texture":"#texture27"},"south":{"uv":[5,14,11,16],"texture":"#texture27"},"west":{"uv":[6,14,10,16],"texture":"#texture27"},"east":{"uv":[6,14,10,16],"texture":"#texture27"}},"_block":"minecraft:oak_button{properties\u003d{face\u003d\u003ewall, powered\u003d\u003efalse, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"},{"from":[8,-8,-8],"to":[16,-4,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom28"},"up":{"uv":[0,0,16,16],"texture":"#top28"},"north":{"uv":[0,8,16,16],"texture":"#side28"},"south":{"uv":[0,8,16,16],"texture":"#side28"},"west":{"uv":[0,8,16,16],"texture":"#side28"},"east":{"uv":[0,8,16,16],"texture":"#side28"}},"_block":"minecraft:oak_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[18,-8,-5],"to":[21,-7,-3],"faces":{"down":{"uv":[5,6,11,10],"texture":"#texture29"},"up":{"uv":[5,10,11,6],"texture":"#texture29"},"north":{"uv":[5,14,11,16],"texture":"#texture29"},"south":{"uv":[5,14,11,16],"texture":"#texture29"},"west":{"uv":[6,14,10,16],"texture":"#texture29"},"east":{"uv":[6,14,10,16],"texture":"#texture29"}},"_block":"minecraft:oak_button{properties\u003d{face\u003d\u003ewall, powered\u003d\u003efalse, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,-8,0],"to":[-8,0,8],"faces":{"down":{"texture":"#down30"},"up":{"texture":"#up30"},"north":{"texture":"#north30"},"south":{"texture":"#south30"},"west":{"texture":"#west30"},"east":{"texture":"#east30"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-8,0],"to":[0,0,8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,-8,8],"to":[-8,0,16],"faces":{"down":{"texture":"#down31"},"up":{"texture":"#up31"},"north":{"texture":"#north31"},"south":{"texture":"#south31"},"west":{"texture":"#west31"},"east":{"texture":"#east31"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-8,8],"to":[0,0,16],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[0,-8,8],"to":[8,0,16],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,-8,16],"to":[-8,0,24],"faces":{"down":{"texture":"#down32"},"up":{"texture":"#up32"},"north":{"texture":"#north32"},"south":{"texture":"#south32"},"west":{"texture":"#west32"},"east":{"texture":"#east32"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,-8,16],"to":[0,0,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[0,-8,16],"to":[8,0,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,0,-16],"to":[-8,8,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,0,-16],"to":[0,8,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,0,-8],"to":[-8,8,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,0,-8],"to":[0,8,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,0,0],"to":[-8,8,8],"faces":{"down":{"texture":"#down33"},"up":{"texture":"#up33"},"north":{"texture":"#north33"},"south":{"texture":"#south33"},"west":{"texture":"#west33"},"east":{"texture":"#east33"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,0,0],"to":[0,4,8],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom34"},"up":{"uv":[0,0,16,16],"texture":"#top34"},"north":{"uv":[0,8,16,16],"texture":"#side34"},"south":{"uv":[0,8,16,16],"texture":"#side34"},"west":{"uv":[0,8,16,16],"texture":"#side34"},"east":{"uv":[0,8,16,16],"texture":"#side34"}},"_block":"minecraft:stone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,0,8],"to":[-8,8,16],"faces":{"down":{"texture":"#down35"},"up":{"texture":"#up35"},"north":{"texture":"#north35"},"south":{"texture":"#south35"},"west":{"texture":"#west35"},"east":{"texture":"#east35"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,0,8],"to":[0,8,16],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[0,0,8],"to":[8,8,16],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,0,16],"to":[-8,8,24],"faces":{"down":{"texture":"#down36"},"up":{"texture":"#up36"},"north":{"texture":"#north36"},"south":{"texture":"#south36"},"west":{"texture":"#west36"},"east":{"texture":"#east36"}},"_block":"minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,0,16],"to":[0,8,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[0,0,16],"to":[8,8,24],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,8,-16],"to":[-8,16,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,8,-16],"to":[0,16,-8],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-16,8,-8],"to":[-8,16,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,8,-8],"to":[0,16,0],"faces":{"north":{"uv":[0,0,16,16],"texture":"#1"},"south":{"uv":[0,0,16,16],"texture":"#1"},"east":{"uv":[0,0,16,16],"texture":"#1"},"west":{"uv":[0,0,16,16],"texture":"#1"},"up":{"uv":[0,0,16,16],"texture":"#1"},"down":{"uv":[0,0,16,16],"texture":"#1"}}},{"from":[-8,8,8],"to":[0,12,16],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom37"},"up":{"uv":[0,0,16,16],"texture":"#top37"},"north":{"uv":[0,8,16,16],"texture":"#side37"},"south":{"uv":[0,8,16,16],"texture":"#side37"},"west":{"uv":[0,8,16,16],"texture":"#side37"},"east":{"uv":[0,8,16,16],"texture":"#side37"}},"_block":"minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,8,8],"to":[8,12,16],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom38"},"up":{"uv":[0,0,16,16],"texture":"#top38"},"north":{"uv":[0,8,16,16],"texture":"#side38"},"south":{"uv":[0,8,16,16],"texture":"#side38"},"west":{"uv":[0,8,16,16],"texture":"#side38"},"east":{"uv":[0,8,16,16],"texture":"#side38"}},"_block":"minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,8,16],"to":[0,12,24],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom39"},"up":{"uv":[0,0,16,16],"texture":"#top39"},"north":{"uv":[0,8,16,16],"texture":"#side39"},"south":{"uv":[0,8,16,16],"texture":"#side39"},"west":{"uv":[0,8,16,16],"texture":"#side39"},"east":{"uv":[0,8,16,16],"texture":"#side39"}},"_block":"minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[0,8,16],"to":[8,12,24],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom40"},"up":{"uv":[0,0,16,16],"texture":"#top40"},"north":{"uv":[0,8,16,16],"texture":"#side40"},"south":{"uv":[0,8,16,16],"texture":"#side40"},"west":{"uv":[0,8,16,16],"texture":"#side40"},"east":{"uv":[0,8,16,16],"texture":"#side40"}},"_block":"minecraft:jungle_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,16,-16],"to":[-8,20,-8],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom41"},"up":{"uv":[0,0,16,16],"texture":"#top41"},"north":{"uv":[0,8,16,16],"texture":"#side41"},"south":{"uv":[0,8,16,16],"texture":"#side41"},"west":{"uv":[0,8,16,16],"texture":"#side41"},"east":{"uv":[0,8,16,16],"texture":"#side41"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"},{"from":[-12,20,-12],"to":[-8,24,-8],"faces":{"up":{"uv":[8,8,16,16],"texture":"#top41"},"north":{"uv":[0,0,8,8],"texture":"#side41"},"south":{"uv":[8,0,16,8],"texture":"#side41"},"west":{"uv":[8,0,16,8],"texture":"#side41"},"east":{"uv":[0,0,8,8],"texture":"#side41"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,16,-16],"to":[0,20,-8],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom42"},"up":{"uv":[0,0,16,16],"texture":"#top42"},"north":{"uv":[0,8,16,16],"texture":"#side42"},"south":{"uv":[0,8,16,16],"texture":"#side42"},"west":{"uv":[0,8,16,16],"texture":"#side42"},"east":{"uv":[0,8,16,16],"texture":"#side42"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"},{"from":[-4,20,-12],"to":[0,24,-8],"faces":{"up":{"uv":[8,8,16,16],"texture":"#top42"},"north":{"uv":[0,0,8,8],"texture":"#side42"},"south":{"uv":[8,0,16,8],"texture":"#side42"},"west":{"uv":[8,0,16,8],"texture":"#side42"},"east":{"uv":[0,0,8,8],"texture":"#side42"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"},{"from":[-16,16,-8],"to":[-8,20,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom43"},"up":{"uv":[0,0,16,16],"texture":"#top43"},"north":{"uv":[0,8,16,16],"texture":"#side43"},"south":{"uv":[0,8,16,16],"texture":"#side43"},"west":{"uv":[0,8,16,16],"texture":"#side43"},"east":{"uv":[0,8,16,16],"texture":"#side43"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"},{"from":[-12,20,-4],"to":[-8,24,0],"faces":{"up":{"uv":[8,8,16,16],"texture":"#top43"},"north":{"uv":[0,0,8,8],"texture":"#side43"},"south":{"uv":[8,0,16,8],"texture":"#side43"},"west":{"uv":[8,0,16,8],"texture":"#side43"},"east":{"uv":[0,0,8,8],"texture":"#side43"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"},{"from":[-8,16,-8],"to":[0,20,0],"faces":{"down":{"uv":[0,0,16,16],"texture":"#bottom44"},"up":{"uv":[0,0,16,16],"texture":"#top44"},"north":{"uv":[0,8,16,16],"texture":"#side44"},"south":{"uv":[0,8,16,16],"texture":"#side44"},"west":{"uv":[0,8,16,16],"texture":"#side44"},"east":{"uv":[0,8,16,16],"texture":"#side44"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"},{"from":[-4,20,-4],"to":[0,24,0],"faces":{"up":{"uv":[8,8,16,16],"texture":"#top44"},"north":{"uv":[0,0,8,8],"texture":"#side44"},"south":{"uv":[8,0,16,8],"texture":"#side44"},"west":{"uv":[8,0,16,8],"texture":"#side44"},"east":{"uv":[0,0,8,8],"texture":"#side44"}},"_block":"minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"}],"display":{"thirdperson_righthand":{"scale":[2,2,2]},"thirdperson_lefthand":{"scale":[2,2,2]},"head":{"scale":[3.26,3.26,3.26]}}}
+{
+  "textures": {
+    "1": "block/stone_bricks",
+    "all0": "block/packed_mud",
+    "all1": "block/packed_mud",
+    "all2": "block/packed_mud",
+    "particle3": "block/dirt",
+    "bottom3": "block/dirt",
+    "top3": "block/grass_block_top",
+    "side3": "block/grass_block_side",
+    "overlay3": "block/grass_block_side_overlay",
+    "particle4": "block/dirt",
+    "bottom4": "block/dirt",
+    "top4": "block/grass_block_top",
+    "side4": "block/grass_block_side",
+    "overlay4": "block/grass_block_side_overlay",
+    "all5": "block/packed_mud",
+    "all6": "block/packed_mud",
+    "all7": "block/packed_mud",
+    "particle8": "block/dirt",
+    "bottom8": "block/dirt",
+    "top8": "block/grass_block_top",
+    "side8": "block/grass_block_side",
+    "overlay8": "block/grass_block_side_overlay",
+    "particle9": "block/dirt",
+    "bottom9": "block/dirt",
+    "top9": "block/grass_block_top",
+    "side9": "block/grass_block_side",
+    "overlay9": "block/grass_block_side_overlay",
+    "all10": "block/packed_mud",
+    "all11": "block/packed_mud",
+    "all12": "block/packed_mud",
+    "all13": "block/light_blue_stained_glass",
+    "all14": "block/light_blue_stained_glass",
+    "all15": "block/packed_mud",
+    "all16": "block/packed_mud",
+    "all17": "block/packed_mud",
+    "all18": "block/light_blue_stained_glass",
+    "particle19": "block/dirt",
+    "bottom19": "block/dirt",
+    "top19": "block/grass_block_top",
+    "side19": "block/grass_block_side",
+    "overlay19": "block/grass_block_side_overlay",
+    "all20": "block/packed_mud",
+    "all21": "block/packed_mud",
+    "all22": "block/packed_mud",
+    "particle23": "block/dirt",
+    "bottom23": "block/dirt",
+    "top23": "block/grass_block_top",
+    "side23": "block/grass_block_side",
+    "overlay23": "block/grass_block_side_overlay",
+    "particle24": "block/dirt",
+    "bottom24": "block/dirt",
+    "top24": "block/grass_block_top",
+    "side24": "block/grass_block_side",
+    "overlay24": "block/grass_block_side_overlay",
+    "texture25": "block/spruce_planks",
+    "bottom26": "block/mud_bricks",
+    "side26": "block/mud_bricks",
+    "top26": "block/mud_bricks",
+    "texture27": "block/oak_planks",
+    "bottom28": "block/oak_planks",
+    "side28": "block/oak_planks",
+    "top28": "block/oak_planks",
+    "texture29": "block/oak_planks",
+    "all30": "block/stone",
+    "all31": "block/stone",
+    "all32": "block/stone",
+    "all33": "block/stone",
+    "bottom34": "block/stone",
+    "side34": "block/stone",
+    "top34": "block/stone",
+    "all35": "block/stone",
+    "all36": "block/stone",
+    "bottom37": "block/bricks",
+    "side37": "block/bricks",
+    "top37": "block/bricks",
+    "bottom38": "block/bricks",
+    "side38": "block/bricks",
+    "top38": "block/bricks",
+    "bottom39": "block/bricks",
+    "side39": "block/bricks",
+    "top39": "block/bricks",
+    "bottom40": "block/jungle_planks",
+    "side40": "block/jungle_planks",
+    "top40": "block/jungle_planks",
+    "bottom41": "block/stone_bricks",
+    "side41": "block/stone_bricks",
+    "top41": "block/stone_bricks",
+    "bottom42": "block/stone_bricks",
+    "side42": "block/stone_bricks",
+    "top42": "block/stone_bricks",
+    "bottom43": "block/stone_bricks",
+    "side43": "block/stone_bricks",
+    "top43": "block/stone_bricks",
+    "bottom44": "block/stone_bricks",
+    "side44": "block/stone_bricks",
+    "top44": "block/stone_bricks"
+  },
+  "elements": [
+    {
+      "from": [
+        -16,
+        -16,
+        -16
+      ],
+      "to": [
+        -8,
+        -8,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down0"
+        },
+        "up": {
+          "texture": "#up0"
+        },
+        "north": {
+          "texture": "#north0"
+        },
+        "south": {
+          "texture": "#south0"
+        },
+        "west": {
+          "texture": "#west0"
+        },
+        "east": {
+          "texture": "#east0"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -16,
+        -16
+      ],
+      "to": [
+        0,
+        -8,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down1"
+        },
+        "up": {
+          "texture": "#up1"
+        },
+        "north": {
+          "texture": "#north1"
+        },
+        "south": {
+          "texture": "#south1"
+        },
+        "west": {
+          "texture": "#west1"
+        },
+        "east": {
+          "texture": "#east1"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -16,
+        -16
+      ],
+      "to": [
+        8,
+        -8,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down2"
+        },
+        "up": {
+          "texture": "#up2"
+        },
+        "north": {
+          "texture": "#north2"
+        },
+        "south": {
+          "texture": "#south2"
+        },
+        "west": {
+          "texture": "#west2"
+        },
+        "east": {
+          "texture": "#east2"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        -16
+      ],
+      "to": [
+        16,
+        -8,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom3"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top3",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        -16
+      ],
+      "to": [
+        16,
+        -8,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay3",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay3",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay3",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay3",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        -16
+      ],
+      "to": [
+        24,
+        -8,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom4"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top4",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side4"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side4"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side4"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side4"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        -16
+      ],
+      "to": [
+        24,
+        -8,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -16,
+        -8
+      ],
+      "to": [
+        -8,
+        -8,
+        0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down5"
+        },
+        "up": {
+          "texture": "#up5"
+        },
+        "north": {
+          "texture": "#north5"
+        },
+        "south": {
+          "texture": "#south5"
+        },
+        "west": {
+          "texture": "#west5"
+        },
+        "east": {
+          "texture": "#east5"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -16,
+        -8
+      ],
+      "to": [
+        0,
+        -8,
+        0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down6"
+        },
+        "up": {
+          "texture": "#up6"
+        },
+        "north": {
+          "texture": "#north6"
+        },
+        "south": {
+          "texture": "#south6"
+        },
+        "west": {
+          "texture": "#west6"
+        },
+        "east": {
+          "texture": "#east6"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -16,
+        -8
+      ],
+      "to": [
+        8,
+        -8,
+        0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down7"
+        },
+        "up": {
+          "texture": "#up7"
+        },
+        "north": {
+          "texture": "#north7"
+        },
+        "south": {
+          "texture": "#south7"
+        },
+        "west": {
+          "texture": "#west7"
+        },
+        "east": {
+          "texture": "#east7"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        -8
+      ],
+      "to": [
+        16,
+        -8,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom8"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top8",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side8"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side8"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side8"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side8"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        -8
+      ],
+      "to": [
+        16,
+        -8,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay8",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay8",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay8",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay8",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        -8
+      ],
+      "to": [
+        24,
+        -8,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom9"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top9",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side9"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side9"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side9"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side9"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        -8
+      ],
+      "to": [
+        24,
+        -8,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay9",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay9",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay9",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay9",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -16,
+        0
+      ],
+      "to": [
+        -8,
+        -8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down10"
+        },
+        "up": {
+          "texture": "#up10"
+        },
+        "north": {
+          "texture": "#north10"
+        },
+        "south": {
+          "texture": "#south10"
+        },
+        "west": {
+          "texture": "#west10"
+        },
+        "east": {
+          "texture": "#east10"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -16,
+        0
+      ],
+      "to": [
+        0,
+        -8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down11"
+        },
+        "up": {
+          "texture": "#up11"
+        },
+        "north": {
+          "texture": "#north11"
+        },
+        "south": {
+          "texture": "#south11"
+        },
+        "west": {
+          "texture": "#west11"
+        },
+        "east": {
+          "texture": "#east11"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -16,
+        0
+      ],
+      "to": [
+        8,
+        -8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down12"
+        },
+        "up": {
+          "texture": "#up12"
+        },
+        "north": {
+          "texture": "#north12"
+        },
+        "south": {
+          "texture": "#south12"
+        },
+        "west": {
+          "texture": "#west12"
+        },
+        "east": {
+          "texture": "#east12"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        0
+      ],
+      "to": [
+        16,
+        -8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down13"
+        },
+        "up": {
+          "texture": "#up13"
+        },
+        "north": {
+          "texture": "#north13"
+        },
+        "south": {
+          "texture": "#south13"
+        },
+        "west": {
+          "texture": "#west13"
+        },
+        "east": {
+          "texture": "#east13"
+        }
+      },
+      "_block": "minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        0
+      ],
+      "to": [
+        24,
+        -8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down14"
+        },
+        "up": {
+          "texture": "#up14"
+        },
+        "north": {
+          "texture": "#north14"
+        },
+        "south": {
+          "texture": "#south14"
+        },
+        "west": {
+          "texture": "#west14"
+        },
+        "east": {
+          "texture": "#east14"
+        }
+      },
+      "_block": "minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -16,
+        8
+      ],
+      "to": [
+        -8,
+        -8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down15"
+        },
+        "up": {
+          "texture": "#up15"
+        },
+        "north": {
+          "texture": "#north15"
+        },
+        "south": {
+          "texture": "#south15"
+        },
+        "west": {
+          "texture": "#west15"
+        },
+        "east": {
+          "texture": "#east15"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -16,
+        8
+      ],
+      "to": [
+        0,
+        -8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down16"
+        },
+        "up": {
+          "texture": "#up16"
+        },
+        "north": {
+          "texture": "#north16"
+        },
+        "south": {
+          "texture": "#south16"
+        },
+        "west": {
+          "texture": "#west16"
+        },
+        "east": {
+          "texture": "#east16"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -16,
+        8
+      ],
+      "to": [
+        8,
+        -8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down17"
+        },
+        "up": {
+          "texture": "#up17"
+        },
+        "north": {
+          "texture": "#north17"
+        },
+        "south": {
+          "texture": "#south17"
+        },
+        "west": {
+          "texture": "#west17"
+        },
+        "east": {
+          "texture": "#east17"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        8
+      ],
+      "to": [
+        16,
+        -8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down18"
+        },
+        "up": {
+          "texture": "#up18"
+        },
+        "north": {
+          "texture": "#north18"
+        },
+        "south": {
+          "texture": "#south18"
+        },
+        "west": {
+          "texture": "#west18"
+        },
+        "east": {
+          "texture": "#east18"
+        }
+      },
+      "_block": "minecraft:light_blue_stained_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        8
+      ],
+      "to": [
+        24,
+        -8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom19"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top19",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side19"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side19"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side19"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side19"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        8
+      ],
+      "to": [
+        24,
+        -8,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay19",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay19",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay19",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay19",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -16,
+        16
+      ],
+      "to": [
+        -8,
+        -8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down20"
+        },
+        "up": {
+          "texture": "#up20"
+        },
+        "north": {
+          "texture": "#north20"
+        },
+        "south": {
+          "texture": "#south20"
+        },
+        "west": {
+          "texture": "#west20"
+        },
+        "east": {
+          "texture": "#east20"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -16,
+        16
+      ],
+      "to": [
+        0,
+        -8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down21"
+        },
+        "up": {
+          "texture": "#up21"
+        },
+        "north": {
+          "texture": "#north21"
+        },
+        "south": {
+          "texture": "#south21"
+        },
+        "west": {
+          "texture": "#west21"
+        },
+        "east": {
+          "texture": "#east21"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -16,
+        16
+      ],
+      "to": [
+        8,
+        -8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down22"
+        },
+        "up": {
+          "texture": "#up22"
+        },
+        "north": {
+          "texture": "#north22"
+        },
+        "south": {
+          "texture": "#south22"
+        },
+        "west": {
+          "texture": "#west22"
+        },
+        "east": {
+          "texture": "#east22"
+        }
+      },
+      "_block": "minecraft:packed_mud{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        16
+      ],
+      "to": [
+        16,
+        -8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom23"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top23",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side23"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side23"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side23"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side23"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -16,
+        16
+      ],
+      "to": [
+        16,
+        -8,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay23",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay23",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay23",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay23",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        16
+      ],
+      "to": [
+        24,
+        -8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom24"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top24",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side24"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side24"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side24"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#side24"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        16,
+        -16,
+        16
+      ],
+      "to": [
+        24,
+        -8,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay24",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay24",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay24",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#overlay24",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -8,
+        -16
+      ],
+      "to": [
+        -8,
+        0,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        -8,
+        -16
+      ],
+      "to": [
+        0,
+        0,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "__comment": "Left-hand post",
+      "from": [
+        8,
+        -6,
+        -13
+      ],
+      "to": [
+        9,
+        0,
+        -12
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            7,
+            2,
+            9
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            0,
+            7,
+            2,
+            9
+          ],
+          "texture": "#texture25"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            7,
+            0,
+            9,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            7,
+            0,
+            9,
+            11
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Right-hand post",
+      "from": [
+        15,
+        -6,
+        -13
+      ],
+      "to": [
+        16,
+        0,
+        -12
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            14,
+            7,
+            16,
+            9
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            14,
+            7,
+            16,
+            9
+          ],
+          "texture": "#texture25"
+        },
+        "north": {
+          "uv": [
+            14,
+            0,
+            16,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "south": {
+          "uv": [
+            14,
+            0,
+            16,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            7,
+            0,
+            9,
+            11
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            7,
+            0,
+            9,
+            11
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Inner vertical post of left-hand gate door",
+      "from": [
+        8,
+        -5,
+        -10
+      ],
+      "to": [
+        9,
+        -1,
+        -9
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            13,
+            2,
+            15
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            0,
+            13,
+            2,
+            15
+          ],
+          "texture": "#texture25"
+        },
+        "north": {
+          "uv": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "south": {
+          "uv": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            1,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            1,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Inner vertical post of right-hand gate door",
+      "from": [
+        15,
+        -5,
+        -10
+      ],
+      "to": [
+        16,
+        -1,
+        -9
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            14,
+            13,
+            16,
+            15
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            14,
+            13,
+            16,
+            15
+          ],
+          "texture": "#texture25"
+        },
+        "north": {
+          "uv": [
+            14,
+            1,
+            16,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "south": {
+          "uv": [
+            14,
+            1,
+            16,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            1,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            1,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Lower horizontal bar of left-hand gate door",
+      "from": [
+        8,
+        -5,
+        -12
+      ],
+      "to": [
+        9,
+        -4,
+        -10
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            9,
+            2,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            0,
+            9,
+            2,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            7,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            7,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Upper horizontal bar of left-hand gate door",
+      "from": [
+        8,
+        -2,
+        -12
+      ],
+      "to": [
+        9,
+        -1,
+        -10
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            9,
+            2,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            0,
+            9,
+            2,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            1,
+            15,
+            4
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            1,
+            15,
+            4
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Lower horizontal bar of left-hand gate door",
+      "from": [
+        15,
+        -5,
+        -12
+      ],
+      "to": [
+        16,
+        -4,
+        -10
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            14,
+            9,
+            16,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            14,
+            9,
+            16,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            7,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            7,
+            15,
+            10
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "__comment": "Upper horizontal bar of left-hand gate door",
+      "from": [
+        15,
+        -2,
+        -12
+      ],
+      "to": [
+        16,
+        -1,
+        -10
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            14,
+            9,
+            16,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "up": {
+          "uv": [
+            14,
+            9,
+            16,
+            13
+          ],
+          "texture": "#texture25"
+        },
+        "west": {
+          "uv": [
+            13,
+            1,
+            15,
+            4
+          ],
+          "texture": "#texture25"
+        },
+        "east": {
+          "uv": [
+            13,
+            1,
+            15,
+            4
+          ],
+          "texture": "#texture25"
+        }
+      },
+      "_block": "minecraft:spruce_fence_gate{properties\u003d{in_wall\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003esouth, open\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -8,
+        -8
+      ],
+      "to": [
+        -8,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        -8,
+        -8
+      ],
+      "to": [
+        0,
+        -4,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom26"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top26"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side26"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side26"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side26"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side26"
+        }
+      },
+      "_block": "minecraft:mud_brick_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -4,
+        -4,
+        -8
+      ],
+      "to": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top26"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side26"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side26"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side26"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side26"
+        }
+      },
+      "_block": "minecraft:mud_brick_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2,
+        -8,
+        -5
+      ],
+      "to": [
+        5,
+        -7,
+        -3
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            5,
+            6,
+            11,
+            10
+          ],
+          "texture": "#texture27"
+        },
+        "up": {
+          "uv": [
+            5,
+            10,
+            11,
+            6
+          ],
+          "texture": "#texture27"
+        },
+        "north": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#texture27"
+        },
+        "south": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#texture27"
+        },
+        "west": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#texture27"
+        },
+        "east": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#texture27"
+        }
+      },
+      "_block": "minecraft:oak_button{properties\u003d{face\u003d\u003ewall, powered\u003d\u003efalse, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8,
+        -8,
+        -8
+      ],
+      "to": [
+        16,
+        -4,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom28"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top28"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side28"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side28"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side28"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side28"
+        }
+      },
+      "_block": "minecraft:oak_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        18,
+        -8,
+        -5
+      ],
+      "to": [
+        21,
+        -7,
+        -3
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            5,
+            6,
+            11,
+            10
+          ],
+          "texture": "#texture29"
+        },
+        "up": {
+          "uv": [
+            5,
+            10,
+            11,
+            6
+          ],
+          "texture": "#texture29"
+        },
+        "north": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#texture29"
+        },
+        "south": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#texture29"
+        },
+        "west": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#texture29"
+        },
+        "east": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#texture29"
+        }
+      },
+      "_block": "minecraft:oak_button{properties\u003d{face\u003d\u003ewall, powered\u003d\u003efalse, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        -8,
+        0
+      ],
+      "to": [
+        -8,
+        0,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down30"
+        },
+        "up": {
+          "texture": "#up30"
+        },
+        "north": {
+          "texture": "#north30"
+        },
+        "south": {
+          "texture": "#south30"
+        },
+        "west": {
+          "texture": "#west30"
+        },
+        "east": {
+          "texture": "#east30"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -8,
+        0
+      ],
+      "to": [
+        0,
+        0,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        -8,
+        8
+      ],
+      "to": [
+        -8,
+        0,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down31"
+        },
+        "up": {
+          "texture": "#up31"
+        },
+        "north": {
+          "texture": "#north31"
+        },
+        "south": {
+          "texture": "#south31"
+        },
+        "west": {
+          "texture": "#west31"
+        },
+        "east": {
+          "texture": "#east31"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -8,
+        8
+      ],
+      "to": [
+        0,
+        0,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        -8,
+        8
+      ],
+      "to": [
+        8,
+        0,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        -8,
+        16
+      ],
+      "to": [
+        -8,
+        0,
+        24
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down32"
+        },
+        "up": {
+          "texture": "#up32"
+        },
+        "north": {
+          "texture": "#north32"
+        },
+        "south": {
+          "texture": "#south32"
+        },
+        "west": {
+          "texture": "#west32"
+        },
+        "east": {
+          "texture": "#east32"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        -8,
+        16
+      ],
+      "to": [
+        0,
+        0,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        -8,
+        16
+      ],
+      "to": [
+        8,
+        0,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        0,
+        -16
+      ],
+      "to": [
+        -8,
+        8,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        0,
+        -16
+      ],
+      "to": [
+        0,
+        8,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        0,
+        -8
+      ],
+      "to": [
+        -8,
+        8,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        0,
+        -8
+      ],
+      "to": [
+        0,
+        8,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        0,
+        0
+      ],
+      "to": [
+        -8,
+        8,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down33"
+        },
+        "up": {
+          "texture": "#up33"
+        },
+        "north": {
+          "texture": "#north33"
+        },
+        "south": {
+          "texture": "#south33"
+        },
+        "west": {
+          "texture": "#west33"
+        },
+        "east": {
+          "texture": "#east33"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        0,
+        0
+      ],
+      "to": [
+        0,
+        4,
+        8
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom34"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top34"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side34"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side34"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side34"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side34"
+        }
+      },
+      "_block": "minecraft:stone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        0,
+        8
+      ],
+      "to": [
+        -8,
+        8,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down35"
+        },
+        "up": {
+          "texture": "#up35"
+        },
+        "north": {
+          "texture": "#north35"
+        },
+        "south": {
+          "texture": "#south35"
+        },
+        "west": {
+          "texture": "#west35"
+        },
+        "east": {
+          "texture": "#east35"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        0,
+        8
+      ],
+      "to": [
+        0,
+        8,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        8
+      ],
+      "to": [
+        8,
+        8,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        0,
+        16
+      ],
+      "to": [
+        -8,
+        8,
+        24
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down36"
+        },
+        "up": {
+          "texture": "#up36"
+        },
+        "north": {
+          "texture": "#north36"
+        },
+        "south": {
+          "texture": "#south36"
+        },
+        "west": {
+          "texture": "#west36"
+        },
+        "east": {
+          "texture": "#east36"
+        }
+      },
+      "_block": "minecraft:stone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        0,
+        16
+      ],
+      "to": [
+        0,
+        8,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        16
+      ],
+      "to": [
+        8,
+        8,
+        24
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        8,
+        -16
+      ],
+      "to": [
+        -8,
+        16,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        8,
+        -16
+      ],
+      "to": [
+        0,
+        16,
+        -8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -16,
+        8,
+        -8
+      ],
+      "to": [
+        -8,
+        16,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        8,
+        -8
+      ],
+      "to": [
+        0,
+        16,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        8,
+        8
+      ],
+      "to": [
+        0,
+        12,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom37"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top37"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side37"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side37"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side37"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side37"
+        }
+      },
+      "_block": "minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        8,
+        8
+      ],
+      "to": [
+        8,
+        12,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom38"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top38"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side38"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side38"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side38"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side38"
+        }
+      },
+      "_block": "minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        8,
+        16
+      ],
+      "to": [
+        0,
+        12,
+        24
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom39"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top39"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side39"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side39"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side39"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side39"
+        }
+      },
+      "_block": "minecraft:brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        8,
+        16
+      ],
+      "to": [
+        8,
+        12,
+        24
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom40"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top40"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side40"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side40"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side40"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side40"
+        }
+      },
+      "_block": "minecraft:jungle_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        16,
+        -16
+      ],
+      "to": [
+        -8,
+        20,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom41"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top41"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side41"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side41"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side41"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side41"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -12,
+        20,
+        -12
+      ],
+      "to": [
+        -8,
+        24,
+        -8
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "texture": "#top41"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side41"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side41"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side41"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side41"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        16,
+        -16
+      ],
+      "to": [
+        0,
+        20,
+        -8
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom42"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top42"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side42"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side42"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side42"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side42"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -4,
+        20,
+        -12
+      ],
+      "to": [
+        0,
+        24,
+        -8
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "texture": "#top42"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side42"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side42"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side42"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side42"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -16,
+        16,
+        -8
+      ],
+      "to": [
+        -8,
+        20,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom43"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top43"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side43"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side43"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side43"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side43"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -12,
+        20,
+        -4
+      ],
+      "to": [
+        -8,
+        24,
+        0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "texture": "#top43"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side43"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side43"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side43"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side43"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -8,
+        16,
+        -8
+      ],
+      "to": [
+        0,
+        20,
+        0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom44"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#top44"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side44"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side44"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side44"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#side44"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -4,
+        20,
+        -4
+      ],
+      "to": [
+        0,
+        24,
+        0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "texture": "#top44"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side44"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side44"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#side44"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#side44"
+        }
+      },
+      "_block": "minecraft:stone_brick_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    }
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "scale": [
+        2,
+        2,
+        2
+      ]
+    },
+    "thirdperson_lefthand": {
+      "scale": [
+        2,
+        2,
+        2
+      ]
+    },
+    "head": {
+      "scale": [
+        3.26,
+        3.26,
+        3.26
+      ]
+    }
+  }
+}

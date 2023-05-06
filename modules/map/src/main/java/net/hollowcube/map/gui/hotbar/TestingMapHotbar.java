@@ -16,7 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class TestingMapHotbar {
-    private TestingMapHotbar() {}
+    private TestingMapHotbar() {
+    }
 
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:map/testingmaphotbar",
                     EventFilter.INSTANCE)

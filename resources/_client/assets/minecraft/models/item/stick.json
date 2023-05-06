@@ -1,11 +1,26 @@
 {
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "item/stick"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/stick"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1000
+      },
+      "model": "mapmaker:item/blank"
     },
-    "overrides": [
-        {"predicate": {"custom_model_data": 1000}, "model": "mapmaker:item/blank"},
-        {"predicate": {"custom_model_data": 1001}, "model": "mapmaker:item/half_stone_brick"},
-        {"predicate": {"custom_model_data": 1002}, "model": "mapmaker:item/matt-mini-castle"}
-    ]
+    {
+      "predicate": {
+        "custom_model_data": 1001
+      },
+      "model": "mapmaker:item/half_stone_brick"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1002
+      },
+      "model": "mapmaker:item/matt-mini-castle"
+    }
+  ]
 }

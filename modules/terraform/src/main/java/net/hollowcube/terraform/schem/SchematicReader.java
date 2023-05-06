@@ -8,7 +8,10 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray;
-import org.jglrxavpok.hephaistos.nbt.*;
+import org.jglrxavpok.hephaistos.nbt.CompressedProcesser;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTInt;
+import org.jglrxavpok.hephaistos.nbt.NBTReader;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -18,7 +21,8 @@ import java.nio.file.Path;
  */
 public final class SchematicReader {
 
-    private SchematicReader() {}
+    private SchematicReader() {
+    }
 
     public static @NotNull Schematic read(@NotNull InputStream stream) {
         try (var reader = new NBTReader(stream, CompressedProcesser.GZIP)) {

@@ -13,7 +13,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class ExtraArguments {
-    private ExtraArguments() {}
+    private ExtraArguments() {
+    }
 
     public static @NotNull Argument<String> Selection(@NotNull String id) {
         return ArgumentType.String(id)

@@ -22,7 +22,6 @@ public interface HistoryStack {
      * then push view C, then pop. The resulting visible view will be View A.
      *
      * @param view the view to push
-     *
      * @see #push(View)
      */
     void pushTransient(@NotNull View view);

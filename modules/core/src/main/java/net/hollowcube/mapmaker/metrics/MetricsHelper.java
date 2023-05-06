@@ -40,8 +40,7 @@ public class MetricsHelper {
     public String getMetricName(int tag) {
         if (tag < MetricsEnum.values().length) {
             return MetricsEnum.values()[tag].name;
-        }
-        else {
+        } else {
             return "NAN";
         }
     }
@@ -61,6 +60,7 @@ public class MetricsHelper {
 
     /**
      * Records a new metric for a player's first join time
+     *
      * @param uuid Player UUID
      */
     public void recordMetricFirstJoinTime(String uuid) {
@@ -75,7 +75,8 @@ public class MetricsHelper {
 
     /**
      * Records a new metric for player's session play time
-     * @param uuid Player UUID
+     *
+     * @param uuid         Player UUID
      * @param timestamp_ms Time since epoch in milliseconds
      */
     public void recordMetricSessionPlayTimeMs(String uuid, long timestamp_ms) {

@@ -13,16 +13,20 @@ public interface PlayerStorage {
         return new PlayerStorageMemory();
     }
 
-    @Blocking static @NotNull PlayerStorage mongo(@NotNull MongoConfig config) {
+    @Blocking
+    static @NotNull PlayerStorage mongo(@NotNull MongoConfig config) {
         var client = MongoClientFactory.get().newClient(config);
         return new PlayerStorageMongo(client, config);
     }
 
-    @Blocking @NotNull PlayerData createPlayer(@NotNull PlayerData player) throws DuplicateEntryError;
+    @Blocking
+    @NotNull PlayerData createPlayer(@NotNull PlayerData player) throws DuplicateEntryError;
 
-    @Blocking @NotNull PlayerData getPlayerByUuid(@NotNull String uuid) throws NotFoundError;
+    @Blocking
+    @NotNull PlayerData getPlayerByUuid(@NotNull String uuid) throws NotFoundError;
 
-    @Blocking void updatePlayer(@NotNull PlayerData player) throws NotFoundError;
+    @Blocking
+    void updatePlayer(@NotNull PlayerData player) throws NotFoundError;
 
 
     class NotFoundError extends RuntimeException {

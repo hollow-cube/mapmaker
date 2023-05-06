@@ -73,12 +73,14 @@ public abstract class View implements Element {
      * <p>
      * Can be used to refresh state, subscribe to an event, etc.
      */
-    protected void mount() {}
+    protected void mount() {
+    }
 
     /**
      * Called when this view is unmounted (stopped being shown to a player).
      * <p>
      * Can be used to unsubscribe from an event, etc.
      */
-    protected void unmount() {}
+    protected void unmount() {
+    }
 }

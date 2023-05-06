@@ -16,8 +16,8 @@ public class Scoreboards {
     private static Sidebar lobbyScoreboard;
 
     // Non-static scoreboards are tracked per player as their active scoreboard
-    private static Tag<Sidebar> activeScoreboard = Tag.Transient("activeScoreboard");
-    private static Tag<Boolean> scoreboardVisible = Tag.Boolean("scoreboardShown");
+    private static final Tag<Sidebar> activeScoreboard = Tag.Transient("activeScoreboard");
+    private static final Tag<Boolean> scoreboardVisible = Tag.Boolean("scoreboardShown");
 
     public static void init() {
         lobbyScoreboard = createLobbyScoreboard();

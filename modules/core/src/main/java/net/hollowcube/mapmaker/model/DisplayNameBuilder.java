@@ -7,8 +7,6 @@ import net.minestom.server.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutionException;
-
 public class DisplayNameBuilder {
     private static final Logger logger = LoggerFactory.getLogger(DisplayNameBuilder.class);
     private static PlayerStorage playerStorage;
@@ -19,15 +17,10 @@ public class DisplayNameBuilder {
 
     //TODO move to a better class with diff name
     public static String getDisplayName(String uuid) {
-        try {
-            String name;
-            if ((name = playerStorage.getPlayerByUuid(uuid).get().getDisplayName()) != null)
-                return name;
-        } catch (PlayerStorage.NotFoundError e) {
-            logger.info("Tried to get display name for player not in storage" + uuid);
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        //todo just cache the player display name on join once and have a reload event/kafka message when something changes that can affect the player.
+        String name;
+        if ((name = playerStorage.getPlayerByUuid(uuid).getDisplayName()) != null)
+            return name;
         return uuid;
     }
 
@@ -47,7 +40,7 @@ public class DisplayNameBuilder {
 
         try {
             for (PlatformPermission permission : PlatformPermission.values()) {
-                if (permissionManager.checkPermission(uuid, permission).get()) {
+                if (permissionManager.checkPermission(uuid, permission)) {
                     displayName.append(Prefix.getDisplayFromPerm(permission));
                 }
             }

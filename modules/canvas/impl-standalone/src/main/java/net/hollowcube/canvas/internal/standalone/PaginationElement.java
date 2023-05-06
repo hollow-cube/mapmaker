@@ -1,6 +1,5 @@
 package net.hollowcube.canvas.internal.standalone;
 
-import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Pagination2;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
 public class PaginationElement<T extends View> extends BaseElement implements Pagination2 {
     private final Class<T> itemClass;
 
-    private List<BaseElement> pageCache = new ArrayList<>();
+    private final List<BaseElement> pageCache = new ArrayList<>();
     private Consumer<PageRequest<T>> pageHandler = null;
     private int maxPage = 0;
     private int page = 0;

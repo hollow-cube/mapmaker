@@ -11,21 +11,26 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface SaveStateStorage {
 
-    class NotFoundError extends RuntimeException { }
+    class NotFoundError extends RuntimeException {
+    }
 
     static @NotNull SaveStateStorage memory() {
         return new SaveStateStorageMemory();
     }
 
-    static @Blocking @NotNull SaveStateStorage mongo(@NotNull MongoConfig config) {
+    static @Blocking
+    @NotNull SaveStateStorage mongo(@NotNull MongoConfig config) {
         var client = MongoClientFactory.get().newClient(config);
         return new SaveStateStorageMongo(client, config);
     }
 
-    @Blocking @NotNull SaveState createSaveState(@NotNull SaveState saveState);
+    @Blocking
+    @NotNull SaveState createSaveState(@NotNull SaveState saveState);
 
-    @Blocking void updateSaveState(@NotNull SaveState saveState);
+    @Blocking
+    void updateSaveState(@NotNull SaveState saveState);
 
-    @Blocking @NotNull SaveState getLatestSaveState(@NotNull String playerId, @NotNull String mapId, @NotNull SaveState.Type type);
+    @Blocking
+    @NotNull SaveState getLatestSaveState(@NotNull String playerId, @NotNull String mapId, @NotNull SaveState.Type type);
 
 }

@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 final class Globals {
-    private Globals() {}
+    private Globals() {
+    }
 
     private static ControllerFactory factory = null;
 

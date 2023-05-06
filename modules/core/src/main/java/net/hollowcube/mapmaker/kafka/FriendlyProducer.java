@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.kafka;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
 import io.prometheus.client.Counter;
 import net.hollowcube.common.ServerRuntime;
 import org.apache.kafka.clients.producer.KafkaProducer;
