@@ -1,10 +1,9 @@
 name: Staging Build & Deploy
 
 on:
-  workflow_run:
-    workflows: ['Quality']
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
   docker-build:

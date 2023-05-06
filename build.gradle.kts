@@ -1,6 +1,6 @@
 plugins {
     id("net.ltgt.errorprone") version "2.0.2" apply false
-    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
+    id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     id("org.sonarqube") version "3.5.0.2730"
 }
 
