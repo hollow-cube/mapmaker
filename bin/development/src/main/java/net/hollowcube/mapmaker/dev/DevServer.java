@@ -134,7 +134,6 @@ public class DevServer {
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         MojangAuth.init();
 
-
         // Start phase 1
         // Connect to low level services
 

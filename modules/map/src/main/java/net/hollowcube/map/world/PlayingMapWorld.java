@@ -1,6 +1,9 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.util.StringUtil;
@@ -13,8 +16,11 @@ import net.hollowcube.world.generation.MapGenerators;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
@@ -26,35 +32,32 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@SuppressWarnings("UnstableApiUsage")
-public class EditingMapWorldNew implements InternalMapWorldNew {
-    private static final System.Logger logger = System.getLogger(EditingMapWorldNew.class.getName());
+public class PlayingMapWorld implements InternalMapWorld {
+    private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
 
     // If set, indicates that the player is an editor.
-    private static final Tag<Boolean> TAG_EDITING = Tag.Boolean("editing").defaultValue(false);
+    private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
 
     private final MapServer server;
     private final MapData map;
     private int flags = 0;
 
     private final BaseWorld baseWorld;
-    private TestingMapWorldNew testWorld = null;
-
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
-    private final EventNode<InstanceEvent> scopedNode = EventNode.event("world-local", EventFilter.INSTANCE, ev -> {
+    private final EventNode<InstanceEvent> scopedNode = EventNode.event("mapworld/playing", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
-            return event.getPlayer().hasTag(TAG_EDITING);
+            return event.getPlayer().hasTag(TAG_PLAYING);
         }
         return true;
     });
 
-    public EditingMapWorldNew(@NotNull MapServer server, @NotNull MapData map) {
+    public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
         this.map = map;
-        this.flags |= FLAG_EDITING;
+        this.flags |= FLAG_PLAYING;
 
         var instance = new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT);
         this.baseWorld = new BaseWorld(server.worldManager(), map.getId(), instance);
@@ -65,6 +68,9 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
+
+        eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
+        eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
     }
 
     @Override
@@ -92,6 +98,7 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
         this.scopedNode.addChild(eventNode);
     }
 
+
     @Override
     public @NotNull Point spawnPoint() {
         return map.getSpawnPoint();
@@ -114,38 +121,25 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
 
     @Override
     public @Blocking void close() {
-        if (testWorld != null) {
-            testWorld.close();
-        }
-
-        // Save the backing world (blocks, etc)
-        var fileId = baseWorld.saveWorld();
-
-        // Update the map with the new file id & save it
-        map.setMapFileId(fileId);
-        server.mapStorage().updateMap(map);
-
         // Unload the backing world
         baseWorld.unloadWorld();
     }
 
     @Override
-    public @Nullable MapWorldNew getMapForPlayer(@NotNull Player player) {
-        if (activePlayers.contains(player))
-            return this;
-        if (testWorld != null)
-            return testWorld.getMapForPlayer(player);
-        return null;
+    public @Nullable MapWorld getMapForPlayer(@NotNull Player player) {
+        return activePlayers.contains(player) ? this : null;
     }
 
     @Override
     public @Blocking void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId(), SaveState.Type.EDITING);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(
+                this, playerData.getId(), SaveState.Type.PLAYING);
 
         activePlayers.add(player);
-        player.setTag(TAG_EDITING, true);
+        player.setTag(TAG_PLAYING, true);
+        player.setTag(MapHooks.PLAYING, true); // Legacy
         player.setTag(SaveState.TAG, saveState);
         player.refreshCommands();
 
@@ -154,21 +148,23 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
         for (int i = 0; i < inventory.size(); i++) {
             player.getInventory().setItemStack(i, inventory.get(i));
         }
-        player.setGameMode(GameMode.CREATIVE);
+        player.setGameMode(GameMode.ADVENTURE);
         player.teleport(saveState.getPos()).join();
 
-        player.sendMessage("Now editing " + map.getName());
+        EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
+        player.sendMessage("Now playing " + map.getName());
     }
 
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
+        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+
+        player.removeTag(TAG_PLAYING);
+        player.removeTag(MapHooks.PLAYING); // Legacy
+        activePlayers.remove(player);
+
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
-
-            // Formerly updateSaveStateForPlayer
-            saveState.setPos(player.getPosition());
-            saveState.setInventory(List.of(player.getInventory().getItemStacks()));
-
             try {
                 var saveStateStorage = server.saveStateStorage();
                 saveStateStorage.updateSaveState(saveState);
@@ -177,30 +173,14 @@ public class EditingMapWorldNew implements InternalMapWorldNew {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
             }
         }
-
-        player.removeTag(TAG_EDITING);
-        activePlayers.remove(player);
     }
 
-    private @Blocking @NotNull TestingMapWorldNew getTestWorld() {
-        if (testWorld == null) {
-            testWorld = new TestingMapWorldNew(this);
-            testWorld.load();
-        }
-
-        return testWorld;
+    private void preventBlockBreak(PlayerBlockBreakEvent event) {
+        event.setCancelled(true);
     }
 
-    public void enterTestMode(@NotNull Player player) {
-        Thread.startVirtualThread(() -> movePlayerToTestWorld(player));
-    }
-
-    private @Blocking void movePlayerToTestWorld(@NotNull Player player) {
-        // remove from this map (leaving them in the Minestom instance)
-        removePlayer(player);
-
-        // add to the test world
-        getTestWorld().acceptPlayer(player);
+    private void preventBlockPlace(PlayerBlockPlaceEvent event) {
+        event.setCancelled(true);
     }
 
 }

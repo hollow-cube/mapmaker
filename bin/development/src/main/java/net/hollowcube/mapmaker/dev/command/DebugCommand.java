@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.dev.command;
 
 import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -47,7 +47,7 @@ public class DebugCommand extends Command {
             return;
         }
 
-        var world = MapWorldNew.forPlayerOptional(player);
+        var world = MapWorld.forPlayerOptional(player);
         if (world == null) {
             player.sendMessage("You are not in a map world!");
             return;

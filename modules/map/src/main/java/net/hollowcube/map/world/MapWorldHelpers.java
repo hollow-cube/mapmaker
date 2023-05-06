@@ -17,7 +17,7 @@ class MapWorldHelpers {
     private MapWorldHelpers() {
     }
 
-    public static @NotNull List<FeatureProvider> loadFeatures(@NotNull InternalMapWorldNew world) {
+    public static @NotNull List<FeatureProvider> loadFeatures(@NotNull InternalMapWorld world) {
         var enabledFeatures = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Load each feature in parallel
@@ -44,7 +44,7 @@ class MapWorldHelpers {
     }
 
     public static @Blocking @NotNull SaveState getOrCreateSaveState(
-            @NotNull InternalMapWorldNew world,
+            @NotNull InternalMapWorld world,
             @NotNull String playerId,
             @NotNull SaveState.Type stateType
     ) {

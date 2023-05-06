@@ -1,6 +1,8 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.map.world.InternalMapWorld;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.minestom.server.command.CommandSender;
@@ -29,6 +31,11 @@ public class HubCommand extends BaseMapCommand {
 
         try {
             sender.sendMessage("Returning to hub");
+
+            var world = MapWorld.forPlayerOptional(player);
+            if (world instanceof InternalMapWorld internalWorld) {
+                internalWorld.removePlayer(player);
+            }
             bridge.sendPlayerToHub(player);
         } catch (Exception e) {
             logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());

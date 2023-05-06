@@ -10,7 +10,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
@@ -53,13 +53,13 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     }
 
     @Override
-    public boolean initMap(@NotNull MapWorldNew world) {
-        if ((world.flags() & MapWorldNew.FLAG_EDITING) != 0) {
+    public boolean initMap(@NotNull MapWorld world) {
+        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
             world.itemRegistry().register(FINISH_PLATE_ITEM);
         }
 
-        if ((world.flags() & MapWorldNew.FLAG_PLAYING) != 0) {
+        if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {
             world.addScopedEventNode(resetManagementNode);
         }
 
@@ -97,7 +97,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
             if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
-            var map = MapWorldNew.forPlayer(player).map();
+            var map = MapWorld.forPlayer(player).map();
 
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)

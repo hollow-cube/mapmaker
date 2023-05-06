@@ -3,7 +3,7 @@ package net.hollowcube.map.command;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.coordinate.Pos;
@@ -41,10 +41,10 @@ public class BuildModeCommand extends BaseMapCommand {
             return false;
         }
 
-        var world = MapWorldNew.forPlayerOptional(player);
+        var world = MapWorld.forPlayerOptional(player);
         if (world == null) return false;
 
-        return (world.flags() & MapWorldNew.FLAG_TESTING) != 0;
+        return (world.flags() & MapWorld.FLAG_TESTING) != 0;
     }
 
     public static void enterBuildMode(@NotNull Player player, @NotNull MapServer mapServer) {

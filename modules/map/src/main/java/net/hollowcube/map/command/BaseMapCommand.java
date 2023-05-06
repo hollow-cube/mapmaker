@@ -1,6 +1,6 @@
 package net.hollowcube.map.command;
 
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
@@ -29,12 +29,12 @@ public class BaseMapCommand extends Command {
             if (!(sender instanceof Player player)) {
                 return false;
             }
-            var mapWorld = MapWorldNew.forPlayerOptional(player);
+            var mapWorld = MapWorld.forPlayerOptional(player);
             if (mapWorld == null) return false;
             // If not edit only we can return true immediately (allowed no matter the map mode)
             if (!editOnly) return true;
 
-            return (mapWorld.flags() & MapWorldNew.FLAG_EDITING) != 0;
+            return (mapWorld.flags() & MapWorld.FLAG_EDITING) != 0;
         };
     }
 }

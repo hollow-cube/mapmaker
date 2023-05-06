@@ -3,7 +3,7 @@ package net.hollowcube.map.feature;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.map.lang.MapMessages;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -70,8 +70,8 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
             if (player == null) return;
 
             // Get the current world of the player, if it is not an editing world then do nothing.
-            var world = MapWorldNew.forPlayerOptional(player);
-            if (world == null || (world.flags() & MapWorldNew.FLAG_EDITING) == 0) {
+            var world = MapWorld.forPlayerOptional(player);
+            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) {
                 logger.log(System.Logger.Level.INFO, "Player {0} is not editing a map, ignoring schematic upload.", player.getUuid());
                 respondAndForget(msg, ERR_NOT_EDITING);
                 return;

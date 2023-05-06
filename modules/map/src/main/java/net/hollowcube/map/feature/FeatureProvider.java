@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature;
 
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.common.config.ConfigProvider;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -25,10 +25,10 @@ public interface FeatureProvider {
      * <p>
      * A map will not be considered "ready" until this future completes.
      *
-     * @param world The {@link MapWorldNew} being initialized.
+     * @param world The {@link MapWorld} being initialized.
      * @return False indicates that a feature is not enabled, so a cleanup callback will not be sent
      */
-    default @Blocking boolean initMap(@NotNull MapWorldNew world) {
+    default @Blocking boolean initMap(@NotNull MapWorld world) {
         return false;
     }
 
@@ -39,9 +39,9 @@ public interface FeatureProvider {
      * Note that all players will be gone by the time this is called.
      * {@link net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent} should be used for player cleanup.
      *
-     * @param world The {@link MapWorldNew} being cleaned up
+     * @param world The {@link MapWorld} being cleaned up
      */
-    default @Blocking void cleanupMap(@NotNull MapWorldNew world) {
+    default @Blocking void cleanupMap(@NotNull MapWorld world) {
     }
 
 }

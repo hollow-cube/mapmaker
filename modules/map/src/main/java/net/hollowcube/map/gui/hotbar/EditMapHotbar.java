@@ -2,7 +2,7 @@ package net.hollowcube.map.gui.hotbar;
 
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.map.command.TestModeCommand;
-import net.hollowcube.map.world.MapWorldNew;
+import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -51,7 +51,7 @@ public final class EditMapHotbar {
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
-        var server = MapWorldNew.forPlayer(player).server();
+        var server = MapWorld.forPlayer(player).server();
         switch (customModelData) {
             case TEST_MODE_CMD -> TestModeCommand.enterTestMode(player, server);
         }
