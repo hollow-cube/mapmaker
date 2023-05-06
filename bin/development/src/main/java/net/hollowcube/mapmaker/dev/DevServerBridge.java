@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.common.result.FutureResult;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 public class EditMapIcon extends View {
     public static final String SIG_CREATE_MAP_IN_SLOT = "create_map_in_slot";
@@ -39,7 +40,7 @@ public class EditMapIcon extends View {
 
     private int slot = -1;
     private String mapId = null; // Set if state is FULL
-    private ListenableFuture<MapData> mapDataFuture = null;
+    private Future<MapData> mapDataFuture = null;
 
 
     public EditMapIcon(@NotNull Context context) {
@@ -57,22 +58,15 @@ public class EditMapIcon extends View {
 
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
         if (state == State.FULL) {
-            mapDataFuture = Futures.submit(() -> mapStorage.getMapById(mapId), ForkJoinPool.commonPool());
-            Futures.addCallback(mapDataFuture, new FutureCallback<>() {
-                @Override
-                public void onSuccess(MapData result) {
-                    full.setArgs(
-                            Component.text(slot + 1),
-                            Component.text(result.getName())
-                    );
-                    setState(Element.State.ACTIVE);
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    throw new RuntimeException(t);
-                }
-            }, Runnable::run);
+            mapDataFuture = VIRTUAL_EXECUTOR.submit(() -> {
+                var map = mapStorage.getMapById(mapId);
+                full.setArgs(
+                        Component.text(slot + 1),
+                        Component.text(map.getName())
+                );
+                setState(Element.State.ACTIVE);
+                return map;
+            });
             // todo super.ephemeralLoad(); // function would load but also handle unmounting gracefully (eg ignore result if unmounted)
         } else {
             var slotArg = Component.text(slot + 1);

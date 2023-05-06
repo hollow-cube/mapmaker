@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -39,22 +40,29 @@ public class ButtonElement extends LabelElement {
     }
 
     @Override
-    public void wireAction(@NotNull View owner, @NotNull Method method) {
+    public void wireAction(@NotNull View owner, @NotNull Method method, @NotNull Action action) {
         method.setAccessible(true); // NOSONAR
         handlers.add((player, slot, clickType) -> {
             if (method.getParameterCount() < 3 && clickType != ClickType.LEFT_CLICK)
                 return CLICK_DENY;
-            try {
-                var args = new ArrayList<>();
-                if (method.getParameterCount() > 0)
-                    args.add(player);
-                if (method.getParameterCount() > 1)
-                    args.add(slot);
-                if (method.getParameterCount() > 2)
-                    args.add(clickType);
-                method.invoke(owner, args.toArray());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke action method " + method, e);
+            Runnable doCall = () -> {
+                try {
+                    var args = new ArrayList<>();
+                    if (method.getParameterCount() > 0)
+                        args.add(player);
+                    if (method.getParameterCount() > 1)
+                        args.add(slot);
+                    if (method.getParameterCount() > 2)
+                        args.add(clickType);
+                    method.invoke(owner, args.toArray());
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to invoke action method " + method, e);
+                }
+            };
+            if (action.async()) {
+                Thread.startVirtualThread(doCall);
+            } else {
+                doCall.run();
             }
             return CLICK_DENY;
         });

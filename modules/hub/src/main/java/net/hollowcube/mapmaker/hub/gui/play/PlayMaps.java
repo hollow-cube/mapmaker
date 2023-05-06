@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayMaps extends View {
+    private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
 
     private @ContextObject MapStorage mapStorage;
 
@@ -26,22 +27,26 @@ public class PlayMaps extends View {
 
     @Action("paging")
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
-        mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1)
-                .then(entries -> {
-                    if (entries.isEmpty()) {
-                        request.respond(List.of(), false);
-                        return;
-                    }
+        //todo could support async in this action
+        Thread.startVirtualThread(() -> {
+            try {
+                var entries = mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1);
+                if (entries.isEmpty()) {
+                    request.respond(List.of(), false);
+                    return;
+                }
 
-                    var result = new ArrayList<MapEntry>();
-                    for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
-                        result.add(new MapEntry(request.context(), entries.get(i)));
-                    }
-                    request.respond(result, entries.size() == request.pageSize() + 1);
-                })
-                .thenErr(err -> {
-                    throw new RuntimeException(err.message());
-                });
+                var result = new ArrayList<MapEntry>();
+                for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
+                    result.add(new MapEntry(request.context(), entries.get(i)));
+                }
+                request.respond(result, entries.size() == request.pageSize() + 1);
+            } catch (Exception e) {
+                //todo log in sentry
+                //todo feedback to user that it went wrong. Right now will load forever
+                logger.log(System.Logger.Level.ERROR, "Failed to fetch page", e);
+            }
+        });
     }
 
     @Action("parkour_toggle")

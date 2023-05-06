@@ -274,7 +274,7 @@ public class DevServer {
 
             int i = 0;
             for (var facet : ServiceLoader.load(Facet.class)) {
-                scope.fork(Executors.callable(() -> facet.hook(MinecraftServer.process())));
+                scope.fork(Executors.callable(() -> facet.hook(MinecraftServer.process(), configProvider)));
                 i++;
             }
             logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);

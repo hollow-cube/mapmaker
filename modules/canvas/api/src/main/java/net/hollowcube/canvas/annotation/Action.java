@@ -9,4 +9,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 public @interface Action {
     String value();
+
+    /**
+     * If set, the action function will be called in a virtual thread.
+     */
+    boolean async() default false;
 }
