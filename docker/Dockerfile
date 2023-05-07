@@ -4,4 +4,4 @@ WORKDIR /app
 COPY ./bin/development/build/libs/development-all.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "--add-modules", "jdk.incubator.concurrent", "-jar", "server.jar"]
