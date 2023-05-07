@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-ubi9-minimal as runtime
+FROM eclipse-temurin:19-jre-ubi9-minimal
 
 WORKDIR /app
 COPY ./bin/development/build/libs/development-all.jar /app/server.jar
