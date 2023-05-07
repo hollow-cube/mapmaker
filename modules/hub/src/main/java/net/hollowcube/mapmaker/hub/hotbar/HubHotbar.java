@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.hotbar;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.gui.play.PlayMaps;
+import net.hollowcube.mapmaker.hub.gui.play.Query;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -16,6 +17,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 
 public final class HubHotbar {
     private HubHotbar() {
@@ -62,7 +64,7 @@ public final class HubHotbar {
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         switch (customModelData) {
-            case PLAY_ITEM_CMD -> server.newOpenGUI(player, PlayMaps::new);
+            case PLAY_ITEM_CMD -> server.newOpenGUI(player, c -> new PlayMaps(c.with(Map.of("query", new Query()))));
             case CREATE_ITEM_CMD -> server.newOpenGUI(player, CreateMaps::new);
         }
     }
