@@ -36,6 +36,11 @@ public class MapData {
 
     public static final @Language("regexp") String NAME_REGEX = "[a-zA-Z0-9_ ]{1,32}";
 
+    // Conditions:
+    //  Allowed characters: A-Z, 0-9, _
+    //  Must contain at least one: A-Z
+    private static final @Language("regexp") String ALIAS_REGEX = "^[A-Z0-9_]*[A-Z]+[A-Z0-9_]*$";
+
     private String id;
     private String owner;
     private String name = "Untitled Map";
@@ -128,20 +133,13 @@ public class MapData {
         return aliasId;
     }
 
-    public static Boolean isValidAlias(String aliasId) {
+    public static boolean isValidAlias(String aliasId) {
         if (aliasId.length() < 3 || aliasId.length() > 16)
             return false;
-
-        // Conditions:
-        //  Allowed characters: A-Z, 0-9, _
-        //  Must contain at least one: A-Z
-        Pattern pattern = Pattern.compile("^[A-Z0-9_]*[A-Z]+[A-Z0-9_]*$");
-        Matcher matcher = pattern.matcher(aliasId);
-
-        return matcher.matches();
+        return aliasId.matches(ALIAS_REGEX);
     }
 
-    public Boolean setAliasId(String aliasId) {
+    public boolean setAliasId(String aliasId) {
         if (isValidAlias(aliasId)) {
             this.aliasId = aliasId;
             return true;
