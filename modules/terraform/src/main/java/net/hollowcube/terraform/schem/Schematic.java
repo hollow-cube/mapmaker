@@ -2,6 +2,7 @@ package net.hollowcube.terraform.schem;
 
 import net.hollowcube.util.schem.Rotation;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.batch.BatchOption;
 import net.minestom.server.instance.batch.RelativeBlockBatch;
 import net.minestom.server.instance.block.Block;
@@ -26,6 +27,8 @@ public record Schematic(
         byte[] blocks
 ) {
     private static final System.Logger logger = System.getLogger(Schematic.class.getName());
+
+    static final Schematic EMPTY = new Schematic(Vec.ZERO, Vec.ZERO, new Block[0], new byte[0]);
 
     public Schematic {
         palette = Arrays.copyOf(palette, palette.length);

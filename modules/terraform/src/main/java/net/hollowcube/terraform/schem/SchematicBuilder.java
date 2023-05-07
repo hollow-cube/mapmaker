@@ -43,13 +43,19 @@ public class SchematicBuilder {
     }
 
     public @NotNull Schematic build() {
-        Point min = new Vec(Double.MAX_VALUE), max = new Vec(Double.MIN_VALUE);
+        if (blockSet.isEmpty()) {
+            return Schematic.EMPTY;
+        }
+
+        Point min = blockSet.keySet().stream().findFirst().get();
+        Point max = min;
         for (Point point : blockSet.keySet()) {
             min = CoordinateUtil.min(min, point);
             max = CoordinateUtil.max(max, point);
         }
 
         var size = max.sub(min).add(1);
+        // This means the offset its always from the min corner, not zero
         offset = offset.add(min);
         var blockCount = size.blockX() * size.blockY() * size.blockZ();
 

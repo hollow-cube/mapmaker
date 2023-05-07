@@ -70,7 +70,12 @@ public abstract class MapServerBase implements MapServer {
             return false;
         });
         MinecraftServer.getGlobalEventHandler().addChild(blockEvents);
-        HCPlacementRules.init(blockEvents);
+//        try {
+//            HCPlacementRules.init(blockEvents);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw e;
+//        }
 
         // Terraform initialization
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
@@ -119,6 +124,9 @@ public abstract class MapServerBase implements MapServer {
 
     @Override
     public @NotNull List<FeatureProvider> features() {
+        if (features == null) {
+            return List.of();
+        }
         return features;
     }
 
@@ -154,12 +162,13 @@ public abstract class MapServerBase implements MapServer {
         var player = event.getPlayer();
         player.refreshCommands();
 
-        var map = MapWorld.forPlayer(event.getPlayer()).map();
-        if (map.isPublished()) {
-            Scoreboards.showPlayerPlayingScoreboard(player, map);
-        } else {
-            Scoreboards.showPlayerEditingScoreboard(player, map);
-        }
+        // This is invalid because the player has not actually entered the map, so forPlayer fails.
+//        var map = MapWorld.forPlayer(event.getPlayer()).map();
+//        if (map.isPublished()) {
+//            Scoreboards.showPlayerPlayingScoreboard(player, map);
+//        } else {
+//            Scoreboards.showPlayerEditingScoreboard(player, map);
+//        }
     }
 
     private void handleMapUnregister(@NotNull MapWorldUnregisterEvent event) {
