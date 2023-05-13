@@ -3,6 +3,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     application
     id("net.kyori.blossom") version "1.2.0"
+
+    id("com.github.evestera.depsize") version "0.1.0"
 }
 
 val minestomVersion = rootProject.property("minestomVersion")

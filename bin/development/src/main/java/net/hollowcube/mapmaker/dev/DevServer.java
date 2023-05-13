@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
+import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
@@ -119,6 +120,7 @@ public class DevServer {
     private MapPermissionManager mapPermissions;
 
     private PlayerService playerService;
+    private LegacyMapService legacyMapService = null;
 
     private DevHubServer hub;
     private DevMapServer maps;
@@ -187,8 +189,17 @@ public class DevServer {
 
             if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
                 this.worldManager = new WorldManager(new FileStorageMemory());
+                this.legacyMapService = LegacyMapService.create("s3://231751fdba5d68aa03ae55c2d817443a:34430f6c5385fe383d52ed8ac420a7173a76045078608f128772efc9ed160f02@bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com/mapmaker");
             } else {
-                this.worldManager = new WorldManager(FileStorageS3.connect(config.s3().uri()));
+                scope.fork(() -> {
+                    try {
+                        this.worldManager = new WorldManager(FileStorageS3.connect(config.s3().uri()));
+                        this.legacyMapService = LegacyMapService.create(config.s3().uri());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                });
             }
 
             // SpiceDB
@@ -220,7 +231,7 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions, playerService);
+            this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions, playerService, legacyMapService);
             this.maps = new DevMapServer(bridge, mapStorage, metricStorage, saveStateStorage, worldManager, platformPermissions);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);

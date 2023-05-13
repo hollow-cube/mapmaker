@@ -1,6 +1,7 @@
 package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,7 +88,13 @@ public abstract class View implements Element {
     }
 
     protected void async(@NotNull Runnable func) {
-        VIRTUAL_EXECUTOR.submit(func);
+        VIRTUAL_EXECUTOR.submit(() -> {
+            try {
+                func.run();
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
+        });
     }
 
     protected <T> @NotNull Future<T> async(@NotNull Callable<T> func) {

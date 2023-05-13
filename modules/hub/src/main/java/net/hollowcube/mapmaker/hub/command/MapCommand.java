@@ -5,6 +5,7 @@ import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.Handler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
+import net.hollowcube.mapmaker.hub.legacy.LegacyCommand;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
@@ -47,6 +48,9 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new EditCommand());
         addSubcommand(new PublishCommand());
         addSubcommand(new DeleteCommand());
+
+        // Legacy
+        addSubcommand(new LegacyCommand(server));
 
         // Admin
         addSubcommand(new MapAdminCommand(server, handler));

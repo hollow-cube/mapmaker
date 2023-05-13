@@ -49,6 +49,8 @@ public class MapData {
     // internally as a reference to a map. Use the ID instead.
     private String publishedId;
 
+    private boolean legacy = false;
+
     // The following is unqueryable data, may be stored in serialized form.
 
     // ID of the file in storage, or null if the map does not yet exist (it is lazily created)
@@ -119,6 +121,13 @@ public class MapData {
         this.publishedId = publishedId;
     }
 
+    public boolean isLegacy() {
+        return legacy;
+    }
+
+    public void setLegacy(boolean legacy) {
+        this.legacy = legacy;
+    }
 
     public String getMapFileId() {
         return mapFileId;

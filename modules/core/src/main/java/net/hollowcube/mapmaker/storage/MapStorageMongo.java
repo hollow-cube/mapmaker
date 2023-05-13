@@ -201,6 +201,7 @@ public class MapStorageMongo implements MapStorage {
                     }
                     case "publishedAt" -> value.setPublishedAt(Instant.ofEpochMilli(reader.readDateTime()));
                     case "publishedId" -> value.setPublishedId(reader.readString());
+                    case "legacy" -> value.setLegacy(reader.readBoolean());
                     case "icon" -> {
                         Material material = Material.fromNamespaceId(reader.readString());
                         if (material != null) {
@@ -255,6 +256,9 @@ public class MapStorageMongo implements MapStorage {
             if (value.isPublished()) {
                 writer.writeDateTime("publishedAt", value.getPublishedAt().toEpochMilli());
                 writer.writeString("publishedId", value.getPublishedId());
+            }
+            if (value.isLegacy()) {
+                writer.writeBoolean("legacy", true);
             }
             if (value.getIcon() != null) {
                 writer.writeString("icon", value.getIcon().material().namespace().toString());

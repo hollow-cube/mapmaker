@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.common.base.Splitter;
+import kotlin.Pair;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +31,20 @@ public record FileStorageS3(
      * @param uri A URI in the format of s3://accessKey:secretKey@address/bucket.
      *            Currently, must follow this exact format.
      */
-    public static @Blocking
-    @NotNull FileStorage connect(@NotNull String uri) {
+    @Blocking
+    public static @NotNull FileStorage connect(@NotNull String uri) {
+        var conn = connectS3(uri);
+        return new FileStorageS3(conn.getFirst(), conn.getSecond());
+    }
+
+    /**
+     * Connects to an S3 compatible service.
+     *
+     * @param uri A URI in the format of s3://accessKey:secretKey@address/bucket.
+     *            Currently, must follow this exact format.
+     */
+    @Blocking
+    public static @NotNull Pair<AmazonS3, String> connectS3(@NotNull String uri) {
         try {
             var parsed = new URI(uri);
             var query = splitQuery(parsed);
@@ -61,10 +74,9 @@ public record FileStorageS3(
                     .enablePathStyleAccess()
                     .build();
 
-            //todo make this use futures
             Check.argCondition(!s3.doesBucketExistV2(bucket), "Supplied bucket (" + bucket + ") does not exist");
 
-            return new FileStorageS3(s3, bucket);
+            return new Pair<>(s3, bucket);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

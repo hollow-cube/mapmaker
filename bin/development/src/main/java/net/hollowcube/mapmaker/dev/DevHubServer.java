@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubServerBase;
+import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
@@ -10,6 +11,7 @@ import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -24,6 +26,8 @@ public class DevHubServer extends HubServerBase {
 
     private final @NotNull PlayerService playerService;
 
+    private final LegacyMapService legacyMapService;
+
     public DevHubServer(
             @NotNull HubToMapBridge bridge,
             @NotNull MapStorage mapStorage,
@@ -32,7 +36,8 @@ public class DevHubServer extends HubServerBase {
             @NotNull WorldManager worldManager,
             @NotNull PlatformPermissionManager platformPermissions,
             @NotNull MapPermissionManager mapPermissions,
-            @NotNull PlayerService playerService) {
+            @NotNull PlayerService playerService,
+            @Nullable LegacyMapService legacyMapService) {
         super(bridge);
         this.playerStorage = Objects.requireNonNull(playerStorage);
         this.mapStorage = Objects.requireNonNull(mapStorage);
@@ -41,6 +46,7 @@ public class DevHubServer extends HubServerBase {
         this.platformPermissions = Objects.requireNonNull(platformPermissions);
         this.mapPermissions = Objects.requireNonNull(mapPermissions);
         this.playerService = Objects.requireNonNull(playerService);
+        this.legacyMapService = legacyMapService;
     }
 
     @Override
@@ -76,5 +82,10 @@ public class DevHubServer extends HubServerBase {
     @Override
     public @NotNull PlayerService playerService() {
         return playerService;
+    }
+
+    @Override
+    public @Nullable LegacyMapService legacyMapService() {
+        return legacyMapService;
     }
 }

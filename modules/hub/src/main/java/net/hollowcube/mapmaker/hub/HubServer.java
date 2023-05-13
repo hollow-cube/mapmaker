@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -13,6 +14,7 @@ import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -41,6 +43,8 @@ public interface HubServer {
     @NotNull PlayerService playerService();
 
     @NotNull HubWorld world();
+
+    @Nullable LegacyMapService legacyMapService();
 
 
     void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider);

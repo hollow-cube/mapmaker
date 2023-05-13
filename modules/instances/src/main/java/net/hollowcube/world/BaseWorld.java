@@ -1,7 +1,6 @@
 package net.hollowcube.world;
 
-import net.hollowcube.world.compression.WorldCompressor;
-import net.hollowcube.world.decompression.WorldDecompressor;
+import net.hollowcube.world.util.Compress;
 import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.world.util.FileUtil;
@@ -12,7 +11,6 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,8 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -76,38 +72,34 @@ public class BaseWorld implements World {
         return WORLD_DIR.resolve(id);
     }
 
-    public @Blocking void loadWorld() {
+    @Blocking
+    public void loadWorld() {
         var file = worldManager.fileStorage().downloadFile(id);
         try (var is = file.data()) {
-            var data = is.readAllBytes();
-
             var regionDir = worldDir().resolve("region");
             Files.createDirectories(regionDir);
-
-            var unzippedSize = Integer.parseInt(file.metadata().get("size"));
-            var regions = WorldDecompressor.decompressWorldRegionFiles(data, unzippedSize);
-            Check.notNull(regions, "Failed to decompress world regions");
-            for (var region : regions) {
-                Files.write(regionDir.resolve(region.getFileName()), region.getData(), StandardOpenOption.CREATE);
-            }
+            Compress.unpack(regionDir, is);
         } catch (Exception e) {
             throw new RuntimeException("failed to load world data", e);
         }
     }
 
     @Override
-    public @Blocking
-    @NotNull String saveWorld() {
-        instance.saveChunksToStorage();
-        var compressed = WorldCompressor.compressWorldRegionFiles(worldDir().toAbsolutePath().toString(), null);
-        return worldManager.fileStorage().uploadFile(id,
-                new ByteArrayInputStream(compressed.getCompressedData()),
-                compressed.getCompressedData().length,
-                Map.of("size", String.valueOf(compressed.getOriginalSize())));
+    @Blocking
+    public @NotNull String saveWorld() {
+        try {
+            instance.saveChunksToStorage();
+            var compressed = Compress.pack(worldDir().toAbsolutePath());
+            return worldManager.fileStorage().uploadFile(id, new ByteArrayInputStream(compressed), compressed.length);
+        } catch (IOException e) {
+            throw new RuntimeException("failed to compress world", e);
+        }
+
     }
 
     @Override
-    public @Blocking void unloadWorld() {
+    @Blocking
+    public void unloadWorld() {
         MinecraftServer.getInstanceManager().unregisterInstance(instance);
         try {
             if (Files.exists(worldDir()))
