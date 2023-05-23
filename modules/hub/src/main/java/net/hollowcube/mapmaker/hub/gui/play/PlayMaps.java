@@ -7,14 +7,18 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.model.MapQuery;
 import net.hollowcube.mapmaker.storage.MapStorage;
+import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PlayMaps extends View {
     private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
+
+    private @ContextObject Query query;
 
     private @ContextObject MapStorage mapStorage;
 
@@ -30,7 +34,20 @@ public class PlayMaps extends View {
         //todo could support async in this action
         Thread.startVirtualThread(() -> {
             try {
-                var entries = mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1);
+                List<MapData> entries = Collections.emptyList();
+                if (query.takeQuery) {
+                    query.takeQuery = false;
+                    // TODO support query by map name
+                    var json = MojangUtils.fromUsername(query.query);
+                    if (json != null) {
+                        var uuid = UUID.fromString(
+                                json.get("id").getAsString().replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"));
+                        entries = mapStorage.queryMaps(new MapQuery(uuid.toString(), true), request.page() * request.pageSize(), request.pageSize() + 1);
+                    }
+                }
+                else {
+                    entries = mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1);
+                }
                 if (entries.isEmpty()) {
                     request.respond(List.of(), false);
                     return;
@@ -52,5 +69,10 @@ public class PlayMaps extends View {
     @Action("parkour_toggle")
     private void parkourToggle() {
         parkourToggle.setState(parkourToggle.getState() == State.ACTIVE ? State.HIDDEN : State.ACTIVE);
+    }
+
+    @Action("query")
+    private void changeQuery() {
+        pushView(c -> new QueryMaps(c.with(Map.of("query", query))));
     }
 }

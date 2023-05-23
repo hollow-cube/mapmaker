@@ -8,7 +8,7 @@
         <!-- TODO how to handle text written into the GUI? -->
         <spacer width="5"/>
         <button translationKey="gui.play_maps.advanced_toggle"/>
-        <button translationKey="gui.play_maps.search_name"/>
+        <button id="query" translationKey="gui.play_maps.search_name"/>
     </box>
 
     <!-- Map list -->
