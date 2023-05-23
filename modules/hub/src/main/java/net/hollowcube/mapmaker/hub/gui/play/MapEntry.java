@@ -37,7 +37,7 @@ public class MapEntry extends View {
     private @Blocking void updateIcon() {
         label.setArgs(
                 map.getNameComponent(),
-                Component.text(map.getId()),
+                Component.text(map.getPublishedId()),
                 playerService.getDisplayName(map.getOwner())
         );
 
