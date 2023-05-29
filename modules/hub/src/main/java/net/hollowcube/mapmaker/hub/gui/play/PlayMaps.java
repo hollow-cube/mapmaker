@@ -37,12 +37,20 @@ public class PlayMaps extends View {
                 List<MapData> entries = Collections.emptyList();
                 if (query.takeQuery) {
                     query.takeQuery = false;
-                    // TODO support query by map name
-                    var json = MojangUtils.fromUsername(query.query);
-                    if (json != null) {
+                    if (query.isQueryMap) {
+                        entries = mapStorage.queryMaps(
+                                new MapQuery(query.query, true, true, false),
+                                request.page() * request.pageSize(), request.pageSize() + 1);
+                    } else {
+                        var json = MojangUtils.fromUsername(query.query);
+                        if (json == null) return;
                         var uuid = UUID.fromString(
-                                json.get("id").getAsString().replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"));
-                        entries = mapStorage.queryMaps(new MapQuery(uuid.toString(), true), request.page() * request.pageSize(), request.pageSize() + 1);
+                                json.get("id").getAsString().replaceFirst(
+                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                        "$1-$2-$3-$4-$5"));
+                        entries = mapStorage.queryMaps(
+                                new MapQuery(uuid.toString(), false, true, false),
+                                request.page() * request.pageSize(), request.pageSize() + 1);
                     }
                 }
                 else {

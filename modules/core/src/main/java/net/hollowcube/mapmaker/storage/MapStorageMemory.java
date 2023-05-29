@@ -67,12 +67,20 @@ class MapStorageMemory implements MapStorage {
     public @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size) {
         return mapsById.values().stream()
                 .filter(map -> {
-                    if (query.author() != null && !query.author().equals(map.getOwner()))
+                    if (query.isQueryMap() == null || query.query() == null || Boolean.FALSE.equals(query.publishedOnly())) {
                         return false;
-                    //noinspection RedundantIfStatement
-                    if (query.publishedOnly() != null && !map.isPublished())
-                        return false;
-                    return true;
+                    }
+                    // This flow kinda sickens me
+                    if (query.isQueryMap()) {
+                        if (Boolean.TRUE.equals(query.exactlyMatching())) {
+                            return query.query().equals(map.getName());
+                        } else {
+                            return map.getName().contains(query.query());
+                        }
+                    } else {
+                        // TODO distinguish exactly matching, we only have UUID to use so more work to do here
+                        return query.query().equals(map.getOwner());
+                    }
                 })
                 .sorted(Comparator.comparing(MapData::getPublishedAt).reversed())
                 .skip(offset)
