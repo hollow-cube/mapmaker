@@ -1,0 +1,18 @@
+// The file holds placeholder data for the translations
+{
+  // Icons
+  "LMB": {
+    "type": "sprite",
+    "ref": "icon/mouse_left"
+  },
+  "SHIFT_LMB": {
+    "type": "sprite",
+    "ref": "icon/mouse_shift_left"
+  },
+
+  // Standard colors
+  "GRAY": {
+    "type": "raw",
+    "value": "#808080"
+  }
+}
