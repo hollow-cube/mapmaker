@@ -50,12 +50,22 @@ dependencies {
     implementation("io.pyroscope:agent:0.11.1")
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDir("src/main/resources")
+            srcDir(rootProject.buildDir.resolve("packer/server"))
+        }
+    }
+}
+
 tasks.withType<ShadowJar> {
     mergeServiceFiles()
 }
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
+
 }
 
 blossom {

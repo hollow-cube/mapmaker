@@ -1,6 +1,6 @@
-package net.hollowcube.mapmaker.lang;
+package net.hollowcube.mapmaker;
 
-import net.hollowcube.mapmaker.PackContext;
+import de.marhali.json5.Json5;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -13,12 +13,34 @@ import java.util.regex.Pattern;
 
 public class LangMergeTransform {
     private static final System.Logger logger = System.getLogger(LangMergeTransform.class.getName());
+    private static final Json5 json5 = new Json5();
 
     // Replacements keeps track of all the text replacements, resolved.
     // For example, for a sprite, the value will be the unicode font character of the sprite.
     private final Map<String, String> replacements = new HashMap<>();
 
-    public void doit(@NotNull PackContext context) throws IOException {
+    public void init(@NotNull PackContext ctx, @NotNull SpriteTransform sprites) throws IOException {
+        var placeholders = json5.parse(Files.readString(ctx.resources().resolve("lang").resolve("placeholders.json5"))).getAsJson5Object();
+        for (var entry : placeholders.entrySet()) {
+            var key = entry.getKey();
+            var value = entry.getValue().getAsJson5Object();
+            var type = value.get("type").getAsString();
+
+            if (type.equals("raw")) {
+                replacements.put(key, value.get("value").getAsString());
+            } else if (type.equals("sprite")) {
+                var ref = value.get("ref").getAsString();
+                var sprite = sprites.entries.get(ref);
+                if (sprite == null) {
+                    throw new RuntimeException("Unknown sprite: " + ref);
+                }
+                replacements.put(key, sprite);
+            }
+        }
+
+    }
+
+    public void process(@NotNull PackContext context) throws IOException {
         var keySources = new HashMap<String, String>();
         var result = new Properties();
 
@@ -49,7 +71,9 @@ public class LangMergeTransform {
             }
         }
 
-        try (var os = Files.newOutputStream(context.out().resolve("lang.properties"))) {
+        var outLangFile = context.out().resolve("server").resolve("en_US.properties");
+        Files.createDirectories(outLangFile.getParent());
+        try (var os = Files.newOutputStream(outLangFile)) {
             result.store(os, "Merged lang files");
         }
     }

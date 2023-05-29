@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker;
 
-import net.hollowcube.mapmaker.lang.LangMergeTransform;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,7 +14,15 @@ public class Packer {
 
         Files.createDirectories(OUT_DIR);
 
-        new LangMergeTransform().doit(new PackContext(RESOURCE_DIR, OUT_DIR));
+        var ctx = new PackContext(RESOURCE_DIR, OUT_DIR);
+        var spriteTransform = new SpriteTransform();
+        spriteTransform.process(ctx);
+
+        var langTransform = new LangMergeTransform();
+        langTransform.init(ctx, spriteTransform);
+        langTransform.process(ctx);
+
+        ctx.cleanup();
 
     }
 }

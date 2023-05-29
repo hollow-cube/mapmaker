@@ -1,17 +1,53 @@
 package net.hollowcube.mapmaker;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import de.marhali.json5.Json5;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PackContext {
 
     private Path resources;
     private Path out;
+    private boolean minify = false;
+    private int resourceId = 0;
 
-    public PackContext(Path resources, Path out) {
+    private Path rpMinecraftBase;
+    private Path rpMapmakerBase;
+    private String mapmakerRefBase;
+
+    private final Map<String, String> remapping = new HashMap<>();
+
+    private final JsonObject fontFile;
+
+    public PackContext(Path resources, Path out) throws IOException {
         this.resources = resources;
         this.out = out;
+
+        copyStaticFiles();
+
+        this.rpMinecraftBase = out.resolve("client").resolve("assets").resolve("minecraft");
+        Files.createDirectories(rpMinecraftBase);
+
+        if (minify) {
+            this.rpMapmakerBase = rpMinecraftBase;
+            this.mapmakerRefBase = "minecraft:";
+        } else {
+            this.rpMapmakerBase = out.resolve("client").resolve("assets").resolve("mapmaker");
+            Files.createDirectories(rpMapmakerBase);
+            this.mapmakerRefBase = "mapmaker:";
+        }
+
+        fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
     }
 
     public @NotNull Path resources() {
@@ -20,5 +56,65 @@ public class PackContext {
 
     public @NotNull Path out() {
         return out;
+    }
+
+    // Resource pack methods
+
+    /** Writes a texture and returns a reference to it. */
+    public @NotNull String writeTexture(@NotNull String name, byte[] data) {
+        try {
+            if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
+            name = minifyId(name);
+
+            var path = rpMapmakerBase.resolve("textures").resolve(name + ".png");
+            Files.createDirectories(path.getParent());
+
+            Files.write(path, data);
+            return mapmakerRefBase + name + ".png";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addFontCharacter(@NotNull JsonObject definition) {
+        fontFile.getAsJsonArray("providers").add(definition);
+    }
+
+    public void cleanup() throws IOException {
+        System.out.println("Cleanup");
+        var gson = new GsonBuilder().create();
+
+        Files.writeString(out.resolve("mapping.json"), gson.toJson(remapping));
+
+        var fontFile = rpMinecraftBase.resolve("font").resolve("default.json");
+        var fontDefinition = gson.toJson(this.fontFile);
+        while (fontDefinition.contains("\\\\")) {
+            // How do i do this with regex???
+            fontDefinition = fontDefinition.replace("\\\\", "\\");
+        }
+        Files.writeString(fontFile, fontDefinition);
+
+    }
+
+    private @NotNull String minifyId(@NotNull String id) {
+        if (!minify) return id;
+
+        var newId = Integer.toString(resourceId++, 36);
+        remapping.put(id, newId);
+        return newId;
+    }
+
+    private void copyStaticFiles() throws IOException {
+        try (var files = Files.walk(resources.resolve("client"))) {
+            for (var file : files.toList()) {
+                System.out.println(file);
+                try {
+                    Files.copy(file, out.resolve(resources.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+                } catch (DirectoryNotEmptyException ignored) {
+//                    System.out.println(e.getMessage());
+                }
+            }
+
+        }
     }
 }

@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    // We will use json-java to remove comments from JSON, but moshi for the actual parsing
-    implementation("org.json:json:20230227")
-    implementation("com.squareup.moshi:moshi:1.15.0")
+    // We will use json5 to remove comments from JSON, but moshi for the actual parsing
+    implementation("de.marhali:json5-java:2.0.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("org.jetbrains:annotations:24.0.1")
 

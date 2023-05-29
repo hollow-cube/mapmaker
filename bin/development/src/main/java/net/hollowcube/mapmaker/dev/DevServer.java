@@ -65,6 +65,9 @@ public class DevServer {
     public static void main(String[] args) {
         long start = System.nanoTime();
 
+        System.out.println(DevServer.class.getClassLoader().getResource("sprites.json"));
+
+
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("minestom.async-commands", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
