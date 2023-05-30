@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
-<component width="9" height="9" align="ttb" sprite="create_maps/info/container">
+<component width="9" height="9" align="ttb">
 
     <box width="9" height="1">
         <BackButton />
@@ -27,6 +27,7 @@
             </box>
 
             <spacer width="9" height="2" />
+
         </box>
         <spacer width="9" height="4"/>
         <spacer width="9" height="4"/>

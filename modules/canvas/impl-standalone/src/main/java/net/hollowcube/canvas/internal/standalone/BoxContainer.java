@@ -87,28 +87,6 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         return CLICK_DENY;
     }
 
-
-    @Override
-    public void buildTitle(@NotNull FontUIBuilder sb, int componentX, int componentY) {
-        drawBackgroundSprite(sb, componentX, componentY);
-
-        if (align == Align.LTR) {
-            int x = 0;
-            for (var child : children()) {
-                child.buildTitle(sb, componentX + x, componentY);
-                x += child.width();
-            }
-        } else if (align == Align.TTB) {
-            int y = 0;
-            for (var child : children()) {
-                child.buildTitle(sb, componentX, componentY + y);
-                y += child.height();
-            }
-        } else {
-            throw new IllegalStateException("Unsupported alignment: " + align);
-        }
-    }
-
     @Override
     public @NotNull BoxContainer clone(@NotNull ElementContext context) {
         return new BoxContainer(context, this);
