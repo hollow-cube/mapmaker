@@ -22,7 +22,7 @@ public class LanguageProvider {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream is = LanguageProvider.class.getResourceAsStream("/lang/en_US.properties")) {
+        try (InputStream is = LanguageProvider.class.getResourceAsStream("/en_US.properties")) {
             if (is != null) {
                 properties.load(is);
             }

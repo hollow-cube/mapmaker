@@ -7,15 +7,16 @@ import net.hollowcube.common.util.FontUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TextElement extends BaseElement implements Text {
+public class TextElement extends ButtonElement implements Text {
 
     private final String font;
     private final int shift;
 
-    private String text = "Map Name";
+    private String text = "";
 
-    public TextElement(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull String font, int shift) {
-        super(context, id, width, height);
+    public TextElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
+                       @NotNull String translationKey, @NotNull String font, int shift) {
+        super(context, id, width, height, translationKey);
         this.font = font;
         this.shift = shift;
     }
@@ -29,6 +30,7 @@ public class TextElement extends BaseElement implements Text {
     @Override
     public void setText(@NotNull String text) {
         this.text = text;
+        context.markDirty();
     }
 
     @Override
@@ -39,12 +41,12 @@ public class TextElement extends BaseElement implements Text {
         sb.pos(shift);
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         //todo why is this const offset required? seems like the measurements of the ascii font are different from the measurements of the offset ascii one.
-        sb.append(FontUtil.rewrite(font, text), FontUtil.measureText(text) - 3);
+        sb.append(FontUtil.rewrite(font, text), FontUtil.measureText(text));
 
     }
 
     @Override
-    public @NotNull BaseElement clone(@NotNull ElementContext context) {
+    public @NotNull TextElement clone(@NotNull ElementContext context) {
         return new TextElement(context, this);
     }
 }

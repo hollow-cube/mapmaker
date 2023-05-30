@@ -99,6 +99,11 @@ public final class FontUtil {
 
         var result = new StringBuilder();
         for (char c : text.toCharArray()) {
+            if (c == ' ') {
+                result.append('\uF824');
+                continue;
+            }
+
             var replacement = charmap.get(c);
             Check.notNull(replacement, "Unknown character: " + c + " in font: " + font);
             result.append(replacement);

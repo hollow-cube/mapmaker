@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
+import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -10,7 +11,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SwitchElement extends ContainerElement implements Switch {
+public class SwitchElement extends ContainerElement implements Switch, SpriteHolder {
     private int state = 0;
 
     public SwitchElement(@NotNull ElementContext context, @Nullable String id, int width, int height) {
@@ -23,6 +24,8 @@ public class SwitchElement extends ContainerElement implements Switch {
 
     @Override
     public void setOption(int option) {
+        if (this.state == option) return;
+
         Check.argCondition(option < 0 || option >= children().size(), "Invalid option: " + option);
         this.state = option;
         context.markDirty();

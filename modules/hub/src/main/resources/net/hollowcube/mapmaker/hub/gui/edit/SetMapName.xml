@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<component id="anvil" width="9" height="1" align="ltr" sprite="create_maps/set_map_name/container">
+    <label id="input" translationKey="forced.input"/>
+    <spacer/>
+    <button id="output" translationKey="out"/>
+</component>

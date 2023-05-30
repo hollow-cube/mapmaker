@@ -139,9 +139,10 @@ public class XmlElementReader {
     private @NotNull BaseElement loadText(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("text"), "Node must be `text`");
 
+        var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
         var fontName = getString(node, "font", "default");
         var shift = getInt(node, "shift", 0);
-        var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node), fontName, shift);
+        var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node), translationKey, fontName, shift);
         return applyTraits(node, elem);
     }
 

@@ -2,6 +2,8 @@ package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
 import net.minestom.server.MinecraftServer;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +72,14 @@ public abstract class View implements Element {
         context.popView();
     }
 
+    /**
+     * A variant of {@link #popView()} that performs a signal on the new view after mounting it.
+     */
+    public void popView(@NotNull String signal, Object... args) {
+        context.popView();
+        context.performSignal(signal, args);
+    }
+
 
     /**
      * Called when this view is mounted (shown to a player).
@@ -87,7 +97,12 @@ public abstract class View implements Element {
     protected void unmount() {
     }
 
-    protected void async(@NotNull Runnable func) {
+    public interface AsyncRunnable {
+        @Blocking void run() throws Exception;
+    }
+
+    @NonBlocking
+    protected void async(@NotNull AsyncRunnable func) {
         VIRTUAL_EXECUTOR.submit(() -> {
             try {
                 func.run();
@@ -97,7 +112,18 @@ public abstract class View implements Element {
         });
     }
 
-    protected <T> @NotNull Future<T> async(@NotNull Callable<T> func) {
-        return VIRTUAL_EXECUTOR.submit(func);
+    public interface AsyncCallable<T> {
+        @Blocking T call() throws Exception;
+    }
+
+    protected <T> @NotNull Future<T> async(@NotNull AsyncCallable<T> func) {
+        return VIRTUAL_EXECUTOR.submit(() -> {
+            try {
+                return func.call();
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+                return null;
+            }
+        });
     }
 }

@@ -76,8 +76,6 @@ public class SpriteTransform {
                     } else {
                         cmd = context.addBasicItemTexture(name, Files.readAllBytes(imageFile));
                     }
-//
-//
 
                     var serverSpriteConf = new JsonObject();
                     serverSpriteConf.addProperty("name", name);
@@ -104,6 +102,7 @@ public class SpriteTransform {
     private void processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf, @NotNull JsonObject serverSpriteConf) throws IOException {
         var image = ImageIO.read(new ByteArrayInputStream(data));
 
+        int width = image.getWidth();
         int height = image.getHeight();
         int ascent = 0;
         int offX = 0;
@@ -122,6 +121,12 @@ public class SpriteTransform {
             graphics.fillRect(0, newImage.getHeight() - 2, newImage.getWidth(), newImage.getHeight());
             graphics.fillRect(0, 0, 2, newImage.getHeight());
             image = newImage;
+        }
+
+        if (conf.has("size")) {
+            var origin = conf.getAsJson5Array("size");
+            width = origin.get(0).getAsInt();
+            height = origin.get(1).getAsInt();
         }
 
         if (conf.has("shift_y")) {
@@ -156,7 +161,7 @@ public class SpriteTransform {
 
         serverSpriteConf.addProperty("name", name);
         serverSpriteConf.addProperty("fontChar", (char) rawFontChar);
-        serverSpriteConf.addProperty("width", image.getWidth());
+        serverSpriteConf.addProperty("width", width);
         serverSpriteConf.addProperty("offsetX", offX);
 
         entries.put(name, fontChar);

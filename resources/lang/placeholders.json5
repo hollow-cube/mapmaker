@@ -9,10 +9,18 @@
     "type": "sprite",
     "ref": "icon/mouse_shift_left"
   },
+  "WARNING": {
+    "type": "sprite",
+    "ref": "icon/warning"
+  },
+  "LOCK": {
+    "type": "sprite",
+    "ref": "icon/lock"
+  },
 
   // Standard colors
-  "GRAY": {
+  "light_gray": {
     "type": "raw",
-    "value": "#808080"
+    "value": "#B0B0B0"
   }
 }
