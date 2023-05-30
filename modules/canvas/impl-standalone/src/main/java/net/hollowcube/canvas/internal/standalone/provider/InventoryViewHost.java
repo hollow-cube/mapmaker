@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.standalone.BaseElement;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
@@ -14,6 +15,7 @@ import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.inventory.condition.InventoryCondition;
 import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
@@ -92,17 +94,16 @@ public class InventoryViewHost {
 //        Check.argCondition(section.width() > 9, "section width must be <= 9, was {}", section.width());
         var id = element.id() != null ? element.id() : "chest";
 
+        Check.argCondition(element.width() != 9, "section width must be 9");
+        Check.argCondition(element.height() > 10, "section height must be <= 10, was {}", element.height());
+        width = element.width();
+        height = element.height();
+
         // Special case for anvil GUIs
         if (id.equals("anvil")) {
             playerInventoryRows = element.height() - 1;
             return InventoryType.ANVIL;
         }
-
-        //todo support for non-9 width inventories
-        Check.argCondition(element.width() != 9, "section width must be 9");
-        Check.argCondition(element.height() > 10, "section height must be <= 10, was {}", element.height());
-        width = element.width();
-        height = element.height();
 
         return switch (element.height()) {
             case 1 -> InventoryType.CHEST_1_ROW;
@@ -170,6 +171,16 @@ public class InventoryViewHost {
         dirty = false;
     }
 
+    static {
+        MinecraftServer.getPacketListenerManager().setListener(ClientNameItemPacket.class, InventoryViewHost::handleAnvilInput);
+    }
+
+    private static void handleAnvilInput(@NotNull ClientNameItemPacket packet, @NotNull Player player) {
+        if (!(player.getOpenInventory() instanceof InventoryWrapper inventory)) return;
+
+        inventory.parent().performSignal(Element.SIG_ANVIL_INPUT, packet.itemName());
+    }
+
     private class InventoryWrapper extends Inventory {
 
         private final InventoryCondition playerCondition = this::playerInvClick;
@@ -181,6 +192,10 @@ public class InventoryViewHost {
             update();
 
             addInventoryCondition(this::openedInvClick);
+        }
+
+        public @NotNull InventoryViewHost parent() {
+            return InventoryViewHost.this;
         }
 
         public boolean needsPlayerInventory() {

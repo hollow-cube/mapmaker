@@ -1,4 +1,4 @@
-<component id="anvil" width="3" height="1" align="ltr">
+<component id="anvil" width="9" height="1" align="ltr">
     <label id="placeholder" width="1" translationKey="todo" sprite="diamond_pickaxe"/>
     <switch id="switch">
         <button id="author_to_map" translationKey="author.todo" sprite="diamond_pickaxe"/>

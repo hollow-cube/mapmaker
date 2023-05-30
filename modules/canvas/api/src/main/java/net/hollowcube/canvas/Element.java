@@ -15,6 +15,9 @@ public interface Element extends ElementLike {
     String SIG_MOUNT = "player_gui_mount";
     String SIG_UNMOUNT = "player_gui_unmount";
 
+    // Sent when receiving anvil input from a player.
+    String SIG_ANVIL_INPUT = "player_gui_anvil_input";
+
     enum State {
         ACTIVE,
         LOADING,
