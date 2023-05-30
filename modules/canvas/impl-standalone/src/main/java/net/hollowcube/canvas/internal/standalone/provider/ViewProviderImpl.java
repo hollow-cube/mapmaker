@@ -43,6 +43,9 @@ public class ViewProviderImpl implements ViewProvider {
     }
 
     private <T extends View> void wireContextObjects(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull RenderableContext context) {
+        if (!viewClass.getSuperclass().equals(View.class))
+            wireContextObjects((Class<? extends View>) viewClass.getSuperclass(), view, context);
+
         try {
             for (var field : viewClass.getDeclaredFields()) {
                 var annotation = field.getAnnotation(ContextObject.class);
@@ -68,6 +71,9 @@ public class ViewProviderImpl implements ViewProvider {
     }
 
     private <T extends View> void wireOutlets(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull BaseElement root) {
+        if (!viewClass.getSuperclass().equals(View.class))
+            wireOutlets((Class<? extends View>) viewClass.getSuperclass(), view, root);
+
         try {
             for (var field : viewClass.getDeclaredFields()) {
                 var outlet = field.getAnnotation(Outlet.class);
@@ -93,6 +99,9 @@ public class ViewProviderImpl implements ViewProvider {
     }
 
     private <T extends View> void wireActions(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull BaseElement root) {
+        if (!viewClass.getSuperclass().equals(View.class))
+            wireActions((Class<? extends View>) viewClass.getSuperclass(), view, root);
+
         for (var method : viewClass.getDeclaredMethods()) {
             var action = method.getAnnotation(Action.class);
             if (action == null) continue;
@@ -106,6 +115,9 @@ public class ViewProviderImpl implements ViewProvider {
     }
 
     private <T extends View> void wireSignals(@NotNull Class<? extends T> viewClass, @NotNull T view, @NotNull ViewContainer root) {
+        if (!viewClass.getSuperclass().equals(View.class))
+            wireSignals((Class<? extends View>) viewClass.getSuperclass(), view, root);
+
         for (var method : viewClass.getDeclaredMethods()) {
             var action = method.getAnnotation(Signal.class);
             if (action == null) continue;

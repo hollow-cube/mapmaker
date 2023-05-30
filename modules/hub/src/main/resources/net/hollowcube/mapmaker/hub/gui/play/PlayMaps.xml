@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
-<component width="9" height="10" align="ttb" sprite="gui/play_maps/container">
+<component width="9" height="10" align="ttb" sprite="play_maps/container">
     <!-- Top bar -->
     <box width="9" align="ltr">
         <label translationKey="gui.generic.back"/>
@@ -33,7 +33,7 @@
         <box width="9" height="2">
             <button id="parkour_toggle" width="3" height="2"
                     translationKey="gui.play_maps.basic.parkour"
-                    sprite="gui/play_maps/parkour_active"/>
+                    sprite="play_maps/parkour_active"/>
             <button width="3" height="2" translationKey="gui.play_maps.basic.building"/>
             <button width="3" height="2" translationKey="gui.play_maps.basic.adventure"/>
         </box>

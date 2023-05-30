@@ -65,7 +65,6 @@ tasks.withType<ShadowJar> {
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
-
 }
 
 blossom {

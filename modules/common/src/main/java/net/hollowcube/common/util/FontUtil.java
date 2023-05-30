@@ -1,8 +1,15 @@
 package net.hollowcube.common.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +60,25 @@ public final class FontUtil {
             Map.entry(8230, 5)
     );
 
+    public static final Map<String, Map<Character, Character>> fontmaps;
+
+    static {
+        //todo rewrite this to be more sane + dynamic (read a single file with all of the fontmaps)
+        try (var is = Files.newInputStream(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/build/packer/server/font_map_title.json"))) {
+//        try (var is = FontUtil.class.getClassLoader().getResourceAsStream("/font_map_title.json")) {
+            Check.notNull(is, "Missing map title font map");
+            var json = new Gson().fromJson(new InputStreamReader(is), JsonObject.class);
+            var chars = new HashMap<Character, Character>();
+            for (var entry : json.entrySet()) {
+                chars.put(entry.getKey().charAt(0), entry.getValue().getAsString().charAt(0));
+                System.out.println(entry.getKey().charAt(0) + " -> " + entry.getValue().getAsString().charAt(0));
+            }
+            fontmaps = Map.of("map_title", Map.copyOf(chars));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static int measureText(@NotNull String text) {
         int width = 0;
         for (int i = 0; i < text.length(); i++) {
@@ -64,6 +90,20 @@ public final class FontUtil {
             width += glyphWidth;
         }
         return width;
+    }
+
+    public static @NotNull String rewrite(@NotNull String font, @NotNull String text) {
+        if (font.equals("default")) return text;
+        var charmap = fontmaps.get(font);
+        Check.notNull(charmap, "Unknown font: " + font);
+
+        var result = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            var replacement = charmap.get(c);
+            Check.notNull(replacement, "Unknown character: " + c + " in font: " + font);
+            result.append(replacement);
+        }
+        return result.toString();
     }
 
     // Represents -2^index pixels of space

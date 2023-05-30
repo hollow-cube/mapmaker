@@ -88,6 +88,7 @@ public class XmlElementReader {
             case "spacer" -> loadSpacer(node);
             case "switch" -> loadSwitch(node);
             case "pagination" -> loadPagination(node);
+            case "text" -> loadText(node);
             default -> loadImportedElement(node);
         };
     }
@@ -115,7 +116,8 @@ public class XmlElementReader {
 
     private @NotNull BaseElement loadSpacer(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("spacer"), "Node must be `spacer`");
-        return new SpacerElement(context, getWidth(node), getHeight(node));
+        var elem = new SpacerElement(context, getWidth(node), getHeight(node));
+        return applyTraits(node, elem);
     }
 
     private @NotNull BaseElement loadSwitch(@NotNull Node node) {
@@ -131,6 +133,15 @@ public class XmlElementReader {
         Check.argCondition(itemClassName == null, "Pagination must have a child class");
         var itemClass = findImportedClass(itemClassName); // NOSONAR - sonarqube doesnt understand contracts
         var elem = new PaginationElement<>(context, getId(node), getWidth(node), getHeight(node), itemClass);
+        return applyTraits(node, elem);
+    }
+
+    private @NotNull BaseElement loadText(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("text"), "Node must be `text`");
+
+        var fontName = getString(node, "font", "default");
+        var shift = getInt(node, "shift", 0);
+        var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node), fontName, shift);
         return applyTraits(node, elem);
     }
 
@@ -189,20 +200,50 @@ public class XmlElementReader {
         }
 
         // Sprites
+        var backgroundSpriteName = getString(node, "backgroundSprite", null);
+        if (backgroundSpriteName != null) {
+            var sprite = Sprite.SPRITE_MAP.get(backgroundSpriteName);
+            if (sprite != null) {
+                if (sprite.fontChar() != 0) {
+                    if (elem instanceof SpriteHolder trait) {
+                        trait.setSprite(sprite);
+                    } else {
+                        throw new IllegalArgumentException("Element does not support sprites: " + elem.getClass().getSimpleName());
+                    }
+                } else {
+                    throw new IllegalArgumentException("Background sprite must be a font sprite: " + backgroundSpriteName);
+                }
+            } else {
+                throw new IllegalArgumentException("Unknown sprite: " + backgroundSpriteName);
+            }
+        }
+
         var spriteName = getString(node, "sprite", null);
         if (spriteName != null) {
             var sprite = Sprite.SPRITE_MAP.get(spriteName);
             if (sprite != null) {
-                if (elem instanceof SpriteHolder trait) {
-                    trait.setSprite(sprite);
+                if (sprite.fontChar() != 0) {
+                    if (elem instanceof SpriteHolder trait) {
+                        trait.setSprite(sprite);
+                    } else {
+                        throw new IllegalArgumentException("Element does not support sprites: " + elem.getClass().getSimpleName());
+                    }
                 } else {
-                    throw new IllegalArgumentException("Element does not support sprites: " + elem.getClass().getSimpleName());
+                    if (elem instanceof ItemSpriteHolder trait) {
+                        trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
+                                .meta(meta -> meta.customModelData(sprite.cmd()))
+                                .build());
+                    } else {
+                        throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
+                    }
                 }
+
             } else {
                 // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
                 var split = Splitter.on('@').splitToList(spriteName);
                 var material = Material.fromNamespaceId(split.get(0));
                 if (material == null) {
+                    logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
                 var builder = ItemStack.builder(material);

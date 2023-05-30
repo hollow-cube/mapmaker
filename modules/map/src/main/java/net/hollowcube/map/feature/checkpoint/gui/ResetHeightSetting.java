@@ -77,7 +77,7 @@ public class ResetHeightSetting extends View {
 
     private void updateIndicator() {
         var state = poi.getOrDefault("active", false) ? 1 : 0;
-        indicatorToggle.setState(state);
+        indicatorToggle.setOption(state);
 
         var args = List.<Component>of(
                 Component.text(getResetHeight())

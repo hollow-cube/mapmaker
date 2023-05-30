@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
@@ -18,7 +20,7 @@ public class PackContext {
 
     private Path resources;
     private Path out;
-    private boolean minify = false;
+    private boolean minify = true;
     private int resourceId = 0;
 
     private Path rpMinecraftBase;
@@ -28,6 +30,9 @@ public class PackContext {
     private final Map<String, String> remapping = new HashMap<>();
 
     private final JsonObject fontFile;
+
+    private final JsonObject leatherArmorFile;
+    private int leatherArmorCMD = 1;
 
     public PackContext(Path resources, Path out) throws IOException {
         this.resources = resources;
@@ -48,6 +53,13 @@ public class PackContext {
         }
 
         fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
+
+        leatherArmorFile = new JsonObject();
+        leatherArmorFile.addProperty("parent", "item/generated");
+        var leatherTextures = new JsonObject();
+        leatherTextures.addProperty("layer0", "item/diamond");
+        leatherArmorFile.add("textures", leatherTextures);
+        leatherArmorFile.add("overrides", new JsonArray());
     }
 
     public @NotNull Path resources() {
@@ -61,23 +73,52 @@ public class PackContext {
     // Resource pack methods
 
     /** Writes a texture and returns a reference to it. */
-    public @NotNull String writeTexture(@NotNull String name, byte[] data) {
+    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data) {
         try {
             if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
             name = minifyId(name);
 
-            var path = rpMapmakerBase.resolve("textures").resolve(name + ".png");
+            var path = rpMapmakerBase.resolve("textures");
+            if (type != null) path = path.resolve(type);
+            path = path.resolve(name + ".png");
             Files.createDirectories(path.getParent());
 
             Files.write(path, data);
-            return mapmakerRefBase + name + ".png";
+            return mapmakerRefBase + (type == null ? "" : type + "/") + name + (type == null ? ".png" : "");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public @NotNull String writeBasicModel(@NotNull String name, byte[] data) throws IOException {
+        name = minifyId(name);
+
+        var obj = new JsonObject();
+        obj.addProperty("parent", "item/generated");
+        var textures = new JsonObject();
+        textures.addProperty("layer0", writeTexture("item", name, data));
+        obj.add("textures", textures);
+
+        var path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, new Gson().toJson(obj));
+
+        return mapmakerRefBase + "item/" + name;
+    }
+
     public void addFontCharacter(@NotNull JsonObject definition) {
         fontFile.getAsJsonArray("providers").add(definition);
+    }
+
+    public int addBasicItemTexture(@NotNull String name, byte[] texture) throws IOException {
+        int cmd = leatherArmorCMD++;
+        var override = new JsonObject();
+        var predicate = new JsonObject();
+        predicate.addProperty("custom_model_data", cmd);
+        override.add("predicate", predicate);
+        override.addProperty("model", writeBasicModel(name, texture));
+        leatherArmorFile.getAsJsonArray("overrides").add(override);
+        return cmd;
     }
 
     public void cleanup() throws IOException {
@@ -94,6 +135,9 @@ public class PackContext {
         }
         Files.writeString(fontFile, fontDefinition);
 
+        var leatherArmorFile = rpMinecraftBase.resolve("models").resolve("item").resolve("diamond.json");
+        Files.writeString(leatherArmorFile, gson.toJson(this.leatherArmorFile));
+
     }
 
     private @NotNull String minifyId(@NotNull String id) {
@@ -107,7 +151,6 @@ public class PackContext {
     private void copyStaticFiles() throws IOException {
         try (var files = Files.walk(resources.resolve("client"))) {
             for (var file : files.toList()) {
-                System.out.println(file);
                 try {
                     Files.copy(file, out.resolve(resources.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
                 } catch (DirectoryNotEmptyException ignored) {

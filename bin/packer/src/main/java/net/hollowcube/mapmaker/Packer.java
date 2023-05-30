@@ -22,6 +22,10 @@ public class Packer {
         langTransform.init(ctx, spriteTransform);
         langTransform.process(ctx);
 
+        var fontTransform = new FontTransform();
+        fontTransform.init(ctx, spriteTransform);
+        fontTransform.process(ctx);
+
         ctx.cleanup();
 
     }

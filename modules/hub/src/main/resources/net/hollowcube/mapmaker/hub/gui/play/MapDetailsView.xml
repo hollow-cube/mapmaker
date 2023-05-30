@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
-<component width="9" height="10" align="ttb" sprite="gui/build_maps/details">
+<component width="9" height="10" align="ttb">
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>

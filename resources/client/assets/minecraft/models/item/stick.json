@@ -8,7 +8,13 @@
       "predicate": {
         "custom_model_data": 1
       },
-      "model": "mapmaker:item/blank"
+      "model": "minecraft:item/blank"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "minecraft:item/broken"
     }
   ]
 }

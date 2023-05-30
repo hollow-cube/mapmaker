@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -21,10 +22,15 @@ public class SwitchElement extends ContainerElement implements Switch {
     }
 
     @Override
-    public void setState(int state) {
-        Check.argCondition(state < 0 || state >= children().size(), "Invalid state: " + state);
-        this.state = state;
+    public void setOption(int option) {
+        Check.argCondition(option < 0 || option >= children().size(), "Invalid option: " + option);
+        this.state = option;
         context.markDirty();
+    }
+
+    @Override
+    public int getOption() {
+        return state;
     }
 
     @Override
@@ -34,8 +40,8 @@ public class SwitchElement extends ContainerElement implements Switch {
     }
 
     @Override
-    public void buildTitle(@NotNull StringBuilder sb) {
-        children().get(state).buildTitle(sb);
+    public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
+        children().get(state).buildTitle(sb, x, y);
     }
 
     @Override

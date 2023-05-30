@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<component width="1" height="1">
+    <switch id="state">
+        <button id="locked" translationKey="gui.map_slot.locked"
+                sprite="create_maps/slot_locked/2"/>
+        <button id="empty" translationKey="gui.map_slot.empty"
+                backgroundSprite="create_maps/slot_empty/background"
+                sprite="create_maps/slot_empty/2" />
+        <button id="full" translationKey="gui.map_slot.map"
+                backgroundSprite="create_maps/slot_empty/background"
+                sprite="create_maps/slot_filled/2"/>
+        <button id="full_inserted" translationKey="gui.map_slot.map"
+                sprite="create_maps/slot_filled/2_inserted"/>
+    </switch>
+</component>

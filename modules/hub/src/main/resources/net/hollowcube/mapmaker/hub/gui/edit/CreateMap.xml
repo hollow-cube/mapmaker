@@ -1,8 +1,26 @@
 <?xml version="1.0" ?>
-<component width="9" height="7" align="ttb" sprite="gui/build_maps/create">
-    <spacer width="9" height="5"/>
-    <box width="9">
-        <spacer width="2"/>
-        <button id="submit" width="5" translationKey="gui.create_map.submit"/>
+<?import net.hollowcube.mapmaker.hub.gui.common ?>
+<component width="9" height="9" align="ttb" sprite="create_maps/create/container">
+    <box width="9" height="1">
+        <BackButton />
+        <label translationKey="gui.edit_map.info" />
     </box>
+
+    <spacer width="9" height="1" />
+
+    <box width="9">
+        <spacer width="1"/>
+        <button id="submit" width="7" translationKey="gui.create_map.submit"/>
+    </box>
+
+    <spacer width="9" height="3" />
+
+    <box width="9" height="3" align="ltr">
+        <spacer height="3"/>
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed" />
+        <spacer height="3"/>
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed" />
+        <spacer height="3"/>
+    </box>
+
 </component>

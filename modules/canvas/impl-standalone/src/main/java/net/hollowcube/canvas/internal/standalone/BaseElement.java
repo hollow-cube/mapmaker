@@ -4,6 +4,7 @@ import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.common.util.FontUtil;
 import net.minestom.server.entity.Player;
@@ -17,7 +18,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 public abstract class BaseElement implements Element {
-    public static final ItemStack LOADING_ITEM = ItemStack.of(Material.BARRIER);
+    public static final ItemStack LOADING_ITEM = ItemStack.builder(Material.STICK)
+            .meta(meta -> meta.customModelData(2))
+            .build();
 
 
     protected final ElementContext context;
@@ -100,17 +103,25 @@ public abstract class BaseElement implements Element {
         return items;
     }
 
-    public void buildTitle(@NotNull StringBuilder sb) {
+    public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
+        drawBackgroundSprite(sb, x, y);
+    }
+
+    protected void drawBackgroundSprite(@NotNull FontUIBuilder sb, int x, int y) {
         if (state == State.ACTIVE && sprite != null) {
-            sb.append(FontUtil.computeOffset(sprite.offsetX()));
-            sb.append(sprite.fontChar());
-            sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width())));
+            System.out.println("DRAWING BACKGROUND " + sprite.fontChar() + " " + x);
+            sb.draw(sprite, x);
+//            sb.append(FontUtil.computeOffset(sprite.offsetX() + (x * 18)));
+//            sb.append(sprite.fontChar());
+//            sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width() + 1 + (x * 18))));
+//            System.out.println("DREW");
         }
 
         if (state == State.LOADING && loadingSprite != null) {
-            sb.append(FontUtil.computeOffset(loadingSprite.offsetX()));
-            sb.append(loadingSprite.fontChar());
-            sb.append(FontUtil.computeOffset(-(loadingSprite.offsetX() + loadingSprite.width())));
+            sb.draw(loadingSprite, 0);
+//            sb.append(FontUtil.computeOffset(loadingSprite.offsetX()));
+//            sb.append(loadingSprite.fontChar());
+//            sb.append(FontUtil.computeOffset(-(loadingSprite.offsetX() + loadingSprite.width())));
         }
     }
 

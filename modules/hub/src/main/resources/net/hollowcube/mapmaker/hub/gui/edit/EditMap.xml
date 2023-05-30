@@ -1,28 +1,48 @@
 <?xml version="1.0" ?>
-<component width="9" height="7" align="ttb"
-           sprite="gui/build_maps/edit"
-           loadingSprite="gui/build_maps/empty">
+<?import net.hollowcube.mapmaker.hub.gui.common ?>
+<component width="9" height="9" align="ttb" sprite="create_maps/info/container">
 
-    <spacer width="9" height="4"/>
+    <box width="9" height="1">
+        <BackButton />
+        <label translationKey="gui.edit_map.info" />
+        <label width="5" translationKey="todo" />
+<!--        todo those last 2 buttons-->
+        <button translationKey="todo" />
+        <button translationKey="todo" />
+    </box>
+
+    <box width="9" height="1">
+        <!-- Shift by 19 to avoid the icon -->
+        <text width="8" font="map_title" shift="19" />
+        <button translationKey="todo" />
+    </box>
+
+    <box width="9" height="1">
+        <button id="" translationKey="todo.left" sprite="generic/left11" />
+        <label width="7" translationKey="todo" sprite="create_maps/info/type_parkour" />
+        <button id="" translationKey="todo.right" sprite="generic/right11" />
+    </box>
+
+    <spacer width="9" height="2" />
 
     <box width="9" align="ltr">
         <spacer/>
         <label id="info" translationKey="gui.slot_view.tab.info"/>
         <spacer/>
-        <label id="build_stats" translationKey="gui.slot_view.tab.build_stats"/>
+        <button id="build_stats" translationKey="gui.slot_view.tab.stats" sprite="create_maps/stats"/>
         <spacer/>
-        <label id="settings" translationKey="gui.slot_view.tab.settings"/>
+        <button id="settings" translationKey="gui.slot_view.tab.settings" sprite="create_maps/actions"/>
         <spacer/>
-        <label id="actions" translationKey="gui.slot_view.tab.actions"/>
+        <button id="actions" translationKey="gui.slot_view.tab.actions" sprite="create_maps/settings"/>
         <spacer/>
     </box>
 
-    <box width="9" height="2" align="ltr">
-        <spacer height="2"/>
-        <button id="edit_in_world" width="3" height="2" translationKey="gui.slot_view.edit"/>
-        <spacer height="2"/>
-        <button id="publish" width="3" height="2" translationKey="gui.slot_view.publish"/>
-        <spacer height="2"/>
+    <box width="9" height="3" align="ltr">
+        <spacer height="3"/>
+        <button id="edit_in_world" width="3" height="3" translationKey="gui.slot_view.edit" sprite="create_maps/build" />
+        <spacer height="3"/>
+        <button id="publish" width="3" height="3" translationKey="gui.slot_view.publish" sprite="create_maps/publish" />
+        <spacer height="3"/>
     </box>
 
 </component>

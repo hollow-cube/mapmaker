@@ -16,7 +16,7 @@ import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
-            .meta(meta -> meta.customModelData(1000))
+            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank").equals("1") ? 2 : 1))
             .build();
 
     private final String translationKey;

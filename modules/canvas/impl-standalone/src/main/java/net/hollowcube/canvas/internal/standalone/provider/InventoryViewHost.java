@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
@@ -161,11 +162,11 @@ public class InventoryViewHost {
         }
 
         // Build the title string
-        var titleBuilder = new StringBuilder();
-        element.buildTitle(titleBuilder);
+        var titleBuilder = new FontUIBuilder();
+        element.buildTitle(titleBuilder, 0, 0);
 
         inventory.replaceInventories(top, bottom);
-        inventory.setTitle(Component.text(titleBuilder.toString(), NamedTextColor.WHITE));
+        inventory.setTitle(Component.text(titleBuilder.build(), NamedTextColor.WHITE));
         dirty = false;
     }
 

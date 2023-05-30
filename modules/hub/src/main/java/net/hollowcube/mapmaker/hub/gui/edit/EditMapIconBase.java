@@ -7,6 +7,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.storage.MapStorage;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class EditMapIcon extends View {
+public class EditMapIconBase extends View {
     public static final String SIG_CREATE_MAP_IN_SLOT = "create_map_in_slot";
     public static final String SIG_SELECT_MAP_IN_SLOT = "select_map_in_slot";
 
@@ -26,6 +27,7 @@ public class EditMapIcon extends View {
         LOCKED,
         EMPTY,
         FULL,
+        SELECTED,
     }
 
     private @ContextObject MapStorage mapStorage;
@@ -40,7 +42,7 @@ public class EditMapIcon extends View {
     private Future<MapData> mapDataFuture = null;
 
 
-    public EditMapIcon(@NotNull Context context) {
+    public EditMapIconBase(@NotNull Context context) {
         super(context);
 
         // Immediately start loading, we will wait until the state is set using #setState
@@ -51,10 +53,10 @@ public class EditMapIcon extends View {
         Check.argCondition(state == State.FULL && mapId == null, "mapId cannot be null if state is FULL");
         this.slot = slot;
         this.mapId = mapId;
-        stateSwitch.setState(state.ordinal());
+        stateSwitch.setOption(state.ordinal());
 
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
-        if (state == State.FULL) {
+        if (state == State.FULL || state == State.SELECTED) {
             mapDataFuture = async(() -> {
                 var map = mapStorage.getMapById(mapId);
                 full.setArgs(
@@ -88,9 +90,34 @@ public class EditMapIcon extends View {
     private void handleFullClick() {
         try {
             //todo should not select until loaded i guess
+            stateSwitch.setOption(State.SELECTED.ordinal());
             performSignal(SIG_SELECT_MAP_IN_SLOT, mapDataFuture.get());
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Signal(SIG_SELECT_MAP_IN_SLOT)
+    private void handleSelectMapInSlot(MapData mapData) {
+        if (mapData.getId().equals(mapId)) {
+            return;
+        }
+
+        // Reset to full if selected
+        if (stateSwitch.getOption() == State.SELECTED.ordinal()) {
+            stateSwitch.setOption(State.FULL.ordinal());
+        }
+    }
+
+    @Signal(SIG_CREATE_MAP_IN_SLOT)
+    private void handleCreateMapInSlot(int slot) {
+        if (slot == this.slot) {
+            return;
+        }
+
+        // Reset to full if selected
+        if (stateSwitch.getOption() == State.SELECTED.ordinal()) {
+            stateSwitch.setOption(State.FULL.ordinal());
         }
     }
 

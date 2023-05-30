@@ -19,19 +19,19 @@ public class SwitchDemo extends View {
     @Action("red")
     private void red(@NotNull Player player) {
         player.sendMessage("red");
-        switchElement.setState(1);
+        switchElement.setOption(1);
     }
 
     @Action("green")
     private void green(@NotNull Player player) {
         player.sendMessage("green");
-        switchElement.setState(2);
+        switchElement.setOption(2);
     }
 
     @Action("blue")
     private void blue(@NotNull Player player) {
         player.sendMessage("blue");
-        switchElement.setState(0);
+        switchElement.setOption(0);
     }
 
 }

@@ -1,6 +1,8 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
+import net.hollowcube.common.util.FontUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -79,10 +81,19 @@ public class ContainerElement extends BaseElement {
     }
 
     @Override
-    public void buildTitle(@NotNull StringBuilder sb) {
-        super.buildTitle(sb);
-        for (var child : children) {
-            child.buildTitle(sb);
+    public void buildTitle(@NotNull FontUIBuilder sb, int componentX, int componentY) {
+        drawBackgroundSprite(sb, componentX, componentY);
+
+        int x = 0, y = 0, nextY = 0;
+        for (var child : children()) {
+            if (x >= width()) {
+                x = 0;
+                y = nextY;
+            }
+
+            child.buildTitle(sb, componentX + x, componentY + y);
+            x += child.width();
+            nextY = Math.max(nextY, y + child.height());
         }
     }
 

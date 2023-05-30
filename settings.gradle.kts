@@ -18,5 +18,5 @@ include(":modules:map")
 
 // Binaries
 include(":bin")
-include(":bin:development")
 include(":bin:packer")
+include(":bin:development")

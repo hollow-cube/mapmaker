@@ -1,6 +1,7 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -84,6 +85,28 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
             throw new IllegalStateException("Unsupported alignment: " + align);
         }
         return CLICK_DENY;
+    }
+
+
+    @Override
+    public void buildTitle(@NotNull FontUIBuilder sb, int componentX, int componentY) {
+        drawBackgroundSprite(sb, componentX, componentY);
+
+        if (align == Align.LTR) {
+            int x = 0;
+            for (var child : children()) {
+                child.buildTitle(sb, componentX + x, componentY);
+                x += child.width();
+            }
+        } else if (align == Align.TTB) {
+            int y = 0;
+            for (var child : children()) {
+                child.buildTitle(sb, componentX, componentY + y);
+                y += child.height();
+            }
+        } else {
+            throw new IllegalStateException("Unsupported alignment: " + align);
+        }
     }
 
     @Override

@@ -26,13 +26,13 @@ public class AnvilDemo extends View {
     @Action("author_to_map")
     private void author_to_map(@NotNull Player player) {
         player.sendMessage("switching to map name query");
-        switchElement.setState(1);
+        switchElement.setOption(1);
     }
 
     @Action("map_to_author")
     private void map_to_author(@NotNull Player player) {
         player.sendMessage("switching to author name query");
-        switchElement.setState(0);
+        switchElement.setOption(0);
     }
 
     @Action("confirmation")

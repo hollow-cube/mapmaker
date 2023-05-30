@@ -1,4 +1,6 @@
 <?xml version="1.0" ?>
 <component>
-    <button id="btn" translationKey="gui.generic.back" sprite="barrier"/>
+    <button id="btn" translationKey="gui.generic.back"
+            backgroundSprite="generic/close_bg"
+            sprite="generic/close"/>
 </component>
