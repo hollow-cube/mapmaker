@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -64,10 +65,9 @@ public final class FontUtil {
 
     static {
         //todo rewrite this to be more sane + dynamic (read a single file with all of the fontmaps)
-        try (var is = Files.newInputStream(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/build/packer/server/font_map_title.json"))) {
-//        try (var is = FontUtil.class.getClassLoader().getResourceAsStream("/font_map_title.json")) {
+        try (var is = FontUtil.class.getResourceAsStream("/font_map_title.json")) {
             Check.notNull(is, "Missing map title font map");
-            var json = new Gson().fromJson(new InputStreamReader(is), JsonObject.class);
+            var json = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class);
             var chars = new HashMap<Character, Character>();
             for (var entry : json.entrySet()) {
                 chars.put(entry.getKey().charAt(0), entry.getValue().getAsString().charAt(0));

@@ -41,7 +41,9 @@ public class SpriteTransform {
                 var configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
                 if (!Files.exists(configFile)) continue;
 
-                var name = guiBaseDir.relativize(imageFile).toString().replace(".png", "");
+                var name = guiBaseDir.relativize(imageFile).toString()
+                        .replace(".png", "")
+                        .replace("\\", "/");
                 var config = json5.parse(Files.readString(configFile)).getAsJson5Object();
                 System.out.println(name);
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public record Sprite(char fontChar, int cmd, int width, int offsetX) {
         var sprites = new HashMap<String, Sprite>();
         try (var is = Sprite.class.getResourceAsStream("/sprites.json")) {
             if (is != null) {
-                var entries = new Gson().fromJson(new String(is.readAllBytes()), JsonArray.class);
+                var entries = new Gson().fromJson(new String(is.readAllBytes(), StandardCharsets.UTF_8), JsonArray.class);
                 for (var entry : entries) {
                     var obj = entry.getAsJsonObject();
                     var key = obj.get("name").getAsString();
