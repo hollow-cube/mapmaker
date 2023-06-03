@@ -109,7 +109,6 @@ public abstract class BaseElement implements Element {
 
     protected void drawBackgroundSprite(@NotNull FontUIBuilder sb, int x, int y) {
         if (state == State.ACTIVE && sprite != null) {
-            System.out.println("DRAWING BACKGROUND " + sprite.fontChar() + " " + x);
             sb.draw(sprite, x);
 //            sb.append(FontUtil.computeOffset(sprite.offsetX() + (x * 18)));
 //            sb.append(sprite.fontChar());

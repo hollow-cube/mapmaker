@@ -48,7 +48,7 @@ class PlayerStorageMongo implements PlayerStorage {
     public void updatePlayer(@NotNull PlayerData player) {
         var filter = eq("_id", player.getId());
         var result = collection().replaceOne(filter, player);
-        if (result.getModifiedCount() == 0)
+        if (result.getMatchedCount() == 0)
             throw new NotFoundError(player.getId());
     }
 

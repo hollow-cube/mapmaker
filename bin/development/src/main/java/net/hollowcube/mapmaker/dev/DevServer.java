@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -12,6 +13,7 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.FakePlayerCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
@@ -39,10 +41,16 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.fakeplayer.FakePlayer;
+import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -53,10 +61,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
-import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
@@ -120,7 +126,6 @@ public class DevServer {
     private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
     private MetricStorage metricStorage;
-    private WhitelistStorage whitelistStorage;
 
     private WorldManager worldManager;
 
@@ -139,7 +144,7 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-        MojangAuth.init();
+//        MojangAuth.init();
 
         // Start phase 1
         // Connect to low level services
@@ -170,15 +175,6 @@ public class DevServer {
             } else {
                 scope.fork(() -> {
                     this.saveStateStorage = SaveStateStorage.mongo(mongoConfig);
-                    return null;
-                });
-            }
-
-            if (System.getenv("MM_WHITELIST_DEV") != null) {
-                this.whitelistStorage = WhitelistStorage.memory();
-            } else {
-                scope.fork(() -> {
-                    this.whitelistStorage = WhitelistStorage.mongo(config.mongo());
                     return null;
                 });
             }
@@ -317,13 +313,6 @@ public class DevServer {
         var player = event.getPlayer();
         var playerId = event.getPlayerUuid().toString();
 
-        // Whitelist check
-        boolean whitelisted = whitelistStorage.isWhitelisted(playerId);
-        if (!whitelisted) {
-            player.kick(Component.text("You are not whitelisted on this server!", NamedTextColor.RED));
-            return;
-        }
-
         PlayerData playerData;
         try {
             playerData = playerStorage.getPlayerByUuid(playerId);
@@ -382,8 +371,7 @@ public class DevServer {
 
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
-        event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5));
-        //TODO whitelist logic
+        event.getPlayer().setRespawnPoint(new Pos(0.5, 4, 0.5));
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -423,5 +411,60 @@ public class DevServer {
         Scoreboards.showPlayerLobbyScoreboard(player);
         Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
         TabLists.showPlayerGlobalTabList(player);
+
+        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
+            hasPhysics = false;
+        }};
+        tube.setNoGravity(true);
+        var tubeMeta = (ItemDisplayMeta) tube.getEntityMeta();
+        tubeMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1004)).build());
+        tubeMeta.setScale(new Vec(4, 4, 4));
+        tubeMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
+        //todo set width and height of model
+        tube.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
+
+        var arm = new Entity(EntityType.ITEM_DISPLAY) {{
+            hasPhysics = false;
+        }};
+        arm.setNoGravity(true);
+        var armMeta = (ItemDisplayMeta) arm.getEntityMeta();
+        armMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1005)).build());
+        armMeta.setScale(new Vec(4, 4, 4));
+        armMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
+        //todo set width and height of model
+        arm.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
+        player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
+
+        var pos = new AtomicDouble(0);
+
+        MinecraftServer.getSchedulerManager()
+                .buildTask(() -> {
+                    tubeMeta.setNotifyAboutChanges(false);
+                    armMeta.setNotifyAboutChanges(false);
+
+                    tubeMeta.setInterpolationDuration(80);
+                    armMeta.setInterpolationDuration(80);
+
+                    tubeMeta.setInterpolationStartDelta(1);
+                    armMeta.setInterpolationStartDelta(1);
+
+                    var newRot = pos.addAndGet(180) % 360;
+                    var rot = new Quaternion(new Vec(0, 1, 0), Math.toRadians(newRot));
+                    tubeMeta.setLeftRotation(rot.into());
+                    armMeta.setRightRotation(rot.into());
+
+                    if (newRot == 180) {
+                        armMeta.setTranslation(new Vec(0, 2, 0));
+                    } else {
+                        armMeta.setTranslation(new Vec(0, 0, 0));
+                    }
+
+                    tubeMeta.setNotifyAboutChanges(true);
+                    armMeta.setNotifyAboutChanges(true);
+                })
+                .delay(5, net.minestom.server.utils.time.TimeUnit.SECOND)
+                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
+                .schedule();
+
     }
 }

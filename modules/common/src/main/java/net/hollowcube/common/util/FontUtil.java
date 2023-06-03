@@ -71,7 +71,6 @@ public final class FontUtil {
             var chars = new HashMap<Character, Character>();
             for (var entry : json.entrySet()) {
                 chars.put(entry.getKey().charAt(0), entry.getValue().getAsString().charAt(0));
-                System.out.println(entry.getKey().charAt(0) + " -> " + entry.getValue().getAsString().charAt(0));
             }
             fontmaps = Map.of("map_title", Map.copyOf(chars));
         } catch (IOException e) {

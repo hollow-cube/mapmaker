@@ -58,6 +58,13 @@ public @Blocking interface MapStorage {
 
 
     class NotFoundError extends RuntimeException {
+
+        public NotFoundError() {
+        }
+
+        public NotFoundError(String message) {
+            super(message);
+        }
     }
 
     class DuplicateEntryError extends RuntimeException {

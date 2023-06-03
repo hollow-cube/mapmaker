@@ -66,8 +66,8 @@ public class MapStorageMongo implements MapStorage {
     public void updateMap(@NotNull MapData map) {
         var filter = eq("_id", map.getId());
         var result = collection().replaceOne(filter, map);
-        if (result.getModifiedCount() == 0)
-            throw new NotFoundError();
+        if (result.getMatchedCount() == 0)
+            throw new NotFoundError(map.getId());
     }
 
     @Override
