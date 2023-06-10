@@ -11,9 +11,13 @@ public class Packer {
 
     static {
         try {
-            System.out.println(Path.of(".").toRealPath());
-            RESOURCE_DIR = Path.of("./resources").toRealPath();
-            OUT_DIR = Path.of("./build/packer").toRealPath();
+            var resourceDir = Path.of("./resources");
+            Files.createDirectories(resourceDir);
+            RESOURCE_DIR = resourceDir.toRealPath();
+
+            var outDir = Path.of("./build/packer");
+            Files.createDirectories(outDir);
+            OUT_DIR = outDir.toRealPath();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
