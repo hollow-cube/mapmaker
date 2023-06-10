@@ -3,6 +3,7 @@ package net.hollowcube.terraform;
 import net.hollowcube.terraform.command.*;
 import net.hollowcube.terraform.command.argument.ExtraArguments;
 import net.hollowcube.terraform.mask.script.MaybeMask;
+import net.hollowcube.terraform.tool.ToolHandler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -15,7 +16,7 @@ public final class Terraform {
     private Terraform() {
     }
 
-    public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
+    public static void init(@NotNull EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         var commands = MinecraftServer.getCommandManager();
 
         // Root/Debug
@@ -49,6 +50,11 @@ public final class Terraform {
 
         // Schematic
         commands.register(new SchematicCommand(condition));
+
+        // Tool
+        var toolHandler = new ToolHandler();
+        commands.register(new ToolCommand(condition, toolHandler));
+        eventNode.addChild(toolHandler.eventNode());
 
         // Testing
         var mask = new Command("mask");

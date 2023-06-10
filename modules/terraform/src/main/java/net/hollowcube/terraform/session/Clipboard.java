@@ -5,6 +5,7 @@ import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.NotNull;
@@ -79,5 +80,4 @@ public class Clipboard {
         }
         transforms.add(transform);
     }
-
 }

@@ -26,6 +26,8 @@ maybe need to have some context in the current execution to set some state, eg f
 
 ## Mask "scripting"
 
+I THINK I WILL SWITCH THIS TO USE | AND & AS EXPECTED
+
 `/` can be used to OR masks together
 `|` is a pipe operator, eg takes the input from left and feeds it to right (aka AND)
 `!` is a not operator, eg inverts the following mask

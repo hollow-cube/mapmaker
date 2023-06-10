@@ -30,7 +30,7 @@ public class Selection {
 
         //todo should use a player configured renderer or choose the best default if they have not chosen
         // eg if they have never chosen a renderer (including on every new join)
-        //    choose in the following order: DebugRenderer, WorldEditCUI, Particles
+        //    choose in the following order: DebugRenderer, WorldEditCUI, Particles, Nothing
         //    if they have chosen a renderer, use that always.
         //    if they have selected a lower priority renderer and join with a higher priority, send them a message ONCE
         //    if they have selected a renderer (such as debug renderer) and join without it, leave their selection and

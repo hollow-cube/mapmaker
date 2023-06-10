@@ -1,0 +1,63 @@
+package net.hollowcube.terraform.tool;
+
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.NamespaceID;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
+
+public interface BuiltinTool {
+    @NotNull Tag<String> TYPE = Tag.String("terraform:tool/type");
+
+    @NotNull String TYPE_CUSTOM = "terraform:custom";
+
+    int RIGHT_CLICK_AIR = 1 << 1;
+    int RIGHT_CLICK_BLOCK = 1 << 2;
+    int RIGHT_CLICK_ENTITY = 1 << 3;
+    int LEFT_CLICK_AIR = 1 << 4;
+    int LEFT_CLICK_BLOCK = 1 << 5;
+    int LEFT_CLICK_ENTITY = 1 << 6;
+
+    @NotNull NamespaceID namespace();
+
+    default @NotNull String name() {
+        return namespace().asString();
+    }
+
+    int flags();
+
+
+    void leftClicked(@NotNull Click click);
+
+    void rightClicked(@NotNull Click click);
+
+
+    record Click(
+            @NotNull BuiltinTool tool,
+            @NotNull Player player,
+            @NotNull ItemStack itemStack,
+            @NotNull Player.Hand hand,
+            @UnknownNullability Point blockPosition,
+            @UnknownNullability Point placePosition,
+            @UnknownNullability BlockFace face,
+            @UnknownNullability Entity entity
+    ) {
+        public @UnknownNullability Instance instance() {
+            return player.getInstance();
+        }
+
+//        public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
+//            var updatedItemStack = itemStack.with(builder -> {
+//                func.accept(builder);
+//                builder.meta(meta -> meta.customModelData(handler.customModelData()));
+//            });
+//            player.setItemInHand(hand, updatedItemStack);
+//        }
+    }
+
+}
