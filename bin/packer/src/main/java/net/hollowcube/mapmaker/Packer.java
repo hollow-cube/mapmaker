@@ -6,8 +6,18 @@ import java.nio.file.Path;
 public class Packer {
     private static final System.Logger logger = System.getLogger(Packer.class.getName());
 
-    private static final Path RESOURCE_DIR = Path.of("./resources");
-    private static final Path OUT_DIR = Path.of("./build/packer");
+    private static final Path RESOURCE_DIR;
+    private static final Path OUT_DIR;
+
+    static {
+        try {
+            System.out.println(Path.of(".").toRealPath());
+            RESOURCE_DIR = Path.of("./resources").toRealPath();
+            OUT_DIR = Path.of("./build/packer").toRealPath();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         logger.log(System.Logger.Level.INFO, "Hello, world!");

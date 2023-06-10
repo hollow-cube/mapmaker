@@ -1,3 +1,5 @@
+import org.gradle.internal.deployment.RunApplication
+
 plugins {
     application
 }
@@ -14,4 +16,8 @@ dependencies {
 
 application {
     mainClass.set("net.hollowcube.mapmaker.Packer")
+}
+
+tasks.getByName<JavaExec>("run") {
+    workingDir = rootProject.projectDir
 }
