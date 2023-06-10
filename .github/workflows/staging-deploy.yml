@@ -1,4 +1,5 @@
 name: Staging Build & Deploy
+concurrency: Staging
 
 on:
   push:
@@ -86,17 +87,15 @@ jobs:
           secrets: |
             global/data/docker user | DOCKER_USER ;
             global/data/docker pass | DOCKER_PASS ;
-            global/data/kubernetes kubeconfig_b64 | KUBECONFIG ;
-            staging/data/mongo uri | MONGO_URI ;
-            staging/data/r2 address | R2_S3_ADDRESS ;
-            staging/data/r2 access_key | R2_ACCESS_KEY ;
-            staging/data/r2 secret_key | R2_SECRET_KEY ;
-            staging/data/spicedb address | SPICEDB_ADDRESS ;
-            staging/data/spicedb secret_key | SPICEDB_SECRET_KEY
+            global/data/kubernetes kubeconfig_b64 | KUBECONFIG
+      - name: Import Secrets 2
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: staging/mapmaker
       - uses: azure/setup-helm@v3
         with:
           version: v3.10.2
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v3
       - name: Upgrade/install helm chart
         run: |
