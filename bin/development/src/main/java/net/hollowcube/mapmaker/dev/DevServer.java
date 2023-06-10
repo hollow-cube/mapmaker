@@ -413,81 +413,81 @@ public class DevServer {
         TabLists.showPlayerGlobalTabList(player);
 
 
-        Thread.startVirtualThread(() -> {
-            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
+//        Thread.startVirtualThread(() -> {
+//            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
+//
+//                MapData map;
+//                var playerData = PlayerData.fromPlayer(player);
+//                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
+//                    map = new MapData();
+//                    map.setOwner(playerData.getId());
+//                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
+//                } else {
+//                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
+//                }
+//
+//                hub.handler().editMap(player, map.getId());
+//
+//                try {
+//                    Thread.sleep(500);
+//                } catch (Exception ignored) {}
+//                MinecraftServer.getCommandManager().execute(player, "give mapmaker:path_tool");
+//            }
+//        });
 
-                MapData map;
-                var playerData = PlayerData.fromPlayer(player);
-                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
-                    map = new MapData();
-                    map.setOwner(playerData.getId());
-                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
-                } else {
-                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
-                }
 
-                hub.handler().editMap(player, map.getId());
-
-                try {
-                    Thread.sleep(500);
-                } catch (Exception ignored) {}
-                MinecraftServer.getCommandManager().execute(player, "give mapmaker:path_tool");
-            }
-        });
-
-
-        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
-            hasPhysics = false;
-        }};
-        tube.setNoGravity(true);
-        var tubeMeta = (ItemDisplayMeta) tube.getEntityMeta();
-        tubeMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1004)).build());
-        tubeMeta.setScale(new Vec(4, 4, 4));
-        tubeMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
-        //todo set width and height of model
-        tube.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
-
-        var arm = new Entity(EntityType.ITEM_DISPLAY) {{
-            hasPhysics = false;
-        }};
-        arm.setNoGravity(true);
-        var armMeta = (ItemDisplayMeta) arm.getEntityMeta();
-        armMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1005)).build());
-        armMeta.setScale(new Vec(4, 4, 4));
-        armMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
-        //todo set width and height of model
-        arm.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
-        player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
-
-        var pos = new AtomicDouble(0);
-        MinecraftServer.getSchedulerManager()
-                .buildTask(() -> {
-                    tubeMeta.setNotifyAboutChanges(false);
-                    armMeta.setNotifyAboutChanges(false);
-
-                    tubeMeta.setInterpolationDuration(80);
-                    armMeta.setInterpolationDuration(80);
-
-                    tubeMeta.setInterpolationStartDelta(1);
-                    armMeta.setInterpolationStartDelta(1);
-
-                    var newRot = pos.addAndGet(180) % 360;
-                    var rot = new Quaternion(new Vec(0, 1, 0), Math.toRadians(newRot));
-                    tubeMeta.setLeftRotation(rot.into());
-                    armMeta.setRightRotation(rot.into());
-
-                    if (newRot == 180) {
-                        armMeta.setTranslation(new Vec(0, 2, 0));
-                    } else {
-                        armMeta.setTranslation(new Vec(0, 0, 0));
-                    }
-
-                    tubeMeta.setNotifyAboutChanges(true);
-                    armMeta.setNotifyAboutChanges(true);
-                })
-                .delay(5, net.minestom.server.utils.time.TimeUnit.SECOND)
-                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
-                .schedule();
+//        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
+//            hasPhysics = false;
+//        }};
+//        tube.setNoGravity(true);
+//        var tubeMeta = (ItemDisplayMeta) tube.getEntityMeta();
+//        tubeMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1004)).build());
+//        tubeMeta.setScale(new Vec(4, 4, 4));
+//        tubeMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
+//        //todo set width and height of model
+//        tube.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
+//
+//        var arm = new Entity(EntityType.ITEM_DISPLAY) {{
+//            hasPhysics = false;
+//        }};
+//        arm.setNoGravity(true);
+//        var armMeta = (ItemDisplayMeta) arm.getEntityMeta();
+//        armMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1005)).build());
+//        armMeta.setScale(new Vec(4, 4, 4));
+//        armMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
+//        //todo set width and height of model
+//        arm.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
+//        player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
+//
+//        var pos = new AtomicDouble(0);
+//        MinecraftServer.getSchedulerManager()
+//                .buildTask(() -> {
+//                    tubeMeta.setNotifyAboutChanges(false);
+//                    armMeta.setNotifyAboutChanges(false);
+//
+//                    tubeMeta.setInterpolationDuration(80);
+//                    armMeta.setInterpolationDuration(80);
+//
+//                    tubeMeta.setInterpolationStartDelta(1);
+//                    armMeta.setInterpolationStartDelta(1);
+//
+//                    var newRot = pos.addAndGet(180) % 360;
+//                    var rot = new Quaternion(new Vec(0, 1, 0), Math.toRadians(newRot));
+//                    tubeMeta.setLeftRotation(rot.into());
+//                    armMeta.setRightRotation(rot.into());
+//
+//                    if (newRot == 180) {
+//                        armMeta.setTranslation(new Vec(0, 2, 0));
+//                    } else {
+//                        armMeta.setTranslation(new Vec(0, 0, 0));
+//                    }
+//
+//                    tubeMeta.setNotifyAboutChanges(true);
+//                    armMeta.setNotifyAboutChanges(true);
+//                })
+//                .delay(5, net.minestom.server.utils.time.TimeUnit.SECOND)
+//                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
+//                .schedule();
 
     }
 }

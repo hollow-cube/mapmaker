@@ -59,7 +59,7 @@ public class BaseWorld implements World {
                 (byte) -4, (byte) 19,
                 new ArrayList<>()
         )));
-        this.instance.setChunkSupplier(LightingChunk::new);
+//        this.instance.setChunkSupplier(LightingChunk::new);
         MinecraftServer.getInstanceManager().registerInstance(instance);
 
         var eventNode = instance.eventNode();
