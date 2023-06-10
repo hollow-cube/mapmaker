@@ -80,18 +80,14 @@ jobs:
       - helm-build
     steps:
       - name: Import Secrets
-        uses: hashicorp/vault-action@v2.2.0
+        uses: hollow-cube/actions/secrets@main
         with:
-          url: https://secrets.hollowcube.dev
           token: ${{ secrets.VAULT_TOKEN }}
-          secrets: |
-            global/data/docker user | DOCKER_USER ;
-            global/data/docker pass | DOCKER_PASS ;
-            global/data/kubernetes kubeconfig_b64 | KUBECONFIG
+          path: global/github
       - name: Tailscale
         uses: tailscale/github-action@main
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          authkey: ${{ env.TAILSCALE_AUTH_KEY }}
       - name: Import Secrets 2
         uses: hollow-cube/actions/secrets@main
         with:
@@ -104,7 +100,7 @@ jobs:
       - name: Upgrade/install helm chart
         run: |
           echo ${{ env.KUBECONFIG }} | base64 -d > ./kubeconfig
-          helm registry login registry.hollowcube.dev --username ${{ env.DOCKER_USER }} --password ${{ env.DOCKER_PASS }}
+          helm registry login registry.hollowcube.dev --username hollowcube --password ${{ env.DOCKER_PASS }}
           helm pull oci://registry.hollowcube.dev/helm-charts/mapmaker-dev --version "3.0.0-${{ github.sha }}"
           cat bin/development/deploy/mapmaker-dev/values-staging.yaml | envsubst > ./values-override.yaml
           helm upgrade --install mapmaker-dev mapmaker-dev-3.0.0-${{ github.sha }}.tgz -n mapmaker --reset-values -f ./values-override.yaml --kubeconfig ./kubeconfig
