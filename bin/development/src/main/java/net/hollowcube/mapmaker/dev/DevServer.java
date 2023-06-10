@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.dev;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -13,7 +12,6 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
-import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.FakePlayerCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
@@ -23,7 +21,6 @@ import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
-import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -41,18 +38,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
-import net.minestom.server.command.builder.CommandExecutor;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -144,7 +133,7 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-        MojangAuth.init();
+//        MojangAuth.init();
 
         // Start phase 1
         // Connect to low level services
@@ -434,8 +423,8 @@ public class DevServer {
 //                MinecraftServer.getCommandManager().execute(player, "give mapmaker:path_tool");
 //            }
 //        });
-
-
+//
+//
 //        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
 //            hasPhysics = false;
 //        }};
