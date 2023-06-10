@@ -88,6 +88,10 @@ jobs:
             global/data/docker user | DOCKER_USER ;
             global/data/docker pass | DOCKER_PASS ;
             global/data/kubernetes kubeconfig_b64 | KUBECONFIG
+      - name: Tailscale
+        uses: tailscale/github-action@main
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       - name: Import Secrets 2
         uses: hollow-cube/actions/secrets@main
         with:
