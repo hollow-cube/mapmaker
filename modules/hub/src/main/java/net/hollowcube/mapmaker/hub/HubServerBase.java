@@ -56,6 +56,10 @@ public abstract class HubServerBase implements HubServer {
         return world;
     }
 
+    public Handler handler() {
+        return mapHandler;
+    }
+
     @Override
     public void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
         guiController.show(player, viewProvider);

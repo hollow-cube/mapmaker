@@ -1,6 +1,5 @@
 package net.hollowcube.terraform.schem;
 
-import net.hollowcube.util.schem.Rotation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.batch.BatchOption;

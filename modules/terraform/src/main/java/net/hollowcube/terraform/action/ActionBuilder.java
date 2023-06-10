@@ -80,7 +80,7 @@ public class ActionBuilder {
             builder.addBlock(point, session.instance().getBlock(point));
         }
 
-        builder.setOffset(at.mul(-1));
+        builder.setOffset(at.mul(-1).add(1, 0, 1));
         callback.accept(builder.build());
     }
 

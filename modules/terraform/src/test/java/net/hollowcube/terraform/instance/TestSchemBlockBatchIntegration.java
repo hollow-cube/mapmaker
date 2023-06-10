@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.instance;
 
-import net.hollowcube.util.schem.Rotation;
+import net.hollowcube.terraform.schem.Rotation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;
@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("JUnitMalformedDeclaration")
 @EnvTest
-public class TestSchemBlockBatchIntegration {
+class TestSchemBlockBatchIntegration {
 
     @Test
-    public void testBasicApply(Env env) {
+    void testBasicApply(Env env) {
         var batch = new SchemBlockBatch();
         batch.setBlock(0, 0, 0, Block.TNT);
 

@@ -45,9 +45,7 @@ public final class Terraform {
         commands.register(new ClipboardCommands.Copy(condition));
         commands.register(new ClipboardCommands.Cut(condition));
         commands.register(new ClipboardCommands.Paste(condition));
-        commands.register(new ClipboardCommands.Rotate(condition));
-        commands.register(new ClipboardCommands.Flip(condition));
-        commands.register(new ClipboardCommands.ClearClipboard(condition));
+        commands.register(new ClipboardCommands.ClipboardCommand(condition));
 
         // Schematic
         commands.register(new SchematicCommand(condition));

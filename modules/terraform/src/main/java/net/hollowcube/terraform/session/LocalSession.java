@@ -58,7 +58,11 @@ public class LocalSession {
 
     // Selection
 
-    public @UnknownNullability Selection selection(@NotNull String name) {
+    public boolean hasSelection(@NotNull String name) {
+        return selection.containsKey(name.toLowerCase(Locale.ROOT));
+    }
+
+    public @NotNull Selection selection(@NotNull String name) {
         return selection.computeIfAbsent(name.toLowerCase(Locale.ROOT), n -> new Selection(playerSession.player(), n));
     }
 

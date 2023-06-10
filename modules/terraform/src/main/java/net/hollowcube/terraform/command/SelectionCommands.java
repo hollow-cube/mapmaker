@@ -463,8 +463,8 @@ public final class SelectionCommands {
             if (context.has(clipboardArg)) {
                 if (context.get(clipboardArg).toLowerCase(Locale.ROOT).equals("clipboard")) {
                     var playerSession = PlayerSession.forPlayer(player);
-                    int count = playerSession.clipboard().blocks().length;
-                    sender.sendMessage(Component.translatable("command.terraform.selection.count", Component.text("clipboard"), Component.text(count)));
+//                    int count = playerSession.clipboard().blocks().length;
+//                    sender.sendMessage(Component.translatable("command.terraform.selection.count", Component.text("clipboard"), Component.text(count)));
                 }
                 return;
             }

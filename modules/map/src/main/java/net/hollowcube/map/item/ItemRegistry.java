@@ -11,7 +11,9 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
@@ -59,6 +61,7 @@ public class ItemRegistry {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:item/registry", EventFilter.INSTANCE)
             .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItemOnBlock)
+            .addListener(PlayerUseItemEvent.class, this::handleUseItem)
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock);
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -122,7 +125,35 @@ public class ItemRegistry {
                 .toList();
     }
 
+    private void handleUseItem(@NotNull PlayerUseItemEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+
+        var cmd = event.getItemStack().meta().getCustomModelData();
+        var itemHandler = customModelDataToItemHandler.get(cmd);
+        if (itemHandler == null) return;
+
+        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_AIR)) return;
+
+        var player = event.getPlayer();
+        if (player.getTargetBlockPosition(5) != null) {
+            // For some dumb reason this is triggered when right clicking on a block, so is playerUseItemOnBlockEvent
+            // so we filter this one out.
+            return;
+        }
+
+        itemHandler.rightClicked(new ItemHandler.Click(
+                itemHandler,
+                player,
+                event.getItemStack(),
+                event.getHand(),
+                null, null,
+                null, null
+        ));
+    }
+
     private void handleUseItemOnBlock(@NotNull PlayerUseItemOnBlockEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+
         var cmd = event.getItemStack().meta().getCustomModelData();
         var itemHandler = customModelDataToItemHandler.get(cmd);
         if (itemHandler == null) return;
@@ -143,6 +174,8 @@ public class ItemRegistry {
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+
         var itemStack = event.getPlayer().getItemInHand(event.getHand());
         var cmd = itemStack.meta().getCustomModelData();
         var itemHandler = customModelDataToItemHandler.get(cmd);

@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.instance;
 
-import net.hollowcube.util.schem.Rotation;
+import net.hollowcube.terraform.schem.Rotation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;

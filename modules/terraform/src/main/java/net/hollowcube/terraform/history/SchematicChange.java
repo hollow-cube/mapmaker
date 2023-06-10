@@ -1,9 +1,9 @@
 package net.hollowcube.terraform.history;
 
+import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicWriter;
 import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.util.schem.Rotation;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTByteArray;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;

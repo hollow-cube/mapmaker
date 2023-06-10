@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
+import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
@@ -40,6 +41,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.command.builder.CommandExecutor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -71,13 +73,11 @@ public class DevServer {
     public static void main(String[] args) {
         long start = System.nanoTime();
 
-        System.out.println(DevServer.class.getClassLoader().getResource("sprites.json"));
-
-
         System.setProperty("minestom.terminal.disabled", "true");
         System.setProperty("minestom.async-commands", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
+        System.setProperty("minestom.chunk-view-distance", "16");
 
         // Convert JUL messages to SLF4J
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -144,7 +144,7 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-//        MojangAuth.init();
+        MojangAuth.init();
 
         // Start phase 1
         // Connect to low level services
@@ -412,6 +412,30 @@ public class DevServer {
         Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
         TabLists.showPlayerGlobalTabList(player);
 
+
+        Thread.startVirtualThread(() -> {
+            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
+
+                MapData map;
+                var playerData = PlayerData.fromPlayer(player);
+                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
+                    map = new MapData();
+                    map.setOwner(playerData.getId());
+                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
+                } else {
+                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
+                }
+
+                hub.handler().editMap(player, map.getId());
+
+                try {
+                    Thread.sleep(500);
+                } catch (Exception ignored) {}
+                MinecraftServer.getCommandManager().execute(player, "give mapmaker:path_tool");
+            }
+        });
+
+
         var tube = new Entity(EntityType.ITEM_DISPLAY) {{
             hasPhysics = false;
         }};
@@ -436,7 +460,6 @@ public class DevServer {
         player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
 
         var pos = new AtomicDouble(0);
-
         MinecraftServer.getSchedulerManager()
                 .buildTask(() -> {
                     tubeMeta.setNotifyAboutChanges(false);

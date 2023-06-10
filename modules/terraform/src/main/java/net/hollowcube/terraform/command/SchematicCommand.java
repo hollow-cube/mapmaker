@@ -67,7 +67,7 @@ public final class SchematicCommand extends Command {
                 return;
             }
 
-            playerSession.setClipboard(schem);
+//            playerSession.setClipboard(schem);
         }
     }
 

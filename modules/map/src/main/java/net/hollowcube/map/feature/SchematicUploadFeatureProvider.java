@@ -88,7 +88,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
 
             // Get their terraform session and set their clipboard
             var session = PlayerSession.forPlayer(player);
-            session.setClipboard(schem);
+//            session.setClipboard(schem);
             player.sendMessage(MapMessages.SCHEMATIC_UPLOAD_SUCCESS.with(Component.text(msg.name())));
 
             respondAndForget(msg, null);

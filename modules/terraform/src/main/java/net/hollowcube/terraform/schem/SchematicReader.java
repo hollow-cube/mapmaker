@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.schem;
 
 
-import net.minestom.server.command.ServerSender;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -71,10 +70,9 @@ public final class SchematicReader {
 
             Block[] paletteBlocks = new Block[paletteSize];
 
-            ArgumentBlockState state = new ArgumentBlockState("");
             palette.forEach((key, value) -> {
                 int assigned = ((NBTInt) value).getValue();
-                Block block = state.parse(new ServerSender(), key);
+                Block block = ArgumentBlockState.staticParse(key);
                 paletteBlocks[assigned] = block;
             });
 

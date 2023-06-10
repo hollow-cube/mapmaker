@@ -84,7 +84,7 @@ public abstract class MapServerBase implements MapServer {
 //        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 //        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
         Terraform.init(terraformEvents, null);
-        TerraformCompat.init(terraformEvents, null);
+//        TerraformCompat.init(terraformEvents, null);
 
         // Register commands
         var commandManager = MinecraftServer.getCommandManager();

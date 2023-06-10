@@ -15,11 +15,10 @@ The command syntax below is as follows:
 
 ## General
 
-## Blah
+- `/terraform` - returns some info about terraform and the installed extensions (todo)
+- `/terraform debug` - returns some debug info
 
-## Blah
-
-## Blah
+## Selection
 
 - `/pos1 [xyz] [selection]`
 - `/pos2 [xyz] [selection]`
@@ -31,3 +30,14 @@ The command syntax below is as follows:
 - `/sel clear [selection]`
 - `/sel type cuboid|etc [selection]`
 - `/sel expand <amount>` - also the other ops like contract and stuff
+
+## Clipboard
+
+- `/copy [mask] from [selection] to [clipboard]`
+- `/paste [mask] [clipboard]`
+- `/c list` - lists the existing clipboards
+- `/c clear [clipboard]` - clears the clipboard, or the default clipboard if unspecified
+- `/c rotate <angle> [axis] [clipboard]`
+- `/c flip [axis] [clipboard]`
+
+## Blah

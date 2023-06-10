@@ -75,7 +75,7 @@ public class SchematicBuilder {
         // Initial buffer size assumes that we have a palette less than 127
         // so each block is one byte. If the palette is larger, we will resize
         var blockBytes = ByteBuffer.allocate(blockCount + 4);
-        for (double i = 0; i < blockCount; i++) {
+        for (int i = 0; i < blockCount; i++) {
 
             // Resize array if it is too small
             if (blockBytes.remaining() <= 3) {
@@ -84,12 +84,18 @@ public class SchematicBuilder {
                 blockBytes.put(oldBytes);
             }
 
-            // Write the block
-            var blockPos = min.add(new Vec(
-                    (int) i % size.blockX(),
-                    (int) (i / (size.blockX() * size.blockY())),
-                    (int) (i / size.blockX()) % size.blockY()
-            ));
+            int index = i, width = size.blockX(), length = size.blockZ();
+            int y = index / (width * length);
+            int remainder = index - (y * width * length);
+            int z = remainder / width;
+            int x = remainder - z * width;
+
+            // Write the block in XZY order
+            var blockPos = new Vec(x, y, z
+//                    (int) (i % size.blockX()),
+//                    (int) (i / (size.blockX() * size.blockZ())),
+//                    (int) ((i / size.blockX()) % size.blockZ())
+            ).add(min);
             var block = blockSet.get(blockPos);
 
             if (block == null) {

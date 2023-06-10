@@ -42,7 +42,7 @@ public class TerraformCommand extends Command {
                 // Print player session info
                 var session = PlayerSession.forPlayer(player);
                 sender.sendMessage(Component.text("Session:"));
-                sender.sendMessage(Component.text("  Clipboard: " + (session.clipboard() != null ? "yes" : "no")));
+//                sender.sendMessage(Component.text("  Clipboard: " + (session.clipboard() != null ? "yes" : "no")));
 
                 // Print local session info
                 var localSession = LocalSession.forPlayer(player);

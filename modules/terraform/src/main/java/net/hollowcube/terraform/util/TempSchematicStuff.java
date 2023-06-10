@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.util;
 
 import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.util.schem.SchematicReader;
+import net.hollowcube.terraform.schem.SchematicReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TempSchematicStuff {
-    private static final String BASE_PATH = System.getenv("MM_SCHEMATICS");
+//    private static final String BASE_PATH = System.getenv("MM_SCHEMATICS");
+    private static final String BASE_PATH = "/Users/matt/dev/projects/hollowcube/mapmaker/schem";
     private static final List<String> schematics = new ArrayList<>();
 
 
