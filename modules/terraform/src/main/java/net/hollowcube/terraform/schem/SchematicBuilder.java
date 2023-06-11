@@ -26,12 +26,12 @@ public class SchematicBuilder {
 
     public void addBlock(@NotNull Point point, @NotNull Block block) {
         var pos = CoordinateUtil.floor(point);
-        if (block.isAir()) {
-            // If it's air, attempt to remove any existing value at that point.
-            blockSet.remove(pos);
-        } else {
-            blockSet.put(pos, block);
-        }
+        blockSet.put(pos, block);
+//        if (block.isAir()) {
+//             If it's air, attempt to remove any existing value at that point.
+//            blockSet.remove(pos);
+//        } else {
+//        }
     }
 
     public void setOffset(double x, double y, double z) {
@@ -62,12 +62,9 @@ public class SchematicBuilder {
         // Map of Block -> Palette ID
         Object2IntMap<Block> paletteMap = new Object2IntArrayMap<>();
 
-        // If the number of blocks set in the builder is not equal to the size of the schematic,
-        // then there must be at least one air block. We just add this immediately.
-        // There can never be an air block in the map because #addBlock does a remove if the block is air.
         // We always keep air as palette block zero, since it is likely the vast
         // majority of blocks, so we want to ensure that it is one byte.
-        if (blockSet.size() != blockCount) {
+        if (blockSet.containsValue(Block.AIR)) {
             paletteMap.put(Block.AIR, 0);
         }
 
