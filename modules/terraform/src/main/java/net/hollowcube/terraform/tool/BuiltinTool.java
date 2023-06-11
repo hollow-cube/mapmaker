@@ -6,10 +6,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
+
+import java.util.function.Consumer;
 
 public interface BuiltinTool {
     @NotNull Tag<String> TYPE = Tag.String("terraform:tool/type");
@@ -31,6 +34,8 @@ public interface BuiltinTool {
 
     int flags();
 
+    @NotNull Material material();
+
 
     void leftClicked(@NotNull Click click);
 
@@ -51,13 +56,9 @@ public interface BuiltinTool {
             return player.getInstance();
         }
 
-//        public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
-//            var updatedItemStack = itemStack.with(builder -> {
-//                func.accept(builder);
-//                builder.meta(meta -> meta.customModelData(handler.customModelData()));
-//            });
-//            player.setItemInHand(hand, updatedItemStack);
-//        }
+        public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
+            player.setItemInHand(hand, itemStack.with(func));
+        }
     }
 
 }

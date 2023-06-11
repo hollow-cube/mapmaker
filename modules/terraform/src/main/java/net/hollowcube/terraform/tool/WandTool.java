@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,11 @@ public class WandTool implements BuiltinTool {
     @Override
     public int flags() {
         return RIGHT_CLICK_BLOCK | LEFT_CLICK_BLOCK;
+    }
+
+    @Override
+    public @NotNull Material material() {
+        return Material.WOODEN_AXE;
     }
 
     @Override
