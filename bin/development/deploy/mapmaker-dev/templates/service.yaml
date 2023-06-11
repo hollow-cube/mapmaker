@@ -5,12 +5,12 @@ metadata:
   labels:
     {{- include "mapmaker-dev.labels" . | nindent 4 }}
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
-    - port: 25566
+    - port: 25565
       targetPort: minecraft
       protocol: TCP
       name: minecraft
-      nodePort: 30565
+{{/*      nodePort: 30565*/}}
   selector:
     {{- include "mapmaker-dev.selectorLabels" . | nindent 4 }}
