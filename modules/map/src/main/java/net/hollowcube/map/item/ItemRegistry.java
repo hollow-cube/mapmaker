@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.terraform.tool.BuiltinTool;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -111,7 +112,11 @@ public class ItemRegistry {
         }
 
         var material = Material.fromNamespaceId(namespace);
-        return material == null ? null : ItemStack.of(material);
+        if (material == null) return null;
+        var builder = ItemStack.builder(material);
+        if (material == Material.DEBUG_STICK)
+            builder.setTag(BuiltinTool.TYPE, "terraform:debug_stick");
+        return builder.build();
     }
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
