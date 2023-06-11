@@ -42,6 +42,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.extras.velocity.VelocityProxy;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -133,7 +134,13 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-//        MojangAuth.init();
+        var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
+        if (velocitySecret != null) {
+            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy...");
+            VelocityProxy.enable(velocitySecret);
+        } else {
+            MojangAuth.init();
+        }
 
         // Start phase 1
         // Connect to low level services
