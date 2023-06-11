@@ -2,12 +2,15 @@ package net.hollowcube.terraform.selection.cui;
 
 import com.mattworzala.debug.DebugMessage;
 import com.mattworzala.debug.Layer;
+import com.mattworzala.debug.shape.LineShape;
 import com.mattworzala.debug.shape.Shape;
 import com.mattworzala.debug.shape.SplineShape;
 import net.hollowcube.terraform.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class DebugRendererSelectionRenderer implements SelectionRenderer {
     private final Player player;
@@ -55,10 +58,10 @@ public class DebugRendererSelectionRenderer implements SelectionRenderer {
     }
 
     @Override
-    public void point(@NotNull Point point) {
+    public void point(@NotNull Point point, double radius) {
         builder.set(nextId(), Shape.box()
-                .start(point.sub(0.05f))
-                .end(point.add(0.05f))
+                .start(point.sub(radius))
+                .end(point.add(radius))
                 .edgeColor(colorScheme.primary())
                 .faceColor(colorScheme.secondary())
                 .build());
@@ -70,6 +73,30 @@ public class DebugRendererSelectionRenderer implements SelectionRenderer {
                 .point(p1).point(p2)
                 .point(p3).point(p4)
                 .type(SplineShape.Type.BEZIER)
+                .color(colorScheme.primary())
+                .layer(Layer.TOP)
+                .build());
+    }
+
+    @Override
+    public void line(@NotNull Point p1, @NotNull Point p2) {
+        builder.set(nextId(), Shape.line()
+                .point(p1)
+                .point(p2)
+                .type(LineShape.Type.SINGLE)
+                .color(colorScheme.primary())
+                .layer(Layer.TOP)
+                .build());
+    }
+
+    @Override
+    public void lineChain(@NotNull List<Point> points) {
+        var b = Shape.line();
+        for (var point : points) {
+            b.point(point);
+        }
+        builder.set(nextId(), b
+                .type(LineShape.Type.SINGLE)
                 .color(colorScheme.primary())
                 .layer(Layer.TOP)
                 .build());

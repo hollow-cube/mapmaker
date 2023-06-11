@@ -21,12 +21,16 @@ import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
+import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
-import net.hollowcube.mapmaker.storage.*;
+import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.storage.MetricStorage;
+import net.hollowcube.mapmaker.storage.PlayerStorage;
+import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.mapmaker.ui.TabLists;
 import net.hollowcube.world.WorldManager;
@@ -409,27 +413,29 @@ public class DevServer {
         TabLists.showPlayerGlobalTabList(player);
 
 
-//        Thread.startVirtualThread(() -> {
-//            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
-//
-//                MapData map;
-//                var playerData = PlayerData.fromPlayer(player);
-//                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
-//                    map = new MapData();
-//                    map.setOwner(playerData.getId());
-//                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
-//                } else {
-//                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
-//                }
-//
-//                hub.handler().editMap(player, map.getId());
-//
-//                try {
-//                    Thread.sleep(500);
-//                } catch (Exception ignored) {}
-//                MinecraftServer.getCommandManager().execute(player, "give mapmaker:path_tool");
-//            }
-//        });
+        Thread.startVirtualThread(() -> {
+            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
+
+                MapData map;
+                var playerData = PlayerData.fromPlayer(player);
+                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
+                    map = new MapData();
+                    map.setOwner(playerData.getId());
+                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
+                } else {
+                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
+                }
+
+                hub.handler().editMap(player, map.getId());
+
+                try {
+                    Thread.sleep(500);
+                } catch (Exception ignored) {
+                }
+                MinecraftServer.getCommandManager().execute(player, "tool create wand");
+                MinecraftServer.getCommandManager().execute(player, "sel type line");
+            }
+        });
 //
 //
 //        var tube = new Entity(EntityType.ITEM_DISPLAY) {{

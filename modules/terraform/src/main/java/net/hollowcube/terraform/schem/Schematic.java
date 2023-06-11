@@ -93,6 +93,15 @@ public record Schematic(
         return batch;
     }
 
+    public @NotNull RelativeBlockBatch build(@NotNull Rotation rotation, boolean skipAir) {
+        RelativeBlockBatch batch = new RelativeBlockBatch(new BatchOption().setCalculateInverse(true));
+        apply(rotation, (pos, block) -> {
+            if (block.isAir() && skipAir) return;
+            batch.setBlock(pos, block);
+        });
+        return batch;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

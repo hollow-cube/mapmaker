@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,7 +53,7 @@ public class MockSelectionRenderer implements SelectionRenderer {
     }
 
     @Override
-    public void point(@NotNull Point point) {
+    public void point(@NotNull Point point, double radius) {
 
     }
 
@@ -60,4 +61,15 @@ public class MockSelectionRenderer implements SelectionRenderer {
     public void bezierCurve(@NotNull Point p1, @NotNull Point p2, @NotNull Point p3, @NotNull Point p4) {
 
     }
+
+    @Override
+    public void lineChain(@NotNull List<Point> points) {
+
+    }
+
+    @Override
+    public void line(@NotNull Point p1, @NotNull Point p2) {
+
+    }
+
 }

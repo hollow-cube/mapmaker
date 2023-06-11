@@ -91,6 +91,7 @@ public class CuboidRegionSelector implements RegionSelector {
         updateRender();
     }
 
+    @Override
     public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
         if (pos1 == null || pos2 == null) return;
 
