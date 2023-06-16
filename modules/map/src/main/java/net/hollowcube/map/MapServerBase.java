@@ -6,7 +6,9 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.block.handler.SignBlockHandler;
 import net.hollowcube.map.block.rule.PlacementRules;
+import net.hollowcube.map.block.rule.SignPlacementRule;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
@@ -27,6 +29,10 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockManager;
+import net.minestom.server.listener.manager.PacketListenerManager;
+import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +44,9 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public abstract class MapServerBase implements MapServer {
+    private static final PacketListenerManager PACKET_LISTENER_MANAGER = MinecraftServer.getPacketListenerManager();
+    private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
+
     private static final System.Logger logger = System.getLogger(MapServerBase.class.getName());
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
@@ -63,22 +72,10 @@ public abstract class MapServerBase implements MapServer {
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
         eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
 
-        PlacementRules.init();
-
         // Placement rules
-        var blockEvents = EventNode.type("placement_rules_map", EventFilter.BLOCK, (event, unused) -> {
-            if (event instanceof InstanceEvent instanceEvent)
-                return MapWorld.unsafeFromInstance(instanceEvent.getInstance()) != null;
-            //todo: fix this
-            return false;
-        });
-        MinecraftServer.getGlobalEventHandler().addChild(blockEvents);
-//        try {
-//            HCPlacementRules.init(blockEvents);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
+        PlacementRules.init();
+        BLOCK_MANAGER.registerHandler(SignBlockHandler.ID, () -> SignBlockHandler.INSTANCE);
+        PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         // Terraform initialization
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,

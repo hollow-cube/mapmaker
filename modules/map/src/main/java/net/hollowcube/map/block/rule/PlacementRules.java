@@ -230,5 +230,11 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.PURPLE_GLAZED_TERRACOTTA, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.MAGENTA_GLAZED_TERRACOTTA, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.PINK_GLAZED_TERRACOTTA, true));
+
+
+        // Block entity
+        for (var signId : BlockTags.MINECRAFT_STANDING_SIGNS.getValues()) {
+            blockManager.registerBlockPlacementRule(new SignPlacementRule(Block.fromNamespaceId(signId)));
+        }
     }
 }
