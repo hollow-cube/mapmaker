@@ -4,7 +4,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
-public class TripwireHookPlacementRule extends FacingHorizontalPlacementRule {
+public class TripwireHookPlacementRule extends FacingClickHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
     private static final String PROP_ATTACHED = "attached";
 

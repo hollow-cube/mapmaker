@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FenceGatePlacementRule extends FacingPlacementRule {
+public class FenceGatePlacementRule extends FacingHorizontalPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.EAST,

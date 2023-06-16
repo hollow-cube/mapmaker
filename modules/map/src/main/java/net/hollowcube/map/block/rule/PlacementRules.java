@@ -12,6 +12,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new RedstonePlacementRule());
 
         // Axis
+        // Logs
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.OAK_LOG));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.SPRUCE_LOG));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BIRCH_LOG));
@@ -44,16 +45,45 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.STRIPPED_DARK_OAK_WOOD));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.STRIPPED_CRIMSON_HYPHAE));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.STRIPPED_WARPED_HYPHAE));
+        // Everything else
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BASALT));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.POLISHED_BASALT));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BONE_BLOCK));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.MUDDY_MANGROVE_ROOTS));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.HAY_BLOCK));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.PURPUR_PILLAR));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.QUARTZ_PILLAR));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.DEEPSLATE));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEE_NEST));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEEHIVE));
+        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.CHAIN));
 
         // Facing
-        blockManager.registerBlockPlacementRule(new FacingPlacementRule(Block.FURNACE, true));
-        blockManager.registerBlockPlacementRule(new FacingPlacementRule(Block.LECTERN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.FURNACE, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LECTERN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.JACK_O_LANTERN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.CARVED_PUMPKIN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.FURNACE, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BLAST_FURNACE, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.STONECUTTER, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LOOM, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.SMOKER, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.COMPARATOR, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.REPEATER, true));
 
-        blockManager.registerBlockPlacementRule(new FacingPlacementRule(Block.BELL, false));
+        // All axis facing
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DISPENSER));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DROPPER));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.OBSERVER));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.COMMAND_BLOCK));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.CHAIN_COMMAND_BLOCK));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.REPEATING_COMMAND_BLOCK));
+
+        // Bell
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BELL, false));
+
+        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD));
+        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD));
 
         // Fences, Walls, and Gates
         for (var fenceGateId : BlockTags.MINECRAFT_FENCE_GATES.getValues()) {
@@ -81,7 +111,7 @@ public final class PlacementRules {
         // Stairs
         //todo completely broken
         for (NamespaceID id : BlockTags.MINECRAFT_STAIRS.getValues()) {
-            blockManager.registerBlockPlacementRule(new StairsPlacementRule(Block.fromNamespaceId(id)));
+            blockManager.registerBlockPlacementRule(new StairPlacementRule(Block.fromNamespaceId(id)));
         }
 
         // Stacking
@@ -100,7 +130,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new SnowPlacementRule());
 
         // Ladder
-        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LADDER));
+        blockManager.registerBlockPlacementRule(new FacingClickHorizontalPlacementRule(Block.LADDER));
 
         // Banners
         //todo completely broken
@@ -182,5 +212,23 @@ public final class PlacementRules {
 
         // Flower pot
         blockManager.registerBlockPlacementRule(new FlowerPotPlacementRule());
+
+        // Terracotta
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.WHITE_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LIGHT_GRAY_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.GRAY_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BLACK_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BROWN_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.RED_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.ORANGE_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.YELLOW_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LIME_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.GREEN_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.CYAN_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LIGHT_BLUE_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BLUE_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.PURPLE_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.MAGENTA_GLAZED_TERRACOTTA, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.PINK_GLAZED_TERRACOTTA, true));
     }
 }

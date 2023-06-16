@@ -4,7 +4,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SmallDripleafPlacementRule extends FacingPlacementRule {
+public class SmallDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
     private static final String PROP_HALF = "half"; // lower/upper
 

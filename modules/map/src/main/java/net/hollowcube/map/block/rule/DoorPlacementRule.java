@@ -5,7 +5,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DoorPlacementRule extends FacingPlacementRule {
+public class DoorPlacementRule extends FacingHorizontalPlacementRule {
     public DoorPlacementRule(@NotNull Block block) {
         super(block, false);
     }
