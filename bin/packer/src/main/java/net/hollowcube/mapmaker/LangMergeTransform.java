@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker;
 
+import com.google.gson.*;
 import de.marhali.json5.Json5;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +45,7 @@ public class LangMergeTransform {
 
     public void process(@NotNull PackContext context) throws IOException {
         var keySources = new HashMap<String, String>();
-        var result = new Properties();
+        var result = new JsonObject();
 
         try (var langFiles = Files.walk(context.resources().resolve("lang"))) {
             var files = langFiles.sorted(Comparator.comparing(Path::toString)).toList();
@@ -68,20 +69,20 @@ public class LangMergeTransform {
                             continue;
                         }
                         keySources.put(key, langFile.getFileName().toString());
-                        result.setProperty(key, processValue(value));
+                        result.add(key, processValue(value));
                     }
                 }
             }
         }
 
-        var outLangFile = context.out().resolve("server").resolve("en_US.properties");
+        var outLangFile = context.out().resolve("server").resolve("en_US.json");
         Files.createDirectories(outLangFile.getParent());
-        try (var os = Files.newOutputStream(outLangFile)) {
-            result.store(os, "Merged lang files");
+        try (var os = Files.newBufferedWriter(outLangFile)) {
+            new Gson().toJson(result, os);
         }
     }
 
-    private @NotNull String processValue(@NotNull String translation) {
+    private @NotNull JsonElement processValue(@NotNull String translation) {
         var result = new StringBuilder();
 
         Pattern pattern = Pattern.compile("\\$(\\w+)");
@@ -100,6 +101,16 @@ public class LangMergeTransform {
         }
         matcher.appendTail(result);
 
-        return result.toString();
+        // Convert newlines to arrays
+        if (result.indexOf("\n") != -1) {
+            var lines = result.toString().split("\n");
+            var array = new JsonArray();
+            for (String line : lines) {
+                array.add(new JsonPrimitive(line));
+            }
+            return array;
+        }
+
+        return new JsonPrimitive(result.toString());
     }
 }

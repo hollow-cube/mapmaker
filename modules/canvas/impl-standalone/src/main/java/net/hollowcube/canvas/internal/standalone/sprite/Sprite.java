@@ -29,7 +29,6 @@ public record Sprite(char fontChar, int cmd, int width, int offsetX) {
                     var width = obj.get("width").getAsInt();
                     var offsetX = obj.get("offsetX").getAsInt();
                     sprites.put(key, new Sprite(fontChar, cmd, width, offsetX));
-                    System.out.println(key + ": " + sprites.get(key) + " " + (int) fontChar);
                 }
             } else {
                 logger.log(System.Logger.Level.WARNING, "No sprites present in build");

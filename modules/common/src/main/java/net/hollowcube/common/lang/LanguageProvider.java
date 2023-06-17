@@ -1,5 +1,8 @@
 package net.hollowcube.common.lang;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -12,34 +15,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.InputStreamReader;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class LanguageProvider {
-    private static final Properties properties = new Properties();
+    private static final JsonObject langData;
 
     static {
-        try (InputStream is = LanguageProvider.class.getResourceAsStream("/en_US.properties")) {
+        JsonObject lang = new JsonObject();
+        try (InputStream is = LanguageProvider.class.getResourceAsStream("/en_US.json")) {
             if (is != null) {
-                properties.load(is);
+                lang = new Gson().fromJson(new InputStreamReader(is), JsonObject.class);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        for (var name : properties.stringPropertyNames()) {
-            var value = properties.getProperty(name);
-            if (!value.contains("\n")) continue;
-
-            properties.remove(name);
-            var lines = value.split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                properties.setProperty(name + "." + i, lines[i]);
-            }
-        }
+        langData = lang;
     }
 
     private static final Pattern ARG_PATTERN = Pattern.compile("\\{[0-9]+}");
@@ -64,8 +56,10 @@ public class LanguageProvider {
             return component;
         }
 
-        String value = properties.getProperty(translatable.key());
-        if (value == null) return Component.text(translatable.key());
+        var raw = langData.get(translatable.key());
+        if (raw == null) return Component.text(translatable.key());
+        var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
+
         Component translated = fromStringSafe(value);
         List<Component> args = translatable.args();
         if (args.size() != 0) {
@@ -92,8 +86,10 @@ public class LanguageProvider {
         }
 
         Component translated = componentCache.computeIfAbsent(translatable.key(), key -> {
-            String value = properties.getProperty(translatable.key());
-            if (value == null) return null;
+            var raw = langData.get(translatable.key());
+            if (raw == null) return Component.text(translatable.key());
+            var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
+
             return fromStringSafe(value);
         });
         if (translated == null) return component;
@@ -119,14 +115,16 @@ public class LanguageProvider {
             return component;
         }
 
-        var raw = properties.getProperty(translatable.key());
+
+        var raw = langData.get(translatable.key());
         if (raw == null) return Component.text(translatable.key());
+        var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
 
         var resolvers = new TagResolver[translatable.args().size()];
         for (int i = 0; i < resolvers.length; i++) {
             resolvers[i] = Placeholder.component(String.valueOf(i), translatable.args().get(i));
         }
-        return MiniMessage.miniMessage().deserialize(raw, resolvers);
+        return MiniMessage.miniMessage().deserialize(value, resolvers);
     }
 
     /**
@@ -144,19 +142,22 @@ public class LanguageProvider {
      * Eventually will be replaced with proxy translation, which will support newlines.
      */
     public static List<Component> optionalMultiTranslatable(@NotNull String key, @NotNull List<Component> args) {
-        return properties.stringPropertyNames().stream()
-                .filter(k -> {
-                    if (!k.startsWith(key)) return false;
-                    var rest = k.substring(key.length());
-                    return rest.length() == 0 || rest.matches("\\.[0-9]+");
-                })
-                .sorted((a, b) -> {
-                    if (a.equals(key)) return -1;
-                    if (b.equals(key)) return 1;
-                    return Integer.compare(Integer.parseInt(a.substring(key.length() + 1)), Integer.parseInt(b.substring(key.length() + 1)));
-                })
-                .map(k -> (Component) Component.translatable(k, args))
-                .toList();
+        var raw = langData.get(key);
+        if (raw == null) return List.of();
+
+        JsonArray value;
+        if (raw.isJsonArray()) {
+            value = raw.getAsJsonArray();
+        } else {
+            value = new JsonArray();
+            value.add(raw);
+        }
+
+        var result = new ArrayList<Component>();
+        for (var entry : value) {
+            result.add(Component.translatable(entry.getAsString(), args));
+        }
+        return result;
     }
 
     private static @NotNull Component fromStringSafe(@NotNull String text) {

@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
@@ -16,6 +17,11 @@ import java.util.function.Function;
 
 public abstract class HubServerBase implements HubServer {
     //todo one readiness check should be ensuring the world is loaded
+
+    static {
+        // Idk why the static initializer is not triggering from other usages
+        new PlayerSpawnInInstanceEvent(null);
+    }
 
     private final HubToMapBridge bridge;
     private Handler mapHandler;

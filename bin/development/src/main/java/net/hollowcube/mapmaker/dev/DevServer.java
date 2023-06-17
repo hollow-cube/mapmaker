@@ -9,9 +9,11 @@ import io.pyroscope.http.Format;
 import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.canvas.View;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.FakePlayerCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
@@ -49,6 +51,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -67,11 +70,9 @@ public class DevServer {
     public static void main(String[] args) {
         long start = System.nanoTime();
 
-        System.setProperty("minestom.terminal.disabled", "true");
+        System.setProperty("minestom.chunk-view-distance", "16");
         System.setProperty("minestom.async-commands", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
-        System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
-        System.setProperty("minestom.chunk-view-distance", "16");
         System.setProperty("minestom.use-new-chunk-sending", "true");
 
         // Convert JUL messages to SLF4J
@@ -241,8 +242,8 @@ public class DevServer {
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 
-            scope.fork(Executors.callable(this.hub::init));
-            scope.fork(Executors.callable(() -> this.maps.init(configProvider)));
+            scope.fork(FutureUtil.call(this.hub::init));
+            scope.fork(FutureUtil.call(() -> this.maps.init(configProvider)));
 
             scope.join();
         } catch (Exception e) {

@@ -2,10 +2,7 @@ package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
 import net.minestom.server.MinecraftServer;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -103,11 +100,12 @@ public abstract class View implements Element {
     }
 
     public interface AsyncRunnable {
+        @Async.Execute
         @Blocking void run() throws Exception;
     }
 
     @NonBlocking
-    protected void async(@NotNull AsyncRunnable func) {
+    protected void async(@Async.Schedule @NotNull AsyncRunnable func) {
         VIRTUAL_EXECUTOR.submit(() -> {
             try {
                 func.run();
