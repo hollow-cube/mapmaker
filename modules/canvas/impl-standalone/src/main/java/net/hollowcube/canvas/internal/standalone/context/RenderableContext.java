@@ -39,6 +39,11 @@ public record RenderableContext(
     }
 
     @Override
+    public boolean canPopView() {
+        return inventory.canPopView();
+    }
+
+    @Override
     public void pushView(@NotNull View view) {
         inventory.pushView(view);
     }

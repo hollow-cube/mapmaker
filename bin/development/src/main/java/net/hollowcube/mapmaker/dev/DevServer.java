@@ -72,6 +72,7 @@ public class DevServer {
         System.setProperty("minestom.event.multiple-parents", "true");
         System.setProperty("hc.instance.temp_dir", "./bin/development/build/local/local-maps");
         System.setProperty("minestom.chunk-view-distance", "16");
+        System.setProperty("minestom.use-new-chunk-sending", "true");
 
         // Convert JUL messages to SLF4J
         SLF4JBridgeHandler.removeHandlersForRootLogger();

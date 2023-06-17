@@ -44,20 +44,23 @@ public class InventoryViewHost {
 
     private final Deque<View> history = new ArrayDeque<>();
 
+    public boolean canPopView() {
+        return !history.isEmpty();
+    }
+
     public void pushView(@NotNull View view) {
         history.addLast(view);
         replaceInventory((BaseElement) view.element());
     }
 
     public void popView() {
-        if (history.size() == 0) {
+        if (history.size() < 2) {
             inventory.getViewers().forEach(Player::closeInventory);
             return;
         }
 
         history.removeLast();
         replaceInventory((BaseElement) history.getLast().element());
-
     }
 
     public @NotNull Inventory getHandle() {

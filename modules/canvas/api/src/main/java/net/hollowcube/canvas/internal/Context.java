@@ -18,6 +18,8 @@ public interface Context {
 
     void performSignal(@NotNull String name, @NotNull Object... args);
 
+    boolean canPopView();
+
     void pushView(@NotNull View view);
 
     void popView();

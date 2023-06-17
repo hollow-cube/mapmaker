@@ -60,6 +60,11 @@ public abstract class View implements Element {
 
     // Routing
 
+    /** Returns true if there is an available view to pop, false otherwise. */
+    public boolean canPopView() {
+        return context.canPopView();
+    }
+
     public void pushView(@NotNull Function<Context, View> viewProvider) {
         context.pushView(viewProvider.apply(context));
     }

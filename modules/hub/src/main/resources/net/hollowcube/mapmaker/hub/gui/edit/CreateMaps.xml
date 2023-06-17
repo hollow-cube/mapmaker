@@ -13,7 +13,7 @@
         <EditMapIcon3 id="slot2"/>
         <EditMapIcon4 id="slot3"/>
         <EditMapIcon5 id="slot4"/>
-        <button id="personal_world" translationKey="gui.create_maps.personal_world"
+        <button id="personal_world" translationKey="gui.create_maps.sandbox"
                 sprite="create_maps/personal_world" />
     </box>
 

@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <component>
-    <button id="btn" translationKey="gui.generic.back"
-            backgroundSprite="generic/close_bg"
-            sprite="generic/close"/>
+    <switch id="switch">
+        <button id="back" translationKey="gui.generic.back_arrow"
+                backgroundSprite="generic/close_bg"
+                sprite="generic/close"/>
+        <button id="close" translationKey="gui.generic.close_menu"
+                backgroundSprite="generic/close_bg"
+                sprite="generic/close"/>
+    </switch>
 </component>

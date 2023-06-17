@@ -36,6 +36,7 @@ public class EditMapIconBase extends View {
     private @Outlet("locked") Label locked;
     private @Outlet("empty") Label empty;
     private @Outlet("full") Label full;
+    private @Outlet("full_inserted") Label fullInserted;
 
     private int slot = -1;
     private String mapId = null; // Set if state is FULL
@@ -59,10 +60,9 @@ public class EditMapIconBase extends View {
         if (state == State.FULL || state == State.SELECTED) {
             mapDataFuture = async(() -> {
                 var map = mapStorage.getMapById(mapId);
-                full.setArgs(
-                        Component.text(slot + 1),
-                        Component.text(map.getName())
-                );
+                var args = new Component[]{Component.text(slot + 1), Component.text(map.getName())};
+                full.setArgs(args);
+                fullInserted.setArgs(args);
                 setState(Element.State.ACTIVE);
                 return map;
             });

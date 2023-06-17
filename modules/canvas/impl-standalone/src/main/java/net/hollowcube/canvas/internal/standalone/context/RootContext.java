@@ -22,6 +22,11 @@ public record RootContext(
     }
 
     @Override
+    public boolean canPopView() {
+        return false;
+    }
+
+    @Override
     public void pushView(@NotNull View view) {
         throw new UnsupportedOperationException("Cannot push view on root context");
     }
