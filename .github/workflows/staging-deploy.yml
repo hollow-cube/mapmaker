@@ -50,7 +50,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
           AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
-          SOURCE_DIR: mapmaker-${{ github.sha }}.zip
+          SOURCE_DIR: build/packer/mapmaker-${{ github.sha }}.zip
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
