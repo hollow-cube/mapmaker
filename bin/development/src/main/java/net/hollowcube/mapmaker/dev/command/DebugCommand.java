@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.dev.command;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.dev.DevRuntime;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -24,9 +26,20 @@ public class DebugCommand extends Command {
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
+        addSyntax(this::handleDebugResourcePack, ArgumentType.Literal("rp"));
         addSyntax(this::handleDebugSelf, ArgumentType.Literal("self"));
         addSyntax(this::handlePlayerReset, ArgumentType.Literal("reset-self"));
         addSyntax(this::handleMapWorldDebug, ArgumentType.Literal("world"));
+    }
+
+    private void handleDebugResourcePack(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
+            return;
+        }
+
+        var runtime = (DevRuntime) ServerRuntime.getRuntime();
+        player.sendMessage(Component.text("Resource pack: " + runtime.resourcePackSha1()));
     }
 
     private void handleDebugSelf(@NotNull CommandSender sender, @NotNull CommandContext context) {

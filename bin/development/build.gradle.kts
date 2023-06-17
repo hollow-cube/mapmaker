@@ -77,4 +77,11 @@ blossom {
         replaceToken("{MAPMAKER_COMMIT}", "dev")
     }
     replaceToken("{MINESTOM_VERSION}", minestomVersion)
+
+    val resourcePackHash = System.getenv("RESOURCE_PACK_SHA")
+    if (resourcePackHash != null) {
+        replaceToken("{RESOURCE_PACK_SHA}", resourcePackHash)
+    } else {
+        replaceToken("{RESOURCE_PACK_SHA}", "dev")
+    }
 }

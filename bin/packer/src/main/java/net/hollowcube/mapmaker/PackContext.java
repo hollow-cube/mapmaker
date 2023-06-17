@@ -20,7 +20,7 @@ public class PackContext {
 
     private Path resources;
     private Path out;
-    private boolean minify = true;
+    private boolean minify = false;
     private int resourceId = 0;
 
     private Path rpMinecraftBase;
@@ -141,7 +141,10 @@ public class PackContext {
     }
 
     private @NotNull String minifyId(@NotNull String id) {
-        if (!minify) return id;
+        if (!minify) {
+            // Need to flatten to avoid issues with atlases
+            return id.replace("/", "_");
+        }
 
         var newId = Integer.toString(resourceId++, 36);
         remapping.put(id, newId);

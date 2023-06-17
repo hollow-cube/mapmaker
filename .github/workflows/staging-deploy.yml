@@ -19,6 +19,11 @@ jobs:
           secrets: |
             global/data/docker user | DOCKER_USER ;
             global/data/docker pass | DOCKER_PASS
+      - name: Import Secrets 2
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/resourcepackr2
       - uses: actions/checkout@v3
       - name: Set up JDK 19
         uses: actions/setup-java@v2
@@ -32,12 +37,27 @@ jobs:
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: :bin:packer:run
+      - name: Zip resource pack
+        working-directory: build/packer
+        run: |
+          zip -r mapmaker-${{ github.sha }}.zip client
+          echo "RESOURCE_PACK_SHA=$(sha1sum mapmaker.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
+          echo "RESOURCE_PACK_SHA: $(sha1sum mapmaker.zip | cut -d ' ' -f1)" >> $GITHUB_SUMMARY
+      - name: Upload resource pack
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: resource-pack
+          AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
+          AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
+          SOURCE_DIR: mapmaker-${{ github.sha }}.zip
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: :bin:development:shadowJar
         env:
           COMMIT_SHA: ${{ github.sha }}
+          RESOURCE_PACK_SHA: ${{ env.RESOURCE_PACK_SHA }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub

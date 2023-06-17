@@ -3,11 +3,9 @@ package net.hollowcube.map.block.handler;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.map.block.rule.BlockTags;
-import net.hollowcube.map.block.rule.FacingHorizontalPlacementRule;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
@@ -22,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class SignBlockHandler implements BlockHandler {
     private record SignData(

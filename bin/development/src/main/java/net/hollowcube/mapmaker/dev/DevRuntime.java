@@ -23,4 +23,9 @@ public class DevRuntime implements ServerRuntime {
         return "{MINESTOM_VERSION}";
     }
 
+
+    public @NotNull String resourcePackSha1() {
+        return "{RESOURCE_PACK_SHA}";
+    }
+
 }
