@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,7 +47,8 @@ public class LangMergeTransform {
         var result = new Properties();
 
         try (var langFiles = Files.walk(context.resources().resolve("lang"))) {
-            for (var langFile : langFiles.toList()) {
+            var files = langFiles.sorted(Comparator.comparing(Path::toString)).toList();
+            for (var langFile : files) {
                 if (!langFile.getFileName().toString().endsWith(".properties")) continue;
 
                 System.out.println(langFile.toRealPath());

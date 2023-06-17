@@ -14,6 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,7 +38,8 @@ public class SpriteTransform {
 
         var guiBaseDir = context.resources().resolve("gui");
         try (var guiFile = Files.walk(guiBaseDir)) {
-            for (var imageFile : guiFile.toList()) {
+            var files = guiFile.sorted(Comparator.comparing(Path::toString)).toList();
+            for (var imageFile : files) {
                 if (!imageFile.getFileName().toString().endsWith(".png")) continue;
                 var configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
                 if (!Files.exists(configFile)) continue;
@@ -45,7 +48,6 @@ public class SpriteTransform {
                         .replace(".png", "")
                         .replace("\\", "/");
                 var config = json5.parse(Files.readString(configFile)).getAsJson5Object();
-                System.out.println(name);
 
                 if (config.get("type").getAsString().equals("sprite")) {
                     var resultFontChar = new JsonObject();

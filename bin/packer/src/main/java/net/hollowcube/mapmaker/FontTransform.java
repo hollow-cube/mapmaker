@@ -8,10 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Path;
+import java.util.*;
 
 public class FontTransform {
     private static final Json5 json5 = new Json5();
@@ -39,7 +37,8 @@ public class FontTransform {
     public void process(@NotNull PackContext ctx) throws IOException {
         var fontBaseDir = ctx.resources().resolve("font");
         try (var fontFileSet = Files.walk(fontBaseDir)) {
-            for (var fontFile : fontFileSet.toList()) {
+            var files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
+            for (var fontFile : files) {
                 if (!fontFile.getFileName().toString().endsWith(".json5")) continue;
 
                 var name = fontFile.getFileName().toString().replace(".json5", "");
