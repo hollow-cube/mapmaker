@@ -41,8 +41,8 @@ jobs:
         working-directory: build/packer
         run: |
           zip -r mapmaker-${{ github.sha }}.zip client
-          echo "RESOURCE_PACK_SHA=$(sha1sum mapmaker.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
-          echo "RESOURCE_PACK_SHA: $(sha1sum mapmaker.zip | cut -d ' ' -f1)" >> $GITHUB_SUMMARY
+          echo "RESOURCE_PACK_SHA=$(sha1sum mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
+          echo "Resource pack sha-1: $(sha1sum mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_SUMMARY
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
