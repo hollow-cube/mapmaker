@@ -10,15 +10,18 @@ import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.generation.MapGenerators;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +68,7 @@ public class EditingMapWorld implements InternalMapWorld {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
+        eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
     }
 
     @Override
@@ -202,6 +206,14 @@ public class EditingMapWorld implements InternalMapWorld {
 
         // add to the test world
         getTestWorld().acceptPlayer(player);
+    }
+
+    private final net.minestom.server.gamedata.tags.@Nullable Tag SWORD_TAG = MinecraftServer.getTagManager().getTag(net.minestom.server.gamedata.tags.Tag.BasicType.ITEMS, "minecraft:swords");
+    private void preventSwordBreaking(PlayerBlockBreakEvent event) {
+        ItemStack item = event.getPlayer().getItemInMainHand();
+        if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {
+            event.setCancelled(true);
+        }
     }
 
 }
