@@ -12,6 +12,7 @@
       <env name="MM_SCHEMATICS" value="./schem" />
       <env name="MM_WHITELIST_DEV" value="true" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
+      <env name="MM_WORLD_MANAGER_DEV" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />

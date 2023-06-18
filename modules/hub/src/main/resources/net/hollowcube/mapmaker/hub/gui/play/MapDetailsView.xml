@@ -5,12 +5,12 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.map_details.info"/>
+        <label translationKey="gui.map_details.map_info_tab.information"/>
         <spacer/>
-        <button width="3" translationKey="gui.map_details.creator" sprite="player_head"/>
+        <button width="3" translationKey="gui.map_details.creator_profile" sprite="player_head"/>
         <spacer/>
-        <button translationKey="gui.map_details.add_to_playlist"/>
-        <button translationKey="gui.map_details.report"/>
+        <button translationKey="gui.map_details.map_info_tab.add_to_playlist"/>
+        <button translationKey="gui.map_details.map_info_tab.report_map"/>
     </box>
 
     <!-- Map list -->
@@ -19,20 +19,20 @@
     <!-- Controls -->
     <box width="9">
         <spacer/>
-        <button translationKey="gui.map_details.tab.info"/>
+        <button translationKey="gui.map_details.map_info_tab"/>
         <spacer/>
-        <button translationKey="gui.map_details.tab.stats"/>
+        <button translationKey="gui.map_details.map_stats_tab"/>
         <spacer/>
-        <button translationKey="gui.map_details.tab.times"/>
+        <button translationKey="gui.map_details.top_times_tab"/>
         <spacer/>
-        <button translationKey="gui.map_details.tab.reviews"/>
+        <button translationKey="gui.map_details.map_reviews_tab"/>
         <spacer/>
     </box>
 
     <!-- More Controls -->
     <box width="9" height="3">
-        <button width="3" height="3" translationKey="gui.map_details.boost"/>
-        <button id="play_map" width="3" height="2" translationKey="gui.map_details.play"/>
-        <button width="3" height="3" translationKey="gui.map_details.suggest"/>
+        <button width="3" height="3" translationKey="gui.map_details.map_info.boost_map"/>
+        <button id="play_map" width="3" height="2" translationKey="gui.map_details.play_map"/>
+        <button width="3" height="3" translationKey="gui.map_details.suggest_similar_maps"/>
     </box>
 </component>

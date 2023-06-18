@@ -4,7 +4,7 @@
 
     <box width="9" height="1">
         <BackButton />
-        <label translationKey="gui.edit_map.info" />
+        <label translationKey="gui.create_maps.map_info_tab.information" />
         <label width="5" translationKey="todo" />
 <!--        todo those last 2 buttons-->
         <button translationKey="gui.create_maps.map_info_tab.manage_builders" />
@@ -35,13 +35,13 @@
 
     <box width="9" align="ltr">
         <spacer/>
-        <button id="tab_info" translationKey="gui.map_details.map_info_tab.name"/>
+        <button id="tab_info" translationKey="gui.create_maps.map_info_tab"/>
         <spacer/>
-        <button id="tab_stats" translationKey="gui.map_details.top_times_tab.name" sprite="create_maps/stats"/>
+        <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab" sprite="create_maps/stats"/>
         <spacer/>
-        <button id="tab_settings" translationKey="gui.create_maps.map_settings_tab.name" sprite="create_maps/actions"/>
+        <button id="tab_settings" translationKey="gui.create_maps.map_settings_tab" sprite="create_maps/actions"/>
         <spacer/>
-        <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab.name" sprite="create_maps/settings"/>
+        <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab" sprite="create_maps/settings"/>
         <spacer/>
     </box>
 
