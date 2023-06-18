@@ -94,7 +94,10 @@ public class LanguageProvider {
         });
         if (translated == null) return component;
 
-        List<Component> args = translatable.args();
+        return translateSingle(translated, translatable.args());
+    }
+
+    private static @NotNull Component translateSingle(@NotNull Component translated, @NotNull List<Component> args) {
         if (args.size() != 0) {
             translated = translated.replaceText(TextReplacementConfig.builder()
                     .match(ARG_PATTERN)
@@ -155,7 +158,7 @@ public class LanguageProvider {
 
         var result = new ArrayList<Component>();
         for (var entry : value) {
-            result.add(Component.translatable(entry.getAsString(), args));
+            result.add(translateSingle(fromStringSafe(entry.getAsString()), args));
         }
         return result;
     }

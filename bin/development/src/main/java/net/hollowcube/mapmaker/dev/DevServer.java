@@ -195,7 +195,6 @@ public class DevServer {
 
             if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
                 this.worldManager = new WorldManager(new FileStorageMemory());
-                this.legacyMapService = LegacyMapService.create("s3://231751fdba5d68aa03ae55c2d817443a:34430f6c5385fe383d52ed8ac420a7173a76045078608f128772efc9ed160f02@bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com/mapmaker");
             } else {
                 scope.fork(() -> {
                     try {
