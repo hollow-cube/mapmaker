@@ -107,6 +107,7 @@ public final class PlacementRules {
         // Chests
         blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.CHEST));
         blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.TRAPPED_CHEST));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.ENDER_CHEST, true));
 
         // Stairs
         //todo completely broken
