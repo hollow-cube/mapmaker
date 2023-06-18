@@ -28,7 +28,7 @@ public class TallFlowerPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull Block block, @NotNull BlockFace blockFace, @NotNull Point cursorPosition) {
+    public boolean isSelfReplaceable(@NotNull Replacement replacement) {
         return true;
     }
 }

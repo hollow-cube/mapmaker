@@ -19,6 +19,7 @@ public class MapEntry extends View {
     private @Outlet("btn") Label label;
 
     private final MapData map;
+    private Component authorName;
 
     public MapEntry(@NotNull Context context, @NotNull MapData map) {
         super(context);
@@ -30,15 +31,16 @@ public class MapEntry extends View {
 
     @Action("btn")
     private void handleClick() {
-        pushView(c -> new MapDetailsView(c, map));
+        pushView(c -> new MapDetailsView(c, map, authorName));
     }
 
     /** Builds and updates the arg list of the map icon. */
     private @Blocking void updateIcon() {
+        authorName = playerService.getDisplayName(map.getOwner());
         label.setArgs(
                 map.getNameComponent(),
-                Component.text(map.getPublishedId()),
-                playerService.getDisplayName(map.getOwner())
+                authorName,
+                Component.text(map.getPublishedId())
         );
 
         label.setState(State.ACTIVE);

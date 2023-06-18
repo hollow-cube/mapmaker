@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface Pagination2 extends Element {
 
+    void reset();
+
     void nextPage();
 
     void prevPage();

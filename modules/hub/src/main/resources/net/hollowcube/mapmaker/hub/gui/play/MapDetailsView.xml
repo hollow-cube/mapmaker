@@ -1,16 +1,21 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="play_maps/details/container">
+    <!-- This is a little cursed, but its acceptable to have zero size elements and they will not affect layout. -->
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="30"/>
+
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.map_details.map_info_tab.information"/>
-        <spacer/>
-        <button width="3" translationKey="gui.map_details.creator_profile" sprite="player_head"/>
-        <spacer/>
-        <button translationKey="gui.map_details.map_info_tab.add_to_playlist"/>
-        <button translationKey="gui.map_details.map_info_tab.report_map"/>
+        <text id="author" width="5" translationKey="gui.map_details.creator_profile"
+              font="map_details_author" shift="7"/>
+        <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
+                sprite="play_maps/details/add_to_playlist"/>
+        <button translationKey="gui.map_details.map_info_tab.report_map"
+                sprite="play_maps/details/report"/>
     </box>
 
     <!-- Map list -->
@@ -29,10 +34,13 @@
         <spacer/>
     </box>
 
-    <!-- More Controls -->
+    <!-- Big notable actions -->
     <box width="9" height="3">
-        <button width="3" height="3" translationKey="gui.map_details.map_info.boost_map"/>
-        <button id="play_map" width="3" height="2" translationKey="gui.map_details.play_map"/>
-        <button width="3" height="3" translationKey="gui.map_details.suggest_similar_maps"/>
+        <button id="boost_map" width="3" height="3"
+                translationKey="gui.map_details.map_info.boost_map"/>
+        <button id="play_map" width="3" height="3"
+                translationKey="gui.map_details.play_map"/>
+        <button id="suggest_similar" width="3" height="3"
+                translationKey="gui.map_details.suggest_similar_maps"/>
     </box>
 </component>

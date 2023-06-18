@@ -100,24 +100,25 @@ public class MapStorageMongo implements MapStorage {
     @Override
     public @NotNull List<MapData> queryMaps(@NotNull MapQuery query, int offset, int size) {
         var conditions = new ArrayList<Bson>();
-        if (query.isQueryMap() == null || query.query() == null || Boolean.FALSE.equals(query.publishedOnly()))
-            return new ArrayList<>();
-        if (query.isQueryMap()) {
-            if (Boolean.TRUE.equals(query.exactlyMatching())) {
-                conditions.add(eq("name", query.query()));
-            } else {
-                conditions.add(Filters.regex("name", query.query()));
-            }
-        } else {
-            // TODO distinguish exactly matching, we only have UUID to use so more work to do here
-            conditions.add(eq("owner", query.query()));
-        }
+//        if (query.isQueryMap() == null || query.query() == null || Boolean.FALSE.equals(query.publishedOnly()))
+//            return new ArrayList<>();
+//        if (query.isQueryMap()) {
+//            if (Boolean.TRUE.equals(query.exactlyMatching())) {
+//                conditions.add(eq("name", query.query()));
+//            } else {
+//                conditions.add(Filters.regex("name", query.query()));
+//            }
+//        } else {
+//            // TODO distinguish exactly matching, we only have UUID to use so more work to do here
+//            conditions.add(eq("owner", query.query()));
+//        }
         if (query.publishedOnly() != null)
             conditions.add(query.publishedOnly() ? exists("publishedAt") : not(exists("publishedAt")));
         var filter = and(conditions);
-        var sort = query.publishedOnly() != null && query.publishedOnly() ? descending("publishedAt") : descending("createdAt");
-        return collection().find(filter)
-                .sort(sort)
+//        var sort = query.publishedOnly() != null && query.publishedOnly() ? descending("publishedAt") : descending("createdAt");
+        return collection()
+                .find(filter)
+//                .sort(sort)
                 .skip(offset)
                 .limit(size)
                 .into(new ArrayList<>());

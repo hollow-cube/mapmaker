@@ -75,6 +75,11 @@ public class EditMap extends View {
         });
     }
 
+    @Action("map_icon")
+    private @NonBlocking void beginUpdateMapIcon() {
+        pushView(SetMapIcon::new);
+    }
+
     @Signal(SetMapName.SIG_UPDATE_NAME)
     private @NonBlocking void finishUpdateMapName(@NotNull String newName) {
         map.setName(newName);

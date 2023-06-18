@@ -1,4 +1,4 @@
 <?xml version="1.0" ?>
 <component>
-    <button id="btn" translationKey="gui.map.entry" sprite="paper"/>
+    <button id="btn" translationKey="gui.play_maps.map_display.map_name" sprite="paper"/>
 </component>

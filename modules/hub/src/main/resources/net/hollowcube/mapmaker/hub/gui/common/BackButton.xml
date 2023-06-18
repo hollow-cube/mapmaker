@@ -2,8 +2,8 @@
 <component>
     <switch id="switch">
         <button id="back" translationKey="gui.generic.back_arrow"
-                backgroundSprite="generic/close_bg"
-                sprite="generic/close"/>
+                backgroundSprite="generic/back_bg"
+                sprite="generic/back"/>
         <button id="close" translationKey="gui.generic.close_menu"
                 backgroundSprite="generic/close_bg"
                 sprite="generic/close"/>

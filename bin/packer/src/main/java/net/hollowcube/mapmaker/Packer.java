@@ -24,6 +24,8 @@ public class Packer {
     }
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("java.awt.headless", "true");
+
         logger.log(System.Logger.Level.INFO, "Hello, world!");
 
         Files.createDirectories(OUT_DIR);

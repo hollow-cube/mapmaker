@@ -64,18 +64,24 @@ public final class FontUtil {
     public static final Map<String, Map<Character, Character>> fontmaps;
 
     static {
-        //todo rewrite this to be more sane + dynamic (read a single file with all of the fontmaps)
-        try (var is = FontUtil.class.getResourceAsStream("/font_map_title.json")) {
-            Check.notNull(is, "Missing map title font map");
-            var json = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class);
-            var chars = new HashMap<Character, Character>();
-            for (var entry : json.entrySet()) {
-                chars.put(entry.getKey().charAt(0), entry.getValue().getAsString().charAt(0));
+        var tempFontmaps = new HashMap<String, Map<Character, Character>>();
+        try (var is = FontUtil.class.getResourceAsStream("/fonts.json")) {
+            if (is != null) {
+                var allFonts = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class);
+
+                for (var entry : allFonts.entrySet()) {
+                    var json = entry.getValue().getAsJsonObject();
+                    var chars = new HashMap<Character, Character>();
+                    for (var entry2 : json.entrySet()) {
+                        chars.put(entry2.getKey().charAt(0), entry2.getValue().getAsString().charAt(0));
+                    }
+                    tempFontmaps.put(entry.getKey(), Map.copyOf(chars));
+                }
             }
-            fontmaps = Map.of("map_title", Map.copyOf(chars));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        fontmaps = Map.copyOf(tempFontmaps);
     }
 
     public static int measureText(@NotNull String text) {

@@ -38,7 +38,7 @@ public class TextElement extends ButtonElement implements Text {
         if (shouldDelegateDraw()) return;
 
         //todo we should only rewrite and measure the text once, not every time we draw it
-        sb.pos(shift);
+        sb.pos(shift + (x * 16));
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         //todo why is this const offset required? seems like the measurements of the ascii font are different from the measurements of the offset ascii one.
         sb.append(FontUtil.rewrite(font, text), FontUtil.measureText(text));

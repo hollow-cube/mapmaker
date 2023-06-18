@@ -31,10 +31,13 @@ public class FontTransform {
                 charmap.add(charset.getAsString());
             }
             charmaps.put("ascii", charmap);
+            charmaps.put("ascii_2x", charmap);
         }
     }
 
     public void process(@NotNull PackContext ctx) throws IOException {
+        var output = new JsonObject();
+
         var fontBaseDir = ctx.resources().resolve("font");
         try (var fontFileSet = Files.walk(fontBaseDir)) {
             var files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
@@ -49,9 +52,13 @@ public class FontTransform {
                 if (charmap == null) throw new RuntimeException("NO such charmap " + charmap);
 
                 var fontEntry = new JsonObject();
+                fontEntry.addProperty("__name", name);
                 fontEntry.addProperty("type", "bitmap");
                 fontEntry.addProperty("file", "minecraft:font/" + type + ".png");
                 fontEntry.addProperty("ascent", 7 - config.get("y").getAsInt());
+                if (type.equals("ascii_2x")) {
+                    fontEntry.addProperty("height", 16);
+                }
 
                 var reverseCharMap = new JsonObject();
 
@@ -71,13 +78,15 @@ public class FontTransform {
                 }
                 fontEntry.add("chars", chars);
 
-                var outFile = ctx.out().resolve("server").resolve("font_" + name + ".json");
-                Files.createDirectories(outFile.getParent());
-                Files.writeString(outFile, new Gson().toJson(reverseCharMap));
+                output.add(name, reverseCharMap);
 
                 ctx.addFontCharacter(fontEntry);
             }
         }
+
+        var outFile = ctx.out().resolve("server").resolve("fonts.json");
+        Files.createDirectories(outFile.getParent());
+        Files.writeString(outFile, new Gson().toJson(output));
     }
 
 }

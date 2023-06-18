@@ -25,7 +25,7 @@ public class SpriteTransform {
 
     private static final boolean debug = false;
 
-    private int nextChar = '\uEff3';
+    private int nextChar = '\uE000';
 
     public final Map<String, String> entries = new HashMap<>();
 

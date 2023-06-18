@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<component width="3" height="2">
+    <switch id="state" width="3" height="2">
+        <button id="deselected" width="3" height="2"
+                translationKey="gui.play_maps.simple.sorting_preset.building"
+                sprite="play_maps/search/filter/building_off" />
+        <button id="selected" width="3" height="2"
+                translationKey="gui.play_maps.simple.sorting_preset.building"
+                sprite="play_maps/search/filter/building_on" />
+    </switch>
+</component>

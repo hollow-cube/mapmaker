@@ -35,6 +35,17 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
+    public void reset() {
+        page = 0;
+        pageCache.clear();
+
+        // Refetch first page
+        if (pageHandler == null) return;
+        //todo need some local "request id" to ensure an old request is not used multiple times
+        pageHandler.accept(new PageFetchRequest(0));
+    }
+
+    @Override
     public void nextPage() {
         if (pageHandler == null) return;
         if (page >= maxPage) return;
@@ -72,13 +83,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     private void mount() {
-        // Reset
-        page = 0;
-        pageCache.clear();
-
-        if (pageHandler == null) return;
-        //todo need some local "request id" to ensure an old request is not used multiple times
-        pageHandler.accept(new PageFetchRequest(0));
+        reset();
     }
 
     @Override

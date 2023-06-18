@@ -30,8 +30,9 @@ public class SnowPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull Block block, @NotNull BlockFace blockFace, @NotNull Point cursorPosition) {
-        return blockFace == BlockFace.TOP && block.id() == Block.SNOW.id() &&
+    public boolean isSelfReplaceable(@NotNull Replacement replacement) {
+        var block = replacement.block();
+        return replacement.blockFace() == BlockFace.TOP && block.id() == Block.SNOW.id() &&
                 Integer.parseInt(block.getProperty(PROP_LAYERS)) < 8;
     }
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<component width="1" height="1">
+    <label id="label" translationKey="forced.input"
+           sprite="diamond_block"/>
+</component>

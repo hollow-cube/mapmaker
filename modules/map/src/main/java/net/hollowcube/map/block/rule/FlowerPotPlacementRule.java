@@ -18,7 +18,8 @@ public class FlowerPotPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull Block block, @NotNull BlockFace blockFace, @NotNull Point cursorPosition) {
+    public boolean isSelfReplaceable(@NotNull Replacement replacement) {
+        var block = replacement.block();
         return BlockTags.MINECRAFT_SMALL_FLOWERS.contains(block.namespace());
     }
 }

@@ -1,14 +1,17 @@
 <?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.hub.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
-<component width="9" height="10" align="ttb" sprite="play_maps/container">
+<?import net.hollowcube.mapmaker.hub.gui.play.simple ?>
+<component width="9" height="10" align="ttb" sprite="play_maps/search/container">
     <!-- Top bar -->
     <box width="9" align="ltr">
-        <label translationKey="gui.generic.back"/>
+        <BackButton/>
         <label translationKey="gui.play_maps.simple.information"/>
         <!-- TODO how to handle text written into the GUI? -->
         <spacer width="5"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
-        <button id="query" translationKey="gui.play_maps.search_by_name"/>
+        <button id="query" translationKey="gui.play_maps.search_by_name"
+                sprite="play_maps/search/filter/search_by_name"/>
     </box>
 
     <!-- Map list -->
@@ -31,19 +34,19 @@
     <!-- Controls -->
     <box width="9" height="3" align="ttb">
         <box width="9" height="2">
-            <button id="parkour_toggle" width="3" height="2"
-                    translationKey="gui.play_maps.simple.sorting_preset.parkour_maps"
-                    sprite="play_maps/parkour_active"/>
-            <button width="3" height="2" translationKey="gui.play_maps.simple.sorting_preset.building_showcases"/>
-            <button width="3" height="2" translationKey="gui.play_maps.simple.sorting_preset.adventure_maps"/>
+            <FilterParkourToggle id="parkour"/>
+            <FilterBuildingToggle id="building"/>
+            <button width="3" height="2"
+                    translationKey="gui.play_maps.simple.sorting_preset.adventure"
+                    sprite="play_maps/search/filter/adventure_off"/>
         </box>
         <box width="9" height="1">
             <spacer width="2"/>
-            <button width="1" translationKey="gui.play_maps.simple.sorting_preset.all_time"/>
-            <button width="1" translationKey="gui.play_maps.simple.sorting_preset.trending"/>
-            <button width="1" translationKey="gui.play_maps.simple.sorting_preset.approved"/>
-            <button width="1" translationKey="gui.play_maps.simple.sorting_preset.boosted"/>
-            <button width="1" translationKey="gui.play_maps.simple.sorting_preset.new"/>
+            <SortBestToggle id="best"/>
+            <SortTrendingToggle id="trending"/>
+            <SortApprovedToggle id="approved"/>
+            <SortBoostedToggle id="boosted"/>
+            <SortRecentToggle id="recent"/>
             <spacer width="2"/>
         </box>
     </box>
