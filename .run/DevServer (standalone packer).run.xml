@@ -1,0 +1,27 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DevServer (standalone packer)" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="true" />
+      <env name="MAPMAKER_S3_URI" value="s3://85b1018684949c3ffe6902d217391ccf:cb12a288ca6f01b18335c3073ab04f1d5108c9f5c71aa3941dccdc80b58e048c@bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com/mapmaker" />
+      <env name="MM_CHAT_STORAGE_DEV" value="" />
+      <env name="MM_MAP_PERMISSIONS_DEV" value="true" />
+      <env name="MM_MAP_STORAGE_DEV" value="true" />
+      <env name="MM_METRICS_STORAGE_DEV" value="true" />
+      <env name="MM_PLAYER_STORAGE_DEV" value="true" />
+      <env name="MM_SAVESTATE_DEV" value="true" />
+      <env name="MM_SCHEMATICS" value="./schem" />
+      <env name="MM_WHITELIST_DEV" value="true" />
+      <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
+      <env name="MM_WORLD_MANAGER_DEV" value="true" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
+    <module name="mapmaker.bin.development.main" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent -Dcanvas.debug_blank=0" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Packer" run_configuration_type="Application" />
+    </method>
+  </configuration>
+</component>
