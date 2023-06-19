@@ -6,7 +6,7 @@
                 backgroundSprite="play_maps/search/filter/trending/bg_default"
                 sprite="play_maps/search/filter/trending/icon" />
         <button id="selected"
-                translationKey="gui.play_maps.simple.sorting_preset.trending"
+                translationKey="gui.play_maps.simple.sorting_preset.trending.already_selected"
                 backgroundSprite="play_maps/search/filter/trending/bg_selected"
                 sprite="play_maps/search/filter/trending/icon" />
     </switch>

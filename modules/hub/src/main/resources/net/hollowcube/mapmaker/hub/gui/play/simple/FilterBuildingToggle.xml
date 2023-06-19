@@ -5,7 +5,7 @@
                 translationKey="gui.play_maps.simple.sorting_preset.building"
                 sprite="play_maps/search/filter/building_off" />
         <button id="selected" width="3" height="2"
-                translationKey="gui.play_maps.simple.sorting_preset.building"
+                translationKey="gui.play_maps.simple.sorting_preset.building.already_selected"
                 sprite="play_maps/search/filter/building_on" />
     </switch>
 </component>

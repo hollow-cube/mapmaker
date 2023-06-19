@@ -6,7 +6,7 @@
                 backgroundSprite="play_maps/search/filter/boosted/bg_default"
                 sprite="play_maps/search/filter/boosted/icon" />
         <button id="selected"
-                translationKey="gui.play_maps.simple.sorting_preset.boosted"
+                translationKey="gui.play_maps.simple.sorting_preset.boosted.already_selected"
                 backgroundSprite="play_maps/search/filter/boosted/bg_selected"
                 sprite="play_maps/search/filter/boosted/icon" />
     </switch>
