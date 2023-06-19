@@ -28,8 +28,10 @@ public class StairPlacementRule extends BlockPlacementRule {
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
         var block = updateState.currentBlock();
+        System.out.println("UPDATE block at " + updateState.blockPosition());
 
         var facing = BlockFace.valueOf(block.getProperty(PROP_FACING).toUpperCase());
+        System.out.println("facing " + facing);
 
         var instance = updateState.instance();
         var blockPos = updateState.blockPosition();
@@ -40,16 +42,21 @@ public class StairPlacementRule extends BlockPlacementRule {
         var orderedFaces = HORIZONTAL_FACING[facing.ordinal() - 2];
         for (int i = 0; i < 4; i++) {
             var blockFace = orderedFaces[i];
+            System.out.println("blockFace " + blockFace);
             var relativeBlock = instance.getBlock(blockPos.relative(blockFace), Block.Getter.Condition.TYPE);
+            System.out.println("relativeBlock " + relativeBlock);
             if (!BlockTags.MINECRAFT_STAIRS.contains(relativeBlock.namespace())) continue; // Non-stairs never connect
 
             var relativeFacing = BlockFace.valueOf(relativeBlock.getProperty(PROP_FACING).toUpperCase());
+            System.out.println("relativeFacing " + relativeFacing);
             if (facing.isSimilar(blockFace)) {
                 // If it is a face next to the stair, then the rule is:
                 // canConnect = rel.facing is perpendicular to block.facing
                 var canConnect = !relativeFacing.isSimilar(facing);
+                System.out.println("canConnect (similar) " + canConnect);
                 if (canConnect) {
                     var nextFace = orderedFaces[(i + 1) % 4];
+                    System.out.println("nextFace " + nextFace);
                     sides[i] = nextFace.equals(relativeFacing) ? 2 : 1;
                 }
             } else {
@@ -57,6 +64,13 @@ public class StairPlacementRule extends BlockPlacementRule {
                 // canConnect = rel.facing == block.facing || rel.facing == blockFace
                 //todo this should also allow opposite of relative facing i think?
                 var canConnect = relativeFacing.equals(facing) || relativeFacing.equals(blockFace);
+                // Weird edge case in vanilla (Issue #108)
+                if ((block.getProperty(PROP_SHAPE).equals("outer_right") ||
+                        block.getProperty(PROP_SHAPE).equals("outer_left")) &&
+                        !relativeFacing.equals(facing))
+                    canConnect = false;
+                System.out.println("relativeFacing " + relativeFacing + ", facing " + facing + ", blockFace " + blockFace);
+                System.out.println("canConnect (not similar) " + canConnect);
                 if (canConnect) sides[i] = 1;
             }
         }
