@@ -45,7 +45,7 @@ public class ChatFacet implements Facet {
             })
             // Very low priority to run other events which might cancel these beforehand
             .setPriority(-10)
-            .addListener(PlayerChatEvent.class, this::handleChatEvent)
+            //.addListener(PlayerChatEvent.class, this::handleChatEvent)
             .addListener(PlayerCommandEvent.class, this::handleCommandEvent);
 
     private ChatStorage storage;
@@ -110,15 +110,15 @@ public class ChatFacet implements Facet {
                 senderData.getId(),
                 event.getMessage()
         );
-        switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
-            case ChatMessage.STAFF_CONTEXT:
-                sendStaffChatMessage(event.getPlayer(), message.message());
-                event.setCancelled(true);
-                break;
-            case ChatMessage.DEFAULT_CONTEXT:
-            default:
-                break;
-        }
+//        switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
+//            case ChatMessage.STAFF_CONTEXT:
+//                sendStaffChatMessage(event.getPlayer(), message.message());
+//                event.setCancelled(true);
+//                break;
+//            case ChatMessage.DEFAULT_CONTEXT:
+//            default:
+//                break;
+//        }
         try {
             storage.recordChatMessage(message);
         } catch (Exception e) {

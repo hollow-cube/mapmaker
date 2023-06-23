@@ -265,11 +265,11 @@ public class DevServer {
             eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
-            eventHandler.addListener(PlayerChatEvent.class, event -> event.setChatFormat(e -> {
-                var player = event.getPlayer();
-                var username = player.getUsername();
-                return Component.translatable("chat.type.text").args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
-            }));
+//            eventHandler.addListener(PlayerChatEvent.class, event -> event.setChatFormat(e -> {
+//                var player = event.getPlayer();
+//                var username = player.getUsername();
+//                return Component.translatable("chat.type.text").args(Component.text(username), Component.text(event.getMessage().replace(":skull:", "\uEff5"), NamedTextColor.RED));
+//            }));
             eventHandler.addListener(MapDeletedEvent.class, event -> {
                 for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     var playerData = PlayerData.fromPlayer(player);

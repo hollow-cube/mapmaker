@@ -57,7 +57,7 @@ public class LanguageProvider {
         }
 
         var raw = langData.get(translatable.key());
-        if (raw == null) return Component.text(translatable.key());
+        if (raw == null) return translatable;
         var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
 
         Component translated = fromStringSafe(value);
@@ -85,9 +85,15 @@ public class LanguageProvider {
             return component;
         }
 
+        //TODO MATT FIX PROPERLY OKAY? THANK YOU!!! <3
+        //TODO DO NOT CACHE MISSING KEYS
+        if (translatable.key().equals("chat.type.text")) {
+            return component;
+        }
+
         Component translated = componentCache.computeIfAbsent(translatable.key(), key -> {
             var raw = langData.get(translatable.key());
-            if (raw == null) return Component.text(translatable.key());
+            if (raw == null) return translatable;
             var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
 
             return fromStringSafe(value);
