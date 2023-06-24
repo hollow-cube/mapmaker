@@ -6,7 +6,6 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.storage.MetricStorage;
-import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +17,6 @@ public interface MapServer {
     @NotNull MetricStorage metricStorage();
 
     @NotNull MapService mapService();
-
-    @NotNull SaveStateStorage saveStateStorage();
 
     @NotNull PlatformPermissionManager platformPermissions();
 

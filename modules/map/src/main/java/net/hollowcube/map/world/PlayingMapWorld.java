@@ -8,8 +8,9 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
+import net.hollowcube.mapmaker.map.SaveStateV2;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -130,22 +131,18 @@ public class PlayingMapWorld implements InternalMapWorld {
     public @Blocking void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(
-                this, playerData.getId(), SaveState.Type.PLAYING);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId());
 
         activePlayers.add(player);
         player.setTag(TAG_PLAYING, true);
         player.setTag(MapHooks.PLAYING, true); // Legacy
-        player.setTag(SaveState.TAG, saveState);
+        player.setTag(SaveStateV2.TAG, saveState);
         player.refreshCommands();
 
-        var inventory = saveState.getInventory();
         player.getInventory().clear();
-        for (int i = 0; i < inventory.size(); i++) {
-            player.getInventory().setItemStack(i, inventory.get(i));
-        }
         player.setGameMode(GameMode.ADVENTURE);
-        player.teleport(saveState.getPos()).join();
+        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
+        player.teleport(pos).join();
 
         EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
         player.sendMessage("Now playing " + map.settings().getName());
@@ -159,15 +156,19 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.removeTag(MapHooks.PLAYING); // Legacy
         activePlayers.remove(player);
 
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState != null) {
-            try {
-                var saveStateStorage = server.saveStateStorage();
-                saveStateStorage.updateSaveState(saveState);
-                logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
-            } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
-            }
+        var saveState = SaveStateV2.optionalFromPlayer(player);
+        if (saveState == null) return;
+
+        var update = new SaveStateUpdateRequest();
+        update.setCompleted(saveState.isCompleted());
+        //todo save other stuff
+
+        try {
+            var playerData = PlayerData.fromPlayer(player);
+            server.mapService().updateSaveState(map.id(), playerData.getId(), saveState.id(), update);
+            logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
         }
     }
 

@@ -131,6 +131,61 @@ public class MapServiceImpl implements MapService {
         }
     }
 
+    @Override
+    public @NotNull SaveStateV2 createSaveState(@NotNull String mapId, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 201 -> GSON.fromJson(res.body(), SaveStateV2.class);
+            default -> throw new InternalError("Failed to create savestate: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull SaveStateV2 getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), SaveStateV2.class);
+            case 404 -> throw new NotFoundError(id);
+            default -> throw new InternalError("Failed to get savestate: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull SaveStateV2 getLatestSaveState(@NotNull String mapId, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest"))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), SaveStateV2.class);
+            case 404 -> throw new NotFoundError("latest");
+            default -> throw new InternalError("Failed to get latest savestate: " + res.body());
+        };
+    }
+
+    @Override
+    public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+        var reqBody = GSON.toJson(update);
+        var req = HttpRequest.newBuilder()
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 204) return; // Ok
+        throw new InternalError("Failed to update savestate: " + res.body());
+    }
+
     private <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
         try {
             var res = httpClient.send(req, handler);

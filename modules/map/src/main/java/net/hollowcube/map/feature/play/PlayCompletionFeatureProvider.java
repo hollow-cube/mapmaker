@@ -7,7 +7,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateV2;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -34,7 +34,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
 
-        var saveState = SaveState.fromPlayer(player);
+        var saveState = SaveStateV2.fromPlayer(player);
         saveState.setCompleted(true);
 
         world.server().newOpenGUI(player, CompletedMapView::new);

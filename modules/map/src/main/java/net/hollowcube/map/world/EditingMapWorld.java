@@ -5,8 +5,9 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
+import net.hollowcube.mapmaker.map.SaveStateV2;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -138,39 +139,42 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @Blocking void acceptPlayer(@NotNull Player player) {
+    @Blocking
+    public void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerData.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId(), SaveState.Type.EDITING);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId());
 
         activePlayers.add(player);
         player.setTag(TAG_EDITING, true);
-        player.setTag(SaveState.TAG, saveState);
+        player.setTag(SaveStateV2.TAG, saveState);
         player.refreshCommands();
 
-        var inventory = saveState.getInventory();
-        player.getInventory().clear();
-        for (int i = 0; i < inventory.size(); i++) {
-            player.getInventory().setItemStack(i, inventory.get(i));
-        }
         player.setGameMode(GameMode.CREATIVE);
-        player.teleport(saveState.getPos()).join();
+        player.getInventory().clear();
+        var savedItems = saveState.getInventoryItems();
+        if (savedItems != null) {
+            for (int i = 0; i < savedItems.size(); i++) {
+                player.getInventory().setItemStack(i, savedItems.get(i));
+            }
+        }
+        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
+        player.teleport(pos).join();
 
         player.sendMessage("Now editing " + map.settings().getName());
     }
 
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
-        var saveState = SaveState.optionalFromPlayer(player);
+        var saveState = SaveStateV2.optionalFromPlayer(player);
         if (saveState != null) {
-
-            // Formerly updateSaveStateForPlayer
-            saveState.setPos(player.getPosition());
-            saveState.setInventory(List.of(player.getInventory().getItemStacks()));
+            var update = new SaveStateUpdateRequest();
+            update.setPos(player.getPosition());
+            update.setInventoryItems(List.of(player.getInventory().getItemStacks()));
 
             try {
-                var saveStateStorage = server.saveStateStorage();
-                saveStateStorage.updateSaveState(saveState);
+                var playerData = PlayerData.fromPlayer(player);
+                server.mapService().updateSaveState(map.id(), playerData.getId(), saveState.id(), update);
                 logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
@@ -181,8 +185,8 @@ public class EditingMapWorld implements InternalMapWorld {
         activePlayers.remove(player);
     }
 
-    private @Blocking
-    @NotNull TestingMapWorld getTestWorld() {
+    @Blocking
+    private @NotNull TestingMapWorld getTestWorld() {
         if (testWorld == null) {
             testWorld = new TestingMapWorld(this);
             testWorld.load();

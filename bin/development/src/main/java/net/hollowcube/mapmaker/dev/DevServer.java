@@ -31,7 +31,6 @@ import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.mapmaker.ui.TabLists;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -114,7 +113,6 @@ public class DevServer {
     private MapService mapService;
 
     private PlayerStorage playerStorage;
-    private SaveStateStorage saveStateStorage;
     private MetricStorage metricStorage;
 
     private PlatformPermissionManager platformPermissions;
@@ -158,16 +156,6 @@ public class DevServer {
             if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
             mapService = new MapServiceImpl(mapServiceUrl);
 
-            if (System.getenv("MM_SAVESTATE_DEV") != null) {
-                this.saveStateStorage = SaveStateStorage.memory();
-            } else {
-                scope.fork(() -> {
-                    this.saveStateStorage = SaveStateStorage.mongo(mongoConfig);
-                    return null;
-                });
-            }
-
-
             if (System.getenv("MM_METRICS_STORAGE_DEV") != null) {
                 this.metricStorage = MetricStorage.memory();
                 MetricsHelper.init(metricStorage);
@@ -204,7 +192,7 @@ public class DevServer {
             var bridge = new DevServerBridge();
 
             this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, platformPermissions, playerService, legacyMapService);
-            this.maps = new DevMapServer(bridge, mapService, metricStorage, saveStateStorage, platformPermissions);
+            this.maps = new DevMapServer(bridge, mapService, metricStorage, platformPermissions);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 

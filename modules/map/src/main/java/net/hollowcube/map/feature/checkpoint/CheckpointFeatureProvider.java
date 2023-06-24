@@ -2,7 +2,6 @@ package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.config.ConfigProvider;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
@@ -13,9 +12,8 @@ import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateV2;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -24,6 +22,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -69,9 +68,9 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     private void acceptPlayer(@NotNull MapWorldPlayerStartPlayingEvent event) {
         var player = event.getPlayer();
-        var saveState = SaveState.fromPlayer(player);
+        var saveState = SaveStateV2.fromPlayer(player);
 
-        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.getCheckpoint()));
+        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
     }
 
     private void cleanupPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
@@ -82,12 +81,12 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     private void handleCheckpointUpdate(@NotNull MapWorldCheckpointReachedEvent event) {
         var player = event.getPlayer();
-        var saveState = SaveState.fromPlayer(player);
+        var saveState = SaveStateV2.fromPlayer(player);
 //        if (event.getCheckpoint().getId().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
 
         // Reached a new checkpoint
 //        saveState.setCheckpoint(event.getCheckpoint().getId());
-        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.getCheckpoint()));
+        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 
@@ -104,8 +103,8 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
             if (player.getPosition().y() < resetHeight || player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
                 // Player has fallen below their reset height, return them to their latest checkpoint
-                var saveState = SaveState.fromPlayer(player);
-                var checkpoint = saveState.getCheckpoint();
+                var saveState = SaveStateV2.fromPlayer(player);
+                var checkpoint = saveState.checkpoint();
                 if (checkpoint == null) {
                     // No checkpoint set, return to spawn
 //                    player.teleport(map.getSpawnPoint())
@@ -120,7 +119,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         }
     }
 
-    private int getCheckpointResetHeight(@NotNull MapData map, @NotNull String checkpointId) {
+    private int getCheckpointResetHeight(@NotNull MapData map, @Nullable String checkpointId) {
 //        var checkpoint = map.getPoi(checkpointId);
 //        if (checkpoint != null && checkpoint.getOrDefault("active", false)) {
 //            return checkpoint.getOrDefault("resetHeight", checkpoint.getPos().blockY() - 5);

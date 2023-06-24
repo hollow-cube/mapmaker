@@ -17,4 +17,6 @@ dependencies {
     implementation("org.spongepowered:configurate-yaml:4.1.2")
 
     implementation(libs.polar)
+
+    implementation("com.squareup.moshi:moshi:1.14.0")
 }

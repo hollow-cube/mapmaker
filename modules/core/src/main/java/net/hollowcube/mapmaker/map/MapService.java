@@ -25,6 +25,12 @@ public interface MapService {
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 
+    // Save states
+    @NotNull SaveStateV2 createSaveState(@NotNull String mapId, @NotNull String playerId);
+    @NotNull SaveStateV2 getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+    @NotNull SaveStateV2 getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
+    void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
             super("Map not found: " + id);

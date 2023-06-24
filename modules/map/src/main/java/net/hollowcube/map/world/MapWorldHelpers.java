@@ -1,9 +1,10 @@
 package net.hollowcube.map.world;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.mapmaker.storage.SaveStateStorage;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.SaveStateV2;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,31 +44,19 @@ class MapWorldHelpers {
         return enabledFeatures;
     }
 
-    public static @Blocking
-    @NotNull SaveState getOrCreateSaveState(
+    @Blocking
+    public static @NotNull SaveStateV2 getOrCreateSaveState(
             @NotNull InternalMapWorld world,
-            @NotNull String playerId,
-            @NotNull SaveState.Type stateType
+            @NotNull String playerId
     ) {
-        var saveStateStorage = world.server().saveStateStorage();
+        var mapService = world.server().mapService();
         var map = world.map();
 
-        SaveState saveState;
         try {
-            saveState = saveStateStorage.getLatestSaveState(playerId, map.id(), stateType);
-        } catch (SaveStateStorage.NotFoundError e) {
-            saveState = new SaveState();
-            saveState.setId(UUID.randomUUID().toString());
-            saveState.setPlayerId(playerId);
-            saveState.setMapId(map.id());
-            saveState.setStartTime(Instant.now());
-            saveState.setPos(map.settings().getSpawnPoint());
-
-            saveState.setType(stateType);
-
-            saveStateStorage.createSaveState(saveState);
+            return mapService.getLatestSaveState(map.id(), playerId);
+        } catch (MapService.NotFoundError ignored) {
+            return mapService.createSaveState(map.id(), playerId);
         }
-        return saveState;
     }
 
 }
