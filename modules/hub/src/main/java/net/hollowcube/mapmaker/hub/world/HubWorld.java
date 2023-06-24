@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.hub.world;
 
 import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
-import net.hollowcube.world.BaseWorld;
-import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.instance.MapInstance;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class HubWorld extends BaseWorld {
+public class HubWorld {
     private static final String WORLD_NAME = "hub";
 
     public static final Tag<Boolean> MARKER = Tag.Boolean("mapmaker:hub/marker"); //todo unnecessary
@@ -33,15 +33,17 @@ public class HubWorld extends BaseWorld {
 
     private final HubServer server;
 
+    private final MapInstance instance;
+
     public HubWorld(@NotNull HubServer server) {
-        super(server.worldManager(), WORLD_NAME);
         this.server = server;
 
-        instance().setTag(MARKER, true);
-        instance().setTag(THIS_TAG, this);
-        instance().setGenerator(HubGenerators.stoneWorld());
+        instance = new MapInstance();
+        instance.setTag(MARKER, true);
+        instance.setTag(THIS_TAG, this);
+        instance.setGenerator(HubGenerators.stoneWorld());
 
-        var eventNode = instance().eventNode();
+        var eventNode = instance.eventNode();
         eventNode.addChild(HubHotbar.eventNode());
 
         //todo add some WorldConfig options passed on world create. Can add some useful/common ones
@@ -50,15 +52,20 @@ public class HubWorld extends BaseWorld {
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace);
 
         eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn);
+
+        //todo load the world
     }
 
     public @NotNull HubServer server() {
         return server;
     }
 
-    @Override
+    public @NotNull Instance instance() {
+        return instance;
+    }
+
     public void loadWorld() {
-        //todo actually load the world
+        //todo
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {

@@ -1,4 +1,4 @@
-package net.hollowcube.world.dimension;
+package net.hollowcube.mapmaker.instance.dimension;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.NamespaceID;

@@ -3,15 +3,11 @@ package net.hollowcube.map.world;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
-import net.hollowcube.map.util.StringUtil;
+import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.polar.PolarLoader;
-import net.hollowcube.polar.PolarWriter;
-import net.hollowcube.world.BaseWorld;
-import net.hollowcube.world.dimension.DimensionTypes;
-import net.hollowcube.world.generation.MapGenerators;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -22,14 +18,12 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -43,7 +37,7 @@ public class EditingMapWorld implements InternalMapWorld {
     private final MapData map;
     private int flags = 0;
 
-    private final BaseWorld baseWorld;
+    private final MapInstance instance;
     private TestingMapWorld testWorld = null;
 
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
@@ -62,12 +56,13 @@ public class EditingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
-        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
+//        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
+//        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
+        instance = new MapInstance();
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
-        var eventNode = instance.eventNode();
 
+        var eventNode = instance.eventNode();
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
@@ -106,49 +101,31 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Instance instance() {
-        return baseWorld.instance();
+        return instance;
     }
 
     @Override
     public @Blocking void load() {
         var mapData = server().mapService().getMapWorld(map.id(), true);
         if (mapData != null) {
-            try {
-                var loader = new PolarLoader(new ByteArrayInputStream(mapData));
-                ((InstanceContainer) baseWorld.instance()).setChunkLoader(loader);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            instance.load(mapData);
         }
-        // Load the map itself (eg blocks, if present)
-//        if (map.getMapFileId() != null) {
-//            baseWorld.loadWorld();
-//        }
 
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
 
     @Override
     public @Blocking void close() {
+        logger.log(System.Logger.Level.INFO, "Closing editing world " + map.id());
         if (testWorld != null) {
             testWorld.close();
         }
 
-        // Save the backing world (blocks, etc)
-//        var fileId = baseWorld.saveWorld();
-        var instance = (InstanceContainer) baseWorld.instance();
-        instance.saveChunksToStorage();
-        var polarWorld = ((PolarLoader) instance.getChunkLoader()).world();
-        var polarData = PolarWriter.write(polarWorld);
-
-        server().mapService().updateMapWorld(map.id(), polarData);
-
-        // Update the map with the new file id & save it
-//        map.setMapFileId(fileId);
-//        server.mapStorage().updateMap(map);
+        var worldData = instance.save();
+        server().mapService().updateMapWorld(map.id(), worldData);
 
         // Unload the backing world
-        baseWorld.unloadWorld();
+        instance.unload();
     }
 
     @Override

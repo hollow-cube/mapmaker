@@ -6,13 +6,11 @@ import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
-import net.hollowcube.map.util.StringUtil;
+import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
-import net.hollowcube.world.BaseWorld;
-import net.hollowcube.world.dimension.DimensionTypes;
-import net.hollowcube.world.generation.MapGenerators;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -24,7 +22,6 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +39,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     private final MapData map;
     private int flags = 0;
 
-    private final BaseWorld baseWorld;
+    private final MapInstance instance;
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
@@ -59,18 +56,17 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_PLAYING;
 
-        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
-        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
+        instance = new MapInstance();
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
-        var eventNode = instance.eventNode();
 
+        var eventNode = instance.eventNode();
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
 
-        eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo again, BaseWorld settings
-        eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo again, BaseWorld settings
+        eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo move to some utility
+        eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo move to some utility
     }
 
     @Override
@@ -106,23 +102,23 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Instance instance() {
-        return baseWorld.instance();
+        return instance;
     }
 
     @Override
     public @Blocking void load() {
         // Load the map itself (eg blocks, if present)
-//        if (map.getMapFileId() != null) {
-//            baseWorld.loadWorld();
-//        }
+        var mapData = server().mapService().getMapWorld(map.id(), true);
+        if (mapData != null) {
+            instance.load(mapData);
+        }
 
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
 
     @Override
     public @Blocking void close() {
-        // Unload the backing world
-        baseWorld.unloadWorld();
+        instance.unload();
     }
 
     @Override

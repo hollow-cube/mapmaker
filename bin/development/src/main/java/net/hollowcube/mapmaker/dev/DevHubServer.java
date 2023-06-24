@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.world.WorldManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +18,6 @@ public class DevHubServer extends HubServerBase {
 
     private final PlayerStorage playerStorage;
     private final MetricStorage metricStorage;
-    private final WorldManager worldManager;
 
     private final PlatformPermissionManager platformPermissions;
 
@@ -32,7 +30,6 @@ public class DevHubServer extends HubServerBase {
             @NotNull MapService mapService,
             @NotNull PlayerStorage playerStorage,
             @NotNull MetricStorage metricStorage,
-            @NotNull WorldManager worldManager,
             @NotNull PlatformPermissionManager platformPermissions,
             @NotNull PlayerService playerService,
             @Nullable LegacyMapService legacyMapService) {
@@ -40,7 +37,6 @@ public class DevHubServer extends HubServerBase {
         this.playerStorage = Objects.requireNonNull(playerStorage);
         this.mapService = Objects.requireNonNull(mapService);
         this.metricStorage = Objects.requireNonNull(metricStorage);
-        this.worldManager = Objects.requireNonNull(worldManager);
         this.platformPermissions = Objects.requireNonNull(platformPermissions);
         this.playerService = Objects.requireNonNull(playerService);
         this.legacyMapService = legacyMapService;
@@ -59,11 +55,6 @@ public class DevHubServer extends HubServerBase {
     @Override
     public @NotNull MetricStorage metricStorage() {
         return metricStorage;
-    }
-
-    @Override
-    public @NotNull WorldManager worldManager() {
-        return worldManager;
     }
 
     @Override

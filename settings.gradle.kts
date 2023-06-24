@@ -7,7 +7,6 @@ include(":modules:terraform")
 include(":modules:chat")
 include(":modules:canvas")
 include(":modules:canvas:api")
-include(":modules:instances")
 include(":modules:canvas:impl-standalone")
 //include(":modules:canvas:impl-mock")
 

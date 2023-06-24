@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import kotlin.Pair;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.world.storage.FileStorageS3;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +24,8 @@ public @Blocking class LegacyMapService {
     private static final String LEGACY_MAPS_BUCKET_NAME = "legacy-maps";
 
     public static @Blocking @NotNull LegacyMapService create(@NotNull String uri) {
-        return new LegacyMapService(FileStorageS3.connectS3(uri).getFirst());
+//        return new LegacyMapService(FileStorageS3.connectS3(uri).getFirst());
+        return null;
     }
 
     // Map of uuid to a future of their legacy maps (to handle inflight requests)

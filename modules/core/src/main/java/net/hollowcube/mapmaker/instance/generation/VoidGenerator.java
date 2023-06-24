@@ -1,4 +1,4 @@
-package net.hollowcube.world.generation;
+package net.hollowcube.mapmaker.instance.generation;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;

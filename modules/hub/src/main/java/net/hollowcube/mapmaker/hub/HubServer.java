@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
-import net.hollowcube.world.WorldManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,8 +39,6 @@ public interface HubServer {
     @NotNull PlayerStorage playerStorage();
 
     @NotNull MetricStorage metricStorage();
-
-    @NotNull WorldManager worldManager();
 
     @NotNull PlatformPermissionManager platformPermissions();
 

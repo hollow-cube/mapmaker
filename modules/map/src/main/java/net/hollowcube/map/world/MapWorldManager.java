@@ -2,8 +2,8 @@ package net.hollowcube.map.world;
 
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;

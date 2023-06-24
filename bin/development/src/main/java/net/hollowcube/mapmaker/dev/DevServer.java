@@ -32,14 +32,9 @@ import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
-import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.hollowcube.mapmaker.ui.TabLists;
-import net.hollowcube.world.WorldManager;
-import net.hollowcube.world.storage.FileStorageMemory;
-import net.hollowcube.world.storage.FileStorageS3;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -122,8 +117,6 @@ public class DevServer {
     private SaveStateStorage saveStateStorage;
     private MetricStorage metricStorage;
 
-    private WorldManager worldManager;
-
     private PlatformPermissionManager platformPermissions;
 
     private PlayerService playerService;
@@ -162,7 +155,7 @@ public class DevServer {
             }
 
             var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-            if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9124";
+            if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
             mapService = new MapServiceImpl(mapServiceUrl);
 
             if (System.getenv("MM_SAVESTATE_DEV") != null) {
@@ -182,20 +175,6 @@ public class DevServer {
                 scope.fork(() -> {
                     this.metricStorage = MetricStorage.mongo(config.mongo());
                     MetricsHelper.init(metricStorage);
-                    return null;
-                });
-            }
-
-            if (System.getenv("MM_WORLD_MANAGER_DEV") != null) {
-                this.worldManager = new WorldManager(new FileStorageMemory());
-            } else {
-                scope.fork(() -> {
-                    try {
-                        this.worldManager = new WorldManager(FileStorageS3.connect(config.s3().uri()));
-                        this.legacyMapService = LegacyMapService.create(config.s3().uri());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     return null;
                 });
             }
@@ -224,8 +203,8 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, worldManager, platformPermissions, playerService, legacyMapService);
-            this.maps = new DevMapServer(bridge, mapService, metricStorage, saveStateStorage, worldManager, platformPermissions);
+            this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, platformPermissions, playerService, legacyMapService);
+            this.maps = new DevMapServer(bridge, mapService, metricStorage, saveStateStorage, platformPermissions);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 
