@@ -4,8 +4,6 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
-import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,11 +12,7 @@ import java.util.function.Function;
 
 public interface MapServer {
 
-    @NotNull MetricStorage metricStorage();
-
     @NotNull MapService mapService();
-
-    @NotNull PlatformPermissionManager platformPermissions();
 
     @NotNull List<FeatureProvider> features();
 

@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
@@ -39,8 +38,6 @@ public interface HubServer {
     @NotNull PlayerStorage playerStorage();
 
     @NotNull MetricStorage metricStorage();
-
-    @NotNull PlatformPermissionManager platformPermissions();
 
     @NotNull PlayerService playerService();
 

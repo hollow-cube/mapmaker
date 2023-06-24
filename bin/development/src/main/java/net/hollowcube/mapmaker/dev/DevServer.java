@@ -26,7 +26,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
 import net.hollowcube.mapmaker.storage.MetricStorage;
@@ -115,8 +114,6 @@ public class DevServer {
     private PlayerStorage playerStorage;
     private MetricStorage metricStorage;
 
-    private PlatformPermissionManager platformPermissions;
-
     private PlayerService playerService;
     private LegacyMapService legacyMapService = null;
 
@@ -167,23 +164,13 @@ public class DevServer {
                 });
             }
 
-            // SpiceDB
-            if (System.getenv("MM_MAP_PERMISSIONS_DEV") != null) {
-                this.platformPermissions = PlatformPermissionManager.noop();
-            } else {
-                scope.fork(() -> {
-                    this.platformPermissions = PlatformPermissionManager.spicedb(config.spicedb());
-                    return null;
-                });
-            }
-
             scope.join();
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "failed during startup", e);
             System.exit(1);
         }
 
-        playerService = new PlayerServiceImpl(playerStorage, platformPermissions);
+        playerService = new PlayerServiceImpl(playerStorage);
 
         // Start phase 2
         // Start hub and map server and bridge them.
@@ -191,8 +178,8 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, platformPermissions, playerService, legacyMapService);
-            this.maps = new DevMapServer(bridge, mapService, metricStorage, platformPermissions);
+            this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, playerService, legacyMapService);
+            this.maps = new DevMapServer(bridge, mapService);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 

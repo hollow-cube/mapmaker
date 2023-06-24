@@ -21,9 +21,7 @@ import java.util.Objects;
 public record Config(
         HttpConf http,
         MinestomConf minestom,
-        MongoConf mongo,
-        S3Conf s3,
-        SpiceDBConf spicedb
+        MongoConf mongo
 ) {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
