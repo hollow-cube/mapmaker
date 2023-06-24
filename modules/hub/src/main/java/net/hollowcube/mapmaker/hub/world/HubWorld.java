@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.hub.world;
 
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.hotbar.HubHotbar;
+import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;

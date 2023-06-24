@@ -4,9 +4,11 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.util.StringUtil;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
+import net.hollowcube.polar.PolarLoader;
+import net.hollowcube.polar.PolarWriter;
 import net.hollowcube.world.BaseWorld;
 import net.hollowcube.world.dimension.DimensionTypes;
 import net.hollowcube.world.generation.MapGenerators;
@@ -27,6 +29,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -59,8 +62,8 @@ public class EditingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-        var instance = new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT);
-        this.baseWorld = new BaseWorld(server.worldManager(), map.getId(), instance);
+        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
+        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
         var eventNode = instance.eventNode();
@@ -98,7 +101,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Point spawnPoint() {
-        return map.getSpawnPoint();
+        return map.settings().getSpawnPoint();
     }
 
     @Override
@@ -108,10 +111,19 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @Blocking void load() {
-        // Load the map itself (eg blocks, if present)
-        if (map.getMapFileId() != null) {
-            baseWorld.loadWorld();
+        var mapData = server().mapService().getMapWorld(map.id(), true);
+        if (mapData != null) {
+            try {
+                var loader = new PolarLoader(new ByteArrayInputStream(mapData));
+                ((InstanceContainer) baseWorld.instance()).setChunkLoader(loader);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        // Load the map itself (eg blocks, if present)
+//        if (map.getMapFileId() != null) {
+//            baseWorld.loadWorld();
+//        }
 
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
@@ -123,11 +135,17 @@ public class EditingMapWorld implements InternalMapWorld {
         }
 
         // Save the backing world (blocks, etc)
-        var fileId = baseWorld.saveWorld();
+//        var fileId = baseWorld.saveWorld();
+        var instance = (InstanceContainer) baseWorld.instance();
+        instance.saveChunksToStorage();
+        var polarWorld = ((PolarLoader) instance.getChunkLoader()).world();
+        var polarData = PolarWriter.write(polarWorld);
+
+        server().mapService().updateMapWorld(map.id(), polarData);
 
         // Update the map with the new file id & save it
-        map.setMapFileId(fileId);
-        server.mapStorage().updateMap(map);
+//        map.setMapFileId(fileId);
+//        server.mapStorage().updateMap(map);
 
         // Unload the backing world
         baseWorld.unloadWorld();
@@ -161,7 +179,7 @@ public class EditingMapWorld implements InternalMapWorld {
         player.setGameMode(GameMode.CREATIVE);
         player.teleport(saveState.getPos()).join();
 
-        player.sendMessage("Now editing " + map.getName());
+        player.sendMessage("Now editing " + map.settings().getName());
     }
 
     @Override
@@ -209,6 +227,7 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     private final net.minestom.server.gamedata.tags.@Nullable Tag SWORD_TAG = MinecraftServer.getTagManager().getTag(net.minestom.server.gamedata.tags.Tag.BasicType.ITEMS, "minecraft:swords");
+
     private void preventSwordBreaking(PlayerBlockBreakEvent event) {
         ItemStack item = event.getPlayer().getItemInMainHand();
         if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {

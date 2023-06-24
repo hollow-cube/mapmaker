@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone.context;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -14,6 +15,11 @@ public record RootContext(
     @Override
     public @NotNull Context with(@NotNull Map<String, Object> contextObjects) {
         throw new UnsupportedOperationException("Cannot create child context from root context");
+    }
+
+    @Override
+    public @NotNull Player player() {
+        throw new UnsupportedOperationException("Cannot get player from root context");
     }
 
     @Override

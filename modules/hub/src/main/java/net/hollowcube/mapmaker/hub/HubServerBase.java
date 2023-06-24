@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.MapCommand;
+import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.MinecraftServer;
@@ -24,7 +25,7 @@ public abstract class HubServerBase implements HubServer {
     }
 
     private final HubToMapBridge bridge;
-    private Handler mapHandler;
+    private HubHandler mapHandler;
     private HubWorld world;
 
     private Controller guiController;
@@ -40,13 +41,14 @@ public abstract class HubServerBase implements HubServer {
 
     @Blocking
     public void init() {
-        this.mapHandler = new Handler(this);
+        StaticAbuse.instance = this;
+        this.mapHandler = new HubHandler(this, mapService());
 
         this.guiController = Controller.make(Map.of(
                 "hubServer", this,
                 "playerStorage", playerStorage(),
                 "playerService", playerService(),
-                "mapStorage", mapStorage(),
+                "mapService", mapService(),
                 "handler", mapHandler
         ));
 
@@ -54,7 +56,8 @@ public abstract class HubServerBase implements HubServer {
         this.world.loadWorld();
 
         var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapCommand(this, mapHandler));
+//        commands.register(new MapCommand(this, mapHandler));
+        commands.register(new MapV2Command(mapService(), mapHandler));
     }
 
     @Override
@@ -62,7 +65,7 @@ public abstract class HubServerBase implements HubServer {
         return world;
     }
 
-    public Handler handler() {
+    public HubHandler handler() {
         return mapHandler;
     }
 

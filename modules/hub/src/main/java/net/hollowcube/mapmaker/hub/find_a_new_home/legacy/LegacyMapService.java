@@ -1,13 +1,12 @@
-package net.hollowcube.mapmaker.hub.legacy;
+package net.hollowcube.mapmaker.hub.find_a_new_home.legacy;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import kotlin.Pair;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.world.storage.FileStorageS3;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 

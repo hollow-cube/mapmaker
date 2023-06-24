@@ -3,7 +3,7 @@ package net.hollowcube.map.feature.checkpoint;
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.utils.NamespaceID;
@@ -37,7 +37,7 @@ public class FinishPlateBlock extends AbstractPlateHandler {
             if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
             map = world.map();
         }
-        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
+//        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
     }
 
     @Override
@@ -51,6 +51,6 @@ public class FinishPlateBlock extends AbstractPlateHandler {
             if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
             map = world.map();
         }
-        map.removePOI(destroy.getBlockPosition());
+//        map.removePOI(destroy.getBlockPosition());
     }
 }

@@ -54,14 +54,14 @@ class MapWorldHelpers {
 
         SaveState saveState;
         try {
-            saveState = saveStateStorage.getLatestSaveState(playerId, map.getId(), stateType);
+            saveState = saveStateStorage.getLatestSaveState(playerId, map.id(), stateType);
         } catch (SaveStateStorage.NotFoundError e) {
             saveState = new SaveState();
             saveState.setId(UUID.randomUUID().toString());
             saveState.setPlayerId(playerId);
-            saveState.setMapId(map.getId());
+            saveState.setMapId(map.id());
             saveState.setStartTime(Instant.now());
-            saveState.setPos(map.getSpawnPoint());
+            saveState.setPos(map.settings().getSpawnPoint());
 
             saveState.setType(stateType);
 

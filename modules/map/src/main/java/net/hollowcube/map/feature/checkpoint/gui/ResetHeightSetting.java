@@ -7,7 +7,6 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.model.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -23,7 +22,7 @@ public class ResetHeightSetting extends View {
     private @Outlet("indicator_off") Label indicatorOff;
     private @Outlet("indicator_on") Label indicatorOn;
 
-    private @ContextObject MapData.POI poi;
+//    private @ContextObject MapData.POI poi;
 
     public ResetHeightSetting(@NotNull Context context) {
         super(context);
@@ -32,13 +31,13 @@ public class ResetHeightSetting extends View {
 
     @Action("indicator_on")
     public void disableResetHeight() {
-        poi.set("active", false);
+//        poi.set("active", false);
         updateIndicator();
     }
 
     @Action("indicator_off")
     public void enableResetHeight() {
-        poi.set("active", true);
+//        poi.set("active", true);
         updateIndicator();
     }
 
@@ -62,22 +61,23 @@ public class ResetHeightSetting extends View {
             case START_SHIFT_CLICK, SHIFT_CLICK -> 5;
             default -> 0;
         };
-        int newHeight = Math.min(getResetHeight() + delta, poi.getPos().blockY());
-        setResetHeight(newHeight);
+//        int newHeight = Math.min(getResetHeight() + delta, poi.getPos().blockY());
+//        setResetHeight(newHeight);
     }
 
     private int getResetHeight() {
-        return poi.getOrDefault("resetHeight", poi.getPos().blockY() - 5);
+//        return poi.getOrDefault("resetHeight", poi.getPos().blockY() - 5);
+        return 0;
     }
 
     private void setResetHeight(int value) {
-        poi.set("resetHeight", value);
+//        poi.set("resetHeight", value);
         updateIndicator();
     }
 
     private void updateIndicator() {
-        var state = poi.getOrDefault("active", false) ? 1 : 0;
-        indicatorToggle.setOption(state);
+//        var state = poi.getOrDefault("active", false) ? 1 : 0;
+//        indicatorToggle.setOption(state);
 
         var args = List.<Component>of(
                 Component.text(getResetHeight())

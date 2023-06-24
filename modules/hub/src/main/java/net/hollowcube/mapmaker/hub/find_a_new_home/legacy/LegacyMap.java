@@ -1,7 +1,7 @@
-package net.hollowcube.mapmaker.hub.legacy;
+package net.hollowcube.mapmaker.hub.find_a_new_home.legacy;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -21,12 +21,12 @@ public record LegacyMap(@NotNull JsonObject raw) {
     }
 
     /** Convert to a modern {@link MapData}. */
-    public @NotNull MapData toMapData() {
-        var map = new MapData();
-        map.setId(UUID.randomUUID().toString());
-        map.setOwner(creatorUuid());
-        map.setName(name());
-
-        return map;
-    }
+//    public @NotNull MapData toMapData() {
+//        var map = new MapData();
+//        map.setId(UUID.randomUUID().toString());
+//        map.setOwner(creatorUuid());
+//        map.setName(name());
+//
+//        return map;
+//    }
 }

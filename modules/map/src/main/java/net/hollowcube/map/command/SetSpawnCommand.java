@@ -60,7 +60,7 @@ public class SetSpawnCommand extends BaseMapCommand {
 
     private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
         var map = MapWorld.forPlayer(player).map();
-        map.setSpawnPoint(newSpawnPoint);
+        map.settings().setSpawnPoint(newSpawnPoint);
         player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
                 Component.text(newSpawnPoint.blockX()).hoverEvent(Component.text(newSpawnPoint.x(), NamedTextColor.DARK_AQUA)),
                 Component.text(newSpawnPoint.blockY()).hoverEvent(Component.text(newSpawnPoint.y(), NamedTextColor.DARK_AQUA)),

@@ -9,13 +9,16 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.storage.MapStorage;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -30,7 +33,7 @@ public class EditMapIconBase extends View {
         SELECTED,
     }
 
-    private @ContextObject MapStorage mapStorage;
+    private @ContextObject MapService mapService;
 
     private @Outlet("state") Switch stateSwitch;
     private @Outlet("locked") Label locked;
@@ -40,7 +43,7 @@ public class EditMapIconBase extends View {
 
     private int slot = -1;
     private String mapId = null; // Set if state is FULL
-    private Future<MapData> mapDataFuture = null;
+    public Future<MapData> mapDataFuture = null; //todo make me private
 
 
     public EditMapIconBase(@NotNull Context context) {
@@ -50,7 +53,7 @@ public class EditMapIconBase extends View {
         setState(Element.State.LOADING);
     }
 
-    public void setState(@NotNull State state, int slot, @Nullable String mapId) {
+    public void setState(@NotNull PlayerData playerData, @NotNull State state, int slot, @Nullable String mapId) {
         Check.argCondition(state == State.FULL && mapId == null, "mapId cannot be null if state is FULL");
         this.slot = slot;
         this.mapId = mapId;
@@ -59,8 +62,10 @@ public class EditMapIconBase extends View {
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
         if (state == State.FULL || state == State.SELECTED) {
             mapDataFuture = async(() -> {
-                var map = mapStorage.getMapById(mapId);
-                var args = new Component[]{Component.text(slot + 1), Component.text(map.getName())};
+                var map = mapService.getMap(playerData.getId(), Objects.requireNonNull(mapId));
+                var mapName = Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME);
+
+                var args = new Component[]{Component.text(slot + 1), Component.text(mapName)};
                 full.setArgs(args);
                 fullInserted.setArgs(args);
                 setState(Element.State.ACTIVE);
@@ -73,6 +78,15 @@ public class EditMapIconBase extends View {
             empty.setArgs(slotArg);
             setState(Element.State.ACTIVE);
         }
+    }
+
+    public void setToSelected(@NotNull MapData map) {
+        mapDataFuture = CompletableFuture.completedFuture(map);
+        var args = new Component[]{Component.text(slot + 1),
+                Component.text(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME))};
+        full.setArgs(args);
+        fullInserted.setArgs(args);
+        stateSwitch.setOption(State.SELECTED.ordinal());
     }
 
     @Action("locked")
@@ -99,7 +113,7 @@ public class EditMapIconBase extends View {
 
     @Signal(SIG_SELECT_MAP_IN_SLOT)
     private void handleSelectMapInSlot(MapData mapData) {
-        if (mapData.getId().equals(mapId)) {
+        if (mapData.id().equals(mapId)) {
             return;
         }
 

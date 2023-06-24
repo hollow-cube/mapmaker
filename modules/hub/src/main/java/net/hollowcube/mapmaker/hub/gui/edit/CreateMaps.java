@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -32,38 +32,41 @@ public class CreateMaps extends View {
 
         slots = new EditMapIconBase[]{slot0, slot1, slot2, slot3, slot4};
 
-        boolean hasMaps = false;
+        int firstSlot = -1;
         var playerData = PlayerData.fromPlayer(player);
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
 
             // If the slot is locked, show the lock icon
             if (i >= playerData.getUnlockedMapSlots()) {
-                slot.setState(EditMapIconBase.State.LOCKED, i, null);
+                slot.setState(playerData, EditMapIconBase.State.LOCKED, i, null);
                 continue;
             }
 
             var mapId = playerData.getMapSlot(i);
             // If there is no map here, show the empty icon
             if (mapId == null) {
-                slot.setState(EditMapIconBase.State.EMPTY, i, null);
+                slot.setState(playerData, EditMapIconBase.State.EMPTY, i, null);
                 continue;
             }
 
             // There is a map, show the full icon
-            slot.setState(EditMapIconBase.State.FULL, i, mapId);
-            hasMaps = true;
+            slot.setState(playerData, EditMapIconBase.State.FULL, i, mapId);
+            if (firstSlot == -1) firstSlot = i;
         }
 
         // If there are no maps, set them to create the first one.
-        if (!hasMaps) createMapInSlot(0);
-
-        //todo if they have a map, we should select it automatically
+        if (firstSlot == -1) {
+            createMapInSlot(0);
+        } else {
+            var slot = firstSlot;
+            async(() -> selectMapInSlot(slots[slot].mapDataFuture.get()));
+        }
     }
 
     @Signal(CreateMap.SIG_MAP_CREATED)
     public void mapCreated(int slot, @NotNull MapData map) {
-        slots[slot].setState(EditMapIconBase.State.SELECTED, slot, map.getId());
+        slots[slot].setToSelected(map);
         editor.showMap(map);
         switcher.setOption(0);
     }

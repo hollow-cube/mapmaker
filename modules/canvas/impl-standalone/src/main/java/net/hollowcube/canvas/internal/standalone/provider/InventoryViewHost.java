@@ -185,6 +185,10 @@ public class InventoryViewHost {
         inventory.parent().performSignal(Element.SIG_ANVIL_INPUT, packet.itemName());
     }
 
+    public @NotNull Player player() {
+        return getHandle().getViewers().stream().findFirst().orElseThrow();
+    }
+
     private class InventoryWrapper extends Inventory {
 
         private final InventoryCondition playerCondition = this::playerInvClick;

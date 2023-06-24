@@ -38,4 +38,5 @@ public class SetMapName extends View {
     public void handleAccept() {
         popView(SIG_UPDATE_NAME, input);
     }
+
 }

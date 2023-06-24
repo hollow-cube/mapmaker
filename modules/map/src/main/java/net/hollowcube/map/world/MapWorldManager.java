@@ -2,7 +2,7 @@ package net.hollowcube.map.world;
 
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.world.event.PlayerInstanceLeaveEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -33,7 +33,7 @@ public class MapWorldManager {
             // Stop if there are still players in the instance
             if (event.getInstance().getPlayers().size() > 1) return;
 
-            var removed = activeMaps.remove(new Pair<>(world.map().getId(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
+            var removed = activeMaps.remove(new Pair<>(world.map().id(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
             if (removed == null) return;
             event.getInstance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
                 // ok to use resultNow because we cannot close a world that is not loaded
@@ -45,7 +45,7 @@ public class MapWorldManager {
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
-        var activeWorld = activeMaps.get(new Pair<>(map.getId(), isEditing));
+        var activeWorld = activeMaps.get(new Pair<>(map.id(), isEditing));
 
         // Create a new world if there is not one present
         if (activeWorld == null) {
@@ -54,7 +54,7 @@ public class MapWorldManager {
                 world.load();
                 return world;
             });
-            activeMaps.put(new Pair<>(map.getId(), isEditing), activeWorld);
+            activeMaps.put(new Pair<>(map.id(), isEditing), activeWorld);
         }
 
         // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)

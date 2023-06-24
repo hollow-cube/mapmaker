@@ -2,7 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.item.ItemRegistry;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;

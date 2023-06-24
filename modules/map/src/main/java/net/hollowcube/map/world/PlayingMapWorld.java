@@ -7,7 +7,7 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.util.StringUtil;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.hollowcube.world.BaseWorld;
@@ -59,8 +59,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_PLAYING;
 
-        var instance = new InstanceContainer(StringUtil.seededUUID(map.getId()), DimensionTypes.FULL_BRIGHT);
-        this.baseWorld = new BaseWorld(server.worldManager(), map.getId(), instance);
+        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
+        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
         var eventNode = instance.eventNode();
@@ -101,7 +101,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Point spawnPoint() {
-        return map.getSpawnPoint();
+        return map.settings().getSpawnPoint();
     }
 
     @Override
@@ -112,9 +112,9 @@ public class PlayingMapWorld implements InternalMapWorld {
     @Override
     public @Blocking void load() {
         // Load the map itself (eg blocks, if present)
-        if (map.getMapFileId() != null) {
-            baseWorld.loadWorld();
-        }
+//        if (map.getMapFileId() != null) {
+//            baseWorld.loadWorld();
+//        }
 
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
@@ -152,7 +152,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.teleport(saveState.getPos()).join();
 
         EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
-        player.sendMessage("Now playing " + map.getName());
+        player.sendMessage("Now playing " + map.settings().getName());
     }
 
     @Override

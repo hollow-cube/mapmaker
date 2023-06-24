@@ -6,7 +6,7 @@ import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.coordinate.Point;
@@ -126,7 +126,7 @@ public class TestingMapWorld implements InternalMapWorld {
 
         player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
-        player.sendMessage("Now testing " + map().getName());
+        player.sendMessage("Now testing " + map().settings().getName());
 
         EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
     }

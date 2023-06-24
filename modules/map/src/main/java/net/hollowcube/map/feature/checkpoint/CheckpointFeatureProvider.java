@@ -12,7 +12,7 @@ import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.SaveState;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -83,10 +83,10 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     private void handleCheckpointUpdate(@NotNull MapWorldCheckpointReachedEvent event) {
         var player = event.getPlayer();
         var saveState = SaveState.fromPlayer(player);
-        if (event.getCheckpoint().getId().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
+//        if (event.getCheckpoint().getId().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
 
         // Reached a new checkpoint
-        saveState.setCheckpoint(event.getCheckpoint().getId());
+//        saveState.setCheckpoint(event.getCheckpoint().getId());
         player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.getCheckpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
@@ -108,23 +108,23 @@ public class CheckpointFeatureProvider implements FeatureProvider {
                 var checkpoint = saveState.getCheckpoint();
                 if (checkpoint == null) {
                     // No checkpoint set, return to spawn
-                    player.teleport(map.getSpawnPoint())
-                            .exceptionally(FutureUtil::handleException);
+//                    player.teleport(map.getSpawnPoint())
+//                            .exceptionally(FutureUtil::handleException);
                 } else {
                     // Return to checkpoint
-                    var checkpointPos = map.getPoi(checkpoint).getPos();
-                    player.teleport(Pos.fromPoint(checkpointPos))
-                            .exceptionally(FutureUtil::handleException);
+//                    var checkpointPos = map.getPoi(checkpoint).getPos();
+//                    player.teleport(Pos.fromPoint(checkpointPos))
+//                            .exceptionally(FutureUtil::handleException);
                 }
             }
         }
     }
 
     private int getCheckpointResetHeight(@NotNull MapData map, @NotNull String checkpointId) {
-        var checkpoint = map.getPoi(checkpointId);
-        if (checkpoint != null && checkpoint.getOrDefault("active", false)) {
-            return checkpoint.getOrDefault("resetHeight", checkpoint.getPos().blockY() - 5);
-        }
+//        var checkpoint = map.getPoi(checkpointId);
+//        if (checkpoint != null && checkpoint.getOrDefault("active", false)) {
+//            return checkpoint.getOrDefault("resetHeight", checkpoint.getPos().blockY() - 5);
+//        }
 
         // No reset height or its disabled, return the default reset height (min)
         //todo should be map height - 50 when map height is implemented

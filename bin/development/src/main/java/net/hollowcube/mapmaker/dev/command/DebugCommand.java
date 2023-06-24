@@ -5,7 +5,6 @@ import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.dev.DevRuntime;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -17,12 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class DebugCommand extends Command {
     private final PlayerStorage playerStorage;
-    private final MapStorage mapStorage;
 
-    public DebugCommand(@NotNull PlayerStorage playerStorage, @NotNull MapStorage mapStorage) {
+    public DebugCommand(@NotNull PlayerStorage playerStorage) {
         super("debug");
         this.playerStorage = playerStorage;
-        this.mapStorage = mapStorage;
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
@@ -78,7 +75,7 @@ public class DebugCommand extends Command {
             return;
         }
 
-        player.sendMessage(Component.text("Map: ").append(world.map().getNameComponent()));
+        player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
         player.sendMessage("Type: " + world.getClass().getSimpleName());
     }
 }

@@ -9,7 +9,6 @@ import io.pyroscope.http.Format;
 import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
-import net.hollowcube.canvas.View;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
@@ -21,15 +20,15 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
-import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
+import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyMapService;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.metrics.MetricsHelper;
-import net.hollowcube.mapmaker.model.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.permission.MapPermissionManager;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
 import net.hollowcube.mapmaker.service.PlayerServiceImpl;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
@@ -51,7 +50,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -118,15 +116,15 @@ public class DevServer {
         logger.log(System.Logger.Level.INFO, "Server started in {0}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
+    private MapService mapService;
+
     private PlayerStorage playerStorage;
-    private MapStorage mapStorage;
     private SaveStateStorage saveStateStorage;
     private MetricStorage metricStorage;
 
     private WorldManager worldManager;
 
     private PlatformPermissionManager platformPermissions;
-    private MapPermissionManager mapPermissions;
 
     private PlayerService playerService;
     private LegacyMapService legacyMapService = null;
@@ -163,14 +161,9 @@ public class DevServer {
                 });
             }
 
-            if (System.getenv("MM_MAP_STORAGE_DEV") != null) {
-                this.mapStorage = MapStorage.memory();
-            } else {
-                scope.fork(() -> {
-                    this.mapStorage = MapStorage.mongo(mongoConfig);
-                    return null;
-                });
-            }
+            var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
+            if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9124";
+            mapService = new MapServiceImpl(mapServiceUrl);
 
             if (System.getenv("MM_SAVESTATE_DEV") != null) {
                 this.saveStateStorage = SaveStateStorage.memory();
@@ -210,14 +203,9 @@ public class DevServer {
             // SpiceDB
             if (System.getenv("MM_MAP_PERMISSIONS_DEV") != null) {
                 this.platformPermissions = PlatformPermissionManager.noop();
-                this.mapPermissions = MapPermissionManager.noop();
             } else {
                 scope.fork(() -> {
                     this.platformPermissions = PlatformPermissionManager.spicedb(config.spicedb());
-                    return null;
-                });
-                scope.fork(() -> {
-                    this.mapPermissions = MapPermissionManager.spicedb(config.spicedb());
                     return null;
                 });
             }
@@ -236,8 +224,8 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, mapStorage, playerStorage, metricStorage, worldManager, platformPermissions, mapPermissions, playerService, legacyMapService);
-            this.maps = new DevMapServer(bridge, mapStorage, metricStorage, saveStateStorage, worldManager, platformPermissions);
+            this.hub = new DevHubServer(bridge, mapService, playerStorage, metricStorage, worldManager, platformPermissions, playerService, legacyMapService);
+            this.maps = new DevMapServer(bridge, mapService, metricStorage, saveStateStorage, worldManager, platformPermissions);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 
@@ -256,7 +244,7 @@ public class DevServer {
 
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage, mapStorage));
+            MinecraftServer.getCommandManager().register(new DebugCommand(playerStorage));
             MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
             MinecraftServer.getCommandManager().register(new FakePlayerCommand());
 
@@ -293,7 +281,7 @@ public class DevServer {
             }
             logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
 
-            Scoreboards.init();
+//            Scoreboards.init();
             TabLists.init();
 
             scope.join();
@@ -346,14 +334,14 @@ public class DevServer {
             var mapId = playerData.getMapSlot(i);
             if (mapId != null) {
                 try {
-                    var map = mapStorage.getMapById(mapId);
+                    var map = mapService.getMap(playerData.getId(), mapId);
                     if (map.isPublished()) {
                         // Map is published, delete from slots.
                         changed = true;
                         playerData.setMapSlot(i, null);
                         logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was published.", mapId, playerData.getId());
                     }
-                } catch (MapStorage.NotFoundError e) {
+                } catch (MapService.NotFoundError e) {
                     // Map is gone, delete from slots
                     changed = true;
                     playerData.setMapSlot(i, null);
@@ -409,8 +397,8 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
-        Scoreboards.showPlayerLobbyScoreboard(player);
-        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
+//        Scoreboards.showPlayerLobbyScoreboard(player);
+//        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
         TabLists.showPlayerGlobalTabList(player);
 
 
@@ -420,14 +408,12 @@ public class DevServer {
                 MapData map;
                 var playerData = PlayerData.fromPlayer(player);
                 if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
-                    map = new MapData();
-                    map.setOwner(playerData.getId());
-                    map = hub.handler().createMapForPlayerInSlot(playerData, map, 0);
+                    map = hub.handler().createMapForPlayerInSlot(playerData, 0);
                 } else {
-                    map = hub.mapStorage().getMapById(playerData.getMapSlot(0));
+                    map = hub.mapService().getMap(playerData.getId(), playerData.getMapSlot(0));
                 }
 
-                hub.handler().editMap(player, map.getId());
+                hub.handler().editMap(player, map.id());
 
                 try {
                     Thread.sleep(500);

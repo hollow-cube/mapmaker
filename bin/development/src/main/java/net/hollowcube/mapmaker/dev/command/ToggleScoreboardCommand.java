@@ -19,17 +19,17 @@ public class ToggleScoreboardCommand extends Command {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can use this command!");
         } else {
-            String parseArg = context.get("on/off");
-            switch (parseArg) {
-                case "on" -> {
-                    Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
-                    sender.sendMessage("You have toggled scoreboards on!");
-                }
-                case "off" -> {
-                    Scoreboards.setScoreboardVisibility(player, Boolean.FALSE);
-                    sender.sendMessage("You have toggled scoreboards off!");
-                }
-            }
+//            String parseArg = context.get("on/off");
+//            switch (parseArg) {
+//                case "on" -> {
+//                    Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
+//                    sender.sendMessage("You have toggled scoreboards on!");
+//                }
+//                case "off" -> {
+//                    Scoreboards.setScoreboardVisibility(player, Boolean.FALSE);
+//                    sender.sendMessage("You have toggled scoreboards off!");
+//                }
+//            }
         }
     }
 }

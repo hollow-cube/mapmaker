@@ -2,7 +2,6 @@ package net.hollowcube.map.event;
 
 import net.hollowcube.map.event.trait.MapWorldEvent;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.model.MapData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public record MapWorldCheckpointReachedEvent(
         @NotNull MapWorld mapWorld,
-        @NotNull Player player,
-        @NotNull MapData.POI checkpoint
+        @NotNull Player player
+//        @NotNull MapData.POI checkpoint
 ) implements MapWorldEvent {
 
     @Override
@@ -24,8 +23,8 @@ public record MapWorldCheckpointReachedEvent(
         return player;
     }
 
-    public @NotNull MapData.POI getCheckpoint() {
-        return checkpoint;
-    }
+//    public @NotNull MapData.POI getCheckpoint() {
+//        return checkpoint;
+//    }
 
 }

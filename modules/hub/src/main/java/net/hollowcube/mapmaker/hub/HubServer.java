@@ -3,12 +3,11 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
+import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
-import net.hollowcube.mapmaker.permission.MapPermissionManager;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
 import net.hollowcube.mapmaker.service.PlayerService;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.PlayerStorage;
 import net.hollowcube.world.WorldManager;
@@ -26,19 +25,25 @@ import java.util.function.Function;
  */
 public interface HubServer {
 
+    class StaticAbuse {
+        public static HubServer instance;
+    }
+
     @NotNull HubToMapBridge bridge();
 
-    @NotNull PlayerStorage playerStorage();
+    @NotNull MapService mapService();
 
-    @NotNull MapStorage mapStorage();
+
+
+
+
+    @NotNull PlayerStorage playerStorage();
 
     @NotNull MetricStorage metricStorage();
 
     @NotNull WorldManager worldManager();
 
     @NotNull PlatformPermissionManager platformPermissions();
-
-    @NotNull MapPermissionManager mapPermissions();
 
     @NotNull PlayerService playerService();
 

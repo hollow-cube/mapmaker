@@ -2,6 +2,7 @@ package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.*;
 
 import java.util.concurrent.Callable;
@@ -15,6 +16,7 @@ public abstract class View implements Element {
 
     private final Context context;
     private final Element delegate;
+
 
     protected View(@NotNull Context context) {
         this.context = context;
@@ -46,6 +48,10 @@ public abstract class View implements Element {
     @Override
     public final void setState(@NotNull State state) {
         delegate.setState(state);
+    }
+
+    protected @NotNull Player player() {
+        return context.player();
     }
 
     // Slot/Signal

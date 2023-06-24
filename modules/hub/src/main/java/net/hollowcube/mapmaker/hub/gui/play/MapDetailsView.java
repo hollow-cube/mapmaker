@@ -6,18 +6,20 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.Handler;
-import net.hollowcube.mapmaker.model.MapData;
+import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class MapDetailsView extends View {
     private static final System.Logger logger = System.getLogger(MapDetailsView.class.getName());
 
-    private @ContextObject Handler handler;
+    private @ContextObject HubHandler handler;
 
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
@@ -28,7 +30,7 @@ public class MapDetailsView extends View {
         super(context);
         this.map = map;
 
-        titleText.setText(map.getName());
+        titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
         var plainAuthorName = PlainTextComponentSerializer.plainText().serialize(authorName);
         authorText.setText(plainAuthorName);
@@ -37,12 +39,12 @@ public class MapDetailsView extends View {
     @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
         try {
-            handler.playMap(player, map.getId());
+//            handler.playMap(player, map.id());
             player.closeInventory();
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
             logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
-                    map.getId(), PlayerData.fromPlayer(player).getId(), e.getMessage());
+                    map.id(), PlayerData.fromPlayer(player).getId(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
     }

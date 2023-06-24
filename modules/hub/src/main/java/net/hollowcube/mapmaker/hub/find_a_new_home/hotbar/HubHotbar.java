@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.hotbar;
+package net.hollowcube.mapmaker.hub.find_a_new_home.hotbar;
 
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;

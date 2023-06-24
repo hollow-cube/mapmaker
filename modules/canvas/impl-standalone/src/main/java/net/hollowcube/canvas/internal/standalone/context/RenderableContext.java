@@ -4,6 +4,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.provider.InventoryViewHost;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -26,6 +27,11 @@ public record RenderableContext(
     @Override
     public @NotNull ViewProvider viewProvider() {
         return parent.viewProvider();
+    }
+
+    @Override
+    public @NotNull Player player() {
+        return inventory.player();
     }
 
     @Override

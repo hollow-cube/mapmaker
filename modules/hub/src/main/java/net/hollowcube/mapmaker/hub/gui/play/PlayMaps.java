@@ -8,11 +8,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.gui.play.simple.*;
-import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.model.MapQuery;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +18,6 @@ public class PlayMaps extends View {
     private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
 
     private @ContextObject Query query;
-    private @ContextObject MapStorage mapStorage;
 
     private @Outlet("paging") Pagination2 pagination;
 
@@ -124,10 +119,10 @@ public class PlayMaps extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
-            List<MapData> entries = mapStorage.queryMaps(
-                    new MapQuery("", false, true, false),
-                    request.page() * request.pageSize(), request.pageSize() + 1);
-            System.out.println("RESPONDED WITH PAGE " + entries);
+//            List<MapData> entries = mapStorage.queryMaps(
+//                    new MapQuery("", false, true, false),
+//                    request.page() * request.pageSize(), request.pageSize() + 1);
+//            System.out.println("RESPONDED WITH PAGE " + entries);
 //            if (query.takeQuery) {
 //                query.takeQuery = false;
 //                if (query.isQueryMap) {
@@ -148,16 +143,16 @@ public class PlayMaps extends View {
 //            } else {
 //                entries = mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1);
 //            }
-            if (entries.isEmpty()) {
-                request.respond(List.of(), false);
-                return;
-            }
+//            if (entries.isEmpty()) {
+//                request.respond(List.of(), false);
+//                return;
+//            }
 
-            var result = new ArrayList<MapEntry>();
-            for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
-                result.add(new MapEntry(request.context(), entries.get(i)));
-            }
-            request.respond(result, entries.size() == request.pageSize() + 1);
+//            var result = new ArrayList<MapEntry>();
+//            for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
+//                result.add(new MapEntry(request.context(), entries.get(i)));
+//            }
+//            request.respond(result, entries.size() == request.pageSize() + 1);
         } catch (Exception e) {
             //todo feedback to user that it went wrong. Right now will load forever
             MinecraftServer.getExceptionManager().handleException(e);

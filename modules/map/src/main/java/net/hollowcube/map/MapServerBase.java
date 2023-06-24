@@ -1,14 +1,12 @@
 package net.hollowcube.map;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
-import net.hollowcube.block.placement.HCPlacementRules;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.SignBlockHandler;
 import net.hollowcube.map.block.rule.PlacementRules;
-import net.hollowcube.map.block.rule.SignPlacementRule;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
@@ -16,10 +14,8 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
-import net.hollowcube.mapmaker.model.MapData;
-import net.hollowcube.mapmaker.ui.Scoreboards;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
-import net.hollowcube.terraform.compat.TerraformCompat;
 import net.hollowcube.world.event.PlayerSpawnInInstanceEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -28,8 +24,6 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.listener.manager.PacketListenerManager;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
@@ -95,7 +89,6 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
         commandManager.register(new TeleportCommand());
-        commandManager.register(new MultiBuildCommand());
         commandManager.register(new TestModeCommand(this));
         commandManager.register(new BuildModeCommand(this));
 
@@ -118,7 +111,7 @@ public abstract class MapServerBase implements MapServer {
 
         this.guiController = Controller.make(Map.of(
                 "mapServer", this,
-                "mapStorage", mapStorage()
+                "mapService", mapService()
         ));
     }
 

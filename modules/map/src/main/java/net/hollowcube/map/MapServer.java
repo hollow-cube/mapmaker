@@ -3,8 +3,8 @@ package net.hollowcube.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.permission.PlatformPermissionManager;
-import net.hollowcube.mapmaker.storage.MapStorage;
 import net.hollowcube.mapmaker.storage.MetricStorage;
 import net.hollowcube.mapmaker.storage.SaveStateStorage;
 import net.hollowcube.world.WorldManager;
@@ -20,7 +20,7 @@ public interface MapServer {
 
     @NotNull MetricStorage metricStorage();
 
-    @NotNull MapStorage mapStorage();
+    @NotNull MapService mapService();
 
     @NotNull SaveStateStorage saveStateStorage();
 

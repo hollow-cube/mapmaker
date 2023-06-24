@@ -1,8 +1,7 @@
-package net.hollowcube.mapmaker.hub.legacy;
+package net.hollowcube.mapmaker.hub.find_a_new_home.legacy;
 
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -140,13 +139,13 @@ public class LegacyCommand extends Command {
                 return;
             }
 
-            var map = legacyMap.toMapData();
-            legacy.importMap(legacyMap, map.getId());
-            map = server.mapStorage().createMap(map);
-            map.setMapFileId(mapId);
-
-            playerData.setMapSlot(slot, map.getId());
-            server.playerStorage().updatePlayer(playerData);
+//            var map = legacyMap.toMapData();
+//            legacy.importMap(legacyMap, map.id());
+//            map = server.mapStorage().createMap(map);
+//            map.setMapFileId(mapId);
+//
+//            playerData.setMapSlot(slot, map.getId());
+//            server.playerStorage().updatePlayer(playerData);
 
             sender.sendMessage("map imported");
         }

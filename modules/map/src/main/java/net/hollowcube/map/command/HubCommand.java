@@ -43,6 +43,6 @@ public class HubCommand extends BaseMapCommand {
                     .forEach(player::sendMessage);
         }
 
-        Scoreboards.showPlayerLobbyScoreboard(player);
+//        Scoreboards.showPlayerLobbyScoreboard(player);
     }
 }
