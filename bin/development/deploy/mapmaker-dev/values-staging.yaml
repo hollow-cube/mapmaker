@@ -5,3 +5,5 @@ env:
   MAPMAKER_PYROSCOPE_ENDPOINT: "http://pyroscope.mgmt.svc.cluster.local:4040"
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
   MAPMAKER_MAP_SERVICE_URL: "http://map-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_PLAYER_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
