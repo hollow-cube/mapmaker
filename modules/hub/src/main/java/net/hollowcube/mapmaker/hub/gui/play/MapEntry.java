@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.item.ItemStack;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapEntry extends View {
 
-//    private @ContextObject PlayerService playerService;
+    private @ContextObject PlayerService playerService;
 
     private @Outlet("btn") Label label;
 
@@ -39,14 +40,16 @@ public class MapEntry extends View {
 
     /** Builds and updates the arg list of the map icon. */
     private @Blocking void updateIcon() {
-//        authorName = playerService.getDisplayName(map.owner());
+
         var icon = map.settings().getIcon();
         label.setItemSprite(ItemStack.of(icon == null ? Material.PAPER : icon));
+
+        authorName = playerService.getPlayerDisplayName(map.owner());
         label.setArgs(
-                map.settings().getNameComponent(),
-                Component.text("todo author here"),
                 Component.text(map.publishedIdString()),
-                Component.text(String.valueOf(map.isCompleted()), map.isCompleted() ? NamedTextColor.GREEN : NamedTextColor.RED) //todo fix this to use a translation key
+                map.settings().getNameComponent(),
+                authorName,
+                map.getCompletionStateText()
         );
 
         label.setState(State.ACTIVE);

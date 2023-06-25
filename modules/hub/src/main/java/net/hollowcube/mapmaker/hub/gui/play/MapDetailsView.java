@@ -39,7 +39,7 @@ public class MapDetailsView extends View {
     @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
         try {
-//            handler.playMap(player, map.id());
+            handler.playMap(player, map.id());
             player.closeInventory();
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)

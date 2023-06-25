@@ -42,6 +42,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     private final MapInstance instance;
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Player> spectatingPlayers = Collections.synchronizedSet(new HashSet<>());
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
@@ -124,7 +125,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @Nullable MapWorld getMapForPlayer(@NotNull Player player) {
-        return activePlayers.contains(player) ? this : null;
+        return activePlayers.contains(player) || spectatingPlayers.contains(player) ? this : null;
     }
 
     @Override
@@ -148,6 +149,13 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.sendMessage("Now playing " + map.settings().getName());
     }
 
+    public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
+        spectatingPlayers.add(player);
+        player.setGameMode(GameMode.SPECTATOR);
+        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
+        player.sendMessage("Now spectating " + map.settings().getName());
+    }
+
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
@@ -155,6 +163,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.removeTag(TAG_PLAYING);
         player.removeTag(MapHooks.PLAYING); // Legacy
         activePlayers.remove(player);
+        spectatingPlayers.remove(player);
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return;

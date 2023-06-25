@@ -7,6 +7,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
@@ -42,6 +43,10 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         // Remove the player from the world itself, they are no longer playing (but will remain in the instance)
         // This will also cause their savestate to be written to DB
         world.removePlayer(player);
+        if (world instanceof PlayingMapWorld pmw) {
+            pmw.startSpectating(player, false);
+        }
+
         player.setGameMode(GameMode.SPECTATOR);
     }
 

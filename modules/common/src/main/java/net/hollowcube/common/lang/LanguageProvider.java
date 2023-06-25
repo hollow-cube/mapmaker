@@ -93,7 +93,7 @@ public class LanguageProvider {
 
         Component translated = componentCache.computeIfAbsent(translatable.key(), key -> {
             var raw = langData.get(translatable.key());
-            if (raw == null) return translatable;
+            if (raw == null) return null;
             var value = raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString();
 
             return fromStringSafe(value);
@@ -115,7 +115,18 @@ public class LanguageProvider {
                                 Component.text("$$" + index);
                     }).build());
         }
-        return translated;
+        return recursiveTranslate(translated);
+    }
+
+    private static @NotNull Component recursiveTranslate(@NotNull Component component) {
+        if (component instanceof TranslatableComponent translatable) {
+            return get2(translatable);
+        }
+
+        var children = new ArrayList<Component>();
+        for (var child : component.children())
+            children.add(recursiveTranslate(child));
+        return component.children(children);
     }
 
     public static @NotNull Component get3(@NotNull Component component) {
@@ -123,7 +134,6 @@ public class LanguageProvider {
         if (!(component instanceof TranslatableComponent translatable)) {
             return component;
         }
-
 
         var raw = langData.get(translatable.key());
         if (raw == null) return Component.text(translatable.key());

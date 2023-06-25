@@ -113,23 +113,18 @@ public class HubHandler {
 //            return map;
 //        }
 //    }
-//
-//    public void playMap(@NotNull Player player, @NotNull String mapId) {
-//        try (var ignored = playMapTime.startTimer()) {
-//            var playerData = PlayerData.fromPlayer(player);
-//            var map = server.mapStorage().getMapById(mapId);
-//
-//            if (!map.isPublished())
-//                throw new MapNotPublishedError();
-//
-//            var hasPermission = server.mapPermissions().checkPermission(mapId, playerData.getId(), MapData.Permission.READ);
-//            if (!hasPermission) {
-//                throw new RuntimeException("blah balh blah");
-//            }
-//
-//            server.bridge().joinMap(player, mapId, false);
-//        }
-//    }
+
+    public void playMap(@NotNull Player player, @NotNull String mapId) {
+        try (var ignored = playMapTime.startTimer()) {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            var map = server.mapService().getMap(playerData.id(), mapId);
+
+            if (!map.isPublished())
+                throw new MapNotPublishedError();
+
+            server.bridge().joinMap(player, mapId, false);
+        }
+    }
 
     public void editMap(@NotNull Player player, @NotNull String mapId) {
         try (var ignored = editMapTime.startTimer()) {
@@ -144,8 +139,8 @@ public class HubHandler {
         }
     }
 
-//    public static class MapNotPublishedError extends RuntimeException {
-//    }
+    public static class MapNotPublishedError extends RuntimeException {
+    }
 
     public static class MapIsPublishedError extends RuntimeException {
     }

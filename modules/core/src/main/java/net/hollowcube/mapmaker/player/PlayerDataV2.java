@@ -19,8 +19,7 @@ public class PlayerDataV2 {
 
     private String id;
     private String username;
-
-    private transient Component displayName;
+    private Component displayName;
 
     private int unlockedMapSlots;
     private String[] mapSlots = new String[MAX_MAP_SLOTS];
@@ -30,6 +29,9 @@ public class PlayerDataV2 {
     }
     public @NotNull String username() {
         return username;
+    }
+    public @NotNull Component displayName() {
+        return displayName;
     }
 
     public int getUnlockedMapSlots() {
