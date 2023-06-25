@@ -8,16 +8,21 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.gui.play.simple.*;
+import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class PlayMaps extends View {
     private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
 
     private @ContextObject Query query;
+    private @ContextObject MapService mapService;
+    private @ContextObject Player player;
 
     private @Outlet("paging") Pagination2 pagination;
 
@@ -36,6 +41,7 @@ public class PlayMaps extends View {
     private enum SortPreset {
         APPROVED, BEST, BOOSTED, RECENT, TRENDING
     }
+
     private SortPreset sortPreset = SortPreset.BEST;
 
     private @Nullable String searchQuery = null;
@@ -119,6 +125,14 @@ public class PlayMaps extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, "");
+
+            var maps = new ArrayList<MapEntry>();
+            for (var map : queryResult.results()) {
+                maps.add(new MapEntry(request.context(), map));
+            }
+            request.respond(maps, queryResult.nextPage());
+
 //            List<MapData> entries = mapStorage.queryMaps(
 //                    new MapQuery("", false, true, false),
 //                    request.page() * request.pageSize(), request.pageSize() + 1);
@@ -148,11 +162,7 @@ public class PlayMaps extends View {
 //                return;
 //            }
 
-//            var result = new ArrayList<MapEntry>();
-//            for (int i = 0; i < Math.min(entries.size(), request.pageSize()); i++) {
-//                result.add(new MapEntry(request.context(), entries.get(i)));
-//            }
-//            request.respond(result, entries.size() == request.pageSize() + 1);
+
         } catch (Exception e) {
             //todo feedback to user that it went wrong. Right now will load forever
             MinecraftServer.getExceptionManager().handleException(e);

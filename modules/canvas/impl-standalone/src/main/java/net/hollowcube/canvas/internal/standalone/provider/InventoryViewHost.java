@@ -257,8 +257,9 @@ public class InventoryViewHost {
         private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
             slot = convertPlayerSlotToChestSlot(slot);
             if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
-            //todo hardcoded double chest
-            slot = 9 * 6 + slot; // Offset to the bottom of the chest
+            //todo hardcoded double chest or anvil, should generalize
+            var offset = getInventoryType() == InventoryType.ANVIL ? 9 : 9 * 6;
+            slot = offset + slot; // Offset to the bottom of the top inventory
 
             var allow = tryHandleClick(slot, player, clickType);
             result.setCancel(!allow);

@@ -5,8 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,6 +40,20 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             throw new InternalError("Failed to create map: " + res.body());
 
         return GSON.fromJson(res.body(), MapData.class);
+    }
+
+    @Override
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, @NotNull String query) {
+        logger.log(System.Logger.Level.INFO, "searching maps for " + query);
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/search?page=" + page + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8)))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapSearchResponse.class);
+            default -> throw new InternalError("Failed to search maps: " + res.body());
+        };
     }
 
     @Override

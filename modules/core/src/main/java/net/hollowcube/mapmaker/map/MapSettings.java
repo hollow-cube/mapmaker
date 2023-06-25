@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +15,13 @@ public class MapSettings {
 
     private Pos spawnPoint;
 
-    public @Nullable String getName() {
+    public @NotNull String getName() {
         return name;
+    }
+    public @NotNull Component getNameComponent() {
+        if (name == null || name.isEmpty())
+            return Component.text(MapData.DEFAULT_NAME);
+        return Component.text(name);
     }
     public void setName(@NotNull String name) {
         this.name = name;

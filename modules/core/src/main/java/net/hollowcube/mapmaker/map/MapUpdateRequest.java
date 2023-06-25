@@ -25,8 +25,9 @@ public class MapUpdateRequest {
     public @Nullable String getIcon() {
         return icon;
     }
-    public void setIcon(@Nullable String icon) {
+    public @NotNull MapUpdateRequest setIcon(@Nullable String icon) {
         this.icon = icon;
+        return this;
     }
 
     public @Nullable MapVariant getVariant() {

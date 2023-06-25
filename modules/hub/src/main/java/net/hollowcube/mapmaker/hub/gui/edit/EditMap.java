@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
@@ -107,9 +108,23 @@ public class EditMap extends View {
         });
     }
 
+    @Signal(SetMapIcon.SIG_UPDATE_ICON)
+    private @NonBlocking void finishUpdateMapIcon(@NotNull Material newMaterial) {
+        map.settings().setIcon(newMaterial);
+        updateElementsFromMap();
+
+        //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        async(() -> {
+            mapService.updateMap(player().getUuid().toString(), map.id(),
+                    new MapUpdateRequest().setIcon(newMaterial.name()));
+            //todo if update fails we should revert the name change and indicate to the user that it failed
+        });
+    }
+
     /** Sets the elements to have the latest info from the map. */
     private void updateElementsFromMap() {
         mapNameText.setText(map.settings().getName()); //todo handle missing
+        //todo update map icon lore to include material
     }
 
     @Action("tab_info")

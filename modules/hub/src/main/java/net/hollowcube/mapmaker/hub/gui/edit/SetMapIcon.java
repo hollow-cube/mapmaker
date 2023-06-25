@@ -11,6 +11,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.item.Material;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 public class SetMapIcon extends View {
+    public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
 
     private @Outlet("input") Label inputField;
     private @Outlet("page") Pagination2 pagination;
@@ -56,6 +58,11 @@ public class SetMapIcon extends View {
             result.add(new MapIconPreview(request.context(), suggestion));
         }
         request.respond(result, false);
+    }
+
+    @Signal(MapIconPreview.SIG_SELECTED)
+    private void handleSelectIcon(@NotNull Material material) {
+        popView(SIG_UPDATE_ICON, material);
     }
 
 }

@@ -4,6 +4,8 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @Blocking
 public interface MapService {
 
@@ -15,6 +17,8 @@ public interface MapService {
      * @return The created map
      */
     @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner);
+
+    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, @NotNull String query);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 
