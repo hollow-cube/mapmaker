@@ -1,24 +1,20 @@
 package net.hollowcube.chat.command;
 
 import net.hollowcube.chat.ChatQuery;
-import net.hollowcube.chat.storage.ChatStorage;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class LogCommand extends Command {
     private final System.Logger logger = System.getLogger(LogCommand.class.getName());
 
-    private final ChatStorage storage;
 
-    public LogCommand(@NotNull ChatStorage storage) {
+    public LogCommand() {
         super("log");
-        this.storage = storage;
 
         /*
         Thinking about time filtering, there are a few things you might want to do

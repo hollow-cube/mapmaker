@@ -7,11 +7,12 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMaps extends View {
+    public static final String SIG_RESET = "create_maps.reset";
 
     private @ContextObject Player player;
 
@@ -32,8 +33,32 @@ public class CreateMaps extends View {
 
         slots = new EditMapIconBase[]{slot0, slot1, slot2, slot3, slot4};
 
+        reset();
+    }
+
+    @Signal(CreateMap.SIG_MAP_CREATED)
+    public void mapCreated(int slot, @NotNull MapData map) {
+        slots[slot].setToSelected(map);
+        editor.showMap(map);
+        switcher.setOption(0);
+    }
+
+    @Signal(EditMapIconBase.SIG_CREATE_MAP_IN_SLOT)
+    public void createMapInSlot(int slot) {
+        creator.setSlot(slot);
+        switcher.setOption(1);
+    }
+
+    @Signal(EditMapIconBase.SIG_SELECT_MAP_IN_SLOT)
+    public void selectMapInSlot(@NotNull MapData map) {
+        editor.showMap(map);
+        switcher.setOption(0);
+    }
+
+    @Signal(SIG_RESET)
+    public void reset() {
         int firstSlot = -1;
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
 
@@ -60,27 +85,12 @@ public class CreateMaps extends View {
             createMapInSlot(0);
         } else {
             var slot = firstSlot;
-            async(() -> selectMapInSlot(slots[slot].mapDataFuture.get()));
+            async(() -> {
+                var map = slots[slot].mapDataFuture.get();
+                selectMapInSlot(map);
+                slots[slot].setToSelected(map);
+            });
         }
-    }
-
-    @Signal(CreateMap.SIG_MAP_CREATED)
-    public void mapCreated(int slot, @NotNull MapData map) {
-        slots[slot].setToSelected(map);
-        editor.showMap(map);
-        switcher.setOption(0);
-    }
-
-    @Signal(EditMapIconBase.SIG_CREATE_MAP_IN_SLOT)
-    public void createMapInSlot(int slot) {
-        creator.setSlot(slot);
-        switcher.setOption(1);
-    }
-
-    @Signal(EditMapIconBase.SIG_SELECT_MAP_IN_SLOT)
-    public void selectMapInSlot(@NotNull MapData map) {
-        editor.showMap(map);
-        switcher.setOption(0);
     }
 
 }

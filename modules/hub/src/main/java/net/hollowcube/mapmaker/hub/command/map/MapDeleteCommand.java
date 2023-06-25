@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -36,8 +36,8 @@ public class MapDeleteCommand extends BaseHubCommand {
         if (map == null) return;
 
         try {
-            var playerData = PlayerData.fromPlayer(player);
-            mapService.deleteMap(playerData.getId(), map.id());
+            var playerData = PlayerDataV2.fromPlayer(player);
+            mapService.deleteMap(playerData.id(), map.id());
 
             //todo in the future this should be a kafka message sent by the map service or something
             EventDispatcher.call(new MapDeletedEvent(map.id()));

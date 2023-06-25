@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    // MongoDB
-    implementation("org.mongodb:mongodb-driver-sync:4.7.0")
 
     // Kafka
     api("org.apache.kafka:kafka-clients:3.4.0")

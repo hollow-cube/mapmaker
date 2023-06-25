@@ -7,7 +7,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubHandler;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public class CreateMap extends View {
     private void handleSubmit(@NotNull Player player) {
         submitButton.setState(State.LOADING);
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
         // Dispatch request to create the map
         try {

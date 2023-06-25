@@ -52,7 +52,6 @@ subprojects {
         }
         testContainersApi("testcontainers")
         testContainersApi("junit-jupiter")
-        testContainersApi("mongodb")
 
         // Auto service (SPI)
         annotationProcessor("com.google.auto.service:auto-service:1.0.1")

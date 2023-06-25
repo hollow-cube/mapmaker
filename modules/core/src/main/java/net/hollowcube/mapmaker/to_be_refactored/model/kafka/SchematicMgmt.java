@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.model.kafka;
+package net.hollowcube.mapmaker.to_be_refactored.model.kafka;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

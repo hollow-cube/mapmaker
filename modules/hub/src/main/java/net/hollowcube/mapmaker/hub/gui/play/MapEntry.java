@@ -7,14 +7,13 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.service.PlayerService;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 public class MapEntry extends View {
 
-    private @ContextObject PlayerService playerService;
+//    private @ContextObject PlayerService playerService;
 
     private @Outlet("btn") Label label;
 
@@ -36,7 +35,7 @@ public class MapEntry extends View {
 
     /** Builds and updates the arg list of the map icon. */
     private @Blocking void updateIcon() {
-        authorName = playerService.getDisplayName(map.owner());
+//        authorName = playerService.getDisplayName(map.owner());
 //        label.setArgs(
 //                map.getNameComponent(),
 //                authorName,

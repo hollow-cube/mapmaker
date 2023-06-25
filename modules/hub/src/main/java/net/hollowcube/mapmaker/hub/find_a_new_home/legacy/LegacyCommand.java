@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.find_a_new_home.legacy;
 
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -16,12 +15,12 @@ import java.util.UUID;
 
 public class LegacyCommand extends Command {
     private final HubServer server;
-    private final LegacyMapService legacy;
+//    private final LegacyMapService legacy;
 
     public LegacyCommand(@NotNull HubServer server) {
         super("legacy");
         this.server = server;
-        this.legacy = server.legacyMapService();
+//        this.legacy = server.legacyMapService();
 
         addSubcommand(new List());
         addSubcommand(new Import());
@@ -52,10 +51,10 @@ public class LegacyCommand extends Command {
             }
 
             // Legacy maps are completely disabled in the local dev server, handle that
-            if (legacy == null) {
-                sender.sendMessage("Legacy maps are disabled");
-                return;
-            }
+//            if (legacy == null) {
+//                sender.sendMessage("Legacy maps are disabled");
+//                return;
+//            }
 
             int page = 0;
             if (context.has(pageArg)) page = context.get(pageArg);
@@ -63,24 +62,24 @@ public class LegacyCommand extends Command {
             var target = player.getUuid().toString();
             if (context.has(uuidArg)) target = context.get(uuidArg).toString();
 
-            var maps = legacy.getMapsForUuid(target)
-                    .stream()
-                    .skip(page * PAGE_SIZE)
-                    .limit(PAGE_SIZE)
-                    .toList();
-            if (maps.isEmpty()) {
-                if (page == 0) {
-                    sender.sendMessage("You have no maps");
-                } else {
-                    sender.sendMessage("No more maps");
-                }
-                return;
-            }
+//            var maps = legacy.getMapsForUuid(target)
+//                    .stream()
+//                    .skip(page * PAGE_SIZE)
+//                    .limit(PAGE_SIZE)
+//                    .toList();
+//            if (maps.isEmpty()) {
+//                if (page == 0) {
+//                    sender.sendMessage("You have no maps");
+//                } else {
+//                    sender.sendMessage("No more maps");
+//                }
+//                return;
+//            }
 
-            sender.sendMessage("Your maps:");
-            for (var map : maps) {
-                sender.sendMessage(" - " + map.name() + " (" + map.id() + ")");
-            }
+//            sender.sendMessage("Your maps:");
+//            for (var map : maps) {
+//                sender.sendMessage(" - " + map.name() + " (" + map.id() + ")");
+//            }
         }
     }
 
@@ -106,38 +105,38 @@ public class LegacyCommand extends Command {
             }
 
             // Legacy maps are completely disabled in the local dev server, handle that
-            if (legacy == null) {
-                sender.sendMessage("Legacy maps are disabled");
-                return;
-            }
-
-            var mapId = context.get(idArg);
-
-            var target = player.getUuid().toString();
-            if (context.has(uuidArg)) target = context.get(uuidArg).toString();
-
-            var legacyMap = legacy.getMapsForUuid(target)
-                    .stream()
-                    .filter(m -> m.id().equals(mapId))
-                    .findFirst()
-                    .orElse(null);
-            if (legacyMap == null) {
-                sender.sendMessage("You don't have a map with that id");
-                return;
-            }
-
-            var playerData = PlayerData.fromPlayer(player);
-            int slot = -1;
-            for (int possibleSlot = 0; possibleSlot < PlayerData.MAX_MAP_SLOTS; possibleSlot++) {
-                if (playerData.getSlotState(possibleSlot) == PlayerData.SLOT_STATE_OPEN) {
-                    slot = possibleSlot;
-                    break;
-                }
-            }
-            if (slot == -1) {
-                sender.sendMessage("You don't have any open map slots");
-                return;
-            }
+//            if (legacy == null) {
+//                sender.sendMessage("Legacy maps are disabled");
+//                return;
+//            }
+//
+//            var mapId = context.get(idArg);
+//
+//            var target = player.getUuid().toString();
+//            if (context.has(uuidArg)) target = context.get(uuidArg).toString();
+//
+//            var legacyMap = legacy.getMapsForUuid(target)
+//                    .stream()
+//                    .filter(m -> m.id().equals(mapId))
+//                    .findFirst()
+//                    .orElse(null);
+//            if (legacyMap == null) {
+//                sender.sendMessage("You don't have a map with that id");
+//                return;
+//            }
+//
+//            var playerData = PlayerData.fromPlayer(player);
+//            int slot = -1;
+//            for (int possibleSlot = 0; possibleSlot < PlayerData.MAX_MAP_SLOTS; possibleSlot++) {
+//                if (playerData.getSlotState(possibleSlot) == PlayerData.SLOT_STATE_OPEN) {
+//                    slot = possibleSlot;
+//                    break;
+//                }
+//            }
+//            if (slot == -1) {
+//                sender.sendMessage("You don't have any open map slots");
+//                return;
+//            }
 
 //            var map = legacyMap.toMapData();
 //            legacy.importMap(legacyMap, map.id());

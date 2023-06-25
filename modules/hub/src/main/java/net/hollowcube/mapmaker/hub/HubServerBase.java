@@ -45,8 +45,8 @@ public abstract class HubServerBase implements HubServer {
 
         this.guiController = Controller.make(Map.of(
                 "hubServer", this,
-                "playerStorage", playerStorage(),
                 "playerService", playerService(),
+                "sessionService", sessionService(),
                 "mapService", mapService(),
                 "handler", mapHandler
         ));

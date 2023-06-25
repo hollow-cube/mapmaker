@@ -6,9 +6,9 @@ import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
-import net.hollowcube.mapmaker.map.SaveStateV2;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -141,13 +141,13 @@ public class EditingMapWorld implements InternalMapWorld {
     @Override
     @Blocking
     public void acceptPlayer(@NotNull Player player) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId());
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
 
         activePlayers.add(player);
         player.setTag(TAG_EDITING, true);
-        player.setTag(SaveStateV2.TAG, saveState);
+        player.setTag(SaveState.TAG, saveState);
         player.refreshCommands();
 
         player.setGameMode(GameMode.CREATIVE);
@@ -166,15 +166,15 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
-        var saveState = SaveStateV2.optionalFromPlayer(player);
+        var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
             var update = new SaveStateUpdateRequest();
             update.setPos(player.getPosition());
             update.setInventoryItems(List.of(player.getInventory().getItemStacks()));
 
             try {
-                var playerData = PlayerData.fromPlayer(player);
-                server.mapService().updateSaveState(map.id(), playerData.getId(), saveState.id(), update);
+                var playerData = PlayerDataV2.fromPlayer(player);
+                server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
                 logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);

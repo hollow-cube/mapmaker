@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
+import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
@@ -8,11 +9,16 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapUpdateRequest;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +30,7 @@ public class EditMap extends View {
     private @ContextObject MapService mapService;
 
     private @Outlet("tab_switch") Switch tabSwitch;
+    private @Outlet("publish") Label publishButton;
 
     // Info tab
     private @Outlet("map_name") Text mapNameText;
@@ -56,14 +63,22 @@ public class EditMap extends View {
 
     @Action(value = "publish", async = true)
     private @Blocking void publishMap(@NotNull Player player) {
-//        var playerData = PlayerData.fromPlayer(player);
-//        try {
-//            mapHandler.publishMap(playerData.getId(), map.getId());
-//            player.closeInventory();
-//        } catch (Exception e) {
-//            //todo record this exception in sentry or something
-//            logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
-//        }
+        var playerData = PlayerDataV2.fromPlayer(player);
+        MapData publishedMap;
+        try {
+            publishButton.setState(State.LOADING);
+            publishedMap = mapService.publishMap(playerData.id(), map.id());
+        } catch (Exception e) {
+            //todo record this exception in sentry or something
+            logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
+            return;
+        } finally {
+            publishButton.setState(State.ACTIVE);
+        }
+
+        EventDispatcher.call(new MapDeletedEvent(map.id())); //todo this event is still scuffed
+        performSignal(CreateMaps.SIG_RESET);
+        pushView(c -> new MapDetailsView(c, publishedMap, Component.text(publishedMap.owner())));
     }
 
     @Action("map_name")

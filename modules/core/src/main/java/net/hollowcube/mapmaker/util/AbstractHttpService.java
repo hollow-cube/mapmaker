@@ -1,0 +1,47 @@
+package net.hollowcube.mapmaker.util;
+
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.util.gson.InstantTypeAdapter;
+import net.hollowcube.mapmaker.util.gson.MaterialTypeAdapter;
+import net.minestom.server.item.Material;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+
+public abstract class AbstractHttpService {
+    private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
+
+    protected static final Gson GSON = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+            .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
+            .create();
+
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+
+    protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
+        try {
+            var res = httpClient.send(req, handler);
+            if (res.statusCode() == 403) {
+                // We simply convert auth issues to 404s
+                logger.log(System.Logger.Level.ERROR, "auth failed for request: " + req.method() + " " + req.uri());
+                throw new MapService.NotFoundError("???");
+            }
+            return res;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MapService.InternalError(e);
+        } catch (IOException e) {
+            throw new MapService.InternalError(e);
+        }
+    }
+
+}

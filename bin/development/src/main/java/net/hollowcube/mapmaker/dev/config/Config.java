@@ -20,8 +20,7 @@ import java.util.Objects;
 @ConfigSerializable
 public record Config(
         HttpConf http,
-        MinestomConf minestom,
-        MongoConf mongo
+        MinestomConf minestom
 ) {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
 

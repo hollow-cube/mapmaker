@@ -11,7 +11,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +53,7 @@ public class EditMapIconBase extends View {
         setState(Element.State.LOADING);
     }
 
-    public void setState(@NotNull PlayerData playerData, @NotNull State state, int slot, @Nullable String mapId) {
+    public void setState(@NotNull PlayerDataV2 playerData, @NotNull State state, int slot, @Nullable String mapId) {
         Check.argCondition(state == State.FULL && mapId == null, "mapId cannot be null if state is FULL");
         this.slot = slot;
         this.mapId = mapId;
@@ -62,7 +62,7 @@ public class EditMapIconBase extends View {
         // If the state is full, we need to additionally load the map data, otherwise it is ready now
         if (state == State.FULL || state == State.SELECTED) {
             mapDataFuture = async(() -> {
-                var map = mapService.getMap(playerData.getId(), Objects.requireNonNull(mapId));
+                var map = mapService.getMap(playerData.id(), Objects.requireNonNull(mapId));
                 var mapName = Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME);
 
                 var args = new Component[]{Component.text(slot + 1), Component.text(mapName)};

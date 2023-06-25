@@ -1,17 +1,14 @@
 package net.hollowcube.map.world;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
-import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.SaveStateV2;
+import net.hollowcube.mapmaker.map.SaveState;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Future;
 
 class MapWorldHelpers {
@@ -45,7 +42,7 @@ class MapWorldHelpers {
     }
 
     @Blocking
-    public static @NotNull SaveStateV2 getOrCreateSaveState(
+    public static @NotNull SaveState getOrCreateSaveState(
             @NotNull InternalMapWorld world,
             @NotNull String playerId
     ) {

@@ -3,15 +3,12 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyMapService;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.service.PlayerService;
-import net.hollowcube.mapmaker.storage.MetricStorage;
-import net.hollowcube.mapmaker.storage.PlayerStorage;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.SessionService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -29,22 +26,18 @@ public interface HubServer {
 
     @NotNull HubToMapBridge bridge();
 
+    @NotNull PlayerService playerService();
+
+    @NotNull SessionService sessionService();
+
     @NotNull MapService mapService();
 
 
 
 
 
-    @NotNull PlayerStorage playerStorage();
-
-    @NotNull MetricStorage metricStorage();
-
-    @NotNull PlayerService playerService();
 
     @NotNull HubWorld world();
-
-    @Nullable LegacyMapService legacyMapService();
-
 
     void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
 

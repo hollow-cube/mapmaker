@@ -7,8 +7,8 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.SaveStateV2;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -111,9 +111,9 @@ public class TestingMapWorld implements InternalMapWorld {
 
     @Override
     public void acceptPlayer(@NotNull Player player) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.getId());
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
 
         var startingPos = player.getPosition();
         player.teleport(startingPos);
@@ -122,7 +122,7 @@ public class TestingMapWorld implements InternalMapWorld {
         activePlayers.add(player);
         player.setTag(TAG_TESTING, true);
         player.setTag(MapHooks.PLAYING, true); // For compatibility
-        player.setTag(SaveStateV2.TAG, saveState);
+        player.setTag(SaveState.TAG, saveState);
 
         player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
@@ -140,7 +140,7 @@ public class TestingMapWorld implements InternalMapWorld {
         activePlayers.remove(player);
 
         // We do not currently save testing savestates, should we?
-        player.removeTag(SaveStateV2.TAG);
+        player.removeTag(SaveState.TAG);
     }
 
 

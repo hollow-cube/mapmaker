@@ -8,7 +8,6 @@ import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.SignBlockHandler;
 import net.hollowcube.map.block.rule.PlacementRules;
 import net.hollowcube.map.command.*;
-import net.hollowcube.map.event.EditWorldPlaceBlockEvent;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
@@ -64,7 +63,7 @@ public abstract class MapServerBase implements MapServer {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
-        eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
+//        eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
 
         // Placement rules
         PlacementRules.init();

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.dev.command;
 
-import net.hollowcube.mapmaker.ui.Scoreboards;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;

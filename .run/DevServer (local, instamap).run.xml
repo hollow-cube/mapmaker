@@ -6,7 +6,6 @@
       <env name="MAPMAKER_SPICEDB_ADDRESS" value="localhost:50051" />
       <env name="MAPMAKER_SPICEDB_SECRETKEY" value="foobar" />
       <env name="MAPMAKER_SPICEDB_TLS" value="false" />
-      <env name="MM_MONGO_URI" value="mongodb://localhost:27017" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
       <env name="MM_MAP_PERMISSIONS_DEV" value="true" />
     </envs>

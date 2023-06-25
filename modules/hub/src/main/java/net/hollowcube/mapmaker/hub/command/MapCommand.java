@@ -5,7 +5,8 @@ import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyCommand;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.SlotState;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -72,7 +73,7 @@ public class MapCommand extends BaseHubCommand {
             var mapId = parseMapFromLongIdOrSlot(player, longIdOrSlot);
             if (mapId == null) return;
 
-            var playerId = PlayerData.fromPlayer(player).getId();
+            var playerId = PlayerDataV2.fromPlayer(player).id();
             //todo
 //            server.mapStorage().getMapById(mapId)
 //                    .flatMap(map -> FutureResult.wrap(server.mapPermissions().checkPermission(map.getId(), playerId, MapData.Permission.READ))
@@ -344,8 +345,8 @@ public class MapCommand extends BaseHubCommand {
         try {
             var slot = Integer.parseInt(longIdOrSlot) - 1;
 
-            var playerData = PlayerData.fromPlayer(player);
-            if (playerData.getSlotState(slot) != PlayerData.SLOT_STATE_IN_USE) {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            if (playerData.getSlotState(slot) != SlotState.FILLED) {
                 if (slot < playerData.getUnlockedMapSlots()) {
                     player.sendMessage(Component.translatable("command.map.delete.slot_locked", Component.text(slot + 1)));
                 } else {

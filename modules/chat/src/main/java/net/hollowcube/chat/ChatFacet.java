@@ -2,12 +2,9 @@ package net.hollowcube.chat;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.chat.command.*;
-import net.hollowcube.chat.storage.ChatStorage;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.ConfigProvider;
-import net.hollowcube.common.config.MongoConfigNew;
 import net.hollowcube.common.facet.Facet;
-import net.hollowcube.mapmaker.model.PlayerData;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.entity.Player;
@@ -21,7 +18,6 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
 
 import java.lang.System.Logger.Level;
 import java.time.Instant;
@@ -48,27 +44,14 @@ public class ChatFacet implements Facet {
             //.addListener(PlayerChatEvent.class, this::handleChatEvent)
             .addListener(PlayerCommandEvent.class, this::handleCommandEvent);
 
-    private ChatStorage storage;
-
     public ChatFacet() {
-    }
-
-    @TestOnly
-    ChatFacet(@NotNull ChatStorage storage) {
-        this.storage = storage;
     }
 
     @Override
     public void hook(@NotNull ServerProcess server, @NotNull ConfigProvider config) {
-        if (System.getenv("MM_CHAT_STORAGE_DEV") != null) {
-            this.storage = ChatStorage.memory();
-        } else {
-            var mongoConf = config.get(MongoConfigNew.class);
-            this.storage = ChatStorage.mongo(mongoConf);
-        }
 
         server.eventHandler().addChild(eventNode);
-        server.command().register(new LogCommand(storage));
+        server.command().register(new LogCommand());
         server.command().register(new MessageCommand(this));
         server.command().register(new ReplyCommand(this));
         server.command().register(new StaffChatCommand(this));
@@ -90,11 +73,11 @@ public class ChatFacet implements Facet {
         );
 
         try {
-            storage.recordChatMessage(chatMessage);
+//            storage.recordChatMessage(chatMessage);
             to.setTag(REPLY_TO, from.getUuid());
             from.setTag(REPLY_TO, to.getUuid());
-            from.sendMessage("to " + PlayerData.fromPlayer(to).getDisplayName() + ": " + message);
-            to.sendMessage("from " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
+//            from.sendMessage("to " + PlayerData.fromPlayer(to).getDisplayName() + ": " + message);
+//            to.sendMessage("from " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
         } catch (Exception e) {
             logger.log(Level.ERROR, "Error sending private message", e);
             from.sendMessage("Error sending private message");
@@ -102,14 +85,14 @@ public class ChatFacet implements Facet {
     }
 
     private @NonBlocking void handleChatEvent(PlayerChatEvent event) {
-        var senderData = PlayerData.fromPlayer(event.getPlayer());
-        var message = new ChatMessage(
-                Instant.now(),
-                runtime.hostname(),
-                ChatMessage.DEFAULT_CONTEXT,
-                senderData.getId(),
-                event.getMessage()
-        );
+//        var senderData = PlayerData.fromPlayer(event.getPlayer());
+//        var message = new ChatMessage(
+//                Instant.now(),
+//                runtime.hostname(),
+//                ChatMessage.DEFAULT_CONTEXT,
+//                senderData.getId(),
+//                event.getMessage()
+//        );
 //        switch (event.getPlayer().getTag(CHAT_CHANNEL)) {
 //            case ChatMessage.STAFF_CONTEXT:
 //                sendStaffChatMessage(event.getPlayer(), message.message());
@@ -119,11 +102,11 @@ public class ChatFacet implements Facet {
 //            default:
 //                break;
 //        }
-        try {
-            storage.recordChatMessage(message);
-        } catch (Exception e) {
-            logger.log(Level.ERROR, "Error recording chat message", e);
-        }
+//        try {
+//            storage.recordChatMessage(message);
+//        } catch (Exception e) {
+//            logger.log(Level.ERROR, "Error recording chat message", e);
+//        }
     }
 
     public @Blocking void sendStaffChatMessage(@NotNull Player from, @NotNull String message) {
@@ -138,8 +121,8 @@ public class ChatFacet implements Facet {
             );
 
             try {
-                storage.recordChatMessage(chatMessage);
-                target.sendMessage("[STAFF] " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
+//                storage.recordChatMessage(chatMessage);
+//                target.sendMessage("[STAFF] " + PlayerData.fromPlayer(from).getDisplayName() + ": " + message);
             } catch (Exception e) {
                 logger.log(Level.ERROR, "Error sending staff chat message", e);
                 from.sendMessage("Error sending staff chat message");
@@ -156,10 +139,10 @@ public class ChatFacet implements Facet {
                 event.getCommand()
         );
 
-        try {
-            storage.recordChatMessage(message);
-        } catch (Exception e) {
-            logger.log(Level.ERROR, "Error recording command", e);
-        }
+//        try {
+//            storage.recordChatMessage(message);
+//        } catch (Exception e) {
+//            logger.log(Level.ERROR, "Error recording command", e);
+//        }
     }
 }

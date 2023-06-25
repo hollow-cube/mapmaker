@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.model.kafka;
 
+import net.hollowcube.mapmaker.to_be_refactored.model.kafka.SchematicMgmt;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

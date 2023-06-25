@@ -8,7 +8,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.model.kafka.SchematicMgmt;
+import net.hollowcube.mapmaker.to_be_refactored.model.kafka.SchematicMgmt;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicReadException;
 import net.hollowcube.terraform.schem.SchematicReader;

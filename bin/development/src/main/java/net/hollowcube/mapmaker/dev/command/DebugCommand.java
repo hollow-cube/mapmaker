@@ -4,8 +4,9 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.dev.DevRuntime;
-import net.hollowcube.mapmaker.model.PlayerData;
-import net.hollowcube.mapmaker.storage.PlayerStorage;
+import net.hollowcube.mapmaker.player.PlayerDataUpdateRequest;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -15,11 +16,11 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class DebugCommand extends Command {
-    private final PlayerStorage playerStorage;
+    private final PlayerService playerService;
 
-    public DebugCommand(@NotNull PlayerStorage playerStorage) {
+    public DebugCommand(@NotNull PlayerService playerService) {
         super("debug");
-        this.playerStorage = playerStorage;
+        this.playerService = playerService;
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
@@ -45,9 +46,9 @@ public class DebugCommand extends Command {
             return;
         }
 
-        var playerData = PlayerData.fromPlayer(player);
-        player.sendMessage(Component.text(playerData.getId() + " (" + playerData.getUsername() + ")"));
-        player.sendMessage(Component.text("Display: ").append(playerData.getDisplayName()));
+        var playerData = PlayerDataV2.fromPlayer(player);
+        player.sendMessage(Component.text(playerData.id() + " (" + playerData.username() + ")"));
+        player.sendMessage(Component.text("Display: ").append(Component.text(playerData.username())));
     }
 
     private void handlePlayerReset(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -56,10 +57,15 @@ public class DebugCommand extends Command {
             return;
         }
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         playerData.setUnlockedMapSlots(5);
-        playerData.setMapSlots(new String[]{null, null, null, null, null});
-        playerStorage.updatePlayer(playerData);
+        for (int i = 0; i < PlayerDataV2.MAX_MAP_SLOTS; i++) {
+            playerData.setMapSlot(i, null);
+        }
+
+        var req = new PlayerDataUpdateRequest().setUnlockedMapSlots(playerData.getUnlockedMapSlots()).setMapSlots(playerData.getRawMapSlots());
+        playerService.updatePlayerData(playerData.id(), req);
+
         player.sendMessage(Component.text("Bye bye data :)"));
     }
 

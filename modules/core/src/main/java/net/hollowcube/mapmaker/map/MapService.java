@@ -22,13 +22,15 @@ public interface MapService {
 
     void deleteMap(@NotNull String authorizer, @NotNull String id);
 
+    @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id);
+
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 
     // Save states
-    @NotNull SaveStateV2 createSaveState(@NotNull String mapId, @NotNull String playerId);
-    @NotNull SaveStateV2 getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
-    @NotNull SaveStateV2 getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
+    @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
+    @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+    @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
     void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
 
     class NotFoundError extends RuntimeException {

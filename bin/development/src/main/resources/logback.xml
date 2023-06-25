@@ -9,8 +9,6 @@
         <appender-ref ref="STDOUT"/>
     </root>
     <logger name="net.minestom.server" level="INFO"/>
-    <logger name="org.mongodb" level="WARN"/>
-    <logger name="io.grpc" level="WARN"/>
     <logger name="io.netty" level="WARN"/>
     <logger name="io.helidon" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>

@@ -14,14 +14,14 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
-public class SaveStateV2 {
-    public static final Tag<SaveStateV2> TAG = Tag.Transient("mapmaker:map/save_state");
+public class SaveState {
+    public static final Tag<SaveState> TAG = Tag.Transient("mapmaker:map/save_state");
 
-    public static @NotNull SaveStateV2 fromPlayer(@NotNull Player player) {
+    public static @NotNull SaveState fromPlayer(@NotNull Player player) {
         return Objects.requireNonNull(optionalFromPlayer(player));
     }
 
-    public static @Nullable SaveStateV2 optionalFromPlayer(@NotNull Player player) {
+    public static @Nullable SaveState optionalFromPlayer(@NotNull Player player) {
         return player.getTag(TAG);
     }
 

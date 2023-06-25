@@ -6,7 +6,8 @@ import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.SlotState;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -32,12 +33,12 @@ public class MapCreateCommand extends BaseHubCommand {
     }
 
     private @Blocking void createMapInFirstSlot(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
         // Determine first available slot
         int slot = -1;
-        for (var i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
-            if (playerData.getSlotState(i) == PlayerData.SLOT_STATE_OPEN) {
+        for (var i = 0; i < PlayerDataV2.MAX_MAP_SLOTS; i++) {
+            if (playerData.getSlotState(i) == SlotState.EMPTY) {
                 slot = i;
                 break;
             }
@@ -52,14 +53,14 @@ public class MapCreateCommand extends BaseHubCommand {
     }
 
     private @Blocking void createMapInSlot(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
         // Argument parser will fail if the slot is not actually available, so safe to ignore checks
         //todo make sure above is actually the case.
         perform(player, playerData, context.get(slotArg));
     }
 
-    private void perform(@NotNull Player player, @NotNull PlayerData playerData, int slot) {
+    private void perform(@NotNull Player player, @NotNull PlayerDataV2 playerData, int slot) {
         try {
             var mapData = handler.createMapForPlayerInSlot(playerData, slot);
             player.sendMessage(HubMessages.COMMAND_MAP_CREATE_SUCCESS.with(mapData.id(), slot));

@@ -1,0 +1,45 @@
+package net.hollowcube.mapmaker.player;
+
+import net.hollowcube.mapmaker.util.AbstractHttpService;
+import org.jetbrains.annotations.NotNull;
+
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class SessionServiceImpl extends AbstractHttpService implements SessionService {
+    private static final System.Logger logger = System.getLogger(SessionServiceImpl.class.getName());
+
+    private final String url;
+
+    public SessionServiceImpl(@NotNull String url) {
+        this.url = String.format("%s/v1/internal/session", url);
+    }
+
+    @Override
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip) {
+        logger.log(System.Logger.Level.INFO, "new session created for {0} ({1}) from {2}", id, username, ip);
+        var reqBody = GSON.toJson(new SessionCreateRequest(username, ip));
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/" + id))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 201)
+            throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
+        return GSON.fromJson(res.body(), PlayerDataV2.class);
+    }
+
+    @Override
+    public void deleteSession(@NotNull String id) {
+        logger.log(System.Logger.Level.INFO, "deleted session for {0}", id);
+        var req = HttpRequest.newBuilder()
+                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/" + id))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 200)
+            throw new InternalError("Failed to delete session: " + res.body());
+    }
+
+}

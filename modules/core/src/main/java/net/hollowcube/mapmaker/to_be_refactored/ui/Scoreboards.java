@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.ui;
+package net.hollowcube.mapmaker.to_be_refactored.ui;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;

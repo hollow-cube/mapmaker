@@ -2,7 +2,8 @@ package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.SlotState;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -28,12 +29,12 @@ public final class ExtraArguments {
      */
     public static Argument<Integer> MapSlot(@NotNull String id, boolean showAvailable) {
         return ArgumentType.Integer(id)
-                .min(1).max(PlayerData.MAX_MAP_SLOTS + 1)
+                .min(1).max(PlayerDataV2.MAX_MAP_SLOTS + 1)
                 .setSuggestionCallback((sender, context, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
 
-                    var playerData = PlayerData.fromPlayer(player);
-                    for (int i = 0; i < PlayerData.MAX_MAP_SLOTS; i++) {
+                    var playerData = PlayerDataV2.fromPlayer(player);
+                    for (int i = 0; i < PlayerDataV2.MAX_MAP_SLOTS; i++) {
                         if (showAvailable == (playerData.getMapSlot(i) != null)) {
                             var entry = new SuggestionEntry(String.valueOf(i + 1));
                             suggestion.addEntry(entry);
@@ -43,7 +44,7 @@ public final class ExtraArguments {
                 .map(value -> {
                     //todo check players slots to throw error for filled slot
                     value -= 1;
-                    if (value < 0 || value > PlayerData.MAX_MAP_SLOTS)
+                    if (value < 0 || value > PlayerDataV2.MAX_MAP_SLOTS)
                         throw new ArgumentSyntaxException("Invalid map slot", String.valueOf(value), ERR_INVALID_MAP_SLOT);
                     return value;
                 });
@@ -63,13 +64,13 @@ public final class ExtraArguments {
                 .map((sender, value) -> {
                     if (!(sender instanceof Player player))
                         throw new ArgumentSyntaxException("Invalid map", value, ERR_INVALID_MAP_SLOT); //todo a more descriptive error
-                    var playerData = PlayerData.fromPlayer(player);
+                    var playerData = PlayerDataV2.fromPlayer(player);
 
                     try { // Try to parse as a slot
                         var slot = Integer.parseInt(value) - 1;
 
                         // Personal world
-                        if (slot == PlayerData.MAX_MAP_SLOTS + 1) {
+                        if (slot == PlayerDataV2.MAX_MAP_SLOTS + 1) {
                             if ((mask & MASK_PERSONAL_WORLD) == 0) // Personal worlds are not enabled
                                 throw new ArgumentSyntaxException("Invalid map", String.valueOf(slot), ERR_INVALID_MAP_SLOT);
 
@@ -77,18 +78,18 @@ public final class ExtraArguments {
                         }
 
                         // Regular slot
-                        if (slot >= 0 && slot < PlayerData.MAX_MAP_SLOTS) {
+                        if (slot >= 0 && slot < PlayerDataV2.MAX_MAP_SLOTS) {
                             if ((mask & MASK_SLOT) == 0) // Filled slots are not enabled
                                 throw new ArgumentSyntaxException("Invalid map", String.valueOf(slot), ERR_INVALID_MAP_SLOT);
 
                             var state = playerData.getSlotState(slot);
-                            if (state == PlayerData.SLOT_STATE_LOCKED)
+                            if (state == SlotState.LOCKED)
                                 throw new ArgumentSyntaxException("Locked slot", String.valueOf(slot), ERR_INVALID_MAP_SLOT);
-                            if (state == PlayerData.SLOT_STATE_OPEN)
+                            if (state == SlotState.EMPTY)
                                 throw new ArgumentSyntaxException("Empty slot", String.valueOf(slot), ERR_INVALID_MAP_SLOT);
 
                             var mapId = Objects.requireNonNull(playerData.getMapSlot(slot));
-                            return HubServer.StaticAbuse.instance.mapService().getMap(playerData.getId(), mapId);
+                            return HubServer.StaticAbuse.instance.mapService().getMap(playerData.id(), mapId);
                         }
 
                         // Any other number is invalid for sure
@@ -101,7 +102,7 @@ public final class ExtraArguments {
                         if ((mask & MASK_ID) == 0) // Ids are not enabled
                             throw new ArgumentSyntaxException("Invalid map", value, ERR_INVALID_MAP_SLOT);
 
-                        return HubServer.StaticAbuse.instance.mapService().getMap(playerData.getId(), mapId);
+                        return HubServer.StaticAbuse.instance.mapService().getMap(playerData.id(), mapId);
                     } catch (IllegalArgumentException ignored) {
                     }
 

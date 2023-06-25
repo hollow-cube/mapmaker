@@ -8,7 +8,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.model.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
@@ -44,7 +44,7 @@ public class MapDetailsView extends View {
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
             logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
-                    map.id(), PlayerData.fromPlayer(player).getId(), e.getMessage());
+                    map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
     }

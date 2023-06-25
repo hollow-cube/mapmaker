@@ -11,23 +11,9 @@ A docker-compose file is provided for local development. It can be started one o
 
 The compose manifest provides the following services:
 
-- MongoDB
 - MinIO
 
 From there, the development server can be started with `./gradlew run :bin:development:run`, or the green
 play button in the main class.
 
-### Temp Note
-
-Currently, the dev server requires a minio connection, though Mongo is optional. First make sure the compose file
-is running as outlined above, and then create a mapmaker bucket in minio by following these steps:
-
-- Navigate to `http://localhost:9001` in your browser.
-- Sign in using the credentials `mapmaker` and `mapmaker`.
-- Click `Create Bucket` in the top right.
-- Name the bucket `mapmaker` and leave all other settings default.
-
-For monitoring mongo and current objects, you can download MongoDB Compass
-at https://www.mongodb.com/try/download/compass
-
-Finally, start the dev server using the `DevServer (mongo)` run configuration provided in the repository (under `.run`).
+Finally, start the dev server using the `DevServer (local)` run configuration provided in the repository (under `.run`).

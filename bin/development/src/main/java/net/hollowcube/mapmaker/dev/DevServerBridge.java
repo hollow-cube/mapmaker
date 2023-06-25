@@ -5,9 +5,7 @@ import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.model.PlayerData;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +28,8 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
 
     @Override
     public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit) {
-        var playerData = PlayerData.fromPlayer(player);
-        var map = mapServer.mapService().getMap(playerData.getId(), mapId);
+        var playerData = PlayerDataV2.fromPlayer(player);
+        var map = mapServer.mapService().getMap(playerData.id(), mapId);
         ((MapServerBase) mapServer).joinMap(player, map, edit);
     }
 
