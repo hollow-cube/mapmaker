@@ -8,12 +8,31 @@ import org.jetbrains.annotations.Nullable;
 
 public class MapSettings {
 
-    private String name = null;
-    private Material icon = null;
+    private String name;
+    private Material icon;
 
-    private MapVariant variant = MapVariant.BUILDING;
+    private MapVariant variant;
 
     private Pos spawnPoint;
+
+    public MapSettings() {
+        this.name = "";
+        this.icon = null;
+        this.variant = MapVariant.BUILDING;
+        this.spawnPoint = new Pos(0.5, 40, 0.5);
+    }
+
+    public MapSettings(
+            @Nullable String name,
+            @Nullable Material icon,
+            @Nullable MapVariant variant,
+            @Nullable Pos spawnPoint
+    ) {
+        this.name = name;
+        this.icon = icon;
+        this.variant = variant;
+        this.spawnPoint = spawnPoint;
+    }
 
     public @NotNull String getName() {
         return name;

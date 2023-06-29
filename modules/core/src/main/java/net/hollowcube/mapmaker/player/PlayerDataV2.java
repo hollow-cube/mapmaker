@@ -21,8 +21,17 @@ public class PlayerDataV2 {
     private String username;
     private Component displayName;
 
-    private int unlockedMapSlots;
+    private int unlockedMapSlots = 2;
     private String[] mapSlots = new String[MAX_MAP_SLOTS];
+
+    public PlayerDataV2() {
+    }
+
+    public PlayerDataV2(@NotNull String id, @NotNull String username, @NotNull Component displayName) {
+        this.id = id;
+        this.username = username;
+        this.displayName = displayName;
+    }
 
     public @NotNull String id() {
         return id;

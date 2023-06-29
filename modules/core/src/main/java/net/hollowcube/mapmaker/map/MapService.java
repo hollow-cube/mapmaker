@@ -31,6 +31,8 @@ public interface MapService {
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 
+    @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
+
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
     @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);

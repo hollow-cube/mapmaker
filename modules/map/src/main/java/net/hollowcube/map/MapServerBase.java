@@ -21,7 +21,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.listener.manager.PacketListenerManager;
@@ -90,6 +89,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new TeleportCommand());
         commandManager.register(new TestModeCommand(this));
         commandManager.register(new BuildModeCommand(this));
+        commandManager.register(new TopTimesCommand(playerService(), mapService()));
 
         // Register features
         var features = new ArrayList<FeatureProvider>();

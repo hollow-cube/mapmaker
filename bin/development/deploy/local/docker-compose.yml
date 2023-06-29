@@ -56,7 +56,7 @@ services:
     networks:
       - mapmaker
   cache:
-    image: redis:6.2-alpine
+    image: redis:7.2-rc2-alpine
     restart: always
     ports:
       - '6379:6379'

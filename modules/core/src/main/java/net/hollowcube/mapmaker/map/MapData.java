@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.time.Instant;
@@ -15,6 +16,23 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
+
+    public MapData() {
+    }
+
+    public MapData(
+            @NotNull String id,
+            @NotNull String owner,
+            @NotNull MapSettings settings,
+            long publishedId,
+            @Nullable Instant publishedAt
+    ) {
+        this.id = id;
+        this.owner = owner;
+        this.settings = settings;
+        this.publishedId = publishedId;
+        this.publishedAt = publishedAt;
+    }
 
     public @NotNull String id() {
         return id;
@@ -38,6 +56,10 @@ public class MapData {
 
     public @UnknownNullability String publishedIdString() {
         return publishedId == 0 ? null : formatPublishedId(publishedId);
+    }
+
+    public @UnknownNullability Instant publishedAt() {
+        return publishedAt;
     }
 
     private static @NotNull String formatPublishedId(long number) {

@@ -147,6 +147,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
         player.sendMessage("Now playing " + map.settings().getName());
+        saveState.setPlayStartTime(System.currentTimeMillis());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
@@ -168,9 +169,11 @@ public class PlayingMapWorld implements InternalMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return;
 
+        saveState.updatePlaytime();
+
         var update = new SaveStateUpdateRequest();
+        update.setPlaytime(saveState.getPlaytime());
         update.setCompleted(saveState.isCompleted());
-        //todo save other stuff
 
         try {
             var playerData = PlayerDataV2.fromPlayer(player);

@@ -1,18 +1,24 @@
 
 // Role definitions for the entirety of mapmaker
 definition mapmaker/platform {
-    // Platform admin, implicitly grants write permission on all resources
+
+    relation hollowcube: mapmaker/player
     relation admin: mapmaker/player
-    permission map_admin = admin
+    relation dev: mapmaker/player
+    relation mod: mapmaker/player
+    relation ct: mapmaker/player
 
-    relation staff: mapmaker/player
-    permission staff = staff
+    // Gives admin permission on all maps
+    permission map_admin = admin + hollowcube
 
-    relation verified: mapmaker/player
-    permission verified = verified
 }
 
 definition mapmaker/player {}
+
+definition mapmaker/organization {
+    relation admin: mapmaker/player
+    relation member: mapmaker/player
+}
 
 definition mapmaker/map {
     relation platform: mapmaker/platform
@@ -21,7 +27,7 @@ definition mapmaker/map {
     relation trusted: mapmaker/player
 
     // Allow setting readership for anybody, will be done when the map is published.
-    relation viewer: mapmaker/player | mapmaker/player:*
+    relation viewer: mapmaker/player:*
 
     permission admin = owner + platform->admin
     permission write = admin + trusted

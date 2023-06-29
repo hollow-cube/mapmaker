@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.map.MapServiceMemory;
 import net.hollowcube.mapmaker.player.*;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -126,17 +127,23 @@ public class DevServer {
         // Start phase 1
         // Connect to low level services
 
-        var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
-        if (playerServiceUrl == null) playerServiceUrl = "http://localhost:9126";
-        playerService = new PlayerServiceImpl(playerServiceUrl);
+        if (System.getenv("MAPMAKER_STANDALONE").equals("1")) {
+            playerService = new PlayerServiceMemory();
+            sessionService = new SessionServiceMemory((PlayerServiceMemory) playerService);
+            mapService = new MapServiceMemory();
+        } else {
+            var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
+            if (playerServiceUrl == null) playerServiceUrl = "http://localhost:9126";
+            playerService = new PlayerServiceImpl(playerServiceUrl);
 
-        var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
-        if (sessionServiceUrl == null) sessionServiceUrl = "http://localhost:9127";
-        sessionService = new SessionServiceImpl(sessionServiceUrl);
+            var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
+            if (sessionServiceUrl == null) sessionServiceUrl = "http://localhost:9127";
+            sessionService = new SessionServiceImpl(sessionServiceUrl);
 
-        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-        if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
-        mapService = new MapServiceImpl(mapServiceUrl);
+            var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
+            if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
+            mapService = new MapServiceImpl(mapServiceUrl);
+        }
 
         // Start phase 2
         // Start hub and map server and bridge them.

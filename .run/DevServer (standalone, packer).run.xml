@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DevServer (standalone, packer)" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="MAPMAKER_STANDALONE" value="1" />
+      <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
+    <module name="mapmaker.bin.development.main" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Packer" run_configuration_type="Application" />
+    </method>
+  </configuration>
+</component>

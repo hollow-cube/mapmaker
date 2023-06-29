@@ -33,6 +33,7 @@ public class SaveState {
     private Instant lastModified;
     private boolean completed;
     private long playtime;
+    private transient long playStartTime;
 
     // Common to play and edit
     private Pos pos = null;
@@ -43,6 +44,15 @@ public class SaveState {
 
     // Playing
     private String checkpoint = null;
+
+    public SaveState() {
+    }
+
+    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId) {
+        this.id = id;
+        this.playerId = playerId;
+        this.mapId = mapId;
+    }
 
     public @NotNull String id() {
         return id;
@@ -77,6 +87,17 @@ public class SaveState {
     }
     public void setPlaytime(long playtime) {
         this.playtime = playtime;
+    }
+    public long getPlayStartTime() {
+        return playStartTime;
+    }
+    public void setPlayStartTime(long playStartTime) {
+        this.playStartTime = playStartTime;
+    }
+    public void updatePlaytime() {
+        if (playStartTime == 0) return;
+        playtime += System.currentTimeMillis() - playStartTime;
+        playStartTime = System.currentTimeMillis();
     }
 
     public @Nullable Pos pos() {

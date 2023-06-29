@@ -6,7 +6,11 @@ import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.polar.PolarLoader;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
@@ -14,6 +18,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class HubWorld {
@@ -65,7 +70,14 @@ public class HubWorld {
     }
 
     public void loadWorld() {
-        //todo
+
+        try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
+            if (is == null) throw new IOException("hcspawn.polar not found");
+            instance.setChunkLoader(new PolarLoader(is));
+
+        } catch (IOException e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {
@@ -81,6 +93,7 @@ public class HubWorld {
         player.refreshCommands();
 
         player.setGameMode(GameMode.ADVENTURE);
+        player.teleport(new Pos(0.5, 40, 0.5, 90, 0));
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
