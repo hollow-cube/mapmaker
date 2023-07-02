@@ -2,7 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
@@ -145,7 +145,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
 
-        EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
         player.sendMessage("Now playing " + map.settings().getName());
         saveState.setPlayStartTime(System.currentTimeMillis());
     }

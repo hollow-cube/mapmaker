@@ -30,6 +30,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -118,16 +119,17 @@ public class DevServer {
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
         if (velocitySecret != null) {
-            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy...");
+            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy..dwadwad.");
             VelocityProxy.enable(velocitySecret);
         } else {
+            logger.log(System.Logger.Level.INFO, "Velocity not configured, using online mode...");
             MojangAuth.init();
         }
 
         // Start phase 1
         // Connect to low level services
 
-        if (System.getenv("MAPMAKER_STANDALONE").equals("1")) {
+        if ("1".equals(System.getenv("MAPMAKER_STANDALONE"))) {
             playerService = new PlayerServiceMemory();
             sessionService = new SessionServiceMemory((PlayerServiceMemory) playerService);
             mapService = new MapServiceMemory();

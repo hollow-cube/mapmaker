@@ -70,7 +70,6 @@ public class HubWorld {
     }
 
     public void loadWorld() {
-
         try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
             if (is == null) throw new IOException("hcspawn.polar not found");
             instance.setChunkLoader(new PolarLoader(is));

@@ -2,7 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
+import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
@@ -28,7 +28,7 @@ import java.util.*;
 public class TestingMapWorld implements InternalMapWorld {
 
     // If set, indicates that the player is an editor.
-    private static final Tag<Boolean> TAG_TESTING = Tag.Boolean("editing").defaultValue(false);
+    private static final Tag<Boolean> TAG_TESTING = Tag.Transient("testing");
 
     private int flags;
 
@@ -128,7 +128,7 @@ public class TestingMapWorld implements InternalMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
         player.sendMessage("Now testing " + map().settings().getName());
 
-        EventDispatcher.call(new MapWorldPlayerStartPlayingEvent(this, player));
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
     }
 
     @Override

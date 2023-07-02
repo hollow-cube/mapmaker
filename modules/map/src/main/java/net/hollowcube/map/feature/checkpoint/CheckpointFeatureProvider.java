@@ -2,10 +2,9 @@ package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
-import net.hollowcube.map.event.MapWorldPlayerStartPlayingEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.map.event.*;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
@@ -14,6 +13,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -23,6 +23,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -40,10 +42,11 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     public static final int MINIMUM_RESET_HEIGHT = -64;
 
     private final EventNode<InstanceEvent> resetManagementNode = EventNode.type("mapmaker:feature/checkpoint", EventFilter.INSTANCE)
-            .addListener(MapWorldPlayerStartPlayingEvent.class, this::acceptPlayer)
+            .addListener(MapPlayerInitEvent.class, this::acceptPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer)
             .addListener(MapWorldCheckpointReachedEvent.class, this::handleCheckpointUpdate)
-            .addListener(InstanceTickEvent.class, this::tick);
+            .addListener(InstanceTickEvent.class, this::tick)
+            .addListener(MapPlayerResetTriggerEvent.class, this::handlePlayerReset);
 
     @Override
     public void init(@NotNull ConfigProvider config) {
@@ -66,7 +69,9 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     }
 
 
-    private void acceptPlayer(@NotNull MapWorldPlayerStartPlayingEvent event) {
+    private void acceptPlayer(@NotNull MapPlayerInitEvent event) {
+        if (!event.isFirstInit()) return;
+
         var player = event.getPlayer();
         var saveState = SaveState.fromPlayer(player);
 
@@ -96,27 +101,40 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
             if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
-            var map = MapWorld.forPlayer(player).map();
+            var world = MapWorld.forPlayer(player);
 
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
 
             if (player.getPosition().y() < resetHeight || player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
                 // Player has fallen below their reset height, return them to their latest checkpoint
-                var saveState = SaveState.fromPlayer(player);
-                var checkpoint = saveState.checkpoint();
-                if (checkpoint == null) {
-                    // No checkpoint set, return to spawn
-//                    player.teleport(map.getSpawnPoint())
-//                            .exceptionally(FutureUtil::handleException);
-                } else {
-                    // Return to checkpoint
+                EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
+            }
+        }
+    }
+
+    private void handlePlayerReset(@NotNull MapPlayerResetTriggerEvent event) {
+        var player = event.getPlayer();
+        var map = event.getMap();
+
+        CompletableFuture<Void> future;
+
+        var saveState = SaveState.fromPlayer(player);
+        var checkpoint = saveState.checkpoint();
+        if (checkpoint == null) {
+            // No checkpoint set, return to spawn
+            future = player.teleport(map.settings().getSpawnPoint());
+        } else {
+            // Return to checkpoint
+            player.sendMessage("you had a checkpoint, but this is not implemented. oopsie woopsie");
 //                    var checkpointPos = map.getPoi(checkpoint).getPos();
 //                    player.teleport(Pos.fromPoint(checkpointPos))
 //                            .exceptionally(FutureUtil::handleException);
-                }
-            }
+            future = CompletableFuture.completedFuture(null);
         }
+
+        future.thenAccept(unused -> EventDispatcher.call(new MapPlayerInitEvent(event.mapWorld(), player, false)))
+                .exceptionally(FutureUtil::handleException);
     }
 
     private int getCheckpointResetHeight(@NotNull MapData map, @Nullable String checkpointId) {

@@ -7,10 +7,13 @@ import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Called after a player has loaded (eg savestate is present) into a map and is starting playing.
+ * Called to trigger a player reset, for example when they fall out of the world, stop sprinting in only sprint, etc.
  */
-public record MapWorldPlayerStartPlayingEvent(@NotNull MapWorld mapWorld,
-                                              @NotNull Player player) implements MapWorldEvent, PlayerEvent {
+public record MapPlayerResetTriggerEvent(
+        @NotNull MapWorld mapWorld,
+        @NotNull Player player
+) implements MapWorldEvent, PlayerEvent {
+
     @Override
     public @NotNull MapWorld getMapWorld() {
         return mapWorld;
@@ -20,4 +23,5 @@ public record MapWorldPlayerStartPlayingEvent(@NotNull MapWorld mapWorld,
     public @NotNull Player getPlayer() {
         return player;
     }
+
 }

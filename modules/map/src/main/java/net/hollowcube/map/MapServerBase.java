@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -76,6 +77,7 @@ public abstract class MapServerBase implements MapServer {
 //        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
 //        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
         Terraform.init(terraformEvents, null);
+        TerraformAxiom.init(terraformEvents, null);
 //        TerraformCompat.init(terraformEvents, null);
 
         // Register commands

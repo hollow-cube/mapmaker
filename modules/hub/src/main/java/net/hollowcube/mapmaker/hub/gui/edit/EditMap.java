@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
@@ -55,10 +56,11 @@ public class EditMap extends View {
     private @Blocking void editMap(@NotNull Player player) {
         try {
             mapHandler.editMap(player, map.id());
-            player.closeInventory();
         } catch (Exception e) {
-            //todo record this exception in sentry or something
-            logger.log(System.Logger.Level.ERROR, "Failed to edit map", e);
+            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            MinecraftServer.getExceptionManager().handleException(e);
+        } finally {
+            player.closeInventory();
         }
     }
 
@@ -82,6 +84,8 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap, Component.text(publishedMap.owner())));
     }
 
+    // MAP NAME EDITING
+
     @Action("map_name")
     private @NonBlocking void beginUpdateMapName() {
         pushView(c -> {
@@ -89,11 +93,6 @@ public class EditMap extends View {
             view.showMap(map.settings().getName());
             return view;
         });
-    }
-
-    @Action("map_icon")
-    private @NonBlocking void beginUpdateMapIcon() {
-        pushView(SetMapIcon::new);
     }
 
     @Signal(SetMapName.SIG_UPDATE_NAME)
@@ -106,6 +105,13 @@ public class EditMap extends View {
             mapService.updateMap(player().getUuid().toString(), map.id(), new MapUpdateRequest().setName(newName));
             //todo if update fails we should revert the name change and indicate to the user that it failed
         });
+    }
+
+    // MAP ICON EDITING
+
+    @Action("map_icon")
+    private @NonBlocking void beginUpdateMapIcon() {
+        pushView(SetMapIcon::new);
     }
 
     @Signal(SetMapIcon.SIG_UPDATE_ICON)
@@ -126,6 +132,8 @@ public class EditMap extends View {
         mapNameText.setText(map.settings().getName()); //todo handle missing
         //todo update map icon lore to include material
     }
+
+    // TAB SWITCHING
 
     @Action("tab_info")
     public void showInfoTab() {
