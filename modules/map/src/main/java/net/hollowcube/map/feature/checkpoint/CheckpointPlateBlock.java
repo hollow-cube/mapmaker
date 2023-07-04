@@ -1,25 +1,29 @@
 package net.hollowcube.map.feature.checkpoint;
 
 import net.hollowcube.map.block.handler.AbstractPlateHandler;
+import net.hollowcube.map.block.handler.PointOfInterestHandlerMixin;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class CheckpointPlateBlock extends AbstractPlateHandler {
-    public static final String POI_TYPE = "mapmaker:checkpoint_plate";
-
-    public static final NamespaceID ID = NamespaceID.from("mapmaker:checkpoint_plate");
+public class CheckpointPlateBlock extends AbstractPlateHandler implements PointOfInterestHandlerMixin {
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
-        return ID;
+        return NamespaceID.from("mapmaker:checkpoint_plate");
+    }
+
+    @Override
+    public @NotNull String poiType() {
+        return "mapmaker:checkpoint_plate";
     }
 
     @Override
@@ -29,8 +33,10 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 //        EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
     }
 
-    @Override
-    public void onPlace(@NotNull Placement placement) {
+//    @Override
+//    public void onPlace(@NotNull Placement placement) {
+//        System.out.println("PLACE");
+//        placement.getInstance().setBlock(placement.getBlockPosition(), placement.getBlock().withTag(Tag.Boolean("abc"), true));
 //        MapData map;
 //        if (placement instanceof PlayerPlacement pp) {
 //            map = MapWorld.forPlayer(pp.getPlayer()).map();
@@ -41,7 +47,7 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 //            map = world.map();
 //        }
 //        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
-    }
+//    }
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
@@ -49,7 +55,9 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
         if ((world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
 
         var player = interaction.getPlayer();
-        if (player.isSneaking()) return false;
+        if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return false;
+
+        player.sendMessage("edit checkpoint");
 
         // Open checkpoint settings GUI
 //        var checkpoint = world.map().getPoi(interaction.getBlockPosition());
@@ -58,8 +66,8 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
         return true;
     }
 
-    @Override
-    public void onDestroy(@NotNull Destroy destroy) {
+//    @Override
+//    public void onDestroy(@NotNull Destroy destroy) {
 //        MapData map;
 //        if (destroy instanceof PlayerDestroy pd) {
 //            map = MapWorld.forPlayer(pd.getPlayer()).map();
@@ -70,5 +78,5 @@ public class CheckpointPlateBlock extends AbstractPlateHandler {
 //            map = world.map();
 //        }
 //        map.removePOI(destroy.getBlockPosition());
-    }
+//    }
 }

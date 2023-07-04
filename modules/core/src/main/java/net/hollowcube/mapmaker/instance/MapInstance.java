@@ -12,6 +12,7 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,8 +25,47 @@ import java.util.UUID;
 public class MapInstance extends InstanceContainer {
     private static final InstanceManager INSTANCE_MANAGER = MinecraftServer.getInstanceManager();
 
+
+    /*
+
+    NOTES ABOUT OBJECTS
+    - Kinda like block handlers in that there will be a registry of object types
+    - Each object will have an ID, position (xyz as doubles), a bounding box, and some type specific data
+    - They can be managed/manage a variety of things:
+      - Blocks in the world / handlers
+      - Entities in the world
+      - Regions (which do not have an associated world entity)
+
+    - They will be indexed by the following:
+      - ID
+      - Position (returns first matching)
+      - Type
+      - Bounding box (will have intersection probably)
+    - They exist per chunk, although neighbors
+
+
+    - Some examples
+      - Pressure plate triggers (block handler in world + settings in object)
+      - Decorative entities (like paintings, item frames, etc)
+      - Markers
+
+
+
+
+
+
+
+     */
+
+
+
+
     public MapInstance() {
-        super(UUID.randomUUID(), DimensionTypes.FULL_BRIGHT);
+        this(DimensionTypes.FULL_BRIGHT);
+    }
+
+    public MapInstance(@NotNull DimensionType dimensionType) {
+        super(UUID.randomUUID(), dimensionType);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.

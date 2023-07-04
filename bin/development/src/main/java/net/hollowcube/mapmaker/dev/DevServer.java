@@ -25,6 +25,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.map.MapServiceMemory;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.terraform.compat.metabrush.brush.MetaBallBrush;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -33,12 +34,10 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.instance.block.Block;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -63,6 +62,9 @@ public class DevServer {
         System.setProperty("minestom.async-commands", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
         System.setProperty("minestom.use-new-chunk-sending", "true");
+
+        System.setProperty("minestom.new-chunk-sending-count-per-interval", "50");
+        System.setProperty("minestom.new-chunk-sending-send-interval", "1");
 
         // Convert JUL messages to SLF4J
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -119,11 +121,11 @@ public class DevServer {
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
         if (velocitySecret != null) {
-            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy..dwadwad.");
+            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy...");
             VelocityProxy.enable(velocitySecret);
         } else {
             logger.log(System.Logger.Level.INFO, "Velocity not configured, using online mode...");
-            MojangAuth.init();
+//            MojangAuth.init();
         }
 
         // Start phase 1
@@ -192,7 +194,15 @@ public class DevServer {
                         }
                     }
                 }
-            });
+            })
+                    .addListener(PlayerUseItemEvent.class, event -> {
+                          var b = new MetaBallBrush();
+                          b.loadProperties();
+
+                          var b2 = event.getPlayer().getTargetBlockPosition(100);
+
+                          b.handleArrowAction(event.getInstance(), b2, Block.STONE, 5);
+                    });
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);

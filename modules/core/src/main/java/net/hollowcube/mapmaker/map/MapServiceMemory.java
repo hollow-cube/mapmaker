@@ -46,15 +46,24 @@ public class MapServiceMemory implements MapService {
             throw new NotFoundError(id);
 
         var name = map.settings().getName();
-        if (update.getName() != null) name = update.getName();
+        if (update.name != null) name = update.name;
         var icon = map.settings().getIcon();
-        if (update.getIcon() != null) icon = Material.fromNamespaceId(update.getIcon());
+        if (update.icon != null) icon = Material.fromNamespaceId(update.icon);
         var variant = map.settings().getVariant();
-        if (update.getVariant() != null) variant = update.getVariant();
+        if (update.variant != null) variant = update.variant;
         var spawnPoint = map.settings().getSpawnPoint();
-        if (update.getSpawnPoint() != null) spawnPoint = update.getSpawnPoint();
+        if (update.spawnPoint != null) spawnPoint = update.spawnPoint;
 
-        var settings = new MapSettings(name, icon, variant, spawnPoint);
+        var onlySprint = map.settings().isOnlySprint();
+        if (update.onlySprint != null) onlySprint = update.onlySprint;
+        var noSprint = map.settings().isNoSprint();
+        if (update.noSprint != null) noSprint = update.noSprint;
+        var noJump = map.settings().isNoJump();
+        if (update.noJump != null) noJump = update.noJump;
+        var noSneak = map.settings().isNoSneak();
+        if (update.noSneak != null) noSneak = update.noSneak;
+
+        var settings = new MapSettings(name, icon, variant, spawnPoint, onlySprint, noSprint, noJump, noSneak);
         map = new MapData(map.id(), map.owner(), settings, map.publishedId(), map.publishedAt());
         maps.put(id, map);
     }

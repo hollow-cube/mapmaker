@@ -1,35 +1,105 @@
 
-// Role definitions for the entirety of mapmaker
+// Role definitions for the entirety of mapmaker. There is a single platform
+// for all of mapmaker, always with the id "0".
+//
+// If this feature gets added to SpiceDB, we can set these relationships statically
+// https://github.com/authzed/spicedb/issues/1266
 definition mapmaker/platform {
 
-    relation hollowcube: mapmaker/player
-    relation admin: mapmaker/player
-    relation dev: mapmaker/player
-    relation mod: mapmaker/player
-    relation ct: mapmaker/player
+    relation hollowcube: mapmaker/player with audit_log_hack
+    relation admin: mapmaker/player with audit_log_hack
+    relation dev: mapmaker/player with audit_log_hack
+    relation mod: mapmaker/player with audit_log_hack
+    relation crt: mapmaker/player
 
     // Gives admin permission on all maps
-    permission map_admin = admin + hollowcube
+    permission global_map_superadmin = hollowcube
+    permission global_map_admin = mod + dev + admin
 
+    permission ip_ban_player = mod + admin
+    permission ban_player = mod + admin + hollowcube
+    permission mute_player = ban_player
 }
 
+// This is a hack to be notified when an elevated permission is used to perform
+// some action on a map. It abuses a mechanic of caveats, so the caveat docs should
+// be read before the following bit: https://authzed.com/docs/reference/caveats.
+//
+// This "never_set" caveat value is never given on the CheckPermission request,
+// meaning the other paths must be evaluated, and only if this is the only remaining
+// path, it will return CONDITIONALLY_ALLOWED. It also returns the missing "never_set"
+// parameter name, which we can use to ensure this is the caveat we hit.
+//
+// TL;DR If we encounter a CONDITIONALLY_ALLOWED check with "never_set" as the only
+// missing caveat parameter, the permission is granted, but elevated perms were used.
+caveat audit_log_hack(never_set bool) {
+    never_set
+}
+
+// A player is any player on mapmaker (identified by their uuid)
 definition mapmaker/player {}
 
+// An organization is a group of players all with access to a set of maps (owned by
+// the organization).
+//
+// Organization maps have some differences from normal maps, namely:
+// - They can only be accessed by platform/hollowcube members
+// - They cannot be published
 definition mapmaker/organization {
+    relation platform: mapmaker/platform
+    // platform_map_admin is required to do the "conditional"/subtraction logic inside of map admin permissions.
+    // Check the comment above that logic for a more detailed explanation
+    permission platform_map_admin = platform->global_map_admin
+
     relation admin: mapmaker/player
     relation member: mapmaker/player
+
+    permission map_admin = admin
+    permission map_write = member + admin
 }
 
 definition mapmaker/map {
     relation platform: mapmaker/platform
 
-    relation owner: mapmaker/player
-    relation trusted: mapmaker/player
+    relation owner: mapmaker/player | mapmaker/organization // Wiped on publish
+    relation trusted: mapmaker/player // Wiped on publish
 
     // Allow setting readership for anybody, will be done when the map is published.
     relation viewer: mapmaker/player:*
 
-    permission admin = owner + platform->admin
-    permission write = admin + trusted
+    // global_elevated_perms will pass for a player with elevated perms (from the platform) which grant them
+    // all permissions on maps in the game. In particular, platform/hollowcube players have all permissions
+    // on every map, whereas other platform roles only grant permission on player maps.
+    //
+    // The way this works is the following: we grant global_map_superadmin on all maps no matter what, then to
+    // handle the other global perms for player maps only we add those permissions to the map, then exclude all
+    // permissions from owner->platform_map_admin. This has a different effect for org and player maps:
+    // - for player maps, the owner never has a platform_map_admin permission meaning global_map_admin always resolves
+    // - for org maps, owner->platform_map_admin resolves to platform->global_map_admin which means the exclusion results
+    //   in zero players, effectively removing the permission.
+    permission global_elevated_perms = platform->global_map_superadmin + (platform->global_map_admin - owner->platform_map_admin)
+
+    // For now all permissions are grouped into 3 categories, though in the future
+    // this may become more complex, so we will use the specific permissions listed below.
+    //
+    // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
+    permission admin = owner + owner->map_admin + global_elevated_perms
+    permission write = trusted + owner->map_write + admin
     permission read = viewer + write
+    // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
+
+    permission edit_settings = admin;
+    permission delete = admin;
+    permission verify = admin;
+    permission publish = admin;
+    permission copy = admin;
+    permission transfer = admin;
+    permission manage_trusted = admin;
+
+    permission edit_gameplay_settings = write;
+    permission edit_world = write;
+    permission invite_temp = write;
+    permission kick_temp = write;
+
+    permission play = read;
 }

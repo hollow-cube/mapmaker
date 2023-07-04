@@ -101,8 +101,9 @@ public class EditMap extends View {
         updateElementsFromMap();
 
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        final var updateRequest = map.settings().getUpdateRequest();
         async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), new MapUpdateRequest().setName(newName));
+            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
             //todo if update fails we should revert the name change and indicate to the user that it failed
         });
     }
@@ -120,9 +121,9 @@ public class EditMap extends View {
         updateElementsFromMap();
 
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        final var updateRequest = map.settings().getUpdateRequest();
         async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(),
-                    new MapUpdateRequest().setIcon(newMaterial.name()));
+            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
             //todo if update fails we should revert the name change and indicate to the user that it failed
         });
     }

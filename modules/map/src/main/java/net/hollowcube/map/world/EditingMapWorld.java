@@ -4,6 +4,7 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -59,7 +60,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
 //        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
 //        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
-        instance = new MapInstance();
+        instance = new MapInstance(DimensionTypes.FULL_BRIGHT);
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 

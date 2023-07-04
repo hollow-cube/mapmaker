@@ -1,6 +1,10 @@
 package net.hollowcube.map.item;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +36,10 @@ public class BlockItemHandler extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var instance = click.instance();
 
-        instance.setBlock(click.placePosition(), block);
+        instance.placeBlock(new BlockHandler.PlayerPlacement(
+                block, instance, click.placePosition(),
+                click.player(), click.hand(), click.face(),
+                0f, 0f, 0f
+        ));
     }
 }

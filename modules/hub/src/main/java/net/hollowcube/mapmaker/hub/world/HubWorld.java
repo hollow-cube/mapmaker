@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -43,7 +44,7 @@ public class HubWorld {
     public HubWorld(@NotNull HubServer server) {
         this.server = server;
 
-        instance = new MapInstance();
+        instance = new MapInstance(DimensionTypes.MAPMAKER_MAP);
         instance.setTag(MARKER, true);
         instance.setTag(THIS_TAG, this);
         instance.setGenerator(HubGenerators.stoneWorld());
