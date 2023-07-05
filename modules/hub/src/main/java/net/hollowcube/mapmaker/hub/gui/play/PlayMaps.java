@@ -117,6 +117,8 @@ public class PlayMaps extends View {
         approvedToggle.setSelected(sortPreset == SortPreset.APPROVED);
         boostedToggle.setSelected(sortPreset == SortPreset.BOOSTED);
         recentToggle.setSelected(sortPreset == SortPreset.RECENT);
+
+        pagination.reset();
     }
 
     // OLD STUFF
@@ -129,7 +131,7 @@ public class PlayMaps extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, "");
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, building, parkour, "");
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {

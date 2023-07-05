@@ -17,6 +17,10 @@ public class EnumTypeAdapter<T extends Enum<T>> extends TypeAdapter<T> {
 
     @Override
     public void write(JsonWriter out, T value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
         out.value(value.name().toLowerCase());
     }
 

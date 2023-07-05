@@ -43,10 +43,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/search?page=" + page + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8)))
+                .uri(URI.create(url + "/search?page=" + page + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());

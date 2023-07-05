@@ -27,7 +27,7 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
         return new MapSearchResponse(
                 page,
                 maps.size() > (page + 1) * 10,
