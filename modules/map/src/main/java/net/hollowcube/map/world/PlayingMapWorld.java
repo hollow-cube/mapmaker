@@ -193,7 +193,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     }
 
     private @NotNull String getDimensionName() {
-        return String.format("mapmaker:emap/%s/p", map.id().substring(0, 8));
+        return String.format("mapmaker:map/%s/p", map.id().substring(0, 8));
     }
 
 }

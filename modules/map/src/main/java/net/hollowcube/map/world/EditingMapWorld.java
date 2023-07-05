@@ -218,7 +218,7 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     private @NotNull String getDimensionName() {
-        return String.format("mapmaker:emap/%s/e", map.id().substring(0, 8));
+        return String.format("mapmaker:map/%s/e", map.id().substring(0, 8));
     }
 
 }
