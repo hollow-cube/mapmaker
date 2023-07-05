@@ -142,7 +142,9 @@ public class XmlElementReader {
         var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
         var fontName = getString(node, "font", "default");
         var shift = getInt(node, "shift", 0);
-        var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node), translationKey, fontName, shift);
+        var centered = getBool(node, "centered");
+        var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node),
+                translationKey, fontName, shift, centered);
         return applyTraits(node, elem);
     }
 
@@ -305,6 +307,11 @@ public class XmlElementReader {
         var attr = node.getAttributes().getNamedItem(name);
         if (attr == null) return def;
         return Integer.parseInt(attr.getNodeValue());
+    }
+
+    private boolean getBool(@NotNull Node node, @NotNull String name) {
+        var attr = node.getAttributes().getNamedItem(name);
+        return attr != null && Boolean.parseBoolean(attr.getNodeValue());
     }
 
     private @UnknownNullability String getString(@NotNull Node node, @NotNull String name, @UnknownNullability String def) {

@@ -17,6 +17,11 @@ public class PersonalizedMapData extends MapData {
         super(id, owner, settings, publishedId, publishedAt);
     }
 
+    public PersonalizedMapData(@NotNull MapData map, Progress progress) {
+        super(map.id(), map.owner(), map.settings(), map.publishedId(), map.publishedAt());
+        this.progress = progress;
+    }
+
     public enum Progress {
         @SerializedName("none") NONE,
         @SerializedName("started") STARTED,

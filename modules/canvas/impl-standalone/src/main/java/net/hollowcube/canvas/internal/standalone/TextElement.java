@@ -13,21 +13,24 @@ public class TextElement extends ButtonElement implements Text {
 
     private final String font;
     private final int shift;
+    private final boolean centered;
 
     private String text = "";
     private TextColor color = NamedTextColor.WHITE;
 
     public TextElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
-                       @NotNull String translationKey, @NotNull String font, int shift) {
+                       @NotNull String translationKey, @NotNull String font, int shift, boolean centered) {
         super(context, id, width, height, translationKey);
         this.font = font;
         this.shift = shift;
+        this.centered = centered;
     }
 
     protected TextElement(@NotNull ElementContext context, @NotNull TextElement other) {
         super(context, other);
         this.font = other.font;
         this.shift = other.shift;
+        this.centered = other.centered;
     }
 
     @Override
@@ -40,13 +43,19 @@ public class TextElement extends ButtonElement implements Text {
     @Override
     public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
         if (shouldDelegateDraw()) return;
-
         //todo we should only rewrite and measure the text once, not every time we draw it
-        sb.pos(shift + (x * 16));
+        var textWidth = FontUtil.measureText(text);
+
         sb.color(color);
+        if (centered) {
+            int totalWidth = width() * 18 - 2; // take off 2 for the left and right padding
+            sb.pos(((totalWidth - textWidth) / 2) +(x * 18));
+        } else {
+            sb.pos(shift + (x * 16));
+        }
+
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
-        //todo why is this const offset required? seems like the measurements of the ascii font are different from the measurements of the offset ascii one.
-        sb.append(FontUtil.rewrite(font, text), FontUtil.measureText(text));
+        sb.append(FontUtil.rewrite(font, text), textWidth);
 
     }
 

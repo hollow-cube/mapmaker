@@ -38,6 +38,7 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.Material;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -323,7 +324,19 @@ public class DevServer {
 //        TabLists.showPlayerGlobalTabList(player);
 
         Thread.startVirtualThread(() -> {
-            if (System.getenv("MAPMAKER_MAP_DEV") != null) {
+            if (System.getenv("MAPMAKER_AUTOCREATE_PUBLISHED") != null) {
+                var playerData = PlayerDataV2.fromPlayer(player);
+                if (playerData.getSlotState(0) != SlotState.EMPTY)
+                    return;
+
+                var map = hub.handler().createMapForPlayerInSlot(playerData, 0);
+                map.settings().setName("Auto Created Map");
+                map.settings().setIcon(Material.STONE);
+                mapService.updateMap(playerData.id(), map.id(), map.settings().getUpdateRequest());
+                mapService.publishMap(playerData.id(), map.id());
+
+            }
+            if (System.getenv("MAPMAKER_AUTOEDIT_MAP") != null) {
 
                 MapData map;
                 var playerData = PlayerDataV2.fromPlayer(player);

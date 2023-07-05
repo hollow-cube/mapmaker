@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public record Sprite(char fontChar, int cmd, int width, int offsetX) {
+public record Sprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
     private static final System.Logger logger = System.getLogger(Sprite.class.getName());
 
     public static final Map<String, Sprite> SPRITE_MAP;
@@ -28,7 +28,8 @@ public record Sprite(char fontChar, int cmd, int width, int offsetX) {
                     else cmd = obj.get("cmd").getAsInt();
                     var width = obj.get("width").getAsInt();
                     var offsetX = obj.get("offsetX").getAsInt();
-                    sprites.put(key, new Sprite(fontChar, cmd, width, offsetX));
+                    var rightOffset = obj.get("rightOffset");
+                    sprites.put(key, new Sprite(fontChar, cmd, width, offsetX, rightOffset == null ? 0 : rightOffset.getAsInt()));
                 }
             } else {
                 logger.log(System.Logger.Level.WARNING, "No sprites present in build");

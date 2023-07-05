@@ -5,6 +5,7 @@
     <envs>
       <env name="MAPMAKER_STANDALONE" value="1" />
       <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="" />
+      <env name="MAPMAKER_AUTOCREATE_PUBLISHED" value="1" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />

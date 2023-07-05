@@ -148,6 +148,23 @@ public class SpriteTransform {
             ascent += origin.get(1).getAsInt();
         }
 
+        // Check for empty pixels on the right side
+        // Minecraft will slice off any empty rows on the right side of font characters (so that bitmaps work
+        // correctly as fonts with variable width), but this is bad for us because we want the textures to
+        // stay as configured. We have a special "rightOffset" property to fix this.
+        var right = 0;
+        outer:
+        for (int x = image.getWidth() - 1; x > 0; x--) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                var zz = image.getRGB(x, y);
+                var alpha = (zz >> 24) & 0xFF;
+                if (alpha != 0) {
+                    break outer;
+                }
+            }
+            right++;
+        }
+
         var baos = new ByteArrayOutputStream();
         ImageIO.write(image, "png", baos);
         var ref = ctx.writeTexture(null, name, baos.toByteArray());
@@ -167,6 +184,8 @@ public class SpriteTransform {
         serverSpriteConf.addProperty("fontChar", (char) rawFontChar);
         serverSpriteConf.addProperty("width", width);
         serverSpriteConf.addProperty("offsetX", offX);
+        if (right != 0)
+            serverSpriteConf.addProperty("rightOffset", right);
 
         entries.put(name, fontChar);
     }

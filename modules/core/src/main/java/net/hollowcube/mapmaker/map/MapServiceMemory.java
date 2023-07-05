@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,8 +28,18 @@ public class MapServiceMemory implements MapService {
 
     @Override
     public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, @NotNull String query) {
-        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.searchMaps is a noop currently");
-        return new MapSearchResponse(0, false, List.of());
+        return new MapSearchResponse(
+                page,
+                maps.size() > (page + 1) * 10,
+                maps.values().stream()
+                        .filter(MapData::isPublished)
+                        .sorted(Comparator.comparing(MapData::publishedAt).reversed())
+                        .skip(page * 10L)
+                        .limit(10)
+                        //todo return real progress once that exists
+                        .map(m -> new PersonalizedMapData(m, PersonalizedMapData.Progress.NONE))
+                        .toList()
+        );
     }
 
     @Override

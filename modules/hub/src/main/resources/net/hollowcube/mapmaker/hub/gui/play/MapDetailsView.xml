@@ -3,34 +3,76 @@
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/details/container">
     <!-- This is a little cursed, but its acceptable to have zero size elements and they will not affect layout. -->
+    <switch id="variant_icon_switch" width="0" height="0">
+        <label width="1" height="1" translationKey="" sprite="play_maps/details/icon_variant_parkour"/>
+        <label width="0" height="0" translationKey="" sprite="play_maps/details/icon_variant_building"/>
+        <label width="0" height="0" translationKey="" sprite="play_maps/details/icon_variant_adventure"/>
+    </switch>
     <text id="title" width="0" height="0" translationKey=""
           font="map_details_title" shift="30"/>
 
     <!-- Top bar -->
-    <box width="9" align="ltr">
-        <BackButton/>
-        <label translationKey="gui.map_details.map_info_tab.information"/>
-        <text id="author" width="5" translationKey="gui.map_details.creator_profile"
-              font="map_details_author" shift="7"/>
-        <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
-                sprite="play_maps/details/add_to_playlist"/>
-        <button translationKey="gui.map_details.map_info_tab.report_map"
-                sprite="play_maps/details/report"/>
-    </box>
 
     <!-- Map list -->
-    <spacer width="9" height="4"/>
+    <switch id="tab_switch" width="9" height="5">
+        <!-- INFO TAB -->
+        <box width="9" height="5" align="ttb" sprite="play_maps/details/tab_info/container">
+            <box width="9" align="ltr">
+                <BackButton/>
+                <label translationKey="gui.map_details.map_info_tab.information"/>
+                <text id="author" width="5" translationKey="gui.map_details.creator_profile"
+                      font="map_details_author" centered="true" />
+                <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
+                        sprite="play_maps/details/add_to_playlist"/>
+                <button translationKey="gui.map_details.map_info_tab.report_map"
+                        sprite="play_maps/details/report"/>
+            </box>
+        </box>
+
+        <!-- STATS TAB -->
+        <spacer width="9" height="5"/>
+
+        <!-- TIMES TAB -->
+        <spacer width="9" height="5"/>
+
+        <!-- REVIEWS TAB -->
+        <spacer width="9" height="5"/>
+    </switch>
 
     <!-- Controls -->
-    <box width="9">
+    <box width="9" align="ltr" sprite="create_maps/tab_container">
         <spacer/>
-        <button translationKey="gui.map_details.map_info_tab"/>
+        <switch id="tab_info_switch">
+            <button id="tab_info" translationKey="gui.map_details.map_info_tab"
+                    sprite="play_maps/details/tab_info/icon"
+                    backgroundSprite="play_maps/details/tab_info/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_info_tab"
+                    sprite="play_maps/details/tab_info/icon_selected"/>
+        </switch>
         <spacer/>
-        <button translationKey="gui.map_details.map_stats_tab"/>
+        <switch id="tab_stats_switch">
+            <button id="tab_stats" translationKey="gui.map_details.map_stats_tab"
+                    sprite="play_maps/details/tab_stats/icon"
+                    backgroundSprite="play_maps/details/tab_stats/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_stats_tab"
+                    sprite="play_maps/details/tab_stats/icon_selected"/>
+        </switch>
         <spacer/>
-        <button translationKey="gui.map_details.top_times_tab"/>
+        <switch id="tab_times_switch">
+            <button id="tab_times" translationKey="gui.map_details.top_times_tab"
+                    sprite="play_maps/details/tab_times/icon"
+                    backgroundSprite="play_maps/details/tab_times/icon_bg_default"/>
+            <button translationKey="gui.map_details.top_times_tab"
+                    sprite="play_maps/details/tab_times/icon_selected"/>
+        </switch>
         <spacer/>
-        <button translationKey="gui.map_details.map_reviews_tab"/>
+        <switch id="tab_reviews_switch">
+            <button id="tab_reviews" translationKey="gui.map_details.map_reviews_tab"
+                    sprite="play_maps/details/tab_reviews/icon"
+                    backgroundSprite="play_maps/details/tab_reviews/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_reviews_tab"
+                    sprite="play_maps/details/tab_reviews/icon_selected"/>
+        </switch>
         <spacer/>
     </box>
 

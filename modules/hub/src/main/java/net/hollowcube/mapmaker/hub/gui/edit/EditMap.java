@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -43,6 +44,7 @@ public class EditMap extends View {
 
     // Info tab
     private @Outlet("map_name") Text mapNameText;
+    private @Outlet("map_type_tab_switch") Switch mapTypeTabSwitch;
 
     private MapData map;
 
@@ -158,6 +160,40 @@ public class EditMap extends View {
         });
     }
 
+    // MAP TYPE SETTINGS
+
+    @Action("map_type_tab_parkour")
+    private void selectMapTypeParkourTab() {
+        if (mapTypeTabSwitch.getOption() == 0) return;
+
+        mapTypeTabSwitch.setOption(0);
+        map.settings().setVariant(MapVariant.PARKOUR);
+        updateElementsFromMap();
+
+        //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        final var updateRequest = map.settings().getUpdateRequest();
+        async(() -> {
+            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+            //todo if update fails we should revert the name change and indicate to the user that it failed
+        });
+    }
+
+    @Action("map_type_tab_building")
+    private void selectMapTypeBuildingTab() {
+        if (mapTypeTabSwitch.getOption() == 1) return;
+
+        mapTypeTabSwitch.setOption(1);
+        map.settings().setVariant(MapVariant.BUILDING);
+        updateElementsFromMap();
+
+        //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        final var updateRequest = map.settings().getUpdateRequest();
+        async(() -> {
+            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+            //todo if update fails we should revert the name change and indicate to the user that it failed
+        });
+    }
+
     /** Sets the elements to have the latest info from the map. */
     private void updateElementsFromMap() {
         // Name
@@ -176,6 +212,9 @@ public class EditMap extends View {
         } else {
             setMapIconSwitch.setOption(0);
         }
+
+        // Type
+        mapTypeTabSwitch.setOption(map.settings().getVariant().ordinal());
 
         publishSwitch.setOption(canPublishMap() ? 1 : 0);
     }

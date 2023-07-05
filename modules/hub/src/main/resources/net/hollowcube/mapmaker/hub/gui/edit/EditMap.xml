@@ -28,21 +28,38 @@
                 </switch>
             </box>
 
-            <box width="9" height="1" sprite="create_maps/tab_info/type_parkour">
-                <button id="" translationKey="todo.left"/>
-                <label width="7" translationKey="todo"/>
-                <button id="" translationKey="todo.right"/>
+            <box width="9">
+                <button id="map_type_tab_parkour" width="3" translationKey="parkour"/>
+                <button id="map_type_tab_building" width="3" translationKey="building"/>
+                <button width="3" translationKey="adventure"/>
             </box>
+            <switch id="map_type_tab_switch" width="9" height="2">
+                <!-- PARKOUR TAB -->
+                <box width="9" height="2" sprite="create_maps/tab_info/tab_parkour/container">
 
-            <spacer width="9" height="2"/>
+                </box>
+
+                <!-- PARKOUR TAB -->
+                <box width="9" height="2" sprite="create_maps/tab_info/tab_building/container">
+
+                </box>
+            </switch>
         </box>
 
         <!-- TAGS TAB -->
         <box width="9" height="5" sprite="create_maps/tab_tags/container">
+            <box width="9" height="1">
+                <BackButton/>
+                <label translationKey="gui.create_maps.map_tags_tab.information"/>
+            </box>
         </box>
 
         <!-- SETTINGS TAB -->
         <box width="9" height="5" sprite="create_maps/tab_settings/container">
+            <box width="9" height="1">
+                <BackButton/>
+                <label translationKey="gui.create_maps.map_settings_tab.information"/>
+            </box>
         </box>
 
         <!-- ACTIONS TAB -->

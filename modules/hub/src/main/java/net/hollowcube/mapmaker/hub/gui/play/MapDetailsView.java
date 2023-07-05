@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.play;
 
+import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -21,6 +22,14 @@ public class MapDetailsView extends View {
 
     private @ContextObject HubHandler handler;
 
+    private @Outlet("tab_switch") Switch tabSwitch;
+    private @Outlet("tab_info_switch") Switch tabInfoSwitch;
+    private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
+    private @Outlet("tab_times_switch") Switch tabTimesSwitch;
+    private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
+    private Switch[] tabSwitches;
+
+    private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
 
@@ -29,6 +38,11 @@ public class MapDetailsView extends View {
     public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull Component authorName) {
         super(context);
         this.map = map;
+
+        this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};
+        selectTab(0);
+
+        variantIconSwitch.setOption(map.settings().getVariant().ordinal());
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
@@ -46,6 +60,35 @@ public class MapDetailsView extends View {
             logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
                     map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
+        }
+    }
+
+    // TAB SWITCHING
+
+    @Action("tab_info")
+    public void showInfoTab() {
+        selectTab(0);
+    }
+
+    @Action("tab_stats")
+    public void showStatsTab() {
+        selectTab(1);
+    }
+
+    @Action("tab_times")
+    public void showTimesTab() {
+        selectTab(2);
+    }
+
+    @Action("tab_reviews")
+    public void showReviewsTab() {
+        selectTab(3);
+    }
+
+    private void selectTab(int index) {
+        tabSwitch.setOption(index);
+        for (int i = 0; i < tabSwitches.length; i++) {
+            tabSwitches[i].setOption(i == index ? 1 : 0);
         }
     }
 

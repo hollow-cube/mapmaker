@@ -33,7 +33,7 @@ public class FontUIBuilder {
         int offset = sprite.offsetX() + (slot * 18); // absolute offset of this char
         appendRaw(FontUtil.computeOffset(offset - pos));
         appendRaw(String.valueOf(sprite.fontChar()));
-        pos = offset + sprite.width() + 1;
+        pos = offset + sprite.width() + 1 - sprite.rightOffset();
         return this;
     }
 
