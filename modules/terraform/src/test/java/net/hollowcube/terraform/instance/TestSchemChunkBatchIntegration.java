@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.instance;
 
+import net.hollowcube.terraform.give_me_new_home.instance.SchemChunkBatch;
 import net.hollowcube.terraform.schem.Rotation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;

@@ -5,7 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.util.gson.ComponentTypeAdapter;
+import net.hollowcube.mapmaker.util.gson.EnumTypeAdapter;
 import net.hollowcube.mapmaker.util.gson.InstantTypeAdapter;
 import net.hollowcube.mapmaker.util.gson.MaterialTypeAdapter;
 import net.kyori.adventure.text.Component;
@@ -23,6 +26,7 @@ public abstract class AbstractHttpService {
 
     protected static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())

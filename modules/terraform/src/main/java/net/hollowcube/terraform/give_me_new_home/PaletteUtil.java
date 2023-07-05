@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.util;
+package net.hollowcube.terraform.give_me_new_home;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;

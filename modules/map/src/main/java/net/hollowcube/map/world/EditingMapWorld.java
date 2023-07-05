@@ -4,12 +4,14 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.session.PlayerSession;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -22,11 +24,15 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.Task;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EditingMapWorld implements InternalMapWorld {
@@ -34,6 +40,8 @@ public class EditingMapWorld implements InternalMapWorld {
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_EDITING = Tag.Boolean("editing").defaultValue(false);
+
+    private static final int MAP_AUTOSAVE_INTERVAL_SEC = 60 * 5; // 5 minutes
 
     private final MapServer server;
     private final MapData map;
@@ -53,13 +61,14 @@ public class EditingMapWorld implements InternalMapWorld {
         return true;
     });
 
+    private final ReentrantLock saveLock = new ReentrantLock();
+    private Task autoSaveTask = null;
+
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-//        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
-//        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
         instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
@@ -114,20 +123,79 @@ public class EditingMapWorld implements InternalMapWorld {
         }
 
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
+
+        // Kick off autosave
+        autoSaveTask = instance.scheduler().submitTask(this::autoSaveTaskWrapper);
+        //todo add a property to Minestom to run async tasks in virtual threads
     }
 
     @Override
     public @Blocking void close() {
-        logger.log(System.Logger.Level.INFO, "Closing editing world " + map.id());
+        logger.log(System.Logger.Level.INFO, "Closing editing world {0}", map.id());
         if (testWorld != null) {
             testWorld.close();
         }
 
-        var worldData = instance.save();
-        server().mapService().updateMapWorld(map.id(), worldData);
+        autoSaveTask.cancel();
+        saveWorld(false);
 
         // Unload the backing world
         instance.unload();
+    }
+
+    @Blocking
+    private void saveWorld(boolean isAutoSave) {
+        saveLock.lock();
+        try {
+            // Save the map settings
+            var settingsUpdate = map.settings().getUpdateRequest();
+            if (settingsUpdate.hasChanges()) {
+                //todo map worlds should have an "owner" which is the owner if they are present, otherwise
+                // it is the first trusted player to join the world. If someone leaves it should find a new
+                // "owner" of the world, or if it cannot (only invited people left), it should close the world.
+                server().mapService().updateMap(map.owner(), map.id(), settingsUpdate);
+                //todo handle errors from the service
+            }
+
+            // Save the world data
+            var worldData = instance.save();
+            server().mapService().updateMapWorld(map.id(), worldData);
+
+            // Save the players data
+            for (var player : activePlayers) {
+                var playerData = PlayerDataV2.fromPlayer(player);
+                var saveState = SaveState.fromPlayer(player);
+                var update = updateSaveState(player, saveState);
+                server().mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
+                //todo handle errors
+
+                var playerSessionState = PlayerSession.save(player);
+                playerData.setTfState(playerSessionState);
+                server().playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
+                //todo handle errors here too
+            }
+
+            if (isAutoSave) {
+                instance.sendMessage(Component.text("World saved!"));
+            }
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to save world " + map.id(), e);
+            instance.sendMessage(Component.text("Failed to save world! your world is now in an inconsistent state because this error was not properly handled. oops!"));
+        } finally {
+            saveLock.unlock();
+        }
+    }
+
+    private @NotNull TaskSchedule autoSaveTaskWrapper() {
+        // Never save the world on the first tick (the task triggers immediately)
+        if (instance.getWorldAge() < 2) return TaskSchedule.seconds(MAP_AUTOSAVE_INTERVAL_SEC);
+
+        Thread.startVirtualThread(() -> {
+            logger.log(System.Logger.Level.INFO, "Autosaving world {0}", map.id());
+            saveWorld(true);
+        });
+
+        return TaskSchedule.seconds(MAP_AUTOSAVE_INTERVAL_SEC);
     }
 
     @Override
@@ -152,6 +220,14 @@ public class EditingMapWorld implements InternalMapWorld {
         player.refreshCommands();
 
         player.setGameMode(GameMode.CREATIVE);
+
+        // Read from player data
+        var playerTfState = playerData.getTfState();
+        if (playerTfState != null) {
+            PlayerSession.load(player, playerTfState);
+        }
+
+        // Read from savestate
         player.getInventory().clear();
         var savedItems = saveState.getInventoryItems();
         if (savedItems != null) {
@@ -159,8 +235,14 @@ public class EditingMapWorld implements InternalMapWorld {
                 player.getInventory().setItemStack(i, savedItems.get(i));
             }
         }
+
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
+
+        if (saveState.tfState() != null) {
+            var session = LocalSession.load(player, saveState.tfState());
+            logger.log(System.Logger.Level.INFO, "Loaded tf state (selections={0})", session.selectionNames().size());
+        }
 
         player.sendMessage("Now editing " + map.settings().getName());
     }
@@ -169,14 +251,18 @@ public class EditingMapWorld implements InternalMapWorld {
     public @Blocking void removePlayer(@NotNull Player player) {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
-            var update = new SaveStateUpdateRequest();
-            update.setPos(player.getPosition());
-            update.setInventoryItems(List.of(player.getInventory().getItemStacks()));
 
             try {
+                //todo handle these errors better
                 var playerData = PlayerDataV2.fromPlayer(player);
-                server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
-                logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
+
+                var saveStateUpdate = updateSaveState(player, saveState);
+                server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
+
+                playerData.setTfState(PlayerSession.save(player));
+                server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
+
+                logger.log(System.Logger.Level.INFO, "Updated data for {0}", player.getUuid());
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
             }
@@ -219,6 +305,14 @@ public class EditingMapWorld implements InternalMapWorld {
 
     private @NotNull String getDimensionName() {
         return String.format("mapmaker:map/%s/e", map.id().substring(0, 8));
+    }
+
+    private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
+        saveState.updatePlaytime();
+        saveState.setPos(player.getPosition());
+        saveState.setInventoryItems(List.of(player.getInventory().getItemStacks()));
+        saveState.setTFState(LocalSession.save(player));
+        return saveState.getUpdateRequest();
     }
 
 }

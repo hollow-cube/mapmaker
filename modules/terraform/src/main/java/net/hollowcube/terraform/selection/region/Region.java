@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.selection.region;
 
-import net.hollowcube.terraform.selection.cui.SelectionRenderer;
+import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,20 +10,19 @@ import java.util.function.BiFunction;
 
 public interface Region extends Iterable<@NotNull Point> {
 
-    @SuppressWarnings("Immutable") // I dont know how to make BiFunction immutable... seems like it should be
     enum Type {
         CUBOID(CuboidRegionSelector::new),
         LINE(LineRegionSelector::new),
         BEZIER_SURFACE(BezierSurfaceRegionSelector::new);
 
-        private final BiFunction<Player, SelectionRenderer, RegionSelector> factory;
+        private final BiFunction<ClientInterface, String, RegionSelector> factory;
 
-        Type(@NotNull BiFunction<Player, SelectionRenderer, RegionSelector> factory) {
+        Type(@NotNull BiFunction<ClientInterface, String, RegionSelector> factory) {
             this.factory = factory;
         }
 
-        public @NotNull RegionSelector newSelector(@NotNull Player player, @NotNull SelectionRenderer renderer) {
-            return factory.apply(player, renderer);
+        public @NotNull RegionSelector newSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
+            return factory.apply(cui, selectionId);
         }
     }
 

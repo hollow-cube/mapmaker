@@ -1,43 +1,43 @@
 package net.hollowcube.terraform.selection;
 
-import net.hollowcube.terraform.selection.cui.ColorScheme;
-import net.hollowcube.terraform.selection.cui.DebugRendererSelectionRenderer;
-import net.hollowcube.terraform.selection.cui.SelectionRenderer;
 import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.selection.region.RegionSelector;
+import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
+import static net.minestom.server.network.NetworkBuffer.STRING;
+
+@SuppressWarnings("UnstableApiUsage")
 public class Selection {
     public static final @NotNull String DEFAULT = "default";
 
-    private final Player player;
+    private final LocalSession session;
     private final String name;
 
-    private final SelectionRenderer renderer;
     private RegionSelector selector;
-    private Region.Type regionType = Region.Type.CUBOID;
+    private Region.Type regionType;
     private Region cachedRegion = null;
 
-    public Selection(@NotNull Player player, @NotNull String name) {
-        this.player = player;
+    public Selection(@NotNull LocalSession session, @NotNull String name) {
+        this(session, name, Region.Type.CUBOID);
+    }
+
+    public Selection(@NotNull LocalSession session, @NotNull NetworkBuffer buffer) {
+        this(session, buffer.read(STRING), buffer.readEnum(Region.Type.class));
+
+        selector.read(buffer);
+    }
+
+    private Selection(@NotNull LocalSession session, @NotNull String name, @NotNull Region.Type regionType) {
+        this.session = session;
         this.name = name;
 
-        //todo should use a player configured renderer or choose the best default if they have not chosen
-        // eg if they have never chosen a renderer (including on every new join)
-        //    choose in the following order: DebugRenderer, WorldEditCUI, Particles, Nothing
-        //    if they have chosen a renderer, use that always.
-        //    if they have selected a lower priority renderer and join with a higher priority, send them a message ONCE
-        //    if they have selected a renderer (such as debug renderer) and join without it, leave their selection and
-        //    send a message indicating that they have fallen back to <next highest priority>
-
-        this.renderer = new DebugRendererSelectionRenderer(player, ColorScheme.DEFAULT, name);
-        this.selector = regionType.newSelector(player, renderer);
+        this.regionType = regionType;
+        this.selector = regionType.newSelector(session.cui(), name);
     }
 
     public String name() {
@@ -50,7 +50,7 @@ public class Selection {
 
     public void setType(@NotNull Region.Type type) {
         this.regionType = type;
-        this.selector = type.newSelector(player, renderer);
+        this.selector = type.newSelector(session.cui(), name);
         this.selector.clear(); // Updates CUI
         this.cachedRegion = null;
     }
@@ -88,24 +88,17 @@ public class Selection {
         return cachedRegion;
     }
 
-    public @NotNull NBTCompound toNBT() {
-        var root = new MutableNBTCompound();
-        root.setString("name", name);
-        root.setString("type", regionType.name());
-        root.set("selector", selector.toNBT());
-        return root.toCompound();
-    }
-
-    public static @NotNull Selection fromNBT(@NotNull Player player, @NotNull NBTCompound nbt) {
-        var selection = new Selection(player, nbt.getString("name"));
-
-        selection.setType(Region.Type.valueOf(nbt.getString("type")));
-        selection.selector().fromNBT(nbt.getCompound("selector"));
-
-        return selection;
-    }
-
+    @Deprecated //todo delete me or change the mechanism
     public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
         selector.changeSize(delta, changeVertical, changeHorizontal);
+    }
+
+    // Serialization
+
+    @ApiStatus.Internal
+    public void write(@NotNull NetworkBuffer buffer) {
+        buffer.write(STRING, name);
+        buffer.writeEnum(Region.Type.class, regionType);
+        selector.write(buffer);
     }
 }

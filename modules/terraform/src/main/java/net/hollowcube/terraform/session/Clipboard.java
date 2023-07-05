@@ -1,19 +1,23 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.terraform.math.AffineTransform;
-import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicBuilder;
+import net.hollowcube.terraform.schem.*;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static net.minestom.server.network.NetworkBuffer.*;
+
+@SuppressWarnings("UnstableApiUsage")
 public class Clipboard {
     public static final @NotNull String DEFAULT = "default";
     @RegExp
@@ -28,6 +32,13 @@ public class Clipboard {
         this.name = name;
 
         this.schematic = null;
+        this.transforms = new ArrayList<>();
+    }
+
+    public Clipboard(@NotNull NetworkBuffer buffer) {
+        this.name = buffer.read(STRING);
+
+        this.schematic = buffer.readOptional(b -> SchematicReader.read(new ByteArrayInputStream(b.read(BYTE_ARRAY))));
         this.transforms = new ArrayList<>();
     }
 
@@ -78,5 +89,18 @@ public class Clipboard {
             transform = transform.translate(schematic.offset().mul(x ? -1 : 0, y ? -1 : 0, z ? -1 : 0));
         }
         transforms.add(transform);
+    }
+
+    // Serialization
+
+    @ApiStatus.Internal
+    public void write(@NotNull NetworkBuffer buffer) {
+        buffer.write(STRING, name);
+
+        //todo writeoptional?? need network buffer type for schematic
+        buffer.write(BOOLEAN, schematic != null);
+        if (schematic != null) {
+            buffer.write(BYTE_ARRAY, SchematicWriter.write(schematic));
+        }
     }
 }

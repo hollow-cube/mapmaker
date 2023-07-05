@@ -133,10 +133,14 @@ public class DevServer {
         // Connect to low level services
 
         if ("1".equals(System.getenv("MAPMAKER_STANDALONE"))) {
+            logger.log(System.Logger.Level.INFO, "Using standalone stubs...");
+
             playerService = new PlayerServiceMemory();
             sessionService = new SessionServiceMemory((PlayerServiceMemory) playerService);
             mapService = new MapServiceMemory();
         } else {
+            logger.log(System.Logger.Level.INFO, "Connecting to remote services...");
+
             var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
             if (playerServiceUrl == null) playerServiceUrl = "http://localhost:9126";
             playerService = new PlayerServiceImpl(playerServiceUrl);
@@ -195,15 +199,7 @@ public class DevServer {
                         }
                     }
                 }
-            })
-                    .addListener(PlayerUseItemEvent.class, event -> {
-                          var b = new MetaBallBrush();
-                          b.loadProperties();
-
-                          var b2 = event.getPlayer().getTargetBlockPosition(100);
-
-                          b.handleArrowAction(event.getInstance(), b2, Block.STONE, 5);
-                    });
+            });
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
@@ -340,13 +336,13 @@ public class DevServer {
 
                 MapData map;
                 var playerData = PlayerDataV2.fromPlayer(player);
-//                if (playerData.getSlotState(0) != PlayerData.SLOT_STATE_IN_USE) {
-//                    map = hub.handler().createMapForPlayerInSlot(playerData, 0);
-//                } else {
-//                    map = hub.mapService().getMap(playerData.getId(), playerData.getMapSlot(0));
-//                }
-//
-//                hub.handler().editMap(player, map.id());
+                if (playerData.getSlotState(0) != SlotState.FILLED) {
+                    map = hub.handler().createMapForPlayerInSlot(playerData, 0);
+                } else {
+                    map = hub.mapService().getMap(playerData.id(), playerData.getMapSlot(0));
+                }
+
+                hub.handler().editMap(player, map.id());
 
                 try {
                     Thread.sleep(500);

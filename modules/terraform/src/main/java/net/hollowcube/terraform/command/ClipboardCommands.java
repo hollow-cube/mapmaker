@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command;
 
-import net.hollowcube.terraform.command.argument.ArgumentSwizzle;
-import net.hollowcube.terraform.command.argument.ExtraArguments;
-import net.hollowcube.terraform.instance.SchemBlockBatch;
+import net.hollowcube.terraform.command.helper.ArgumentSwizzle;
+import net.hollowcube.terraform.command.helper.ExtraArguments;
+import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;

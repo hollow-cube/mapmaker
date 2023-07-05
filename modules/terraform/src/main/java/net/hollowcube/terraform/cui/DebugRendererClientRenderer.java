@@ -1,18 +1,18 @@
-package net.hollowcube.terraform.selection.cui;
+package net.hollowcube.terraform.cui;
 
 import com.mattworzala.debug.DebugMessage;
 import com.mattworzala.debug.Layer;
 import com.mattworzala.debug.shape.LineShape;
 import com.mattworzala.debug.shape.Shape;
 import com.mattworzala.debug.shape.SplineShape;
-import net.hollowcube.terraform.util.CoordinateUtil;
+import net.hollowcube.terraform.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class DebugRendererSelectionRenderer implements SelectionRenderer {
+public class DebugRendererClientRenderer implements ClientRenderer {
     private final Player player;
     private final ColorScheme colorScheme;
 
@@ -20,7 +20,7 @@ public class DebugRendererSelectionRenderer implements SelectionRenderer {
     private DebugMessage.Builder builder;
     private int id = 0;
 
-    public DebugRendererSelectionRenderer(@NotNull Player player, @NotNull ColorScheme colorScheme, @NotNull String name) {
+    public DebugRendererClientRenderer(@NotNull Player player, @NotNull ColorScheme colorScheme, @NotNull String name) {
         this.player = player;
         this.colorScheme = colorScheme;
 
@@ -33,14 +33,14 @@ public class DebugRendererSelectionRenderer implements SelectionRenderer {
     }
 
     @Override
-    public void begin() {
+    public void begin(@NotNull String id2) {
         builder = DebugMessage.builder()
                 .clear(namespace);
         id = 0;
     }
 
     @Override
-    public void end() {
+    public void end(@NotNull String id2) {
         builder.build().sendTo(player);
         builder = null;
     }

@@ -12,6 +12,8 @@ public class PlayerDataUpdateRequest {
     private Integer unlockedMapSlots = null;
     private String[] mapSlots = null;
 
+    private String tfState = null; // base64 bytes
+
     public @NotNull PlayerDataUpdateRequest setUsername(String username) {
         this.username = username;
         return this;
@@ -35,5 +37,9 @@ public class PlayerDataUpdateRequest {
     public @NotNull PlayerDataUpdateRequest setMapSlots(String[] mapSlots) {
         this.mapSlots = mapSlots;
         return this;
+    }
+
+    public void setTfState(String tfState) {
+        this.tfState = tfState;
     }
 }

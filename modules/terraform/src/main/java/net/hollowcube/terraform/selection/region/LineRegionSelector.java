@@ -1,24 +1,30 @@
 package net.hollowcube.terraform.selection.region;
 
-import net.hollowcube.terraform.selection.cui.SelectionRenderer;
-import net.hollowcube.terraform.util.CoordinateUtil;
+import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
+import net.hollowcube.terraform.math.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
-public class LineRegionSelector implements RegionSelector {
-    private final Player player;
-    private final SelectionRenderer renderer;
-    private Point pos1 = null, pos2 = null;
+import static net.minestom.server.network.NetworkBuffer.VECTOR3;
 
-    public LineRegionSelector(@NotNull Player player, @NotNull SelectionRenderer renderer) {
-        this.player = player;
-        this.renderer = renderer;
+@SuppressWarnings("UnstableApiUsage")
+public class LineRegionSelector implements RegionSelector {
+    private final ClientInterface cui;
+    private final String selectionId;
+
+    private Point pos1 = null;
+    private Point pos2 = null;
+
+    public LineRegionSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
+        this.cui = cui;
+        this.selectionId = selectionId;
     }
 
     @Override
@@ -28,8 +34,10 @@ public class LineRegionSelector implements RegionSelector {
 
         updateRender();
         if (explain) {
-            player.sendMessage(Component.translatable("command.worldedit.line.explain.primary",
-                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+            cui.sendMessage(
+                    "terraform.line.explain.primary",
+                    point.blockX(), point.blockY(), point.blockZ()
+            );
         }
 
         return true;
@@ -42,8 +50,10 @@ public class LineRegionSelector implements RegionSelector {
 
         updateRender();
         if (explain) {
-            player.sendMessage(Component.translatable("command.worldedit.line.explain.secondary",
-                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
+            cui.sendMessage(
+                    "terraform.line.explain.secondary",
+                    point.blockX(), point.blockY(), point.blockZ()
+            );
         }
 
         return true;
@@ -63,33 +73,27 @@ public class LineRegionSelector implements RegionSelector {
     }
 
     private void updateRender() {
-        renderer.begin();
+        var renderer = cui.renderer();
+
+        renderer.begin(selectionId);
         if (pos1 != null) renderer.point(pos1.add(0.5), 0.55);
         if (pos2 != null) renderer.point(pos2.add(0.5), 0.55);
         if (pos1 != null && pos2 != null) {
             renderer.line(pos1.add(0.5), pos2.add(0.5));
         }
-        renderer.end();
+        renderer.end(selectionId);
     }
 
     @Override
-    public @NotNull NBTCompound toNBT() {
-        var root = new MutableNBTCompound();
-        if (pos1 != null) root.set("pos1", CoordinateUtil.toNBT(pos1));
-        if (pos2 != null) root.set("pos2", CoordinateUtil.toNBT(pos2));
-        return root.toCompound();
+    public void write(@NotNull NetworkBuffer buffer) {
+        buffer.writeOptional(VECTOR3, pos1);
+        buffer.writeOptional(VECTOR3, pos2);
     }
 
     @Override
-    public void fromNBT(@NotNull NBTCompound nbt) {
-        pos1 = nbt.contains("pos1") ? CoordinateUtil.fromNBT(nbt.getCompound("pos1")) : null;
-        pos2 = nbt.contains("pos2") ? CoordinateUtil.fromNBT(nbt.getCompound("pos2")) : null;
-        updateRender();
-    }
-
-    @Override
-    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-        throw new UnsupportedOperationException();
+    public void read(@NotNull NetworkBuffer buffer) {
+        pos1 = buffer.readOptional(VECTOR3);
+        pos2 = buffer.readOptional(VECTOR3);
     }
 
 }

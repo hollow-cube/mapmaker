@@ -1,17 +1,24 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
+import net.hollowcube.terraform.selection.Selection;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import static net.minestom.server.network.NetworkBuffer.SHORT;
+import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 /**
  * Represents a player's Terraform session, responsible for holding all "global" state.
@@ -22,7 +29,10 @@ import java.util.Set;
  * <br/>
  * todo are clipboards really going to be global?
  */
+@SuppressWarnings({"UnstableApiUsage"})
 public class PlayerSession {
+    public static final int STATE_VERSION = 1;
+
     public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
 
     public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
@@ -34,20 +44,55 @@ public class PlayerSession {
         return session;
     }
 
+    public static @NotNull PlayerSession load(@NotNull Player player, byte[] data) {
+        //todo do we want to overwrite the session if there is one present?
+        var session = new PlayerSession(player, data);
+        player.setTag(TAG, session);
+        return session;
+    }
+
+    public static byte @NotNull [] save(@NotNull Player player) {
+        return forPlayer(player).write();
+    }
+
     private final Player player;
 
     private final Map<String, Clipboard> clipboards = new HashMap<>();
-    private Clipboard clipboard = null;
-    // Since I don't see any obvious way to rotate and store the Schematic, store the rotation separately
-    // Also, this should be better since we don't recalculate the schematic every time we rotate
-    private Rotation rotation = Rotation.NONE;
 
     PlayerSession(@NotNull Player player) {
+        this(player, null);
+    }
+
+    PlayerSession(@NotNull Player player, byte @Nullable [] data) {
         this.player = player;
+
+        if (data != null && data.length > 0) read(data);
     }
 
     public @NotNull Player player() {
         return player;
+    }
+
+    public @NotNull ClientInterface cui() {
+        return new ClientInterface() {
+            @Override
+            public void sendMessage(@NotNull String key, @NotNull Object... args) {
+                var componentArgs = new Component[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    Object arg = args[i];
+                    if (arg instanceof Component c)
+                        componentArgs[i] = c;
+                    else componentArgs[i] = Component.text(args[i].toString());
+                }
+
+                player.sendMessage(Component.translatable(key, componentArgs));
+            }
+
+            @Override
+            public @NotNull ClientRenderer renderer() {
+                return ClientRenderer.noop();
+            }
+        };
     }
 
     // Clipboard
@@ -91,6 +136,30 @@ public class PlayerSession {
     public @NotNull Set<String> clipboardNames() {
         clipboards.values().removeIf(Clipboard::isEmpty);
         return Set.copyOf(clipboards.keySet());
+    }
+
+
+    // Serialization
+    //todo document this format somewhere
+
+    private byte @NotNull [] write() {
+        //todo compress
+        return NetworkBuffer.makeArray(buffer -> {
+            buffer.write(SHORT, (short) STATE_VERSION);
+
+            buffer.writeCollection(clipboards.values(), (b, c) -> c.write(b));
+        });
+    }
+
+    private void read(byte @NotNull [] data) {
+        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+
+        var version = buffer.read(SHORT);
+        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+
+        var clipboards = buffer.readCollection(Clipboard::new);
+        clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
+
     }
 
 }

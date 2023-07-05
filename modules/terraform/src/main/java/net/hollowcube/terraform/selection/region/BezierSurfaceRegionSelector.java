@@ -1,11 +1,10 @@
 package net.hollowcube.terraform.selection.region;
 
-import net.hollowcube.terraform.selection.cui.SelectionRenderer;
-import net.hollowcube.terraform.util.CoordinateUtil;
-import net.kyori.adventure.text.Component;
+import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -18,14 +17,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class BezierSurfaceRegionSelector implements RegionSelector {
-    private final Player player;
-    private final SelectionRenderer renderer;
+    private final ClientInterface cui;
+    private final String selectionId;
 
     private final List<Curve> curves = new ArrayList<>();
 
-    public BezierSurfaceRegionSelector(@NotNull Player player, @NotNull SelectionRenderer renderer) {
-        this.player = player;
-        this.renderer = renderer;
+    public BezierSurfaceRegionSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
+        this.cui = cui;
+        this.selectionId = selectionId;
     }
 
     @Override
@@ -38,10 +37,11 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         curves.add(new Curve(point));
 
         updateRender();
-        if (explain) {
-            player.sendMessage(Component.translatable("command.worldedit.bezier.explain.primary",
-                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
-        }
+        if (explain) cui.sendMessage(
+                "command.worldedit.bezier.explain.primary",
+                point.blockX(), point.blockY(), point.blockZ()
+        );
+
         return true;
     }
 
@@ -57,32 +57,12 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         curve.addLast(point);
 
         updateRender();
-        if (explain) {
-            player.sendMessage(Component.translatable("command.worldedit.bezier.explain.secondary",
-                    Component.text(point.blockX()), Component.text(point.blockY()), Component.text(point.blockZ())));
-        }
+        if (explain) cui.sendMessage(
+                "command.worldedit.bezier.explain.secondary",
+                point.blockX(), point.blockY(), point.blockZ()
+        );
+
         return true;
-    }
-
-    @Override
-    public @NotNull NBTCompound toNBT() {
-        var nbt = new MutableNBTCompound();
-        var curvesNBT = new ArrayList<NBTList<NBTCompound>>();
-        for (var curve : curves) {
-            curvesNBT.add(curve.toNBT());
-        }
-        nbt.set("curves", new NBTList<>(NBTType.TAG_List, curvesNBT));
-        return nbt.toCompound();
-    }
-
-    @Override
-    public void fromNBT(@NotNull NBTCompound nbt) {
-        var curvesNBT = nbt.getList("curves");
-        curves.clear();
-        for (var curveNBT : curvesNBT) {
-            curves.add(Curve.fromNBT((NBTList<NBTCompound>) curveNBT));
-        }
-        updateRender();
     }
 
     @Override
@@ -96,10 +76,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         return new BezierSurfaceRegion(List.copyOf(curves));
     }
 
-    @Override
-    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-        throw new UnsupportedOperationException();
-    }
+
 
 
     // Exposed details used by //loft remove
@@ -148,8 +125,10 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
     }
 
     private void updateRender() {
+        var renderer = cui.renderer();
+
         try {
-            renderer.begin();
+            renderer.begin(selectionId);
             if (curves.isEmpty()) return;
 
 
@@ -246,8 +225,18 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
                 }
             }
         } finally {
-            renderer.end();
+            renderer.end(selectionId);
         }
+    }
+
+    @Override
+    public void write(@NotNull NetworkBuffer buffer) {
+        //todo
+    }
+
+    @Override
+    public void read(@NotNull NetworkBuffer buffer) {
+        //todo
     }
 
     public static class Curve {

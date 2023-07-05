@@ -28,9 +28,11 @@ public class SignBlockHandler implements BlockHandler {
             Component[] lines // Always 4 long
     ) {
         private static final TagSerializer<SignData> SERIALIZER = new TagSerializer<>() {
+            private static final List<Component> DEFAULT_MESSAGES = List.of(Component.text(""), Component.text(""), Component.text(""), Component.text(""));
+
             private static final Tag<Boolean> HAS_GLOWING_TEXT = Tag.Boolean("has_glowing_text").defaultValue(false);
             private static final Tag<String> COLOR = Tag.String("color").defaultValue("black");
-            private static final Tag<List<Component>> LINES = Tag.Component("lines").list().defaultValue(List.of());
+            private static final Tag<List<Component>> LINES = Tag.Component("messages").list().defaultValue(DEFAULT_MESSAGES);
 
             @Override
             public @NotNull SignData read(@NotNull TagReadable reader) {

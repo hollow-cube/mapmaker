@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.compat.axiom;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
-import net.hollowcube.terraform.util.PaletteUtil;
+import net.hollowcube.terraform.give_me_new_home.PaletteUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.coordinate.Pos;

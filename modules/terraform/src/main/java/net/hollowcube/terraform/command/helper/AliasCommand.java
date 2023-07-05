@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.util;
+package net.hollowcube.terraform.command.helper;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;

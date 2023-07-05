@@ -25,6 +25,8 @@ public class SaveState {
         return player.getTag(TAG);
     }
 
+    private transient SaveStateUpdateRequest updates = new SaveStateUpdateRequest();
+
     private String id;
     private String playerId;
     private String mapId;
@@ -40,7 +42,7 @@ public class SaveState {
 
     // Editing
     private String inventory = null; // base64 bytes
-    private String tfstate = null; // base64 bytes
+    private String tfState = null; // base64 bytes
 
     // Playing
     private String checkpoint = null;
@@ -52,6 +54,12 @@ public class SaveState {
         this.id = id;
         this.playerId = playerId;
         this.mapId = mapId;
+    }
+
+    public @NotNull SaveStateUpdateRequest getUpdateRequest() {
+        var updates = this.updates;
+        this.updates = new SaveStateUpdateRequest();
+        return updates;
     }
 
     public @NotNull String id() {
@@ -79,6 +87,7 @@ public class SaveState {
         return completed;
     }
     public void setCompleted(boolean completed) {
+        updates.setCompleted(completed);
         this.completed = completed;
     }
 
@@ -86,6 +95,7 @@ public class SaveState {
         return playtime;
     }
     public void setPlaytime(long playtime) {
+        updates.setPlaytime(playtime);
         this.playtime = playtime;
     }
     public long getPlayStartTime() {
@@ -96,7 +106,7 @@ public class SaveState {
     }
     public void updatePlaytime() {
         if (playStartTime == 0) return;
-        playtime += System.currentTimeMillis() - playStartTime;
+        setPlaytime(playtime + System.currentTimeMillis() - playStartTime);
         playStartTime = System.currentTimeMillis();
     }
 
@@ -104,13 +114,22 @@ public class SaveState {
         return pos;
     }
 
+    public void setPos(Pos pos) {
+        updates.setPos(pos);
+        this.pos = pos;
+    }
+
     public byte @Nullable [] inventory() {
         if (inventory == null) return null;
         return Base64.getDecoder().decode(inventory);
     }
     public byte @Nullable [] tfState() {
-        if (tfstate == null) return null;
-        return Base64.getDecoder().decode(tfstate);
+        if (tfState == null) return null;
+        return Base64.getDecoder().decode(tfState);
+    }
+    public void setTFState(byte @NotNull [] tfstate) {
+        this.tfState = Base64.getEncoder().encodeToString(tfstate);
+        updates.setTfState(this.tfState);
     }
 
     public @Nullable String checkpoint() {
@@ -125,6 +144,16 @@ public class SaveState {
         if (inventory == null) return null;
         return new NetworkBuffer(ByteBuffer.wrap(inventory))
                 .readCollection(NetworkBuffer.ITEM);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public void setInventoryItems(@Nullable List<ItemStack> items) {
+        if (items == null) {
+            this.inventory = null;
+        } else {
+            this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.writeCollection(NetworkBuffer.ITEM, items)));
+        }
+        updates.setInventory(this.inventory);
     }
 
 }

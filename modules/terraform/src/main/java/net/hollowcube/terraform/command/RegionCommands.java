@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.command;
 
-import net.hollowcube.terraform.command.argument.ExtraArguments;
+import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;

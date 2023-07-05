@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.selection.cui;
 
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MockSelectionRenderer implements SelectionRenderer {
+public class MockSelectionRenderer implements ClientRenderer {
     private final EnumSet<Feature> features;
 
     public MockSelectionRenderer() {

@@ -1,30 +1,35 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.terraform.action.ActionBuilder;
-import net.hollowcube.terraform.history.Change;
+import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
+import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.selection.Selection;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagSerializer;
-import net.minestom.server.tag.TagWritable;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
-import org.jglrxavpok.hephaistos.nbt.*;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
+import java.nio.ByteBuffer;
 import java.util.*;
+
+import static net.minestom.server.network.NetworkBuffer.*;
 
 /**
  * A Terraform session local to a world. Stores only information relevant to the
  * world and defers to a {@link PlayerSession} for everything else.
+ * <p>
+ * LocalSessions can be serialized to/from a binary blob. The format is an implementation
+ * detail and should NOT be depended upon. Limits should be imposed using capabilities (todo)
  *
  * @implNote {@link LocalSession}s will be stored with editing world savestates.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class LocalSession {
+    public static final int STATE_VERSION = 1;
 
     public static @NotNull LocalSession forPlayer(@NotNull Player player) {
         var instance = player.getInstance();
@@ -37,38 +42,69 @@ public class LocalSession {
         return session;
     }
 
+    public static @NotNull LocalSession load(@NotNull Player player, byte[] data) {
+        var instance = player.getInstance();
+        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
+        var session = instance.getTag(tag);
+        if (session != null) {
+            throw new IllegalStateException("Attempted to load a session for a player that already has one");
+        }
+
+        session = new LocalSession(PlayerSession.forPlayer(player), instance, data);
+        instance.setTag(tag, session);
+        return session;
+    }
+
+    public static byte @NotNull [] save(@NotNull Player player) {
+        return forPlayer(player).serialize();
+    }
+
     private final PlayerSession playerSession;
     private final Instance instance;
 
-    private final Map<String, Selection> selection = new HashMap<>();
+    private final Map<String, Selection> selections = new HashMap<>();
 
     private final List<Change> history = new ArrayList<>();
     private int historyPointer = 0;
 
     public LocalSession(@NotNull PlayerSession playerSession, @NotNull Instance instance) {
+        this(playerSession, instance, null);
+    }
+
+    public LocalSession(@NotNull PlayerSession playerSession, @NotNull Instance instance, byte @Nullable [] data) {
         this.playerSession = playerSession;
         this.instance = instance;
 
-        selection.put(Selection.DEFAULT, new Selection(playerSession.player(), Selection.DEFAULT));
+        selections.put(Selection.DEFAULT, new Selection(this, Selection.DEFAULT));
+
+        // Read the existing data if it was provided
+        if (data != null && data.length != 0) deserialize(data);
     }
 
     public @NotNull Instance instance() {
         return instance;
     }
 
+    public @NotNull ClientInterface cui() {
+        return playerSession.cui();
+    }
+
+
     // Selection
 
     public boolean hasSelection(@NotNull String name) {
-        return selection.containsKey(name.toLowerCase(Locale.ROOT));
+        return selections.containsKey(name.toLowerCase(Locale.ROOT));
     }
 
     public @NotNull Selection selection(@NotNull String name) {
-        return selection.computeIfAbsent(name.toLowerCase(Locale.ROOT), n -> new Selection(playerSession.player(), n));
+        return selections.computeIfAbsent(name.toLowerCase(Locale.ROOT),
+                n -> new Selection(this, n));
     }
 
     public @NotNull Collection<String> selectionNames() {
-        return Set.copyOf(selection.keySet());
+        return Set.copyOf(selections.keySet());
     }
+
 
     // Action
 
@@ -121,62 +157,43 @@ public class LocalSession {
         historyPointer = 0;
     }
 
-    private static class Serializer implements TagSerializer<LocalSession> {
-        private static final Tag<NBT> TAG = Tag.NBT("terraform:local_session");
 
-        @Override
-        public @Nullable LocalSession read(@NotNull TagReadable reader) {
-            var root = (NBTCompound) reader.getTag(TAG);
+    // Serialization
+    //todo document this format somewhere
 
-            //todo storing a reference to the player like this and assuming they are present is extremely yikes.
-            // will instead store this data in some other format (dunno what) and then require that it is manually set
-            // eg when loading the player
-            var player = MinecraftServer.getConnectionManager().getPlayer(UUID.fromString(root.getString("owner")));
-            var instance = MinecraftServer.getInstanceManager().getInstance(UUID.fromString(root.getString("instance")));
-            var session = new LocalSession(PlayerSession.forPlayer(player), instance);
+    private byte @NotNull [] serialize() {
+        //todo compress
+        return NetworkBuffer.makeArray(buffer -> {
+            buffer.write(SHORT, (short) STATE_VERSION);
 
-            // Selection
-            var selections = root.getList("selections");
-            for (var entry : selections) {
-                var selection = Selection.fromNBT(player, (NBTCompound) entry);
-                session.selection.put(selection.name(), selection);
-            }
+            // Selections
+            buffer.writeCollection(selections.values(), (b, s) -> s.write(b));
 
             // History
-            session.historyPointer = root.getInt("history_pointer");
-            var history = root.getList("history");
-            for (var entry : history) {
-                var change = Change.fromNBT((NBTCompound) entry);
-                session.history.add(change);
-            }
+//            buffer.write(VAR_INT, historyPointer);
+//            buffer.write(VAR_INT, history.size());
+//            for (var change : history) {
+            //todo write the changes
+//            }
+        });
+    }
 
-            return session;
+    private void deserialize(byte @NotNull [] data) {
+        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+
+        var version = buffer.read(SHORT);
+        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+
+        // Selections
+        int selectionCount = buffer.read(VAR_INT);
+        for (int i = 0; i < selectionCount; i++) {
+            var selection = new Selection(this, buffer);
+            this.selections.put(selection.name(), selection);
         }
 
-        @Override
-        public void write(@NotNull TagWritable writer, @NotNull LocalSession value) {
-            var root = new MutableNBTCompound();
-            //todo see comment in `read`
-            root.set("owner", new NBTString(value.playerSession.player().getUuid().toString()));
-            root.set("instance", new NBTString(value.instance.getUniqueId().toString()));
-
-            // Selection
-            var selections = new ArrayList<NBTCompound>();
-            for (var selection : value.selection.values()) {
-                selections.add(selection.toNBT());
-            }
-            root.set("selections", new NBTList<>(NBTType.TAG_Compound, selections));
-
-            // History
-            root.set("history_pointer", new NBTInt(value.historyPointer));
-            var history = new ArrayList<NBTCompound>();
-            for (var change : value.history) {
-                history.add(change.toNBT());
-            }
-            root.set("history", new NBTList<>(NBTType.TAG_Compound, history));
-
-            writer.setTag(TAG, root.toCompound());
-        }
+        // History
+//        this.historyPointer = buffer.read(VAR_INT);
+        //todo
     }
 
 }

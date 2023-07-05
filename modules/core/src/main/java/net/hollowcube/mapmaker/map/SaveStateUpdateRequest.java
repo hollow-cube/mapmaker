@@ -14,11 +14,11 @@ public class SaveStateUpdateRequest {
     private Long playtime = null;
     private Pos pos = null;
     private String inventory = null;
-    private String tfstate = null;
+    private String tfState = null;
     private String checkpoint = null;
 
     public boolean hasChanges() {
-        return completed != null || playtime != null || pos != null || inventory != null || tfstate != null || checkpoint != null;
+        return completed != null || playtime != null || pos != null || inventory != null || tfState != null || checkpoint != null;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
@@ -36,6 +36,10 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public void setInventory(String inventory) {
+        this.inventory = inventory;
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     public @NotNull SaveStateUpdateRequest setInventoryItems(@Nullable List<ItemStack> items) {
         if (items == null) {
@@ -47,8 +51,12 @@ public class SaveStateUpdateRequest {
     }
 
     public @NotNull SaveStateUpdateRequest setTFState(@NotNull byte[] tfstate) {
-        this.tfstate = Base64.getEncoder().encodeToString(tfstate);
+        this.tfState = Base64.getEncoder().encodeToString(tfstate);
         return this;
+    }
+
+    public void setTfState(String tfState) {
+        this.tfState = tfState;
     }
 
     public @NotNull SaveStateUpdateRequest setCheckpoint(@NotNull String checkpoint) {

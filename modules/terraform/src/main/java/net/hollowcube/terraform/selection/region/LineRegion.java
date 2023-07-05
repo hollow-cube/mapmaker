@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.selection.region;
 
-import net.hollowcube.terraform.util.CoordinateUtil;
+import net.hollowcube.terraform.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +28,7 @@ public record LineRegion(
         return new LineIterator(pos1.add(0.5), pos2.add(0.5));
     }
 
-    private class LineIterator implements Iterator<@NotNull Point> {
+    private static class LineIterator implements Iterator<@NotNull Point> {
         private final Vec step;
         private int maxSteps;
         private int currentStep = 0;

@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.blueprint;
+package net.hollowcube.terraform.give_me_new_home.blueprint;
 
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.coordinate.Point;

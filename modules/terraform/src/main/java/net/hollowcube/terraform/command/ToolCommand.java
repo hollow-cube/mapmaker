@@ -1,9 +1,7 @@
 package net.hollowcube.terraform.command;
 
 import net.hollowcube.terraform.tool.ToolHandler;
-import net.hollowcube.terraform.util.TerraformCommand;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandSender;
+import net.hollowcube.terraform.command.helper.TerraformCommand;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;

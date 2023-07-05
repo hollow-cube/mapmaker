@@ -7,6 +7,7 @@ import de.marhali.json5.Json5;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -22,7 +23,7 @@ public class FontTransform {
 
         try (var is = getClass().getResourceAsStream("/minecraft_font_default.json")) {
             if (is == null) throw new IOException("Failed to load minecraft_font_default.json");
-            var fontChars = json5.parse(is).getAsJson5Object()
+            var fontChars = json5.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8)).getAsJson5Object()
                     .getAsJson5Array("providers")
                     .get(2).getAsJson5Object()
                     .getAsJson5Array("chars");

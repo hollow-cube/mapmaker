@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -37,10 +38,6 @@ public interface RegionSelector {
      */
     @Nullable Region region();
 
-    @NotNull NBTCompound toNBT();
-
-    void fromNBT(@NotNull NBTCompound nbt);
-
     /**
      * Changes the size of the region by the specified amount.
      *
@@ -48,5 +45,13 @@ public interface RegionSelector {
      * @param changeVertical   If the size change should modify the selection in the vertical direction (+/- y coordinate). True to modify, false to not
      * @param changeHorizontal If the size change should modify the selection in the horizontal directions (+/- x and z coordinates). True to modify, false to not
      */
-    void changeSize(int delta, boolean changeVertical, boolean changeHorizontal);
+    @Deprecated //todo would rather explicit expand/contract methods which operate on xyz
+    default void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
+        throw new UnsupportedOperationException();
+    }
+
+    void write(@NotNull NetworkBuffer buffer);
+
+    void read(@NotNull NetworkBuffer buffer);
+
 }

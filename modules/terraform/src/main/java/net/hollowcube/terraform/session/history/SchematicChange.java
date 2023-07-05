@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.history;
+package net.hollowcube.terraform.session.history;
 
 import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.schem.Schematic;

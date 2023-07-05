@@ -1,7 +1,7 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.command.*;
-import net.hollowcube.terraform.command.argument.ExtraArguments;
+import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.mask.script.MaybeMask;
 import net.hollowcube.terraform.tool.ToolHandler;
 import net.minestom.server.MinecraftServer;

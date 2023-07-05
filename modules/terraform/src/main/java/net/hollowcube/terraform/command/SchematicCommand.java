@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command;
 
 import net.hollowcube.terraform.session.PlayerSession;
-import net.hollowcube.terraform.util.TempSchematicStuff;
+import net.hollowcube.terraform.give_me_new_home.TempSchematicStuff;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;

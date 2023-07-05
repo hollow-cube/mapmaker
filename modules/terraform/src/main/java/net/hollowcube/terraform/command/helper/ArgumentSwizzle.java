@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.command.argument;
+package net.hollowcube.terraform.command.helper;
 
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.Argument;

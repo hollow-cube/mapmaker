@@ -2,8 +2,8 @@ package net.hollowcube.terraform.action;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.terraform.action.edit.WorldView;
-import net.hollowcube.terraform.history.Change;
-import net.hollowcube.terraform.instance.SchemBlockBatch;
+import net.hollowcube.terraform.session.history.Change;
+import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;

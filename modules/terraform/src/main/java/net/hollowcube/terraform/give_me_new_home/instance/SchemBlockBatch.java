@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.instance;
+package net.hollowcube.terraform.give_me_new_home.instance;
 
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
