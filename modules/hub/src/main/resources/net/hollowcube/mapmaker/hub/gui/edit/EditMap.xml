@@ -29,19 +29,33 @@
             </box>
 
             <box width="9">
-                <button id="map_type_tab_parkour" width="3" translationKey="parkour"/>
-                <button id="map_type_tab_building" width="3" translationKey="building"/>
-                <button width="3" translationKey="adventure"/>
+                <button id="map_type_tab_parkour" width="3" translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
+                <button id="map_type_tab_building" width="3" translationKey="gui.create_maps.map_info_tab.select_type.building"/>
+                <button width="3" translationKey="gui.create_maps.map_info_tab.select_type.adventure"/>
             </box>
             <switch id="map_type_tab_switch" width="9" height="2">
                 <!-- PARKOUR TAB -->
                 <box width="9" height="2" sprite="create_maps/tab_info/tab_parkour/container">
-
+                    <spacer width="1"/>
+                    <button id="map_type_tab_parkour_speedrun" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"/>
+                    <button id="map_type_tab_parkour_sectioned" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"/>
+                    <button id="map_type_tab_parkour_rankup" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"/>
+                    <button id="map_type_tab_parkour_gauntlet" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"/>
+                    <button id="map_type_tab_parkour_dropper" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"/>
+                    <button id="map_type_tab_parkour_one_jump" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"/>
+                    <button id="map_type_tab_parkour_informative" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"/>
                 </box>
 
-                <!-- PARKOUR TAB -->
+                <!-- BUILDING TAB -->
                 <box width="9" height="2" sprite="create_maps/tab_info/tab_building/container">
-
+                    <spacer width="1"/>
+                    <button id="map_type_tab_building_showcase" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
+                    <spacer width="1"/>
+                    <button id="map_type_tab_building_tutorial" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"/>
+                    <spacer width="1"/>
+                    <button id="map_type_tab_building_educational" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.educational"/>
+                    <spacer width="1"/>
+                    <button id="map_type_tab_building_map_pack" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"/>
                 </box>
             </switch>
         </box>
@@ -69,23 +83,23 @@
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
                 <label width="5" translationKey="todo"/>
                 <!--        todo those last 2 buttons-->
-                <button translationKey="idk1" sprite="create_maps/tab_actions/idk1" />
-                <button translationKey="idk2" sprite="create_maps/tab_actions/idk2" />
+                <button translationKey="gui.create_maps.map_actions_tab.map_backups" sprite="create_maps/tab_actions/idk1" />
+                <button translationKey="gui.create_maps.map_actions_tab.submit_maps" sprite="create_maps/tab_actions/idk2" />
             </box>
 
             <box width="9" height="4" align="ltr">
                 <spacer height="4" />
 
                 <box width="3" height="4" align="ttb">
-                    <button width="3" height="2" translationKey="copy" />
-                    <button width="3" height="2" translationKey="transfer" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.copy_map" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.transfer_ownership" />
                 </box>
 
                 <spacer height="4" />
 
                 <box width="3" height="4" align="ttb">
-                    <button width="3" height="2" translationKey="move" />
-                    <button width="3" height="2" translationKey="delete" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map" />
                 </box>
 
             </box>
@@ -134,7 +148,7 @@
                 sprite="create_maps/build"/>
         <spacer height="3"/>
         <switch id="publish_switch" width="3" height="3">
-            <button width="3" height="3" translationKey="gui.create_maps.publish_map.error"
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name_and_no_display_item"
                     sprite="create_maps/publish_error"/>
             <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
                     sprite="create_maps/publish"/>

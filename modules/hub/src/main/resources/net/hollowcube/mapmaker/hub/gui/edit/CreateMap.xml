@@ -3,25 +3,33 @@
 <component width="9" height="9" align="ttb" sprite="create_maps/create/container">
     <box width="9" height="1">
         <BackButton />
-        <label translationKey="gui.edit_map.info" />
+        <label translationKey="gui.create_maps.new_map.information" />
     </box>
 
     <spacer width="9" height="1" />
 
     <box width="9">
         <spacer width="2"/>
-        <button width="5" translationKey="blah.blah.blah"/>
+        <button width="1" translationKey="gui.create_maps.new_map.generator"/>
+        <button width="1" translationKey="gui.create_maps.new_map.generator.void"/>
+        <button width="1" translationKey="gui.create_maps.new_map.generator.flat"/>
+        <button width="1" translationKey="gui.create_maps.new_map.generator.ocean"/>
+        <button width="1" translationKey="gui.create_maps.new_map.generator.more"/>
     </box>
     <box width="9">
         <spacer width="2"/>
-        <button width="5" translationKey="blah.blah.blah"/>
+        <button width="1" translationKey="gui.create_maps.new_map.size"/>
+        <button width="1" translationKey="gui.create_maps.new_map.size.normal"/>
+        <button width="1" translationKey="gui.create_maps.new_map.size.large"/>
+        <button width="1" translationKey="gui.create_maps.new_map.size.massive"/>
+        <button width="1" translationKey="gui.create_maps.new_map.size.colossal"/>
     </box>
 
     <spacer width="9" height="1" />
 
     <box width="9">
         <spacer width="2"/>
-        <button id="submit" width="5" translationKey="gui.create_map.submit"/>
+        <button id="submit" width="5" translationKey="gui.create_maps.new_map.submit"/>
     </box>
 
     <box width="9" height="3" align="ltr">
