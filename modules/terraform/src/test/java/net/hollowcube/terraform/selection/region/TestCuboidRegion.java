@@ -1,13 +1,14 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.minestom.server.coordinate.Vec;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestCuboidRegion {
+class TestCuboidRegion {
 
     @Test
     public void testSameBlock() {
@@ -48,7 +49,8 @@ public class TestCuboidRegion {
         assertEquals(new Vec(1, 51, 32), region.max());
     }
 
-    public static class TestIterator {
+    @Nested
+    class TestIterator {
 
         @Test
         public void testSameBlock() {

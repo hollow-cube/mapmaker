@@ -6,10 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MockSelectionRenderer implements ClientRenderer {
     private final EnumSet<Feature> features;
@@ -29,20 +30,16 @@ public class MockSelectionRenderer implements ClientRenderer {
 
     // Rendering state
 
-    private final AtomicBoolean rendering = new AtomicBoolean(false);
+    private final Map<String, Boolean> rendering = new ConcurrentHashMap<>();
 
     @Override
-    public void begin() {
-        assertFalse(rendering.getAndSet(true), "Already rendering");
+    public void begin(@NotNull String id) {
+        assertNull(rendering.put(id, true), "Already rendering " + id);
     }
 
     @Override
-    public void end() {
-        assertTrue(rendering.getAndSet(false), "Not rendering");
-    }
-
-    public void assertNotRendering() {
-        assertFalse(rendering.get());
+    public void end(@NotNull String id) {
+        assertEquals(true, rendering.remove(id), "Not rendering " + id);
     }
 
     // Drawn shapes

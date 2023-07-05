@@ -93,7 +93,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BELL, false));
 
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD));
-        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD));
+        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD, true));
 
         // Fences, Walls, and Gates
         for (var fenceGateId : BlockTags.MINECRAFT_FENCE_GATES.getValues()) {
