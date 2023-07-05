@@ -42,7 +42,7 @@ public class PlayMaps extends View {
         APPROVED, BEST, BOOSTED, RECENT, TRENDING
     }
 
-    private SortPreset sortPreset = SortPreset.BEST;
+    private SortPreset sortPreset = SortPreset.RECENT;
 
     private @Nullable String searchQuery = null;
 
@@ -66,34 +66,38 @@ public class PlayMaps extends View {
 
     @Signal(SortBestToggle.SIG_TOGGLE)
     private void handleBestToggle(boolean selected) {
-        if (!selected) return;
-
-        sortPreset = SortPreset.BEST;
-        updateQuery();
+        // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
+//        if (!selected) return;
+//
+//        sortPreset = SortPreset.BEST;
+//        updateQuery();
     }
 
     @Signal(SortTrendingToggle.SIG_TOGGLE)
     private void handleTrendingToggle(boolean selected) {
-        if (!selected) return;
-
-        sortPreset = SortPreset.TRENDING;
-        updateQuery();
+        // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
+//        if (!selected) return;
+//
+//        sortPreset = SortPreset.TRENDING;
+//        updateQuery();
     }
 
     @Signal(SortApprovedToggle.SIG_TOGGLE)
     private void handleApprovedToggle(boolean selected) {
-        if (!selected) return;
-
-        sortPreset = SortPreset.APPROVED;
-        updateQuery();
+        // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
+//        if (!selected) return;
+//
+//        sortPreset = SortPreset.APPROVED;
+//        updateQuery();
     }
 
     @Signal(SortBoostedToggle.SIG_TOGGLE)
     private void handleBoostedToggle(boolean selected) {
-        if (!selected) return;
-
-        sortPreset = SortPreset.BOOSTED;
-        updateQuery();
+        // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
+//        if (!selected) return;
+//
+//        sortPreset = SortPreset.BOOSTED;
+//        updateQuery();
     }
 
     @Signal(SortRecentToggle.SIG_TOGGLE)

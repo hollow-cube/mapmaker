@@ -14,9 +14,9 @@ import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -32,6 +32,13 @@ public class EditMap extends View {
     private @ContextObject MapService mapService;
 
     private @Outlet("tab_switch") Switch tabSwitch;
+    private @Outlet("tab_info_switch") Switch tabInfoSwitch;
+    private @Outlet("tab_tags_switch") Switch tabTagsSwitch;
+    private @Outlet("tab_settings_switch") Switch tabSettingsSwitch;
+    private @Outlet("tab_actions_switch") Switch tabActionsSwitch;
+    private Switch[] tabSwitches;
+
+    private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
 
     // Info tab
@@ -41,7 +48,9 @@ public class EditMap extends View {
 
     public EditMap(@NotNull Context context) {
         super(context);
+        this.tabSwitches = new Switch[]{tabInfoSwitch, tabTagsSwitch, tabSettingsSwitch, tabActionsSwitch};
 
+        selectTab(0);
         setState(State.LOADING);
     }
 
@@ -84,6 +93,17 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap, Component.text(publishedMap.owner())));
     }
 
+    //todo move this function somewhere where it can be used by the command, etc. maybe some kind of map helpers util class
+    private boolean canPublishMap() {
+        var settings = map.settings();
+        if (settings.getName().isEmpty() || settings.getIcon() == null)
+            return false;
+
+        //todo other checks like whether there is a world, parkour tags, etc.
+
+        return true;
+    }
+
     // MAP NAME EDITING
 
     @Action("map_name")
@@ -110,8 +130,18 @@ public class EditMap extends View {
 
     // MAP ICON EDITING
 
-    @Action("map_icon")
-    private @NonBlocking void beginUpdateMapIcon() {
+    private @Outlet("set_map_icon_switch") Switch setMapIconSwitch;
+    private @Outlet("set_map_icon_set") Label setMapIconSetLabel;
+
+    @Action("set_map_icon_unset")
+    private @NonBlocking void beginUpdateMapIcon1() {
+        System.out.println("CALL 1");
+        pushView(SetMapIcon::new);
+    }
+
+    @Action("set_map_icon_set")
+    private @NonBlocking void beginUpdateMapIcon2() {
+        System.out.println("CALL 2");
         pushView(SetMapIcon::new);
     }
 
@@ -130,30 +160,53 @@ public class EditMap extends View {
 
     /** Sets the elements to have the latest info from the map. */
     private void updateElementsFromMap() {
-        mapNameText.setText(map.settings().getName()); //todo handle missing
-        //todo update map icon lore to include material
+        // Name
+        var name = map.settings().getName();
+        if (name.isEmpty()) {
+            mapNameText.setText(MapData.DEFAULT_NAME, TextColor.color(0xB0B0B0)); // Light gray color
+        } else {
+            mapNameText.setText(name);
+        }
+
+        // Icon
+        var icon = map.settings().getIcon();
+        if (icon != null) {
+            setMapIconSetLabel.setArgs(Component.text(icon.name()));
+            setMapIconSwitch.setOption(1);
+        } else {
+            setMapIconSwitch.setOption(0);
+        }
+
+        publishSwitch.setOption(canPublishMap() ? 1 : 0);
     }
 
     // TAB SWITCHING
 
     @Action("tab_info")
     public void showInfoTab() {
-        tabSwitch.setOption(0);
+        selectTab(0);
     }
 
     @Action("tab_stats")
     public void showStatsTab() {
-        tabSwitch.setOption(1);
+        selectTab(1);
     }
 
     @Action("tab_settings")
     public void showSettingsTab() {
-        tabSwitch.setOption(2);
+        selectTab(2);
     }
 
     @Action("tab_actions")
     public void showActionsTab() {
-        tabSwitch.setOption(3);
+        selectTab(3);
+    }
+
+    private void selectTab(int index) {
+        tabSwitch.setOption(index);
+        for (int i = 0; i < tabSwitches.length; i++) {
+            tabSwitches[i].setOption(i == index ? 1 : 0);
+        }
     }
 
 }

@@ -60,7 +60,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
 //        var instance = new InstanceContainer(StringUtil.seededUUID(map.id()), DimensionTypes.FULL_BRIGHT);
 //        this.baseWorld = new BaseWorld(server.worldManager(), map.id(), instance);
-        instance = new MapInstance(DimensionTypes.FULL_BRIGHT);
+        instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 
@@ -215,6 +215,10 @@ public class EditingMapWorld implements InternalMapWorld {
         if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {
             event.setCancelled(true);
         }
+    }
+
+    private @NotNull String getDimensionName() {
+        return String.format("mapmaker:emap/%s/e", map.id().substring(0, 8));
     }
 
 }

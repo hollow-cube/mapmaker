@@ -9,11 +9,20 @@
     <spacer width="9" height="1" />
 
     <box width="9">
-        <spacer width="1"/>
-        <button id="submit" width="7" translationKey="gui.create_map.submit"/>
+        <spacer width="2"/>
+        <button width="5" translationKey="blah.blah.blah"/>
+    </box>
+    <box width="9">
+        <spacer width="2"/>
+        <button width="5" translationKey="blah.blah.blah"/>
     </box>
 
-    <spacer width="9" height="3" />
+    <spacer width="9" height="1" />
+
+    <box width="9">
+        <spacer width="2"/>
+        <button id="submit" width="5" translationKey="gui.create_map.submit"/>
+    </box>
 
     <box width="9" height="3" align="ltr">
         <spacer height="3"/>

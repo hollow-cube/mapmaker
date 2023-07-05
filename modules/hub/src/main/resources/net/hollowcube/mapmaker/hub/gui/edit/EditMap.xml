@@ -1,49 +1,113 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
 <component width="9" height="9" align="ttb">
-
-    <box width="9" height="1">
-        <BackButton/>
-        <label translationKey="gui.create_maps.map_info_tab.information"/>
-        <label width="5" translationKey="todo"/>
-        <!--        todo those last 2 buttons-->
-        <button translationKey="gui.create_maps.map_info_tab.manage_builders"/>
-        <button translationKey="gui.create_maps.map_info_tab.invite_players"/>
-    </box>
-
-    <switch id="tab_switch" width="9" height="4">
-        <box width="9" height="4" sprite="create_maps/info/container">
+    <switch id="tab_switch" width="9" height="5">
+        <!-- INFO TAB -->
+        <box width="9" height="5" align="TTB">
+            <box width="9" height="1" sprite="create_maps/tab_info/header">
+                <BackButton/>
+                <label translationKey="gui.create_maps.map_info_tab.information"/>
+                <label width="5" translationKey="todo"/>
+                <!--        todo those last 2 buttons-->
+                <button translationKey="gui.create_maps.map_info_tab.manage_builders"
+                        sprite="create_maps/tab_info/manage_builders" />
+                <button translationKey="gui.create_maps.map_info_tab.invite_players"
+                        sprite="create_maps/tab_info/invite_players" />
+            </box>
             <box width="9" height="1">
                 <!-- Shift by 19 to avoid the icon -->
                 <text id="map_name" width="8" translationKey="gui.create_maps.map_info_tab.change_name"
                       font="map_title" shift="19"/>
-                <button id="map_icon"
-                        translationKey="gui.create_maps.map_info_tab.set_display_item"
-                        sprite="create_maps/set_map_icon/icon"/>
+                <switch id="set_map_icon_switch">
+                    <button id="set_map_icon_unset" translationKey="gui.create_maps.map_info_tab.set_display_item.unset"
+                            sprite="create_maps/tab_info/set_map_icon_unset"
+                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_unset" />
+                    <button id="set_map_icon_set" translationKey="gui.create_maps.map_info_tab.set_display_item.set"
+                            sprite="create_maps/tab_info/set_map_icon_set"
+                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_set" />
+                </switch>
             </box>
 
-            <box width="9" height="1">
-                <button id="" translationKey="todo.left" sprite="generic/left11"/>
-                <label width="7" translationKey="todo" sprite="create_maps/info/type_parkour"/>
-                <button id="" translationKey="todo.right" sprite="generic/right11"/>
+            <box width="9" height="1" sprite="create_maps/tab_info/type_parkour">
+                <button id="" translationKey="todo.left"/>
+                <label width="7" translationKey="todo"/>
+                <button id="" translationKey="todo.right"/>
             </box>
 
             <spacer width="9" height="2"/>
         </box>
-        <spacer width="9" height="4"/>
-        <spacer width="9" height="4"/>
-        <spacer width="9" height="4"/>
+
+        <!-- TAGS TAB -->
+        <box width="9" height="5" sprite="create_maps/tab_tags/container">
+        </box>
+
+        <!-- SETTINGS TAB -->
+        <box width="9" height="5" sprite="create_maps/tab_settings/container">
+        </box>
+
+        <!-- ACTIONS TAB -->
+        <box width="9" height="5" sprite="create_maps/tab_actions/container">
+            <box width="9" height="1">
+                <BackButton/>
+                <label translationKey="gui.create_maps.map_actions_tab.information"/>
+                <label width="5" translationKey="todo"/>
+                <!--        todo those last 2 buttons-->
+                <button translationKey="idk1" sprite="create_maps/tab_actions/idk1" />
+                <button translationKey="idk2" sprite="create_maps/tab_actions/idk2" />
+            </box>
+
+            <box width="9" height="4" align="ltr">
+                <spacer height="4" />
+
+                <box width="3" height="4" align="ttb">
+                    <button width="3" height="2" translationKey="copy" />
+                    <button width="3" height="2" translationKey="transfer" />
+                </box>
+
+                <spacer height="4" />
+
+                <box width="3" height="4" align="ttb">
+                    <button width="3" height="2" translationKey="move" />
+                    <button width="3" height="2" translationKey="delete" />
+                </box>
+
+            </box>
+        </box>
     </switch>
 
-    <box width="9" align="ltr">
+    <box width="9" align="ltr" sprite="create_maps/tab_container">
         <spacer/>
-        <button id="tab_info" translationKey="gui.create_maps.map_info_tab"/>
+        <switch id="tab_info_switch">
+            <button id="tab_info" translationKey="gui.create_maps.map_info_tab"
+                    sprite="create_maps/tab_info/icon"
+                    backgroundSprite="create_maps/tab_info/icon_bg_default" />
+            <button translationKey="gui.create_maps.map_info_tab"
+                    sprite="create_maps/tab_info/icon_selected" />
+        </switch>
         <spacer/>
-        <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab" sprite="create_maps/stats"/>
+        <switch id="tab_tags_switch">
+            <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab"
+                    sprite="create_maps/tab_tags/icon"
+                    backgroundSprite="create_maps/tab_tags/icon_bg_default" />
+            <button translationKey="gui.create_maps.map_tags_tab"
+                    sprite="create_maps/tab_tags/icon_selected" />
+        </switch>
         <spacer/>
-        <button id="tab_settings" translationKey="gui.create_maps.map_settings_tab" sprite="create_maps/actions"/>
+        <switch id="tab_settings_switch">
+            <button id="tab_settings" translationKey="gui.create_maps.map_settings_tab"
+                    sprite="create_maps/tab_settings/icon"
+                    backgroundSprite="create_maps/tab_settings/icon_bg_default" />
+            <button translationKey="gui.create_maps.map_settings_tab"
+                    sprite="create_maps/tab_settings/icon_selected" />
+        </switch>
         <spacer/>
-        <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab" sprite="create_maps/settings"/>
+        <switch id="tab_actions_switch">
+            <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab"
+                    sprite="create_maps/tab_actions/icon"
+                    backgroundSprite="create_maps/tab_actions/icon_bg_default" />
+            <button translationKey="gui.create_maps.map_actions_tab"
+                    sprite="create_maps/tab_actions/icon_selected" />
+        </switch>
         <spacer/>
     </box>
 
@@ -52,8 +116,12 @@
         <button id="edit_in_world" width="3" height="3" translationKey="gui.create_maps.build_map"
                 sprite="create_maps/build"/>
         <spacer height="3"/>
-        <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
-                sprite="create_maps/publish"/>
+        <switch id="publish_switch" width="3" height="3">
+            <button width="3" height="3" translationKey="gui.create_maps.publish_map.error"
+                    sprite="create_maps/publish_error"/>
+            <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
+                    sprite="create_maps/publish"/>
+        </switch>
         <spacer height="3"/>
     </box>
 

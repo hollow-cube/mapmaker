@@ -4,6 +4,8 @@ import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +15,7 @@ public class TextElement extends ButtonElement implements Text {
     private final int shift;
 
     private String text = "";
+    private TextColor color = NamedTextColor.WHITE;
 
     public TextElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
                        @NotNull String translationKey, @NotNull String font, int shift) {
@@ -28,8 +31,9 @@ public class TextElement extends ButtonElement implements Text {
     }
 
     @Override
-    public void setText(@NotNull String text) {
+    public void setText(@NotNull String text, @NotNull TextColor color) {
         this.text = text;
+        this.color = color;
         context.markDirty();
     }
 
@@ -39,6 +43,7 @@ public class TextElement extends ButtonElement implements Text {
 
         //todo we should only rewrite and measure the text once, not every time we draw it
         sb.pos(shift + (x * 16));
+        sb.color(color);
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         //todo why is this const offset required? seems like the measurements of the ascii font are different from the measurements of the offset ascii one.
         sb.append(FontUtil.rewrite(font, text), FontUtil.measureText(text));

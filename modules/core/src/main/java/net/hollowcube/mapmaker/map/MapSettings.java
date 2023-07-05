@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MapSettings {
 
-    private transient MapUpdateRequest updates;
+    private transient MapUpdateRequest updates = new MapUpdateRequest();
 
     private String name;
     private Material icon;

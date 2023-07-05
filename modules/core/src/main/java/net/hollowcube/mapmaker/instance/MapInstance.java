@@ -12,6 +12,7 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -60,16 +61,18 @@ public class MapInstance extends InstanceContainer {
 
 
 
-    public MapInstance() {
-        this(DimensionTypes.FULL_BRIGHT);
+    public MapInstance(@NotNull String dimensionName) {
+        this(dimensionName, DimensionTypes.FULL_BRIGHT);
     }
 
-    public MapInstance(@NotNull DimensionType dimensionType) {
-        super(UUID.randomUUID(), dimensionType);
+    public MapInstance(@NotNull String dimensionName, @NotNull DimensionType dimensionType) {
+        super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
+
+        setTimeRate(0); //todo eventually this should be a map setting
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-        setChunkSupplier(LightingChunk::new);
+//        setChunkSupplier(LightingChunk::new);
         setChunkLoader(new PolarLoader(new PolarWorld(
                 PolarWorld.LATEST_VERSION,
                 PolarWorld.CompressionType.ZSTD,

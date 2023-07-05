@@ -58,7 +58,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_PLAYING;
 
-        instance = new MapInstance();
+        instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 
@@ -190,6 +190,10 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
+    }
+
+    private @NotNull String getDimensionName() {
+        return String.format("mapmaker:emap/%s/p", map.id().substring(0, 8));
     }
 
 }
