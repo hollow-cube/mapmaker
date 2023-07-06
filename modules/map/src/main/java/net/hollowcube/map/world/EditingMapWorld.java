@@ -136,6 +136,10 @@ public class EditingMapWorld implements InternalMapWorld {
             testWorld.close();
         }
 
+        for (var player : activePlayers) {
+            removePlayer(player);
+        }
+
         autoSaveTask.cancel();
         saveWorld(false);
 

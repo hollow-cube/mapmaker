@@ -126,7 +126,7 @@ public class DevServer {
             VelocityProxy.enable(velocitySecret);
         } else {
             logger.log(System.Logger.Level.INFO, "Velocity not configured, using online mode...");
-//            MojangAuth.init();
+            MojangAuth.init();
         }
 
         // Start phase 1
@@ -213,6 +213,12 @@ public class DevServer {
 
 //            Scoreboards.init();
 //            TabLists.init();
+
+            MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
+                logger.log(System.Logger.Level.INFO, "Graceful shutdown starting...");
+                hub.shutdown();
+                maps.shutdown();
+            });
 
             scope.join();
         } catch (Exception e) {

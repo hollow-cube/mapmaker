@@ -72,4 +72,15 @@ public class MapWorldManager {
             throw new RuntimeException(e);
         }
     }
+
+    public void shutdown() {
+        for (var mapFuture : activeMaps.values()) {
+            try {
+                var world = mapFuture.get();
+                world.close();
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to close world", e);
+            }
+        }
+    }
 }

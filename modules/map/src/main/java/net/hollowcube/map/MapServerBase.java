@@ -185,4 +185,8 @@ public abstract class MapServerBase implements MapServer {
         guiController.show(player, viewProvider);
     }
 
+    public void shutdown() {
+        mwm.shutdown();
+    }
+
 }

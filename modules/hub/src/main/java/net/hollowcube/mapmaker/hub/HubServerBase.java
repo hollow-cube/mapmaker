@@ -73,4 +73,8 @@ public abstract class HubServerBase implements HubServer {
         guiController.show(player, viewProvider);
     }
 
+    public void shutdown() {
+
+    }
+
 }
