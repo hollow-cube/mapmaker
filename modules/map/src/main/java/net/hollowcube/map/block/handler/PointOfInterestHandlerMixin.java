@@ -2,22 +2,30 @@ package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface PointOfInterestHandlerMixin extends BlockHandler {
 
     @NotNull String poiType();
 
+    @Nullable MapVariant requiredVariant();
+
     @Override
     default void onPlace(@NotNull Placement placement) {
+        Player placer = null;
         MapData map;
         var instance = placement.getInstance();
         if (placement instanceof PlayerPlacement pp) {
             map = MapWorld.forPlayer(pp.getPlayer()).map();
+            placer = pp.getPlayer();
         } else {
             // OK to choose the first editing world, the block is only placed in editing world.
             var world = MapWorld.unsafeFromInstance(placement.getInstance());
@@ -26,8 +34,18 @@ public interface PointOfInterestHandlerMixin extends BlockHandler {
         }
 
         var blockPosition = placement.getBlockPosition();
-        boolean added = map.addPointOfInterest(poiType(), blockPosition);
-        if (!added) {
+        boolean added = map.addPointOfInterest(poiType(), blockPosition); //todo: do these atomically
+        if (added) {
+            if (requiredVariant() != null && map.settings().getVariant() != requiredVariant()) {
+                map.settings().setVariant(requiredVariant());
+                //todo this whole file is turbo trash code
+                if (placer != null) {
+                    placer.sendMessage(Component.text("Block was placed which changed the map type to " + requiredVariant()));
+                } else {
+                    instance.sendMessage(Component.text("Block was placed which changed the map to " + requiredVariant() + " but not by a player we know about :("));
+                }
+            }
+        } else {
             // The player is over the limit, unset the block
             instance.setBlock(blockPosition, Block.AIR);
             var packet = new EffectPacket(2001, blockPosition, placement.getBlock().stateId(), false);
