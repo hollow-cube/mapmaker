@@ -127,24 +127,6 @@ public abstract class MapServerBase implements MapServer {
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
         mwm.joinMap(player, map, isEditing);
-
-//        var activeMaps = maps.computeIfAbsent(map.getId(), id -> new ConcurrentHashMap<>());
-//
-//        // Search for a world with the same flags
-//        var activeWorld = activeMaps.get(isEditing ? EditingMapWorld.class : PlayingMapWorld.class);
-//        if (activeWorld != null) {
-//            return FutureResult.wrap(player.setInstance(activeWorld.instance(), new Pos(0.5, 60, 0.5)));
-//        }
-//
-//        // No such map, create a new one
-//        MapWorld world = isEditing ? new EditingMapWorld(this, map) : new PlayingMapWorld(this, map);
-//        activeMaps.put(world.getClass(), world);
-//
-//        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
-//        if (map.getMapFileId() != null)
-//            future = world.loadWorld();
-//        return FutureResult.wrap(future.thenCompose(unused ->
-//                player.setInstance(world.instance(), new Pos(0.5, 60, 0.5))));
     }
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {

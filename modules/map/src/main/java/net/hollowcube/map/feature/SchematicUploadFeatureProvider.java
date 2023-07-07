@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.to_be_refactored.model.kafka.SchematicMgmt;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicReadException;
 import net.hollowcube.terraform.schem.SchematicReader;
+import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -88,7 +89,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
 
             // Get their terraform session and set their clipboard
             var session = PlayerSession.forPlayer(player);
-//            session.setClipboard(schem);
+            session.clipboard(Clipboard.DEFAULT).setData(schem);
             player.sendMessage(MapMessages.SCHEMATIC_UPLOAD_SUCCESS.with(Component.text(msg.name())));
 
             respondAndForget(msg, null);
