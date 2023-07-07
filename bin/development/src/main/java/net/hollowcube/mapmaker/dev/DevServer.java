@@ -290,7 +290,7 @@ public class DevServer {
 
     private void handleLogin(PlayerLoginEvent event) {
         event.setSpawningInstance(hub.world().instance());
-        event.getPlayer().setRespawnPoint(new Pos(0.5, 4, 0.5));
+        event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5, 90, 0));
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -312,9 +312,10 @@ public class DevServer {
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
         var player = event.getPlayer();
-        player.setGameMode(GameMode.CREATIVE);
-        player.setAllowFlying(true);
-        player.setPermissionLevel(4);
+//        player.setGameMode(GameMode.CREATIVE);
+//        player.setAllowFlying(true);
+//        player.setPermissionLevel(4);
+//        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.5f);
 
         // Alpha watermark
         var runtime = ServerRuntime.getRuntime();

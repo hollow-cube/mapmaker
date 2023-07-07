@@ -28,17 +28,17 @@ public final class HubHotbar {
             .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock);
 
     private static final int PLAY_ITEM_CMD = 500;
-    private static final int CREATE_ITEM_CMD = 501;
+    private static final int CREATE_ITEM_CMD = 3;
 
     private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.NETHER_STAR)
-            .displayName(Component.translatable("gui.hub.hotbar.play_maps.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.hub.hotbar.play_maps.lore", List.of()))
+            .displayName(Component.translatable("hotbar.lobby.play_maps.name"))
+            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.lobby.play_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
             .build();
 
-    private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.DIAMOND_PICKAXE)
-            .displayName(Component.translatable("gui.hub.hotbar.create_maps.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.hub.hotbar.create_maps.lore", List.of()))
+    private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.STICK)
+            .displayName(Component.translatable("hotbar.lobby.create_maps.name"))
+            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.lobby.create_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 

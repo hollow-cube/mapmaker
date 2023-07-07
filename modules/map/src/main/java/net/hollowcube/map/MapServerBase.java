@@ -71,14 +71,13 @@ public abstract class MapServerBase implements MapServer {
         PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         // Terraform initialization
+        var condition = BaseMapCommand.createMapCondition(true);
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> MapWorld.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-//        Terraform.init(terraformEvents, BaseMapCommand.createMapCondition(true));
-//        TerraformCompat.init(terraformEvents, BaseMapCommand.createMapCondition(true));
-        Terraform.init(terraformEvents, null);
-        TerraformAxiom.init(terraformEvents, null);
-//        TerraformCompat.init(terraformEvents, null);
+        Terraform.init(terraformEvents, condition);
+//        TerraformCompat.init(terraformEvents, condition);
+        TerraformAxiom.init(terraformEvents, condition);
 
         // Register commands
         var commandManager = MinecraftServer.getCommandManager();

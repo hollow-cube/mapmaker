@@ -6,16 +6,25 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
 public class TerraformCommand extends Command {
-    public TerraformCommand() {
+    public TerraformCommand(@Nullable CommandCondition condition) {
         super("terraform", "tf:terraform");
+        setCondition(condition);
+
+        addSyntax(this::showTerraformInfo);
 
         addSubcommand(new Debug());
+    }
+
+    private void showTerraformInfo(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        sender.sendMessage("todo show terraform info");
     }
 
     public static final class Debug extends Command {

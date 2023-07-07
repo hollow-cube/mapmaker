@@ -20,7 +20,7 @@ public final class Terraform {
         var commands = MinecraftServer.getCommandManager();
 
         // Root/Debug
-        commands.register(new TerraformCommand());
+        commands.register(new TerraformCommand(condition));
 
         // Selection
         commands.register(new SelectionCommands.Pos1(condition));

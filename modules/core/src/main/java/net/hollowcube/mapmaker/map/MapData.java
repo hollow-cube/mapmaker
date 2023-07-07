@@ -14,6 +14,11 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 
+    public static final String SPAWN_MAP_ID = "";
+    public static final List<String> SPAWN_MAP_PLAYERS = List.of(
+            "notmattw"
+    );
+
     private String id;
     private String owner;
 

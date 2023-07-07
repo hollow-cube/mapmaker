@@ -6,9 +6,16 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
+import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerStartFlyingEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +35,10 @@ public abstract class HubServerBase implements HubServer {
     private HubWorld world;
 
     private Controller guiController;
+
+    private EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
+            .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn)
+            .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump);
 
     public HubServerBase(@NotNull HubToMapBridge bridge) {
         this.bridge = bridge;
@@ -53,9 +64,9 @@ public abstract class HubServerBase implements HubServer {
 
         this.world = new HubWorld(this);
         this.world.loadWorld();
+        this.world.instance().eventNode().addChild(eventNode);
 
         var commands = MinecraftServer.getCommandManager();
-//        commands.register(new MapCommand(this, mapHandler));
         commands.register(new MapV2Command(mapService(), mapHandler));
     }
 
@@ -75,6 +86,28 @@ public abstract class HubServerBase implements HubServer {
 
     public void shutdown() {
 
+    }
+
+    private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
+        var player = event.getPlayer();
+        player.refreshCommands();
+
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setAllowFlying(true);
+        player.setPermissionLevel(4);
+        player.teleport(new Pos(0.5, 40, 0.5, 90, 0));
+
+        player.getInventory().clear();
+        HubHotbar.applyToPlayer(player);
+    }
+
+    private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
+        var player = event.getPlayer();
+        if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+
+        var boostVelocity = player.getPosition().direction().mul(20.0).withY(20.0);
+        player.setVelocity(boostVelocity);
+        player.setFlying(false);
     }
 
 }

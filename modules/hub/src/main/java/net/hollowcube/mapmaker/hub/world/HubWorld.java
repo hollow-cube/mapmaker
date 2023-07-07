@@ -57,8 +57,6 @@ public class HubWorld {
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak);
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace);
 
-        eventNode.addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn);
-
         //todo load the world
     }
 
@@ -86,16 +84,5 @@ public class HubWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
-    }
-
-    private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
-        var player = event.getPlayer();
-        player.refreshCommands();
-
-        player.setGameMode(GameMode.ADVENTURE);
-        player.teleport(new Pos(0.5, 40, 0.5, 90, 0));
-
-        player.getInventory().clear();
-        HubHotbar.applyToPlayer(player);
     }
 }

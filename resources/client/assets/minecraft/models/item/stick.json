@@ -15,6 +15,12 @@
         "custom_model_data": 2
       },
       "model": "minecraft:item/broken"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "minecraft:item/hammer"
     }
   ]
 }
