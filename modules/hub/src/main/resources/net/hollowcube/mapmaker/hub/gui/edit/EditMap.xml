@@ -7,7 +7,7 @@
             <box width="9" height="1" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
-                <label width="5" translationKey="gui.create_maps.map_slot"/>
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_info_tab.manage_builders"
                         sprite="create_maps/tab_info/manage_builders"/>

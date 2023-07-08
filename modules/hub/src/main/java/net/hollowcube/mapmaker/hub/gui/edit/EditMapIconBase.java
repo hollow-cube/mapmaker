@@ -105,14 +105,14 @@ public class EditMapIconBase extends View {
         try {
             //todo should not select until loaded i guess
             stateSwitch.setOption(State.SELECTED.ordinal());
-            performSignal(SIG_SELECT_MAP_IN_SLOT, mapDataFuture.get());
+            performSignal(SIG_SELECT_MAP_IN_SLOT, mapDataFuture.get(), slot);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Signal(SIG_SELECT_MAP_IN_SLOT)
-    private void handleSelectMapInSlot(MapData mapData) {
+    private void handleSelectMapInSlot(MapData mapData, int slot) {
         if (mapData.id().equals(mapId)) {
             return;
         }

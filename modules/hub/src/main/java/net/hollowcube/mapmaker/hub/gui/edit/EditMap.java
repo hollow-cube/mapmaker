@@ -30,6 +30,8 @@ public class EditMap extends View {
     private @ContextObject("handler") HubHandler mapHandler;
     private @ContextObject MapService mapService;
 
+    private @Outlet("slot_id") Text slotIdText;
+
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
     private @Outlet("tab_tags_switch") Switch tabTagsSwitch;
@@ -71,8 +73,10 @@ public class EditMap extends View {
         setState(State.LOADING);
     }
 
-    public void showMap(@NotNull MapData map) {
+    public void showMap(@NotNull MapData map, int slot) {
         this.map = map;
+
+        slotIdText.setText(String.format("Slot #%d", slot + 1));
 
         updateElementsFromMap();
         setState(State.ACTIVE);
@@ -346,7 +350,9 @@ public class EditMap extends View {
         });
     }
 
-    /** Sets the elements to have the latest info from the map. */
+    /**
+     * Sets the elements to have the latest info from the map.
+     */
     private void updateElementsFromMap() {
         // Name
         var name = map.settings().getName();

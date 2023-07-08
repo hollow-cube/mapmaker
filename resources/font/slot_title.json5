@@ -1,0 +1,6 @@
+{
+  // type=ascii uses minecraft:font/ascii.png
+  "type": "ascii",
+  // Shift the font 8 pixels down
+  "y": 16,
+}

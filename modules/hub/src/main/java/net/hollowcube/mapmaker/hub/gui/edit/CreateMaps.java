@@ -44,7 +44,7 @@ public class CreateMaps extends View {
     @Signal(CreateMap.SIG_MAP_CREATED)
     public void mapCreated(int slot, @NotNull MapData map) {
         slots[slot].setToSelected(map);
-        editor.showMap(map);
+        editor.showMap(map, slot);
         switcher.setOption(0);
     }
 
@@ -55,8 +55,8 @@ public class CreateMaps extends View {
     }
 
     @Signal(EditMapIconBase.SIG_SELECT_MAP_IN_SLOT)
-    public void selectMapInSlot(@NotNull MapData map) {
-        editor.showMap(map);
+    public void selectMapInSlot(@NotNull MapData map, int slot) {
+        editor.showMap(map, slot);
         switcher.setOption(0);
     }
 
@@ -92,7 +92,7 @@ public class CreateMaps extends View {
             var slot = firstSlot;
             async(() -> {
                 var map = slots[slot].mapDataFuture.get();
-                selectMapInSlot(map);
+                selectMapInSlot(map, slot);
                 slots[slot].setToSelected(map);
             });
         }
