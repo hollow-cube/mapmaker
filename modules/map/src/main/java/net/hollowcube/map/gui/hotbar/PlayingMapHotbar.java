@@ -74,10 +74,12 @@ public final class PlayingMapHotbar {
                 var playerData = PlayerDataV2.fromPlayer(player);
 
                 if (world instanceof PlayingMapWorld playingWorld) {
-                    var saveState = SaveState.fromPlayer(player);
 
                     // Delete the save state
-                    mapService.deleteSaveState(world.map().id(), playerData.id(), saveState.id());
+                    var saveState = SaveState.optionalFromPlayer(player);
+                    if (saveState != null) {
+                        mapService.deleteSaveState(world.map().id(), playerData.id(), saveState.id());
+                    }
 
                     // Remove and re-add the player without re-saving the savestate
                     playingWorld.removePlayer(player, false);

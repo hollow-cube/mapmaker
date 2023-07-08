@@ -151,13 +151,13 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.refreshCommands();
         player.setTeam(PLAYING_TEAM);
         player.setGameMode(GameMode.ADVENTURE);
+        player.setAllowFlying(false);
 
         player.getInventory().clear();
         PlayingMapHotbar.applyToPlayer(player);
 
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
-
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
         player.sendMessage("Now playing " + map.settings().getName());
@@ -166,7 +166,8 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
         spectatingPlayers.add(player);
-        player.setGameMode(GameMode.SPECTATOR);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setAllowFlying(true);
         if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
         player.sendMessage("Now spectating " + map.settings().getName());
     }

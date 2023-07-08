@@ -10,7 +10,6 @@ import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.Blocking;
@@ -52,7 +51,6 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             pmw.startSpectating(player, false);
         }
 
-        player.setGameMode(GameMode.SPECTATOR);
     }
 
 }

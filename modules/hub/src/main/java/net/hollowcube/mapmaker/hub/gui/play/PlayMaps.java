@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class PlayMaps extends View {
     private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
@@ -123,10 +122,10 @@ public class PlayMaps extends View {
 
     // OLD STUFF
 
-    @Action("query")
-    private void changeQuery() {
-        pushView(c -> new QueryMaps(c.with(Map.of("query", query))));
-    }
+//    @Action("query")
+//    private void changeQuery() {
+//        pushView(c -> new QueryMaps(c.with(Map.of("query", query))));
+//    }
 
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
