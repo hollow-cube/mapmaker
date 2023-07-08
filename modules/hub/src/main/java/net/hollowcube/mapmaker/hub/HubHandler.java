@@ -122,7 +122,7 @@ public class HubHandler {
             if (!map.isPublished())
                 throw new MapNotPublishedError();
 
-            server.bridge().joinMap(player, mapId, false);
+            server.bridge().joinMap(player, mapId, false, false);
         }
     }
 
@@ -135,8 +135,12 @@ public class HubHandler {
                 // todo you should perhaps just lose editing permission?
                 throw new MapIsPublishedError();
 
-            server.bridge().joinMap(player, mapId, true);
+            server.bridge().joinMap(player, mapId, true, false);
         }
+    }
+
+    public void spectateMap(@NotNull Player player, @NotNull String mapId) {
+        server.bridge().joinMap(player, mapId, false, true);
     }
 
     public static class MapNotPublishedError extends RuntimeException {

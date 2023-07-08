@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.hub.command.ExtraArguments.*;
+import static net.hollowcube.mapmaker.hub.command.ExtraArguments.MASK_SLOT;
 
 public class MapMoveCommand extends BaseHubCommand {
     private final Argument<MapData> fromArg = ExtraArguments.Map("from", MASK_SLOT);

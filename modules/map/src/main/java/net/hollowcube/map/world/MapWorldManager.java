@@ -44,7 +44,7 @@ public class MapWorldManager {
         });
     }
 
-    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
+    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing, boolean isSpectating) {
         var activeWorld = activeMaps.get(new Pair<>(map.id(), isEditing));
 
         // Create a new world if there is not one present
@@ -63,8 +63,13 @@ public class MapWorldManager {
 
             // spawn in minestom instance & then notify world
             player.setInstance(world.instance(), world.spawnPoint()).join();
-            world.acceptPlayer(player);
-
+            // TODO: This is bad and should be changed
+            // Don't have 2 booleans to determine state, use an Enum or something else, and also have the spectate functionality extracted to InternalMapWorld (probably)
+            if (isSpectating && world instanceof PlayingMapWorld playingMapWorld) {
+                playingMapWorld.startSpectating(player, false);
+            } else {
+                world.acceptPlayer(player);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {

@@ -3,6 +3,7 @@
 
 .idea
 /bin/development/build/
+/bin/packer/build/
 /modules/canvas/build/
 /modules/chat/build/
 /modules/common/build/

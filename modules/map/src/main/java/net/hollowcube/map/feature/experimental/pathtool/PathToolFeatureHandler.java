@@ -27,7 +27,7 @@ public class PathToolFeatureHandler implements FeatureProvider {
 
         Thread.startVirtualThread(() -> {
             //todo obviously this is stupid
-            thePath.addViewer(MinecraftServer.getConnectionManager().findPlayer("notmattw"));
+            //thePath.addViewer(MinecraftServer.getConnectionManager().findPlayer("notmattw"));
         });
 
         var node = EventNode.type("abduawfaw", EventFilter.INSTANCE);

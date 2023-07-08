@@ -130,8 +130,8 @@ public abstract class MapServerBase implements MapServer {
         return bridge;
     }
 
-    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
-        mwm.joinMap(player, map, isEditing);
+    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing, boolean isSpectating) {
+        mwm.joinMap(player, map, isEditing, isSpectating);
     }
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {
