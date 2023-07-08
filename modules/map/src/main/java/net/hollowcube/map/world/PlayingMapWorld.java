@@ -80,8 +80,8 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         // Controls player visibility
         instance.scheduler().buildTask(() -> {
-            for (Player activePlayer : activePlayers) {
-                activePlayer.updateViewableRule();
+            for (Player p : players()) {
+                p.updateViewableRule();
             }
         }).repeat(TaskSchedule.tick(5)).schedule();
 
@@ -168,7 +168,10 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setAllowFlying(false);
         player.setInvisible(false);
 
-        player.updateViewableRule(p -> player.getDistanceSquared(p) > 5.5 * 5.5);
+        player.updateViewableRule(p -> {
+            if (p.isInvisible()) return true;
+            return player.getDistanceSquared(p) > 3.5 * 3.5;
+        });
 
         player.getInventory().clear();
         PlayingMapHotbar.applyToPlayer(player);
@@ -185,7 +188,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         spectatingPlayers.add(player);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
-        player.updateViewableRule((p) -> true);
         player.setInvisible(true);
         if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
         player.sendMessage("Now spectating " + map.settings().getName());
@@ -203,6 +205,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         player.removeTag(TAG_PLAYING);
         player.removeTag(MapHooks.PLAYING); // Legacy
+        player.setInvisible(false);
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
 
