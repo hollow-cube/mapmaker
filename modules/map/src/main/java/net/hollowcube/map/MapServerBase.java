@@ -10,6 +10,7 @@ import net.hollowcube.map.block.rule.PlacementRules;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.invites.PlayerInviteService;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
@@ -91,6 +92,9 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new TestModeCommand(this));
         commandManager.register(new BuildModeCommand(this));
         commandManager.register(new TopTimesCommand(playerService(), mapService()));
+        commandManager.register(new InviteCommand());
+        commandManager.register(new AcceptInviteCommand());
+        commandManager.register(new RejectInviteCommand());
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
@@ -113,6 +117,8 @@ public abstract class MapServerBase implements MapServer {
                 "mapServer", this,
                 "mapService", mapService()
         ));
+
+        PlayerInviteService.init(mwm);
     }
 
     @Override
