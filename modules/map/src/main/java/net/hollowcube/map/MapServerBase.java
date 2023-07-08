@@ -118,7 +118,7 @@ public abstract class MapServerBase implements MapServer {
                 "mapService", mapService()
         ));
 
-        PlayerInviteService.init(mwm);
+        PlayerInviteService.init(mwm, mapService());
     }
 
     @Override
