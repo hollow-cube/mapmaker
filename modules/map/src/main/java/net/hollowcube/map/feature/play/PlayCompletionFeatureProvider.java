@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.CompletedMapView;
+import net.hollowcube.map.util.FireworkUtil;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -14,6 +15,8 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @AutoService(FeatureProvider.class)
 public class PlayCompletionFeatureProvider implements FeatureProvider {
@@ -37,6 +40,8 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
         var saveState = SaveState.fromPlayer(player);
         saveState.setCompleted(true);
+
+        FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
 
         world.server().newOpenGUI(player, CompletedMapView::new);
 
