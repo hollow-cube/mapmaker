@@ -96,7 +96,6 @@ public class EditMap extends View {
         //todo handle errors from begin verify
 
         // Send the player to the map
-
         try {
             mapHandler.editMap(player, map.id());
         } catch (Exception e) {

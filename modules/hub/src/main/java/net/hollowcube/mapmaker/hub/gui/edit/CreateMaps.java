@@ -2,12 +2,16 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +19,7 @@ public class CreateMaps extends View {
     public static final String SIG_RESET = "create_maps.reset";
 
     private @ContextObject Player player;
+    private @ContextObject("handler") HubHandler mapHandler;
 
     private @Outlet("switch") Switch switcher;
     private @Outlet("editor") EditMap editor;
@@ -90,6 +95,24 @@ public class CreateMaps extends View {
                 selectMapInSlot(map);
                 slots[slot].setToSelected(map);
             });
+        }
+    }
+
+    @Action("personal_world")
+    public void enterPersonalWorld(@NotNull Player player) {
+        var spawnMapId = MapData.SPAWN_MAP_ID;
+        if (spawnMapId == null) return;
+
+        if (!MapData.SPAWN_MAP_PLAYERS.contains(player.getUuid().toString()))
+            return;
+
+        try {
+            mapHandler.editMap(player, spawnMapId);
+        } catch (Exception e) {
+            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            MinecraftServer.getExceptionManager().handleException(e);
+        } finally {
+            player.closeInventory();
         }
     }
 

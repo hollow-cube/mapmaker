@@ -3,21 +3,29 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 
-    public static final String SPAWN_MAP_ID = "";
+    public static final String SPAWN_MAP_ID = System.getenv("MAPMAKER_SPAWN_MAP_ID");
     public static final List<String> SPAWN_MAP_PLAYERS = List.of(
-            "notmattw"
+            "e6c3e11c-1166-4dcd-ad59-c12e386b00bd", // Nixotica
+            "aceb326f-da15-45bc-bf2f-11940c21780c", // notmattw
+            "dbe21059-5b0b-4312-aa12-830dc540ad04", // Seth28
+            "a3634428-40a0-45b3-8583-a3b5813d64c5", // SethPRG
+            "b6496267-8dfe-485c-982f-85871ae4cbe4", // Tamto
+            "3e66e238-ec72-49bb-b9dc-6a8a83d0aae6", // ArcaneWarrior
+            "47cc8695-2681-4dcd-b772-7eeb8d69c09b", // Ossipago1
+            "194845a1-cd34-43a7-9c35-a70c26bc0d90", // TheSmartFox
+            "ed017f08-fd89-46e2-bba0-495686319801"  // Ontal
     );
 
     private String id;
@@ -28,7 +36,9 @@ public class MapData {
     private long publishedId;
     private Instant publishedAt;
 
-    private record PointOfInterest(String type, Vec pos) {}
+    private record PointOfInterest(String type, Vec pos) {
+    }
+
     private int maxPois = 5; //todo once map service sets this default it can be unset here
     private List<PointOfInterest> pois;
     private transient final ReentrantLock poiLock = new ReentrantLock();
@@ -67,9 +77,11 @@ public class MapData {
     public boolean needsVerification() {
         return settings().getVariant() != MapVariant.BUILDING;
     }
+
     public boolean isVerified() {
         return !needsVerification() || verification == MapVerification.VERIFIED;
     }
+
     public @NotNull MapVerification verification() {
         return verification;
     }
