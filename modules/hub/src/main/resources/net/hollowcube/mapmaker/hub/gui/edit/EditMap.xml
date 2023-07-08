@@ -10,9 +10,9 @@
                 <label width="5" translationKey="todo"/>
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_info_tab.manage_builders"
-                        sprite="create_maps/tab_info/manage_builders" />
+                        sprite="create_maps/tab_info/manage_builders"/>
                 <button translationKey="gui.create_maps.map_info_tab.invite_players"
-                        sprite="create_maps/tab_info/invite_players" />
+                        sprite="create_maps/tab_info/invite_players"/>
             </box>
             <box width="9" height="1">
                 <!-- Shift by 19 to avoid the icon -->
@@ -21,41 +21,112 @@
                 <switch id="set_map_icon_switch">
                     <button id="set_map_icon_unset" translationKey="gui.create_maps.map_info_tab.set_display_item.unset"
                             sprite="create_maps/tab_info/set_map_icon_unset"
-                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_unset" />
+                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_unset"/>
                     <button id="set_map_icon_set" translationKey="gui.create_maps.map_info_tab.set_display_item.set"
                             sprite="create_maps/tab_info/set_map_icon_set"
-                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_set" />
+                            backgroundSprite="create_maps/tab_info/set_map_icon_bg_set"/>
                 </switch>
             </box>
 
             <box width="9">
-                <button id="map_type_tab_parkour" width="3" translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
-                <button id="map_type_tab_building" width="3" translationKey="gui.create_maps.map_info_tab.select_type.building"/>
+                <button id="map_type_tab_parkour" width="3"
+                        translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
+                <button id="map_type_tab_building" width="3"
+                        translationKey="gui.create_maps.map_info_tab.select_type.building"/>
                 <button width="3" translationKey="gui.create_maps.map_info_tab.select_type.adventure"/>
             </box>
             <switch id="map_type_tab_switch" width="9" height="2">
                 <!-- PARKOUR TAB -->
                 <box width="9" height="2" sprite="create_maps/tab_info/tab_parkour/container">
+                    <!-- These names MUST be synced with the ParkourSubVariant enum -->
+                    <!-- todo this is super repetitive, might be worth looking into scripting it after all -->
                     <spacer width="1"/>
-                    <button id="map_type_tab_parkour_speedrun" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"/>
-                    <button id="map_type_tab_parkour_sectioned" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"/>
-                    <button id="map_type_tab_parkour_rankup" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"/>
-                    <button id="map_type_tab_parkour_gauntlet" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"/>
-                    <button id="map_type_tab_parkour_dropper" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"/>
-                    <button id="map_type_tab_parkour_one_jump" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"/>
-                    <button id="map_type_tab_parkour_informative" width="1" translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"/>
+                    <switch id="parkour_subvariant_speedrun_switch">
+                        <button id="parkour_subvariant_speedrun_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"
+                                sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_bg"/>
+                        <button id="parkour_subvariant_speedrun_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"
+                                sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_sectioned_switch">
+                        <button id="parkour_subvariant_sectioned_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"
+                                sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_bg"/>
+                        <button id="parkour_subvariant_sectioned_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"
+                                sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_rankup_switch">
+                        <button id="parkour_subvariant_rankup_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"
+                                sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_bg"/>
+                        <button id="parkour_subvariant_rankup_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"
+                                sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_gauntlet_switch">
+                        <button id="parkour_subvariant_gauntlet_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"
+                                sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_bg"/>
+                        <button id="parkour_subvariant_gauntlet_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"
+                                sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_dropper_switch">
+                        <button id="parkour_subvariant_dropper_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"
+                                sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_bg"/>
+                        <button id="parkour_subvariant_dropper_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"
+                                sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_one_jump_switch">
+                        <button id="parkour_subvariant_one_jump_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"
+                                sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_bg"/>
+                        <button id="parkour_subvariant_one_jump_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"
+                                sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_selected"/>
+                    </switch>
+                    <switch id="parkour_subvariant_informative_switch">
+                        <button id="parkour_subvariant_informative_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"
+                                sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_bg"/>
+                        <button id="parkour_subvariant_informative_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"
+                                sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
+                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_selected"/>
+                    </switch>
                 </box>
 
                 <!-- BUILDING TAB -->
                 <box width="9" height="2" sprite="create_maps/tab_info/tab_building/container">
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_showcase" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
+                    <button id="map_type_tab_building_showcase" width="1"
+                            translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_tutorial" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"/>
+                    <button id="map_type_tab_building_tutorial" width="1"
+                            translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"/>
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_educational" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.educational"/>
+                    <button id="map_type_tab_building_educational" width="1"
+                            translationKey="gui.create_maps.map_info_tab.select_type.building.educational"/>
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_map_pack" width="1" translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"/>
+                    <button id="map_type_tab_building_map_pack" width="1"
+                            translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"/>
                 </box>
             </switch>
         </box>
@@ -83,23 +154,25 @@
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
                 <label width="5" translationKey="todo"/>
                 <!--        todo those last 2 buttons-->
-                <button translationKey="gui.create_maps.map_actions_tab.map_backups" sprite="create_maps/tab_actions/idk1" />
-                <button translationKey="gui.create_maps.map_actions_tab.submit_maps" sprite="create_maps/tab_actions/idk2" />
+                <button translationKey="gui.create_maps.map_actions_tab.map_backups"
+                        sprite="create_maps/tab_actions/idk1"/>
+                <button translationKey="gui.create_maps.map_actions_tab.submit_maps"
+                        sprite="create_maps/tab_actions/idk2"/>
             </box>
 
             <box width="9" height="4" align="ltr">
-                <spacer height="4" />
+                <spacer height="4"/>
 
                 <box width="3" height="4" align="ttb">
-                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.copy_map" />
-                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.transfer_ownership" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.copy_map"/>
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.transfer_ownership"/>
                 </box>
 
-                <spacer height="4" />
+                <spacer height="4"/>
 
                 <box width="3" height="4" align="ttb">
-                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map" />
-                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map" />
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map"/>
+                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map"/>
                 </box>
 
             </box>
@@ -111,33 +184,33 @@
         <switch id="tab_info_switch">
             <button id="tab_info" translationKey="gui.create_maps.map_info_tab"
                     sprite="create_maps/tab_info/icon"
-                    backgroundSprite="create_maps/tab_info/icon_bg_default" />
+                    backgroundSprite="create_maps/tab_info/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_info_tab"
-                    sprite="create_maps/tab_info/icon_selected" />
+                    sprite="create_maps/tab_info/icon_selected"/>
         </switch>
         <spacer/>
         <switch id="tab_tags_switch">
             <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab"
                     sprite="create_maps/tab_tags/icon"
-                    backgroundSprite="create_maps/tab_tags/icon_bg_default" />
+                    backgroundSprite="create_maps/tab_tags/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_tags_tab"
-                    sprite="create_maps/tab_tags/icon_selected" />
+                    sprite="create_maps/tab_tags/icon_selected"/>
         </switch>
         <spacer/>
         <switch id="tab_settings_switch">
             <button id="tab_settings" translationKey="gui.create_maps.map_settings_tab"
                     sprite="create_maps/tab_settings/icon"
-                    backgroundSprite="create_maps/tab_settings/icon_bg_default" />
+                    backgroundSprite="create_maps/tab_settings/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_settings_tab"
-                    sprite="create_maps/tab_settings/icon_selected" />
+                    sprite="create_maps/tab_settings/icon_selected"/>
         </switch>
         <spacer/>
         <switch id="tab_actions_switch">
             <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab"
                     sprite="create_maps/tab_actions/icon"
-                    backgroundSprite="create_maps/tab_actions/icon_bg_default" />
+                    backgroundSprite="create_maps/tab_actions/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_actions_tab"
-                    sprite="create_maps/tab_actions/icon_selected" />
+                    sprite="create_maps/tab_actions/icon_selected"/>
         </switch>
         <spacer/>
     </box>

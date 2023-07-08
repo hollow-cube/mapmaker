@@ -12,10 +12,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -51,11 +48,24 @@ public class EditMap extends View {
     private @Outlet("map_name") Text mapNameText;
     private @Outlet("map_type_tab_switch") Switch mapTypeTabSwitch;
 
+    // Subvariant selector
+    private @Outlet("parkour_subvariant_speedrun_switch") Switch parkourSubvariantSpeedrunSwitch;
+    private @Outlet("parkour_subvariant_sectioned_switch") Switch parkourSubvariantSectionedSwitch;
+    private @Outlet("parkour_subvariant_rankup_switch") Switch parkourSubvariantRankupSwitch;
+    private @Outlet("parkour_subvariant_gauntlet_switch") Switch parkourSubvariantGauntletSwitch;
+    private @Outlet("parkour_subvariant_dropper_switch") Switch parkourSubvariantDropperSwitch;
+    private @Outlet("parkour_subvariant_one_jump_switch") Switch parkourSubvariantOneJumpSwitch;
+    private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
+    private final Switch[] parkourSubvariantSwitches;
+
     private MapData map;
 
     public EditMap(@NotNull Context context) {
         super(context);
         this.tabSwitches = new Switch[]{tabInfoSwitch, tabTagsSwitch, tabSettingsSwitch, tabActionsSwitch};
+        this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
+                parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
+                parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
 
         selectTab(0);
         setState(State.LOADING);
@@ -212,6 +222,110 @@ public class EditMap extends View {
         });
     }
 
+    @Action("parkour_subvariant_speedrun_unset")
+    private void parkourSubVariantSpeedrunUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.SPEEDRUN);
+        updateElementsFromMap();
+
+        //todo need to only dispatch one of these tasks at once and have some deduplication logic
+        final var updateRequest = map.settings().getUpdateRequest();
+        async(() -> {
+            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+            //todo if update fails we should revert the name change and indicate to the user that it failed
+        });
+    }
+
+    @Action("parkour_subvariant_speedrun_set")
+    private void parkourSubVariantSpeedrunSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_sectioned_unset")
+    private void parkourSubVariantSectionedUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.SECTIONED);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_sectioned_set")
+    private void parkourSubVariantSectionedSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_rankup_unset")
+    private void parkourSubVariantRankupUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.RANKUP);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_rankup_set")
+    private void parkourSubVariantRankupSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_gauntlet_unset")
+    private void parkourSubVariantGauntletUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.GAUNTLET);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_gauntlet_set")
+    private void parkourSubVariantGauntletSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_dropper_unset")
+    private void parkourSubVariantDropperUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.DROPPER);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_dropper_set")
+    private void parkourSubVariantDropperSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_one_jump_unset")
+    private void parkourSubVariantOneJumpUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.ONE_JUMP);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_one_jump_set")
+    private void parkourSubVariantOneJumpSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_informative_unset")
+    private void parkourSubVariantInformativeUnset() {
+        map.settings().setSubVariant(ParkourSubVariant.INFORMATIVE);
+        updateElementsFromMap();
+        //todo save
+    }
+
+    @Action("parkour_subvariant_informative_set")
+    private void parkourSubVariantInformativeSet() {
+        map.settings().setSubVariant(null);
+        updateElementsFromMap();
+        //todo save
+    }
+
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
         if (mapTypeTabSwitch.getOption() == 1) return;
@@ -249,6 +363,18 @@ public class EditMap extends View {
 
         // Type
         mapTypeTabSwitch.setOption(map.settings().getVariant().ordinal());
+        switch (map.settings().getVariant()) {
+            case PARKOUR -> {
+                var subvariant = map.settings().getParkourSubVariant();
+                for (int i = 0; i < parkourSubvariantSwitches.length; i++) {
+                    var selected = subvariant != null && subvariant.ordinal() == i;
+                    parkourSubvariantSwitches[i].setOption(selected ? 1 : 0);
+                }
+            }
+            case BUILDING -> {
+
+            }
+        }
 
         publishSwitch.setOption(getPublishState());
     }

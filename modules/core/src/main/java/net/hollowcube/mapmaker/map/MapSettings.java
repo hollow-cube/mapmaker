@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,7 @@ public class MapSettings {
     private Material icon;
 
     private MapVariant variant;
+    private String subvariant;
 
     private Pos spawnPoint;
 
@@ -82,6 +84,21 @@ public class MapSettings {
     public void setVariant(@NotNull MapVariant type) {
         updates.setVariant(type);
         this.variant = type;
+    }
+
+    public @Nullable ParkourSubVariant getParkourSubVariant() {
+        if (subvariant == null) return null;
+        try {
+            return ParkourSubVariant.valueOf(subvariant.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public void setSubVariant(@Nullable ParkourSubVariant subvariant) {
+        Check.argCondition(variant != MapVariant.PARKOUR, "Parkour subvariant can only be set for parkour maps");
+        this.subvariant = subvariant == null ? null : subvariant.name().toLowerCase();
+        updates.setSubVariant(this.subvariant);
     }
 
     public @NotNull Pos getSpawnPoint() {

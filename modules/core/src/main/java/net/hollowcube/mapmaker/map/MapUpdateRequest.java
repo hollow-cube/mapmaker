@@ -8,6 +8,7 @@ public class MapUpdateRequest {
     String name = null;
     String icon = null;
     MapVariant variant = null;
+    String subvariant = null;
     Pos spawnPoint = null;
 
     Boolean onlySprint = null;
@@ -16,7 +17,7 @@ public class MapUpdateRequest {
     Boolean noSneak = null;
 
     public boolean hasChanges() {
-        return name != null || icon != null || variant != null || spawnPoint != null ||
+        return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
                 onlySprint != null || noSprint != null || noJump != null || noSneak != null;
     }
 
@@ -29,6 +30,9 @@ public class MapUpdateRequest {
 
     public void setVariant(@Nullable MapVariant variant) {
         this.variant = variant;
+    }
+    public void setSubVariant(@Nullable String subvariant) {
+        this.subvariant = subvariant == null ? "none" : subvariant;
     }
 
     public void setSpawnPoint(@Nullable Pos spawnPoint) {
