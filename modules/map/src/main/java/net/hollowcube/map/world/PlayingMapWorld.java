@@ -28,11 +28,17 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class PlayingMapWorld implements InternalMapWorld {
     private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
@@ -43,6 +49,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     private static final Team PLAYING_TEAM = MinecraftServer.getTeamManager()
             .createBuilder("playing-team")
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
+            .seeInvisiblePlayers()
             .build();
 
     private final MapServer server;
@@ -70,6 +77,13 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
+
+        // Controls player visibility
+        instance.scheduler().buildTask(() -> {
+            for (Player activePlayer : activePlayers) {
+                activePlayer.updateViewableRule();
+            }
+        }).repeat(TaskSchedule.tick(5)).schedule();
 
         var eventNode = instance.eventNode();
         this.itemRegistry = new ItemRegistry();
@@ -152,6 +166,9 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setTeam(PLAYING_TEAM);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(false);
+        player.setInvisible(false);
+
+        player.updateViewableRule(p -> player.getDistanceSquared(p) > 5.5 * 5.5);
 
         player.getInventory().clear();
         PlayingMapHotbar.applyToPlayer(player);
@@ -168,6 +185,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         spectatingPlayers.add(player);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
+        player.updateViewableRule((p) -> true);
+        player.setInvisible(true);
         if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
         player.sendMessage("Now spectating " + map.settings().getName());
     }
@@ -179,6 +198,8 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     public @Blocking void removePlayer(@NotNull Player player, boolean save) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+
+        player.updateViewableRule((p) -> true);
 
         player.removeTag(TAG_PLAYING);
         player.removeTag(MapHooks.PLAYING); // Legacy
