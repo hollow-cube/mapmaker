@@ -102,6 +102,7 @@ public abstract class HubServerBase implements HubServer {
         player.setAllowFlying(true);
         player.setPermissionLevel(4);
         player.teleport(new Pos(0.5, 40, 0.5, 90, 0));
+        player.sendActionBar(Component.empty());
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);

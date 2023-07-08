@@ -7,7 +7,10 @@ import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.polar.PolarLoader;
+import net.hollowcube.polar.PolarReader;
+import net.hollowcube.polar.PolarWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -16,14 +19,17 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class HubWorld {
-    private static final String WORLD_NAME = "hub";
+    private static final System.Logger logger = System.getLogger(HubWorld.class.getName());
 
     public static final Tag<Boolean> MARKER = Tag.Boolean("mapmaker:hub/marker"); //todo unnecessary
     private static final Tag<HubWorld> THIS_TAG = ExtraTags.Transient("mapmaker:hub/world");
@@ -69,13 +75,25 @@ public class HubWorld {
     }
 
     public void loadWorld() {
-        try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
-            if (is == null) throw new IOException("hcspawn.polar not found");
-            instance.setChunkLoader(new PolarLoader(is));
-
-        } catch (IOException e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+        var spawnMapId = MapData.SPAWN_MAP_ID;
+        if (spawnMapId != null) {
+            var mapData = server().mapService().getMapWorld(spawnMapId, false);
+            assert mapData != null;
+            instance.setChunkLoader(new PolarLoader(PolarReader.read(mapData)));
+        } else {
+            try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
+                if (is == null) throw new IOException("hcspawn.polar not found");
+                instance.setChunkLoader(new PolarLoader(is));
+            } catch (IOException e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
         }
+
+        var loadingChunks = new ArrayList<CompletableFuture<Void>>();
+        ChunkUtils.forChunksInRange(0, 0, 16, (x, z) ->
+                loadingChunks.add(instance.loadChunk(x, z).thenRun(() -> {})));
+        CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
+                .thenRun(() -> logger.log(System.Logger.Level.INFO, "Loaded spawn chunks"));
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {

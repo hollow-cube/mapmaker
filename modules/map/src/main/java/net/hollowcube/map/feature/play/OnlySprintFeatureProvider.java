@@ -1,10 +1,12 @@
 package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -24,13 +26,16 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/onlysprint", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
-            .addListener(PlayerStartSprintingEvent.class, this::onStartSprinting)
             .addListener(PlayerStopSprintingEvent.class, this::onStopSprinting)
             .addListener(PlayerMoveEvent.class, this::onPlayerMove);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         if ((world.flags() & (MapWorld.FLAG_PLAYING|MapWorld.FLAG_TESTING)) == 0)
+            return false;
+
+        var settings = world.map().settings();
+        if (settings.getVariant() != MapVariant.PARKOUR || !settings.isOnlySprint())
             return false;
 
         world.addScopedEventNode(eventNode);
@@ -40,19 +45,15 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-//        player.removeTag(ONLY_SPRINT_TAG);
+        if (!MapHooks.isPlayerPlaying(player)) return;
+
         player.setTag(ONLY_SPRINT_TAG, player.getPosition());
-    }
-
-    public void onStartSprinting(@NotNull PlayerStartSprintingEvent event) {
-        var player = event.getPlayer();
-//        if (!player.hasTag(ONLY_SPRINT_TAG)) {
-
-//        }
     }
 
     public void onStopSprinting(@NotNull PlayerStopSprintingEvent event) {
         var player = event.getPlayer();
+        if (!MapHooks.isPlayerPlaying(player)) return;
+
         player.removeTag(ONLY_SPRINT_TAG);
 
         var world = MapWorld.forPlayer(player);
@@ -62,6 +63,7 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         var player = event.getPlayer();
+        if (!MapHooks.isPlayerPlaying(player)) return;
         if (player.isSprinting() || !player.hasTag(ONLY_SPRINT_TAG)) return;
 
         var startPos = player.getTag(ONLY_SPRINT_TAG);
