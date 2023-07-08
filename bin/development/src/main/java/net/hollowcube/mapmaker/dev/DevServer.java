@@ -14,7 +14,6 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.dev.command.FakePlayerCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
@@ -31,7 +30,10 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.player.*;
+import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.Material;
@@ -177,7 +179,6 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             MinecraftServer.getCommandManager().register(new DebugCommand(playerService));
             MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
-            MinecraftServer.getCommandManager().register(new FakePlayerCommand());
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

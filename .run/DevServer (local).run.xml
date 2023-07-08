@@ -6,7 +6,6 @@
       <env name="MAPMAKER_SPICEDB_SECRETKEY" value="foobar" />
       <env name="MAPMAKER_SPICEDB_TLS" value="false" />
       <env name="PROMETHEUS_DISABLE_CREATED_SERIES" value="true" />
-      <env name="MAPMAKER_SPAWN_MAP_ID" value="435b8c62-d673-43d0-a7f1-80fd445e38d5" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />
