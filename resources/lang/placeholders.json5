@@ -13,13 +13,13 @@
     "type": "sprite",
     "ref": "icon/warning"
   },
-  "CHECKMARK": {
+  "CONFIRM": {
     "type": "sprite",
-    "ref": "icon/checkmark"
+    "ref": "icon/confirm"
   },
-  "XMARK": {
+  "DENY": {
     "type": "sprite",
-    "ref": "icon/xmark"
+    "ref": "icon/deny"
   },
   "LOCK": {
     "type": "sprite",
