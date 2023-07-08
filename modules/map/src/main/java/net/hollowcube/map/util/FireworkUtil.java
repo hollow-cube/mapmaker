@@ -37,7 +37,7 @@ public class FireworkUtil {
         var random = ThreadLocalRandom.current();
 
         meta.setFireworkInfo(fireworkItem);
-        fireworkEntity.updateViewableRule((player) -> true);
+        fireworkEntity.updateViewableRule((player) -> audience.getPlayers().contains(player));
         fireworkEntity.setNoGravity(true);
         fireworkEntity.setVelocity(new Vec(random.nextDouble(-0.01, 0.01), 1, random.nextDouble(-0.01, 0.01)));
         fireworkEntity.setInstance(instance, point);
