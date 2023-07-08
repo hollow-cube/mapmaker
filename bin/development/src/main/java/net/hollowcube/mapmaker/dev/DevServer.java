@@ -25,19 +25,15 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.map.MapServiceMemory;
 import net.hollowcube.mapmaker.player.*;
-import net.hollowcube.terraform.compat.metabrush.brush.MetaBallBrush;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -60,7 +56,7 @@ public class DevServer {
         long start = System.nanoTime();
 
         System.setProperty("minestom.chunk-view-distance", "16");
-        System.setProperty("minestom.async-commands", "true");
+        System.setProperty("minestom.command.async-virtual", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
         System.setProperty("minestom.use-new-chunk-sending", "true");
 

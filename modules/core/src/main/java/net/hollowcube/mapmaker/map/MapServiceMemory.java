@@ -85,6 +85,16 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
+    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.beginVerification is a noop currently");
+    }
+
+    @Override
+    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.deleteVerification is a noop currently");
+    }
+
+    @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
         var map = maps.get(id);
         if (map == null)

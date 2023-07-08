@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -39,6 +40,10 @@ public class EditMap extends View {
     private @Outlet("tab_actions_switch") Switch tabActionsSwitch;
     private Switch[] tabSwitches;
 
+    private static final int VERIFY_ERROR = 0;
+    private static final int VERIFY = 1;
+    private static final int PUBLISH_ERROR = 2;
+    private static final int PUBLISH = 3;
     private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
 
@@ -65,6 +70,33 @@ public class EditMap extends View {
 
     @Action(value = "edit_in_world", async = true)
     private @Blocking void editMap(@NotNull Player player) {
+        try {
+            if (map.verification() != MapVerification.UNVERIFIED) {
+                player.sendMessage("there was verification progress but you deleted it by editing the map again, oops");
+
+                var playerData = PlayerDataV2.fromPlayer(player);
+                mapService.deleteVerification(playerData.id(), map.id());
+            }
+
+            mapHandler.editMap(player, map.id());
+        } catch (Exception e) {
+            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            MinecraftServer.getExceptionManager().handleException(e);
+        } finally {
+            player.closeInventory();
+        }
+    }
+
+    @Action(value = "verify", async = true)
+    private void verifyMap(@NotNull Player player) {
+        if (map.verification() == MapVerification.UNVERIFIED) {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            mapService.beginVerification(playerData.id(), map.id());
+        }
+        //todo handle errors from begin verify
+
+        // Send the player to the map
+
         try {
             mapHandler.editMap(player, map.id());
         } catch (Exception e) {
@@ -93,6 +125,11 @@ public class EditMap extends View {
         EventDispatcher.call(new MapDeletedEvent(map.id())); //todo this event is still scuffed
         performSignal(CreateMaps.SIG_RESET);
         pushView(c -> new MapDetailsView(c, publishedMap, Component.text(publishedMap.owner())));
+    }
+
+    private int getPublishState() {
+        if (!map.isVerified()) return VERIFY;
+        return canPublishMap() ? PUBLISH : PUBLISH_ERROR;
     }
 
     //todo move this function somewhere where it can be used by the command, etc. maybe some kind of map helpers util class
@@ -137,13 +174,11 @@ public class EditMap extends View {
 
     @Action("set_map_icon_unset")
     private @NonBlocking void beginUpdateMapIcon1() {
-        System.out.println("CALL 1");
         pushView(SetMapIcon::new);
     }
 
     @Action("set_map_icon_set")
     private @NonBlocking void beginUpdateMapIcon2() {
-        System.out.println("CALL 2");
         pushView(SetMapIcon::new);
     }
 
@@ -216,7 +251,7 @@ public class EditMap extends View {
         // Type
         mapTypeTabSwitch.setOption(map.settings().getVariant().ordinal());
 
-        publishSwitch.setOption(canPublishMap() ? 1 : 0);
+        publishSwitch.setOption(getPublishState());
     }
 
     // TAB SWITCHING

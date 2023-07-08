@@ -3,14 +3,8 @@ package net.hollowcube.mapmaker.util;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapServiceImpl;
-import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.util.gson.ComponentTypeAdapter;
-import net.hollowcube.mapmaker.util.gson.EnumTypeAdapter;
-import net.hollowcube.mapmaker.util.gson.InstantTypeAdapter;
-import net.hollowcube.mapmaker.util.gson.MaterialTypeAdapter;
+import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +21,8 @@ public abstract class AbstractHttpService {
     protected static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
+            .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
+            .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())

@@ -5,6 +5,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -27,6 +28,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,7 +127,11 @@ public class EditingMapWorld implements InternalMapWorld {
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
 
         // Kick off autosave
-        autoSaveTask = instance.scheduler().submitTask(this::autoSaveTaskWrapper);
+        if (map.verification() == MapVerification.UNVERIFIED)
+            autoSaveTask = instance.scheduler().buildTask(this::autoSaveTaskWrapper)
+                    .delay(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
+                    .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
+                    .schedule();
         //todo add a property to Minestom to run async tasks in virtual threads
     }
 
@@ -140,7 +146,7 @@ public class EditingMapWorld implements InternalMapWorld {
             removePlayer(player);
         }
 
-        autoSaveTask.cancel();
+        if (autoSaveTask != null) autoSaveTask.cancel();
         saveWorld(false);
 
         // Unload the backing world
@@ -161,9 +167,11 @@ public class EditingMapWorld implements InternalMapWorld {
                 //todo handle errors from the service
             }
 
-            // Save the world data
-            var worldData = instance.save();
-            server().mapService().updateMapWorld(map.id(), worldData);
+            // Save the world data (if it is unverified only)
+            if (map.verification() == MapVerification.UNVERIFIED) {
+                var worldData = instance.save();
+                server().mapService().updateMapWorld(map.id(), worldData);
+            }
 
             // Save the players data
             for (var player : activePlayers) {
@@ -190,16 +198,11 @@ public class EditingMapWorld implements InternalMapWorld {
         }
     }
 
-    private @NotNull TaskSchedule autoSaveTaskWrapper() {
-        // Never save the world on the first tick (the task triggers immediately)
-        if (instance.getWorldAge() < 2) return TaskSchedule.seconds(MAP_AUTOSAVE_INTERVAL_SEC);
-
+    private void autoSaveTaskWrapper() {
         Thread.startVirtualThread(() -> {
             logger.log(System.Logger.Level.INFO, "Autosaving world {0}", map.id());
             saveWorld(true);
         });
-
-        return TaskSchedule.seconds(MAP_AUTOSAVE_INTERVAL_SEC);
     }
 
     @Override
@@ -216,46 +219,52 @@ public class EditingMapWorld implements InternalMapWorld {
     public void acceptPlayer(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        if (map.verification() == MapVerification.PENDING) {
+            enterTestMode(player);
+        } else {
+            var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
 
-        activePlayers.add(player);
-        player.setTag(TAG_EDITING, true);
-        player.setTag(SaveState.TAG, saveState);
-        player.refreshCommands();
+            activePlayers.add(player);
+            player.setTag(TAG_EDITING, true);
+            player.setTag(SaveState.TAG, saveState);
 
-        player.setGameMode(GameMode.CREATIVE);
+            player.setGameMode(GameMode.CREATIVE);
 
-        // Read from player data
-        var playerTfState = playerData.getTfState();
-        if (playerTfState != null) {
-            PlayerSession.load(player, playerTfState);
-        }
-
-        // Read from savestate
-        player.getInventory().clear();
-        var savedItems = saveState.getInventoryItems();
-        if (savedItems != null) {
-            for (int i = 0; i < savedItems.size(); i++) {
-                player.getInventory().setItemStack(i, savedItems.get(i));
+            // Read from player data
+            var playerTfState = playerData.getTfState();
+            if (playerTfState != null) {
+                PlayerSession.load(player, playerTfState);
             }
+
+            // Read from savestate
+            player.getInventory().clear();
+            var savedItems = saveState.getInventoryItems();
+            if (savedItems != null) {
+                for (int i = 0; i < savedItems.size(); i++) {
+                    player.getInventory().setItemStack(i, savedItems.get(i));
+                }
+            }
+
+            var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
+            player.teleport(pos).join();
+
+            if (saveState.tfState() != null) {
+                var session = LocalSession.load(player, saveState.tfState());
+                logger.log(System.Logger.Level.INFO, "Loaded tf state (selections={0})", session.selectionNames().size());
+            }
+
+            player.sendMessage("Now editing " + map.settings().getName() + " " + map.verification());
         }
 
-        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
-        player.teleport(pos).join();
-
-        if (saveState.tfState() != null) {
-            var session = LocalSession.load(player, saveState.tfState());
-            logger.log(System.Logger.Level.INFO, "Loaded tf state (selections={0})", session.selectionNames().size());
-        }
-
-        player.sendMessage("Now editing " + map.settings().getName());
+        player.refreshCommands(); //todo this should just be done on every instance change
     }
 
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
+        if (map.verification() == MapVerification.PENDING) return;
+
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
-
             try {
                 //todo handle these errors better
                 var playerData = PlayerDataV2.fromPlayer(player);
@@ -272,6 +281,7 @@ public class EditingMapWorld implements InternalMapWorld {
             }
         }
 
+        player.removeTag(SaveState.TAG);
         player.removeTag(TAG_EDITING);
         activePlayers.remove(player);
     }

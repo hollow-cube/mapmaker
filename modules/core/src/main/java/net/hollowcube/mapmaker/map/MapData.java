@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -21,8 +22,8 @@ public class MapData {
 
     private String id;
     private String owner;
-
     private MapSettings settings;
+    private MapVerification verification = MapVerification.UNVERIFIED;
 
     private long publishedId;
     private Instant publishedAt;
@@ -61,6 +62,16 @@ public class MapData {
 
     public @NotNull MapSettings settings() {
         return settings;
+    }
+
+    public boolean needsVerification() {
+        return settings().getVariant() != MapVariant.BUILDING;
+    }
+    public boolean isVerified() {
+        return !needsVerification() || verification == MapVerification.VERIFIED;
+    }
+    public @NotNull MapVerification verification() {
+        return verification;
     }
 
     public boolean isPublished() {

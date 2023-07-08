@@ -26,6 +26,9 @@ public interface MapService {
 
     void deleteMap(@NotNull String authorizer, @NotNull String id);
 
+    void beginVerification(@NotNull String authorizer, @NotNull String mapId);
+    void deleteVerification(@NotNull String authorizer, @NotNull String mapId);
+
     @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id);
 
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);

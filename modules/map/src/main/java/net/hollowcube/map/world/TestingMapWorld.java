@@ -7,7 +7,9 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -26,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class TestingMapWorld implements InternalMapWorld {
+    private static final System.Logger logger = System.getLogger(TestingMapWorld.class.getName());
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_TESTING = Tag.Transient("testing");
@@ -114,6 +117,7 @@ public class TestingMapWorld implements InternalMapWorld {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        System.out.println("NEW SAVE STATE " + saveState.type());
 
         var startingPos = player.getPosition();
         player.teleport(startingPos);
@@ -139,7 +143,24 @@ public class TestingMapWorld implements InternalMapWorld {
         player.removeTag(TAG_TESTING);
         activePlayers.remove(player);
 
-        // We do not currently save testing savestates, should we?
+        // Save their save state if this is a pending verification
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null || map().verification() != MapVerification.PENDING) return;
+
+        saveState.updatePlaytime();
+
+        var update = new SaveStateUpdateRequest();
+        update.setPlaytime(saveState.getPlaytime());
+        update.setCompleted(saveState.isCompleted());
+
+        try {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            parent.server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), update);
+            logger.log(System.Logger.Level.INFO, "Updated testing savestate for {0}", player.getUuid());
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+        }
+
         player.removeTag(SaveState.TAG);
     }
 

@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
+import net.hollowcube.map.world.InternalMapWorld;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.hub.HubServer;
@@ -40,6 +42,11 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
 
     @Override
     public @Blocking void sendPlayerToHub(@NotNull Player player) {
+
+        var world = MapWorld.forPlayerOptional(player);
+        if (world instanceof InternalMapWorld internalWorld) {
+            internalWorld.removePlayer(player);
+        }
         player.setInstance(hub.world().instance(), player.getPosition().withCoord(0.5, 4, 0.5)).join();
     }
 }

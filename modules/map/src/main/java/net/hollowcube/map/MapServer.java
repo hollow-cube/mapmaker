@@ -3,6 +3,7 @@ package net.hollowcube.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface MapServer {
+
+    @NotNull MapToHubBridge bridge();
 
     @NotNull PlayerService playerService();
 

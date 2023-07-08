@@ -6,6 +6,8 @@ import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.Blocking;
@@ -32,10 +34,20 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var world = (TestingMapWorld) MapWorld.forPlayer(player);
 
-        // Not sure what should really happen here, for now just tell them
-        // they completed the map and send them back to editing mode
-        player.sendMessage("Completed map");
-        world.exitTestMode(player);
+        var map = world.map();
+        if (map.verification() == MapVerification.PENDING) {
+            // In this case, they just finished verifying the map. congrats to them.
+            var saveState = SaveState.fromPlayer(player);
+            saveState.setCompleted(true);
+
+            world.server().bridge().sendPlayerToHub(player);
+
+        } else {
+            // Not sure what should really happen here, for now just tell them
+            // they completed the map and send them back to editing mode
+            player.sendMessage("Completed map");
+            world.exitTestMode(player);
+        }
     }
 
 }

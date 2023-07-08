@@ -125,6 +125,11 @@ public abstract class MapServerBase implements MapServer {
 
     private final MapWorldManager mwm = new MapWorldManager(this);
 
+    @Override
+    public @NotNull MapToHubBridge bridge() {
+        return bridge;
+    }
+
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing) {
         mwm.joinMap(player, map, isEditing);
     }

@@ -101,7 +101,39 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 204 -> {/* delete ok */}
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to delete map: " + res.body());
-        };
+        }
+    }
+
+    @Override
+    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
+        logger.log(System.Logger.Level.INFO, "beginning verification for map " + mapId);
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/" + mapId + "/verify"))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {/* verification ok */}
+            case 404 -> throw new NotFoundError(mapId);
+            default -> throw new InternalError("Failed to begin verification: " + res.body());
+        }
+    }
+
+    @Override
+    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
+        logger.log(System.Logger.Level.INFO, "deleting verification for map " + mapId);
+        var req = HttpRequest.newBuilder()
+                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/" + mapId + "/verify"))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {/* deleted */}
+            case 404 -> throw new NotFoundError(mapId);
+            default -> throw new InternalError("Failed to delete verification (" + res.statusCode() + "): " + res.body());
+        }
     }
 
     @Override
