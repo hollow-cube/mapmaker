@@ -5,7 +5,6 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -13,14 +12,14 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -89,6 +88,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo move to some utility
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo move to some utility
+        eventNode.addListener(InstanceTickEvent.class, this::worldTick);
     }
 
     @Override
@@ -234,6 +234,18 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     private void preventBlockPlace(PlayerBlockPlaceEvent event) {
         event.setCancelled(true);
+    }
+
+    private long lastSpectatorUpdate = 0;
+    private final long SPECTATOR_MSG_DELAY_MS = 1000;
+    private void worldTick(InstanceTickEvent event) {
+        lastSpectatorUpdate += event.getDuration();
+        if (lastSpectatorUpdate > SPECTATOR_MSG_DELAY_MS) {
+            lastSpectatorUpdate = 0;
+            for (Player player : spectatingPlayers) {
+                player.sendActionBar(Component.text("Currently Spectating", NamedTextColor.GRAY));
+            }
+        }
     }
 
     private @NotNull String getDimensionName() {
