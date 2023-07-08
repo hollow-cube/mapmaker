@@ -7,7 +7,7 @@
             <box width="9" height="1" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
-                <label width="5" translationKey="todo"/>
+                <label width="5" translationKey="gui.create_maps.map_slot"/>
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_info_tab.manage_builders"
                         sprite="create_maps/tab_info/manage_builders"/>
@@ -152,7 +152,7 @@
             <box width="9" height="1">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
-                <label width="5" translationKey="todo"/>
+                <label width="5" translationKey="gui.create_maps.map_slot"/>
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_actions_tab.map_backups"
                         sprite="create_maps/tab_actions/idk1"/>

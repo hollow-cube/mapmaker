@@ -165,7 +165,11 @@ public class EditMap extends View {
 
     @Signal(SetMapName.SIG_UPDATE_NAME)
     private @NonBlocking void finishUpdateMapName(@NotNull String newName) {
-        map.settings().setName(newName);
+        int maxLength = 20;
+        //TODO make this only update the display of the name in the GUI, appending ... to the end, and not messing with the actual name
+        String limitedName = newName.length() > maxLength ? newName.substring(0, maxLength): newName;
+
+        map.settings().setName(limitedName);
         updateElementsFromMap();
 
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
