@@ -148,4 +148,9 @@ public class MapServiceMemory implements MapService {
     public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         logger.log(System.Logger.Level.WARNING, "MapServiceMemory.updateSaveState is a noop currently");
     }
+
+    @Override
+    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.deleteSaveState is a noop currently");
+    }
 }

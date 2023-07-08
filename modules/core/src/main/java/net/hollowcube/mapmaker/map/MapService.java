@@ -4,8 +4,6 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 @Blocking
 public interface MapService {
 
@@ -41,6 +39,7 @@ public interface MapService {
     @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
     @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
     void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+    void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {

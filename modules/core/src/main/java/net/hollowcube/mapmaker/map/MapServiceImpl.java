@@ -254,4 +254,15 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         throw new InternalError("Failed to update savestate: " + res.body());
     }
 
+    @Override
+    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
+        var req = HttpRequest.newBuilder()
+                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 204) return; // Ok
+        throw new InternalError("Failed to delete savestate: " + res.body());
+    }
 }

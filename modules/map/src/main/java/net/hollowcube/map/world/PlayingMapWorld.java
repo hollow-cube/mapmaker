@@ -5,6 +5,7 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -74,6 +75,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
+        eventNode.addChild(PlayingMapHotbar.eventNode());
 
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo move to some utility
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo move to some utility
@@ -148,11 +150,14 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setTag(SaveState.TAG, saveState);
         player.refreshCommands();
         player.setTeam(PLAYING_TEAM);
+        player.setGameMode(GameMode.ADVENTURE);
 
         player.getInventory().clear();
-        player.setGameMode(GameMode.ADVENTURE);
+        PlayingMapHotbar.applyToPlayer(player);
+
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
+
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
         player.sendMessage("Now playing " + map.settings().getName());
@@ -168,6 +173,10 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
+        removePlayer(player, true);
+    }
+
+    public @Blocking void removePlayer(@NotNull Player player, boolean save) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 
         player.removeTag(TAG_PLAYING);
@@ -175,22 +184,26 @@ public class PlayingMapWorld implements InternalMapWorld {
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
 
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState == null) return;
+        if (save) {
+            var saveState = SaveState.optionalFromPlayer(player);
+            if (saveState == null) return;
 
-        saveState.updatePlaytime();
+            saveState.updatePlaytime();
 
-        var update = new SaveStateUpdateRequest();
-        update.setPlaytime(saveState.getPlaytime());
-        update.setCompleted(saveState.isCompleted());
+            var update = new SaveStateUpdateRequest();
+            update.setPlaytime(saveState.getPlaytime());
+            update.setCompleted(saveState.isCompleted());
 
-        try {
-            var playerData = PlayerDataV2.fromPlayer(player);
-            server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
-            logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
-        } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+            try {
+                var playerData = PlayerDataV2.fromPlayer(player);
+                server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
+                logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+            }
         }
+
+        player.removeTag(SaveState.TAG);
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {

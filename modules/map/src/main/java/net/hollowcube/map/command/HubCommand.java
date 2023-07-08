@@ -28,6 +28,7 @@ public class HubCommand extends BaseMapCommand {
             return;
         }
 
+        //todo this code is duplicated hella
         try {
             sender.sendMessage("Returning to hub");
 
