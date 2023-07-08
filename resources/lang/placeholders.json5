@@ -13,6 +13,14 @@
     "type": "sprite",
     "ref": "icon/warning"
   },
+  "CHECKMARK": {
+    "type": "sprite",
+    "ref": "icon/checkmark"
+  },
+  "XMARK": {
+    "type": "sprite",
+    "ref": "icon/xmark"
+  },
   "LOCK": {
     "type": "sprite",
     "ref": "icon/lock"
