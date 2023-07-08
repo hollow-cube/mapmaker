@@ -39,7 +39,7 @@ public class MapData {
     private record PointOfInterest(String type, Vec pos) {
     }
 
-    private int maxPois = 5; //todo once map service sets this default it can be unset here
+    private int maxPois = 100; //todo once map service sets this default it can be unset here
     private List<PointOfInterest> pois;
     private transient final ReentrantLock poiLock = new ReentrantLock();
 

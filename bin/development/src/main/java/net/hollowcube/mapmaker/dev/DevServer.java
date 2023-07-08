@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -295,6 +296,8 @@ public class DevServer {
             var player = event.getPlayer();
             var playerData = PlayerDataV2.fromPlayer(player);
 
+            Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
+
             try {
                 //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
                 sessionService.deleteSession(playerData.id());
@@ -314,6 +317,9 @@ public class DevServer {
 //        player.setPermissionLevel(4);
 //        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.5f);
 
+        var playerData = PlayerDataV2.fromPlayer(player);
+        Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
+
         // Alpha watermark
         var runtime = ServerRuntime.getRuntime();
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
@@ -325,7 +331,6 @@ public class DevServer {
 
         Thread.startVirtualThread(() -> {
             if (System.getenv("MAPMAKER_AUTOCREATE_PUBLISHED") != null) {
-                var playerData = PlayerDataV2.fromPlayer(player);
                 if (playerData.getSlotState(0) != SlotState.EMPTY)
                     return;
 
@@ -339,7 +344,6 @@ public class DevServer {
             if (System.getenv("MAPMAKER_AUTOEDIT_MAP") != null) {
 
                 MapData map;
-                var playerData = PlayerDataV2.fromPlayer(player);
                 if (playerData.getSlotState(0) != SlotState.FILLED) {
                     map = hub.handler().createMapForPlayerInSlot(playerData, 0);
                 } else {
@@ -411,4 +415,5 @@ public class DevServer {
 //                .schedule();
 
     }
+
 }
