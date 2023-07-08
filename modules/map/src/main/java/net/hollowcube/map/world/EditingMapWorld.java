@@ -329,4 +329,8 @@ public class EditingMapWorld implements InternalMapWorld {
         return saveState.getUpdateRequest();
     }
 
+    @Override
+    public @NotNull Set<Player> players() {
+        return activePlayers;
+    }
 }

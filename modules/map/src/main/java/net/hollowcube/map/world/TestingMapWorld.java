@@ -176,4 +176,9 @@ public class TestingMapWorld implements InternalMapWorld {
         // add to the test world
         parent.acceptPlayer(player);
     }
+
+    @Override
+    public @NotNull Set<Player> players() {
+        return activePlayers;
+    }
 }

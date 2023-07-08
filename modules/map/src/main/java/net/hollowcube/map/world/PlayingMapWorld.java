@@ -205,4 +205,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         return String.format("mapmaker:map/%s/p", map.id().substring(0, 8));
     }
 
+    @Override
+    public @NotNull Set<Player> players() {
+        return activePlayers;
+    }
 }

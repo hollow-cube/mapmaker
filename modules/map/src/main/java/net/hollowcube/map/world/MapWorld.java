@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static net.hollowcube.map.world.InternalMapWorld.SELF_TAG;
 
@@ -54,5 +55,7 @@ public interface MapWorld {
     @NotNull ItemRegistry itemRegistry();
 
     void addScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode);
+
+    @NotNull Set<Player> players();
 
 }
