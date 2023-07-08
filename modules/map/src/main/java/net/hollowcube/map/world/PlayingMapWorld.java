@@ -7,11 +7,12 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -23,6 +24,8 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.Team;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +38,11 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
+
+    private static final Team PLAYING_TEAM = MinecraftServer.getTeamManager()
+            .createBuilder("playing-team")
+            .collisionRule(TeamsPacket.CollisionRule.NEVER)
+            .build();
 
     private final MapServer server;
     private final MapData map;
@@ -139,6 +147,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setTag(MapHooks.PLAYING, true); // Legacy
         player.setTag(SaveState.TAG, saveState);
         player.refreshCommands();
+        player.setTeam(PLAYING_TEAM);
 
         player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
