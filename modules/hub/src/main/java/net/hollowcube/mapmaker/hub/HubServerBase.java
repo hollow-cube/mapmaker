@@ -71,8 +71,7 @@ public abstract class HubServerBase implements HubServer {
         this.world = new HubWorld(this);
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
-
-        System.out.println("REGISTERING MAP COMMANDS");
+        
         var commands = MinecraftServer.getCommandManager();
         commands.register(new MapV2Command(mapService(), mapHandler));
     }
