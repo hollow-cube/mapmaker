@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -184,7 +185,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
         player.sendMessage("Now playing " + map.settings().getName());
-        saveState.setPlayStartTime(instance.getWorldAge());
+        saveState.setPlayStartTime(System.currentTimeMillis());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
@@ -216,12 +217,13 @@ public class PlayingMapWorld implements InternalMapWorld {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            saveState.getPlaytime(instance.getWorldAge()); // Triggers update
-            saveState.setCompleted(true);
+            saveState.updatePlaytime();
+
+            var update = new SaveStateUpdateRequest();
+            update.setPlaytime(saveState.getPlaytime());
+            update.setCompleted(saveState.isCompleted());
 
             try {
-                var update = saveState.getUpdateRequest();
-
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
                 logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
