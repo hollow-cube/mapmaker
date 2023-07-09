@@ -1,6 +1,7 @@
 package net.hollowcube.map.gui.hotbar;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -80,12 +81,14 @@ public final class PlayingMapHotbar {
                     // Delete the save state
                     var saveState = SaveState.optionalFromPlayer(player);
                     if (saveState != null) {
+                        player.removeTag(MapHooks.PLAYING);
                         saveState.setPlaytime(0);
                         saveState.setPlayStartTime(System.currentTimeMillis());
                         saveState.setCompleted(false);
                         player.teleport(world.map().settings().getSpawnPoint()).join();
                         EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
                         //todo this will not clear effects or anything, i guess the plate fp will have to do that
+                        player.setTag(MapHooks.PLAYING, true);
                     } else {
                         // The player has no save state because they are spectating, so just re-add them to the server
                         playingWorld.removePlayer(player, false);

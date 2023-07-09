@@ -85,6 +85,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new HubCommand(bridge));
         commandManager.register(new GiveCommand());
         commandManager.register(new SetSpawnCommand());
+        commandManager.register(new SpawnCommand());
         commandManager.register(new ClearInventoryCommand());
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());

@@ -47,18 +47,19 @@ public class PlayMaps extends View {
     public PlayMaps(@NotNull Context context) {
         super(context);
 
+        updateQuery(false);
     }
 
     @Signal(FilterParkourToggle.SIG_TOGGLE)
     private void handleParkourToggle(boolean selected) {
         parkour = selected;
-        updateQuery();
+        updateQuery(true);
     }
 
     @Signal(FilterBuildingToggle.SIG_TOGGLE)
     private void handleBuildingToggle(boolean selected) {
         building = selected;
-        updateQuery();
+        updateQuery(true);
     }
 
     @Signal(SortBestToggle.SIG_TOGGLE)
@@ -102,10 +103,10 @@ public class PlayMaps extends View {
         if (!selected) return;
 
         sortPreset = SortPreset.RECENT;
-        updateQuery();
+        updateQuery(true);
     }
 
-    private void updateQuery() {
+    private void updateQuery(boolean refresh) {
         parkourToggle.setSelected(parkour);
         buildingToggle.setSelected(building);
 
@@ -115,7 +116,7 @@ public class PlayMaps extends View {
         boostedToggle.setSelected(sortPreset == SortPreset.BOOSTED);
         recentToggle.setSelected(sortPreset == SortPreset.RECENT);
 
-        pagination.reset();
+        if (refresh) pagination.reset();
     }
 
     // OLD STUFF
@@ -129,8 +130,6 @@ public class PlayMaps extends View {
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
             var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, building, parkour, "");
-
-            System.out.println(Thread.currentThread());
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
