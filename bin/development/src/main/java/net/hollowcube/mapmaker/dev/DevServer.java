@@ -38,6 +38,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.Material;
+import net.minestom.server.resourcepack.ResourcePack;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -54,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
     private static final System.Logger logger = System.getLogger(DevServer.class.getName());
+
+    private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
 
     public static void main(String[] args) {
         long start = System.nanoTime();
@@ -312,6 +315,18 @@ public class DevServer {
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
         var player = event.getPlayer();
+
+        // Send resource pack if present
+        var runtime = ServerRuntime.getRuntime();
+        var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
+        if (!resourcePackHash.equals("dev")) {
+            player.setResourcePack(ResourcePack.forced(
+                    String.format(RESOURCE_PACK_URL, runtime.commit()),
+                    resourcePackHash
+            ));
+        }
+
+
 //        player.setGameMode(GameMode.CREATIVE);
 //        player.setAllowFlying(true);
 //        player.setPermissionLevel(4);
@@ -321,7 +336,6 @@ public class DevServer {
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
         // Alpha watermark
-        var runtime = ServerRuntime.getRuntime();
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
