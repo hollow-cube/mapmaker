@@ -1,5 +1,6 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
@@ -13,8 +14,8 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -23,7 +24,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -41,6 +41,8 @@ import java.util.*;
 
 public class PlayingMapWorld implements InternalMapWorld {
     private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
+
+    private static final BadSprite SPECTATOR_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/spectator"));
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
@@ -77,13 +79,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 
-        // Controls player visibility
-        instance.scheduler().buildTask(() -> {
-            for (Player p : players()) {
-                p.updateViewableRule();
-            }
-        }).repeat(TaskSchedule.tick(5)).schedule();
-
         var eventNode = instance.eventNode();
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
@@ -92,7 +87,15 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo move to some utility
         eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo move to some utility
-        eventNode.addListener(InstanceTickEvent.class, this::worldTick);
+
+        instance.scheduler().buildTask(this::updateSpectators)
+                .repeat(TaskSchedule.seconds(1))
+                .schedule();
+
+        // Controls player visibility
+        instance.scheduler().buildTask(this::updateViewership)
+                .repeat(TaskSchedule.tick(5))
+                .schedule();
     }
 
     @Override
@@ -240,18 +243,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         event.setCancelled(true);
     }
 
-    private long lastSpectatorUpdate = 0;
-    private final long SPECTATOR_MSG_DELAY_MS = 1000;
-    private void worldTick(InstanceTickEvent event) {
-        lastSpectatorUpdate += event.getDuration();
-        if (lastSpectatorUpdate > SPECTATOR_MSG_DELAY_MS) {
-            lastSpectatorUpdate = 0;
-            for (Player player : spectatingPlayers) {
-                player.sendActionBar(Component.text("Currently Spectating", NamedTextColor.GRAY));
-            }
-        }
-    }
-
     private @NotNull String getDimensionName() {
         return String.format("mapmaker:map/%s/p", map.id().substring(0, 8));
     }
@@ -259,5 +250,18 @@ public class PlayingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Set<Player> players() {
         return activePlayers;
+    }
+
+    private void updateViewership() {
+        for (Player p : players()) {
+            p.updateViewableRule();
+        }
+    }
+
+    private void updateSpectators() {
+        for (var player : spectatingPlayers) {
+            player.sendActionBar(Component.text(SPECTATOR_SPRITE.fontChar(), FontUtil.NO_SHADOW));
+            player.setInvisible(true);
+        }
     }
 }
