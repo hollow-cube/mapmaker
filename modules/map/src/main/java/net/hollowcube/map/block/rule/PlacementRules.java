@@ -64,8 +64,6 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.PURPUR_PILLAR));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.QUARTZ_PILLAR));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.DEEPSLATE));
-        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEE_NEST));
-        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEEHIVE));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.CHAIN));
 
         // Facing
@@ -73,6 +71,8 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LECTERN, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.JACK_O_LANTERN, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.CARVED_PUMPKIN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BEEHIVE, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BEE_NEST, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.FURNACE, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BLAST_FURNACE, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.STONECUTTER, true));
