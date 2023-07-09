@@ -9,7 +9,6 @@ import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
@@ -147,13 +146,12 @@ public class TestingMapWorld implements InternalMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || map().verification() != MapVerification.PENDING) return;
 
-        saveState.updatePlaytime();
-
-        var update = new SaveStateUpdateRequest();
-        update.setPlaytime(saveState.getPlaytime());
-        update.setCompleted(saveState.isCompleted());
+        saveState.getPlaytime(instance.getWorldAge()); // Triggers update
+        saveState.setCompleted(true);
 
         try {
+            var update = saveState.getUpdateRequest();
+
             var playerData = PlayerDataV2.fromPlayer(player);
             parent.server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), update);
             logger.log(System.Logger.Level.INFO, "Updated testing savestate for {0}", player.getUuid());

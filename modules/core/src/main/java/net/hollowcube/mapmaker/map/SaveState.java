@@ -35,7 +35,7 @@ public class SaveState {
     private Instant lastModified;
     private boolean completed;
     private long playtime;
-    private transient long playStartTime;
+    private transient long playStartTimeTick;
 
     // Common to play and edit
     private Pos pos = null;
@@ -91,23 +91,19 @@ public class SaveState {
         this.completed = completed;
     }
 
-    public long getPlaytime() {
+    // Returns playtime in ticks
+    public long getPlaytime(long currentTick) {
+        if (playStartTimeTick == 0) return playtime;
+        setPlaytime(playtime + ((currentTick - playStartTimeTick) * 50));
+        playStartTimeTick = currentTick;
         return playtime;
     }
     public void setPlaytime(long playtime) {
         updates.setPlaytime(playtime);
         this.playtime = playtime;
     }
-    public long getPlayStartTime() {
-        return playStartTime;
-    }
     public void setPlayStartTime(long playStartTime) {
-        this.playStartTime = playStartTime;
-    }
-    public void updatePlaytime() {
-        if (playStartTime == 0) return;
-        setPlaytime(playtime + System.currentTimeMillis() - playStartTime);
-        playStartTime = System.currentTimeMillis();
+        this.playStartTimeTick = playStartTime;
     }
 
     public @Nullable Pos pos() {

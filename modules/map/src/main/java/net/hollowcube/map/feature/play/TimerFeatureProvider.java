@@ -2,6 +2,7 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -9,6 +10,9 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
@@ -28,29 +32,43 @@ public class TimerFeatureProvider implements FeatureProvider {
         var instance = world.instance();
         instance.scheduler()
                 .buildTask(() -> sendTimerActionBar(world))
-                .repeat(2, net.minestom.server.utils.time.TimeUnit.SERVER_TICK)
+                .repeat(1, net.minestom.server.utils.time.TimeUnit.SERVER_TICK)
                 .schedule();
+
+        world.addScopedEventNode(EventNode.type("balwhdf", EventFilter.INSTANCE)
+                .addListener(MapWorldCompleteEvent.class, this::onComplete));
 
         return true;
     }
 
+    public void onComplete(@NotNull MapWorldCompleteEvent event) {
+        var player = event.getPlayer();
+        sendPlaytime(player, event.getMapWorld().instance().getWorldAge());
+    }
+
     private void sendTimerActionBar(@NotNull MapWorld world) {
+        var worldTime = world.instance().getWorldAge();
+
         for (var player : world.players()) {
-            var text = new StringBuilder();
-            text.append(TIMER_CONTAINER.fontChar());
-            text.append(FontUtil.computeOffset(-52));
-
-            var saveState = SaveState.fromPlayer(player);
-            var time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
-
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-            long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
-
-            var a = String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
-            text.append(a);
-
-            player.sendActionBar(Component.text(text.toString(), TextColor.color(78, 92, 36)));
+            sendPlaytime(player, worldTime);
         }
+    }
+
+    private void sendPlaytime(@NotNull Player player, long worldTime) {
+        var text = new StringBuilder();
+        text.append(TIMER_CONTAINER.fontChar());
+        text.append(FontUtil.computeOffset(-52));
+
+        var saveState = SaveState.fromPlayer(player);
+        var timeMs = saveState.getPlaytime(worldTime);
+
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(timeMs);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(timeMs) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeMs));
+        long milliseconds = timeMs - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
+
+        var a = String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+        text.append(a);
+
+        player.sendActionBar(Component.text(text.toString(), TextColor.color(78, 92, 36)));
     }
 }
