@@ -13,6 +13,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteService;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.map.MapData;
@@ -136,8 +137,8 @@ public abstract class MapServerBase implements MapServer {
         return bridge;
     }
 
-    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing, boolean isSpectating) {
-        mwm.joinMap(player, map, isEditing, isSpectating);
+    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {
+        mwm.joinMap(player, map, joinMapState);
     }
 
     private void handleSpawn(@NotNull PlayerSpawnEvent event) {
@@ -180,5 +181,6 @@ public abstract class MapServerBase implements MapServer {
     public void shutdown() {
         mwm.shutdown();
     }
+
 
 }

@@ -2,6 +2,8 @@ package net.hollowcube.map.world;
 
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.MapServerBase;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.MinecraftServer;
@@ -44,7 +46,8 @@ public class MapWorldManager {
         });
     }
 
-    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, boolean isEditing, boolean isSpectating) {
+    public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {
+        boolean isEditing = joinMapState == HubToMapBridge.JoinMapState.EDITING;
         var activeWorld = activeMaps.get(new Pair<>(map.id(), isEditing));
 
         // Create a new world if there is not one present
@@ -63,9 +66,8 @@ public class MapWorldManager {
 
             // spawn in minestom instance & then notify world
             player.setInstance(world.instance(), world.spawnPoint()).join();
-            // TODO: This is bad and should be changed
-            // Don't have 2 booleans to determine state, use an Enum or something else, and also have the spectate functionality extracted to InternalMapWorld (probably)
-            if (isSpectating && world instanceof PlayingMapWorld playingMapWorld) {
+            // Have the spectate functionality extracted to InternalMapWorld (probably)
+            if (joinMapState == HubToMapBridge.JoinMapState.SPECTATING && world instanceof PlayingMapWorld playingMapWorld) {
                 playingMapWorld.startSpectating(player, false);
             } else {
                 world.acceptPlayer(player, true);
