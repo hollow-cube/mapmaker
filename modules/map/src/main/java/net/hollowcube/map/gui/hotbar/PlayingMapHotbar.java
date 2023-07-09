@@ -1,6 +1,7 @@
 package net.hollowcube.map.gui.hotbar;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -8,6 +9,7 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerUseItemEvent;
@@ -77,13 +79,23 @@ public final class PlayingMapHotbar {
 
                     // Delete the save state
                     var saveState = SaveState.optionalFromPlayer(player);
-                    if (saveState != null) {
-                        mapService.deleteSaveState(world.map().id(), playerData.id(), saveState.id());
-                    }
+                    if (saveState == null) return;
+
+                    saveState.setPlaytime(0);
+                    saveState.setPlayStartTime(System.currentTimeMillis());
+                    saveState.setCompleted(false);
+                    player.teleport(world.map().settings().getSpawnPoint()).join();
+                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                    //todo this will not clear effects or anything, i guess the plate fp will have to do that
+
+
+//                    if (saveState != null) {
+//                        mapService.deleteSaveState(world.map().id(), playerData.id(), saveState.id());
+//                    }
 
                     // Remove and re-add the player without re-saving the savestate
-                    playingWorld.removePlayer(player, false);
-                    playingWorld.acceptPlayer(player, false);
+//                    playingWorld.removePlayer(player, false);
+//                    playingWorld.acceptPlayer(player, false);
                 }
             }
             case HUB_CMD -> {

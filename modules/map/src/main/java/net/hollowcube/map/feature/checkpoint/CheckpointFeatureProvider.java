@@ -4,7 +4,10 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.*;
+import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
+import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
+import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.item.ItemHandler;
@@ -132,6 +135,10 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 //                            .exceptionally(FutureUtil::handleException);
             future = CompletableFuture.completedFuture(null);
         }
+
+        saveState.setPlaytime(0);
+        saveState.setPlayStartTime(System.currentTimeMillis());
+        saveState.setCompleted(false);
 
         future.thenAccept(unused -> EventDispatcher.call(new MapPlayerInitEvent(event.mapWorld(), player, false)))
                 .exceptionally(FutureUtil::handleException);
