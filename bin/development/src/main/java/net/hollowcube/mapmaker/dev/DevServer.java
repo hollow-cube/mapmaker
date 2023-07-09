@@ -320,10 +320,9 @@ public class DevServer {
         var runtime = ServerRuntime.getRuntime();
         var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
         if (!resourcePackHash.equals("dev")) {
-            player.setResourcePack(ResourcePack.forced(
-                    String.format(RESOURCE_PACK_URL, runtime.commit()),
-                    resourcePackHash
-            ));
+            var url = String.format(RESOURCE_PACK_URL, runtime.commit());
+            System.out.println("Sending resource pack " + url + " (" + resourcePackHash + ")");
+            player.setResourcePack(ResourcePack.forced(url, resourcePackHash));
         }
 
 //        player.setGameMode(GameMode.CREATIVE);
