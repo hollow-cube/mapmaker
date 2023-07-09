@@ -37,6 +37,7 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.resourcepack.ResourcePack;
 import org.eclipse.microprofile.health.HealthCheck;
@@ -370,6 +371,7 @@ public class DevServer {
                 }
                 MinecraftServer.getCommandManager().execute(player, "tool create wand");
                 MinecraftServer.getCommandManager().execute(player, "sel type line");
+                player.getInventory().addItemStack(ItemStack.of(Material.POINTED_DRIPSTONE));
             }
         });
 

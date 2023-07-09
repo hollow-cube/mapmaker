@@ -247,5 +247,8 @@ public final class PlacementRules {
         for (var signId : BlockTags.MINECRAFT_STANDING_SIGNS.getValues()) {
             blockManager.registerBlockPlacementRule(new SignPlacementRule(Block.fromNamespaceId(signId)));
         }
+
+        // Dripstone
+        blockManager.registerBlockPlacementRule(new DripstonePlacementRule());
     }
 }
