@@ -19,6 +19,12 @@ public interface ServerRuntime {
         return "dev";
     }
 
+    default @NotNull String shortCommit() {
+        if (commit().length() < 7)
+            return commit();
+        return commit().substring(0, 7);
+    }
+
     /**
      * Returns some identifier of the current instance.
      * For example in a Kubernetes environment the pod name would work.

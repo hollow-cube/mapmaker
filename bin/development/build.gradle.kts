@@ -63,7 +63,7 @@ blossom {
 
     val commitHash = System.getenv("COMMIT_SHA")
     if (commitHash != null) {
-        replaceToken("{MAPMAKER_COMMIT}", commitHash.substring(0..6))
+        replaceToken("{MAPMAKER_COMMIT}", commitHash)
     } else {
         replaceToken("{MAPMAKER_COMMIT}", "dev")
     }

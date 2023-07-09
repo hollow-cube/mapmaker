@@ -334,7 +334,7 @@ public class DevServer {
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
         // Alpha watermark
-        String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
+        String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);

@@ -17,7 +17,6 @@ public class DevRuntime implements ServerRuntime {
         return "{MAPMAKER_COMMIT}";
     }
 
-
     @Override
     public @NotNull String minestom() {
         return "{MINESTOM_VERSION}";
