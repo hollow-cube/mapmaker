@@ -8,7 +8,14 @@ import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
+import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -16,8 +23,11 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -75,7 +85,45 @@ public final class HubHotbar {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!(event.getTarget() instanceof Player)) return;
         if (player.getItemInMainHand().meta().getCustomModelData() != CREATE_ITEM_CMD) return;
+
         player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, ThreadLocalRandom.current().nextFloat(0.9f, 1.1f)), Sound.Emitter.self());
+
+        spawnBonkEntity(event.getInstance(), event.getTarget().getPosition(), player);
+    }
+
+    private static void spawnBonkEntity(Instance instance, Point position, Player viewer) {
+        var random = ThreadLocalRandom.current();
+        var bonkEntity = new Entity(EntityType.TEXT_DISPLAY);
+        bonkEntity.setNoGravity(true);
+        bonkEntity.setAutoViewable(false);
+        bonkEntity.addViewer(viewer);
+        var meta = (TextDisplayMeta) bonkEntity.getEntityMeta();
+        meta.setNotifyAboutChanges(false);
+        meta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
+        meta.setShadow(true);
+        meta.setBackgroundColor(0);
+        meta.setScale(new Vec(0.75, 0.75, 1));
+        meta.setNotifyAboutChanges(true);
+        bonkEntity.setInstance(instance, position.add(random.nextDouble(-1, 1), random.nextDouble(2, 2.5), random.nextDouble(-1, 1)));
+
+        bonkEntity.scheduler().buildTask(() -> doBonkAnimation(meta))
+                .delay(TaskSchedule.tick(3))
+                .repeat(TaskSchedule.tick(4))
+                .schedule();
+        bonkEntity.scheduleRemove(10, TimeUnit.SERVER_TICK);
+    }
+
+    private static void doBonkAnimation(TextDisplayMeta meta) {
+        meta.setNotifyAboutChanges(false);
+        meta.setText(Component.text("BONK!", NamedTextColor.RED));
+        meta.setInterpolationDuration(3);
+        meta.setInterpolationStartDelta(0);
+        if (meta.getScale().x() == 0.75) {
+            meta.setScale(new Vec(1.5, 1.5, 1));
+        } else {
+            meta.setScale(new Vec(1.2, 1.2, 1));
+        }
+        meta.setNotifyAboutChanges(true);
     }
 
     private static void handleItemDrop(@NotNull ItemDropEvent event) {

@@ -1,7 +1,7 @@
 metadata.format.version = "1.1"
 
 [versions]
-minestom = "3dbf364340"
+minestom = "d47db72421"
 polar = "1.2.0"
 
 [libraries]
