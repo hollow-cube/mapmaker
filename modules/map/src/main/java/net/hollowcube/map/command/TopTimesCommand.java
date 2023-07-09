@@ -2,17 +2,27 @@ package net.hollowcube.map.command;
 
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class TopTimesCommand extends BaseMapCommand {
     private final PlayerService playerService;
     private final MapService mapService;
+    private final Argument<UUID> mapIdArg = ArgumentType.UUID("map-id");
 
     public TopTimesCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("toptimes", "tt");
@@ -20,6 +30,7 @@ public class TopTimesCommand extends BaseMapCommand {
         this.mapService = mapService;
 
         setDefaultExecutor(this::showTopTimes);
+        addSyntax(this::showTopTimesOfMap, mapIdArg);
     }
 
     private void showTopTimes(@NotNull CommandSender sender, @NotNull CommandContext unused) {
@@ -28,11 +39,34 @@ public class TopTimesCommand extends BaseMapCommand {
             return;
         }
 
-        var world = MapWorld.forPlayer(player);
-        //todo should not run for non-map worlds
+        var playerData = PlayerDataV2.fromPlayer(player);
+        // TODO Find a better method for determining if the player is in the hub
+        if (true) {
+            // Player is in hub, check their last played
+            String mapId = playerData.getLastPlayedMap();
+            if (mapId == null || mapId.isBlank()) {
+                player.sendMessage(Component.text("Unable to check last played map times.", NamedTextColor.RED));
+            } else {
+                var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerData.id());
+                formatAndSendLeaderboardData(player, playerData, leaderboard);
+            }
+        } else {
+            var world = MapWorld.forPlayer(player);
+            var leaderboard = mapService.getPlaytimeLeaderboard(world.map().id(), playerData.id());
+            formatAndSendLeaderboardData(player, playerData, leaderboard);
+        }
+    }
+
+
+    private void showTopTimesOfMap(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
+            return;
+        }
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        var leaderboard = mapService.getPlaytimeLeaderboard(world.map().id(), playerData.id());
+        UUID id = context.get(mapIdArg);
+        LeaderboardData data = mapService.getPlaytimeLeaderboard(id.toString(), playerData.id());
 
         var messages = leaderboard.toComponents(playerService, false);
         if (messages == null) {
