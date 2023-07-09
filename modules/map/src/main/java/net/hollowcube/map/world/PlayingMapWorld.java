@@ -217,7 +217,6 @@ public class PlayingMapWorld implements InternalMapWorld {
             if (saveState == null) return;
 
             saveState.getPlaytime(instance.getWorldAge()); // Triggers update
-            saveState.setCompleted(true);
 
             try {
                 var update = saveState.getUpdateRequest();
