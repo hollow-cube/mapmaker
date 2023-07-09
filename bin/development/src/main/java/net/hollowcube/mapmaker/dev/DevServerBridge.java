@@ -29,7 +29,7 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     //
 
     @Override
-    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, JoinMapState joinMapState) {
+    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
         var playerData = PlayerDataV2.fromPlayer(player);
         var map = mapServer.mapService().getMap(playerData.id(), mapId);
         ((MapServerBase) mapServer).joinMap(player, map, joinMapState);
