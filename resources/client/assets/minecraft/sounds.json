@@ -1,0 +1,7 @@
+{
+  "item.toy.squeak": {
+    "category": "master",
+    "subtitle": "Toy squeaks",
+    "sounds": ["custom/toysqueak"]
+  }
+}

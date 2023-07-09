@@ -5,10 +5,13 @@ import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.gui.play.PlayMaps;
 import net.hollowcube.mapmaker.hub.gui.play.Query;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -25,7 +28,8 @@ public final class HubHotbar {
 
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub/hotbar", EventFilter.INSTANCE)
             .addListener(PlayerUseItemEvent.class, HubHotbar::handleUseItem)
-            .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock);
+            .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock)
+            .addListener(EntityAttackEvent.class, HubHotbar::handleHitPlayer);
 
     private static final int PLAY_ITEM_CMD = 500;
     private static final int CREATE_ITEM_CMD = 3;
@@ -67,6 +71,12 @@ public final class HubHotbar {
             case PLAY_ITEM_CMD -> server.newOpenGUI(player, c -> new PlayMaps(c.with(Map.of("query", new Query()))));
             case CREATE_ITEM_CMD -> server.newOpenGUI(player, CreateMaps::new);
         }
+    }
+
+    private static void handleHitPlayer(@NotNull EntityAttackEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getTarget() instanceof Player)) return;
+        player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, 1f), Sound.Emitter.self());
     }
 
 }
