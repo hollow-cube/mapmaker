@@ -326,11 +326,6 @@ public class DevServer {
             player.setResourcePack(ResourcePack.forced(url, resourcePackHash));
         }
 
-//        player.setGameMode(GameMode.CREATIVE);
-//        player.setAllowFlying(true);
-//        player.setPermissionLevel(4);
-//        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.5f);
-
         var playerData = PlayerDataV2.fromPlayer(player);
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 

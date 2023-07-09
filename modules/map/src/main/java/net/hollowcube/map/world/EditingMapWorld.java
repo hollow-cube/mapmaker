@@ -271,6 +271,7 @@ public class EditingMapWorld implements InternalMapWorld {
                 var saveStateUpdate = updateSaveState(player, saveState);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
 
+                playerData.setLastEditedMap(map.id());
                 playerData.setTfState(PlayerSession.save(player));
                 server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
 
