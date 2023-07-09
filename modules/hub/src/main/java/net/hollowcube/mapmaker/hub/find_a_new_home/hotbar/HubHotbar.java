@@ -12,7 +12,10 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -20,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class HubHotbar {
     private HubHotbar() {
@@ -27,7 +31,10 @@ public final class HubHotbar {
 
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub/hotbar", EventFilter.INSTANCE)
             .addListener(PlayerUseItemEvent.class, HubHotbar::handleUseItem)
-            .addListener(EntityAttackEvent.class, HubHotbar::handleHitPlayer);
+            .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock)
+            .addListener(EntityAttackEvent.class, HubHotbar::handleHitPlayer)
+            .addListener(ItemDropEvent.class, HubHotbar::handleItemDrop)
+            .addListener(InventoryPreClickEvent.class, HubHotbar::handleItemClick);
 
     private static final int PLAY_ITEM_CMD = 500;
     private static final int CREATE_ITEM_CMD = 3;
@@ -58,6 +65,11 @@ public final class HubHotbar {
         handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
     }
 
+    private static void handleUseItemOnBlock(@NotNull PlayerUseItemOnBlockEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+        handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
+    }
+
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         switch (customModelData) {
@@ -69,7 +81,15 @@ public final class HubHotbar {
     private static void handleHitPlayer(@NotNull EntityAttackEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!(event.getTarget() instanceof Player)) return;
-        player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, 1f), Sound.Emitter.self());
+        if (player.getItemInMainHand().meta().getCustomModelData() != CREATE_ITEM_CMD) return;
+        player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, ThreadLocalRandom.current().nextFloat(0.9f, 1.1f)), Sound.Emitter.self());
+    }
+
+    private static void handleItemDrop(@NotNull ItemDropEvent event) {
+        event.setCancelled(true);
+    }
+    private static void handleItemClick(@NotNull InventoryPreClickEvent event) {
+        event.setCancelled(true);
     }
 
 }
