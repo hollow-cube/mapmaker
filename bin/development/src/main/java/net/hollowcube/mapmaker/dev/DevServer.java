@@ -12,6 +12,7 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
@@ -26,7 +27,6 @@ import net.hollowcube.mapmaker.map.MapServiceMemory;
 import net.hollowcube.mapmaker.player.*;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
@@ -337,7 +337,7 @@ public class DevServer {
 
         // Alpha watermark
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.commit());
-        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(TextColor.color(78, 92, 36)), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);

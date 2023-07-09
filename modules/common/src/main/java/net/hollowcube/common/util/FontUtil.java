@@ -2,14 +2,13 @@ package net.hollowcube.common.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,8 @@ import java.util.Map;
 public final class FontUtil {
     private FontUtil() {
     }
+
+    public static final TextColor NO_SHADOW = TextColor.color(78, 92, 36);
 
     public static final Map<Integer, Integer> GLYPH_WIDTHS = Map.<Integer, Integer>ofEntries(
             Map.entry(65, 6), Map.entry(196, 6), Map.entry(197, 6), Map.entry(198, 6),
