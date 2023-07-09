@@ -365,7 +365,13 @@ public class EditMap extends View {
         // Icon
         var icon = map.settings().getIcon();
         if (icon != null) {
-            setMapIconSetLabel.setArgs(Component.text(icon.name()));
+            var translationKey = String.format(
+                    "%s.%s.%s",
+                    icon.isBlock() ? "block" : "item",
+                    icon.namespace().namespace(),
+                    icon.namespace().path()
+            );
+            setMapIconSetLabel.setArgs(Component.translatable(translationKey));
             setMapIconSwitch.setOption(1);
         } else {
             setMapIconSwitch.setOption(0);

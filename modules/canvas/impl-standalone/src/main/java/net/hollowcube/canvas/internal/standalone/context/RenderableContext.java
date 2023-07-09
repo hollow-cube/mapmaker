@@ -31,7 +31,7 @@ public record RenderableContext(
 
     @Override
     public @NotNull Player player() {
-        return inventory.player();
+        return contextObjects.get("player") instanceof Player player ? player : inventory.player();
     }
 
     @Override
