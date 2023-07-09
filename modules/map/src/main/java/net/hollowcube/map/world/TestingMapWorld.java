@@ -147,6 +147,7 @@ public class TestingMapWorld implements InternalMapWorld {
         if (saveState == null || map().verification() != MapVerification.PENDING) return;
 
         saveState.getPlaytime(instance.getWorldAge()); // Triggers update
+        saveState.setCompleted(true);
 
         try {
             var update = saveState.getUpdateRequest();
