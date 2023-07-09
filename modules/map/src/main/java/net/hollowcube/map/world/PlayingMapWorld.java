@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -33,12 +34,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class PlayingMapWorld implements InternalMapWorld {
     private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
@@ -167,6 +163,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(false);
         player.setInvisible(false);
+        player.setVelocity(Vec.ZERO);
 
         player.updateViewableRule(p -> {
             if (p.isInvisible()) return true;
