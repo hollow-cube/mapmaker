@@ -60,9 +60,9 @@ public class PlayerInviteService {
             invites.remove(key);
             var map = ms.getMap(inviter.getUuid().toString(), context.mapId);
             if (map.isPublished()) {
-                mwm.joinMap(invitee, map, false);
+                mwm.joinMap(invitee, map, false, false);
             } else {
-                mwm.joinMap(invitee, map, true);
+                mwm.joinMap(invitee, map, true, false);
             }
             inviter.sendMessage(PlayerDataV2.fromPlayer(invitee).displayName() + " has accepted your invite!");
         }
