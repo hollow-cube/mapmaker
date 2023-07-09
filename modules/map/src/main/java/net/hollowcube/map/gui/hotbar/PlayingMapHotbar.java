@@ -55,12 +55,12 @@ public final class PlayingMapHotbar {
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
-        handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
+        Thread.startVirtualThread(() -> handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData()));
     }
 
     private static void handleUseItemOnBlock(@NotNull PlayerUseItemOnBlockEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
-        handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
+        Thread.startVirtualThread(() -> handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData()));
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
