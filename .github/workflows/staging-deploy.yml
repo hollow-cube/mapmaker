@@ -41,7 +41,7 @@ jobs:
         working-directory: build/packer
         run: |
           mkdir -p out
-          zip -r out/mapmaker-${{ github.sha }}.zip client
+          cd client && zip -r ../out/mapmaker-${{ github.sha }}.zip .
           echo "RESOURCE_PACK_SHA=$(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
           echo "Resource pack sha-1: $(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_STEP_SUMMARY
       - name: Upload resource pack

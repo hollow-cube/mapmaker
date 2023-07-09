@@ -326,7 +326,6 @@ public class DevServer {
             ));
         }
 
-
 //        player.setGameMode(GameMode.CREATIVE);
 //        player.setAllowFlying(true);
 //        player.setPermissionLevel(4);
