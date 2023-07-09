@@ -65,6 +65,12 @@ public class MapData {
     public @NotNull String id() {
         return id;
     }
+    public @NotNull String name() {
+        var name = settings.getName();
+        if (name.isEmpty())
+            return DEFAULT_NAME;
+        return name;
+    }
 
     public @NotNull String owner() {
         return owner;
