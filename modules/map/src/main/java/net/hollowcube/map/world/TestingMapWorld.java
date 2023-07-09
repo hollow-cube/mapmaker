@@ -113,11 +113,10 @@ public class TestingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public void acceptPlayer(@NotNull Player player) {
+    public void acceptPlayer(@NotNull Player player, boolean firstSpawn) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
-        System.out.println("NEW SAVE STATE " + saveState.type());
 
         var startingPos = player.getPosition();
         player.teleport(startingPos);
@@ -130,9 +129,11 @@ public class TestingMapWorld implements InternalMapWorld {
 
         player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
-        player.sendMessage("Now testing " + map().settings().getName());
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
+
+        if (firstSpawn)
+            player.sendMessage("Now testing " + map().settings().getName());
     }
 
     @Override
@@ -174,11 +175,11 @@ public class TestingMapWorld implements InternalMapWorld {
         removePlayer(player);
 
         // add to the test world
-        parent.acceptPlayer(player);
+        parent.acceptPlayer(player, false);
     }
 
     @Override
     public @NotNull Set<Player> players() {
-        return activePlayers;
+        return Set.copyOf(activePlayers);
     }
 }

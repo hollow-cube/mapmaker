@@ -13,7 +13,6 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -28,7 +27,6 @@ public final class HubHotbar {
 
     private static final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub/hotbar", EventFilter.INSTANCE)
             .addListener(PlayerUseItemEvent.class, HubHotbar::handleUseItem)
-            .addListener(PlayerUseItemOnBlockEvent.class, HubHotbar::handleUseItemOnBlock)
             .addListener(EntityAttackEvent.class, HubHotbar::handleHitPlayer);
 
     private static final int PLAY_ITEM_CMD = 500;
@@ -56,11 +54,6 @@ public final class HubHotbar {
     }
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
-        if (event.getHand() != Player.Hand.MAIN) return;
-        handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
-    }
-
-    private static void handleUseItemOnBlock(@NotNull PlayerUseItemOnBlockEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
         handleItem(event.getPlayer(), event.getItemStack().meta().getCustomModelData());
     }

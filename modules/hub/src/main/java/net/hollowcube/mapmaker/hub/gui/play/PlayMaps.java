@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class PlayMaps extends View {
     private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
 
-    private @ContextObject Query query;
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
@@ -48,7 +47,6 @@ public class PlayMaps extends View {
     public PlayMaps(@NotNull Context context) {
         super(context);
 
-        updateQuery();
     }
 
     @Signal(FilterParkourToggle.SIG_TOGGLE)
@@ -131,6 +129,8 @@ public class PlayMaps extends View {
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
             var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, building, parkour, "");
+
+            System.out.println(Thread.currentThread());
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {

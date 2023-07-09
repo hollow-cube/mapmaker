@@ -64,15 +64,18 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
-    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action unused) {
+    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action action) {
         method.setAccessible(true); // NOSONAR
-        pageHandler = req -> {
+
+        Consumer<PageRequest<T>> handleFunc = req -> {
             try {
                 method.invoke(view, req);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         };
+        pageHandler = !action.async() ? handleFunc :
+                req -> Thread.startVirtualThread(() -> handleFunc.accept(req));
     }
 
     @Override
@@ -136,21 +139,23 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
 
         @Override
         public void respond(@NotNull List<@NotNull T> view, boolean nextPage) {
-            maxPage = nextPage ? Math.max(maxPage, fetchPage + 1) : fetchPage;
-            page = fetchPage;
+            context.player().scheduleNextTick(unused -> {
+                maxPage = nextPage ? Math.max(maxPage, fetchPage + 1) : fetchPage;
+                page = fetchPage;
 
-            // Build & cache the page for future use
-            var pageContainer = new ContainerElement(
-                    context, null,
-                    PaginationElement.this.width(),
-                    PaginationElement.this.height());
-            for (var item : view) {
-                pageContainer.addChild((BaseElement) item.element());
-            }
-            pageCache.add(fetchPage, pageContainer);
+                // Build & cache the page for future use
+                var pageContainer = new ContainerElement(
+                        context, null,
+                        PaginationElement.this.width(),
+                        PaginationElement.this.height());
+                for (var item : view) {
+                    pageContainer.addChild((BaseElement) item.element());
+                }
+                pageCache.add(fetchPage, pageContainer);
 
-            // Redraw
-            context.markDirty();
+                // Redraw
+                context.markDirty();
+            });
         }
     }
 }

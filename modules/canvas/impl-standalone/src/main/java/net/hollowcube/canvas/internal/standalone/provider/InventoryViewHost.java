@@ -186,7 +186,9 @@ public class InventoryViewHost {
     }
 
     public @NotNull Player player() {
-        return getHandle().getViewers().stream().findFirst().orElseThrow();
+        var viewers = getHandle().getViewers().iterator();
+        if (!viewers.hasNext()) throw new IllegalStateException("No viewers");
+        return viewers.next();
     }
 
     private class InventoryWrapper extends Inventory {

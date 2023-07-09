@@ -156,7 +156,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @Blocking void acceptPlayer(@NotNull Player player) {
+    public @Blocking void acceptPlayer(@NotNull Player player, boolean firstSpawn) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
@@ -183,9 +183,11 @@ public class PlayingMapWorld implements InternalMapWorld {
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
 
-        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
-        player.sendMessage("Now playing " + map.settings().getName());
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn));
         saveState.setPlayStartTime(System.currentTimeMillis());
+
+        if (firstSpawn)
+            player.sendMessage("Now playing " + map.settings().getName());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
@@ -249,7 +251,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Set<Player> players() {
-        return activePlayers;
+        return Set.copyOf(activePlayers);
     }
 
     private void updateViewership() {

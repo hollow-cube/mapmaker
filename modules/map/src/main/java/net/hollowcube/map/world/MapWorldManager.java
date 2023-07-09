@@ -68,7 +68,7 @@ public class MapWorldManager {
             if (isSpectating && world instanceof PlayingMapWorld playingMapWorld) {
                 playingMapWorld.startSpectating(player, false);
             } else {
-                world.acceptPlayer(player);
+                world.acceptPlayer(player, true);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

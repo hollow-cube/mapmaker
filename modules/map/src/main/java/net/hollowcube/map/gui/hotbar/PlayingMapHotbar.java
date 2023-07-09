@@ -83,7 +83,7 @@ public final class PlayingMapHotbar {
 
                     // Remove and re-add the player without re-saving the savestate
                     playingWorld.removePlayer(player, false);
-                    playingWorld.acceptPlayer(player);
+                    playingWorld.acceptPlayer(player, false);
                 }
             }
             case HUB_CMD -> {

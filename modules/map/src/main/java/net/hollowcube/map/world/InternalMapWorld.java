@@ -47,7 +47,7 @@ public interface InternalMapWorld extends MapWorld {
      * @return A future that completes when the player may begin interacting with the world.
      */
     @Blocking
-    void acceptPlayer(@NotNull Player player);
+    void acceptPlayer(@NotNull Player player, boolean firstSpawn);
 
     /**
      * Called as a player is leaving the world, but before the player is removed from the {@link net.minestom.server.instance.Instance}.

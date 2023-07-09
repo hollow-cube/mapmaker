@@ -4,11 +4,11 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVerification;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -25,9 +25,7 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -216,7 +214,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     @Blocking
-    public void acceptPlayer(@NotNull Player player) {
+    public void acceptPlayer(@NotNull Player player, boolean firstSpawn) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         if (map.verification() == MapVerification.PENDING) {
@@ -253,7 +251,8 @@ public class EditingMapWorld implements InternalMapWorld {
                 logger.log(System.Logger.Level.INFO, "Loaded tf state (selections={0})", session.selectionNames().size());
             }
 
-            player.sendMessage("Now editing " + map.settings().getName() + " " + map.verification());
+            if (firstSpawn)
+                player.sendMessage("Now editing " + map.settings().getName() + " " + map.verification());
         }
 
         player.refreshCommands(); //todo this should just be done on every instance change
@@ -305,7 +304,7 @@ public class EditingMapWorld implements InternalMapWorld {
         removePlayer(player);
 
         // add to the test world
-        getTestWorld().acceptPlayer(player);
+        getTestWorld().acceptPlayer(player, true);
     }
 
     private final net.minestom.server.gamedata.tags.@Nullable Tag SWORD_TAG = MinecraftServer.getTagManager().getTag(net.minestom.server.gamedata.tags.Tag.BasicType.ITEMS, "minecraft:swords");
@@ -331,6 +330,6 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @NotNull Set<Player> players() {
-        return activePlayers;
+        return Set.copyOf(activePlayers);
     }
 }
