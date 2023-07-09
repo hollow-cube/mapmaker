@@ -79,23 +79,19 @@ public final class PlayingMapHotbar {
 
                     // Delete the save state
                     var saveState = SaveState.optionalFromPlayer(player);
-                    if (saveState == null) return;
+                    if (saveState != null) {
+                        saveState.setPlaytime(0);
+                        saveState.setPlayStartTime(System.currentTimeMillis());
+                        saveState.setCompleted(false);
+                        player.teleport(world.map().settings().getSpawnPoint()).join();
+                        EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                        //todo this will not clear effects or anything, i guess the plate fp will have to do that
+                    } else {
+                        // The player has no save state because they are spectating, so just re-add them to the server
+                        playingWorld.removePlayer(player, false);
+                        playingWorld.acceptPlayer(player, false);
+                    }
 
-                    saveState.setPlaytime(0);
-                    saveState.setPlayStartTime(System.currentTimeMillis());
-                    saveState.setCompleted(false);
-                    player.teleport(world.map().settings().getSpawnPoint()).join();
-                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
-                    //todo this will not clear effects or anything, i guess the plate fp will have to do that
-
-
-//                    if (saveState != null) {
-//                        mapService.deleteSaveState(world.map().id(), playerData.id(), saveState.id());
-//                    }
-
-                    // Remove and re-add the player without re-saving the savestate
-//                    playingWorld.removePlayer(player, false);
-//                    playingWorld.acceptPlayer(player, false);
                 }
             }
             case HUB_CMD -> {

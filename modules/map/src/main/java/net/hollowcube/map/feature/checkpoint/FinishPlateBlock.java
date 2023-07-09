@@ -4,17 +4,12 @@ import net.hollowcube.map.block.handler.AbstractPlateHandler;
 import net.hollowcube.map.block.handler.PointOfInterestHandlerMixin;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 public class FinishPlateBlock extends AbstractPlateHandler implements PointOfInterestHandlerMixin {
 

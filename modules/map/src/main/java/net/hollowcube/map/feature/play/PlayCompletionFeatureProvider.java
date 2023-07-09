@@ -40,16 +40,16 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         var saveState = SaveState.fromPlayer(player);
         saveState.setCompleted(true);
 
-        FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
-
-        world.server().newOpenGUI(player, CompletedMapView::new);
-
         // Remove the player from the world itself, they are no longer playing (but will remain in the instance)
         // This will also cause their savestate to be written to DB
         world.removePlayer(player);
         if (world instanceof PlayingMapWorld pmw) {
             pmw.startSpectating(player, false);
         }
+
+        world.server().newOpenGUI(player, CompletedMapView::new);
+
+        FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
 
     }
 
