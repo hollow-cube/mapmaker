@@ -90,7 +90,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.REPEATING_COMMAND_BLOCK));
 
         // Bell
-        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BELL, false));
+        blockManager.registerBlockPlacementRule(new BellPlacementRule());
 
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD));
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD, true));
