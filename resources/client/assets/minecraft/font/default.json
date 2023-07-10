@@ -36,15 +36,6 @@
         "\uF82E": 512,
         "\uF82F": 1024
       }
-    },
-    {
-      "type": "bitmap",
-      "file": "minecraft:font/sethjumpscare.png",
-      "ascent": 46,
-      "height": 96,
-      "chars": [
-        "\uE010"
-      ]
     }
   ]
 }

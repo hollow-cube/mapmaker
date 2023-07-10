@@ -3,10 +3,5 @@
     "category": "master",
     "subtitle": "Toy squeaks",
     "sounds": ["custom/toysqueak"]
-  },
-  "staff.seth.jumpscare": {
-    "category": "master",
-    "subtitle": "SETH JUMPSCARES",
-    "sounds": ["custom/vineboom"]
   }
 }
