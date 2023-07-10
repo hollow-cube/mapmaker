@@ -9,6 +9,18 @@ import java.time.Instant;
 
 public class PersonalizedMapData extends MapData {
 
+    public static final int MIN_PLAYS_FOR_DIFFICULTY = 1; //todo
+
+    public enum Progress {
+        @SerializedName("none") NONE,
+        @SerializedName("started") STARTED,
+        @SerializedName("complete") COMPLETE
+    }
+    private Progress progress;
+
+    private int uniquePlays;
+    private double clearRate;
+
     public PersonalizedMapData() {
         super();
     }
@@ -22,13 +34,6 @@ public class PersonalizedMapData extends MapData {
         this.progress = progress;
     }
 
-    public enum Progress {
-        @SerializedName("none") NONE,
-        @SerializedName("started") STARTED,
-        @SerializedName("complete") COMPLETE
-    }
-    private Progress progress;
-
     public @NotNull Component getCompletionStateText() {
         return Component.translatable(switch (progress) {
             case NONE -> "gui.play_maps.map_display.progress_none";
@@ -37,4 +42,11 @@ public class PersonalizedMapData extends MapData {
         });
     }
 
+    public int getUniquePlays() {
+        return uniquePlays;
+    }
+
+    public double getClearRate() {
+        return clearRate;
+    }
 }

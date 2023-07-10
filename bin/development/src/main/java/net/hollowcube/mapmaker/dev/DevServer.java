@@ -370,16 +370,34 @@ public class DevServer {
             }
         });
 
+//        var textEntity = new Entity(EntityType.TEXT_DISPLAY){{
+//            hasPhysics = false;
+//            setNoGravity(true);
+//        }};
+//        var textMeta = (TextDisplayMeta) textEntity.getEntityMeta();
+//
+//        var lbData = mapService.getPlaytimeLeaderboard("dec02f24-8f84-4e25-b0ea-2babcb62fc5c", "aceb326f-da15-45bc-bf2f-11940c21780c")
+//                .toComponents(playerService, true);
+//        if (lbData == null) {
+//            textMeta.setText(Component.text("No leaderboard data"));
+//        } else {
+//            textMeta.setText(lbData.stream().reduce((a, b) -> a.append(Component.newline()).append(b)).orElse(Component.text("No leaderboard data")));
+//        }
+//        textMeta.setTextOpacity((byte) 0xFF);
+//        textMeta.setScale(new Vec(1, 1, 1));
+//
+//        textEntity.setInstance(player.getInstance(), new Vec(0, 42, 0)).join();
+
 //        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
 //            hasPhysics = false;
+//            setNoGravity(true);
 //        }};
-//        tube.setNoGravity(true);
 //        var tubeMeta = (ItemDisplayMeta) tube.getEntityMeta();
 //        tubeMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1004)).build());
 //        tubeMeta.setScale(new Vec(4, 4, 4));
 //        tubeMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
 //        //todo set width and height of model
-//        tube.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
+//        tube.setInstance(hub.world().instance(), new Vec(0, 42, 0)).join();
 //
 //        var arm = new Entity(EntityType.ITEM_DISPLAY) {{
 //            hasPhysics = false;
