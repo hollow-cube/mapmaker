@@ -50,6 +50,6 @@ public class SethJumpscareCommand extends Command {
 
     private boolean handleCondition(@NotNull CommandSender sender, @Nullable String commandString) {
         if (!(sender instanceof Player player)) return false;
-        return player.getUuid().equals(SETH_UUID);
+        return player.getUuid() == SETH_UUID;
     }
 }
