@@ -7,7 +7,22 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.SignBlockHandler;
 import net.hollowcube.map.block.rule.PlacementRules;
-import net.hollowcube.map.command.*;
+import net.hollowcube.map.command.AcceptInviteCommand;
+import net.hollowcube.map.command.BaseMapCommand;
+import net.hollowcube.map.command.BuildModeCommand;
+import net.hollowcube.map.command.ClearInventoryCommand;
+import net.hollowcube.map.command.FlyCommand;
+import net.hollowcube.map.command.FlySpeedCommand;
+import net.hollowcube.map.command.GiveCommand;
+import net.hollowcube.map.command.HubCommand;
+import net.hollowcube.map.command.InviteCommand;
+import net.hollowcube.map.command.RejectInviteCommand;
+import net.hollowcube.map.command.SetSpawnCommand;
+import net.hollowcube.map.command.SethJumpscareCommand;
+import net.hollowcube.map.command.SpawnCommand;
+import net.hollowcube.map.command.TeleportCommand;
+import net.hollowcube.map.command.TestModeCommand;
+import net.hollowcube.map.command.TopTimesCommand;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteService;
@@ -96,6 +111,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new InviteCommand());
         commandManager.register(new AcceptInviteCommand());
         commandManager.register(new RejectInviteCommand());
+        commandManager.register(new SethJumpscareCommand());
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
