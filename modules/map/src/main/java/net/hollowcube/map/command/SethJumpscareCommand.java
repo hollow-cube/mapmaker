@@ -8,6 +8,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,15 @@ import java.util.UUID;
 
 public class SethJumpscareCommand extends Command {
 
-    private static final UUID SETH_UUID = UUID.fromString("a3634428-40a0-45b3-8583-a3b5813d64c5");
+//    private static final UUID SETH_UUID = UUID.fromString("a3634428-40a0-45b3-8583-a3b5813d64c5");
+    private static final UUID SETH_UUID = UUID.fromString("7bd5b459-1e6b-4753-8274-1fbd2fe9a4d5");
+
+    private static final Sound SOUND = Sound.sound(Key.key("staff.seth.jumpscare"), Sound.Source.MASTER, 1f, 1f);
+    private static final Title TITLE = Title.title(
+            Component.text("\uE010"),
+            Component.empty(),
+            Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofSeconds(2))
+    );
 
     public SethJumpscareCommand() {
         super("sethjumpscare");
@@ -26,7 +35,7 @@ public class SethJumpscareCommand extends Command {
         setCondition(this::handleCondition);
 
         setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /sethjumpscare <player>"));
-        addSyntax(this::jumpscare, ArgumentType.Entity("player").onlyPlayers(true).singleEntity(true));
+        addSyntax(this::jumpscare, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
     private void jumpscare(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -36,16 +45,14 @@ public class SethJumpscareCommand extends Command {
         }
 
         EntityFinder entityFinder = context.get("player");
-        Player target = entityFinder.findFirstPlayer(sender);
+        for (Entity entity : entityFinder.find(sender)) {
+            if (!(entity instanceof Player target)) continue;
 
-        player.sendMessage(Component.text("You just jumpscared " + target.getUsername() + "!!"));
+            player.sendMessage(Component.text("You just jumpscared " + target.getUsername() + "!!"));
 
-        target.playSound(Sound.sound(Key.key("staff.seth.jumpscare"), Sound.Source.MASTER, 1f, 1f), Sound.Emitter.self());
-        target.showTitle(Title.title(
-                Component.text("\uE010"),
-                Component.empty(),
-                Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofSeconds(2))
-        ));
+            target.playSound(SOUND, Sound.Emitter.self());
+            target.showTitle(TITLE);
+        }
     }
 
     private boolean handleCondition(@NotNull CommandSender sender, @Nullable String commandString) {
