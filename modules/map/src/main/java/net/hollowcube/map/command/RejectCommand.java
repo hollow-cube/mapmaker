@@ -9,8 +9,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-public class RejectInviteCommand extends Command {
-    public RejectInviteCommand() {
+public class RejectCommand extends Command {
+    public RejectCommand() {
         super("reject");
         setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /reject <player>"));
         addSyntax(this::reject, ArgumentType.Entity("player").onlyPlayers(true));
@@ -30,6 +30,6 @@ public class RejectInviteCommand extends Command {
             return;
         }
 
-        PlayerInviteService.rejectInvite(target, (Player) sender);
+        PlayerInviteService.reject((Player) sender, target);
     }
 }
