@@ -9,19 +9,19 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-public class RejectInviteCommand extends Command {
-    public RejectInviteCommand() {
-        super("reject");
-        setDefaultExecutor(((sender, context) -> sender.sendMessage("Usage: /reject <player>")));
-        addSyntax(this::reject, ArgumentType.Entity("player").onlyPlayers(true));
+public class AcceptCommand extends Command {
+    public AcceptCommand() {
+        super("accept");
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /accept <player>"));
+        addSyntax(this::accept, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
-    private void reject(@NotNull CommandSender sender, @NotNull CommandContext context) {
+    private void accept(@NotNull CommandSender sender, @NotNull CommandContext context) {
         EntityFinder entityFinder = context.get("player");
         Player target = entityFinder.findFirstPlayer(sender);
 
         if (target == sender) {
-            sender.sendMessage("You can't reject yourself!");
+            sender.sendMessage("You can't accept yourself!");
             return;
         }
 
@@ -30,6 +30,6 @@ public class RejectInviteCommand extends Command {
             return;
         }
 
-        PlayerInviteService.rejectInvite(target, (Player) sender);
+        PlayerInviteService.accept((Player) sender, target);
     }
 }
