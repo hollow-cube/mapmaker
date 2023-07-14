@@ -35,9 +35,10 @@ public class PlayerInviteService {
     public static void accept(@NotNull Player accepter, @NotNull Player acceptee) {
         var inviteKey = new Invite(acceptee.getUuid(), accepter.getUuid());
         var requestKey = new Request(acceptee.getUuid(), accepter.getUuid());
+        var acepteeName = PlayerDataV2.fromPlayer(acceptee).displayName();
 
         if (requests.get(requestKey) == null && invites.get(inviteKey) == null) {
-            accepter.sendMessage("You do not have any requests or invites!"); //todo all translation keys
+            accepter.sendMessage(Component.translatable("map.invite_and_request.can't_send", acepteeName));
         } else if (invites.get(inviteKey) == null) {
             acceptRequest(acceptee, accepter);
         } else if (requests.get(requestKey) == null) {
@@ -60,7 +61,7 @@ public class PlayerInviteService {
         var requestKey = new Request(rejectee.getUuid(), rejecter.getUuid());
 
         if (invites.get(inviteKey) == null && requests.get(requestKey) == null) {
-            rejecter.sendMessage("You do not have any requests or invites to reject!");
+            rejecter.sendMessage(Component.translatable("map.invite_and_request.can't_reject"));
             return;
         }
         if (invites.get(inviteKey) != null) {
@@ -74,11 +75,13 @@ public class PlayerInviteService {
     public static void registerInvite(@NotNull Player inviter, @NotNull Player invitee) {
         var inviterMap = MapWorld.forPlayerOptional(inviter);
         var inviteeMap = MapWorld.forPlayerOptional(invitee);
+        var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
+        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
         if (inviterMap == null) {
-            inviter.sendMessage("You must be in a map to invite a player!");
+            inviter.sendMessage(Component.translatable("map.invite.no_map"));
             return;
         } else if (inviteeMap == inviterMap) {
-            inviter.sendMessage("This player is already in your map!");
+            inviter.sendMessage(Component.translatable("map.invite.same_map", inviteeName));
             return;
         }
         var key = new Invite(inviter.getUuid(), invitee.getUuid());
@@ -88,11 +91,12 @@ public class PlayerInviteService {
 
         if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
             invites.put(key, val);
-        inviter.sendMessage("Sent invite to " + PlayerDataV2.fromPlayer(invitee).displayName() + ".");
         if (!inviterMap.map().isPublished()) {
-            invitee.sendMessage(Component.translatable("create_maps.invite.sent", PlayerDataV2.fromPlayer(inviter).displayName(), Component.text(inviterMap.map().name())));
+            inviter.sendMessage(Component.translatable("map.build.invite.sent", inviteeName, Component.text(inviterMap.map().name())));
+            invitee.sendMessage(Component.translatable("map.build.invite.pending", inviterName, Component.text(inviterMap.map().name())));
         } else {
-            invitee.sendMessage("You've been invited to play " + inviterMap.map().name() + " by " + PlayerDataV2.fromPlayer(inviter).displayName() + ".");
+            inviter.sendMessage(Component.translatable("map.play.invite.sent", inviteeName, Component.text(inviterMap.map().name())));
+            invitee.sendMessage(Component.translatable("map.play.invite.pending", inviterName, Component.text(inviterMap.map().name())));
         }
     }
 
@@ -101,33 +105,40 @@ public class PlayerInviteService {
         var context = invites.get(key);
         var now = Instant.now();
         var inviterMap = MapWorld.forPlayerOptional(inviter);
+        var inviteeMap = MapWorld.forPlayerOptional(invitee);
         var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
+        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
         if (context == null) {
-            invitee.sendMessage("You don't have an invite to join " + inviterName + ".");
+            invitee.sendMessage(Component.translatable("map.invite.no_join", inviterName));
         } else if (inviterMap == null || !inviterMap.map().id().equals(context.mapId())) {
-            invitee.sendMessage(inviterName + " has left the map!");
+            invitee.sendMessage(Component.translatable("map.invite.left_map", inviterName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            invitee.sendMessage("That invite has expired!");
+            invitee.sendMessage("map.invite.expired");
         } else {
             invites.remove(key);
             var map = ms.getMap(inviter.getUuid().toString(), context.mapId);
             if (map.isPublished()) {
-                mwm.joinMap(invitee, map, false, false);
+                mwm.joinMap(inviter, map, true, false);
+                inviter.sendMessage(Component.translatable("map.play.invite.accepted", inviteeName, Component.text(inviteeMap.map().name())));
+                invitee.sendMessage(Component.translatable("map.play.invite.accept", inviterName, Component.text(inviteeMap.map().name())));
             } else {
-                mwm.joinMap(invitee, map, true, false);
+                mwm.joinMap(inviter, map, true, false);
+                inviter.sendMessage(Component.translatable("map.build.invite.accepted", inviteeName, Component.text(inviteeMap.map().name())));
+                invitee.sendMessage(Component.translatable("map.build.invite.accept", inviterName, Component.text(inviteeMap.map().name())));
             }
-            inviter.sendMessage(PlayerDataV2.fromPlayer(invitee).displayName() + " has accepted your invite!");
         }
     }
 
     public static void registerRequest(@NotNull Player requester, @NotNull Player requestee) {
         var requesteeMap = MapWorld.forPlayerOptional(requestee);
         var requesterMap = MapWorld.forPlayerOptional(requester);
+        var requesteeName = PlayerDataV2.fromPlayer(requestee).displayName();
+        var requesterName = PlayerDataV2.fromPlayer(requester).displayName();
         if (requesteeMap == null) {
-            requester.sendMessage(PlayerDataV2.fromPlayer(requestee).displayName() + " must be in a map for you to request to join them!");
+            requester.sendMessage(Component.translatable("map.play.request.cant_send", PlayerDataV2.fromPlayer(requestee).displayName()));
             return;
         } else if (requesteeMap == requesterMap) {
-            requester.sendMessage("You are already in the same map as that player!");
+            requester.sendMessage(Component.translatable());
             return;
         }
         var key = new Request(requester.getUuid(), requestee.getUuid());
@@ -136,11 +147,12 @@ public class PlayerInviteService {
         var val = new Context(now, requesteeMap.map().id());
         if (context == null || Duration.between(context.time, now).compareTo(requestExpirationTime) > 0)
             requests.put(key, val);
-        requester.sendMessage("Sent request to join " + PlayerDataV2.fromPlayer(requestee).displayName());
         if (!requesteeMap.map().isPublished()) {
-            requestee.sendMessage(PlayerDataV2.fromPlayer(requester).displayName() + " wants to build with you on  " + requesteeMap.map().name() + ".");
+            requester.sendMessage(Component.translatable("map.build.request.sent", requesteeName));
+            requestee.sendMessage(Component.translatable("map.build.request.pending", requesterName, Component.text(requesteeMap.map().name())));
         } else {
-            requestee.sendMessage(PlayerDataV2.fromPlayer(requester).displayName() + " wants to play with you on " + requesteeMap.map().name() + ".");
+            requester.sendMessage(Component.translatable("map.play.request.sent", requesteeName));
+            requestee.sendMessage(Component.translatable("map.play.request.pending", requesterName, Component.text(requesteeMap.map().name())));
         }
     }
 
@@ -152,26 +164,23 @@ public class PlayerInviteService {
         var requesteeName = PlayerDataV2.fromPlayer(requestee).displayName();
         var requesterName = PlayerDataV2.fromPlayer(requester).displayName();
         if (context == null) {
-            requestee.sendMessage("You don't have a request to join " + requesterName + "!");
-            System.out.println("2");
+            requestee.sendMessage(Component.translatable("map.request.no_join", requesterName));
         } else if (requesteeMap == null || !requesteeMap.map().id().equals(context.mapId())) {
-            requester.sendMessage(requesteeName + " has left the map!");
-            System.out.println("2.5");
+            requester.sendMessage(Component.translatable("map.invite.left_map", requesteeName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            requestee.sendMessage(Component.translatable("create_maps.invite.expired"));
-            System.out.println("2.75");
+            requestee.sendMessage(Component.translatable("map.invite.expired"));
         } else {
             requests.remove(key);
             var map = ms.getMap(requester.getUuid().toString(), context.mapId);
             if (map.isPublished()) {
-                mwm.joinMap(requester, map, false, false);
-                System.out.println("2.8");
+                mwm.joinMap(requester, map, true, false);
+                requester.sendMessage(Component.translatable("map.play.request.accepted", requesteeName, Component.text(requesteeMap.map().name())));
+                requestee.sendMessage(Component.translatable("map.play.request.accept", requesterName, Component.text(requesteeMap.map().name())));
             } else {
                 mwm.joinMap(requester, map, true, false);
-                System.out.println("2.9");
+                requester.sendMessage(Component.translatable("map.build.request.accepted", requesteeName, Component.text(requesteeMap.map().name())));
+                requestee.sendMessage(Component.translatable("map.build.request.accept", requesterName, Component.text(requesteeMap.map().name())));
             }
-            requester.sendMessage(PlayerDataV2.fromPlayer(requestee).displayName() + " has accepted your request!");
-            System.out.println("2.99");
         }
     }
 
@@ -179,12 +188,14 @@ public class PlayerInviteService {
         var key = new Invite(inviter.getUuid(), invitee.getUuid());
         var context = invites.get(key);
         var now = Instant.now();
+        var inviteeMap = MapWorld.forPlayerOptional(invitee);
         var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
+        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
         if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
-            invitee.sendMessage("No current invite from " + inviterName + ".");
+            invitee.sendMessage(Component.translatable("map.request.no_join", inviterName));
         else {
-            invitee.sendMessage("Rejected invite from " + inviterName + ".");
-            inviter.sendMessage(PlayerDataV2.fromPlayer(invitee).displayName() + " has rejected your invite.");
+            invitee.sendMessage(Component.translatable("map.play.invite.deny", inviterName, Component.text(inviteeMap.map().name())));
+            inviter.sendMessage(Component.translatable("map.play.invite.denied", inviteeName, Component.text(inviteeMap.map().name())));
         }
         invites.remove(key);
     }
@@ -193,12 +204,13 @@ public class PlayerInviteService {
         var key = new Request(requester.getUuid(), requestee.getUuid());
         var context = requests.get(key);
         var now = Instant.now();
+        var requesteeMap = MapWorld.forPlayerOptional(requestee);
         var inviterName = PlayerDataV2.fromPlayer(requester).displayName();
         if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
-            requestee.sendMessage("No current request from " + inviterName + ".");
+            requestee.sendMessage(Component.translatable("map.request.no_join", inviterName));
         else {
-            requestee.sendMessage("Rejected request from " + inviterName + ".");
-            requester.sendMessage(PlayerDataV2.fromPlayer(requestee).displayName() + " has rejected your request to join them.");
+            requestee.sendMessage(Component.translatable("map.play.request.deny", inviterName, Component.text(requesteeMap.map().name())));
+            requester.sendMessage(Component.translatable("map.play.request.denied", PlayerDataV2.fromPlayer(requestee).displayName(), Component.text(requesteeMap.map().name())));
         }
         requests.remove(key);
     }

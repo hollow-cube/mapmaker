@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.map.invites.PlayerInviteService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -21,12 +22,12 @@ public class AcceptCommand extends Command {
         Player target = entityFinder.findFirstPlayer(sender);
 
         if (target == sender) {
-            sender.sendMessage("You can't accept yourself!");
+            sender.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
 
         if (target == null) {
-            sender.sendMessage("That player is not online!");
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(target.toString()))); //uh, maybe null, but hopefully it's just passing the target name lol
             return;
         }
 
