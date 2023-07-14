@@ -27,12 +27,12 @@ public class InviteCommand extends Command {
         Player target = entityFinder.findFirstPlayer(sender);
 
         if (target == sender) {
-            sender.sendMessage("You can't invite yourself!");
+            sender.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
 
         if (target == null) {
-            sender.sendMessage("That player is not online!");
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(target.toString())));
             return;
         }
 

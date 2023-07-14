@@ -9,9 +9,21 @@
     "type": "sprite",
     "ref": "icon/mouse_shift_left"
   },
+  "CONFIRM": {
+    "type": "sprite",
+    "ref": "icon/confirm"
+  },
   "WARNING": {
     "type": "sprite",
     "ref": "icon/warning"
+  },
+  "DENY": {
+    "type": "sprite",
+    "ref": "icon/deny"
+  },
+  "SYSTEM": {
+    "type": "sprite",
+    "ref": "icon/system"
   },
   "LOCK": {
     "type": "sprite",
