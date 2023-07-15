@@ -2,9 +2,8 @@ package net.hollowcube.terraform.session;
 
 import net.hollowcube.terraform.action.ActionBuilder;
 import net.hollowcube.terraform.cui.ClientInterface;
-import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.session.history.Change;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -12,11 +11,14 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static net.minestom.server.network.NetworkBuffer.*;
+import static net.minestom.server.network.NetworkBuffer.SHORT;
+import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 /**
  * A Terraform session local to a world. Stores only information relevant to the
@@ -29,6 +31,8 @@ import static net.minestom.server.network.NetworkBuffer.*;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class LocalSession {
+    private static final Logger logger = LoggerFactory.getLogger(LocalSession.class);
+
     public static final int STATE_VERSION = 1;
 
     public static @NotNull LocalSession forPlayer(@NotNull Player player) {
@@ -47,7 +51,7 @@ public class LocalSession {
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
         var session = instance.getTag(tag);
         if (session != null) {
-            throw new IllegalStateException("Attempted to load a session for a player that already has one");
+            logger.warn("Attempted to load a session for a player that already has one");
         }
 
         session = new LocalSession(PlayerSession.forPlayer(player), instance, data);

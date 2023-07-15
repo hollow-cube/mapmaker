@@ -24,6 +24,7 @@ public class MapSettings {
     private boolean noSprint = false;
     private boolean noJump = false;
     private boolean noSneak = false;
+    private boolean boat = false;
 
     public MapSettings() {
         this.name = "";
@@ -137,5 +138,11 @@ public class MapSettings {
         updates.setNoSneak(noSneak);
         this.noSneak = noSneak;
     }
-
+    public boolean isBoat() {
+        return boat;
+    }
+    public void setBoat(boolean boat) {
+        updates.setBoat(boat);
+        this.boat = boat;
+    }
 }
