@@ -56,6 +56,7 @@ tasks.withType<ShadowJar> {
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
+    applicationDefaultJvmArgs = listOf("--enable-preview", "--add-modules", "jdk.incubator.concurrent")
 }
 
 blossom {
