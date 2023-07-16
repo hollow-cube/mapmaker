@@ -2,8 +2,8 @@ package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("UnstableApiUsage")
 public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
 
@@ -25,7 +25,7 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
         var posBelow = placementState.placePosition().add(0, -1, 0);
         var blockBelow = placementState.instance().getBlock(posBelow, Block.Getter.Condition.TYPE);
         if (blockBelow.id() == Block.BIG_DRIPLEAF.id() || blockBelow.id() == Block.BIG_DRIPLEAF_STEM.id())
@@ -42,4 +42,8 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
         return super.blockPlace(placementState);
     }
 
+    @Override
+    public int maxUpdateDistance() {
+        return 1;
+    }
 }

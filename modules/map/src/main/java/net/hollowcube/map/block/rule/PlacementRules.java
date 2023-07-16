@@ -9,7 +9,7 @@ public final class PlacementRules {
 
     public static void init() {
         BlockManager blockManager = MinecraftServer.getBlockManager();
-        blockManager.registerBlockPlacementRule(new RedstonePlacementRule());
+//        blockManager.registerBlockPlacementRule(new RedstonePlacementRule());
 
         // Axis
         // Logs
@@ -99,10 +99,10 @@ public final class PlacementRules {
         for (var fenceGateId : BlockTags.MINECRAFT_FENCE_GATES.getValues()) {
             blockManager.registerBlockPlacementRule(new FenceGatePlacementRule(Block.fromNamespaceId(fenceGateId)));
         }
-        for (var fenceId : BlockTags.MINECRAFT_FENCES.getValues()) {
+        for (var fenceId : BlockTags.FENCES.getValues()) {
             blockManager.registerBlockPlacementRule(new FencePlacementRule(Block.fromNamespaceId(fenceId)));
         }
-        for (var wallId : BlockTags.MINECRAFT_WALLS.getValues()) {
+        for (var wallId : BlockTags.WALLS.getValues()) {
             blockManager.registerBlockPlacementRule(new WallPlacementRule(Block.fromNamespaceId(wallId)));
         }
 

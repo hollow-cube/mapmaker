@@ -1,14 +1,12 @@
 package net.hollowcube.map.block.rule;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TallFlowerPlacementRule extends BlockPlacementRule {
+@SuppressWarnings("UnstableApiUsage")
+public class TallFlowerPlacementRule extends BaseBlockPlacementRule {
 
     public TallFlowerPlacementRule(@NotNull Block block) {
         super(block);

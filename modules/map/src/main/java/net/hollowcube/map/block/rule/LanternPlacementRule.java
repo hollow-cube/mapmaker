@@ -1,20 +1,15 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LanternPlacementRule extends BlockPlacementRule {
+@SuppressWarnings("UnstableApiUsage")
+public class LanternPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_HANGING = "hanging";
 
     public LanternPlacementRule(@NotNull Block block) {
         super(block);
-    }
-
-    @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
     }
 
     @Override

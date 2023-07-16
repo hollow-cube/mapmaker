@@ -1,13 +1,16 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BedPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+@SuppressWarnings("UnstableApiUsage")
+public class BedPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_PART = "part";
     private static final String PROP_FACING = "facing";
 
@@ -17,7 +20,8 @@ public class BedPlacementRule extends BlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var facing = BlockFace.fromYaw(placementState.playerPosition().yaw());
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+        var facing = BlockFace.fromYaw(playerPosition.yaw());
 
         //todo bad code using instance directly
         if (!(placementState.instance() instanceof Instance instance)) return null;

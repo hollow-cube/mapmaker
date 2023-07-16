@@ -1,13 +1,15 @@
 package net.hollowcube.map.block.rule;
 
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 
-// Initially taken from https://github.com/Minestom/Minestom/pull/1759/files
-public class BannerPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+// Initially taken from https://github.com/Minestom/Minestom/pull/1759
+public class BannerPlacementRule extends BaseBlockPlacementRule {
 
     public BannerPlacementRule(@NotNull Block block) {
         super(block);
@@ -16,13 +18,14 @@ public class BannerPlacementRule extends BlockPlacementRule {
     @Override
     public Block blockPlace(@NotNull PlacementState placementState) {
         // Can't place at the bottom of a block
-        var blockFace = placementState.blockFace();
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP); // Top is an arbitrary choice.
         if (blockFace == BlockFace.BOTTOM) {
             return null;
         }
 
         if (blockFace == BlockFace.TOP) {
-            float yaw = placementState.playerPosition().yaw() + 180;
+            var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+            float yaw = playerPosition.yaw() + 180;
             int rotation = (int) (Math.round(yaw / 22.5d) % 16);
 
             return withBannerData(placementState.block())

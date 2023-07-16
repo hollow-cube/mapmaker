@@ -1,22 +1,18 @@
 package net.hollowcube.map.block.rule;
 
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SlabPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+public class SlabPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_TYPE = "type";
 
     public SlabPlacementRule(@NotNull Block block) {
         super(block);
-    }
-
-    @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
     }
 
     @Override
@@ -32,7 +28,7 @@ public class SlabPlacementRule extends BlockPlacementRule {
         if (blockFace == BlockFace.TOP) return block.withProperty(PROP_TYPE, "bottom");
         if (blockFace == BlockFace.BOTTOM) return block.withProperty(PROP_TYPE, "top");
 
-        var type = placementState.cursorPosition().y() > 0.5 ? "top" : "bottom";
+        var type = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y() > 0.5 ? "top" : "bottom";
         return block.withProperty(PROP_TYPE, type);
     }
 

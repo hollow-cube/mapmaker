@@ -1,14 +1,15 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class FacingClickHorizontalPlacementRule extends BlockPlacementRule {
+public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.WEST,
@@ -24,13 +25,14 @@ public class FacingClickHorizontalPlacementRule extends BlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var blockFace = placementState.blockFace();
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
         return switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> block.withProperty(PROP_FACING, blockFace.name().toLowerCase());
             case TOP, BOTTOM -> {
                 var instance = placementState.instance();
 
-                var facingFace = BlockFace.fromYaw(placementState.playerPosition().yaw());
+                var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+                var facingFace = BlockFace.fromYaw(playerPosition.yaw());
                 for (var neighborFace : getFaceOrder(facingFace)) {
                     var neighbor = instance.getBlock(placementState.placePosition().relative(neighborFace));
                     if (neighbor.isSolid()) {

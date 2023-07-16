@@ -3,8 +3,6 @@ package net.hollowcube.terraform.tool;
 import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.hollowcube.terraform.selection.Selection;
-import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -13,7 +11,9 @@ import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 @AutoService(BuiltinTool.class)
 public class DebugStickTool implements BuiltinTool {
@@ -103,7 +103,7 @@ public class DebugStickTool implements BuiltinTool {
             }
         }
         if (name == null) name = props[0];
-        instance.setBlock(blockPosition, block.withProperty(newProperty, name));
+        instance.setBlock(blockPosition, block.withProperty(newProperty, name), false);
         if (!newProperty.equals(oldProperty)) click.updateItemStack(b -> b.setTag(TAG_PROPERTY, newProperty));
         player.sendActionBar(Component.text("\"" + newProperty + "\" to " + name)); // "snowy" to false
     }

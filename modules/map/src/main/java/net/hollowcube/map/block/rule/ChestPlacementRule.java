@@ -1,12 +1,12 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ChestPlacementRule extends BlockPlacementRule {
+//todo update to new placement stuff
+public class ChestPlacementRule extends BaseBlockPlacementRule {
 
     public ChestPlacementRule(@NotNull Block block) {
         super(block);

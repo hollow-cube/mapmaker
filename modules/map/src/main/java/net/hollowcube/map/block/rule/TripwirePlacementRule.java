@@ -2,13 +2,12 @@ package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TripwirePlacementRule extends BlockPlacementRule {
+public class TripwirePlacementRule extends BaseBlockPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.EAST,

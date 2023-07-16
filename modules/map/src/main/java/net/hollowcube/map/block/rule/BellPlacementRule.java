@@ -1,14 +1,16 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 
-public class BellPlacementRule extends BlockPlacementRule {
+//todo this needs to be updated based on the changes to placement
+public class BellPlacementRule extends BaseBlockPlacementRule {
     private static final String FACING = "facing";
     private static final String ATTACHMENT = "attachment";
 
@@ -24,9 +26,10 @@ public class BellPlacementRule extends BlockPlacementRule {
         int y = placementState.placePosition().blockY();
         int z = placementState.placePosition().blockZ();
 
-        BlockFace clickedFace = placementState.blockFace();
+        BlockFace clickedFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         Direction clickedDirection = clickedFace.toDirection();
-        Direction facing = BlockFace.fromYaw(placementState.playerPosition().yaw()).toDirection();
+        Direction facing = BlockFace.fromYaw(playerPosition.yaw()).toDirection();
 
         if (clickedFace == BlockFace.BOTTOM) {
             // If we clicked on the bottom of a block, the bell is hanging from the ceiling
@@ -108,5 +111,10 @@ public class BellPlacementRule extends BlockPlacementRule {
 
     private static boolean isAir(@NotNull Block block) {
         return block.compare(Block.AIR) || block.compare(Block.VOID_AIR) || block.compare(Block.CAVE_AIR);
+    }
+
+    @Override
+    public int maxUpdateDistance() {
+        return 1;
     }
 }
