@@ -223,6 +223,9 @@ public final class PlacementRules {
 
         // Flower pot
         blockManager.registerBlockPlacementRule(new FlowerPotPlacementRule());
+        for (var flowerId : BlockTags.SMALL_FLOWERS.getValues()) {
+            blockManager.registerBlockPlacementRule(new SmallFlowerPlacementRule(Block.fromNamespaceId(flowerId)));
+        }
 
         // Terracotta
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.WHITE_GLAZED_TERRACOTTA, true));

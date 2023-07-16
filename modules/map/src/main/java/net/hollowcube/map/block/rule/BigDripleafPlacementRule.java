@@ -1,6 +1,7 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -14,6 +15,7 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
         var currentBlock = updateState.currentBlock();
+        if (updateState.fromFace() != BlockFace.TOP) return currentBlock;
 
         var posAbove = updateState.blockPosition().add(0, 1, 0);
         var blockAbove = updateState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);

@@ -39,7 +39,7 @@ public final class BlockTags {
 
     public static final Tag MINECRAFT_DOORS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:doors"));
 
-    public static final Tag MINECRAFT_SMALL_FLOWERS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:small_flowers"));
+    public static final Tag SMALL_FLOWERS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:small_flowers"));
 
     public static final Tag MINECRAFT_BEDS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:beds"));
 

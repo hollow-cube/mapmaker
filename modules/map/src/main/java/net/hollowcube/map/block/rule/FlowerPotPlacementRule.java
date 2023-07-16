@@ -11,12 +11,17 @@ public class FlowerPotPlacementRule extends BaseBlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        var block = placementState.block();
+        if (BlockTags.SMALL_FLOWERS.contains(block.namespace())) {
+            return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
+        }
+
         return placementState.block();
     }
 
     @Override
     public boolean isSelfReplaceable(@NotNull Replacement replacement) {
-        var block = replacement.block();
-        return BlockTags.MINECRAFT_SMALL_FLOWERS.contains(block.namespace());
+        var block = replacement.material().block();
+        return BlockTags.SMALL_FLOWERS.contains(block.namespace());
     }
 }
