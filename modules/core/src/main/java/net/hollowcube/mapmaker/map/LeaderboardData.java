@@ -57,7 +57,7 @@ public record LeaderboardData(
         var selfId = player() != null ? player().player() : null;
 
         var shouldShowSelf = true;
-        for (var i = top().size() - 1; i >= 0; i--) {
+        for (var i = 0; i < top().size(); i++) {
             var entry = top().get(i);
             var comp = Component.text();
             var t = "#" + entry.rank();
