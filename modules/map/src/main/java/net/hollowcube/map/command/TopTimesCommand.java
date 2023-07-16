@@ -8,9 +8,8 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class TopTimesCommand extends BaseMapCommand {
+public class TopTimesCommand extends Command {
     private final PlayerService playerService;
     private final MapService mapService;
     private final Argument<UUID> mapIdArg = ArgumentType.UUID("map-id");
@@ -41,19 +40,19 @@ public class TopTimesCommand extends BaseMapCommand {
 
         var playerData = PlayerDataV2.fromPlayer(player);
         // TODO Find a better method for determining if the player is in the hub
-        if (true) {
+        if (player.getInstance().getDimensionName().equals("mapmaker:hub")) {
             // Player is in hub, check their last played
             String mapId = playerData.getLastPlayedMap();
             if (mapId == null || mapId.isBlank()) {
                 player.sendMessage(Component.text("Unable to check last played map times.", NamedTextColor.RED));
             } else {
                 var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerData.id());
-                formatAndSendLeaderboardData(player, playerData, leaderboard);
+                formatAndSendLeaderboardData(player, leaderboard);
             }
         } else {
             var world = MapWorld.forPlayer(player);
             var leaderboard = mapService.getPlaytimeLeaderboard(world.map().id(), playerData.id());
-            formatAndSendLeaderboardData(player, playerData, leaderboard);
+            formatAndSendLeaderboardData(player, leaderboard);
         }
     }
 
@@ -63,18 +62,11 @@ public class TopTimesCommand extends BaseMapCommand {
             sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
             return;
         }
-
         var playerData = PlayerDataV2.fromPlayer(player);
-        UUID id = context.get(mapIdArg);
-        LeaderboardData data = mapService.getPlaytimeLeaderboard(id.toString(), playerData.id());
+        var mapId = context.get(mapIdArg).toString();
+        LeaderboardData leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerData.id());
 
-        var messages = leaderboard.toComponents(playerService, false);
-        if (messages == null) {
-            player.sendMessage("No times have been recorded yet.");
-            return;
-        }
-
-        messages.forEach(player::sendMessage);
+        formatAndSendLeaderboardData(player, leaderboard);
 
 //        if (leaderboard.top().isEmpty()) {
 //            player.sendMessage("No times have been recorded yet.");
@@ -120,6 +112,17 @@ public class TopTimesCommand extends BaseMapCommand {
 //        if (shouldShowSelf && playerEntry != null) {
 //            player.sendMessage("Your time: " + playerEntry.score() + "ms (#" + playerEntry.rank() + ")");
 //        }
+    }
+
+    private void formatAndSendLeaderboardData(@NotNull Player player, @NotNull LeaderboardData leaderboard) {
+
+        var messages = leaderboard.toComponents(playerService, false);
+        if (messages == null) {
+            player.sendMessage("No times have been recorded yet.");
+            return;
+        }
+
+        messages.forEach(player::sendMessage);
     }
 //
 //    private static @NotNull String timeToFriendly(long timeInMs) {
