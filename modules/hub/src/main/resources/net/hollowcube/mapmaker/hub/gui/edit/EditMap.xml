@@ -148,7 +148,7 @@
         </box>
 
         <!-- ACTIONS TAB -->
-        <box width="9" height="5" sprite="create_maps/tab_actions/container">
+        <box width="9" height="5" sprite="create_maps/tab_actions/container" align="ttb">
             <box width="9" height="1">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
@@ -172,7 +172,7 @@
 
                 <box width="3" height="4" align="ttb">
                     <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map"/>
-                    <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map"/>
+                    <button id="delete_map" width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map"/>
                 </box>
 
             </box>

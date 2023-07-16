@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.hub;
 
 import io.prometheus.client.Histogram;
+import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.SlotState;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -113,6 +115,14 @@ public class HubHandler {
 //            return map;
 //        }
 //    }
+
+    public void deleteMap(@NotNull Player player, @NotNull String mapId) {
+        var playerData = PlayerDataV2.fromPlayer(player);
+        mapService.deleteMap(playerData.id(), mapId);
+
+        //todo in the future this should be a kafka message sent by the map service or something
+        EventDispatcher.call(new MapDeletedEvent(mapId));
+    }
 
     public void playMap(@NotNull Player player, @NotNull String mapId) {
         try (var ignored = playMapTime.startTimer()) {

@@ -1,18 +1,15 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.mapmaker.event.MapDeletedEvent;
+import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.hub.command.ExtraArguments.*;
@@ -20,11 +17,11 @@ import static net.hollowcube.mapmaker.hub.command.ExtraArguments.*;
 public class MapDeleteCommand extends BaseHubCommand {
     private final Argument<MapData> mapArg = ExtraArguments.Map("map", MASK_ID | MASK_SLOT | MASK_PERSONAL_WORLD | MASK_PUBLISHED_ID);
 
-    private final MapService mapService;
+    private final HubHandler handler;
 
-    public MapDeleteCommand(@NotNull MapService mapService) {
+    public MapDeleteCommand(@NotNull HubHandler handler) {
         super("delete");
-        this.mapService = mapService;
+        this.handler = handler;
 
         addSyntax(wrap(this::deleteMap), mapArg);
 
@@ -36,12 +33,7 @@ public class MapDeleteCommand extends BaseHubCommand {
         if (map == null) return;
 
         try {
-            var playerData = PlayerDataV2.fromPlayer(player);
-            mapService.deleteMap(playerData.id(), map.id());
-
-            //todo in the future this should be a kafka message sent by the map service or something
-            EventDispatcher.call(new MapDeletedEvent(map.id()));
-
+            handler.deleteMap(player, map.id());
             player.sendMessage(HubMessages.COMMAND_MAP_DELETE_SUCCESS);
         } catch (Exception e) {
             //todo handle known exception cases
