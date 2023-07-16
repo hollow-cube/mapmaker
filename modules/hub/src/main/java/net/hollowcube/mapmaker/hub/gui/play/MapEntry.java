@@ -6,9 +6,12 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -17,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class MapEntry extends View {
 
     private @ContextObject PlayerService playerService;
+    private @ContextObject HubHandler handler;
 
     private @Outlet("btn") Label label;
 
@@ -32,8 +36,11 @@ public class MapEntry extends View {
     }
 
     @Action("btn")
-    private void handleClick() {
-        pushView(c -> new MapDetailsView(c, map, authorName));
+    private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        switch (clickType) {
+            case START_SHIFT_CLICK -> handler.playMap(player, map.id());
+            case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
+        }
     }
 
     /** Builds and updates the arg list of the map icon. */
