@@ -27,7 +27,7 @@ public class AcceptCommand extends Command {
         }
 
         if (target == null) {
-            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(target.toString()))); //uh, maybe null, but hopefully it's just passing the target name lol
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(context.get("player").toString())));
             return;
         }
 
