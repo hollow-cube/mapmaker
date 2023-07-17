@@ -18,7 +18,7 @@ public class RequestCommand extends Command {
     }
 
     private void request(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
@@ -27,12 +27,12 @@ public class RequestCommand extends Command {
         Player target = entityFinder.findFirstPlayer(sender);
 
         if (target == sender) {
-            sender.sendMessage("You can't request to join yourself!");
+            sender.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
 
         if (target == null) {
-            sender.sendMessage("That player is not online!");
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(context.get("player").toString())));
             return;
         }
 

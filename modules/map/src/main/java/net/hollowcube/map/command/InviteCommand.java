@@ -18,7 +18,7 @@ public class InviteCommand extends Command {
     }
 
     private void invite(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
@@ -32,7 +32,7 @@ public class InviteCommand extends Command {
         }
 
         if (target == null) {
-            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(target.toString())));
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(context.get("player").toString())));
             return;
         }
 

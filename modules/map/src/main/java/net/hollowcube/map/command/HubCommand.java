@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.map.invites.PlayerInviteService;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
@@ -36,6 +37,7 @@ public class HubCommand extends BaseMapCommand {
             if (world instanceof InternalMapWorld internalWorld) {
                 internalWorld.removePlayer(player);
             }
+            PlayerInviteService.invalidateInvitesAndRequests(player);
             bridge.sendPlayerToHub(player);
         } catch (Exception e) {
             logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
