@@ -3,29 +3,27 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public abstract class HubServerBase implements HubServer {
@@ -42,9 +40,12 @@ public abstract class HubServerBase implements HubServer {
 
     private Controller guiController;
 
-    private EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
+    private final Tag<Boolean> DOUBLE_JUMP_TAG = Tag.Boolean("mapmaker:hub-double-jump");
+
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
             .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn)
-            .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump);
+            .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump)
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     public HubServerBase(@NotNull HubToMapBridge bridge) {
         this.bridge = bridge;
@@ -94,6 +95,8 @@ public abstract class HubServerBase implements HubServer {
 
     }
 
+    private final Pos HUB_SPAWN_POINT = new Pos(0.5, 40, 0.5, 90, 0);
+
     private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
         player.refreshCommands();
@@ -101,7 +104,7 @@ public abstract class HubServerBase implements HubServer {
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setPermissionLevel(4);
-        player.teleport(new Pos(0.5, 40, 0.5, 90, 0));
+        player.teleport(HUB_SPAWN_POINT);
         player.sendActionBar(Component.empty());
 
         player.getInventory().clear();
@@ -111,10 +114,36 @@ public abstract class HubServerBase implements HubServer {
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+        if (player.hasTag(DOUBLE_JUMP_TAG)) return;
 
         var boostVelocity = player.getPosition().direction().mul(20.0).withY(20.0);
         player.setVelocity(boostVelocity);
         player.setFlying(false);
+        player.setTag(DOUBLE_JUMP_TAG, true);
     }
 
+
+    private final int LOWER_X_BOUND = Integer.getInteger("mapmaker.hub.lower-x-bound", -250);
+    private final int LOWER_Y_BOUND = Integer.getInteger("mapmaker.hub.lower-y-bound", -30);
+    private final int LOWER_Z_BOUND = Integer.getInteger("mapmaker.hub.lower-z-bound", -100);
+    private final int UPPER_X_BOUND = Integer.getInteger("mapmaker.hub.upper-x-bound", 60);
+    private final int UPPER_Y_BOUND = Integer.getInteger("mapmaker.hub.upper-y-bound", 130);
+    private final int UPPER_Z_BOUND = Integer.getInteger("mapmaker.hub.upper-z-bound", 100);
+
+
+    private final Vec lowerHubCoord = new Vec(LOWER_X_BOUND, LOWER_Y_BOUND, LOWER_Z_BOUND);
+    private final Vec upperHubCoord = new Vec(UPPER_X_BOUND, UPPER_Y_BOUND, UPPER_Z_BOUND);
+
+    private void handlePlayerMovement(@NotNull PlayerMoveEvent event) {
+        if (event.isOnGround() && event.getPlayer().hasTag(DOUBLE_JUMP_TAG)) {
+            event.getPlayer().removeTag(DOUBLE_JUMP_TAG);
+        }
+
+        Pos playerPos = event.getPlayer().getPosition();
+        if (playerPos.x() < lowerHubCoord.x() || playerPos.x() > upperHubCoord.x() ||
+                playerPos.y() < lowerHubCoord.y() || playerPos.y() > upperHubCoord.y() ||
+                playerPos.z() < lowerHubCoord.z() || playerPos.z() > upperHubCoord.z()) {
+            event.getPlayer().teleport(HUB_SPAWN_POINT);
+        }
+    }
 }
