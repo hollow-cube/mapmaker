@@ -27,7 +27,7 @@ public class RejectCommand extends Command {
         }
 
         if (target == null) {
-            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(target.toString())));
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(context.get("player").toString())));
             return;
         }
 
