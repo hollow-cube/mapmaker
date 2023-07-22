@@ -19,6 +19,8 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
@@ -60,7 +62,7 @@ public abstract class MapServerBase implements MapServer {
         this.bridge = bridge;
     }
 
-    public @Blocking void init(@NotNull ConfigProvider config) {
+    public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
@@ -81,7 +83,6 @@ public abstract class MapServerBase implements MapServer {
         TerraformAxiom.init(terraformEvents, condition);
 
         // Register commands
-        var commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new HubCommand(bridge));
         commandManager.register(new GiveCommand());
         commandManager.register(new SetSpawnCommand());
@@ -96,6 +97,10 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new InviteCommand());
         commandManager.register(new AcceptInviteCommand());
         commandManager.register(new RejectInviteCommand());
+
+        var cmd = new Command("abc");
+        cmd.setDefaultExecutor((sender, context) -> sender.sendMessage("IN MAP"));
+        commandManager.register(cmd);
 
         // Register features
         var features = new ArrayList<FeatureProvider>();

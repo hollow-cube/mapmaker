@@ -14,8 +14,8 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.dev.command.ToggleScoreboardCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -30,6 +30,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -39,6 +40,8 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
+import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -114,6 +117,9 @@ public class DevServer {
         logger.log(System.Logger.Level.INFO, "Server started in {0}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
+    private final CommandManager hubCommandManager = new CommandManager();
+    private final CommandManager mapCommandManager = new CommandManager();
+
     private PlayerService playerService;
     private SessionService sessionService;
     private MapService mapService;
@@ -161,6 +167,14 @@ public class DevServer {
         // Start hub and map server and bridge them.
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+
+            // Configure command rewriter
+            var packetListenerManager = MinecraftServer.getPacketListenerManager();
+            var rewriter = new CommandRewriter(hubCommandManager, mapCommandManager);
+            packetListenerManager.setListener(ClientCommandChatPacket.class, rewriter::execCommand);
+            packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
+            MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
+
             var bridge = new DevServerBridge();
 
             this.hub = new DevHubServer(bridge, playerService, sessionService, mapService);
@@ -168,8 +182,8 @@ public class DevServer {
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 
-            scope.fork(FutureUtil.call(this.hub::init));
-            scope.fork(FutureUtil.call(() -> this.maps.init(configProvider)));
+            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager)));
+            scope.fork(FutureUtil.call(() -> this.maps.init(configProvider, mapCommandManager)));
 
             scope.join();
         } catch (Exception e) {
@@ -182,8 +196,9 @@ public class DevServer {
         // Load all facets & other misc startup tasks like setting up some events & minestom properties
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            MinecraftServer.getCommandManager().register(new DebugCommand(playerService));
-            MinecraftServer.getCommandManager().register(new ToggleScoreboardCommand());
+            var debugCommand = new DebugCommand(playerService);
+            hubCommandManager.register(debugCommand);
+            mapCommandManager.register(debugCommand);
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
@@ -212,9 +227,6 @@ public class DevServer {
                 i++;
             }
             logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
-
-//            Scoreboards.init();
-//            TabLists.init();
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 logger.log(System.Logger.Level.INFO, "Graceful shutdown starting...");

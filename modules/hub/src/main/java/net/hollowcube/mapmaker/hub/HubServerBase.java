@@ -3,16 +3,14 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -20,12 +18,10 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public abstract class HubServerBase implements HubServer {
@@ -56,7 +52,7 @@ public abstract class HubServerBase implements HubServer {
     }
 
     @Blocking
-    public void init() {
+    public void init(@NotNull CommandManager commandManager) {
         StaticAbuse.instance = this;
         this.mapHandler = new HubHandler(this, mapService());
 
@@ -72,8 +68,11 @@ public abstract class HubServerBase implements HubServer {
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
         
-        var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapV2Command(mapService(), mapHandler));
+        commandManager.register(new MapV2Command(mapService(), mapHandler));
+
+        var cmd = new Command("abc");
+        cmd.setDefaultExecutor((sender, context) -> sender.sendMessage("IN HUB"));
+        commandManager.register(cmd);
     }
 
     @Override
