@@ -4,6 +4,7 @@ include(":modules")
 // Standalone modules
 include(":modules:common")
 include(":modules:terraform")
+include(":modules:replay")
 include(":modules:chat")
 include(":modules:canvas")
 include(":modules:canvas:api")

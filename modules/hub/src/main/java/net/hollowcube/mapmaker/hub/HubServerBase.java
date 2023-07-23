@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -69,10 +68,6 @@ public abstract class HubServerBase implements HubServer {
         this.world.instance().eventNode().addChild(eventNode);
         
         commandManager.register(new MapV2Command(mapService(), mapHandler));
-
-        var cmd = new Command("abc");
-        cmd.setDefaultExecutor((sender, context) -> sender.sendMessage("IN HUB"));
-        commandManager.register(cmd);
     }
 
     @Override

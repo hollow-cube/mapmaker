@@ -1,5 +1,6 @@
 dependencies {
     implementation(project(":modules:core"))
+    implementation(project(":modules:replay"))
     implementation(project(":modules:canvas:api"))
     runtimeOnly(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:terraform"))

@@ -20,7 +20,6 @@ import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
@@ -97,10 +96,6 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new InviteCommand());
         commandManager.register(new AcceptInviteCommand());
         commandManager.register(new RejectInviteCommand());
-
-        var cmd = new Command("abc");
-        cmd.setDefaultExecutor((sender, context) -> sender.sendMessage("IN MAP"));
-        commandManager.register(cmd);
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
