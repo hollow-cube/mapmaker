@@ -77,7 +77,7 @@ public abstract class MapServerBase implements MapServer {
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> MapWorld.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        Terraform.init(terraformEvents, condition);
+        Terraform.init(commandManager, terraformEvents, condition);
 //        TerraformCompat.init(terraformEvents, condition);
         TerraformAxiom.init(terraformEvents, condition);
 

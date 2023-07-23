@@ -4,7 +4,7 @@ import net.hollowcube.terraform.command.*;
 import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.mask.script.MaybeMask;
 import net.hollowcube.terraform.tool.ToolHandler;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.EventNode;
@@ -16,44 +16,42 @@ public final class Terraform {
     private Terraform() {
     }
 
-    public static void init(@NotNull EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
-        var commands = MinecraftServer.getCommandManager();
-
+    public static void init(@NotNull CommandManager commandManager, @NotNull EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
         // Root/Debug
-        commands.register(new TerraformCommand(condition));
+        commandManager.register(new TerraformCommand(condition));
 
         // Selection
-        commands.register(new SelectionCommands.Pos1(condition));
-        commands.register(new SelectionCommands.Pos2(condition));
-        commands.register(new SelectionCommands.HPos1(condition));
-        commands.register(new SelectionCommands.HPos2(condition));
-        commands.register(new SelectionCommands.Sel(condition));
-        commands.register(new SelectionCommands.Outset(condition));
-        commands.register(new SelectionCommands.Inset(condition));
-        commands.register(new SelectionCommands.Chunk(condition));
-        commands.register(new SelectionCommands.Size(condition));
+        commandManager.register(new SelectionCommands.Pos1(condition));
+        commandManager.register(new SelectionCommands.Pos2(condition));
+        commandManager.register(new SelectionCommands.HPos1(condition));
+        commandManager.register(new SelectionCommands.HPos2(condition));
+        commandManager.register(new SelectionCommands.Sel(condition));
+        commandManager.register(new SelectionCommands.Outset(condition));
+        commandManager.register(new SelectionCommands.Inset(condition));
+        commandManager.register(new SelectionCommands.Chunk(condition));
+        commandManager.register(new SelectionCommands.Size(condition));
 
         // Region
-        commands.register(new RegionCommands.Set(condition));
-        commands.register(new RegionCommands.Replace(condition));
+        commandManager.register(new RegionCommands.Set(condition));
+        commandManager.register(new RegionCommands.Replace(condition));
 
         // History
-        commands.register(new HistoryCommands.Undo(condition));
-        commands.register(new HistoryCommands.Redo(condition));
-        commands.register(new HistoryCommands.ClearHistory(condition));
+        commandManager.register(new HistoryCommands.Undo(condition));
+        commandManager.register(new HistoryCommands.Redo(condition));
+        commandManager.register(new HistoryCommands.ClearHistory(condition));
 
         // Clipboard
-        commands.register(new ClipboardCommands.Copy(condition));
-        commands.register(new ClipboardCommands.Cut(condition));
-        commands.register(new ClipboardCommands.Paste(condition));
-        commands.register(new ClipboardCommands.ClipboardCommand(condition));
+        commandManager.register(new ClipboardCommands.Copy(condition));
+        commandManager.register(new ClipboardCommands.Cut(condition));
+        commandManager.register(new ClipboardCommands.Paste(condition));
+        commandManager.register(new ClipboardCommands.ClipboardCommand(condition));
 
         // Schematic
-        commands.register(new SchematicCommand(condition));
+        commandManager.register(new SchematicCommand(condition));
 
         // Tool
         var toolHandler = new ToolHandler();
-        commands.register(new ToolCommand(condition, toolHandler));
+        commandManager.register(new ToolCommand(condition, toolHandler));
         eventNode.addChild(toolHandler.eventNode());
 
         // Testing
@@ -77,6 +75,6 @@ public final class Terraform {
             }
 //            sender.sendMessage("test " + context.get("mask") + " " + context.get("abc"));
         }, maskArg);
-        commands.register(mask);
+        commandManager.register(mask);
     }
 }
