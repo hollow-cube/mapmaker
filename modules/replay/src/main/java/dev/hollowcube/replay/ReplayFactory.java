@@ -10,6 +10,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class ReplayFactory {
@@ -28,6 +29,16 @@ public class ReplayFactory {
 
     public ReplayFactory(@NotNull Int2ObjectMap<RecordedChange.Reader> readers) {
         this.readers = readers;
+    }
+
+    public int version() {
+        return Replay.VERSION;
+    }
+
+    public RecordedChange readEntry(int entryId, @NotNull ReplayMetadata metadata, @NotNull NetworkBuffer buffer) {
+        if (!readers.containsKey(entryId))
+            throw new IllegalArgumentException("Unknown recorded action type: " + entryId);
+        return readers.get(entryId).read(metadata, buffer);
     }
 
 

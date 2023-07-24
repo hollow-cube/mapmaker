@@ -4,6 +4,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -145,6 +146,12 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
+    public @NotNull SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.getBestSaveState is a noop currently");
+        throw new NotFoundError("");
+    }
+
+    @Override
     public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         logger.log(System.Logger.Level.WARNING, "MapServiceMemory.updateSaveState is a noop currently");
     }
@@ -152,5 +159,16 @@ public class MapServiceMemory implements MapService {
     @Override
     public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
         logger.log(System.Logger.Level.WARNING, "MapServiceMemory.deleteSaveState is a noop currently");
+    }
+
+    @Override
+    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.getSaveStateReplay is a noop currently");
+        return null;
+    }
+
+    @Override
+    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.updateSaveStateReplay is a noop currently");
     }
 }

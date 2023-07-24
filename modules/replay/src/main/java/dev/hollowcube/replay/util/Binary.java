@@ -25,8 +25,8 @@ public final class Binary {
         var y = readPosComponent(buffer);
         var z = readPosComponent(buffer);
 
-        var yaw = 0f;
-        var pitch = 0f;
+        var yaw = fromHalfFloat(buffer.read(SHORT));
+        var pitch = fromHalfFloat(buffer.read(SHORT));
 
         return new Pos(x, y, z, yaw, pitch);
     }
@@ -38,8 +38,12 @@ public final class Binary {
 
     public static double readPosComponent(@NotNull NetworkBuffer buffer) {
         double value = buffer.read(VAR_INT);
-        value += fromHalfFloat(buffer.read(SHORT));
-        return value;
+        var decimal = fromHalfFloat(buffer.read(SHORT));
+        if (decimal < 0) {
+            return -value + decimal;
+        } else {
+            return value + decimal;
+        }
     }
 
     // https://stackoverflow.com/a/6162687

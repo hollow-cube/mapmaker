@@ -1,10 +1,5 @@
 package net.hollowcube.mapmaker.dev;
 
-import dev.hollowcube.replay.ReplayFactory;
-import dev.hollowcube.replay.ReplayRecorder;
-import dev.hollowcube.replay.change.RecordedPlayerMove;
-import dev.hollowcube.replay.change.RecordedPlayerSpawn;
-import dev.hollowcube.replay.playback.PlaybackPlayer;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -13,7 +8,6 @@ import io.prometheus.client.hotspot.DefaultExports;
 import io.pyroscope.http.Format;
 import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
@@ -37,23 +31,16 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
-import net.minestom.server.network.packet.server.play.EntityHeadLookPacket;
 import net.minestom.server.resourcepack.ResourcePack;
-import net.minestom.server.timer.TaskSchedule;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -138,8 +125,6 @@ public class DevServer {
     private DevHubServer hub;
     private DevMapServer maps;
 
-    ReplayRecorder recorder = null;
-
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
@@ -213,86 +198,12 @@ public class DevServer {
             hubCommandManager.register(debugCommand);
             mapCommandManager.register(debugCommand);
 
-            var replayFactory = ReplayFactory.builder().build();
-
-            var startCommand = new Command("start");
-            startCommand.setDefaultExecutor((sender, context) -> {
-                if (!(sender instanceof Player player)) return;
-
-                if (recorder != null) {
-                    player.sendMessage(Component.text("Already recording!"));
-                    return;
-                }
-
-                recorder = new ReplayRecorder(player.getInstance(), player.getPosition());
-                recorder.record(new RecordedPlayerSpawn(player.getEntityId()));
-                player.scheduler().submitTask(() -> {
-                    if (recorder == null) return TaskSchedule.stop();
-
-                    recorder.record(new RecordedPlayerMove(player.getEntityId(), player.getPosition()));
-
-                    return TaskSchedule.nextTick();
-                });
-                player.sendMessage(Component.text("Started recording!"));
-            });
-            hubCommandManager.register(startCommand);
-
-            var stopCommand = new Command("stop");
-            stopCommand.setDefaultExecutor((sender, context) -> {
-                if (!(sender instanceof Player player)) return;
-
-                if (recorder == null) {
-                    player.sendMessage(Component.text("Not recording!"));
-                    return;
-                }
-
-                var rec = recorder.complete();
-                recorder = null;
-                player.sendMessage(Component.text("Stopped recording!"));
-
-                var changeIter = rec.getChanges().iterator();
-
-                var entitiesById = new Int2ObjectArrayMap<Entity>();
-
-                player.scheduler().submitTask(() -> {
-                    if (!changeIter.hasNext()) {
-                        for (var entity : entitiesById.values()) {
-                            entity.remove();
-                        }
-                        return TaskSchedule.stop();
-                    }
-
-                    for (var change : changeIter.next()) {
-                        switch (change) {
-                            case RecordedPlayerSpawn spawn -> {
-                                var entity = new PlaybackPlayer();
-                                entity.setInstance(player.getInstance());
-                                entitiesById.put(spawn.entityId(), entity);
-                                player.spectate(entity);
-                            }
-                            case RecordedPlayerMove move -> {
-                                var entity = entitiesById.get(move.entityId());
-                                if (entity == null) {
-                                    throw new RuntimeException("No such entity " + move.entityId());
-                                }
-                                entity.teleport(move.pos());
-                                entity.sendPacketToViewers(new EntityHeadLookPacket(entity.getEntityId(), move.pos().yaw()));
-                            }
-                            default -> throw new IllegalStateException("Unexpected value: " + change);
-                        }
-                    }
-
-                    return TaskSchedule.nextTick();
-                });
-
-            });
-            hubCommandManager.register(stopCommand);
-
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
             eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
+            eventHandler.addListener(PlayerSkinInitEvent.class, this::handleSkinInit);
             eventHandler.addListener(MapDeletedEvent.class, event -> {
                 for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     var playerData = PlayerDataV2.fromPlayer(player);
@@ -409,6 +320,10 @@ public class DevServer {
                 logger.log(System.Logger.Level.ERROR, "Failed to close session for " + playerData.id(), e);
             }
         });
+    }
+
+    private void handleSkinInit(PlayerSkinInitEvent event) {
+        event.setSkin(PlayerSkin.fromUuid(event.getPlayer().getUuid().toString()));
     }
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
