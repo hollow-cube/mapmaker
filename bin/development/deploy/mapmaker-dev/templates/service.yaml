@@ -11,6 +11,10 @@ spec:
       targetPort: minecraft
       protocol: TCP
       name: minecraft
+    - port: 9124
+      targetPort: http
+      protocol: TCP
+      name: http
 {{/*      nodePort: 30565*/}}
   selector:
     {{- include "mapmaker-dev.selectorLabels" . | nindent 4 }}
