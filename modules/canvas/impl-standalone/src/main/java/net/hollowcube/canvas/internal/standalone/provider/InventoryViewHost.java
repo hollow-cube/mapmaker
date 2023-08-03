@@ -17,6 +17,8 @@ import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
+import net.minestom.server.timer.Scheduler;
+import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import java.util.Deque;
 import java.util.List;
 
 public class InventoryViewHost {
+    private static final Scheduler SCHEDULER = MinecraftServer.getSchedulerManager();
     private static final System.Logger logger = System.getLogger(InventoryViewHost.class.getName());
 
     private int width, height;
@@ -37,7 +40,8 @@ public class InventoryViewHost {
 
     private boolean dirty = false;
     // Start in deferred mode in case the view is marked dirty immediately (eg during constructor)
-    private boolean deferredDirty = true;
+//    private boolean deferredDirty = true;
+    private Task redrawTask = null;
 
     // The number of rows of the player inventory currently in use.
     private int playerInventoryRows = 0;
@@ -82,7 +86,7 @@ public class InventoryViewHost {
 
         // Mount the contents in this inventory
         this.element.performSignal(Element.SIG_MOUNT);
-        deferredDirty = false;
+//        deferredDirty = false;
         drawCurrentElement();
 
         if (oldInv != null) {
@@ -136,13 +140,27 @@ public class InventoryViewHost {
     public void markDirty() {
         dirty = true;
 
-        // If not deferred, redraw immediately.
-        if (!deferredDirty) {
-            drawCurrentElement();
+        if (redrawTask == null) {
+            redrawTask = SCHEDULER.scheduleNextTick(this::drawCurrentElement);
+        } else {
+            logger.log(System.Logger.Level.INFO, "skipped redraw because one was scheduled");
         }
+
+        // If not deferred, redraw immediately.
+//        if (!deferredDirty) {
+//            drawCurrentElement();
+//        }
     }
 
     private void drawCurrentElement() {
+        logger.log(System.Logger.Level.INFO, "redraw (view = {0})", history.getLast());
+//        List.of(Thread.currentThread().getStackTrace())
+//                .stream()
+//                .map(StackTraceElement::toString)
+//                .filter(s -> !s.contains("java.base/") && !s.contains("net.hollowcube.canvas"))
+//                .forEach(System.out::println);
+
+
         var contents = element.getContents();
         ItemStack[] top, bottom = null;
 
@@ -173,6 +191,7 @@ public class InventoryViewHost {
 //        if (inventory.getInventoryType() != InventoryType.ANVIL)
             inventory.setTitle(Component.text("", NamedTextColor.WHITE).append(titleBuilder.build()));
         dirty = false;
+        redrawTask = null;
     }
 
     static {
@@ -270,9 +289,9 @@ public class InventoryViewHost {
         private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
             if (element == null) return false;
 
-            deferredDirty = true;
+//            deferredDirty = true;
             var result = element.handleClick(player, index, clickType);
-            deferredDirty = false;
+//            deferredDirty = false;
             if (dirty) drawCurrentElement();
             return result;
         }
