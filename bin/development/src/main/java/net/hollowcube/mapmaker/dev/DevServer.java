@@ -45,6 +45,8 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
@@ -56,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
-    private static final System.Logger logger = System.getLogger(DevServer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
 
     private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
 
@@ -78,10 +80,10 @@ public class DevServer {
         // Setup pyroscope profiler
         var pyroscopeEndpoint = System.getenv("MAPMAKER_PYROSCOPE_ENDPOINT");
         if (pyroscopeEndpoint != null) {
-            logger.log(System.Logger.Level.INFO, "Enabling pyroscope profiling...");
+            logger.info("Enabling pyroscope profiling...");
             PyroscopeAgent.start(new io.pyroscope.javaagent.config.Config.Builder().setApplicationName("mapmaker").setProfilingEvent(EventType.ITIMER).setFormat(Format.JFR).setServerAddress(pyroscopeEndpoint).build());
         } else {
-            logger.log(System.Logger.Level.INFO, "Skipping profiler...");
+            logger.info("Skipping profiler...");
         }
 
         // Prometheus JVM exporters
@@ -94,13 +96,13 @@ public class DevServer {
 
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
-        MinecraftServer.getExceptionManager().setExceptionHandler(t -> logger.log(System.Logger.Level.ERROR, "An uncaught exception has been handled", t));
+        MinecraftServer.getExceptionManager().setExceptionHandler(t -> logger.error("An uncaught exception has been handled", t));
         var server = new DevServer();
 
         // Add health check & metrics web server.
         var httpConfig = configProvider.get(HttpConfig.class);
         WebServer webServer = WebServer.builder().host(httpConfig.host()).port(httpConfig.port()).addRouting(Routing.builder().register(HealthSupport.builder().webContext("alive").addLiveness(() -> HealthCheckResponse.up("mapmaker")).build()).register(HealthSupport.builder().webContext("ready").addReadiness(server.readinessChecks()).build()).register(PrometheusSupport.create()).build()).build();
-        webServer.start().thenAccept(ws -> logger.log(System.Logger.Level.INFO, "Web server is running at " + config.http().host() + ":" + ws.port()));
+        webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", config.http().host(), ws.port()));
 
         // Finish server initialization
         server.start(config, configProvider);
@@ -112,7 +114,7 @@ public class DevServer {
             ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
         });
 
-        logger.log(System.Logger.Level.INFO, "Server started in {0}ms", (System.nanoTime() - start) / 1_000_000);
+        logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
     private final CommandManager hubCommandManager = new CommandManager();
@@ -129,10 +131,10 @@ public class DevServer {
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
         var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
         if (velocitySecret != null) {
-            logger.log(System.Logger.Level.INFO, "Enabling velocity proxy...");
+            logger.info("Enabling velocity proxy...");
             VelocityProxy.enable(velocitySecret);
         } else {
-            logger.log(System.Logger.Level.INFO, "Velocity not configured, using online mode...");
+            logger.info("Velocity not configured, using online mode...");
             MojangAuth.init();
         }
 
@@ -140,13 +142,13 @@ public class DevServer {
         // Connect to low level services
 
         if ("1".equals(System.getenv("MAPMAKER_STANDALONE"))) {
-            logger.log(System.Logger.Level.INFO, "Using standalone stubs...");
+            logger.info("Using standalone stubs...");
 
             playerService = new PlayerServiceMemory();
             sessionService = new SessionServiceMemory((PlayerServiceMemory) playerService);
             mapService = new MapServiceMemory();
         } else {
-            logger.log(System.Logger.Level.INFO, "Connecting to remote services...");
+            logger.info("Connecting to remote services...");
 
             var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
             if (playerServiceUrl == null) playerServiceUrl = "http://localhost:9126";
@@ -185,7 +187,7 @@ public class DevServer {
 
             scope.join();
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "failed during startup", e);
+            logger.error("failed during startup", e);
             System.exit(1);
         }
 
@@ -210,7 +212,7 @@ public class DevServer {
                     for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
                         var map = playerData.getMapSlot(i);
                         if (map != null && map.equals(event.mapId())) {
-                            logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was deleted.", event.mapId(), playerData.id());
+                            logger.info("Removed map {} from player {} because it was deleted.", event.mapId(), playerData.id());
                             playerData.setMapSlot(i, null);
                         }
                     }
@@ -225,17 +227,17 @@ public class DevServer {
                 scope.fork(Executors.callable(() -> facet.hook(MinecraftServer.process(), configProvider)));
                 i++;
             }
-            logger.log(System.Logger.Level.INFO, "Loaded {0} facets.", i);
+            logger.info("Loaded {} facets.", i);
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
-                logger.log(System.Logger.Level.INFO, "Graceful shutdown starting...");
+                logger.info("Graceful shutdown starting...");
                 hub.shutdown();
                 maps.shutdown();
             });
 
             scope.join();
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "failed during startup", e);
+            logger.error("failed during startup", e);
             System.exit(1);
         }
     }
@@ -257,7 +259,7 @@ public class DevServer {
             );
             player.setTag(PlayerDataV2.TAG, playerData);
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "failed to create session", e);
+            logger.error("failed to create session", e);
             player.kick(Component.text("Failed to login. Please try again later."));
         }
 
@@ -276,15 +278,15 @@ public class DevServer {
                                 // Map is published, delete from slots.
                                 changed = true;
                                 playerData.setMapSlot(i, null);
-                                logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was published.", mapId, playerData.id());
+                                logger.info("Removed map {} from player {} because it was published.", mapId, playerData.id());
                             }
                         } catch (MapService.NotFoundError e) {
                             // Map is gone, delete from slots
                             changed = true;
                             playerData.setMapSlot(i, null);
-                            logger.log(System.Logger.Level.INFO, "Removed map {0} from player {1} because it was deleted.", mapId, playerData.id());
+                            logger.info("Removed map {} from player {} because it was deleted.", mapId, playerData.id());
                         } catch (Exception e) {
-                            logger.log(System.Logger.Level.ERROR, "Failed to load map data for " + event.getUsername(), e);
+                            logger.info("Failed to load map data for " + event.getUsername(), e);
                             player.kick(Component.text("Failed to load map data! Please try again later."));
                             return;
                         }
@@ -295,7 +297,7 @@ public class DevServer {
                     playerService.updatePlayerData(playerData.id(), req);
                 }
             } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "failed to cleanup player data", e);
+                logger.error("failed to cleanup player data", e);
                 MinecraftServer.getExceptionManager().handleException(e);
             }
         });
@@ -317,7 +319,7 @@ public class DevServer {
                 //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
                 sessionService.deleteSession(playerData.id());
             } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "Failed to close session for " + playerData.id(), e);
+                logger.error("Failed to close session for " + playerData.id(), e);
             }
         });
     }
