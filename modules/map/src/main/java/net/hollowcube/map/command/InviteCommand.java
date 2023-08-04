@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class InviteCommand extends Command {
     public InviteCommand() {
         super("invite");
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /invite <player>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.invite.usage")));
         addSyntax(this::invite, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
