@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class RejectCommand extends Command {
     public RejectCommand() {
         super("reject");
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /reject <player>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.reject.usage")));
         addSyntax(this::reject, ArgumentType.Entity("player").onlyPlayers(true));
     }
 

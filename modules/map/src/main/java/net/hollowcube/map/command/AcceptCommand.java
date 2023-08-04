@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class AcceptCommand extends Command {
     public AcceptCommand() {
         super("accept");
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /accept <player>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.accept.usage")));
         addSyntax(this::accept, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
