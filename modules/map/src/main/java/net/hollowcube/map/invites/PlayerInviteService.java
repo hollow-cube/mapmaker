@@ -40,7 +40,7 @@ public class PlayerInviteService {
         var acepteeName = PlayerDataV2.fromPlayer(acceptee).displayName();
 
         if (requests.get(requestKey) == null && invites.get(inviteKey) == null) {
-            accepter.sendMessage(Component.translatable("map.invite_and_request.can't_send", acepteeName));
+            accepter.sendMessage(Component.translatable("map.invite_and_request.cant_send", acepteeName));
         } else if (invites.get(inviteKey) == null) {
             acceptRequest(acceptee, accepter);
         } else if (requests.get(requestKey) == null) {
@@ -63,7 +63,7 @@ public class PlayerInviteService {
         var requestKey = new Request(rejectee.getUuid(), rejecter.getUuid());
 
         if (invites.get(inviteKey) == null && requests.get(requestKey) == null) {
-            rejecter.sendMessage(Component.translatable("map.invite_and_request.can't_reject"));
+            rejecter.sendMessage(Component.translatable("map.invite_and_request.cant_reject"));
             return;
         }
         if (invites.get(inviteKey) != null) {

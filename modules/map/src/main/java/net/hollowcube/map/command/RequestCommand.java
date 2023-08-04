@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class RequestCommand extends Command {
     public RequestCommand() {
         super("request");
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /request <player>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.request.usage")));
         addSyntax(this::request, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
