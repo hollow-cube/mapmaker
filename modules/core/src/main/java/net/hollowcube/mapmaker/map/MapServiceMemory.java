@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.util.AbstractMemoryService;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MapServiceMemory implements MapService {
+public class MapServiceMemory extends AbstractMemoryService implements MapService {
     private static final System.Logger logger = System.getLogger(MapServiceMemory.class.getName());
 
     private final Map<String, MapData> maps = new ConcurrentHashMap<>();
@@ -28,15 +30,16 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        if (SLOW) FutureUtil.sleep(ThreadLocalRandom.current().nextInt(2000));
         return new MapSearchResponse(
                 page,
-                maps.size() > (page + 1) * 10,
+                maps.size() > (page + 1) * pageSize,
                 maps.values().stream()
                         .filter(MapData::isPublished)
                         .sorted(Comparator.comparing(MapData::publishedAt).reversed())
-                        .skip(page * 10L)
-                        .limit(10)
+                        .skip((long) page * pageSize)
+                        .limit(pageSize)
                         //todo return real progress once that exists
                         .map(m -> new PersonalizedMapData(m, PersonalizedMapData.Progress.NONE))
                         .toList()

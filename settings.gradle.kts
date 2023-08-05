@@ -1,5 +1,9 @@
 rootProject.name = "mapmaker"
 
+// Tools
+include(":tools")
+include(":tools:compile")
+
 include(":modules")
 // Standalone modules
 include(":modules:common")

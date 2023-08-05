@@ -20,10 +20,7 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapServiceImpl;
-import net.hollowcube.mapmaker.map.MapServiceMemory;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.*;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -51,7 +48,9 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
 import java.util.ServiceLoader;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -234,6 +233,24 @@ public class DevServer {
                 hub.shutdown();
                 maps.shutdown();
             });
+
+            if ("1".equals(System.getenv("MAPMAKER_STANDALONE"))) {
+                scope.fork(() -> {
+
+                    var rand = new Random(55);
+                    for (int j = 0; j < 100; j++) {
+                        var creator = UUID.randomUUID().toString();
+                        var md = mapService.createMap(creator, creator);
+                        md.settings().setName("Test Map " + j);
+                        if (rand.nextDouble() > 0.5) md.settings().setVariant(MapVariant.PARKOUR);
+                        md.settings().setIcon(Material.fromId(rand.nextInt(1000)));
+                        md = mapService.publishMap(creator, md.id());
+                        logger.info("Created map {}", md.id());
+                    }
+
+                    return null;
+                });
+            }
 
             scope.join();
         } catch (Exception e) {

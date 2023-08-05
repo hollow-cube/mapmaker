@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemHideFlag;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,12 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
             .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
             .build();
+
+    private static final ItemHideFlag[] ALL_HIDE_FLAGS = new ItemHideFlag[]{
+            ItemHideFlag.HIDE_ENCHANTS, ItemHideFlag.HIDE_ATTRIBUTES, ItemHideFlag.HIDE_UNBREAKABLE,
+            ItemHideFlag.HIDE_DESTROYS, ItemHideFlag.HIDE_PLACED_ON, ItemHideFlag.HIDE_POTION_EFFECTS,
+            ItemHideFlag.HIDE_DYE
+    };
 
     private final String translationKey;
 
@@ -65,6 +72,7 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         itemSprite = itemSprite.with(builder -> {
             builder.displayName(Component.translatable(translationKey + ".name", args));
             builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
+            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
         });
         context.markDirty();
     }

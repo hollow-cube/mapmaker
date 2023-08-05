@@ -18,7 +18,7 @@ public interface MapService {
      */
     @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner);
 
-    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query);
+    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 

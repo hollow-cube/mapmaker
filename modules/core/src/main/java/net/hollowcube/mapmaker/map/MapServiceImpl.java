@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,10 +45,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/search?page=" + page + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
+                .uri(URI.create(url + "/search?page=" + page + "&page_size=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
