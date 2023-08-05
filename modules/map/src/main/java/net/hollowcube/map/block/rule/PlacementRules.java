@@ -253,5 +253,8 @@ public final class PlacementRules {
 
         // Dripstone
         blockManager.registerBlockPlacementRule(new DripstonePlacementRule());
+
+        // Cave vines (glow berries)
+        blockManager.registerBlockPlacementRule(new CaveVinesPlacementRule());
     }
 }
