@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -26,7 +27,7 @@ public class SchematicBuilder {
 
     public void addBlock(@NotNull Point point, @NotNull Block block) {
         var pos = CoordinateUtil.floor(point);
-        blockSet.put(pos, block);
+        blockSet.put(pos, Objects.requireNonNull(block));
 //        if (block.isAir()) {
 //             If it's air, attempt to remove any existing value at that point.
 //            blockSet.remove(pos);

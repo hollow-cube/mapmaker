@@ -140,16 +140,8 @@ public class InventoryViewHost {
     public void markDirty() {
         dirty = true;
 
-        if (redrawTask == null) {
-            redrawTask = SCHEDULER.scheduleNextTick(this::drawCurrentElement);
-        } else {
-            logger.log(System.Logger.Level.INFO, "skipped redraw because one was scheduled");
-        }
-
-        // If not deferred, redraw immediately.
-//        if (!deferredDirty) {
-//            drawCurrentElement();
-//        }
+        if (redrawTask != null) return;
+        redrawTask = SCHEDULER.scheduleNextTick(this::drawCurrentElement);
     }
 
     private void drawCurrentElement() {
