@@ -25,9 +25,9 @@ public class FontUIBuilder {
 
     /**
      * Draws the given sprite with an offset from the given slot
-     * @param sprite
-     * @param slot
-     * @return
+     * @param sprite The sprite to draw
+     * @param slot The slot to draw it at
+     * @return This object, mutated by the parameters
      */
     public @NotNull FontUIBuilder draw(@NotNull Sprite sprite, int slot) {
         int offset = sprite.offsetX() + (slot * 18); // absolute offset of this char
