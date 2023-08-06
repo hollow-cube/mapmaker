@@ -1,5 +1,20 @@
 package net.hollowcube.map.feature.mapsize;
 
-import net.minestom.server.coordinate.Pos;
+public enum MapSizeData {
 
-public record MapSizeData(Pos mapCenter, double horizontalSize, double verticalSize) {}
+
+    STANDARD(50),
+    LARGE(100),
+    SETH(1000000) // Basically unrestricted, also it's named seth cause I can't think of a better name
+    ;
+
+    private final double radius;
+
+    MapSizeData(double radius) {
+        this.radius = radius;
+    }
+
+    public double radius() {
+        return radius;
+    }
+}

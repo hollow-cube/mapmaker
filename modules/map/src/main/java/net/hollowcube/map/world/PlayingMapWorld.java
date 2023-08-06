@@ -123,6 +123,10 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.scopedNode.addChild(eventNode);
     }
 
+    @Override
+    public void removeScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
+        this.scopedNode.removeChild(eventNode);
+    }
 
     @Override
     public @NotNull Point spawnPoint() {

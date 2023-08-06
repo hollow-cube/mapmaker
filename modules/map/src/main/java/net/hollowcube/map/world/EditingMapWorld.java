@@ -21,7 +21,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
@@ -82,7 +81,6 @@ public class EditingMapWorld implements InternalMapWorld {
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
-        eventNode.addListener(PlayerBlockPlaceEvent.class, this::onBlockPlace);
     }
 
     @Override
@@ -111,6 +109,11 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
+    public void removeScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
+        this.scopedNode.removeChild(eventNode);
+    }
+
+    @Override
     public @NotNull Point spawnPoint() {
         return map.settings().getSpawnPoint();
     }
@@ -118,14 +121,6 @@ public class EditingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Instance instance() {
         return instance;
-    }
-
-    public void setMapSizeData(@Nullable MapSizeData mapSizeData) {
-        this.mapSizeData = mapSizeData;
-        if (mapSizeData != null) {
-            instance.getWorldBorder().setCenter((float) mapSizeData.mapCenter().x(), (float) mapSizeData.mapCenter().z());
-            instance.getWorldBorder().setDiameter(mapSizeData.horizontalSize());
-        }
     }
 
     @Override
@@ -327,18 +322,6 @@ public class EditingMapWorld implements InternalMapWorld {
         ItemStack item = event.getPlayer().getItemInMainHand();
         if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {
             event.setCancelled(true);
-        }
-    }
-
-    private void onBlockPlace(PlayerBlockPlaceEvent event) {
-        if (mapSizeData != null) {
-            Point blockPos = event.getBlockPosition();
-            boolean isOutsideBoundary = blockPos.x() < (mapSizeData.mapCenter().x() - mapSizeData.horizontalSize()) || blockPos.x() > (mapSizeData.mapCenter().x() + mapSizeData.horizontalSize()) ||
-                    blockPos.y() < (mapSizeData.mapCenter().y() - mapSizeData.verticalSize()) || blockPos.y() > (mapSizeData.mapCenter().y() + mapSizeData.verticalSize()) ||
-                    blockPos.z() < (mapSizeData.mapCenter().z() - mapSizeData.horizontalSize()) || blockPos.z() > (mapSizeData.mapCenter().z() + mapSizeData.horizontalSize());
-            if (isOutsideBoundary) {
-                event.setCancelled(true);
-            }
         }
     }
 

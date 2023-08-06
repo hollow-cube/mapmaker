@@ -56,6 +56,8 @@ public interface MapWorld {
 
     void addScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode);
 
+    void removeScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode);
+
     @NotNull Set<Player> players();
 
 }
