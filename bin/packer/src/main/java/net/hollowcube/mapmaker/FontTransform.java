@@ -66,7 +66,8 @@ public class FontTransform {
                 var chars = new JsonArray();
                 for (var charset : charmap) {
                     var sb = new StringBuilder();
-                    for (char c : charset.toCharArray()) {
+                    for (int i = 0; i < charset.length(); i++) {
+                        char c = charset.charAt(i);
                         if (c == 0) {
                             sb.append('\u0000');
                             continue;
