@@ -72,7 +72,6 @@ public class EditingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-
         instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
@@ -341,15 +340,5 @@ public class EditingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Set<Player> players() {
         return Set.copyOf(activePlayers);
-    }
-
-    @Override
-    public @NotNull MapSizeData mapSizeData() {
-        return mapSizeData;
-    }
-
-    @Override
-    public void setMapSizeData(@NotNull MapSizeData mapSizeData) {
-        this.mapSizeData = mapSizeData;
     }
 }

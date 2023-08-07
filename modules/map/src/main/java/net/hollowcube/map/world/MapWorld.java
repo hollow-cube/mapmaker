@@ -62,6 +62,4 @@ public interface MapWorld {
 
     @NotNull Set<Player> players();
 
-    @NotNull MapSizeData mapSizeData();
-    @Blocking void setMapSizeData(@NotNull MapSizeData mapSizeData);
 }

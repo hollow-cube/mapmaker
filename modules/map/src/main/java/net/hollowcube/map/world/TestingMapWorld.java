@@ -5,7 +5,6 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.feature.mapsize.MapSizeData;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVerification;
@@ -50,8 +49,6 @@ public class TestingMapWorld implements InternalMapWorld {
         return true;
     });
 
-    private final MapSizeData mapSizeData; // shouldn't be modified anyway
-
     TestingMapWorld(@NotNull EditingMapWorld parent) {
         this.flags |= FLAG_TESTING | FLAG_PLAYING;
 
@@ -61,8 +58,6 @@ public class TestingMapWorld implements InternalMapWorld {
 
         this.itemRegistry = new ItemRegistry();
         this.instance.eventNode().addChild(eventNode);
-
-        this.mapSizeData = parent.mapSizeData();
     }
 
     @Override
@@ -192,12 +187,4 @@ public class TestingMapWorld implements InternalMapWorld {
     public @NotNull Set<Player> players() {
         return Set.copyOf(activePlayers);
     }
-
-    @Override
-    public @NotNull MapSizeData mapSizeData() {
-        return mapSizeData;
-    }
-
-    @Override
-    public void setMapSizeData(@NotNull MapSizeData mapSizeData) {}
 }

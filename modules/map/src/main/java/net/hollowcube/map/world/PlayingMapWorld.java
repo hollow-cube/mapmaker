@@ -6,7 +6,6 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.feature.mapsize.MapSizeData;
 import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
@@ -71,8 +70,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         return true;
     });
 
-    private MapSizeData mapSizeData;
-
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
         this.map = map;
@@ -99,8 +96,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.scheduler().buildTask(this::updateViewership)
                 .repeat(TaskSchedule.tick(5))
                 .schedule();
-
-        this.mapSizeData = MapSizeData.SETH; // FIXME: Assign them accordingly
     }
 
     @Override
@@ -275,15 +270,5 @@ public class PlayingMapWorld implements InternalMapWorld {
             player.sendActionBar(Component.text(SPECTATOR_SPRITE.fontChar(), FontUtil.NO_SHADOW));
             player.setInvisible(true);
         }
-    }
-
-    @Override
-    public @NotNull MapSizeData mapSizeData() {
-        return mapSizeData;
-    }
-
-    @Override
-    public void setMapSizeData(@NotNull MapSizeData mapSizeData) {
-        this.mapSizeData = mapSizeData;
     }
 }

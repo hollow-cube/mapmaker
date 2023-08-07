@@ -11,16 +11,18 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.lang.Math.abs;
 
-@AutoService(FeatureProvider.class)
 public class MapSizeFeature implements FeatureProvider {
+    private final MapSizeData mapSizeData;
 
+    public MapSizeFeature(MapSizeData mapSizeData) {
+        this.mapSizeData = mapSizeData;
+    }
+    
     private final EventNode<InstanceEvent> mapBoundaryNode = EventNode.type("mapmaker:feature/map-boundary", EventFilter.INSTANCE)
             .addListener(PlayerBlockPlaceEvent.class, this::onBlockPlace);
-    private MapSizeData mapSizeData;
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        this.mapSizeData = world.mapSizeData();
         if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             world.addScopedEventNode(mapBoundaryNode);
             world.instance().getWorldBorder().setCenter(0f, 0f);
