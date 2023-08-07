@@ -86,11 +86,6 @@ public class TestingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public void removeScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
-        this.eventNode.removeChild(eventNode);
-    }
-
-    @Override
     public @NotNull Instance instance() {
         return instance;
     }

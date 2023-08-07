@@ -109,11 +109,6 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public void removeScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
-        this.scopedNode.removeChild(eventNode);
-    }
-
-    @Override
     public @NotNull Point spawnPoint() {
         return map.settings().getSpawnPoint();
     }

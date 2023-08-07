@@ -9,10 +9,13 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
-import static java.lang.Math.abs;
-
+@AutoService(FeatureProvider.class)
 public class MapSizeFeature implements FeatureProvider {
     private final MapSizeData mapSizeData;
+
+    public MapSizeFeature() {
+        this(MapSizeData.STANDARD);
+    }
 
     public MapSizeFeature(MapSizeData mapSizeData) {
         this.mapSizeData = mapSizeData;
@@ -26,23 +29,18 @@ public class MapSizeFeature implements FeatureProvider {
         if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             world.addScopedEventNode(mapBoundaryNode);
             world.instance().getWorldBorder().setCenter(0f, 0f);
-            world.instance().getWorldBorder().setDiameter(mapSizeData.xLimit * mapSizeData.zLimit);
+            world.instance().getWorldBorder().setDiameter(mapSizeData.radius);
             return true;
         }
         return false;
     }
 
     @Override
-    public void cleanupMap(@NotNull MapWorld world) {
-        world.removeScopedEventNode(mapBoundaryNode);
-    }
+    public void cleanupMap(@NotNull MapWorld world) {}
 
     private void onBlockPlace(PlayerBlockPlaceEvent event) {
         var block = event.getBlockPosition();
-        if (abs(block.x()) > mapSizeData.xLimit ||
-            abs(block.y()) > mapSizeData.yLimit ||
-            abs(block.z()) > mapSizeData.zLimit)
-                event.setCancelled(true);
-
+        if (Math.abs(block.x()) > mapSizeData.radius || Math.abs(block.z()) > mapSizeData.radius)
+            event.setCancelled(true);
     }
 }
