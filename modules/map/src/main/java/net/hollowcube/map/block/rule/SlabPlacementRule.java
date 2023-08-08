@@ -39,8 +39,9 @@ public class SlabPlacementRule extends BaseBlockPlacementRule {
 
         var type = block.getProperty(PROP_TYPE);
         var blockFace = replacement.blockFace();
-        if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM)
-            return !"double".equals(type);
+        if ((blockFace == BlockFace.TOP && "bottom".equals(type)) ||
+            (blockFace == BlockFace.BOTTOM && "top".equals(type)))
+            return true;
 
         var cursorPosition = replacement.cursorPosition();
         return ("bottom".equals(type) && cursorPosition.y() > 0.5) ||
