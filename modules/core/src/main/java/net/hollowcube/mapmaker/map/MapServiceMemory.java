@@ -78,7 +78,10 @@ public class MapServiceMemory extends AbstractMemoryService implements MapServic
         var noSneak = map.settings().isNoSneak();
         if (update.noSneak != null) noSneak = update.noSneak;
 
-        var settings = new MapSettings(name, icon, variant, spawnPoint, onlySprint, noSprint, noJump, noSneak);
+        var tags = map.settings().getTags();
+        if (update.tags != null) tags = update.tags;
+
+        var settings = new MapSettings(name, icon, variant, spawnPoint, onlySprint, noSprint, noJump, noSneak, tags);
         map = new MapData(map.id(), map.owner(), settings, map.publishedId(), map.publishedAt());
         maps.put(id, map);
     }
