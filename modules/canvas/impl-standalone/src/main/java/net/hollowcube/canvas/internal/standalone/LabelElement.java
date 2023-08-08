@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemHideFlag;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +30,8 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     private final String translationKey;
 
     private ItemStack itemSprite = BLANK_ITEM;
+    private ItemStack itemBlank = BLANK_ITEM;
+    private Integer itemPosition = null;
 
     public LabelElement(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull String translationKey) {
         super(context, id, width, height);
@@ -58,18 +61,32 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         if (shouldDelegateDraw()) return super.getContents();
 
         var contents = new ItemStack[width() * height()];
-        Arrays.fill(contents, itemSprite);
+        if (itemPosition != null) {
+            Arrays.fill(contents, itemBlank);
+            contents[itemPosition] = itemSprite;
+        } else {
+            Arrays.fill(contents, itemSprite);
+        }
         return contents;
     }
 
     @Override
-    public void setItemSprite(@Nullable ItemStack itemStack) {
+    public void setItemSprite(@Nullable ItemStack itemStack, @Nullable Integer itemPosition) {
+        Check.argCondition(itemPosition != null && (itemPosition < 0 || itemPosition >= width() * height()),
+                "Item position must be null or in range [0, " + (width() * height() - 1) + "], got " + itemPosition);
+
         this.itemSprite = itemStack == null ? BLANK_ITEM : itemStack;
+        this.itemPosition = itemPosition;
         updateItem(List.of());
     }
 
     private void updateItem(@NotNull List<Component> args) {
-        itemSprite = itemSprite.with(builder -> {
+        itemSprite = this.itemSprite.with(builder -> {
+            builder.displayName(Component.translatable(translationKey + ".name", args));
+            builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
+            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+        });
+        itemBlank = BLANK_ITEM.with(builder -> {
             builder.displayName(Component.translatable(translationKey + ".name", args));
             builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
             builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));

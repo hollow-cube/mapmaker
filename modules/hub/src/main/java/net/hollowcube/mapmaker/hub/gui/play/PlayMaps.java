@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.play;
 
-import net.hollowcube.canvas.Pagination2;
+import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
@@ -21,7 +21,7 @@ public class PlayMaps extends View {
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
-    private @Outlet("paging") Pagination2 pagination;
+    private @Outlet("paging") Pagination pagination;
 
     private @Outlet("parkour") AbstractToggle parkourToggle;
     private @Outlet("building") AbstractToggle buildingToggle;
@@ -125,7 +125,7 @@ public class PlayMaps extends View {
     // Pagination view
 
     @Action(value = "paging", async = true)
-    private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
+    private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
             var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, "");
 

@@ -136,7 +136,50 @@
             <box width="9" height="1">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
             </box>
+
+            <box width="9">
+                <button width="4" id="map_tags_tab_visual"
+                        translationKey="gui.map_details.map_tags_tab.visual_tag"/>
+                <spacer width="1"/>
+                <button width="4" id="map_tags_tab_gameplay"
+                        translationKey="gui.map_details.map_tags_tab.gameplay_tag"/>
+            </box>
+            <switch id="map_tags_tab_switch" width="9" height="3">
+                <!-- VISUAL TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container">
+                    <!-- These names MUST be synced with the MapTags.java enum -->
+                    <spacer width="1"/>
+                    <switch id="map_tag_2d_switch">
+                        <button id="map_tag_2d_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.2d"
+                                sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_bg"/>
+                        <button id="map_tag_2d_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.2d"
+                                sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_selected"/>
+                    </switch>
+                    <!-- TODO add rest of visual tags -->
+                </box>
+                <!-- GAMEPLAY TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_gameplay/container">
+                    <!-- These names MUST be synced with MapTags.java enum -->
+                    <spacer width="1"/>
+                    <switch id="map_tag_autocomplete_switch">
+                        <button id="map_tag_autocomplete_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_bg"/>
+                        <button id="map_tag_autocomplete_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_selected"/>
+                    </switch>
+                    <!-- TODO add rest of gameplay tags -->
+                </box>
+            </switch>
         </box>
 
         <!-- SETTINGS TAB -->

@@ -143,7 +143,7 @@ public class MapData {
         }
     }
 
-    private static @NotNull String formatPublishedId(long number) {
+    public static @NotNull String formatPublishedId(long number) {
         // Pad zeros if necessary
         var numberString = new StringBuilder(String.valueOf(number));
         while (numberString.length() < 9) {

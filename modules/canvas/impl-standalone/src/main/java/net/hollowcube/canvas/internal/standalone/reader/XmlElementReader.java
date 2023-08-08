@@ -223,6 +223,14 @@ public class XmlElementReader {
 
         var spriteName = getString(node, "sprite", null);
         if (spriteName != null) {
+            Integer spritePos = null;
+            var rawSpritePos = node.getAttributes().getNamedItem("spritePos");
+            if (rawSpritePos != null) {
+                spritePos = Integer.parseInt(rawSpritePos.getNodeValue());
+            }
+
+            System.out.println(spriteName + spritePos);
+
             var sprite = Sprite.SPRITE_MAP.get(spriteName);
             if (sprite != null) {
                 if (sprite.fontChar() != 0) {
@@ -235,7 +243,7 @@ public class XmlElementReader {
                     if (elem instanceof ItemSpriteHolder trait) {
                         trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
                                 .meta(meta -> meta.customModelData(sprite.cmd()))
-                                .build());
+                                .build(), spritePos);
                     } else {
                         throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                     }
@@ -254,7 +262,7 @@ public class XmlElementReader {
                     builder.meta(meta -> meta.customModelData(Integer.parseInt(split.get(1))));
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
-                    trait.setItemSprite(builder.build());
+                    trait.setItemSprite(builder.build(), spritePos);
                 } else {
                     throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                 }

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub;
 
 import io.prometheus.client.Histogram;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -132,7 +133,7 @@ public class HubHandler {
             if (!map.isPublished())
                 throw new MapNotPublishedError();
 
-            server.bridge().joinMap(player, mapId, false, false);
+            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.PLAYING);
         }
     }
 
@@ -145,12 +146,12 @@ public class HubHandler {
                 // todo you should perhaps just lose editing permission?
                 throw new MapIsPublishedError();
 
-            server.bridge().joinMap(player, mapId, true, false);
+            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.EDITING);
         }
     }
 
     public void spectateMap(@NotNull Player player, @NotNull String mapId) {
-        server.bridge().joinMap(player, mapId, false, true);
+        server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.SPECTATING);
     }
 
     public static class MapNotPublishedError extends RuntimeException {

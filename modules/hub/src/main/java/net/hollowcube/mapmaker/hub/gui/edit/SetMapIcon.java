@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Pagination2;
+import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -22,7 +22,7 @@ public class SetMapIcon extends View {
     public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
 
     private @Outlet("input") Label inputField;
-    private @Outlet("page") Pagination2 pagination;
+    private @Outlet("page") Pagination pagination;
 
     private String input = "";
 
@@ -52,11 +52,16 @@ public class SetMapIcon extends View {
     }
 
     @Action("page")
-    private void createPage(@NotNull Pagination2.PageRequest<MapIconPreview> request) {
+    private void createPage(@NotNull Pagination.PageRequest<MapIconPreview> request) {
         var result = new ArrayList<MapIconPreview>();
         for (var suggestion : Autocompletors.material(input, request.pageSize())) {
             result.add(new MapIconPreview(request.context(), suggestion));
         }
+
+        if (!input.isEmpty() && result.isEmpty()) {
+            result.add(new MapIconPreview(request.context()));
+        }
+
         request.respond(result, false);
     }
 

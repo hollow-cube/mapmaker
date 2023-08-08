@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class RejectInviteCommand extends Command {
     public RejectInviteCommand() {
         super("reject");
-        setDefaultExecutor(((sender, context) -> sender.sendMessage("Usage: /reject <player>")));
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /reject <player>"));
         addSyntax(this::reject, ArgumentType.Entity("player").onlyPlayers(true));
     }
 

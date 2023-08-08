@@ -5,6 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ItemSpriteHolder {
 
-    void setItemSprite(@Nullable ItemStack itemStack);
+    void setItemSprite(@Nullable ItemStack itemStack, @Nullable Integer itemPosition);
 
 }
