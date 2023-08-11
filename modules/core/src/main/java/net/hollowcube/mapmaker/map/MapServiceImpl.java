@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpRequest;
@@ -43,10 +45,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/search?page=" + page + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
+                .uri(URI.create(url + "/search?page=" + page + "&page_size=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -242,6 +245,20 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/best"))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), SaveState.class);
+            case 404 -> null;
+            default -> throw new InternalError("Failed to get latest savestate: " + res.body());
+        };
+    }
+
+    @Override
     public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
@@ -264,5 +281,29 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 204) return; // Ok
         throw new InternalError("Failed to delete savestate: " + res.body());
+    }
+
+    @Override
+    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
+        if (res.statusCode() == 200) return res.body(); // Ok
+        if (res.statusCode() == 404) return null; // Not found
+        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
+    }
+
+    @Override
+    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
+        var req = HttpRequest.newBuilder()
+                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return; // Ok
+        throw new InternalError("Failed to update savestate replay: " + res.body());
     }
 }

@@ -36,6 +36,7 @@ public class SchematicWriter {
 
         MutableNBTCompound palette = new MutableNBTCompound();
         for (int i = 0; i < blocks.length; i++) {
+            if (blocks[i] == null) blocks[i] = Block.AIR;
             palette.setInt(BlockUtil.toStateString(blocks[i]), i);
         }
         schematicNBT.set("Palette", palette.toCompound());

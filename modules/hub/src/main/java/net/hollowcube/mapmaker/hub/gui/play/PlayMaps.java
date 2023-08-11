@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 
 public class PlayMaps extends View {
-    private final System.Logger logger = System.getLogger(PlayMaps.class.getSimpleName());
 
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
@@ -50,6 +49,8 @@ public class PlayMaps extends View {
         updateQuery(false);
     }
 
+    // Map type filter
+
     @Signal(FilterParkourToggle.SIG_TOGGLE)
     private void handleParkourToggle(boolean selected) {
         parkour = selected;
@@ -61,6 +62,8 @@ public class PlayMaps extends View {
         building = selected;
         updateQuery(true);
     }
+
+    // Simple preset
 
     @Signal(SortBestToggle.SIG_TOGGLE)
     private void handleBestToggle(boolean selected) {
@@ -119,58 +122,32 @@ public class PlayMaps extends View {
         if (refresh) pagination.reset();
     }
 
-    // OLD STUFF
-
-//    @Action("query")
-//    private void changeQuery() {
-//        pushView(c -> new QueryMaps(c.with(Map.of("query", query))));
-//    }
+    // Pagination view
 
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination2.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), 0, building, parkour, "");
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, "");
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
                 maps.add(new MapEntry(request.context(), map));
             }
             request.respond(maps, queryResult.nextPage());
-
-//            List<MapData> entries = mapStorage.queryMaps(
-//                    new MapQuery("", false, true, false),
-//                    request.page() * request.pageSize(), request.pageSize() + 1);
-//            System.out.println("RESPONDED WITH PAGE " + entries);
-//            if (query.takeQuery) {
-//                query.takeQuery = false;
-//                if (query.isQueryMap) {
-//                    entries = mapStorage.queryMaps(
-//                            new MapQuery(query.query, true, true, false),
-//                            request.page() * request.pageSize(), request.pageSize() + 1);
-//                } else {
-//                    var json = MojangUtils.fromUsername(query.query);
-//                    if (json == null) return;
-//                    var uuid = UUID.fromString(
-//                            json.get("id").getAsString().replaceFirst(
-//                                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-//                                    "$1-$2-$3-$4-$5"));
-//                    entries = mapStorage.queryMaps(
-//                            new MapQuery(uuid.toString(), false, true, false),
-//                            request.page() * request.pageSize(), request.pageSize() + 1);
-//                }
-//            } else {
-//                entries = mapStorage.getLatestMaps(request.page() * request.pageSize(), request.pageSize() + 1);
-//            }
-//            if (entries.isEmpty()) {
-//                request.respond(List.of(), false);
-//                return;
-//            }
-
-
         } catch (Exception e) {
             //todo feedback to user that it went wrong. Right now will load forever
             MinecraftServer.getExceptionManager().handleException(e);
         }
+    }
+
+    @Action("next_page")
+    public void nextPage() {
+        pagination.nextPage();
+    }
+
+    @Action("prev_page")
+    public void prevPage() {
+        pagination.prevPage();
     }
 
 }

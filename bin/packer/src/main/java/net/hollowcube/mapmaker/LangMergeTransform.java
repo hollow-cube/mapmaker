@@ -82,6 +82,7 @@ public class LangMergeTransform {
         }
     }
 
+    @SuppressWarnings("StringSplitter")
     private @NotNull JsonElement processValue(@NotNull String translation) {
         var result = new StringBuilder();
 

@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -57,7 +58,7 @@ public abstract class HubServerBase implements HubServer {
     }
 
     @Blocking
-    public void init() {
+    public void init(@NotNull CommandManager commandManager) {
         StaticAbuse.instance = this;
         this.mapHandler = new HubHandler(this, mapService());
 
@@ -73,8 +74,7 @@ public abstract class HubServerBase implements HubServer {
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
         
-        var commands = MinecraftServer.getCommandManager();
-        commands.register(new MapV2Command(mapService(), mapHandler));
+        commandManager.register(new MapV2Command(mapService(), mapHandler));
     }
 
     @Override

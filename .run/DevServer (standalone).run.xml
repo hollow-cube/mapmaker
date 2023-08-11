@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DevServer (standalone)" type="Application" factoryName="Application">
     <envs>
-      <env name="MAPMAKER_STANDALONE" value="1" />
       <env name="MAPMAKER_KAFKA_BOOTSTRAP_SERVERS" value="" />
-      <env name="MAPMAKER_AUTOEDIT_MAP" value="1" />
+      <env name="MAPMAKER_STANDALONE" value="1" />
+      <env name="MAPMAKER_SIMULATED_SLOWNESS" value="1" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer" />
     <module name="mapmaker.bin.development.main" />

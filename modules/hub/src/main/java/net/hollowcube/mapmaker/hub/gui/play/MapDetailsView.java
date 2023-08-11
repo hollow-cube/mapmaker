@@ -14,11 +14,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
 public class MapDetailsView extends View {
-    private static final System.Logger logger = System.getLogger(MapDetailsView.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
     private @ContextObject HubHandler handler;
 
@@ -57,8 +59,7 @@ public class MapDetailsView extends View {
             player.closeInventory();
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
-            logger.log(System.Logger.Level.ERROR, "failed to join map {} for {}: {}",
-                    map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
+            logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
     }

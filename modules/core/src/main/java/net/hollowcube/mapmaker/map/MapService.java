@@ -4,6 +4,8 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.InputStream;
+
 @Blocking
 public interface MapService {
 
@@ -16,7 +18,7 @@ public interface MapService {
      */
     @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner);
 
-    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query);
+    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 
@@ -38,8 +40,11 @@ public interface MapService {
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
     @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
     @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
+    @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
     void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+    @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
+    void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {

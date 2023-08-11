@@ -18,7 +18,7 @@
     <box width="9" height="5">
         <box height="5" align="ttb">
             <spacer/>
-            <button height="3" translationKey="gui.generic.previous_page"/>
+            <button id="prev_page" height="3" translationKey="gui.generic.previous_page"/>
             <spacer/>
         </box>
 
@@ -26,7 +26,7 @@
 
         <box height="5" align="ttb">
             <spacer/>
-            <button height="3" translationKey="gui.generic.next_page"/>
+            <button id="next_page" height="3" translationKey="gui.generic.next_page"/>
             <spacer/>
         </box>
     </box>

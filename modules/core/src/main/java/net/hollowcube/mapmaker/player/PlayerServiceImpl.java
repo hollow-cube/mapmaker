@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.player;
 
+import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +11,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class PlayerServiceImpl extends AbstractHttpService implements PlayerService {
+    private static final Summary remoteFetchDisplayNameTime = Summary.build()
+            .namespace("mapmaker").name("remote_fetch_display_name_time_seconds")
+            .help("Summary of the time it takes to fetch a player's display name from the remote service")
+            .register();
+
     private static final System.Logger logger = System.getLogger(PlayerServiceImpl.class.getName());
 
     private final String url;
@@ -42,14 +47,17 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
         //todo probably should have some basic cache here
 
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + id + "/displayname"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), Component.class);
-            case 404 -> Component.text("Unknown Player");
-            default -> throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
-        };
+        try (var $ = remoteFetchDisplayNameTime.startTimer()) {
+            var req = HttpRequest.newBuilder()
+                    .uri(URI.create(url + "/" + id + "/displayname"))
+                    .build();
+            var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+            return switch (res.statusCode()) {
+                case 200 -> GSON.fromJson(res.body(), Component.class);
+                case 404 -> Component.text("Unknown Player");
+                default -> throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
+            };
+        }
+
     }
 }

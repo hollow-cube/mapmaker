@@ -32,4 +32,21 @@ public final class FutureUtil {
         };
     }
 
+    public static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void assertThread() {
+        var thread = Thread.currentThread();
+        if (thread.isVirtual()) return;
+        var name = thread.getName();
+        if (name.contains("ForkJoinPool")) return;
+
+        throw new IllegalStateException("Unsafe blocking call " + name);
+    }
+
 }
