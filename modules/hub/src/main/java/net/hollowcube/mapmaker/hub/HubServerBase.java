@@ -114,11 +114,11 @@ public abstract class HubServerBase implements HubServer {
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+        player.setFlying(false);
         if (player.hasTag(DOUBLE_JUMP_TAG)) return;
 
         var boostVelocity = player.getPosition().direction().mul(20.0).withY(20.0);
         player.setVelocity(boostVelocity);
-        player.setFlying(false);
         player.setTag(DOUBLE_JUMP_TAG, true);
     }
 
