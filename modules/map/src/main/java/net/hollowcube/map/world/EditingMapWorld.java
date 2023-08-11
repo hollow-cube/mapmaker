@@ -2,7 +2,6 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.feature.mapsize.MapSizeData;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -50,8 +49,6 @@ public class EditingMapWorld implements InternalMapWorld {
 
     private final MapInstance instance;
     private TestingMapWorld testWorld = null;
-
-    private MapSizeData mapSizeData;
 
     private final Set<Player> activePlayers = Collections.synchronizedSet(new HashSet<>());
 

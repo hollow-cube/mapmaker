@@ -1,14 +1,12 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.feature.mapsize.MapSizeData;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

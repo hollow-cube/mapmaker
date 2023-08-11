@@ -14,11 +14,7 @@ public class MapSizeFeature implements FeatureProvider {
     private final MapSizeData mapSizeData;
 
     public MapSizeFeature() {
-        this(MapSizeData.STANDARD);
-    }
-
-    public MapSizeFeature(MapSizeData mapSizeData) {
-        this.mapSizeData = mapSizeData;
+        this.mapSizeData = MapSizeData.STANDARD;
     }
     
     private final EventNode<InstanceEvent> mapBoundaryNode = EventNode.type("mapmaker:feature/map-boundary", EventFilter.INSTANCE)
