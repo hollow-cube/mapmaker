@@ -120,6 +120,7 @@ public abstract class HubServerBase implements HubServer {
         var boostVelocity = player.getPosition().direction().mul(20.0).withY(20.0);
         player.setVelocity(boostVelocity);
         player.setTag(DOUBLE_JUMP_TAG, true);
+        player.setAllowFlying(false);
     }
 
 
@@ -137,6 +138,7 @@ public abstract class HubServerBase implements HubServer {
     private void handlePlayerMovement(@NotNull PlayerMoveEvent event) {
         if (event.isOnGround() && event.getPlayer().hasTag(DOUBLE_JUMP_TAG)) {
             event.getPlayer().removeTag(DOUBLE_JUMP_TAG);
+            event.getPlayer().setAllowFlying(true);
         }
 
         Pos playerPos = event.getPlayer().getPosition();
