@@ -40,7 +40,7 @@ public class PlayerInviteService {
         var acepteeName = PlayerDataV2.fromPlayer(acceptee).displayName();
 
         if (requests.get(requestKey) == null && invites.get(inviteKey) == null) {
-            accepter.sendMessage(Component.translatable("map.invite_and_request.cant_send", acepteeName));
+            accepter.sendMessage(Component.translatable("map.invite_and_request.cant_accept", acepteeName));
         } else if (invites.get(inviteKey) == null) {
             acceptRequest(acceptee, accepter);
         } else if (requests.get(requestKey) == null) {
@@ -189,14 +189,14 @@ public class PlayerInviteService {
         var key = new Invite(inviter.getUuid(), invitee.getUuid());
         var context = invites.get(key);
         var now = Instant.now();
-        var inviteeMap = MapWorld.forPlayerOptional(invitee);
+        var inviterMap = MapWorld.forPlayerOptional(inviter);
         var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
         var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
         if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
             invitee.sendMessage(Component.translatable("map.request.no_join", inviterName));
         } else {
-            invitee.sendMessage(Component.translatable("map.play.invite.deny", inviterName, Component.text(inviteeMap.map().name())));
-            inviter.sendMessage(Component.translatable("map.play.invite.denied", inviteeName, Component.text(inviteeMap.map().name())));
+            invitee.sendMessage(Component.translatable("map.play.invite.deny", inviterName, Component.text(inviterMap.map().name())));
+            inviter.sendMessage(Component.translatable("map.play.invite.denied", inviteeName, Component.text(inviterMap.map().name())));
         }
         invites.remove(key);
     }
@@ -218,16 +218,16 @@ public class PlayerInviteService {
 
     public static void invalidateInvitesAndRequests(Player invalidater) {
         invites.forEach((invite, context) -> {
-            if (invite.inviterUUID().equals(invalidater.getUuid()) || invite.inviteeUUID().equals(invalidater.getUuid())) {
+            if (invite.inviterUUID().equals(invalidater.getUuid())) {
                 invites.remove(invite);
-                // TODO messages
+                invalidater.sendMessage(Component.translatable("map.invite.invalidated"));
             }
         });
 
         requests.forEach((request, context) -> {
             if (request.requesterUUID().equals(invalidater.getUuid()) || request.requesteeUUID().equals(invalidater.getUuid())) {
                 requests.remove(request);
-                // TODO messages
+                //invalidater.sendMessage(Component.translatable("map.request.invalidated")); //TODO make this send to the requester
             }
         });
     }
