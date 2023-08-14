@@ -57,6 +57,11 @@ public class SetMapIcon extends View {
         for (var suggestion : Autocompletors.material(input, request.pageSize())) {
             result.add(new MapIconPreview(request.context(), suggestion));
         }
+
+        if (!input.isEmpty() && result.isEmpty()) {
+            result.add(new MapIconPreview(request.context()));
+        }
+
         request.respond(result, false);
     }
 
