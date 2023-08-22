@@ -55,6 +55,14 @@ public class MapServiceMemory extends AbstractMemoryService implements MapServic
     }
 
     @Override
+    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
+        return maps.values().stream()
+                .filter(m -> publishedId == m.publishedId())
+                .findFirst()
+                .orElseThrow(() -> new NotFoundError(MapData.formatPublishedId(publishedId)));
+    }
+
+    @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
         var map = maps.get(id);
         if (map == null)

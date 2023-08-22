@@ -21,6 +21,7 @@ public interface MapService {
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
+    @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
 

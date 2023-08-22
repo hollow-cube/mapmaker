@@ -75,6 +75,21 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
+        logger.log(System.Logger.Level.INFO, "getting map by published id " + publishedId);
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + publishedId))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapData.class);
+            case 404 -> throw new NotFoundError(MapData.formatPublishedId(publishedId));
+            default -> throw new InternalError("Failed to get map: " + res.body());
+        };
+    }
+
+    @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
         logger.log(System.Logger.Level.INFO, "updating map " + id);
         var reqBody = GSON.toJson(update);
