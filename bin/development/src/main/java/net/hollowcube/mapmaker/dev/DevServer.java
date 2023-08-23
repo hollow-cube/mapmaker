@@ -14,6 +14,8 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProvider;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.command.PlayCommand;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
@@ -60,6 +62,8 @@ public class DevServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
 
     private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
+
+    private HubToMapBridge hubToMapBridge;
 
     public static void main(String[] args) {
         long start = System.nanoTime();
@@ -180,6 +184,7 @@ public class DevServer {
             this.maps = new DevMapServer(bridge, playerService, sessionService, mapService);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
+            this.hubToMapBridge = bridge;
 
             scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager)));
             scope.fork(FutureUtil.call(() -> this.maps.init(configProvider, mapCommandManager)));
@@ -198,6 +203,10 @@ public class DevServer {
             var debugCommand = new DebugCommand(playerService);
             hubCommandManager.register(debugCommand);
             mapCommandManager.register(debugCommand);
+
+            var playCommand = new PlayCommand(mapService, hubToMapBridge);
+            hubCommandManager.register(playCommand);
+            mapCommandManager.register(playCommand);
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
