@@ -19,46 +19,49 @@ public class PlayCommand extends Command {
     private final HubToMapBridge hubToMapBridge;
 
     public PlayCommand(@NotNull MapService mapService, @NotNull HubToMapBridge hubToMapBridge) {
-        super("play", "enter", "e");
+        super("play", "pl", "enter", "e");
 
         this.mapService = mapService;
         this.hubToMapBridge = hubToMapBridge;
 
         setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.play.usage")));
-        System.out.println("1");
 
         addSyntax(this::playMap, mapIDArg);
     }
 
     private void playMap(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        System.out.println("2");
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.translatable("generic.player_only"));
             return;
         }
-        System.out.println("3");
+
         String publishedIDArg = context.get("Map ID");
 
         try {
-            Player player = ((Player) sender);
-            System.out.println("4");
             try {
-                long publishedID = Long.parseLong(publishedIDArg);
+                long publishedID = parsePublishedID(publishedIDArg);
                 var mapData = mapService.getMapByPublishedId(player.getUsername(), publishedID);
                 joinMap(player, mapData);
-                System.out.println("5");
             } catch (MapService.NotFoundError e) {
                 sender.sendMessage(Component.translatable("command.play.invalid_ID", Component.text(publishedIDArg)));
             }
         } catch (NumberFormatException e) {
             sender.sendMessage(Component.translatable("command.play.wrong_format", Component.text(publishedIDArg)));
-            System.out.println("6");
         }
-        System.out.println("7");
+    }
+
+    private long parsePublishedID(String idString) {
+        idString = idString.replace("-", "");
+
+        while (idString.length() > 1 && idString.startsWith("0")) {
+            idString = idString.substring(1);
+        }
+
+        return Long.parseLong(idString);
+
     }
 
     private void joinMap(@NotNull Player player, @NotNull MapData mapData) {
-        hubToMapBridge.joinMap(player, mapData.toString(), false, false);
-        System.out.println("8");
+        hubToMapBridge.joinMap(player, mapData.id(), false, false);
     }
 }
