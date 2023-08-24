@@ -4,7 +4,7 @@
     <box width="9" height="1" align="ltr">
         <button id="input" translationKey="forced.input"/>
         <spacer/>
-        <label id="output" translationKey="out"/>
+        <label id="output" translationKey="gui.generic.empty"/>
     </box>
 
     <pagination id="page" width="9" height="3" child="MapIconPreview"/>
