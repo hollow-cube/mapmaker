@@ -17,9 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerInviteService {
 
-    private record Invite(UUID inviterUUID, UUID inviteeUUID) {}
-    private record Request(UUID requesterUUID, UUID requesteeUUID) {}
-    private record Context(Instant time, String mapId) {}
+    private record Invite(UUID inviterUUID, UUID inviteeUUID) { }
+    private record Request(UUID requesterUUID, UUID requesteeUUID) { }
+    private record Context(Instant time, String mapId) { }
 
     private static final ConcurrentHashMap<Invite, Context> invites = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Request, Context> requests = new ConcurrentHashMap<>();
@@ -33,7 +33,7 @@ public class PlayerInviteService {
         ms = mapService;
     }
 
-    public static void accept(@NotNull Player sender, @NotNull Player target) {
+    public static void accept(@NotNull Player sender, @NotNull Player target) { //TODO fix
         var inviteKey = new Invite(sender.getUuid(), target.getUuid());
         var requestKey = new Request(sender.getUuid(), target.getUuid());
         var accepteeName = PlayerDataV2.fromPlayer(target).displayName();
@@ -58,7 +58,7 @@ public class PlayerInviteService {
         }
     }
 
-    public static void reject(@NotNull Player sender, @NotNull Player target) {
+    public static void reject(@NotNull Player sender, @NotNull Player target) { //TODO fix
         var inviteKey = new Invite(sender.getUuid(), target.getUuid());
         var requestKey = new Request(sender.getUuid(), target.getUuid());
 
@@ -80,7 +80,7 @@ public class PlayerInviteService {
             sender.sendMessage(Component.translatable("map.invite.no_map"));
             return;
         }
-        if (!doesPlayerOwnMap(sender, senderMap)) {
+        if (!playerInviteAllowed(sender, senderMap)) {
             sender.sendMessage(Component.translatable("map.invite.no_permission"));
             return;
         }

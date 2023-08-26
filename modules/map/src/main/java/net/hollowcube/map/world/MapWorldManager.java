@@ -2,7 +2,6 @@ package net.hollowcube.map.world;
 
 import kotlin.Pair;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
