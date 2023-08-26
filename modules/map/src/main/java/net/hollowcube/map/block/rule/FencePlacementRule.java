@@ -1,14 +1,15 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FencePlacementRule extends BlockPlacementRule {
+@SuppressWarnings("UnstableApiUsage")
+public class FencePlacementRule extends BaseBlockPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.EAST,
@@ -22,33 +23,34 @@ public class FencePlacementRule extends BlockPlacementRule {
 
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        var block = updateState.currentBlock();
-        var blockPosition = updateState.blockPosition();
-        for (var blockFace : HORIZONTAL_FACES) {
-            var neighbor = updateState.instance().getBlock(blockPosition.relative(blockFace));
+        return genericUpdateState(updateState.instance(), updateState.currentBlock(), updateState.blockPosition(), updateState.fromFace());
+    }
 
-            var canConnect = neighbor.isSolid() && !isPane(neighbor) && checkGateConnection(neighbor, blockFace);
+    @Override
+    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        return genericUpdateState(placementState.instance(), block, placementState.placePosition(), null);
+    }
+
+    private @NotNull Block genericUpdateState(@NotNull Block.Getter instance, @NotNull Block block, @NotNull Point blockPosition, @Nullable BlockFace faceFilter) {
+        for (var blockFace : HORIZONTAL_FACES) {
+            if (faceFilter != null && blockFace != faceFilter) continue;
+            var neighbor = instance.getBlock(blockPosition.relative(blockFace));
+
+            var neighborFaceIsSolid = neighbor.registry().collisionShape().isOccluded(block.registry().collisionShape(), blockFace.getOppositeFace());
+            var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || isSimilarFence(block, neighbor)
+                    || FenceGatePlacementRule.isConnectableGate(neighbor, blockFace));
             block = block.withProperty(blockFace.name().toLowerCase(), String.valueOf(canConnect));
         }
         return block;
     }
 
+    private boolean isSimilarFence(@NotNull Block block, @NotNull Block neighbor) {
+        return BlockTags.FENCES.contains(neighbor.namespace()) &&
+                BlockTags.WOODEN_FENCES.contains(block.namespace()) == BlockTags.WOODEN_FENCES.contains(neighbor.namespace());
+    }
+
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        return block;
+    public int maxUpdateDistance() {
+        return 1;
     }
-
-    private boolean isPane(@NotNull Block block) {
-        return BlockTags.PANES.contains(block.id());
-    }
-
-    private boolean checkGateConnection(@NotNull Block block, @NotNull BlockFace fenceFace) {
-        if (!BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()))
-            return true;
-
-        var facing = BlockFace.valueOf(block.getProperty("facing").toUpperCase());
-        facing = HORIZONTAL_FACES.get((HORIZONTAL_FACES.indexOf(facing) + 1) % 4); // Get clockwise direction of gate
-        return facing.isSimilar(fenceFace);
-    }
-
 }

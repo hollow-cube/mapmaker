@@ -1,22 +1,16 @@
 package net.hollowcube.map.block.rule;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SnowPlacementRule extends BlockPlacementRule {
+@SuppressWarnings("UnstableApiUsage")
+public class SnowPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_LAYERS = "layers";
 
     public SnowPlacementRule() {
         super(Block.SNOW);
-    }
-
-    @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
     }
 
     @Override

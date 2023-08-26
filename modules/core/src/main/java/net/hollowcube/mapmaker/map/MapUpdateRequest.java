@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import net.minestom.server.coordinate.Pos;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MapUpdateRequest {
@@ -15,10 +14,11 @@ public class MapUpdateRequest {
     Boolean noSprint = null;
     Boolean noJump = null;
     Boolean noSneak = null;
+    Boolean boat = null;
 
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
-                onlySprint != null || noSprint != null || noJump != null || noSneak != null;
+                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null;
     }
 
     public void setName(@Nullable String name) {
@@ -51,5 +51,7 @@ public class MapUpdateRequest {
     public void setNoSneak(boolean noSneak) {
         this.noSneak = noSneak;
     }
-
+    public void setBoat(Boolean boat) {
+        this.boat = boat;
+    }
 }

@@ -1,6 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
-import net.hollowcube.canvas.Pagination2;
+import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.Context;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class PaginationElement<T extends View> extends BaseElement implements Pagination2 {
+public class PaginationElement<T extends View> extends BaseElement implements Pagination {
     private final Class<T> itemClass;
 
     private final List<BaseElement> pageCache = new ArrayList<>();
@@ -50,7 +50,15 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
         if (pageHandler == null) return;
         if (page >= maxPage) return;
 
-        pageHandler.accept(new PageFetchRequest(this.page + 1));
+        if (pageCache.size() > page + 1) {
+            // Move forward a page and trigger redraw
+            page += 1;
+            performSignal(SIG_PAGE_CHANGED, page);
+            context.markDirty();
+        } else {
+            // Fetch the next page from data source
+            pageHandler.accept(new PageFetchRequest(this.page + 1));
+        }
     }
 
     @Override
@@ -60,6 +68,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
 
         // Move back a page and trigger redraw
         page -= 1;
+        performSignal(SIG_PAGE_CHANGED, page);
         context.markDirty();
     }
 
@@ -154,6 +163,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
                 pageCache.add(fetchPage, pageContainer);
 
                 // Redraw
+                performSignal(SIG_PAGE_CHANGED, page);
                 context.markDirty();
             });
         }

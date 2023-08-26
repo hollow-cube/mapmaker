@@ -3,6 +3,9 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":tools:compile"))
+    annotationProcessor(project(":tools:compile"))
+    testAnnotationProcessor(project(":tools:compile"))
 
     // Kafka
     api("org.apache.kafka:kafka-clients:3.4.0")
@@ -12,4 +15,9 @@ dependencies {
     implementation(libs.polar)
 
     implementation("com.squareup.moshi:moshi:1.14.0")
+}
+
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xplugin:HollowCubeCompilePlugin")
 }

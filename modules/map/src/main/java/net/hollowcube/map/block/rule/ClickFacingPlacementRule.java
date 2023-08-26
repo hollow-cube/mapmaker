@@ -2,11 +2,12 @@ package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ClickFacingPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+public class ClickFacingPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACING = "facing";
 
     private final boolean allowUp;
@@ -19,14 +20,9 @@ public class ClickFacingPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
-    }
-
-    @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var facing = directionFromBlockFace(placementState.blockFace());
-        return placementState.block().withProperty(PROP_FACING, facing);
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), invert ? BlockFace.TOP : BlockFace.BOTTOM);
+        return placementState.block().withProperty(PROP_FACING, directionFromBlockFace(blockFace));
     }
 
     private @NotNull String directionFromBlockFace(@NotNull BlockFace blockFace) {

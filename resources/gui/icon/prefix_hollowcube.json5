@@ -1,0 +1,7 @@
+{
+    "type": "sprite",
+    // Overwrite the character used to always be the given one
+    "char": "\uF8FF",
+    "size": [10, 10],
+    "origin": [0, 9]
+}

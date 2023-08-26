@@ -1,12 +1,14 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FacingAllAxisPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+public class FacingAllAxisPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACING = "facing";
 
     public FacingAllAxisPlacementRule(@NotNull Block block) {
@@ -15,14 +17,15 @@ public class FacingAllAxisPlacementRule extends BlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        String facing;
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
 
-        var pitch = placementState.playerPosition().pitch();
+        String facing;
+        var pitch = playerPosition.pitch();
         if (pitch < -45.0) facing = "down";
         else if (pitch > 45.0) facing = "up";
-        else facing = BlockFace.fromYaw(placementState.playerPosition().yaw())
-                    .getOppositeFace().name().toLowerCase();
+        else facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace().name().toLowerCase();
 
         return block.withProperty(PROP_FACING, facing);
     }
+
 }

@@ -1,0 +1,57 @@
+package dev.hollowcube.replay.playback;
+
+import net.minestom.server.entity.*;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
+import net.minestom.server.network.packet.server.play.SpawnPlayerPacket;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Map;
+
+@SuppressWarnings("UnstableApiUsage")
+public class PlaybackPlayer extends Entity {
+    private final String username;
+
+    private final String skinTexture;
+    private final String skinSignature;
+
+    public PlaybackPlayer(@NotNull String username, @Nullable String skinTexture, @Nullable String skinSignature) {
+        super(EntityType.PLAYER);
+        this.username = username;
+
+        this.skinTexture = skinTexture;
+        this.skinSignature = skinSignature;
+
+        setNoGravity(true);
+    }
+
+    @Override
+    public void updateNewViewer(@NotNull Player player) {
+        super.updateNewViewer(player);
+
+        var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
+        if (skinTexture != null && skinSignature != null) {
+            properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
+        }
+        var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
+                0, GameMode.SURVIVAL, null, null);
+
+        player.sendPackets(
+                new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry),
+                new SpawnPlayerPacket(getEntityId(), getUuid(), getPosition()),
+                // Enable skin layers
+                new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127)))
+        );
+        setInvisible(true);
+    }
+
+    @Override
+    public void updateOldViewer(@NotNull Player player) {
+        super.updateOldViewer(player);
+
+        player.sendPacket(new PlayerInfoRemovePacket(getUuid()));
+    }
+}

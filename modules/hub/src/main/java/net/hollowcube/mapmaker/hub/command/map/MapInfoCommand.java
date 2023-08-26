@@ -34,7 +34,7 @@ public class MapInfoCommand extends BaseHubCommand {
     private void printMapInfo(@NotNull Player player, @NotNull MapData map) {
         player.sendMessage("Map Info:");
         player.sendMessage("  ID: " + map.id());
-        player.sendMessage("  Name: " + map.settings().getName());
+        player.sendMessage("  Name: " + map.name());
     }
 
 }

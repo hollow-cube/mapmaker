@@ -1,14 +1,13 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class RedstonePlacementRule extends BlockPlacementRule {
+public class RedstonePlacementRule extends BaseBlockPlacementRule {
 
     public RedstonePlacementRule() {
         super(Block.REDSTONE_WIRE);

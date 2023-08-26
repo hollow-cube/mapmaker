@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.player;
 
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
@@ -24,9 +23,12 @@ public class PlayerDataV2 {
     private String id;
     private String username;
     private Component displayName;
+    private PlayerSettings settings = new PlayerSettings();
 
     private int unlockedMapSlots = 2;
     private String[] mapSlots = new String[MAX_MAP_SLOTS];
+    private @Nullable String lastPlayedMap = null;
+    private @Nullable String lastEditedMap = null;
 
     private String tfState = null; // base64 bytes
 
@@ -53,6 +55,9 @@ public class PlayerDataV2 {
     }
     public @NotNull Component displayName() {
         return displayName;
+    }
+    public @NotNull PlayerSettings settings() {
+        return settings;
     }
 
     public int getUnlockedMapSlots() {
@@ -93,6 +98,20 @@ public class PlayerDataV2 {
         mapSlots[slot] = mapId;
         updates.setMapSlots(mapSlots);
         return true;
+    }
+    public @Nullable String getLastPlayedMap() {
+        return lastPlayedMap;
+    }
+    public void setLastPlayedMap(@Nullable String lastPlayedMap) {
+        this.updates.setLastPlayedMap(lastPlayedMap);
+        this.lastPlayedMap = lastPlayedMap;
+    }
+    public @Nullable String getLastEditedMap() {
+        return lastEditedMap;
+    }
+    public void setLastEditedMap(@Nullable String lastEditedMap) {
+        this.updates.setLastEditedMap(lastEditedMap);
+        this.lastEditedMap = lastEditedMap;
     }
 
     public byte @Nullable [] getTfState() {

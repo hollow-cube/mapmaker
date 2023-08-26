@@ -1,12 +1,11 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ChestPlacementRule extends BlockPlacementRule {
+public class ChestPlacementRule extends BaseBlockPlacementRule {
 
     public ChestPlacementRule(@NotNull Block block) {
         super(block);
@@ -73,7 +72,8 @@ public class ChestPlacementRule extends BlockPlacementRule {
                             return currBlock.withProperty("type", "single");
                         }
                     }
-                } case "south" -> {
+                }
+                case "south" -> {
                     if (currBlock.getProperty("type").equals("left")) {
                         if (!blockUtils.west().getBlock().compare(currBlock)) {
                             return currBlock.withProperty("type", "single");
@@ -83,7 +83,8 @@ public class ChestPlacementRule extends BlockPlacementRule {
                             return currBlock.withProperty("type", "single");
                         }
                     }
-                } case "east" -> {
+                }
+                case "east" -> {
                     if (currBlock.getProperty("type").equals("left")) {
                         if (!blockUtils.south().getBlock().compare(currBlock)) {
                             return currBlock.withProperty("type", "single");
@@ -93,7 +94,8 @@ public class ChestPlacementRule extends BlockPlacementRule {
                             return currBlock.withProperty("type", "single");
                         }
                     }
-                } case "west" -> {
+                }
+                case "west" -> {
                     if (currBlock.getProperty("type").equals("left")) {
                         if (!blockUtils.north().getBlock().compare(currBlock)) {
                             return currBlock.withProperty("type", "single");
@@ -188,4 +190,10 @@ public class ChestPlacementRule extends BlockPlacementRule {
         }
         return currBlock;
     }
+
+    @Override
+    public int maxUpdateDistance() {
+        return 1;
+    }
+
 }

@@ -1,15 +1,16 @@
 package net.hollowcube.map.block.rule;
 
 import net.hollowcube.map.block.handler.SignBlockHandler;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class SignPlacementRule extends BlockPlacementRule {
+public class SignPlacementRule extends BaseBlockPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.WEST,
@@ -31,13 +32,14 @@ public class SignPlacementRule extends BlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var blockFace = placementState.blockFace();
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         return switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> wallBlock.withProperty(PROP_FACING, blockFace.name().toLowerCase());
             case BOTTOM -> {
                 var instance = placementState.instance();
 
-                var facingFace = BlockFace.fromYaw(placementState.playerPosition().yaw());
+                var facingFace = BlockFace.fromYaw(playerPosition.yaw());
                 for (var neighborFace : getFaceOrder(facingFace)) {
                     var neighbor = instance.getBlock(placementState.placePosition().relative(neighborFace));
                     if (neighbor.isSolid()) {
@@ -48,7 +50,7 @@ public class SignPlacementRule extends BlockPlacementRule {
                 yield null;
             }
             case TOP -> {
-                float yaw = placementState.playerPosition().yaw() + 180;
+                float yaw = playerPosition.yaw() + 180;
                 int rotation = (int) (Math.round(yaw / 22.5d) % 16);
                 yield block.withProperty("rotation", String.valueOf(rotation));
             }

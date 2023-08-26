@@ -1,9 +1,11 @@
 package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SmallDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
     private static final String PROP_HALF = "half"; // lower/upper
@@ -15,6 +17,7 @@ public class SmallDripleafPlacementRule extends FacingHorizontalPlacementRule {
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
         var currentBlock = updateState.currentBlock();
+        if (updateState.fromFace() != BlockFace.TOP) return currentBlock;
 
         var posAbove = updateState.blockPosition().add(0, 1, 0);
         var blockAbove = updateState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);
@@ -41,6 +44,11 @@ public class SmallDripleafPlacementRule extends FacingHorizontalPlacementRule {
 
         // Otherwise, use the inverted player facing handled by the superclass.
         return super.blockPlace(placementState);
+    }
+
+    @Override
+    public int maxUpdateDistance() {
+        return 1;
     }
 
 }

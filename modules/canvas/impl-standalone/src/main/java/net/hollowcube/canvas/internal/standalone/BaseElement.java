@@ -86,6 +86,7 @@ public abstract class BaseElement implements Element {
         context.markDirty();
     }
 
+    @Override
     public void performSignal(@NotNull String name, @NotNull Object... args) {
     }
 

@@ -9,7 +9,7 @@ public final class PlacementRules {
 
     public static void init() {
         BlockManager blockManager = MinecraftServer.getBlockManager();
-        blockManager.registerBlockPlacementRule(new RedstonePlacementRule());
+//        blockManager.registerBlockPlacementRule(new RedstonePlacementRule());
 
         // Axis
         // Logs
@@ -64,8 +64,6 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.PURPUR_PILLAR));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.QUARTZ_PILLAR));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.DEEPSLATE));
-        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEE_NEST));
-        blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.BEEHIVE));
         blockManager.registerBlockPlacementRule(new AxisPlacementRule(Block.CHAIN));
 
         // Facing
@@ -73,6 +71,8 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.LECTERN, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.JACK_O_LANTERN, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.CARVED_PUMPKIN, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BEEHIVE, true));
+        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BEE_NEST, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.FURNACE, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BLAST_FURNACE, true));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.STONECUTTER, true));
@@ -90,7 +90,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.REPEATING_COMMAND_BLOCK));
 
         // Bell
-        blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.BELL, false));
+        blockManager.registerBlockPlacementRule(new BellPlacementRule());
 
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD));
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD, true));
@@ -99,10 +99,10 @@ public final class PlacementRules {
         for (var fenceGateId : BlockTags.MINECRAFT_FENCE_GATES.getValues()) {
             blockManager.registerBlockPlacementRule(new FenceGatePlacementRule(Block.fromNamespaceId(fenceGateId)));
         }
-        for (var fenceId : BlockTags.MINECRAFT_FENCES.getValues()) {
+        for (var fenceId : BlockTags.FENCES.getValues()) {
             blockManager.registerBlockPlacementRule(new FencePlacementRule(Block.fromNamespaceId(fenceId)));
         }
-        for (var wallId : BlockTags.MINECRAFT_WALLS.getValues()) {
+        for (var wallId : BlockTags.WALLS.getValues()) {
             blockManager.registerBlockPlacementRule(new WallPlacementRule(Block.fromNamespaceId(wallId)));
         }
 
@@ -223,6 +223,9 @@ public final class PlacementRules {
 
         // Flower pot
         blockManager.registerBlockPlacementRule(new FlowerPotPlacementRule());
+        for (var flowerId : BlockTags.SMALL_FLOWERS.getValues()) {
+            blockManager.registerBlockPlacementRule(new SmallFlowerPlacementRule(Block.fromNamespaceId(flowerId)));
+        }
 
         // Terracotta
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.WHITE_GLAZED_TERRACOTTA, true));
@@ -250,5 +253,8 @@ public final class PlacementRules {
 
         // Dripstone
         blockManager.registerBlockPlacementRule(new DripstonePlacementRule());
+
+        // Cave vines (glow berries)
+        blockManager.registerBlockPlacementRule(new CaveVinesPlacementRule());
     }
 }

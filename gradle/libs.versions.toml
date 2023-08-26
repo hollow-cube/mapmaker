@@ -1,8 +1,8 @@
 metadata.format.version = "1.1"
 
 [versions]
-minestom = "3dbf364340"
-polar = "1.2.0"
+minestom = "74ca1041f3"
+polar = "1.3.1"
 
 [libraries]
 minestom = { group = "dev.hollowcube", name = "minestom-ce", version.ref = "minestom" }

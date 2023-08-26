@@ -395,6 +395,22 @@ public class EditMap extends View {
         publishSwitch.setOption(getPublishState());
     }
 
+    // ACTIONS TAB
+
+    @Action(value = "delete_map", async = true)
+    private void deleteMap(@NotNull Player player) {
+        try {
+            mapHandler.deleteMap(player, map.id());
+            showInfoTab();
+            performSignal(CreateMaps.SIG_RESET);
+            player.sendMessage("deleted");
+        } catch (Exception e) {
+            player.sendMessage("failed to delete map");
+            logger.log(System.Logger.Level.ERROR, "failed to delete map", e);
+            player.closeInventory();
+        }
+    }
+
     // TAB SWITCHING
 
     @Action("tab_info")

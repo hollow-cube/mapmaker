@@ -16,13 +16,14 @@ public final class BlockTags {
 
     public static final Tag MINECRAFT_STAIRS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:stairs"));
 
-    public static final Tag MINECRAFT_WALLS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:walls"));
+    public static final Tag WALLS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:walls"));
 
     public static final Tag MINECRAFT_SLABS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:slabs"));
 
     public static final Tag MINECRAFT_BUTTONS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:buttons"));
 
-    public static final Tag MINECRAFT_FENCES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:fences"));
+    public static final Tag FENCES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:fences"));
+    public static final Tag WOODEN_FENCES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:wooden_fences"));
     public static final Tag MINECRAFT_FENCE_GATES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:fence_gates"));
 
     public static final Tag MINECRAFT_WALL_SIGNS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:wall_signs"));
@@ -38,9 +39,13 @@ public final class BlockTags {
 
     public static final Tag MINECRAFT_DOORS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:doors"));
 
-    public static final Tag MINECRAFT_SMALL_FLOWERS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:small_flowers"));
+    public static final Tag SMALL_FLOWERS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:small_flowers"));
 
     public static final Tag MINECRAFT_BEDS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:beds"));
+
+    public static final Tag LEAVES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:leaves"));
+
+    public static final Tag SHULKER_BOXES = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:shulker_boxes"));
 
     public static final Set<Integer> PANES = Set.of(
             Block.GLASS_PANE.id(),

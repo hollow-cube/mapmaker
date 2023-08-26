@@ -1,6 +1,6 @@
 package net.hollowcube.canvas.demo;
 
-import net.hollowcube.canvas.Pagination2;
+import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 public class PaginatedList extends View {
 
-    private @Outlet("pagination") Pagination2 pagination;
+    private @Outlet("pagination") Pagination pagination;
 
     public PaginatedList(@NotNull Context context) {
         super(context);
@@ -28,7 +28,7 @@ public class PaginatedList extends View {
     }
 
     @Action("pagination")
-    private void fetchPage(@NotNull Pagination2.PageRequest<PageItem> request) {
+    private void fetchPage(@NotNull Pagination.PageRequest<PageItem> request) {
         var pageItems = IntStream.range(0, request.pageSize())
                 .mapToObj(i -> {
                     var item = new PageItem(request.context());

@@ -1,16 +1,19 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.item.ItemMeta;
 import net.minestom.server.item.metadata.PlayerHeadMeta;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTType;
 
-public class HeadPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+public class HeadPlacementRule extends BaseBlockPlacementRule {
 
     public HeadPlacementRule(@NotNull Block block) {
         super(block);
@@ -20,10 +23,10 @@ public class HeadPlacementRule extends BlockPlacementRule {
     public Block blockPlace(@NotNull PlacementState placementState) {
         var usedItemMeta = placementState.usedItemMeta();
 
-        var blockFace = placementState.blockFace();
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
         if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) {
-            float yaw = placementState.playerPosition().yaw() + 360;
-            int rotation = (int) (Math.round(yaw / 22.5d) % 16);
+            var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+            int rotation = (int) (Math.round((playerPosition.yaw() + 360) / 22.5d) % 16);
 
             return withSkin(usedItemMeta, block)
                     .withProperty("rotation", String.valueOf(rotation));
@@ -58,7 +61,9 @@ public class HeadPlacementRule extends BlockPlacementRule {
      * @param block the block
      * @return the block with the skin tags
      */
-    private Block withSkin(ItemMeta meta, Block block) {
+    private @NotNull Block withSkin(@Nullable ItemMeta meta, @NotNull Block block) {
+        if (meta == null) return block;
+
         var skullOwner = meta.getTag(PlayerHeadMeta.SKULL_OWNER);
         if (skullOwner == null) return block;
 

@@ -19,7 +19,7 @@ public class SetSpawnCommand extends BaseMapCommand {
     private final Argument<RelativeVec> rotationArg = ArgumentType.RelativeVec2("position");
 
     public SetSpawnCommand() {
-        super(true, "setspawn");
+        super(true, "setspawn", "setstart");
 
         addSyntax(this::setSpawn);
         addSyntax(this::setSpawnWithPos, positionArg);

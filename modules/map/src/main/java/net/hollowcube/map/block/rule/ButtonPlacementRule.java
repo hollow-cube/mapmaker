@@ -2,11 +2,12 @@ package net.hollowcube.map.block.rule;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ButtonPlacementRule extends BlockPlacementRule {
+import java.util.Objects;
+
+public class ButtonPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACE = "face";
     private static final String PROP_FACING = "facing";
 
@@ -15,13 +16,8 @@ public class ButtonPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
-    }
-
-    @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var blockFace = placementState.blockFace();
+        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.WEST);
         return switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> block
                     .withProperty(PROP_FACE, "wall")

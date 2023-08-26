@@ -34,6 +34,11 @@ public class SetMapName extends View {
 //        outputField.setArgs(Component.text(input));
     }
 
+    @Action("input")
+    public void handleBackButton() {
+        popView();
+    }
+
     @Action("output")
     public void handleAccept() {
         popView(SIG_UPDATE_NAME, input);

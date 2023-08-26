@@ -1,9 +1,12 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.util.AbstractMemoryService;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MapServiceMemory implements MapService {
+public class MapServiceMemory extends AbstractMemoryService implements MapService {
     private static final System.Logger logger = System.getLogger(MapServiceMemory.class.getName());
 
     private final Map<String, MapData> maps = new ConcurrentHashMap<>();
@@ -27,15 +30,16 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        if (SLOW) FutureUtil.sleep(ThreadLocalRandom.current().nextInt(2000));
         return new MapSearchResponse(
                 page,
-                maps.size() > (page + 1) * 10,
+                maps.size() > (page + 1) * pageSize,
                 maps.values().stream()
                         .filter(MapData::isPublished)
                         .sorted(Comparator.comparing(MapData::publishedAt).reversed())
-                        .skip(page * 10L)
-                        .limit(10)
+                        .skip((long) page * pageSize)
+                        .limit(pageSize)
                         //todo return real progress once that exists
                         .map(m -> new PersonalizedMapData(m, PersonalizedMapData.Progress.NONE))
                         .toList()
@@ -48,6 +52,14 @@ public class MapServiceMemory implements MapService {
         if (map == null)
             throw new NotFoundError(id);
         return map;
+    }
+
+    @Override
+    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
+        return maps.values().stream()
+                .filter(m -> publishedId == m.publishedId())
+                .findFirst()
+                .orElseThrow(() -> new NotFoundError(MapData.formatPublishedId(publishedId)));
     }
 
     @Override
@@ -145,6 +157,12 @@ public class MapServiceMemory implements MapService {
     }
 
     @Override
+    public @NotNull SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.getBestSaveState is a noop currently");
+        throw new NotFoundError("");
+    }
+
+    @Override
     public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         logger.log(System.Logger.Level.WARNING, "MapServiceMemory.updateSaveState is a noop currently");
     }
@@ -152,5 +170,16 @@ public class MapServiceMemory implements MapService {
     @Override
     public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
         logger.log(System.Logger.Level.WARNING, "MapServiceMemory.deleteSaveState is a noop currently");
+    }
+
+    @Override
+    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.getSaveStateReplay is a noop currently");
+        return null;
+    }
+
+    @Override
+    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
+        logger.log(System.Logger.Level.WARNING, "MapServiceMemory.updateSaveStateReplay is a noop currently");
     }
 }

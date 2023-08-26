@@ -1,25 +1,27 @@
 package net.hollowcube.map.block.rule;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FlowerPotPlacementRule extends BlockPlacementRule {
+public class FlowerPotPlacementRule extends BaseBlockPlacementRule {
     protected FlowerPotPlacementRule() {
         super(Block.FLOWER_POT);
     }
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        var block = placementState.block();
+        if (BlockTags.SMALL_FLOWERS.contains(block.namespace())) {
+            return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
+        }
+
         return placementState.block();
     }
 
     @Override
     public boolean isSelfReplaceable(@NotNull Replacement replacement) {
-        var block = replacement.block();
-        return BlockTags.MINECRAFT_SMALL_FLOWERS.contains(block.namespace());
+        var block = replacement.material().block();
+        return BlockTags.SMALL_FLOWERS.contains(block.namespace());
     }
 }

@@ -84,20 +84,20 @@
     "value": "#3490C9"
   },
   // #FFBC0F - Gold (Boost Maps, #1 Top Times)
-  "gold": {
-    "type": "raw",
-    "value": "#FFBC0F"
-  },
-  // #808080 - Silver (#2 Top Times)
-  "silver": {
-    "type": "raw",
-    "value": "#808080"
-  },
-  // #CD7F32 - Bronze (#3 Top Times)
-  "bronze": {
-    "type": "raw",
-    "value": "#CD7F32"
-  },
+    "gold": {
+      "type": "raw",
+      "value": "#FFBC0F"
+    },
+    // #808080 - Silver (#2 Top Times)
+    "silver": {
+      "type": "raw",
+      "value": "#808080"
+    },
+    // #CD7F32 - Bronze (#3 Top Times)
+    "bronze": {
+      "type": "raw",
+      "value": "#CD7F32"
+    },
   // #FF9FFF - Light Pink (Cubits)
   "light_pink": {
     "type": "raw",

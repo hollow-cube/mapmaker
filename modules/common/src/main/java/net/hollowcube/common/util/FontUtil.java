@@ -1,10 +1,14 @@
 package net.hollowcube.common.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class FontUtil {
+    private static final Logger logger = LoggerFactory.getLogger(FontUtil.class);
+
     private FontUtil() {
     }
 
@@ -46,7 +52,7 @@ public final class FontUtil {
             Map.entry(44, 2), Map.entry(58, 2), Map.entry(59, 2), Map.entry(33, 2),
             Map.entry(161, 2), Map.entry(63, 6), Map.entry(191, 6), Map.entry(183, 3),
             Map.entry(8226, 3), Map.entry(42, 5), Map.entry(35, 6), Map.entry(47, 6),
-            Map.entry(92, 6), Map.entry(40, 5), Map.entry(41, 5), Map.entry(123, 5),
+            Map.entry(92, 6), Map.entry(40, 4), Map.entry(41, 4), Map.entry(123, 5),
             Map.entry(125, 5), Map.entry(91, 4), Map.entry(93, 4), Map.entry(45, 6),
             Map.entry(173, 3), Map.entry(8212, 6), Map.entry(95, 6), Map.entry(171, 6),
             Map.entry(187, 6), Map.entry(34, 5), Map.entry(39, 3), Map.entry(32, 4),
@@ -85,37 +91,7 @@ public final class FontUtil {
         fontmaps = Map.copyOf(tempFontmaps);
     }
 
-    public static int measureText(@NotNull String text) {
-        int width = 0;
-        for (int i = 0; i < text.length(); i++) {
-            int codePoint = text.codePointAt(i);
-            int glyphWidth = GLYPH_WIDTHS.getOrDefault(codePoint, -1);
-            if (glyphWidth == -1) {
-                throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
-            }
-            width += glyphWidth;
-        }
-        return width;
-    }
-
-    public static @NotNull String rewrite(@NotNull String font, @NotNull String text) {
-        if (font.equals("default")) return text;
-        var charmap = fontmaps.get(font);
-        Check.notNull(charmap, "Unknown font: " + font);
-
-        var result = new StringBuilder();
-        for (char c : text.toCharArray()) {
-            if (c == ' ') {
-                result.append('\uF824');
-                continue;
-            }
-
-            var replacement = charmap.get(c);
-            Check.notNull(replacement, "Unknown character: " + c + " in font: " + font);
-            result.append(replacement);
-        }
-        return result.toString();
-    }
+    public static final Int2IntArrayMap ALL_GLYPH_WIDTHS = new Int2IntArrayMap();
 
     // Represents -2^index pixels of space
     public static final @NotNull List<String> NEGATIVE_SPACE = List.of(
@@ -146,6 +122,66 @@ public final class FontUtil {
             "\uF82E", // 512
             "\uF82F"  // 1024
     );
+
+    static {
+        ALL_GLYPH_WIDTHS.putAll(GLYPH_WIDTHS);
+
+        for (int i = 0; i < POSITIVE_SPACE.size(); i++) {
+            ALL_GLYPH_WIDTHS.put(POSITIVE_SPACE.get(i).charAt(0), 1 << i);
+        }
+
+        for (int i = 0; i < NEGATIVE_SPACE.size(); i++) {
+            ALL_GLYPH_WIDTHS.put(NEGATIVE_SPACE.get(i).charAt(0), -(1 << i));
+        }
+
+        try (var is = FontUtil.class.getResourceAsStream("/sprites.json")) {
+            if (is != null) {
+                var allSprites = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonArray.class);
+                for (var entry : allSprites) {
+                    var obj = entry.getAsJsonObject();
+                    if (!obj.has("fontChar")) continue;
+                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0), obj.get("width").getAsInt());
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static int measureText(@NotNull String text) {
+        int width = 0;
+        for (int i = 0; i < text.length(); i++) {
+            int codePoint = text.codePointAt(i);
+            int glyphWidth = ALL_GLYPH_WIDTHS.getOrDefault(codePoint, -1);
+            if (glyphWidth == -1) {
+                throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
+            }
+            width += glyphWidth;
+        }
+        return width;
+    }
+
+    public static @NotNull String rewrite(@NotNull String font, @NotNull String text) {
+        if (font.equals("default")) return text;
+        var charmap = fontmaps.get(font);
+        Check.notNull(charmap, "Unknown font: " + font);
+
+        var result = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            if (c == ' ') {
+                result.append('\uF824');
+                continue;
+            }
+
+            var replacement = charmap.get(c);
+            if (replacement == null) {
+                logger.warn("Unknown character: " + c + " in font: " + font);
+                replacement = c;
+            }
+            result.append(replacement);
+        }
+        return result.toString();
+    }
 
     public static @NotNull String computeOffset(int offset) {
         if (offset == 0) return "";

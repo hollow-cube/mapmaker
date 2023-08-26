@@ -5,6 +5,8 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class DoorPlacementRule extends FacingHorizontalPlacementRule {
     public DoorPlacementRule(@NotNull Block block) {
         super(block, false);
@@ -14,7 +16,7 @@ public class DoorPlacementRule extends FacingHorizontalPlacementRule {
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         if (placementState.instance().getBlock(placementState.placePosition().add(0, 1, 0)).isAir()) {
             // We can place above, proceed
-            Block toPlace = super.blockPlace(placementState);
+            Block toPlace = Objects.requireNonNull(super.blockPlace(placementState), "unreachable");
             // Check if we should have inverted hinge - based on side of the block we placed on, or, if there is another door block to our left or right
             boolean isLeft = true;
 

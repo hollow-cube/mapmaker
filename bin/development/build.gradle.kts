@@ -22,6 +22,7 @@ dependencies {
     runtimeOnly(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:chat"))
     implementation(project(":modules:terraform"))
+    implementation(project(":modules:replay"))
 
     implementation("com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220")
 
@@ -56,6 +57,7 @@ tasks.withType<ShadowJar> {
 
 application {
     mainClass.set("net.hollowcube.mapmaker.dev.DevServer")
+    applicationDefaultJvmArgs = listOf("--enable-preview", "--add-modules", "jdk.incubator.concurrent")
 }
 
 blossom {

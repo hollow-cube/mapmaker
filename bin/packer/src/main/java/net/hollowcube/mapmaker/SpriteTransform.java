@@ -169,7 +169,12 @@ public class SpriteTransform {
         ImageIO.write(image, "png", baos);
         var ref = ctx.writeTexture(null, name, baos.toByteArray());
 
-        var rawFontChar = nextChar++;
+        int rawFontChar;
+        if (conf.has("char")) {
+            rawFontChar = conf.get("char").getAsString().charAt(0);
+        } else {
+            rawFontChar = nextChar++;
+        }
         var fontChar = String.valueOf((char) rawFontChar);//String.format("\\u%04x", nextChar++);
 
         fontConf.addProperty("type", "bitmap");

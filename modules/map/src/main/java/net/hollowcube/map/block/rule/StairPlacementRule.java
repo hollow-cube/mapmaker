@@ -1,14 +1,18 @@
 package net.hollowcube.map.block.rule;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 
-public class StairPlacementRule extends BlockPlacementRule {
+@SuppressWarnings("UnstableApiUsage")
+public class StairPlacementRule extends BaseBlockPlacementRule {
     private static final BlockFace[][] HORIZONTAL_FACING = new BlockFace[][]{
             // indices here are blockface.ordinal - 2
             /* NORTH */{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST},
@@ -27,12 +31,28 @@ public class StairPlacementRule extends BlockPlacementRule {
 
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        var block = updateState.currentBlock();
+        return genericUpdateShape(updateState.instance(), updateState.currentBlock(), updateState.blockPosition());
+    }
 
+    @Override
+    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        var placeFace = placementState.blockFace();
+        var placeY = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y();
+        var half = placeFace == BlockFace.TOP || (placeFace != BlockFace.BOTTOM && placeY < 0.5) ? "bottom" : "top";
+
+        // Facing is always the player facing direction, and is never updated
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+        var facing = BlockFace.fromYaw(playerPosition.yaw());
+
+        var block = this.block.withProperties(Map.of(
+                PROP_HALF, half,
+                PROP_FACING, facing.name().toLowerCase()
+        ));
+        return genericUpdateShape(placementState.instance(), block, placementState.placePosition());
+    }
+
+    private @NotNull Block genericUpdateShape(@NotNull Block.Getter instance, @NotNull Block block, @NotNull Point blockPos) {
         var facing = BlockFace.valueOf(block.getProperty(PROP_FACING).toUpperCase());
-
-        var instance = updateState.instance();
-        var blockPos = updateState.blockPosition();
 
         // Reordered directions for the side array. See comment in that function
         // for explanation of the order here.
@@ -70,18 +90,8 @@ public class StairPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var placeFace = placementState.blockFace();
-        var placeY = placementState.cursorPosition().y();
-        var half = placeFace == BlockFace.TOP || (placeFace != BlockFace.BOTTOM && placeY < 0.5) ? "bottom" : "top";
-
-        // Facing is always the player facing direction, and is never updated
-        var facing = BlockFace.fromYaw(placementState.playerPosition().yaw());
-
-        return block.withProperties(Map.of(
-                PROP_HALF, half,
-                PROP_FACING, facing.name().toLowerCase()
-        ));
+    public int maxUpdateDistance() {
+        return 1;
     }
 
     private static final String[] SHAPE_INDICES = new String[]{

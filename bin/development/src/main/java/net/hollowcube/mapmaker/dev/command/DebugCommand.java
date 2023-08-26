@@ -49,6 +49,10 @@ public class DebugCommand extends Command {
         var playerData = PlayerDataV2.fromPlayer(player);
         player.sendMessage(Component.text(playerData.id() + " (" + playerData.username() + ")"));
         player.sendMessage(Component.text("Display: ").append(Component.text(playerData.username())));
+        player.sendMessage(Component.text("Last played: " + playerData.getLastPlayedMap()));
+        player.sendMessage(Component.text("Last edited: " + playerData.getLastEditedMap()));
+        player.sendMessage(Component.text("Settings: "));
+        player.sendMessage(Component.text("  scoreboards: " + playerData.settings().isScoreboardEnabled()));
     }
 
     private void handlePlayerReset(@NotNull CommandSender sender, @NotNull CommandContext context) {

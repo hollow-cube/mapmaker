@@ -33,10 +33,10 @@ jobs:
           cache: 'gradle'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Package resources
+      - name: Setup gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: :bin:packer:run
+      - name: Package resources
+        run: ./gradlew :bin:packer:run
       - name: Zip resource pack
         working-directory: build/packer
         run: |
@@ -52,11 +52,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
           AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
           SOURCE_DIR: build/packer/out
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: :bin:development:shadowJar
+      - name: Build standalone binary
+        run: ./gradlew :bin:development:shadowJar
         env:
+          HOLLOWCUBE_STRIPPED_BINARY: true
           COMMIT_SHA: ${{ github.sha }}
           RESOURCE_PACK_SHA: ${{ env.RESOURCE_PACK_SHA }}
       - run: cp bin/development/build/libs/development-all.jar development-all.jar

@@ -2,10 +2,13 @@
   "configurations": [
     {
       "type": "gradle",
-      "name": "Dev Server",
+      "name": "DevServer (local)",
       "tasks": [
         ":bin:development:run"
-      ]
+      ],
+      "environment": {
+        "MAPMAKER_KAFKA_BOOTSTRAP_SERVERS": ""
+      }
     }
   ]
 }

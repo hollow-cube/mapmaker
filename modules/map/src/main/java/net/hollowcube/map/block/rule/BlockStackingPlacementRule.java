@@ -1,14 +1,11 @@
 package net.hollowcube.map.block.rule;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** Also usable for sea pickles */
-public class BlockStackingPlacementRule extends BlockPlacementRule {
+public class BlockStackingPlacementRule extends BaseBlockPlacementRule {
     private static final int MAX_AMOUNT = 4;
 
     public static final String CANDLE_PROPERTY = "candles";
@@ -19,11 +16,6 @@ public class BlockStackingPlacementRule extends BlockPlacementRule {
     public BlockStackingPlacementRule(@NotNull Block block, @NotNull String property) {
         super(block);
         this.property = property;
-    }
-
-    @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return updateState.currentBlock();
     }
 
     @Override
