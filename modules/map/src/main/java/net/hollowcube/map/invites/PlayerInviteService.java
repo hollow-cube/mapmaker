@@ -1,6 +1,5 @@
 package net.hollowcube.map.invites;
 
-import net.hollowcube.map.MapServerBase;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
@@ -9,6 +8,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,8 +22,8 @@ public class PlayerInviteService {
     private record Request(UUID requesterUUID, UUID requesteeUUID) {}
     private record Context(Instant time, String mapId) {}
 
-    private static ConcurrentHashMap<Invite, Context> invites = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Request, Context> requests = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Invite, Context> invites = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Request, Context> requests = new ConcurrentHashMap<>();
     private static final Duration inviteExpirationTime = Duration.of(5, ChronoUnit.MINUTES);
     private static final Duration requestExpirationTime = Duration.of(1, ChronoUnit.MINUTES);
     private static MapWorldManager mwm;
@@ -34,189 +34,190 @@ public class PlayerInviteService {
         ms = mapService;
     }
 
-    public static void accept(@NotNull Player accepter, @NotNull Player acceptee) {
-        var inviteKey = new Invite(acceptee.getUuid(), accepter.getUuid());
-        var requestKey = new Request(acceptee.getUuid(), accepter.getUuid());
-        var acepteeName = PlayerDataV2.fromPlayer(acceptee).displayName();
+    public static void accept(@NotNull Player sender, @NotNull Player target) {
+        var inviteKey = new Invite(sender.getUuid(), target.getUuid());
+        var requestKey = new Request(sender.getUuid(), target.getUuid());
+        var accepteeName = PlayerDataV2.fromPlayer(target).displayName();
 
-        if (requests.get(requestKey) == null && invites.get(inviteKey) == null) {
-            accepter.sendMessage(Component.translatable("map.invite_and_request.cant_accept", acepteeName));
-        } else if (invites.get(inviteKey) == null) {
-            acceptRequest(acceptee, accepter);
-        } else if (requests.get(requestKey) == null) {
-            acceptInvite(acceptee, accepter);
-        } else {
+        if (invites.get(inviteKey) != null && requests.get(requestKey) != null) {
+            // Whichever came later wins
             var inviteTime = invites.get(inviteKey).time;
             var requestTime = requests.get(requestKey).time;
             if (inviteTime.compareTo(requestTime) > 0) {
-                acceptInvite(acceptee, accepter);
+                acceptInvite(target, sender);
                 requests.remove(requestKey);
             } else {
-                acceptRequest(acceptee, accepter);
+                acceptRequest(target, sender);
                 invites.remove(inviteKey);
             }
+        } else if (requests.get(requestKey) != null) {
+            acceptRequest(sender, target);
+        } else if (invites.get(inviteKey) != null) {
+            acceptInvite(sender, target);
+        } else {
+            sender.sendMessage(Component.translatable("map.invite_and_request.cant_accept", accepteeName));
         }
     }
 
-    public static void reject(@NotNull Player rejecter, @NotNull Player rejectee) {
-        var inviteKey = new Invite(rejectee.getUuid(), rejecter.getUuid());
-        var requestKey = new Request(rejectee.getUuid(), rejecter.getUuid());
+    public static void reject(@NotNull Player sender, @NotNull Player target) {
+        var inviteKey = new Invite(sender.getUuid(), target.getUuid());
+        var requestKey = new Request(sender.getUuid(), target.getUuid());
 
         if (invites.get(inviteKey) == null && requests.get(requestKey) == null) {
-            rejecter.sendMessage(Component.translatable("map.invite_and_request.cant_reject"));
+            sender.sendMessage(Component.translatable("map.invite_and_request.cant_reject"));
             return;
         }
         if (invites.get(inviteKey) != null) {
-            rejectInvite(rejectee, rejecter);
+            rejectInvite(sender, target);
         }
         if (requests.get(requestKey) != null) {
-            rejectRequest(rejectee, rejecter);
+            rejectRequest(sender, target);
         }
     }
 
-    public static void registerInvite(@NotNull Player inviter, @NotNull Player invitee) {
-        var inviterMap = MapWorld.forPlayerOptional(inviter);
-        var inviteeMap = MapWorld.forPlayerOptional(invitee);
-        var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
-        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
-        if (inviterMap == null) {
-            inviter.sendMessage(Component.translatable("map.invite.no_map"));
-            return;
-        } else if (inviteeMap == inviterMap) {
-            inviter.sendMessage(Component.translatable("map.invite.same_map", inviteeName));
+    public static void registerInvite(@NotNull Player sender, @NotNull Player target) {
+        var senderMap = MapWorld.forPlayerOptional(sender);
+        if (senderMap == null) {
+            sender.sendMessage(Component.translatable("map.invite.no_map"));
             return;
         }
-        var key = new Invite(inviter.getUuid(), invitee.getUuid());
+        if (!doesPlayerOwnMap(sender, senderMap)) {
+            sender.sendMessage(Component.translatable("map.invite.no_permission"));
+            return;
+        }
+
+        var targetMap = MapWorld.forPlayerOptional(target);
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
+        if (targetMap == senderMap) {
+            sender.sendMessage(Component.translatable("map.invite.same_map", targetDisplayName));
+            return;
+        }
+        var key = new Invite(sender.getUuid(), target.getUuid());
         var context = invites.get(key);
         var now = Instant.now();
-        var val = new Context(now, inviterMap.map().id());
+        var val = new Context(now, senderMap.map().id());
 
         if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
             invites.put(key, val);
-        if (!inviterMap.map().isPublished()) {
-            inviter.sendMessage(Component.translatable("map.build.invite.sent", inviteeName, Component.text(inviterMap.map().name())));
-            invitee.sendMessage(Component.translatable("map.build.invite.pending", inviterName, Component.text(inviterMap.map().name())));
-        } else {
-            inviter.sendMessage(Component.translatable("map.play.invite.sent", inviteeName, Component.text(inviterMap.map().name())));
-            invitee.sendMessage(Component.translatable("map.play.invite.pending", inviterName, Component.text(inviterMap.map().name())));
-        }
+
+        // build/play determined by map publish state
+        String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".invite.";
+        sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(senderMap.map().name())));
+        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(senderMap.map().name())));
     }
 
-    private static void acceptInvite(@NotNull Player inviter, @NotNull Player invitee) {
-        var key = new Invite(inviter.getUuid(), invitee.getUuid());
+    private static void acceptInvite(@NotNull Player sender, @NotNull Player target) {
+        var key = new Invite(sender.getUuid(), target.getUuid());
         var context = invites.get(key);
-        var now = Instant.now();
-        var inviterMap = MapWorld.forPlayerOptional(inviter);
-        var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
-        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
         if (context == null) {
-            invitee.sendMessage(Component.translatable("map.invite.no_join", inviterName));
-        } else if (inviterMap == null || !inviterMap.map().id().equals(context.mapId())) {
-            invitee.sendMessage(Component.translatable("map.invite.left_map", inviterName));
+            target.sendMessage(Component.translatable("map.invite.no_join", senderDisplayName));
+            return;
+        }
+
+        var now = Instant.now();
+        var senderMap = MapWorld.forPlayerOptional(sender);
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
+        if (senderMap == null || !senderMap.map().id().equals(context.mapId())) {
+            target.sendMessage(Component.translatable("map.invite.left_map", senderDisplayName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            invitee.sendMessage("map.invite.expired");
+            target.sendMessage("map.invite.expired");
         } else {
             invites.remove(key);
-            var map = ms.getMap(inviter.getUuid().toString(), context.mapId);
-            if (map.isPublished()) {
-                mwm.joinMap(inviter, map, HubToMapBridge.JoinMapState.PLAYING);
-                inviter.sendMessage(Component.translatable("map.play.invite.accepted", inviteeName, Component.text(inviterMap.map().name())));
-                invitee.sendMessage(Component.translatable("map.play.invite.accept", inviterName, Component.text(inviterMap.map().name())));
-            } else {
-                mwm.joinMap(inviter, map, HubToMapBridge.JoinMapState.EDITING);
-                inviter.sendMessage(Component.translatable("map.build.invite.accepted", inviteeName, Component.text(inviterMap.map().name())));
-                invitee.sendMessage(Component.translatable("map.build.invite.accept", inviterName, Component.text(inviterMap.map().name())));
-            }
+            // build/play determined by map publish state
+            String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".invite.";
+            sender.sendMessage(Component.translatable(translateString + "accepted", targetDisplayName, Component.text(senderMap.map().name())));
+            target.sendMessage(Component.translatable(translateString + "accept", senderDisplayName, Component.text(senderMap.map().name())));
+            // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
+            mwm.joinMap(target, senderMap.map(), (senderMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }
     }
 
-    public static void registerRequest(@NotNull Player requester, @NotNull Player requestee) {
-        var requesteeMap = MapWorld.forPlayerOptional(requestee);
-        var requesterMap = MapWorld.forPlayerOptional(requester);
-        var requesteeName = PlayerDataV2.fromPlayer(requestee).displayName();
-        var requesterName = PlayerDataV2.fromPlayer(requester).displayName();
-        if (requesteeMap == null) {
-            requester.sendMessage(Component.translatable("map.play.request.cant_send", PlayerDataV2.fromPlayer(requestee).displayName()));
+    public static void registerRequest(@NotNull Player sender, @NotNull Player target) {
+        var senderMap = MapWorld.forPlayerOptional(sender);
+        var targetMap = MapWorld.forPlayerOptional(target);
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        if (senderMap == null) {
+            sender.sendMessage(Component.translatable("map.play.request.cant_send", targetDisplayName));
             return;
-        } else if (requesteeMap == requesterMap) {
-            requester.sendMessage(Component.translatable("map.request.same_map", requesteeName));
+        } else if (senderMap == targetMap) {
+            sender.sendMessage(Component.translatable("map.request.same_map", targetDisplayName));
             return;
         }
-        var key = new Request(requester.getUuid(), requestee.getUuid());
+        var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
         var now = Instant.now();
-        var val = new Context(now, requesteeMap.map().id());
+        var val = new Context(now, senderMap.map().id());
         if (context == null || Duration.between(context.time, now).compareTo(requestExpirationTime) > 0)
             requests.put(key, val);
-        if (!requesteeMap.map().isPublished()) {
-            requester.sendMessage(Component.translatable("map.build.request.sent", requesteeName, Component.text(requesteeMap.map().name())));
-            requestee.sendMessage(Component.translatable("map.build.request.pending", requesterName, Component.text(requesteeMap.map().name())));
-        } else {
-            requester.sendMessage(Component.translatable("map.play.request.sent", requesteeName, Component.text(requesteeMap.map().name())));
-            requestee.sendMessage(Component.translatable("map.play.request.pending", requesterName, Component.text(requesteeMap.map().name())));
-        }
+
+        // build/play determined by map publish state
+        String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".request.";
+        sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(senderMap.map().name())));
+        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(senderMap.map().name())));
     }
 
-    private static void acceptRequest(@NotNull Player requester, @NotNull Player requestee) {
-        var key = new Request(requester.getUuid(), requestee.getUuid());
+    private static void acceptRequest(@NotNull Player sender, @NotNull Player target) {
+        var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
-        var now = Instant.now();
-        var requesteeMap = MapWorld.forPlayerOptional(requestee);
-        var requesteeName = PlayerDataV2.fromPlayer(requestee).displayName();
-        var requesterName = PlayerDataV2.fromPlayer(requester).displayName();
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
         if (context == null) {
-            requestee.sendMessage(Component.translatable("map.request.no_join", requesterName));
-        } else if (requesteeMap == null || !requesteeMap.map().id().equals(context.mapId())) {
-            requester.sendMessage(Component.translatable("map.invite.left_map", requesteeName));
+            target.sendMessage(Component.translatable("map.request.no_join", senderDisplayName));
+            return;
+        }
+        var now = Instant.now();
+        var targetMap = MapWorld.forPlayerOptional(target);
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
+
+        if (targetMap == null || !targetMap.map().id().equals(context.mapId())) {
+            sender.sendMessage(Component.translatable("map.invite.left_map", targetDisplayName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            requestee.sendMessage(Component.translatable("map.invite.expired"));
+            target.sendMessage(Component.translatable("map.invite.expired"));
         } else {
             requests.remove(key);
-            var map = ms.getMap(requester.getUuid().toString(), context.mapId);
-            if (map.isPublished()) {
-                mwm.joinMap(requester, map, HubToMapBridge.JoinMapState.PLAYING);
-                requester.sendMessage(Component.translatable("map.play.request.accepted", requesteeName, Component.text(requesteeMap.map().name())));
-                requestee.sendMessage(Component.translatable("map.play.request.accept", requesterName, Component.text(requesteeMap.map().name())));
-            } else {
-                mwm.joinMap(requester, map, HubToMapBridge.JoinMapState.PLAYING);
-                requester.sendMessage(Component.translatable("map.build.request.accepted", requesteeName, Component.text(requesteeMap.map().name())));
-                requestee.sendMessage(Component.translatable("map.build.request.accept", requesterName, Component.text(requesteeMap.map().name())));
-            }
+
+            // build/play determined by map publish state
+            String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
+            sender.sendMessage(Component.translatable(translateString + "accepted", targetDisplayName, Component.text(targetMap.map().name())));
+            target.sendMessage(Component.translatable(translateString + "accept", senderDisplayName, Component.text(targetMap.map().name())));
+            // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
+            mwm.joinMap(target, targetMap.map(), (targetMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }
     }
 
-    private static void rejectInvite(@NotNull Player inviter, @NotNull Player invitee) {
-        var key = new Invite(inviter.getUuid(), invitee.getUuid());
+    private static void rejectInvite(@NotNull Player sender, @NotNull Player target) {
+        var key = new Invite(sender.getUuid(), target.getUuid());
         var context = invites.get(key);
         var now = Instant.now();
-        var inviterMap = MapWorld.forPlayerOptional(inviter);
-        var inviterName = PlayerDataV2.fromPlayer(inviter).displayName();
-        var inviteeName = PlayerDataV2.fromPlayer(invitee).displayName();
-        if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            invitee.sendMessage(Component.translatable("map.request.no_join", inviterName));
+        var senderMap = MapWorld.forPlayerOptional(sender);
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        if (context == null || senderMap == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
+            target.sendMessage(Component.translatable("map.request.no_join", senderDisplayName));
         } else {
-            invitee.sendMessage(Component.translatable("map.play.invite.deny", inviterName, Component.text(inviterMap.map().name())));
-            inviter.sendMessage(Component.translatable("map.play.invite.denied", inviteeName, Component.text(inviterMap.map().name())));
+            target.sendMessage(Component.translatable("map.play.invite.deny", senderDisplayName, Component.text(senderMap.map().name())));
+            sender.sendMessage(Component.translatable("map.play.invite.denied", PlayerDataV2.fromPlayer(target).displayName(), Component.text(senderMap.map().name())));
+            invites.remove(key);
         }
-        invites.remove(key);
     }
 
-    private static void rejectRequest(@NotNull Player requester, @NotNull Player requestee) {
-        var key = new Request(requester.getUuid(), requestee.getUuid());
+    private static void rejectRequest(@NotNull Player sender, @NotNull Player target) {
+        var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
         var now = Instant.now();
-        var requesteeMap = MapWorld.forPlayerOptional(requestee);
-        var inviterName = PlayerDataV2.fromPlayer(requester).displayName();
-        if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
-            requestee.sendMessage(Component.translatable("map.request.no_join", inviterName));
+        var targetMap = MapWorld.forPlayerOptional(target);
+        var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        if (context == null || targetMap == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
+            target.sendMessage(Component.translatable("map.request.no_join", senderDisplayName));
         else {
-            requestee.sendMessage(Component.translatable("map.play.request.deny", inviterName, Component.text(requesteeMap.map().name())));
-            requester.sendMessage(Component.translatable("map.play.request.denied", PlayerDataV2.fromPlayer(requestee).displayName(), Component.text(requesteeMap.map().name())));
+            target.sendMessage(Component.translatable("map.play.request.deny", senderDisplayName, Component.text(targetMap.map().name())));
+            sender.sendMessage(Component.translatable("map.play.request.denied", PlayerDataV2.fromPlayer(target).displayName(), Component.text(targetMap.map().name())));
+            requests.remove(key);
         }
-        requests.remove(key);
     }
 
-    public static void invalidateInvitesAndRequests(Player invalidater) {
+    public static void invalidateInvitesAndRequests(@NotNull Player invalidater) {
         invites.forEach((invite, context) -> {
             if (invite.inviterUUID().equals(invalidater.getUuid())) {
                 invites.remove(invite);
@@ -230,5 +231,9 @@ public class PlayerInviteService {
                 //invalidater.sendMessage(Component.translatable("map.request.invalidated")); //TODO make this send to the requester
             }
         });
+    }
+
+    private static boolean doesPlayerOwnMap(@NotNull Player player, @NotNull MapWorld mapWorld) {
+        return player.getUuid().equals(UUID.fromString(mapWorld.map().owner()));
     }
 }
