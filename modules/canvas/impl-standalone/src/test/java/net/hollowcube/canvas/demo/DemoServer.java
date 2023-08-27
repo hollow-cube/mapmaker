@@ -3,7 +3,7 @@ package net.hollowcube.canvas.demo;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.command.builder.Command;
@@ -45,7 +45,7 @@ public class DemoServer {
 
         var server = MinecraftServer.init();
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
-        MinestomAdventure.COMPONENT_TRANSLATOR = (comp, locale) -> LanguageProvider.get2(comp);
+        MinestomAdventure.COMPONENT_TRANSLATOR = (comp, locale) -> LanguageProviderV2.translate(comp);
 
         var instanceManager = MinecraftServer.getInstanceManager();
         var instance = instanceManager.createInstanceContainer();

@@ -1,9 +1,12 @@
 package net.hollowcube.common.lang;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
@@ -35,7 +38,7 @@ public class LanguageProviderV2 {
 
     static {
         JsonObject lang = new JsonObject();
-        try (InputStream is = LanguageProvider.class.getResourceAsStream("/en_US.json")) {
+        try (InputStream is = LanguageProviderV2.class.getResourceAsStream("/en_US.json")) {
             if (is != null) {
                 lang = new Gson().fromJson(new InputStreamReader(is), JsonObject.class);
             }
@@ -47,6 +50,7 @@ public class LanguageProviderV2 {
 
     // Stores all the partially parsed components, or null if there is no associated translation key.
     private static final Map<String, @Nullable ElementNode> componentCache = new ConcurrentHashMap<>();
+    private static final Map<String, @Nullable List<ElementNode>> multiComponentCache = new ConcurrentHashMap<>();
 
     public static @NotNull Component translate(@NotNull Component component) {
         if (!(component instanceof TranslatableComponent translatable)) {
@@ -56,13 +60,26 @@ public class LanguageProviderV2 {
         // Fetch the partially parsed minimessage tree, or return the translatable if we dont know about it,
         // for example we need to pass through `chat.type.text` and others.
         var partial = componentCache.computeIfAbsent(translatable.key(), LanguageProviderV2::parseComponent);
-        if (partial == null) return component;
+        if (partial == null) return translatable;
 
         // Apply the args to the partial (after translating the args)
         var args = translatable.args().stream()
                 .map(LanguageProviderV2::translate)
                 .toList();
-        return treeToComponent(partial, args);
+        return BASE_EMPTY.append(treeToComponent(partial, args));
+    }
+
+    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<Component> args) {
+        var partials = multiComponentCache.computeIfAbsent(key, LanguageProviderV2::parseMultiComponent);
+        if (partials == null) return List.of(); // Must return empty because we use it for lore which is not required.
+
+        // Apply the args to the partials (after translating the args)
+        var translatedArgs = args.stream()
+                .map(LanguageProviderV2::translate)
+                .toList();
+        return partials.stream()
+                .map(partial -> BASE_EMPTY.append(treeToComponent(partial, translatedArgs)))
+                .toList();
     }
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
@@ -71,6 +88,8 @@ public class LanguageProviderV2 {
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
     private static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
             .build();
+
+    private static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
 
     private record PlaceholderTag(int index) implements Tag {
         private static final TagResolver RESOLVER = new TagResolver() {
@@ -102,6 +121,25 @@ public class LanguageProviderV2 {
         if (raw == null) return null;
 
         return deserializeToTree(raw.isJsonPrimitive() ? raw.getAsString() : raw.getAsJsonArray().get(0).getAsString());
+    }
+
+    private static @Nullable List<ElementNode> parseMultiComponent(String key) {
+        var raw = langData.get(key);
+        if (raw == null) return null;
+
+        JsonArray value;
+        if (raw.isJsonArray()) {
+            value = raw.getAsJsonArray();
+        } else {
+            value = new JsonArray();
+            value.add(raw);
+        }
+
+        var result = new ArrayList<ElementNode>();
+        for (var entry : value) {
+            result.add(deserializeToTree(entry.getAsString()));
+        }
+        return result;
     }
 
     static @NotNull ElementNode deserializeToTree(@NotNull String value) {
