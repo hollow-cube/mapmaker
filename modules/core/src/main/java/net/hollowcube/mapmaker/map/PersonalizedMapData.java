@@ -42,6 +42,34 @@ public class PersonalizedMapData extends MapData {
         });
     }
 
+    public @NotNull Component getDifficulty() {
+        if (getUniquePlays() < PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY)
+            return Component.translatable("gui.play_maps.map_display.difficulty.unknown");
+
+        return Component.translatable(
+                "gui.play_maps.map_display.difficulty." + getDifficultyName(),
+                Component.text(getClearRateString())
+        );
+    }
+
+    public @NotNull String getDifficultyName() {
+        var cr = getClearRate();
+        if (cr < 0.015) return "nightmare";
+        if (cr < 0.075) return "expert";
+        if (cr < 0.2) return "hard";
+        if (cr < 0.4) return "medium";
+        return "easy";
+    }
+
+    public @NotNull String getClearRateString() {
+        var cr = getClearRate() * 100;
+        if (cr >= 100) return "100";
+        else if (cr <= 0) return "0";
+        else if (cr >= 10) return String.format("%.1f", cr);
+        else if (cr >= 1) return String.format("%.2f", cr);
+        else return String.format("%.3f", cr);
+    }
+
     public int getUniquePlays() {
         return uniquePlays;
     }

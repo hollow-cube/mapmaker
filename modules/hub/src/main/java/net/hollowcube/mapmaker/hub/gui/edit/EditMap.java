@@ -137,7 +137,8 @@ public class EditMap extends View {
 
         EventDispatcher.call(new MapDeletedEvent(map.id())); //todo this event is still scuffed
         performSignal(CreateMaps.SIG_RESET);
-        pushView(c -> new MapDetailsView(c, publishedMap, Component.text(publishedMap.owner())));
+        PersonalizedMapData publishedMap2 = new PersonalizedMapData();
+        pushView(c -> new MapDetailsView(c, publishedMap2, Component.text(publishedMap.owner())));
     }
 
     private int getPublishState() {

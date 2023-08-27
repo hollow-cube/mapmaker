@@ -9,8 +9,11 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -31,13 +34,23 @@ public class MapDetailsView extends View {
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
     private Switch[] tabSwitches;
 
+    // MAP DIFFICULTIES
+    private @Outlet("difficulty_switch") Switch difficultySwitch;
+    private @Outlet("difficulty_none_text") Text difficultyNoneText;
+    private @Outlet("difficulty_easy_text") Text difficultyEasyText;
+    private @Outlet("difficulty_medium_text") Text difficultyMediumText;
+    private @Outlet("difficulty_hard_text") Text difficultyHardText;
+    private @Outlet("difficulty_expert_text") Text difficultyExpertText;
+    private @Outlet("difficulty_nightmare_text") Text difficultyNightmareText;
+    private Switch[] difficultySwitches;
+
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
 
-    private final MapData map;
+    private final PersonalizedMapData map;
 
-    public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull Component authorName) {
+    public MapDetailsView(@NotNull Context context, @NotNull PersonalizedMapData map, @NotNull Component authorName) {
         super(context);
         this.map = map;
 
@@ -45,6 +58,18 @@ public class MapDetailsView extends View {
         selectTab(0);
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
+
+        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
+            this.difficultySwitches = new Switch[]{difficultySwitch};
+            switch (map.getDifficultyName()) {
+                case "easy" -> difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
+                case "medium" -> difficultyMediumText.setText("Medium", TextColor.color(0xFFE11C));
+                case "hard" -> difficultyHardText.setText("Hard", TextColor.color(0xFA8C34));
+                case "expert" -> difficultyExpertText.setText("Expert", TextColor.color(0xE6464F));
+                case "nightmare" -> difficultyNightmareText.setText("Nightmare", TextColor.color(0xCC216D));
+                default -> difficultyNoneText.setText("TBD");
+            }
+        }
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
@@ -92,5 +117,4 @@ public class MapDetailsView extends View {
             tabSwitches[i].setOption(i == index ? 1 : 0);
         }
     }
-
 }
