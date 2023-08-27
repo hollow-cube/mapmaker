@@ -11,7 +11,7 @@ import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
@@ -221,7 +221,7 @@ public class DevServer {
 //            });
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
-            MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProvider.get2(component);
+            MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
             int i = 0;
             for (var facet : ServiceLoader.load(Facet.class)) {

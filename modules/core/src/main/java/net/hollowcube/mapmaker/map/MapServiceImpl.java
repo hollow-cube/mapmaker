@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,9 +25,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
 
     private final String url;
+    private final String legacyUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
+        this.legacyUrl = String.format("%s/v1/internal/legacy/maps", url);
     }
 
     @Override
@@ -333,4 +337,30 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         throw new InternalError("Failed to get map player data: " + res.body());
     }
 
+    @Override
+    public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(legacyUrl + "/" + playerId))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            //noinspection Convert2Diamond
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<LegacyMapInfo>>(){});
+            case 404 -> List.of();
+            default -> throw new InternalError("Failed to get legacy maps: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull MapData importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(legacyUrl + "/" + playerId + "/" + legacyMapId))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapData.class); // Ok
+        throw new InternalError("Failed to import legacy map: " + res.body());
+    }
 }

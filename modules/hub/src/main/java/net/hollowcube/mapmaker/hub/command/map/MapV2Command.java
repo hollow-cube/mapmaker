@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
+import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,8 @@ public class MapV2Command extends BaseHubCommand {
         addSubcommand(new MapDeleteCommand(mapService));
         addSubcommand(new MapSpectateCommand(bridge));
         addSubcommand(new MapEditCommand(bridge));
+
+        addSubcommand(new MapLegacyCommand(mapService));
     }
 
 }

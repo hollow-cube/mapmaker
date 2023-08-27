@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
+import java.util.List;
 
 @Blocking
 public interface MapService {
@@ -46,6 +47,11 @@ public interface MapService {
     void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
+
+    // Legacy
+
+    @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);
+    @NotNull MapData importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
