@@ -262,6 +262,7 @@ public class DevServer {
 
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
+            logger.info("loaded map player data: {}", mapPlayerData);
         } catch (Exception e) {
             logger.error("failed to create session", e);
             player.kick(Component.text("Failed to login. Please try again later."));
