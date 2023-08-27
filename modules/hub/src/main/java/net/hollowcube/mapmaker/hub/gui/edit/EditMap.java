@@ -60,6 +60,11 @@ public class EditMap extends View {
     private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
     private final Switch[] parkourSubvariantSwitches;
 
+    // Tags selector
+    private @Outlet("map_tags_tab_switch") Switch mapTagsTabSwitch;
+    private @Outlet("map_tag_2d_switch") Switch mapTag2dSwitch;
+    private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutocompleteSwitch;
+
     private MapData map;
 
     public EditMap(@NotNull Context context) {
@@ -68,7 +73,6 @@ public class EditMap extends View {
         this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
                 parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
                 parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
-
         selectTab(0);
         setState(State.LOADING);
     }
@@ -336,6 +340,7 @@ public class EditMap extends View {
 
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
+        System.out.println("map_type_tab_building");
         if (mapTypeTabSwitch.getOption() == 1) return;
 
         mapTypeTabSwitch.setOption(1);
@@ -348,6 +353,50 @@ public class EditMap extends View {
             mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
             //todo if update fails we should revert the name change and indicate to the user that it failed
         });
+    }
+
+    // MAP TAGS
+
+    @Action("map_tags_tab_visual")
+    private void selectMapTagVisual() {
+        System.out.println("map_tags_tab_visual");
+        if (mapTagsTabSwitch.getOption() == 0) return;
+        mapTagsTabSwitch.setOption(0);
+    }
+
+    @Action("map_tags_tab_gameplay")
+    private void selectMapTagGameplay() {
+        System.out.println("map_tags_tab_gameplay");
+        if (mapTagsTabSwitch.getOption() == 1) return;
+        mapTagsTabSwitch.setOption(1);
+    }
+
+    @Action("map_tag_2d_unset")
+    private void mapTag2dUnset() {
+        System.out.println("map_tag_2d_unset");
+        mapTag2dSwitch.setOption(1);
+        map.settings().removeTag(MapTags.Tag.TWODIMENSIONAL);
+    }
+
+    @Action("map_tag_2d_set")
+    private void mapTag2dSet() {
+        System.out.println("map_tag_2d_set");
+        mapTag2dSwitch.setOption(0);
+        map.settings().addTag(MapTags.Tag.TWODIMENSIONAL);
+    }
+
+    @Action("map_tag_autocomplete_unset")
+    private void mapTagAutocompleteUnset() {
+        System.out.println("map_tag_autocomplete_unset");
+        mapTagAutocompleteSwitch.setOption(1);
+        map.settings().removeTag(MapTags.Tag.AUTOCOMPLETE);
+    }
+
+    @Action("map_tag_autocomplete_set")
+    private void mapTagAutocompleteSet() {
+        System.out.println("map_tag_autocomplete_set");
+        mapTagAutocompleteSwitch.setOption(0);
+        map.settings().addTag(MapTags.Tag.AUTOCOMPLETE);
     }
 
     /**

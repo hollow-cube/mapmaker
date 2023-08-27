@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class MapUpdateRequest {
     String name = null;
     String icon = null;
@@ -16,9 +18,11 @@ public class MapUpdateRequest {
     Boolean noSneak = null;
     Boolean boat = null;
 
+    List<MapTags.Tag> tags = null;
+
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
-                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null;
+                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null || tags != null;
     }
 
     public void setName(@Nullable String name) {
@@ -53,5 +57,8 @@ public class MapUpdateRequest {
     }
     public void setBoat(Boolean boat) {
         this.boat = boat;
+    }
+    public void setTags(List<MapTags.Tag> tags) {
+        this.tags = tags;
     }
 }

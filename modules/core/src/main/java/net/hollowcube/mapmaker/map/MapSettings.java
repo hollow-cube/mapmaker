@@ -7,6 +7,8 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class MapSettings {
 
     private transient MapUpdateRequest updates = new MapUpdateRequest();
@@ -26,6 +28,8 @@ public class MapSettings {
     private boolean noSneak = false;
     private boolean boat = false;
 
+    private List<MapTags.Tag> tags;
+
     public MapSettings() {
         this.name = "";
         this.icon = null;
@@ -41,7 +45,8 @@ public class MapSettings {
             boolean onlySprint,
             boolean noSprint,
             boolean noJump,
-            boolean noSneak
+            boolean noSneak,
+            @Nullable List<MapTags.Tag> tags
     ) {
         this.name = name;
         this.icon = icon;
@@ -51,6 +56,7 @@ public class MapSettings {
         this.noSprint = noSprint;
         this.noJump = noJump;
         this.noSneak = noSneak;
+        this.tags = tags;
     }
 
     public @NotNull MapUpdateRequest getUpdateRequest() {
@@ -144,5 +150,21 @@ public class MapSettings {
     public void setBoat(boolean boat) {
         updates.setBoat(boat);
         this.boat = boat;
+    }
+
+    public List<MapTags.Tag> getTags() {
+        return this.tags;
+    }
+
+    public void addTag(@NotNull MapTags.Tag tag) {
+        if (variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY) {
+            System.out.println("you shouldn't be here! make sure you're not allowing build maps to use gameplay tags.");
+        }
+        updates.tags.add(tag);
+        this.tags.add(tag);
+    }
+
+    public void removeTag(@NotNull MapTags.Tag tag) {
+        this.tags.remove(tag);
     }
 }
