@@ -29,9 +29,9 @@
             </box>
 
             <box width="9" align="ltr">
-                <spacer width="5" height="1"/>
-                <switch id="difficulty_switch" width="4" height="1">
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                <switch id="difficulty_switch" width="9" height="1">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_none"
                                 translationKey="map.difficulty.none"
@@ -39,9 +39,10 @@
                         <text width="3" height="1"
                               id="difficulty_none_text"
                               translationKey="map.difficulty.none"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_easy"
                                 translationKey="map.difficulty.easy"
@@ -49,9 +50,10 @@
                         <text width="3" height="1"
                               id="difficulty_easy_text"
                               translationKey="map.difficulty.easy"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_medium"
                                 translationKey="map.difficulty.medium"
@@ -59,9 +61,10 @@
                         <text width="3" height="1"
                               id="difficulty_medium_text"
                               translationKey="map.difficulty.medium"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_hard"
                                 translationKey="map.hard.none"
@@ -69,9 +72,10 @@
                         <text width="3" height="1"
                               id="difficulty_hard_text"
                               translationKey="map.difficulty.hard"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_expert"
                                 translationKey="map.difficulty.expert"
@@ -79,9 +83,10 @@
                         <text width="3" height="1"
                               id="difficulty_expert_text"
                               translationKey="map.difficulty.expert"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
-                    <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                    <box width="9" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <spacer width="5" height="1"/>
                         <button width="1" height="1"
                                 id="difficulty_nightmare"
                                 translationKey="map.difficulty.nightmare"
@@ -89,7 +94,7 @@
                         <text width="3" height="1"
                               id="difficulty_nightmare_text"
                               translationKey="map.difficulty.nightmare"
-                              font="map_details_author" centered="true"/>
+                              font="map_details_difficulty" centered="true"/>
                     </box>
                 </switch>
             </box>

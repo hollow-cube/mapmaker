@@ -62,13 +62,33 @@ public class MapDetailsView extends View {
         if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
             this.difficultySwitches = new Switch[]{difficultySwitch};
             switch (map.getDifficultyName()) {
-                case "easy" -> difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
-                case "medium" -> difficultyMediumText.setText("Medium", TextColor.color(0xFFE11C));
-                case "hard" -> difficultyHardText.setText("Hard", TextColor.color(0xFA8C34));
-                case "expert" -> difficultyExpertText.setText("Expert", TextColor.color(0xE6464F));
-                case "nightmare" -> difficultyNightmareText.setText("Nightmare", TextColor.color(0xCC216D));
-                default -> difficultyNoneText.setText("TBD");
+                case "easy" -> {
+                    difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
+                    difficultySwitch.setOption(1);
+                }
+                case "medium" -> {
+                    difficultyMediumText.setText("Medium", TextColor.color(0xFFE11C));
+                    difficultySwitch.setOption(2);
+                }
+                case "hard" -> {
+                    difficultyHardText.setText("Hard", TextColor.color(0xFA8C34));
+                    difficultySwitch.setOption(3);
+                }
+                case "expert" -> {
+                    difficultyExpertText.setText("Expert", TextColor.color(0xE6464F));
+                    difficultySwitch.setOption(4);
+                }
+                case "nightmare" -> {
+                    difficultyNightmareText.setText("Nightmare", TextColor.color(0xCC216D));
+                    difficultySwitch.setOption(5);
+                }
+                default -> {
+                    difficultyNoneText.setText("TBD");
+                    difficultySwitch.setOption(0);
+                }
             }
+        } else {
+            difficultySwitch.setOption(0);
         }
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
