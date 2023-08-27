@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -30,7 +31,7 @@ public class MapListCommand extends BaseHubCommand {
     }
 
     private void listMapsSelf(@NotNull Player player, @NotNull CommandContext context) {
-        showMapList(player, PlayerDataV2.fromPlayer(player));
+        showMapList(player, MapPlayerData.fromPlayer(player));
     }
 
     private void listMapsOther(@NotNull Player player, @NotNull CommandContext context) {
@@ -41,10 +42,10 @@ public class MapListCommand extends BaseHubCommand {
         }
 
         //todo this only works for other online players, eventually it should work for offline players
-        showMapList(player, PlayerDataV2.fromPlayer(target));
+        showMapList(player, MapPlayerData.fromPlayer(target));
     }
 
-    private void showMapList(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
+    private void showMapList(@NotNull Player player, @NotNull MapPlayerData playerData) {
         for (var slot = 0; slot < PlayerDataV2.MAX_MAP_SLOTS; slot++) {
             var slotId = slot + 1;
             switch (playerData.getSlotState(slot)) {

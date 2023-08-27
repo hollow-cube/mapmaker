@@ -7,7 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -22,7 +22,7 @@ import java.util.Objects;
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
-    private @ContextObject HubHandler handler;
+    private @ContextObject HubToMapBridge bridge;
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
@@ -55,7 +55,7 @@ public class MapDetailsView extends View {
     @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
         try {
-            handler.playMap(player, map.id());
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
             player.closeInventory();
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)

@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -67,14 +66,15 @@ public abstract class HubServerBase implements HubServer {
                 "playerService", playerService(),
                 "sessionService", sessionService(),
                 "mapService", mapService(),
-                "handler", mapHandler
+                "handler", mapHandler,
+                "bridge", bridge
         ));
 
         this.world = new HubWorld(this);
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
         
-        commandManager.register(new MapV2Command(mapService(), mapHandler));
+        commandManager.register(new MapV2Command(mapService(), bridge()));
     }
 
     @Override

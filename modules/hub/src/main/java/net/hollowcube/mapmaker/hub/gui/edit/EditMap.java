@@ -9,8 +9,8 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
-import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
-    private @ContextObject("handler") HubHandler mapHandler;
+    private @ContextObject HubToMapBridge bridge;
     private @ContextObject MapService mapService;
 
     private @Outlet("slot_id") Text slotIdText;
@@ -66,6 +66,7 @@ public class EditMap extends View {
     private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutocompleteSwitch;
 
     private MapData map;
+    private int slot;
 
     public EditMap(@NotNull Context context) {
         super(context);
@@ -79,6 +80,7 @@ public class EditMap extends View {
 
     public void showMap(@NotNull MapData map, int slot) {
         this.map = map;
+        this.slot = slot;
 
         slotIdText.setText(String.format("Slot #%d", slot + 1));
 
@@ -96,7 +98,7 @@ public class EditMap extends View {
                 mapService.deleteVerification(playerData.id(), map.id());
             }
 
-            mapHandler.editMap(player, map.id());
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
@@ -115,7 +117,7 @@ public class EditMap extends View {
 
         // Send the player to the map
         try {
-            mapHandler.editMap(player, map.id());
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
@@ -164,11 +166,7 @@ public class EditMap extends View {
 
     @Action("map_name")
     private @NonBlocking void beginUpdateMapName() {
-        pushView(c -> {
-            var view = new SetMapName(c);
-            view.showMap(map.settings().getName());
-            return view;
-        });
+        pushView(c -> new SetMapName(c, map.settings().getName()));
     }
 
     @Signal(SetMapName.SIG_UPDATE_NAME)
@@ -449,7 +447,21 @@ public class EditMap extends View {
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
         try {
-            mapHandler.deleteMap(player, map.id());
+            var mapPlayerData = MapPlayerData.fromPlayer(player);
+            mapService.deleteMap(mapPlayerData, map.id());
+
+            // Remove the map from the player as a "prediction", we will get
+            // the actual update from the service later.
+            var newMapSlots = mapPlayerData.mapSlots();
+            newMapSlots[slot] = null;
+            mapPlayerData.update(new MapPlayerData(
+                    mapPlayerData.id(),
+                    mapPlayerData.unlockedMapSlots(),
+                    newMapSlots,
+                    mapPlayerData.lastPlayedMap(),
+                    mapPlayerData.lastEditedMap()
+            ));
+
             showInfoTab();
             performSignal(CreateMaps.SIG_RESET);
             player.sendMessage("deleted");

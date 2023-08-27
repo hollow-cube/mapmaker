@@ -229,8 +229,6 @@ public class XmlElementReader {
                 spritePos = Integer.parseInt(rawSpritePos.getNodeValue());
             }
 
-            System.out.println(spriteName + spritePos);
-
             var sprite = Sprite.SPRITE_MAP.get(spriteName);
             if (sprite != null) {
                 if (sprite.fontChar() != 0) {

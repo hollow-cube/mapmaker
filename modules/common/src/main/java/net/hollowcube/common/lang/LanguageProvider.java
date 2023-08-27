@@ -107,7 +107,7 @@ public class LanguageProvider {
     }
 
     private static @NotNull Component translateSingle(@NotNull Component translated, @NotNull List<Component> args) {
-        if (args.size() != 0) {
+        if (!args.isEmpty()) {
             translated = translated.replaceText(TextReplacementConfig.builder()
                     .match(ARG_PATTERN)
                     .replacement((result, builder) -> {

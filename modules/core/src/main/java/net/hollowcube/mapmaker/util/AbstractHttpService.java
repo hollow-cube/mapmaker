@@ -18,7 +18,7 @@ import java.time.Instant;
 public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
 
-    protected static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))

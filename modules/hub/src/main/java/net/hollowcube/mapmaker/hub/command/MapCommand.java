@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyCommand;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.SlotState;
 import net.kyori.adventure.text.Component;
@@ -345,9 +346,9 @@ public class MapCommand extends BaseHubCommand {
         try {
             var slot = Integer.parseInt(longIdOrSlot) - 1;
 
-            var playerData = PlayerDataV2.fromPlayer(player);
+            var playerData = MapPlayerData.fromPlayer(player);
             if (playerData.getSlotState(slot) != SlotState.FILLED) {
-                if (slot < playerData.getUnlockedMapSlots()) {
+                if (slot < playerData.unlockedMapSlots()) {
                     player.sendMessage(Component.translatable("command.map.delete.slot_locked", Component.text(slot + 1)));
                 } else {
                     player.sendMessage(Component.translatable("command.map.delete.slot_not_in_use", Component.text(slot + 1)));

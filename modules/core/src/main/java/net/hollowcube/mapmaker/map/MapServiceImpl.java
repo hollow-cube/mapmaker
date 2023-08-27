@@ -29,13 +29,13 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner) {
-        logger.log(System.Logger.Level.INFO, "creating new map for " + owner);
-        var reqBody = GSON.toJson(Map.of("owner", owner));
+    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot) {
+        logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
+        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url))
-                .header(AUTHORIZER_HEADER, authorizer)
+                .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
@@ -107,12 +107,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id) {
+    public void deleteMap(@NotNull MapPlayerData player, @NotNull String id) {
         logger.log(System.Logger.Level.INFO, "deleting map " + id);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + id))
-                .header(AUTHORIZER_HEADER, authorizer)
+                .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
@@ -321,4 +321,16 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         if (res.statusCode() == 200) return; // Ok
         throw new InternalError("Failed to update savestate replay: " + res.body());
     }
+
+    @Override
+    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapPlayerData.class); // Ok
+        throw new InternalError("Failed to get map player data: " + res.body());
+    }
+
 }

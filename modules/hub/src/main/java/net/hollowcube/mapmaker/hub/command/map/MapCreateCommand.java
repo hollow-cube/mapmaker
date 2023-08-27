@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.SlotState;
@@ -21,19 +21,17 @@ public class MapCreateCommand extends BaseHubCommand {
     private final Argument<Integer> slotArg = ExtraArguments.MapSlot("slot", true);
 
     private final MapService mapService;
-    private final HubHandler handler;
 
-    public MapCreateCommand(@NotNull MapService mapService, @NotNull HubHandler handler) {
+    public MapCreateCommand(@NotNull MapService mapService) {
         super("create");
         this.mapService = mapService;
-        this.handler = handler;
 
         addSyntax(wrap(this::createMapInFirstSlot));
         addSyntax(wrap(this::createMapInSlot), slotArg);
     }
 
     private @Blocking void createMapInFirstSlot(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
 
         // Determine first available slot
         int slot = -1;
@@ -53,16 +51,16 @@ public class MapCreateCommand extends BaseHubCommand {
     }
 
     private @Blocking void createMapInSlot(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
 
         // Argument parser will fail if the slot is not actually available, so safe to ignore checks
         //todo make sure above is actually the case.
         perform(player, playerData, context.get(slotArg));
     }
 
-    private void perform(@NotNull Player player, @NotNull PlayerDataV2 playerData, int slot) {
+    private void perform(@NotNull Player player, @NotNull MapPlayerData playerData, int slot) {
         try {
-            var mapData = handler.createMapForPlayerInSlot(playerData, slot);
+            var mapData = mapService.createMap(playerData, slot);
             player.sendMessage(HubMessages.COMMAND_MAP_CREATE_SUCCESS.with(mapData.id(), slot));
         } catch (Exception e) {
             //todo handle known exception cases

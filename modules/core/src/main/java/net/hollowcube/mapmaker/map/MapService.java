@@ -12,11 +12,9 @@ public interface MapService {
     /**
      * Creates a new map in the map service with the given owner.
      *
-     * @param authorizer The player authorizing the request to the map service.
-     * @param owner      The player who will own the newly created map.
      * @return The created map
      */
-    @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner);
+    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot);
 
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
@@ -25,7 +23,7 @@ public interface MapService {
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
 
-    void deleteMap(@NotNull String authorizer, @NotNull String id);
+    void deleteMap(@NotNull MapPlayerData player, @NotNull String id);
 
     void beginVerification(@NotNull String authorizer, @NotNull String mapId);
     void deleteVerification(@NotNull String authorizer, @NotNull String mapId);
@@ -46,6 +44,8 @@ public interface MapService {
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
     @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
     void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
+
+    @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {

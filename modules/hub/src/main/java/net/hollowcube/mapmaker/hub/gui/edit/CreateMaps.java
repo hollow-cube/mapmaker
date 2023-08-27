@@ -7,9 +7,10 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -19,6 +20,7 @@ public class CreateMaps extends View {
     public static final String SIG_RESET = "create_maps.reset";
 
     private @ContextObject Player player;
+    private @ContextObject HubToMapBridge bridge;
     private @ContextObject("handler") HubHandler mapHandler;
 
     private @Outlet("switch") Switch switcher;
@@ -63,12 +65,12 @@ public class CreateMaps extends View {
     @Signal(SIG_RESET)
     public void reset() {
         int firstSlot = -1;
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
 
             // If the slot is locked, show the lock icon
-            if (i >= playerData.getUnlockedMapSlots()) {
+            if (i >= playerData.unlockedMapSlots()) {
                 slot.setState(playerData, EditMapIconBase.State.LOCKED, i, null);
                 continue;
             }
@@ -107,7 +109,7 @@ public class CreateMaps extends View {
             return;
 
         try {
-            mapHandler.editMap(player, spawnMapId);
+            bridge.joinMap(player, spawnMapId, HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
