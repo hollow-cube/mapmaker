@@ -3,8 +3,9 @@ package net.hollowcube.mapmaker.hub.command;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.SlotState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.SlotState;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -110,6 +111,21 @@ public final class ExtraArguments {
                     //todo publishedId
 
                     throw new ArgumentSyntaxException("Invalid map", value, ERR_INVALID_MAP_SLOT);
+                });
+    }
+
+    public static @NotNull Argument<String> PlayerNameWithCompletion(
+            @NotNull PlayerService playerService,
+            @NotNull String id
+    ) {
+        return ArgumentType.String(id)
+                .setSuggestionCallback((sender, context, suggestion) -> {
+                    var start = suggestion.getStart() - 1;
+                    var query = suggestion.getInput().substring(start, start + suggestion.getLength()).trim();
+                    var r = playerService.getUsernameTabCompletions(query);
+                    r
+                            .result()
+                            .forEach(entry -> suggestion.addEntry(new SuggestionEntry(entry.username())));
                 });
     }
 

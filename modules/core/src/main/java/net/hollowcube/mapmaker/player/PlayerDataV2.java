@@ -22,11 +22,6 @@ public class PlayerDataV2 {
     private String username;
     private Component displayName;
     private PlayerSettings settings = new PlayerSettings();
-//
-//    private int unlockedMapSlots = 2;
-//    private String[] mapSlots = new String[MAX_MAP_SLOTS];
-//    private @Nullable String lastPlayedMap = null;
-//    private @Nullable String lastEditedMap = null;
 
     private String tfState = null; // base64 bytes
 

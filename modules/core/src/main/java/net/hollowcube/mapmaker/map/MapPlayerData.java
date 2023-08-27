@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.annotations.SerializedName;
-import net.hollowcube.mapmaker.player.SlotState;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;

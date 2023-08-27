@@ -1,33 +1,37 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
+import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
+import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 public class MapListCommand extends BaseHubCommand {
-    private final ArgumentEntity playerArg = ArgumentType.Entity("player")
-            .onlyPlayers(true)
-            .singleEntity(true);
+    private static final @NotNull ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
     private final MapService mapService;
+    private final Argument<String> targetArg;
 
-    public MapListCommand(@NotNull MapService mapService) {
+    public MapListCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("list");
         this.mapService = mapService;
 
+        this.targetArg = ExtraArguments.PlayerNameWithCompletion(playerService, "target");
+
         addSyntax(wrap(this::listMapsSelf));
-        addSyntax(wrap(this::listMapsOther), playerArg);
+        addSyntax(wrap(this::listMapsOther), targetArg);
     }
 
     private void listMapsSelf(@NotNull Player player, @NotNull CommandContext context) {
@@ -35,14 +39,25 @@ public class MapListCommand extends BaseHubCommand {
     }
 
     private void listMapsOther(@NotNull Player player, @NotNull CommandContext context) {
-        var target = context.get(playerArg).findFirstPlayer(player);
-        if (target == null) {
-            player.sendMessage("Invalid player.");
+        MapPlayerData playerData;
+
+        try {
+            var playerName = context.get(targetArg).trim();
+            if (playerName.isEmpty()) {
+                player.sendMessage("Player not found."); //todo
+                return;
+            }
+
+            var onlinePlayer = CONNECTION_MANAGER.getPlayer(playerName);
+            if (onlinePlayer != null)
+                playerData = MapPlayerData.fromPlayer(onlinePlayer);
+            else playerData = mapService.getMapPlayerData(playerName);
+        } catch (MapService.NotFoundError e) {
+            player.sendMessage("Player not found."); //todo
             return;
         }
 
-        //todo this only works for other online players, eventually it should work for offline players
-        showMapList(player, MapPlayerData.fromPlayer(target));
+        showMapList(player, playerData);
     }
 
     private void showMapList(@NotNull Player player, @NotNull MapPlayerData playerData) {

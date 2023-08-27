@@ -38,18 +38,20 @@ public class CommandRewriter {
     }
 
     public void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
-        final String text = packet.text();
-        final Suggestion suggestion = getSuggestion(player, text);
-        if (suggestion != null) {
-            player.sendPacket(new TabCompletePacket(
-                    packet.transactionId(),
-                    suggestion.getStart(),
-                    suggestion.getLength(),
-                    suggestion.getEntries().stream()
-                            .map(suggestionEntry -> new TabCompletePacket.Match(suggestionEntry.getEntry(), suggestionEntry.getTooltip()))
-                            .toList())
-            );
-        }
+        Thread.startVirtualThread(() -> {
+            final String text = packet.text();
+            final Suggestion suggestion = getSuggestion(player, text);
+            if (suggestion != null) {
+                player.sendPacket(new TabCompletePacket(
+                        packet.transactionId(),
+                        suggestion.getStart(),
+                        suggestion.getLength(),
+                        suggestion.getEntries().stream()
+                                .map(suggestionEntry -> new TabCompletePacket.Match(suggestionEntry.getEntry(), suggestionEntry.getTooltip()))
+                                .toList())
+                );
+            }
+        });
     }
 
     private @Nullable Suggestion getSuggestion(Player commandSender, String text) {

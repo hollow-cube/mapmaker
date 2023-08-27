@@ -11,4 +11,6 @@ public interface PlayerService {
 
     void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update);
 
+    @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query);
+
 }

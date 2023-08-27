@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
 
 public class PlayerServiceImpl extends AbstractHttpService implements PlayerService {
     private static final Summary remoteFetchDisplayNameTime = Summary.build()
@@ -21,7 +23,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     private final String url;
 
     public PlayerServiceImpl(String url) {
-        this.url = String.format("%s/v1/internal/players", url);
+        this.url = String.format("%s/v1/internal", url);
     }
 
     @Override
@@ -30,7 +32,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(url + "/players/" + id))
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
@@ -49,7 +51,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
         try (var $ = remoteFetchDisplayNameTime.startTimer()) {
             var req = HttpRequest.newBuilder()
-                    .uri(URI.create(url + "/" + id + "/displayname"))
+                    .uri(URI.create(url + "/players/" + id + "/displayname"))
                     .build();
             var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
@@ -58,6 +60,20 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
                 default -> throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
             };
         }
+    }
 
+    @Override
+    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
+        if (query.isEmpty()) return new TabCompleteResponse(List.of());
+
+        var reqBody = GSON.toJson(Map.of("query", query));
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/tab_complete"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 200)
+            throw new InternalError("Failed to get tab completions (" + res.statusCode() + "): " + res.body());
+        return GSON.fromJson(res.body(), TabCompleteResponse.class);
     }
 }

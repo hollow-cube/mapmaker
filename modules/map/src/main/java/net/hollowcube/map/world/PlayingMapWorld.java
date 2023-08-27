@@ -229,9 +229,6 @@ public class PlayingMapWorld implements InternalMapWorld {
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
 
-//                playerData.setLastPlayedMap(map.id());
-                server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
-
                 logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
