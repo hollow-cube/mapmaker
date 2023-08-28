@@ -388,6 +388,8 @@ public class DevServer {
                 var map = hub.handler().createMapForPlayerInSlot(playerData, 0);
                 map.settings().setName("Auto Created Map");
                 map.settings().setIcon(Material.STONE);
+                map.settings().setVariant(MapVariant.PARKOUR);
+                map.settings().setSubVariant(ParkourSubVariant.GAUNTLET);
                 mapService.updateMap(playerData.id(), map.id(), map.settings().getUpdateRequest());
                 mapService.publishMap(playerData.id(), map.id());
 

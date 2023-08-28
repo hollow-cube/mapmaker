@@ -10,6 +10,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.ParkourSubVariant;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -54,6 +55,7 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_dropper_text") Text mapTypeDropperText;
     private @Outlet("map_type_one_jump_text") Text mapTypeOneJumpText;
     private @Outlet("map_type_informative_text") Text mapTypeInformativeText;
+    private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
@@ -101,45 +103,36 @@ public class MapDetailsView extends View {
             }
 
             Switch[] mapTypeSwitches = new Switch[]{mapTypeSwitch};
-            if (!(map.settings().getParkourSubVariant() == null)) {
-                switch (Objects.requireNonNull(map.settings().getParkourSubVariant())) {
-                    case SPEEDRUN -> {
-                        mapTypeSpeedrunText.setText("Speedrun", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(1);
-                    }
-                    case SECTIONED -> {
-                        mapTypeSectionedText.setText("Sectioned", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(2);
-                    }
-                    case RANKUP -> {
-                        mapTypeRankupText.setText("Rankup", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(3);
-                    }
-                    case GAUNTLET -> {
-                        mapTypeGauntletText.setText("Gauntlet", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(4);
-                    }
-                    case DROPPER -> {
-                        mapTypeDropperText.setText("Dropper", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(5);
-                    }
-                    case ONE_JUMP -> {
-                        mapTypeOneJumpText.setText("One Jump", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(6);
-                    }
-                    case INFORMATIVE -> {
-                        mapTypeInformativeText.setText("Informative", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(7);
-                    }
-                    default -> {
-                        mapTypeParkourText.setText("Parkour", TextColor.color(0x15ADD3));
-                        mapTypeSwitch.setOption(0);
-                    }
-                }
+            if (map.settings().getParkourSubVariant() == ParkourSubVariant.SPEEDRUN) {
+                mapTypeSpeedrunText.setText("Speedrun", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(1);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeSectionedText.setText("Sectioned", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(2);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeRankupText.setText("Rankup", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(3);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeGauntletText.setText("Gauntlet", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(4);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeDropperText.setText("Dropper", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(5);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeOneJumpText.setText("One Jump", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(6);
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
+                mapTypeInformativeText.setText("Informative", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(7);
+            } else {
+                mapTypeParkourText.setText("Parkour", TextColor.color(0x15ADD3));
+                mapTypeSwitch.setOption(0);
             }
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
+            mapTypeBuildingText.setText("Building (SubVariants TODO)", TextColor.color(0x0B9F0B));
+            mapTypeSwitch.setOption(8);
         }
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
