@@ -42,7 +42,18 @@ public class MapDetailsView extends View {
     private @Outlet("difficulty_hard_text") Text difficultyHardText;
     private @Outlet("difficulty_expert_text") Text difficultyExpertText;
     private @Outlet("difficulty_nightmare_text") Text difficultyNightmareText;
-    private Switch[] difficultySwitches;
+    private @Outlet("row_one") Switch rowOneSwitch;
+
+    // MAP TYPES
+    private @Outlet("map_type_switch") Switch mapTypeSwitch;
+    private @Outlet("map_type_parkour_text") Text mapTypeParkourText;
+    private @Outlet("map_type_speedrun_text") Text mapTypeSpeedrunText;
+    private @Outlet("map_type_sectioned_text") Text mapTypeSectionedText;
+    private @Outlet("map_type_rankup_text") Text mapTypeRankupText;
+    private @Outlet("map_type_gauntlet_text") Text mapTypeGauntletText;
+    private @Outlet("map_type_dropper_text") Text mapTypeDropperText;
+    private @Outlet("map_type_one_jump_text") Text mapTypeOneJumpText;
+    private @Outlet("map_type_informative_text") Text mapTypeInformativeText;
 
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
@@ -59,8 +70,9 @@ public class MapDetailsView extends View {
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
 
-        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
-            this.difficultySwitches = new Switch[]{difficultySwitch};
+        if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            Switch[] difficultySwitches = new Switch[]{difficultySwitch};
+            rowOneSwitch.setOption(1);
             switch (map.getDifficultyName()) {
                 case "easy" -> {
                     difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
@@ -87,7 +99,46 @@ public class MapDetailsView extends View {
                     difficultySwitch.setOption(0);
                 }
             }
-        } else {
+
+            Switch[] mapTypeSwitches = new Switch[]{mapTypeSwitch};
+            if (!(map.settings().getParkourSubVariant() == null)) {
+                switch (Objects.requireNonNull(map.settings().getParkourSubVariant())) {
+                    case SPEEDRUN -> {
+                        mapTypeSpeedrunText.setText("Speedrun", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(1);
+                    }
+                    case SECTIONED -> {
+                        mapTypeSectionedText.setText("Sectioned", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(2);
+                    }
+                    case RANKUP -> {
+                        mapTypeRankupText.setText("Rankup", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(3);
+                    }
+                    case GAUNTLET -> {
+                        mapTypeGauntletText.setText("Gauntlet", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(4);
+                    }
+                    case DROPPER -> {
+                        mapTypeDropperText.setText("Dropper", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(5);
+                    }
+                    case ONE_JUMP -> {
+                        mapTypeOneJumpText.setText("One Jump", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(6);
+                    }
+                    case INFORMATIVE -> {
+                        mapTypeInformativeText.setText("Informative", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(7);
+                    }
+                    default -> {
+                        mapTypeParkourText.setText("Parkour", TextColor.color(0x15ADD3));
+                        mapTypeSwitch.setOption(0);
+                    }
+                }
+            }
+        } else if (map.settings().getVariant() == MapVariant.BUILDING) {
+            rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
         }
 
