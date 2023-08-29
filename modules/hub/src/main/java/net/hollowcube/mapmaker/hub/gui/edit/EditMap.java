@@ -173,7 +173,7 @@ public class EditMap extends View {
     private @NonBlocking void finishUpdateMapName(@NotNull String newName) {
         int maxLength = 20;
         //TODO make this only update the display of the name in the GUI, appending ... to the end, and not messing with the actual name
-        String limitedName = newName.length() > maxLength ? newName.substring(0, maxLength): newName;
+        String limitedName = newName.length() > maxLength ? newName.substring(0, maxLength) : newName;
 
         map.settings().setName(limitedName);
         updateElementsFromMap();
@@ -223,7 +223,10 @@ public class EditMap extends View {
         mapTypeTabSwitch.setOption(0);
         map.settings().setVariant(MapVariant.PARKOUR);
         updateElementsFromMap();
+        updateRequest();
+    }
 
+    private void updateRequest() {
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
         final var updateRequest = map.settings().getUpdateRequest();
         async(() -> {
@@ -236,104 +239,98 @@ public class EditMap extends View {
     private void parkourSubVariantSpeedrunUnset() {
         map.settings().setSubVariant(ParkourSubVariant.SPEEDRUN);
         updateElementsFromMap();
-
-        //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
-            //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+        updateRequest();
     }
 
     @Action("parkour_subvariant_speedrun_set")
     private void parkourSubVariantSpeedrunSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_unset")
     private void parkourSubVariantSectionedUnset() {
         map.settings().setSubVariant(ParkourSubVariant.SECTIONED);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_set")
     private void parkourSubVariantSectionedSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_unset")
     private void parkourSubVariantRankupUnset() {
         map.settings().setSubVariant(ParkourSubVariant.RANKUP);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_set")
     private void parkourSubVariantRankupSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_unset")
     private void parkourSubVariantGauntletUnset() {
         map.settings().setSubVariant(ParkourSubVariant.GAUNTLET);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_set")
     private void parkourSubVariantGauntletSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_unset")
     private void parkourSubVariantDropperUnset() {
         map.settings().setSubVariant(ParkourSubVariant.DROPPER);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_set")
     private void parkourSubVariantDropperSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_unset")
     private void parkourSubVariantOneJumpUnset() {
         map.settings().setSubVariant(ParkourSubVariant.ONE_JUMP);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_set")
     private void parkourSubVariantOneJumpSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_informative_unset")
     private void parkourSubVariantInformativeUnset() {
         map.settings().setSubVariant(ParkourSubVariant.INFORMATIVE);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_informative_set")
     private void parkourSubVariantInformativeSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("map_type_tab_building")

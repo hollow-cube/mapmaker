@@ -36,6 +36,7 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.player.*;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
@@ -136,7 +137,7 @@ public class DevServer {
             VelocityProxy.enable(velocitySecret);
         } else {
             logger.info("Velocity not configured, using online mode...");
-//            MojangAuth.init();
+            MojangAuth.init();
         }
 
         // Start phase 1
