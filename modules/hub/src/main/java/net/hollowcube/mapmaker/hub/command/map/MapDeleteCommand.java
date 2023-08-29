@@ -1,11 +1,12 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
 import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -17,11 +18,11 @@ import static net.hollowcube.mapmaker.hub.command.ExtraArguments.*;
 public class MapDeleteCommand extends BaseHubCommand {
     private final Argument<MapData> mapArg = ExtraArguments.Map("map", MASK_ID | MASK_SLOT | MASK_PERSONAL_WORLD | MASK_PUBLISHED_ID);
 
-    private final HubHandler handler;
+    private final MapService mapService;
 
-    public MapDeleteCommand(@NotNull HubHandler handler) {
+    public MapDeleteCommand(@NotNull MapService mapService) {
         super("delete");
-        this.handler = handler;
+        this.mapService = mapService;
 
         addSyntax(wrap(this::deleteMap), mapArg);
 
@@ -33,7 +34,8 @@ public class MapDeleteCommand extends BaseHubCommand {
         if (map == null) return;
 
         try {
-            handler.deleteMap(player, map.id());
+            var playerData = MapPlayerData.fromPlayer(player);
+            mapService.deleteMap(playerData, map.id());
             player.sendMessage(HubMessages.COMMAND_MAP_DELETE_SUCCESS);
         } catch (Exception e) {
             //todo handle known exception cases

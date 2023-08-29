@@ -1,6 +1,6 @@
 package net.hollowcube.map.gui.hotbar;
 
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.command.TestModeCommand;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
@@ -29,7 +29,7 @@ public final class EditMapHotbar {
 
     private static final ItemStack TEST_MODE_ITEM = ItemStack.builder(Material.FEATHER)
             .displayName(Component.translatable("gui.map.hotbar.test_mode.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.map.hotbar.test_mode.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("gui.map.hotbar.test_mode.lore", List.of()))
             .meta(meta -> meta.customModelData(TEST_MODE_CMD))
             .build();
 

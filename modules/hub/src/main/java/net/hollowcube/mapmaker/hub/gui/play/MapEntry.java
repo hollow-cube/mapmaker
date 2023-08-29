@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class MapEntry extends View {
 
     private @ContextObject PlayerService playerService;
-    private @ContextObject HubHandler handler;
+    private @ContextObject HubToMapBridge bridge;
 
     private @Outlet("btn") Label label;
 
@@ -38,7 +38,7 @@ public class MapEntry extends View {
     @Action("btn")
     private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case START_SHIFT_CLICK -> handler.playMap(player, map.id());
+            case START_SHIFT_CLICK -> bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
             case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
         }
     }

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
-import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.map.MapData;
@@ -14,11 +14,11 @@ import static net.hollowcube.mapmaker.hub.command.ExtraArguments.*;
 public class MapEditCommand extends BaseHubCommand {
     private final Argument<MapData> mapArg = ExtraArguments.Map("map", MASK_ID | MASK_SLOT | MASK_PERSONAL_WORLD | MASK_PUBLISHED_ID);
 
-    private final HubHandler handler;
+    private final HubToMapBridge bridge;
 
-    public MapEditCommand(@NotNull HubHandler handler) {
+    public MapEditCommand(@NotNull HubToMapBridge bridge) {
         super("edit");
-        this.handler = handler;
+        this.bridge = bridge;
 
         addSyntax(wrap(this::editMap), mapArg);
     }
@@ -28,7 +28,7 @@ public class MapEditCommand extends BaseHubCommand {
         if (map == null) return;
 
         player.sendMessage("Sending you to your map :O");
-        handler.editMap(player, map.id());
+        bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
     }
 
 }

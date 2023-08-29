@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.player;
+package net.hollowcube.mapmaker.map;
 
 public enum SlotState {
     EMPTY,

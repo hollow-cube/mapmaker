@@ -1,6 +1,6 @@
 package net.hollowcube.map.gui.hotbar;
 
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.world.InternalMapWorld;
@@ -37,13 +37,13 @@ public final class PlayingMapHotbar {
     private static final int HUB_CMD = 509;
     private static final ItemStack RESET_ITEM = ItemStack.builder(Material.REDSTONE)
             .displayName(Component.translatable("hotbar.regular_play.reset.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.regular_play.reset.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("hotbar.regular_play.reset.lore", List.of()))
             .meta(meta -> meta.customModelData(RESET_CMD))
             .build();
 
     private static final ItemStack HUB_ITEM = ItemStack.builder(Material.REDSTONE)
             .displayName(Component.translatable("hotbar.regular_play.leave.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.regular_play.leave.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("hotbar.regular_play.leave.lore", List.of()))
             .meta(meta -> meta.customModelData(HUB_CMD))
             .build();
 
@@ -107,7 +107,7 @@ public final class PlayingMapHotbar {
                     world.server().bridge().sendPlayerToHub(player);
                 } catch (Exception e) {
                     logger.log(System.Logger.Level.ERROR, "failed to send player {0} to hub: {1}", player.getUuid(), e.getMessage());
-                    LanguageProvider.createMultiTranslatable("command.generic.unknown_error")
+                    LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())
                             .forEach(player::sendMessage);
                 }
             }

@@ -21,6 +21,12 @@ public interface HubToMapBridge {
      * system, or an external allocator/matchmaker.
      */
     @Blocking
-    void joinMap(@NotNull Player player, @NotNull String mapId, boolean edit, boolean spectate);
+    void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState);
 
+
+    public enum JoinMapState {
+        EDITING,
+        PLAYING,
+        SPECTATING
+    }
 }

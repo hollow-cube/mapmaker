@@ -1,7 +1,9 @@
 package net.hollowcube.map.invites;
 
+import net.hollowcube.map.MapServerBase;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
@@ -60,9 +62,9 @@ public class PlayerInviteService {
             invites.remove(key);
             var map = ms.getMap(inviter.getUuid().toString(), context.mapId);
             if (map.isPublished()) {
-                mwm.joinMap(invitee, map, false, false);
+                mwm.joinMap(invitee, map, HubToMapBridge.JoinMapState.PLAYING);
             } else {
-                mwm.joinMap(invitee, map, true, false);
+                mwm.joinMap(invitee, map, HubToMapBridge.JoinMapState.EDITING);
             }
             inviter.sendMessage(PlayerDataV2.fromPlayer(invitee).displayName() + " has accepted your invite!");
         }

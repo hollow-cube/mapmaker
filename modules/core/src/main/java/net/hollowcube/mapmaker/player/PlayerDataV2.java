@@ -3,11 +3,9 @@ package net.hollowcube.mapmaker.player;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Base64;
 
 public class PlayerDataV2 {
@@ -24,11 +22,6 @@ public class PlayerDataV2 {
     private String username;
     private Component displayName;
     private PlayerSettings settings = new PlayerSettings();
-
-    private int unlockedMapSlots = 2;
-    private String[] mapSlots = new String[MAX_MAP_SLOTS];
-    private @Nullable String lastPlayedMap = null;
-    private @Nullable String lastEditedMap = null;
 
     private String tfState = null; // base64 bytes
 
@@ -58,60 +51,6 @@ public class PlayerDataV2 {
     }
     public @NotNull PlayerSettings settings() {
         return settings;
-    }
-
-    public int getUnlockedMapSlots() {
-        return unlockedMapSlots;
-    }
-
-    public void setUnlockedMapSlots(int unlockedMapSlots) {
-        updates.setUnlockedMapSlots(unlockedMapSlots);
-        this.unlockedMapSlots = unlockedMapSlots;
-    }
-
-    @ApiStatus.Internal
-    public String[] getRawMapSlots() {
-        return mapSlots;
-    }
-
-    public @NotNull SlotState getSlotState(int slot) {
-        if (slot < 0 || slot >= unlockedMapSlots)
-            return SlotState.LOCKED;
-        if (slot >= mapSlots.length || mapSlots[slot] == null)
-            return SlotState.EMPTY;
-        return SlotState.FILLED;
-    }
-
-    public @Nullable String getMapSlot(int slot) {
-        if (slot < 0 || slot >= unlockedMapSlots || slot >= mapSlots.length)
-            return null;
-        return mapSlots[slot];
-    }
-
-    public boolean setMapSlot(int slot, @Nullable String mapId) {
-        if (slot < 0 || slot >= unlockedMapSlots)
-            return false;
-
-        // Resize if necessary, then set
-        if (slot >= mapSlots.length)
-            mapSlots = Arrays.copyOf(mapSlots, slot + 1);
-        mapSlots[slot] = mapId;
-        updates.setMapSlots(mapSlots);
-        return true;
-    }
-    public @Nullable String getLastPlayedMap() {
-        return lastPlayedMap;
-    }
-    public void setLastPlayedMap(@Nullable String lastPlayedMap) {
-        this.updates.setLastPlayedMap(lastPlayedMap);
-        this.lastPlayedMap = lastPlayedMap;
-    }
-    public @Nullable String getLastEditedMap() {
-        return lastEditedMap;
-    }
-    public void setLastEditedMap(@Nullable String lastEditedMap) {
-        this.updates.setLastEditedMap(lastEditedMap);
-        this.lastEditedMap = lastEditedMap;
     }
 
     public byte @Nullable [] getTfState() {

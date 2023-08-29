@@ -4,7 +4,7 @@ import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemHideFlag;
 import net.minestom.server.item.ItemStack;
@@ -83,12 +83,12 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     private void updateItem(@NotNull List<Component> args) {
         itemSprite = this.itemSprite.with(builder -> {
             builder.displayName(Component.translatable(translationKey + ".name", args));
-            builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
+            builder.lore(LanguageProviderV2.translateMulti(translationKey + ".lore", args));
             builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
         });
         itemBlank = BLANK_ITEM.with(builder -> {
             builder.displayName(Component.translatable(translationKey + ".name", args));
-            builder.lore(LanguageProvider.optionalMultiTranslatable(translationKey + ".lore", args));
+            builder.lore(LanguageProviderV2.translateMulti(translationKey + ".lore", args));
             builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
         });
         context.markDirty();

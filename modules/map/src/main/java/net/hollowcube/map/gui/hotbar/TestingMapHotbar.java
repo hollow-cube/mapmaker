@@ -1,6 +1,6 @@
 package net.hollowcube.map.gui.hotbar;
 
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -30,19 +30,19 @@ public final class TestingMapHotbar {
 
     private static final ItemStack RETURN_CHECKPOINT_ITEM = ItemStack.builder(Material.RED_DYE)
             .displayName(Component.translatable("gui.map.hotbar.return_checkpoint.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.map.hotbar.return_checkpoint.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("gui.map.hotbar.return_checkpoint.lore", List.of()))
             .meta(meta -> meta.customModelData(RETURN_CHECKPOINT_CMD))
             .build();
 
     private static final ItemStack SPECTATOR_ITEM = ItemStack.builder(Material.GREEN_DYE)
             .displayName(Component.translatable("gui.map.hotbar.spectator.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.map.hotbar.spectator.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("gui.map.hotbar.spectator.lore", List.of()))
             .meta(meta -> meta.customModelData(SPECTATOR_CMD))
             .build();
 
     private static final ItemStack BUILD_MODE_ITEM = ItemStack.builder(Material.DIAMOND_PICKAXE)
             .displayName(Component.translatable("gui.map.hotbar.build_mode.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("gui.map.hotbar.build_mode.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("gui.map.hotbar.build_mode.lore", List.of()))
             .meta(meta -> meta.customModelData(BUILD_MODE_CMD))
             .build();
 

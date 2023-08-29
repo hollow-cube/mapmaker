@@ -2,7 +2,7 @@ package net.hollowcube.map.item;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.tool.BuiltinTool;
 import net.kyori.adventure.text.Component;
@@ -105,7 +105,7 @@ public class ItemRegistry {
             var baseTranslationKey = String.format("item.%s.%s",
                     itemHandler.id().namespace(), itemHandler.id().path());
             builder.displayName(Component.translatable(baseTranslationKey + ".name"));
-            builder.lore(LanguageProvider.optionalMultiTranslatable(baseTranslationKey + ".lore", List.of()));
+            builder.lore(LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
             itemHandler.updateItemStack(builder, TagHandler.newHandler()); //todo pass nbt
             builder.meta(meta -> meta.customModelData(itemHandler.customModelData()));
             return builder.build();

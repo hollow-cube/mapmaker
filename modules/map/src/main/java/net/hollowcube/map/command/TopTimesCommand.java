@@ -3,6 +3,7 @@ package net.hollowcube.map.command;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -38,11 +39,11 @@ public class TopTimesCommand extends Command {
             return;
         }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
         // TODO Find a better method for determining if the player is in the hub
         if (player.getInstance().getDimensionName().equals("mapmaker:hub")) {
             // Player is in hub, check their last played
-            String mapId = playerData.getLastPlayedMap();
+            String mapId = playerData.lastPlayedMap();
             if (mapId == null || mapId.isBlank()) {
                 player.sendMessage(Component.text("Unable to check last played map times.", NamedTextColor.RED));
             } else {

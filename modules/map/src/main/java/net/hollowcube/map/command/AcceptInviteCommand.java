@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class AcceptInviteCommand extends Command {
     public AcceptInviteCommand() {
         super("accept");
-        setDefaultExecutor(((sender, context) -> sender.sendMessage("Usage: /accept <player>")));
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /accept <player>"));
         addSyntax(this::accept, ArgumentType.Entity("player").onlyPlayers(true));
     }
 

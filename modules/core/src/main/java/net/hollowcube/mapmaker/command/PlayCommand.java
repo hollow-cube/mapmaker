@@ -62,6 +62,6 @@ public class PlayCommand extends Command {
     }
 
     private void joinMap(@NotNull Player player, @NotNull MapData mapData) {
-        hubToMapBridge.joinMap(player, mapData.id(), false, false);
+        hubToMapBridge.joinMap(player, mapData.id(), HubToMapBridge.JoinMapState.PLAYING);
     }
 }

@@ -9,8 +9,8 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
-import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
-    private @ContextObject("handler") HubHandler mapHandler;
+    private @ContextObject HubToMapBridge bridge;
     private @ContextObject MapService mapService;
 
     private @Outlet("slot_id") Text slotIdText;
@@ -60,7 +60,13 @@ public class EditMap extends View {
     private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
     private final Switch[] parkourSubvariantSwitches;
 
+    // Tags selector
+    private @Outlet("map_tags_tab_switch") Switch mapTagsTabSwitch;
+    private @Outlet("map_tag_2d_switch") Switch mapTag2dSwitch;
+    private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutocompleteSwitch;
+
     private MapData map;
+    private int slot;
 
     public EditMap(@NotNull Context context) {
         super(context);
@@ -68,13 +74,13 @@ public class EditMap extends View {
         this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
                 parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
                 parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
-
         selectTab(0);
         setState(State.LOADING);
     }
 
     public void showMap(@NotNull MapData map, int slot) {
         this.map = map;
+        this.slot = slot;
 
         slotIdText.setText(String.format("Slot #%d", slot + 1));
 
@@ -92,7 +98,7 @@ public class EditMap extends View {
                 mapService.deleteVerification(playerData.id(), map.id());
             }
 
-            mapHandler.editMap(player, map.id());
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
@@ -111,7 +117,7 @@ public class EditMap extends View {
 
         // Send the player to the map
         try {
-            mapHandler.editMap(player, map.id());
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
@@ -161,18 +167,14 @@ public class EditMap extends View {
 
     @Action("map_name")
     private @NonBlocking void beginUpdateMapName() {
-        pushView(c -> {
-            var view = new SetMapName(c);
-            view.showMap(map.settings().getName());
-            return view;
-        });
+        pushView(c -> new SetMapName(c, map.settings().getName()));
     }
 
     @Signal(SetMapName.SIG_UPDATE_NAME)
     private @NonBlocking void finishUpdateMapName(@NotNull String newName) {
         int maxLength = 20;
         //TODO make this only update the display of the name in the GUI, appending ... to the end, and not messing with the actual name
-        String limitedName = newName.length() > maxLength ? newName.substring(0, maxLength): newName;
+        String limitedName = newName.length() > maxLength ? newName.substring(0, maxLength) : newName;
 
         map.settings().setName(limitedName);
         updateElementsFromMap();
@@ -222,7 +224,10 @@ public class EditMap extends View {
         mapTypeTabSwitch.setOption(0);
         map.settings().setVariant(MapVariant.PARKOUR);
         updateElementsFromMap();
+        updateRequest();
+    }
 
+    private void updateRequest() {
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
         final var updateRequest = map.settings().getUpdateRequest();
         async(() -> {
@@ -235,108 +240,103 @@ public class EditMap extends View {
     private void parkourSubVariantSpeedrunUnset() {
         map.settings().setSubVariant(ParkourSubVariant.SPEEDRUN);
         updateElementsFromMap();
-
-        //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
-            //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+        updateRequest();
     }
 
     @Action("parkour_subvariant_speedrun_set")
     private void parkourSubVariantSpeedrunSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_unset")
     private void parkourSubVariantSectionedUnset() {
         map.settings().setSubVariant(ParkourSubVariant.SECTIONED);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_set")
     private void parkourSubVariantSectionedSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_unset")
     private void parkourSubVariantRankupUnset() {
         map.settings().setSubVariant(ParkourSubVariant.RANKUP);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_set")
     private void parkourSubVariantRankupSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_unset")
     private void parkourSubVariantGauntletUnset() {
         map.settings().setSubVariant(ParkourSubVariant.GAUNTLET);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_set")
     private void parkourSubVariantGauntletSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_unset")
     private void parkourSubVariantDropperUnset() {
         map.settings().setSubVariant(ParkourSubVariant.DROPPER);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_set")
     private void parkourSubVariantDropperSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_unset")
     private void parkourSubVariantOneJumpUnset() {
         map.settings().setSubVariant(ParkourSubVariant.ONE_JUMP);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_set")
     private void parkourSubVariantOneJumpSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_informative_unset")
     private void parkourSubVariantInformativeUnset() {
         map.settings().setSubVariant(ParkourSubVariant.INFORMATIVE);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("parkour_subvariant_informative_set")
     private void parkourSubVariantInformativeSet() {
         map.settings().setSubVariant(null);
         updateElementsFromMap();
-        //todo save
+        updateRequest();
     }
 
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
+        System.out.println("map_type_tab_building");
         if (mapTypeTabSwitch.getOption() == 1) return;
 
         mapTypeTabSwitch.setOption(1);
@@ -349,6 +349,50 @@ public class EditMap extends View {
             mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
             //todo if update fails we should revert the name change and indicate to the user that it failed
         });
+    }
+
+    // MAP TAGS
+
+    @Action("map_tags_tab_visual")
+    private void selectMapTagVisual() {
+        System.out.println("map_tags_tab_visual");
+        if (mapTagsTabSwitch.getOption() == 0) return;
+        mapTagsTabSwitch.setOption(0);
+    }
+
+    @Action("map_tags_tab_gameplay")
+    private void selectMapTagGameplay() {
+        System.out.println("map_tags_tab_gameplay");
+        if (mapTagsTabSwitch.getOption() == 1) return;
+        mapTagsTabSwitch.setOption(1);
+    }
+
+    @Action("map_tag_2d_unset")
+    private void mapTag2dUnset() {
+        System.out.println("map_tag_2d_unset");
+        mapTag2dSwitch.setOption(1);
+        map.settings().removeTag(MapTags.Tag.TWODIMENSIONAL);
+    }
+
+    @Action("map_tag_2d_set")
+    private void mapTag2dSet() {
+        System.out.println("map_tag_2d_set");
+        mapTag2dSwitch.setOption(0);
+        map.settings().addTag(MapTags.Tag.TWODIMENSIONAL);
+    }
+
+    @Action("map_tag_autocomplete_unset")
+    private void mapTagAutocompleteUnset() {
+        System.out.println("map_tag_autocomplete_unset");
+        mapTagAutocompleteSwitch.setOption(1);
+        map.settings().removeTag(MapTags.Tag.AUTOCOMPLETE);
+    }
+
+    @Action("map_tag_autocomplete_set")
+    private void mapTagAutocompleteSet() {
+        System.out.println("map_tag_autocomplete_set");
+        mapTagAutocompleteSwitch.setOption(0);
+        map.settings().addTag(MapTags.Tag.AUTOCOMPLETE);
     }
 
     /**
@@ -401,7 +445,21 @@ public class EditMap extends View {
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
         try {
-            mapHandler.deleteMap(player, map.id());
+            var mapPlayerData = MapPlayerData.fromPlayer(player);
+            mapService.deleteMap(mapPlayerData, map.id());
+
+            // Remove the map from the player as a "prediction", we will get
+            // the actual update from the service later.
+            var newMapSlots = mapPlayerData.mapSlots();
+            newMapSlots[slot] = null;
+            mapPlayerData.update(new MapPlayerData(
+                    mapPlayerData.id(),
+                    mapPlayerData.unlockedMapSlots(),
+                    newMapSlots,
+                    mapPlayerData.lastPlayedMap(),
+                    mapPlayerData.lastEditedMap()
+            ));
+
             showInfoTab();
             performSignal(CreateMaps.SIG_RESET);
             player.sendMessage("deleted");
