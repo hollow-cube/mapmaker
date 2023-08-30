@@ -10,6 +10,7 @@ public class MapLegacyCommand extends BaseHubCommand {
         super("legacy");
 
         addSubcommand(new MapLegacyListCommand(mapService));
+        addSubcommand(new MapLegacyImportCommand(mapService));
     }
 
 }

@@ -43,6 +43,7 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         super(context, other);
         this.translationKey = other.translationKey;
         this.itemSprite = other.itemSprite;
+        this.itemPosition = other.itemPosition;
         updateItem(List.of());
     }
 
