@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.hub.command.map.legacy;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -20,6 +22,8 @@ public class MapLegacyListCommand extends BaseHubCommand {
         super("list");
         this.mapService = mapService;
 
+        //todo usage
+
         addSyntax(wrap(this::listMaps));
         addSyntax(wrap(this::listMaps), playerArg);
     }
@@ -28,10 +32,23 @@ public class MapLegacyListCommand extends BaseHubCommand {
         var target = player.getUuid().toString();
         if (context.has(playerArg)) target = context.get(playerArg).toString();
 
-        var playerData = PlayerDataV2.fromPlayer(player);
-        var legacyMaps = mapService.getLegacyMaps(playerData.id(), target);
+        try {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            var legacyMaps = mapService.getLegacyMaps(playerData.id(), target);
 
-        player.sendMessage("listMapsFor " + target + ": " + legacyMaps);
+            if (legacyMaps.isEmpty()) {
+                player.sendMessage(Component.translatable("command.map.legacy.list.no_maps"));
+                return;
+            }
+
+            player.sendMessage(Component.translatable("command.map.legacy.list.header"));
+            for (var map : legacyMaps) {
+                player.sendMessage(Component.translatable("command.map.legacy.list.entry", Component.text(map.name()), Component.text(map.id())));
+            }
+        } catch (Exception e) {
+            player.sendMessage(Component.translatable("command.map.legacy.list.failure"));
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
     }
 
 }
