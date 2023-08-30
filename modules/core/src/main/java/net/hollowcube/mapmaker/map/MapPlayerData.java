@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import com.google.gson.annotations.SerializedName;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ public class MapPlayerData {
 
     private String id;
     private int unlockedMapSlots = 5;
-    @SerializedName("maps")
     private String[] mapSlots = new String[5];
     private String lastPlayedMap;
     private String lastEditedMap;
