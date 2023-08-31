@@ -75,54 +75,49 @@ public class MapDetailsView extends View {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             Switch[] difficultySwitches = new Switch[]{difficultySwitch};
             rowOneSwitch.setOption(1);
-            switch (map.getDifficultyName()) {
-                case "easy" -> {
+            if (map.getUniquePlays() > 1) { //todo make >1 later
+                if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
                     difficultySwitch.setOption(1);
-                }
-                case "medium" -> {
+                } else if (map.getDifficultyName().equals("medium")) {
                     difficultyMediumText.setText("Medium", TextColor.color(0xFFE11C));
                     difficultySwitch.setOption(2);
-                }
-                case "hard" -> {
+                } else if (map.getDifficultyName().equals("hard")) {
                     difficultyHardText.setText("Hard", TextColor.color(0xFA8C34));
                     difficultySwitch.setOption(3);
-                }
-                case "expert" -> {
+                } else if (map.getDifficultyName().equals("expert")) {
                     difficultyExpertText.setText("Expert", TextColor.color(0xE6464F));
                     difficultySwitch.setOption(4);
-                }
-                case "nightmare" -> {
+                } else if (map.getDifficultyName().equals("nightmare")) {
                     difficultyNightmareText.setText("Nightmare", TextColor.color(0xCC216D));
                     difficultySwitch.setOption(5);
                 }
-                default -> {
-                    difficultyNoneText.setText("TBD");
-                    difficultySwitch.setOption(0);
-                }
+            } else {
+                difficultyNoneText.setText("TBD");
+                difficultySwitch.setOption(0);
             }
 
             Switch[] mapTypeSwitches = new Switch[]{mapTypeSwitch};
             if (map.settings().getParkourSubVariant() == ParkourSubVariant.SPEEDRUN) {
-                mapTypeSpeedrunText.setText("Speedrun", TextColor.color(0x15ADD3));
+                mapTypeSpeedrunText.setText("Speedrun Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(1);
             } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeSectionedText.setText("Sectioned", TextColor.color(0x15ADD3));
+                mapTypeSectionedText.setText("Sectioned Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(2);
-            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeRankupText.setText("Rankup", TextColor.color(0x15ADD3));
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.RANKUP) {
+                mapTypeRankupText.setText("Rankup Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(3);
-            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeGauntletText.setText("Gauntlet", TextColor.color(0x15ADD3));
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.GAUNTLET) {
+                mapTypeGauntletText.setText("Gauntlet Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(4);
-            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeDropperText.setText("Dropper", TextColor.color(0x15ADD3));
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.DROPPER) {
+                mapTypeDropperText.setText("Dropper Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(5);
-            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeOneJumpText.setText("One Jump", TextColor.color(0x15ADD3));
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.ONE_JUMP) {
+                mapTypeOneJumpText.setText("One Jump Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(6);
-            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.SECTIONED) {
-                mapTypeInformativeText.setText("Informative", TextColor.color(0x15ADD3));
+            } else if (map.settings().getParkourSubVariant() == ParkourSubVariant.INFORMATIVE) {
+                mapTypeInformativeText.setText("Informative Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(7);
             } else {
                 mapTypeParkourText.setText("Parkour", TextColor.color(0x15ADD3));

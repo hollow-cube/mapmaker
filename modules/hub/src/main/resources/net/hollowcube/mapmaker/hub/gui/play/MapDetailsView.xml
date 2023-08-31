@@ -48,61 +48,61 @@
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_none"
-                                    translationKey="map.difficulty.none"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.tbd"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/none_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_none_text"
-                                  translationKey="map.difficulty.none"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.tbd"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_easy"
-                                    translationKey="map.difficulty.easy"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.easy"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/easy_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_easy_text"
-                                  translationKey="map.difficulty.easy"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.easy"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_medium"
-                                    translationKey="map.difficulty.medium"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.medium"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/medium_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_medium_text"
-                                  translationKey="map.difficulty.medium"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.medium"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_hard"
-                                    translationKey="map.hard.none"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.hard"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/hard_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_hard_text"
-                                  translationKey="map.difficulty.hard"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.hard"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_expert"
-                                    translationKey="map.difficulty.expert"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.expert"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/expert_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_expert_text"
-                                  translationKey="map.difficulty.expert"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.expert"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_nightmare"
-                                    translationKey="map.difficulty.nightmare"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/nightmare_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_nightmare_text"
-                                  translationKey="map.difficulty.nightmare"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                     </switch>
