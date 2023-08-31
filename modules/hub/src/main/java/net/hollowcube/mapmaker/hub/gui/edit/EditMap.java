@@ -143,7 +143,7 @@ public class EditMap extends View {
 
         EventDispatcher.call(new MapDeletedEvent(map.id())); //todo this event is still scuffed
         performSignal(CreateMaps.SIG_RESET);
-        PersonalizedMapData publishedMap2 = new PersonalizedMapData();
+        PersonalizedMapData publishedMap2 = new PersonalizedMapData(map, PersonalizedMapData.Progress.NONE);
         pushView(c -> new MapDetailsView(c, publishedMap2, Component.text(publishedMap.owner())));
     }
 
