@@ -112,81 +112,81 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_parkour"
-                            translationKey="map.type.parkour"
+                            translationKey="gui.map_details.map_info_tab.type.parkour"
                             sprite="play_maps/details/tab_info/parkour/parkour_icon"/>
                     <text width="8" height="1"
                           id="map_type_parkour_text"
-                          translationKey="map.type.parkour"
+                          translationKey="gui.map_details.map_info_tab.type.parkour"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_speedrun"
-                            translationKey="map.type.speedrun"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.speedrun"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_speedrun_icon"/>
                     <text width="8" height="1"
                           id="map_type_speedrun_text"
-                          translationKey="map.type.speedrun"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.speedrun"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_sectioned"
-                            translationKey="map.type.sectioned"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.sectioned"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_sectioned_icon"/>
                     <text width="8" height="1"
                           id="map_type_sectioned_text"
-                          translationKey="map.type.sectioned"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.sectioned"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_rankup"
-                            translationKey="map.type.rankup"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.rankup"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_rankup_icon"/>
                     <text width="8" height="1"
                           id="map_type_rankup_text"
-                          translationKey="map.type.rankup"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.rankup"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_gauntlet"
-                            translationKey="map.type.gauntlet"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.gauntlet"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_gauntlet_icon"/>
                     <text width="8" height="1"
                           id="map_type_gauntlet_text"
-                          translationKey="map.type.gauntlet"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.gauntlet"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_dropper"
-                            translationKey="map.type.dropper"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.dropper"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_dropper_icon"/>
                     <text width="8" height="1"
                           id="map_type_dropper_text"
-                          translationKey="map.type.dropper"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.dropper"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_one_jump"
-                            translationKey="map.type.one_jump"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.one_jump"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_one_jump_icon"/>
                     <text width="8" height="1"
                           id="map_type_one_jump_text"
-                          translationKey="map.type.one_jump"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.one_jump"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_informative"
-                            translationKey="map.type.informative"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.informative"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_informative_icon"/>
                     <text width="8" height="1"
                           id="map_type_informative_text"
-                          translationKey="map.type.informative"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.informative"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
