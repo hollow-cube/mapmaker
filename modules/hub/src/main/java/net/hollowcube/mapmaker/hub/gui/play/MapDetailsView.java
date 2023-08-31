@@ -93,7 +93,7 @@ public class MapDetailsView extends View {
                     difficultySwitch.setOption(5);
                 }
             } else {
-                difficultyNoneText.setText("TBD");
+                difficultyNoneText.setText("Unknown");
                 difficultySwitch.setOption(0);
             }
 

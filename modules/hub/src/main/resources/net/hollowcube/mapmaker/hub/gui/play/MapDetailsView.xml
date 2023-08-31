@@ -48,11 +48,11 @@
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_none"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.tbd"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.unknown"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/none_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_none_text"
-                                  translationKey="gui.map_details.map_info_tab.difficulty.tbd"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.unknown"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
                         <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
