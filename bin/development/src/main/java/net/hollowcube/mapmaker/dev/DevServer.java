@@ -137,7 +137,7 @@ public class DevServer {
             VelocityProxy.enable(velocitySecret);
         } else {
             logger.info("Velocity not configured, using online mode...");
-            //MojangAuth.init(); lol noob
+            MojangAuth.init();
         }
 
         // Start phase 1

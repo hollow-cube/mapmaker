@@ -55,7 +55,7 @@ public class MapEntry extends View {
                 map.settings().getNameComponent(),
                 authorName,
                 map.getCompletionStateText(),
-                map.getDifficulty()
+                map.getDifficultyComponent()
         );
 
         label.setState(State.ACTIVE);

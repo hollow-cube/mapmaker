@@ -42,7 +42,7 @@ public class PersonalizedMapData extends MapData {
         });
     }
 
-    public @NotNull Component getDifficulty() {
+    public @NotNull Component getDifficultyComponent() {
         if (getUniquePlays() < PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY)
             return Component.translatable("gui.play_maps.map_display.difficulty.unknown");
 
