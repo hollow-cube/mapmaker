@@ -353,14 +353,18 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
+    public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(legacyUrl + "/" + playerId + "/" + legacyMapId))
+                .uri(URI.create(legacyUrl + "/" + playerId + "/" + legacyMapId + "/import"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapData.class); // Ok
-        throw new InternalError("Failed to import legacy map: " + res.body());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapData.WithSlot.class);
+            case 404 -> throw new MapService.NotFoundError(legacyMapId);
+            case 403 -> throw new MapService.NoPermissionError();
+            default -> throw new InternalError("Failed to import legacy map: " + res.body());
+        };
     }
 }

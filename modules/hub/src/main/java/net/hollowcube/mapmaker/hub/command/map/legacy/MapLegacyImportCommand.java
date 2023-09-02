@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
+import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapService;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -21,16 +23,31 @@ public class MapLegacyImportCommand extends BaseHubCommand {
         //todo usage
 
         addSyntax(wrap(this::importMap), legacyMapIdArg);
-        addSyntax(wrap(this::importMap2), playerArg, legacyMapIdArg);
-//        addSyntax(wrap(this::listMaps), playerArg);
+        addSyntax(wrap(this::importMap), playerArg, legacyMapIdArg);
     }
 
     private void importMap(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("H1");
-    }
+        var authorizer = player.getUuid().toString();
 
-    private void importMap2(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("H2");
+        var mapOwner = context.getOrDefault(playerArg, authorizer);
+        var legacyMapId = context.get(legacyMapIdArg);
+
+        try {
+            var mapData = mapService.importLegacyMap(authorizer, mapOwner, legacyMapId);
+            player.sendMessage(HubMessages.COMMAND_MAP_LEGACY_IMPORT_SUCCESS
+                    .with(mapData.settings().getNameComponent(), mapData.slot()));
+
+        } catch (MapService.NotFoundError ignored) {
+            player.sendMessage(HubMessages.COMMAND_MAP_LEGACY_IMPORT_NOT_FOUND
+                    .with(legacyMapId));
+        } catch (MapService.NoPermissionError ignored) {
+            player.sendMessage(HubMessages.COMMAND_MAP_LEGACY_IMPORT_NO_PERMISSION
+                    .with(legacyMapId));
+        } catch (Exception e) {
+            player.sendMessage(HubMessages.COMMAND_MAP_LEGACY_IMPORT_UNKNOWN_ERROR
+                    .with(legacyMapId));
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
     }
 
 }

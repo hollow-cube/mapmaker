@@ -157,4 +157,12 @@ public class MapData {
                 "-" +
                 numberString.substring(6);
     }
+
+    public static class WithSlot extends MapData {
+        private int slot;
+
+        public int slot() {
+            return slot;
+        }
+    }
 }

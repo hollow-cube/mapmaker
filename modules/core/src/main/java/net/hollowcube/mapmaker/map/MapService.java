@@ -51,11 +51,17 @@ public interface MapService {
     // Legacy
 
     @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);
-    @NotNull MapData importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
+    @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
             super("Map not found: " + id);
+        }
+    }
+
+    class NoPermissionError extends RuntimeException {
+        public NoPermissionError() {
+            super("No permission for map");
         }
     }
 

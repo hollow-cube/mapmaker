@@ -4,7 +4,7 @@
     <switch id="tab_switch" width="9" height="5">
         <!-- INFO TAB -->
         <box width="9" height="5" align="ttb">
-            <box width="9" height="1" sprite="create_maps/tab_info/header">
+            <box width="9" height="1" align="ltr" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
                 <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
@@ -14,7 +14,7 @@
                 <button translationKey="gui.create_maps.map_info_tab.invite_players"
                         sprite="create_maps/tab_info/invite_players"/>
             </box>
-            <box width="9" height="1">
+            <box width="9" height="1" align="ltr">
                 <!-- Shift by 19 to avoid the icon -->
                 <text id="map_name" width="8" translationKey="gui.create_maps.map_info_tab.change_name"
                       font="map_title" shift="19"/>
@@ -28,7 +28,7 @@
                 </switch>
             </box>
 
-            <box width="9">
+            <box width="9" align="ltr">
                 <button id="map_type_tab_parkour" width="3"
                         translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
                 <button id="map_type_tab_building" width="3"
@@ -37,7 +37,7 @@
             </box>
             <switch id="map_type_tab_switch" width="9" height="2">
                 <!-- PARKOUR TAB -->
-                <box width="9" height="2" sprite="create_maps/tab_info/tab_parkour/container">
+                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_parkour/container">
                     <!-- These names MUST be synced with the ParkourSubVariant enum -->
                     <!-- todo this is super repetitive, might be worth looking into scripting it after all -->
                     <spacer width="1"/>
@@ -114,7 +114,7 @@
                 </box>
 
                 <!-- BUILDING TAB -->
-                <box width="9" height="2" sprite="create_maps/tab_info/tab_building/container">
+                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_building/container">
                     <spacer width="1"/>
                     <button id="map_type_tab_building_showcase" width="1"
                             translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
