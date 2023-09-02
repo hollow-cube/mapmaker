@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<component width="1" height="1">
+<component width="1" height="1" align="ltr">
     <switch id="state">
         <button id="locked" translationKey="gui.create_maps.map_slot.locked"
                 sprite="create_maps/slot_locked/2"/>

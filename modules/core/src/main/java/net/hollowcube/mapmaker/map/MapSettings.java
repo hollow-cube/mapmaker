@@ -7,6 +7,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapSettings {
@@ -35,6 +36,7 @@ public class MapSettings {
         this.icon = null;
         this.variant = MapVariant.BUILDING;
         this.spawnPoint = new Pos(0.5, 40, 0.5);
+        this.tags = new ArrayList<>();
     }
 
     public MapSettings(

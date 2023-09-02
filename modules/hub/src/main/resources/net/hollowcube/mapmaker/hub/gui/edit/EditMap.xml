@@ -3,7 +3,7 @@
 <component width="9" height="9" align="ttb">
     <switch id="tab_switch" width="9" height="5">
         <!-- INFO TAB -->
-        <box width="9" height="5" align="TTB">
+        <box width="9" height="5" align="ttb">
             <box width="9" height="1" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
@@ -132,14 +132,14 @@
         </box>
 
         <!-- TAGS TAB -->
-        <box width="9" height="5" sprite="create_maps/tab_tags/container">
-            <box width="9" height="1">
+        <box width="9" height="5" sprite="create_maps/tab_tags/container" align="ttb">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
                 <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
             </box>
 
-            <box width="9">
+            <box width="9" align="ltr">
                 <button width="4" id="map_tags_tab_visual"
                         translationKey="gui.map_details.map_tags_tab.visual_tag"/>
                 <spacer width="1"/>
@@ -148,7 +148,7 @@
             </box>
             <switch id="map_tags_tab_switch" width="9" height="3">
                 <!-- VISUAL TAB -->
-                <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container">
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container" align="ltr">
                     <!-- These names MUST be synced with the MapTags.java enum -->
                     <spacer width="1"/>
                     <switch id="map_tag_2d_switch">
@@ -164,7 +164,7 @@
                     <!-- TODO add rest of visual tags -->
                 </box>
                 <!-- GAMEPLAY TAB -->
-                <box width="9" height="3" sprite="create_maps/tab_tags/tab_gameplay/container">
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_gameplay/container" align="ltr">
                     <!-- These names MUST be synced with MapTags.java enum -->
                     <spacer width="1"/>
                     <switch id="map_tag_autocomplete_switch">
@@ -183,8 +183,8 @@
         </box>
 
         <!-- SETTINGS TAB -->
-        <box width="9" height="5" sprite="create_maps/tab_settings/container">
-            <box width="9" height="1">
+        <box width="9" height="5" sprite="create_maps/tab_settings/container" align="ttb">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_settings_tab.information"/>
             </box>
@@ -192,7 +192,7 @@
 
         <!-- ACTIONS TAB -->
         <box width="9" height="5" sprite="create_maps/tab_actions/container" align="ttb">
-            <box width="9" height="1">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
                 <label width="5" translationKey="gui.create_maps.map_slot"/>

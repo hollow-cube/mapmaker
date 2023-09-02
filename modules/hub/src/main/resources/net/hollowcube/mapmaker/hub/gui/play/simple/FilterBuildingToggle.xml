@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<component width="3" height="2">
+<component width="3" height="2" align="ltr">
     <switch id="state" width="3" height="2">
         <button id="deselected" width="3" height="2"
                 translationKey="gui.play_maps.simple.sorting_preset.building"

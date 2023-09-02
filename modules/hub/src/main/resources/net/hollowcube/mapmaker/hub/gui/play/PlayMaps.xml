@@ -15,7 +15,7 @@
     </box>
 
     <!-- Map list -->
-    <box width="9" height="5">
+    <box width="9" height="5" align="ltr">
         <box height="5" align="ttb">
             <spacer/>
             <button id="prev_page" height="3"
@@ -37,14 +37,14 @@
 
     <!-- Controls -->
     <box width="9" height="3" align="ttb">
-        <box width="9" height="2">
+        <box width="9" height="2" align="ltr">
             <FilterParkourToggle id="parkour"/>
             <FilterBuildingToggle id="building"/>
             <button width="3" height="2"
                     translationKey="gui.play_maps.simple.sorting_preset.adventure"
                     sprite="play_maps/search/filter/adventure_off"/>
         </box>
-        <box width="9" height="1">
+        <box width="9" height="1" align="ltr">
             <spacer width="2"/>
             <SortBestToggle id="best"/>
             <SortTrendingToggle id="trending"/>

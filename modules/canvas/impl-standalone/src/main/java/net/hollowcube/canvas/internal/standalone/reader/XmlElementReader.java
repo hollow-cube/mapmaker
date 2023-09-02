@@ -75,7 +75,7 @@ public class XmlElementReader {
     private @NotNull ViewContainer loadRoot(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("component"), "Root node must be 'component'");
         var elem = new ViewContainer(context, getId(node), getWidth(node), getHeight(node),
-                getEnum(node, "align", BoxContainer.Align.LTR));
+                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Component must have an alignment"));
         return applyTraits(node, loadChildren(node, elem));
     }
 
@@ -96,7 +96,7 @@ public class XmlElementReader {
     private @NotNull BaseElement loadBox(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("box"), "Node must be `box`");
         var elem = new BoxContainer(context, getId(node), getWidth(node), getHeight(node),
-                getEnum(node, "align", BoxContainer.Align.LTR));
+                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Box must have an alignment"));
         return applyTraits(node, loadChildren(node, elem));
     }
 
@@ -326,10 +326,10 @@ public class XmlElementReader {
         return attr.getNodeValue();
     }
 
-    private <E extends Enum<E>> @NotNull E getEnum(@NotNull Node node, @NotNull String name, @NotNull E def) {
+    private <E extends Enum<E>> @UnknownNullability E getEnum(@NotNull Class<E> clazz, @NotNull Node node, @NotNull String name, @UnknownNullability E def) {
         var value = getString(node, name, null);
         if (value == null) return def;
-        return Enum.valueOf(def.getDeclaringClass(), value.toUpperCase());
+        return Enum.valueOf(clazz, value.toUpperCase());
     }
 
 }

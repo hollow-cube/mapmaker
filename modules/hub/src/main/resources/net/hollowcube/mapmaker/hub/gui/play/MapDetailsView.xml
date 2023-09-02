@@ -45,7 +45,7 @@
                           id="quality_none_text"
                           translationKey="map.quality.unrated"/>
                     <switch id="difficulty_switch" width="4" height="1">
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_none"
                                     translationKey="gui.map_details.map_info_tab.difficulty.unknown"
@@ -55,7 +55,7 @@
                                   translationKey="gui.map_details.map_info_tab.difficulty.unknown"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_easy"
                                     translationKey="gui.map_details.map_info_tab.difficulty.easy"
@@ -65,7 +65,7 @@
                                   translationKey="gui.map_details.map_info_tab.difficulty.easy"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_medium"
                                     translationKey="gui.map_details.map_info_tab.difficulty.medium"
@@ -75,7 +75,7 @@
                                   translationKey="gui.map_details.map_info_tab.difficulty.medium"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_hard"
                                     translationKey="gui.map_details.map_info_tab.difficulty.hard"
@@ -85,7 +85,7 @@
                                   translationKey="gui.map_details.map_info_tab.difficulty.hard"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_expert"
                                     translationKey="gui.map_details.map_info_tab.difficulty.expert"
@@ -95,7 +95,7 @@
                                   translationKey="gui.map_details.map_info_tab.difficulty.expert"
                                   font="map_details_difficulty" centered="false" shift="13"/>
                         </box>
-                        <box width="4" height="1" sprite="play_maps/details/tab_info/container_difficulty">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_nightmare"
                                     translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
@@ -249,7 +249,7 @@
     </box>
 
     <!-- Big notable actions -->
-    <box width="9" height="3">
+    <box width="9" height="3" align="ltr">
         <button id="boost_map" width="3" height="3"
                 translationKey="gui.map_details.map_info.boost_map"/>
         <button id="play_map" width="3" height="3"
