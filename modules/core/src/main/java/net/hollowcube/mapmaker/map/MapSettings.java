@@ -94,10 +94,6 @@ public class MapSettings {
         return size;
     }
 
-    public void setSize(@NotNull MapSize mapSize) {
-        this.size = mapSize;
-    }
-
     public @NotNull MapVariant getVariant() {
         return variant;
     }

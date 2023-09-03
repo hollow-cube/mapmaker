@@ -8,7 +8,6 @@ import java.util.List;
 public class MapUpdateRequest {
     String name = null;
     String icon = null;
-    MapSize size = null;
     MapVariant variant = null;
     String subvariant = null;
     Pos spawnPoint = null;

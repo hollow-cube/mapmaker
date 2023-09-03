@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.map;
 import org.jetbrains.annotations.Nullable;
 
 public enum MapSize {
-    NORMAL(1000),
-    LARGE(5000),
-    MASSIVE(10000),
-    COLOSSAL(50000),
+    NORMAL(150),
+    LARGE(300),
+    MASSIVE(600),
+    COLOSSAL(1200),
     UNLIMITED(29_999_984 /*Minecraft world limit*/) // POWER!!!
     ;
 
