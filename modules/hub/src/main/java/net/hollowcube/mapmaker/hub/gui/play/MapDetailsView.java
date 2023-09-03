@@ -57,6 +57,11 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_informative_text") Text mapTypeInformativeText;
     private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
+    // MAP TAGS - VISUAL
+
+    // MAP TAGS - GAMEPLAY
+
+    // GENERAL
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;

@@ -7,7 +7,8 @@
             <box width="9" height="1" align="ltr" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
-                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                      centered="true"/>
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_info_tab.manage_builders"
                         sprite="create_maps/tab_info/manage_builders"/>
@@ -136,7 +137,8 @@
             <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
-                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                      centered="true"/>
             </box>
 
             <box width="9" align="ltr">
@@ -215,7 +217,8 @@
 
                 <box width="3" height="4" align="ttb">
                     <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map"/>
-                    <button id="delete_map" width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map"/>
+                    <button id="delete_map" width="3" height="2"
+                            translationKey="gui.create_maps.map_actions_tab.delete_map"/>
                 </box>
 
             </box>

@@ -46,11 +46,11 @@ public class EditMap extends View {
     private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
 
-    // Info tab
+    // INFO TAB
     private @Outlet("map_name") Text mapNameText;
     private @Outlet("map_type_tab_switch") Switch mapTypeTabSwitch;
 
-    // Subvariant selector
+    // MAP TYPE
     private @Outlet("parkour_subvariant_speedrun_switch") Switch parkourSubvariantSpeedrunSwitch;
     private @Outlet("parkour_subvariant_sectioned_switch") Switch parkourSubvariantSectionedSwitch;
     private @Outlet("parkour_subvariant_rankup_switch") Switch parkourSubvariantRankupSwitch;
@@ -60,10 +60,31 @@ public class EditMap extends View {
     private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
     private final Switch[] parkourSubvariantSwitches;
 
-    // Tags selector
+    // MAP TAGS
     private @Outlet("map_tags_tab_switch") Switch mapTagsTabSwitch;
-    private @Outlet("map_tag_2d_switch") Switch mapTag2dSwitch;
-    private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutocompleteSwitch;
+
+    // VISUAL
+//    private @Outlet("map_tag_terrain_switch") Switch mapTagTerrainSwitch;
+//    private @Outlet("map_tag_organics_switch") Switch mapTagOrganicsSwitch;
+//    private @Outlet("map_tag_structure_switch") Switch mapTagStructureSwitch;
+//    private @Outlet("map_tag_interior_switch") Switch mapTagInteriorSwitch;
+//    private @Outlet("map_tag_music_switch") Switch mapTagMusicSwitch;
+    private @Outlet("map_tag_2d_switch") Switch mapTag2DSwitch;
+//    private @Outlet("map_tag_recreation_switch") Switch mapTagRecreationSwitch;
+//    private @Outlet("map_tag_story_switch") Switch mapTagStorySwitch;
+    private final Switch[] mapTagVisualSwitches;
+
+    //GAMEPLAY
+//    private @Outlet("map_tag_coop_switch") Switch mapTagCoOpSwitch;
+//    private @Outlet("map_tag_puzzle_switch") Switch mapTagPuzzleSwitch;
+//    private @Outlet("map_tag_minigame_switch") Switch mapTagMinigameSwitch;
+//    private @Outlet("map_tag_exploration_switch") Switch mapTagExplorationSwitch;
+//    private @Outlet("map_tag_boss_battle_switch") Switch mapTagBossBattleSwitch;
+    private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutoCompleteSwitch;
+//    private @Outlet("map_tag_escape_switch") Switch mapTagEscapeSwitch;
+//    private @Outlet("map_tag_trivia_switch") Switch mapTagTriviaSwitch;
+//    private @Outlet("map_tag_Strategy_switch") Switch mapTagStrategySwitch;
+    private final Switch[] mapTagGameplaySwitches;
 
     private MapData map;
     private int slot;
@@ -74,6 +95,19 @@ public class EditMap extends View {
         this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
                 parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
                 parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
+        this.mapTagVisualSwitches = new Switch[]{
+//                mapTagTerrainSwitch, mapTagOrganicsSwitch, mapTagStructureSwitch,
+//                mapTagInteriorSwitch, mapTagMusicSwitch,
+                mapTag2DSwitch
+//                , mapTagRecreationSwitch, mapTagStorySwitch
+        };
+        this.mapTagGameplaySwitches = new Switch[]{
+//                mapTagCoOpSwitch, mapTagPuzzleSwitch, mapTagMinigameSwitch,
+//                mapTagExplorationSwitch, mapTagBossBattleSwitch,
+                mapTagAutoCompleteSwitch
+//                , mapTagEscapeSwitch,
+//                mapTagTriviaSwitch, mapTagStrategySwitch
+        };
         selectTab(0);
         setState(State.LOADING);
     }
@@ -388,33 +422,247 @@ public class EditMap extends View {
         mapTagsTabSwitch.setOption(1);
     }
 
+    // VISUAL
+
+//    @Action("map_tag_terrain_unset")
+//    private void mapTagTerrainUnset() {
+//        System.out.println("map_tag_terrain_unset");
+//        mapTagTerrainSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.TERRAIN);
+//    }
+//
+//    @Action("map_tag_terrain_set")
+//    private void mapTagTerrainSet() {
+//        System.out.println("map_tag_terrain_set");
+//        mapTagTerrainSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.TERRAIN);
+//    }
+//
+//    @Action("map_tag_organics_unset")
+//    private void mapTagOrganicsUnset() {
+//        System.out.println("map_tag_organics_unset");
+//        mapTagOrganicsSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.ORGANICS);
+//    }
+//
+//    @Action("map_tag_organics_set")
+//    private void mapTagOrganicsSet() {
+//        System.out.println("map_tag_organics_set");
+//        mapTagOrganicsSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.ORGANICS);
+//    }
+//
+//    @Action("map_tag_structure_unset")
+//    private void mapTagStructureUnset() {
+//        System.out.println("map_tag_structure_unset");
+//        mapTagStructureSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.STRUCTURE);
+//    }
+//
+//    @Action("map_tag_structure_set")
+//    private void mapTagStructureSet() {
+//        System.out.println("map_tag_structure_set");
+//        mapTagStructureSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.STRUCTURE);
+//    }
+//
+//    @Action("map_tag_interior_unset")
+//    private void mapTagInteriorUnset() {
+//        System.out.println("map_tag_interior_unset");
+//        mapTagInteriorSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.INTERIOR);
+//    }
+//
+//    @Action("map_tag_interior_set")
+//    private void mapTagInteriorSet() {
+//        System.out.println("map_tag_interior_set");
+//        mapTagInteriorSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.INTERIOR);
+//    }
+//
+//    @Action("map_tag_music_unset")
+//    private void mapTagMusicUnset() {
+//        System.out.println("map_tag_music_unset");
+//        mapTagMusicSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.MUSIC);
+//    }
+//
+//    @Action("map_tag_music_set")
+//    private void mapTagMusicSet() {
+//        System.out.println("map_tag_music_set");
+//        mapTagMusicSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.MUSIC);
+//    }
+
     @Action("map_tag_2d_unset")
-    private void mapTag2dUnset() {
+    private void mapTag2DUnset() {
         System.out.println("map_tag_2d_unset");
-        mapTag2dSwitch.setOption(1);
+        mapTag2DSwitch.setOption(1);
         map.settings().removeTag(MapTags.Tag.TWODIMENSIONAL);
     }
 
     @Action("map_tag_2d_set")
-    private void mapTag2dSet() {
+    private void mapTag2DSet() {
         System.out.println("map_tag_2d_set");
-        mapTag2dSwitch.setOption(0);
+        mapTag2DSwitch.setOption(0);
         map.settings().addTag(MapTags.Tag.TWODIMENSIONAL);
     }
 
-    @Action("map_tag_autocomplete_unset")
-    private void mapTagAutocompleteUnset() {
+//    @Action("map_tag_recreation_unset")
+//    private void mapTagRecreationUnset() {
+//        System.out.println("map_tag_recreation_unset");
+//        mapTag2DSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.RECREATION);
+//    }
+//
+//    @Action("map_tag_recreation_set")
+//    private void mapTagRecreationSet() {
+//        System.out.println("map_tag_recreation_set");
+//        mapTagRecreationSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.RECREATION);
+//    }
+//
+//    @Action("map_tag_story_unset")
+//    private void mapTagStoryUnset() {
+//        System.out.println("map_tag_story_unset");
+//        mapTagStorySwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.STORY);
+//    }
+//
+//    @Action("map_tag_recreation_set")
+//    private void mapTagStorySet() {
+//        System.out.println("map_tag_recreation_set");
+//        mapTagRecreationSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.STORY);
+//    }
+
+    // GAMEPLAY
+
+//    @Action("map_tag_coop_unset")
+//    private void mapTagCoOpUnset() {
+//        System.out.println("map_tag_coop_unset");
+//        mapTagCoOpSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.COOP);
+//    }
+//
+//    @Action("map_tag_coop_set")
+//    private void mapTagCoOpSet() {
+//        System.out.println("map_tag_coop_set");
+//        mapTagCoOpSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.COOP);
+//    }
+//
+//    @Action("map_tag_puzzle_unset")
+//    private void mapTagPuzzleUnset() {
+//        System.out.println("map_tag_puzzle_unset");
+//        mapTagPuzzleSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.PUZZLE);
+//    }
+//
+//    @Action("map_tag_puzzle_set")
+//    private void mapTagPuzzleSet() {
+//        System.out.println("map_tag_puzzle_set");
+//        mapTagPuzzleSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.PUZZLE);
+//    }
+//
+//    @Action("map_tag_minigame_unset")
+//    private void mapTagMinigameUnset() {
+//        System.out.println("map_tag_minigame_unset");
+//        mapTagMinigameSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.MINIGAME);
+//    }
+//
+//    @Action("map_tag_minigame_set")
+//    private void mapTagMinigameSet() {
+//        System.out.println("map_tag_minigame_set");
+//        mapTagMinigameSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.MINIGAME);
+//    }
+//
+//    @Action("map_tag_exploration_unset")
+//    private void mapTagExplorationUnset() {
+//        System.out.println("map_tag_exploration_unset");
+//        mapTagExplorationSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.EXPLORATION);
+//    }
+//
+//    @Action("map_tag_exploration_set")
+//    private void mapTagExplorationSet() {
+//        System.out.println("map_tag_exploration_set");
+//        mapTagExplorationSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.EXPLORATION);
+//    }
+//
+//    @Action("map_tag_boss_battle_unset")
+//    private void mapTagBossBattleUnset() {
+//        System.out.println("map_tag_boss_battle_unset");
+//        mapTagBossBattleSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.BOSSBATTLE);
+//    }
+//
+//    @Action("map_tag_boss_battle_set")
+//    private void mapTagBossBattleSet() {
+//        System.out.println("map_tag_boss_battle_set");
+//        mapTagBossBattleSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.BOSSBATTLE);
+//    }
+
+    @Action("map_tag_autocomplete_unset") // do this tag at all?
+    private void mapTagAutoCompleteUnset() {
         System.out.println("map_tag_autocomplete_unset");
-        mapTagAutocompleteSwitch.setOption(1);
+        mapTagAutoCompleteSwitch.setOption(1);
         map.settings().removeTag(MapTags.Tag.AUTOCOMPLETE);
     }
 
     @Action("map_tag_autocomplete_set")
-    private void mapTagAutocompleteSet() {
+    private void mapTagAutoCompleteSet() {
         System.out.println("map_tag_autocomplete_set");
-        mapTagAutocompleteSwitch.setOption(0);
+        mapTagAutoCompleteSwitch.setOption(0);
         map.settings().addTag(MapTags.Tag.AUTOCOMPLETE);
     }
+
+//    @Action("map_tag_escape_unset")
+//    private void mapTagEscapeUnset() {
+//        System.out.println("map_tag_escape_unset");
+//        mapTagEscapeSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.ESCAPE);
+//    }
+//
+//    @Action("map_tag_escape_set")
+//    private void mapTagEscapeSet() {
+//        System.out.println("map_tag_escape_set");
+//        mapTagEscapeSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.ESCAPE);
+//    }
+//
+//    @Action("map_tag_trivia_unset")
+//    private void mapTagTriviaUnset() {
+//        System.out.println("map_tag_trivia_unset");
+//        mapTagTriviaSwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.TRIVIA);
+//    }
+//
+//    @Action("map_tag_trivia_set")
+//    private void mapTagTriviaSet() {
+//        System.out.println("map_tag_trivia_set");
+//        mapTagTriviaSwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.TRIVIA);
+//    }
+//
+//    @Action("map_tag_strategy_unset")
+//    private void mapTagStrategyUnset() {
+//        System.out.println("map_tag_strategy_unset");
+//        mapTagStrategySwitch.setOption(1);
+//        map.settings().removeTag(MapTags.Tag.TRIVIA);
+//    }
+//
+//    @Action("map_tag_strategy_set")
+//    private void mapTagStrategySet() {
+//        System.out.println("map_tag_strategy_set");
+//        mapTagStrategySwitch.setOption(0);
+//        map.settings().addTag(MapTags.Tag.AUTOCOMPLETE);
+//    }
 
     /**
      * Sets the elements to have the latest info from the map.
