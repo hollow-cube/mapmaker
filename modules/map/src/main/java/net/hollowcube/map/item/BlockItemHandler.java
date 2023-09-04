@@ -1,10 +1,6 @@
 package net.hollowcube.map.item;
 
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;

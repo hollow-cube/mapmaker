@@ -16,7 +16,7 @@ public class MapSettings {
 
     private String name;
     private Material icon;
-
+    private MapSize size;
     private MapVariant variant;
     private String subvariant;
 
@@ -35,6 +35,7 @@ public class MapSettings {
         this.name = "";
         this.icon = null;
         this.variant = MapVariant.BUILDING;
+        this.size = MapSize.NORMAL;
         this.spawnPoint = new Pos(0.5, 40, 0.5);
         this.tags = new ArrayList<>();
     }
@@ -42,6 +43,7 @@ public class MapSettings {
     public MapSettings(
             @Nullable String name,
             @Nullable Material icon,
+            @Nullable MapSize size,
             @Nullable MapVariant variant,
             @Nullable Pos spawnPoint,
             boolean onlySprint,
@@ -52,6 +54,7 @@ public class MapSettings {
     ) {
         this.name = name;
         this.icon = icon;
+        this.size = size;
         this.variant = variant;
         this.spawnPoint = spawnPoint;
         this.onlySprint = onlySprint;
@@ -85,6 +88,10 @@ public class MapSettings {
     public void setIcon(@NotNull Material icon) {
         updates.setIcon(icon.name());
         this.icon = icon;
+    }
+
+    public @Nullable MapSize getSize() {
+        return size;
     }
 
     public @NotNull MapVariant getVariant() {

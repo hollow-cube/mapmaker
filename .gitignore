@@ -1,5 +1,6 @@
 .gradle
 /build/
+tools/compile/build
 
 .DS_Store
 

@@ -2,7 +2,6 @@ package net.hollowcube.map.feature.experimental.pathtool;
 
 import net.hollowcube.map.item.ItemHandler;
 import net.minestom.server.item.Material;
-import net.minestom.server.listener.BlockPlacementListener;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.feature.experimental.pathtool.PathToolFeatureHandler.thePath;
