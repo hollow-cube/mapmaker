@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
@@ -20,6 +21,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
@@ -78,6 +80,11 @@ public class EditingMapWorld implements InternalMapWorld {
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
+
+        eventNode.addListener(PlayerBlockPlaceEvent.class, event -> {
+            var handler = event.getBlock().handler();
+            if (!(handler instanceof ObjectBlockHandler objectHandler)) return;
+        });
     }
 
     @Override
