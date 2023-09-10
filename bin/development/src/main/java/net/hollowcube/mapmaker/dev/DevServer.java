@@ -53,7 +53,6 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -252,36 +251,27 @@ public class DevServer {
 
     @Blocking
     private void handlePreLogin(AsyncPlayerPreLoginEvent event) {
+        // This event is executed off the main thread, so its ok to block here.
+        var player = event.getPlayer();
+
         try {
-            // Run in a new thread because fork join pool is not considered a safe thread in all jvms
-            Executors.newVirtualThreadPerTaskExecutor()
-                    .submit(() -> {
-                        // This event is executed off the main thread, so its ok to block here.
-                        var player = event.getPlayer();
+            var playerData = sessionService.createSession(
+                    event.getPlayerUuid().toString(),
+                    event.getUsername(),
+                    "todo"
+            );
+            player.setTag(PlayerDataV2.TAG, playerData);
 
-                        try {
-                            var playerData = sessionService.createSession(
-                                    event.getPlayerUuid().toString(),
-                                    event.getUsername(),
-                                    "todo"
-                            );
-                            player.setTag(PlayerDataV2.TAG, playerData);
-
-                            var mapPlayerData = mapService.getMapPlayerData(playerData.id());
-                            player.setTag(MapPlayerData.TAG, mapPlayerData);
-                            logger.info("loaded map player data: {}", mapPlayerData);
-                        } catch (SessionService.UnauthorizedError ignored) {
-                            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
-                                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
-                                    .append(Component.text(" for more information.")));
-                        } catch (Exception e) {
-                            logger.error("failed to create session", e);
-                            player.kick(Component.text("Failed to login. Please try again later."));
-                        }
-                    })
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            var mapPlayerData = mapService.getMapPlayerData(playerData.id());
+            player.setTag(MapPlayerData.TAG, mapPlayerData);
+            logger.info("loaded map player data: {}", mapPlayerData);
+        } catch (SessionService.UnauthorizedError ignored) {
+            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
+                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
+                    .append(Component.text(" for more information.")));
+        } catch (Exception e) {
+            logger.error("failed to create session", e);
+            player.kick(Component.text("Failed to login. Please try again later."));
         }
     }
 
