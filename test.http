@@ -8,3 +8,14 @@ GET https://axiom.moulberry.com/api/mcauth/connect?uuid=aceb326f-da15-45bc-bf2f-
 ###
 
 GET https://axiom.moulberry.com/api/mcauth/has_beta_access?uuid=aceb326f-da15-45bc-bf2f-11940c21780c
+
+### Create Org map for hollow cube
+POST http://10.42.1.6:9124/v1/internal/maps
+Content-Type: application/json
+x-hc-user-id: b571aed9-19f4-4032-9c06-75a4b7cf6c00
+
+{
+  "is_org": true,
+  "owner": "b571aed9-19f4-4032-9c06-75a4b7cf6c00",
+  "size": 3
+}
