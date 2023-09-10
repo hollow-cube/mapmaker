@@ -209,18 +209,6 @@ public class DevServer {
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
             eventHandler.addListener(PlayerSkinInitEvent.class, this::handleSkinInit);
-//            eventHandler.addListener(MapDeletedEvent.class, event -> {
-//                for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-//                    var playerData = PlayerDataV2.fromPlayer(player);
-//                    for (int i = 0; i < playerData.getUnlockedMapSlots(); i++) {
-//                        var map = playerData.getMapSlot(i);
-//                        if (map != null && map.equals(event.mapId())) {
-//                            logger.info("Removed map {} from player {} because it was deleted.", event.mapId(), playerData.id());
-//                            playerData.setMapSlot(i, null);
-//                        }
-//                    }
-//                }
-//            });
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
