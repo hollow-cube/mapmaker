@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -43,6 +44,11 @@ public class MapData {
     private List<PointOfInterest> pois;
     private transient final ReentrantLock poiLock = new ReentrantLock();
 
+    private int objectLimit = 100;
+    private List<ObjectData> objects = new ArrayList<>();
+    private transient int objectUsage = -1;
+    private transient final ReentrantLock objectLock = new ReentrantLock();
+
     public MapData() {
     }
 
@@ -60,6 +66,8 @@ public class MapData {
         this.publishedAt = publishedAt;
         this.pois = new ArrayList<>();
         this.maxPois = 100;
+        this.objectLimit = 100;
+        this.objects = new ArrayList<>();
     }
 
     public @NotNull String id() {
@@ -140,6 +148,50 @@ public class MapData {
             return removed;
         } finally {
             poiLock.unlock();
+        }
+    }
+
+    public int objectUsage() {
+        if (objectUsage == -1) {
+            objectUsage = objects.stream()
+                    .mapToInt(o -> o.type().cost())
+                    .sum();
+        }
+
+        return objectUsage;
+    }
+
+    public boolean addObject(@NotNull ObjectData object) {
+        objectLock.lock();
+        try {
+            if (objectUsage() + object.type().cost() > objectLimit)
+                return false;
+
+            objects.add(object);
+            objectUsage += object.type().cost();
+            return true;
+        } finally {
+            objectLock.unlock();
+        }
+    }
+
+    public boolean removeObject(@NotNull String id) {
+        objectLock.lock();
+        try {
+            var removed = false;
+            var iter = objects.iterator();
+            while (iter.hasNext()) {
+                var object = iter.next();
+
+                if (object.id().equals(id)) {
+                    iter.remove();
+                    objectUsage = objectUsage() - object.type().cost();
+                    removed = true;
+                }
+            }
+            return removed;
+        } finally {
+            objectLock.unlock();
         }
     }
 

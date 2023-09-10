@@ -180,11 +180,17 @@ public class EditMap extends View {
         updateElementsFromMap();
 
         //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+        async(() -> map.settings().withUpdateRequest(req -> {
             //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+            try {
+                mapService.updateMap(player().getUuid().toString(), map.id(), req);
+                return true;
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to update map name", e);
+                MinecraftServer.getExceptionManager().handleException(e);
+                return false;
+            }
+        }));
     }
 
     // MAP ICON EDITING
@@ -207,12 +213,17 @@ public class EditMap extends View {
         map.settings().setIcon(newMaterial);
         updateElementsFromMap();
 
-        //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+        async(() -> map.settings().withUpdateRequest(req -> {
             //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+            try {
+                mapService.updateMap(player().getUuid().toString(), map.id(), req);
+                return true;
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to update map icon", e);
+                MinecraftServer.getExceptionManager().handleException(e);
+                return false;
+            }
+        }));
     }
 
     // MAP TYPE SETTINGS
@@ -228,12 +239,17 @@ public class EditMap extends View {
     }
 
     private void updateRequest() {
-        //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+        async(() -> map.settings().withUpdateRequest(req -> {
             //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+            try {
+                mapService.updateMap(player().getUuid().toString(), map.id(), req);
+                return true;
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to update map", e);
+                MinecraftServer.getExceptionManager().handleException(e);
+                return false;
+            }
+        }));
     }
 
     @Action("parkour_subvariant_speedrun_unset")
@@ -343,12 +359,17 @@ public class EditMap extends View {
         map.settings().setVariant(MapVariant.BUILDING);
         updateElementsFromMap();
 
-        //todo need to only dispatch one of these tasks at once and have some deduplication logic
-        final var updateRequest = map.settings().getUpdateRequest();
-        async(() -> {
-            mapService.updateMap(player().getUuid().toString(), map.id(), updateRequest);
+        async(() -> map.settings().withUpdateRequest(req -> {
             //todo if update fails we should revert the name change and indicate to the user that it failed
-        });
+            try {
+                mapService.updateMap(player().getUuid().toString(), map.id(), req);
+                return true;
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to update map name", e);
+                MinecraftServer.getExceptionManager().handleException(e);
+                return false;
+            }
+        }));
     }
 
     // MAP TAGS

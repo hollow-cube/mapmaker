@@ -9,36 +9,34 @@ import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.item.BlockItemHandler;
-import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.EntityTracker;
-import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class CheckpointFeatureProvider implements FeatureProvider {
-    private static final CheckpointPlateBlock CHECKPOINT_PLATE_BLOCK = new CheckpointPlateBlock();
-    private static final ItemHandler CHECKPOINT_PLATE_ITEM = new BlockItemHandler(
-            CHECKPOINT_PLATE_BLOCK, Block.HEAVY_WEIGHTED_PRESSURE_PLATE);
+//    private static final CheckpointPlateBlockOld CHECKPOINT_PLATE_BLOCK = new CheckpointPlateBlockOld();
+//    private static final ItemHandler CHECKPOINT_PLATE_ITEM = new BlockItemHandler(
+//            CHECKPOINT_PLATE_BLOCK, Block.HEAVY_WEIGHTED_PRESSURE_PLATE);
 
-    private static final FinishPlateBlock FINISH_PLATE_BLOCK = new FinishPlateBlock();
-    private static final ItemHandler FINISH_PLATE_ITEM = new BlockItemHandler(
-            FINISH_PLATE_BLOCK, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
+//    private static final FinishPlateBlockOld FINISH_PLATE_BLOCK = new FinishPlateBlockOld();
+//    private static final ItemHandler FINISH_PLATE_ITEM = new BlockItemHandler(
+//            FINISH_PLATE_BLOCK, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
 
     // Marks the current reset height of a player. If they fall below it, they will be returned to their latest checkpoint, or the map spawn point.
     private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
@@ -53,15 +51,20 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     @Override
     public void init(@NotNull ConfigProvider config) {
-        MinecraftServer.getBlockManager().registerHandler(CHECKPOINT_PLATE_BLOCK.getNamespaceId(), () -> CHECKPOINT_PLATE_BLOCK);
-        MinecraftServer.getBlockManager().registerHandler(FINISH_PLATE_BLOCK.getNamespaceId(), () -> FINISH_PLATE_BLOCK);
+//        MinecraftServer.getBlockManager().registerHandler(CHECKPOINT_PLATE_BLOCK.getNamespaceId(), () -> CHECKPOINT_PLATE_BLOCK);
+//        MinecraftServer.getBlockManager().registerHandler(FINISH_PLATE_BLOCK.getNamespaceId(), () -> FINISH_PLATE_BLOCK);
+    }
+
+    @Override
+    public @NotNull List<BlockHandler> blockHandlers() {
+        return List.of(FinishPlateBlock.INSTANCE, CheckpointPlateBlock.INSTANCE);
     }
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
-            world.itemRegistry().register(CHECKPOINT_PLATE_ITEM);
-            world.itemRegistry().register(FINISH_PLATE_ITEM);
+            world.itemRegistry().register(FinishPlateBlock.ITEM);
+            world.itemRegistry().register(CheckpointPlateBlock.ITEM);
         }
 
         if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {

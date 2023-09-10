@@ -18,16 +18,18 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
 
     @Override
     public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip) {
-        logger.log(System.Logger.Level.INFO, "new session created for {0} ({1}) from {2}", id, username, ip);
+        logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
         var reqBody = GSON.toJson(new SessionCreateRequest(username, ip));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + id))
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 201)
-            throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
-        return GSON.fromJson(res.body(), PlayerDataV2.class);
+        return switch (res.statusCode()) {
+            case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
+            case 401 -> throw new UnauthorizedError();
+            default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
+        };
     }
 
     @Override

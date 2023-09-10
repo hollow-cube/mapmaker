@@ -4,6 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
@@ -26,6 +27,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
+            .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
             .create();
 
     private final HttpClient httpClient = HttpClient.newHttpClient();

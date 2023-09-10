@@ -240,6 +240,16 @@ public class InventoryViewHost {
                 player.getInventory().getInventoryConditions().remove(playerCondition);
                 player.getInventory().update();
             }
+
+            // If there are zero viewers we assume the inventory was closed
+            if (getViewers().isEmpty()) {
+                // Unmount and close
+                element.performSignal(Element.SIG_UNMOUNT);
+                element.performSignal(Element.SIG_CLOSE);
+                // Remove inventory condition immediately, do not want ghost clicks or anything
+                getInventoryConditions().clear();
+            }
+
             return result;
         }
 

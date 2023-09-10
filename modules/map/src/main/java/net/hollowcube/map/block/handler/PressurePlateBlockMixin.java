@@ -7,16 +7,16 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractPlateHandler implements BlockHandler {
-    private static final BoundingBox BOUNDING_BOX = new BoundingBox(14.0 / 16.0, 1.0 / 16.0, 14.0 / 16.0);
+public interface PressurePlateBlockMixin extends BlockHandler {
+    BoundingBox BOUNDING_BOX = new BoundingBox(14.0 / 16.0, 1.0 / 16.0, 14.0 / 16.0);
 
     @Override
-    public boolean isTickable() {
+    default boolean isTickable() {
         return true;
     }
 
     @Override
-    public void tick(@NotNull Tick tick) {
+    default void tick(@NotNull Tick tick) {
         var instance = tick.getInstance();
         var pos = tick.getBlockPosition();
         var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
@@ -40,5 +40,5 @@ public abstract class AbstractPlateHandler implements BlockHandler {
         }
     }
 
-    public abstract void onPlatePressed(@NotNull Tick tick, @NotNull Player player);
+    void onPlatePressed(@NotNull Tick tick, @NotNull Player player);
 }

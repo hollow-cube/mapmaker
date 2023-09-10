@@ -103,6 +103,9 @@ public abstract class MapServerBase implements MapServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             for (var feature : ServiceLoader.load(FeatureProvider.class)) {
                 features.add(feature);
+                for (var blockHandler : feature.blockHandlers()) {
+                    BLOCK_MANAGER.registerHandler(blockHandler.getNamespaceId(), () -> blockHandler);
+                }
                 scope.fork(Executors.callable(() -> feature.init(config)));
             }
 

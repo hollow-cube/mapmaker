@@ -29,6 +29,7 @@ import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
@@ -264,6 +265,10 @@ public class DevServer {
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
             logger.info("loaded map player data: {}", mapPlayerData);
+        } catch (SessionService.UnauthorizedError ignored) {
+            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
+                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
+                    .append(Component.text(" for more information.")));
         } catch (Exception e) {
             logger.error("failed to create session", e);
             player.kick(Component.text("Failed to login. Please try again later."));

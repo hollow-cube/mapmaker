@@ -1,2 +1,10 @@
 GET http://10.42.1.209:9124/v1/internal/maps/players/aceb326f-da15-45bc-bf2f-11940c21780c
 x-hc-user-id: aceb326f-da15-45bc-bf2f-11940c21780c
+
+###
+
+GET https://axiom.moulberry.com/api/mcauth/connect?uuid=aceb326f-da15-45bc-bf2f-11940c21780c&server=localhost:25565
+
+###
+
+GET https://axiom.moulberry.com/api/mcauth/has_beta_access?uuid=aceb326f-da15-45bc-bf2f-11940c21780c

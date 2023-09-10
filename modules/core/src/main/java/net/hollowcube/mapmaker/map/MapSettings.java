@@ -9,10 +9,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 public class MapSettings {
 
     private transient MapUpdateRequest updates = new MapUpdateRequest();
+    private transient ReentrantLock updateLock = new ReentrantLock();
 
     private String name;
     private Material icon;
@@ -64,10 +67,18 @@ public class MapSettings {
         this.tags = tags;
     }
 
-    public @NotNull MapUpdateRequest getUpdateRequest() {
-        var updates = this.updates;
-        this.updates = new MapUpdateRequest();
-        return updates;
+    /**
+     * Run a callback with the update request, and if the callback returns true, reset the update request.
+     */
+    public void withUpdateRequest(@NotNull Function<@NotNull MapUpdateRequest, Boolean> callback) {
+        updateLock.lock();
+        try {
+            if (updates.hasChanges() && callback.apply(updates)) {
+                this.updates = new MapUpdateRequest();
+            }
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public @NotNull String getName() {
@@ -79,15 +90,25 @@ public class MapSettings {
         return Component.text(name);
     }
     public void setName(@NotNull String name) {
-        updates.setName(name);
-        this.name = name;
+        updateLock.lock();
+        try {
+            updates.setName(name);
+            this.name = name;
+        } finally {
+            updateLock.unlock();
+        }
     }
     public @Nullable Material getIcon() {
         return icon;
     }
     public void setIcon(@NotNull Material icon) {
-        updates.setIcon(icon.name());
-        this.icon = icon;
+        updateLock.lock();
+        try {
+            updates.setIcon(icon.name());
+            this.icon = icon;
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public @Nullable MapSize getSize() {
@@ -98,8 +119,13 @@ public class MapSettings {
         return variant;
     }
     public void setVariant(@NotNull MapVariant type) {
-        updates.setVariant(type);
-        this.variant = type;
+        updateLock.lock();
+        try {
+            updates.setVariant(type);
+            this.variant = type;
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public @Nullable ParkourSubVariant getParkourSubVariant() {
@@ -112,53 +138,88 @@ public class MapSettings {
     }
 
     public void setSubVariant(@Nullable ParkourSubVariant subvariant) {
-        Check.argCondition(variant != MapVariant.PARKOUR, "Parkour subvariant can only be set for parkour maps");
-        this.subvariant = subvariant == null ? null : subvariant.name().toLowerCase();
-        updates.setSubVariant(this.subvariant);
+        updateLock.lock();
+        try {
+            Check.argCondition(variant != MapVariant.PARKOUR, "Parkour subvariant can only be set for parkour maps");
+            this.subvariant = subvariant == null ? null : subvariant.name().toLowerCase();
+            updates.setSubVariant(this.subvariant);
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public @NotNull Pos getSpawnPoint() {
         return spawnPoint;
     }
     public void setSpawnPoint(@NotNull Pos spawnPoint) {
-        updates.setSpawnPoint(spawnPoint);
-        this.spawnPoint = spawnPoint;
+        updateLock.lock();
+        try {
+            updates.setSpawnPoint(spawnPoint);
+            this.spawnPoint = spawnPoint;
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public boolean isOnlySprint() {
         return onlySprint;
     }
     public void setOnlySprint(boolean onlySprint) {
-        updates.setOnlySprint(onlySprint);
-        this.onlySprint = onlySprint;
+        updateLock.lock();
+        try {
+            updates.setOnlySprint(onlySprint);
+            this.onlySprint = onlySprint;
+        } finally {
+            updateLock.unlock();
+        }
     }
     public boolean isNoSprint() {
         return noSprint;
     }
     public void setNoSprint(boolean noSprint) {
-        updates.setNoSprint(noSprint);
-        this.noSprint = noSprint;
+        updateLock.lock();
+        try {
+            updates.setNoSprint(noSprint);
+            this.noSprint = noSprint;
+        } finally {
+            updateLock.unlock();
+        }
     }
     public boolean isNoJump() {
         return noJump;
     }
     public void setNoJump(boolean noJump) {
-        updates.setNoJump(noJump);
-        this.noJump = noJump;
+        updateLock.lock();
+        try {
+            updates.setNoJump(noJump);
+            this.noJump = noJump;
+        } finally {
+            updateLock.unlock();
+        }
     }
     public boolean isNoSneak() {
         return noSneak;
     }
     public void setNoSneak(boolean noSneak) {
-        updates.setNoSneak(noSneak);
-        this.noSneak = noSneak;
+        updateLock.lock();
+        try {
+            updates.setNoSneak(noSneak);
+            this.noSneak = noSneak;
+        } finally {
+            updateLock.unlock();
+        }
     }
     public boolean isBoat() {
         return boat;
     }
     public void setBoat(boolean boat) {
-        updates.setBoat(boat);
-        this.boat = boat;
+        updateLock.lock();
+        try {
+            updates.setBoat(boat);
+            this.boat = boat;
+        } finally {
+            updateLock.unlock();
+        }
     }
 
     public List<MapTags.Tag> getTags() {
@@ -166,14 +227,24 @@ public class MapSettings {
     }
 
     public void addTag(@NotNull MapTags.Tag tag) {
-        if (variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY) {
-            System.out.println("you shouldn't be here! make sure you're not allowing build maps to use gameplay tags.");
+        updateLock.lock();
+        try {
+            if (variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY) {
+                System.out.println("you shouldn't be here! make sure you're not allowing build maps to use gameplay tags.");
+            }
+            updates.tags.add(tag);
+            this.tags.add(tag);
+        } finally {
+            updateLock.unlock();
         }
-        updates.tags.add(tag);
-        this.tags.add(tag);
     }
 
     public void removeTag(@NotNull MapTags.Tag tag) {
-        this.tags.remove(tag);
+        updateLock.lock();
+        try {
+            this.tags.remove(tag);
+        } finally {
+            updateLock.unlock();
+        }
     }
 }
