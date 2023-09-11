@@ -223,6 +223,8 @@ public class MapSettings {
     }
 
     public List<MapTags.Tag> getTags() {
+        if (this.tags == null)
+            return new ArrayList<>();
         return this.tags;
     }
 
@@ -232,8 +234,11 @@ public class MapSettings {
             if (variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY) {
                 System.out.println("you shouldn't be here! make sure you're not allowing build maps to use gameplay tags.");
             }
-            updates.tags.add(tag);
+            if (this.tags == null) {
+                this.tags = new ArrayList<>();
+            }
             this.tags.add(tag);
+            updates.setTags(this.tags);
         } finally {
             updateLock.unlock();
         }
@@ -242,7 +247,10 @@ public class MapSettings {
     public void removeTag(@NotNull MapTags.Tag tag) {
         updateLock.lock();
         try {
-            this.tags.remove(tag);
+            if (this.tags != null) {
+                this.tags.remove(tag);
+                updates.setTags(this.tags);
+            }
         } finally {
             updateLock.unlock();
         }
