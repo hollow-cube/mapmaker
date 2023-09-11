@@ -89,6 +89,25 @@ public class MapSettings {
             return Component.text(MapData.DEFAULT_NAME);
         return Component.text(name);
     }
+    public @NotNull Component getTagsComponent() {
+        var tags = getTags();
+        var maxTags = Math.min(2, tags.size());
+        var currTagIdx = 0;
+        var tagsLabel = Component.text("");
+        // TODO find a way to terminate after a certain length of displayed text
+        while (currTagIdx < maxTags) {
+//            var tagName = tags.get(currTagIdx).displayName(); // TODO figure out how to get translation key working
+            var tagName = Component.text(tags.get(currTagIdx).name());
+            tagsLabel = tagsLabel.append(tagName);
+            tagsLabel = tagsLabel.append(Component.text(", "));
+            currTagIdx++;
+        }
+        if (currTagIdx == 0)
+            tagsLabel = Component.text("None");
+        if (currTagIdx < tags.size())
+            tagsLabel = tagsLabel.append(Component.text(String.format("+%s", tags.size() - currTagIdx)));
+        return tagsLabel;
+    }
     public void setName(@NotNull String name) {
         updateLock.lock();
         try {

@@ -50,12 +50,14 @@ public class MapEntry extends View {
         label.setItemSprite(ItemStack.of(icon == null ? Material.PAPER : icon));
 
         authorName = playerService.getPlayerDisplayName(map.owner());
+
         label.setArgs(
                 Component.text(map.publishedIdString()),
                 map.settings().getNameComponent(),
                 authorName,
                 map.getCompletionStateText(),
-                map.getDifficultyComponent()
+                map.getDifficultyComponent(),
+                map.settings().getTagsComponent()
         );
 
         label.setState(State.ACTIVE);
