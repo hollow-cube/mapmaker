@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.object.ObjectData;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapUpdateRequest {
@@ -20,9 +22,13 @@ public class MapUpdateRequest {
 
     List<MapTags.Tag> tags = null;
 
+    List<ObjectData> newObjects = new ArrayList<>();
+    List<String> removedObjects = new ArrayList<>();
+
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
-                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null || tags != null;
+                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null ||
+                tags != null || !newObjects.isEmpty() || !removedObjects.isEmpty();
     }
 
     public void setName(@Nullable String name) {

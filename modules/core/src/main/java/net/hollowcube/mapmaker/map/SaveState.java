@@ -135,6 +135,10 @@ public class SaveState {
     public @Nullable String checkpoint() {
         return checkpoint;
     }
+    public void setCheckpoint(@Nullable String checkpoint) {
+        this.checkpoint = checkpoint;
+        updates.setCheckpoint(checkpoint == null ? "" : checkpoint);
+    }
 
     // Utilities
 

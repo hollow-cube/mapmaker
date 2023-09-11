@@ -47,7 +47,6 @@ public class MapData {
     private int objectLimit = 100;
     private List<ObjectData> objects = new ArrayList<>();
     private transient int objectUsage = -1;
-    private transient final ReentrantLock objectLock = new ReentrantLock();
 
     public MapData() {
     }
@@ -162,21 +161,26 @@ public class MapData {
     }
 
     public boolean addObject(@NotNull ObjectData object) {
-        objectLock.lock();
+        settings.updateLock.lock();
         try {
             if (objectUsage() + object.type().cost() > objectLimit)
                 return false;
 
             objects.add(object);
             objectUsage += object.type().cost();
+
+            // Add to update
+            settings.updates.newObjects.add(object);
+            settings.updates.removedObjects.remove(object.id());
+
             return true;
         } finally {
-            objectLock.unlock();
+            settings.updateLock.unlock();
         }
     }
 
     public boolean removeObject(@NotNull String id) {
-        objectLock.lock();
+        settings.updateLock.lock();
         try {
             var removed = false;
             var iter = objects.iterator();
@@ -187,12 +191,23 @@ public class MapData {
                     iter.remove();
                     objectUsage = objectUsage() - object.type().cost();
                     removed = true;
+
+                    settings.updates.removedObjects.add(id);
                 }
             }
+
+            if (removed) {
+                settings.updates.newObjects.removeIf(p -> p.id().equals(id));
+            }
+
             return removed;
         } finally {
-            objectLock.unlock();
+            settings.updateLock.unlock();
         }
+    }
+
+    public @NotNull List<ObjectData> objects() {
+        return List.copyOf(objects);
     }
 
     public static @NotNull String formatPublishedId(long number) {

@@ -2,6 +2,7 @@ package net.hollowcube.map.feature.checkpoint;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
+import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
@@ -10,6 +11,7 @@ import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.TagHandler;
@@ -48,7 +50,9 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        System.out.println("press checkpoint!!");
+        var mapWorld = MapWorld.forPlayer(player);
+        var event = new MapWorldCheckpointReachedEvent(mapWorld, player, createObjectId(tick.getBlockPosition()));
+        EventDispatcher.call(event);
     }
 
     public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {

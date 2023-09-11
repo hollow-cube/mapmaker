@@ -1,7 +1,6 @@
 package net.hollowcube.map.feature.checkpoint;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
@@ -30,13 +29,6 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class CheckpointFeatureProvider implements FeatureProvider {
-//    private static final CheckpointPlateBlockOld CHECKPOINT_PLATE_BLOCK = new CheckpointPlateBlockOld();
-//    private static final ItemHandler CHECKPOINT_PLATE_ITEM = new BlockItemHandler(
-//            CHECKPOINT_PLATE_BLOCK, Block.HEAVY_WEIGHTED_PRESSURE_PLATE);
-
-//    private static final FinishPlateBlockOld FINISH_PLATE_BLOCK = new FinishPlateBlockOld();
-//    private static final ItemHandler FINISH_PLATE_ITEM = new BlockItemHandler(
-//            FINISH_PLATE_BLOCK, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
 
     // Marks the current reset height of a player. If they fall below it, they will be returned to their latest checkpoint, or the map spawn point.
     private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
@@ -48,12 +40,6 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             .addListener(MapWorldCheckpointReachedEvent.class, this::handleCheckpointUpdate)
             .addListener(InstanceTickEvent.class, this::tick)
             .addListener(MapPlayerResetTriggerEvent.class, this::handlePlayerReset);
-
-    @Override
-    public void init(@NotNull ConfigProvider config) {
-//        MinecraftServer.getBlockManager().registerHandler(CHECKPOINT_PLATE_BLOCK.getNamespaceId(), () -> CHECKPOINT_PLATE_BLOCK);
-//        MinecraftServer.getBlockManager().registerHandler(FINISH_PLATE_BLOCK.getNamespaceId(), () -> FINISH_PLATE_BLOCK);
-    }
 
     @Override
     public @NotNull List<BlockHandler> blockHandlers() {
@@ -69,6 +55,9 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {
             world.addScopedEventNode(resetManagementNode);
+
+            // Create checkpoint cache (which adds itself to the world)
+            new CheckpointCache(world);
         }
 
         return true;
@@ -93,11 +82,11 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     private void handleCheckpointUpdate(@NotNull MapWorldCheckpointReachedEvent event) {
         var player = event.getPlayer();
         var saveState = SaveState.fromPlayer(player);
-//        if (event.getCheckpoint().getId().equals(saveState.getCheckpoint())) return; // Already at this checkpoint
+        if (event.checkpointId().equals(saveState.checkpoint())) return; // Already at this checkpoint
 
         // Reached a new checkpoint
-//        saveState.setCheckpoint(event.getCheckpoint().getId());
-        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
+        saveState.setCheckpoint(event.checkpointId());
+//        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 

@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 public class MapSettings {
 
-    private transient MapUpdateRequest updates = new MapUpdateRequest();
-    private transient ReentrantLock updateLock = new ReentrantLock();
+    transient MapUpdateRequest updates = new MapUpdateRequest();
+    transient ReentrantLock updateLock = new ReentrantLock();
 
     private String name;
     private Material icon;

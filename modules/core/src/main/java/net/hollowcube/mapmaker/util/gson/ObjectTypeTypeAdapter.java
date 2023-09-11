@@ -16,7 +16,7 @@ public class ObjectTypeTypeAdapter extends TypeAdapter<ObjectType> {
             return;
         }
 
-        out.jsonValue(value.id());
+        out.value(value.id());
     }
 
     @Override

@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -220,11 +219,11 @@ public class PlayingMapWorld implements InternalMapWorld {
 
             saveState.updatePlaytime();
 
-            var update = new SaveStateUpdateRequest();
-            update.setPlaytime(saveState.getPlaytime());
-            update.setCompleted(saveState.isCompleted());
 
             try {
+                var update = saveState.getUpdateRequest();
+                update.setCompleted(true);
+
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
 

@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +29,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
             .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
+            .registerTypeAdapter(Point.class, new PointTypeAdapter())
             .create();
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
