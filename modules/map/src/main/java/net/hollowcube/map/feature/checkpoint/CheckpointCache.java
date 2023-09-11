@@ -29,4 +29,8 @@ public final class CheckpointCache {
         world.instance().setTag(TAG, this);
     }
 
+    public boolean isEmpty() {
+        return checkpoints.isEmpty();
+    }
+
 }

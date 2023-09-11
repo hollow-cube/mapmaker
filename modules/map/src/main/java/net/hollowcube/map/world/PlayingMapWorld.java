@@ -176,7 +176,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         });
 
         player.getInventory().clear();
-        PlayingMapHotbar.applyToPlayer(player);
+        PlayingMapHotbar.applyToPlayer(this, player);
 
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
