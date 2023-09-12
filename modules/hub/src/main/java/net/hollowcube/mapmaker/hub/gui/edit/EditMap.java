@@ -43,8 +43,9 @@ public class EditMap extends View {
 
     private static final int VERIFY_ERROR = 0;
     private static final int VERIFY = 1;
-    private static final int PUBLISH_ERROR = 2;
-    private static final int PUBLISH = 3;
+    private static final int ADD_NAME = 2;
+    private static final int ADD_ICON = 3;
+    private static final int PUBLISH = 4;
     private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
 
@@ -175,18 +176,9 @@ public class EditMap extends View {
 
     private int getPublishState() {
         if (!map.isVerified()) return VERIFY;
-        return canPublishMap() ? PUBLISH : PUBLISH_ERROR;
-    }
-
-    //todo move this function somewhere where it can be used by the command, etc. maybe some kind of map helpers util class
-    private boolean canPublishMap() {
-        var settings = map.settings();
-        if (settings.getName().isEmpty() || settings.getIcon() == null)
-            return false;
-
-        //todo other checks like whether there is a world, parkour tags, etc.
-
-        return true;
+        if (map.settings().getName().isEmpty()) return ADD_NAME;
+        if (map.settings().getIcon() == null) return ADD_ICON;
+        return PUBLISH;
     }
 
     // MAP NAME EDITING
