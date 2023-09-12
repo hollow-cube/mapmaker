@@ -279,13 +279,13 @@
                                 sprite="create_maps/tab_tags/tab_gameplay/tag_exploration_icon"
                                 backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_exploration_selected"/>
                     </switch>
-                    <switch id="map_tag_boss_battle_switch">
-                        <button id="map_tag_boss_battle_unset"
-                                translationKey="gui.create_maps.map_tags_tab.gameplay.boss_battle"
+                    <switch id="map_tag_bossbattle_switch">
+                        <button id="map_tag_bossbattle_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle"
                                 sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
                                 backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_bg"/>
-                        <button id="map_tag_boss_battle_set"
-                                translationKey="gui.create_maps.map_tags_tab.gameplay.boss_battle"
+                        <button id="map_tag_bossbattle_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle"
                                 sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
                                 backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_selected"/>
                     </switch>

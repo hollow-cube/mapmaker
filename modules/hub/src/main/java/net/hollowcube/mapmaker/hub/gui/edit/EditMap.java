@@ -81,7 +81,7 @@ public class EditMap extends View {
     private @Outlet("map_tag_puzzle_switch") Switch mapTagPuzzleSwitch;
     private @Outlet("map_tag_minigame_switch") Switch mapTagMinigameSwitch;
     private @Outlet("map_tag_exploration_switch") Switch mapTagExplorationSwitch;
-    private @Outlet("map_tag_boss_battle_switch") Switch mapTagBossBattleSwitch;
+    private @Outlet("map_tag_bossbattle_switch") Switch mapTagBossBattleSwitch;
     private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutoCompleteSwitch;
     private @Outlet("map_tag_escape_switch") Switch mapTagEscapeSwitch;
     private @Outlet("map_tag_trivia_switch") Switch mapTagTriviaSwitch;
@@ -481,21 +481,21 @@ public class EditMap extends View {
     }
 
     @Action("map_tag_music_unset")
-    private void mapTagMusicUnset() {
-        System.out.println("map_tag_music_unset");
-        mapTagMusicSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.MUSIC);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagMusicUnset() { // TODO coming later
+//        System.out.println("map_tag_music_unset");
+//        mapTagMusicSwitch.setOption(1);
+//        map.settings().addTag(MapTags.Tag.MUSIC);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_music_set")
-    private void mapTagMusicSet() {
-        System.out.println("map_tag_music_set");
-        mapTagMusicSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.MUSIC);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagMusicSet() { // TODO coming later
+//        System.out.println("map_tag_music_set");
+//        mapTagMusicSwitch.setOption(0);
+//        map.settings().removeTag(MapTags.Tag.MUSIC);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_2d_unset")
@@ -555,21 +555,21 @@ public class EditMap extends View {
     // GAMEPLAY
 
     @Action("map_tag_coop_unset")
-    private void mapTagCoOpUnset() {
-        System.out.println("map_tag_coop_unset");
-        mapTagCoOpSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.COOP);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagCoOpUnset() { // TODO coming later
+//        System.out.println("map_tag_coop_unset");
+//        mapTagCoOpSwitch.setOption(1);
+//        map.settings().addTag(MapTags.Tag.COOP);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_coop_set")
-    private void mapTagCoOpSet() {
-        System.out.println("map_tag_coop_set");
-        mapTagCoOpSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.COOP);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagCoOpSet() { // TODO coming later
+//        System.out.println("map_tag_coop_set");
+//        mapTagCoOpSwitch.setOption(0);
+//        map.settings().removeTag(MapTags.Tag.COOP);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_puzzle_unset")
@@ -591,21 +591,21 @@ public class EditMap extends View {
     }
 
     @Action("map_tag_minigame_unset")
-    private void mapTagMinigameUnset() {
-        System.out.println("map_tag_minigame_unset");
-        mapTagMinigameSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.MINIGAME);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagMinigameUnset() { // TODO coming later
+//        System.out.println("map_tag_minigame_unset");
+//        mapTagMinigameSwitch.setOption(1);
+//        map.settings().addTag(MapTags.Tag.MINIGAME);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_minigame_set")
-    private void mapTagMinigameSet() {
-        System.out.println("map_tag_minigame_set");
-        mapTagMinigameSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.MINIGAME);
-        updateElementsFromMap();
-        updateRequest();
+    private void mapTagMinigameSet() { // TODO coming later
+//        System.out.println("map_tag_minigame_set");
+//        mapTagMinigameSwitch.setOption(0);
+//        map.settings().removeTag(MapTags.Tag.MINIGAME);
+//        updateElementsFromMap();
+//        updateRequest();
     }
 
     @Action("map_tag_exploration_unset")
@@ -626,18 +626,18 @@ public class EditMap extends View {
         updateRequest();
     }
 
-    @Action("map_tag_boss_battle_unset")
+    @Action("map_tag_bossbattle_unset")
     private void mapTagBossBattleUnset() {
-        System.out.println("map_tag_boss_battle_unset");
+        System.out.println("map_tag_bossbattle_unset");
         mapTagBossBattleSwitch.setOption(1);
         map.settings().addTag(MapTags.Tag.BOSSBATTLE);
         updateElementsFromMap();
         updateRequest();
     }
 
-    @Action("map_tag_boss_battle_set")
+    @Action("map_tag_bossbattle_set")
     private void mapTagBossBattleSet() {
-        System.out.println("map_tag_boss_battle_set");
+        System.out.println("map_tag_bossbattle_set");
         mapTagBossBattleSwitch.setOption(0);
         map.settings().removeTag(MapTags.Tag.BOSSBATTLE);
         updateElementsFromMap();

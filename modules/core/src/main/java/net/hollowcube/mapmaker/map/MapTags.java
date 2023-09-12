@@ -15,12 +15,12 @@ public final class MapTags {
         // To support backward compatibility, consider leaving them here and deprecating
         // tags individually and removing the ability to select them in the GUI.
         // It is safe to change the display name of tags, however.
-        COOP(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.co-op.name"),
+        COOP(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.coop.name"),
         PUZZLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.puzzle.name"),
         ESCAPE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.escape.name"),
         MINIGAME(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.minigame.name"),
         TRIVIA(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.trivia.name"),
-        BOSSBATTLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.boss_battle.name"),
+        BOSSBATTLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.bossbattle.name"),
         EXPLORATION(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.exploration.name"),
         AUTOCOMPLETE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.auto-complete.name"),
         STRATEGY(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.strategy.name"),
