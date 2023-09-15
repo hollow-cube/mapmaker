@@ -41,11 +41,15 @@ public class EditMap extends View {
     private @Outlet("tab_actions_switch") Switch tabActionsSwitch;
     private Switch[] tabSwitches;
 
-    private static final int VERIFY_ERROR = 0;
-    private static final int VERIFY = 1;
-    private static final int ADD_NAME = 2;
-    private static final int ADD_ICON = 3;
-    private static final int PUBLISH = 4;
+    private enum PublishStage {
+        VERIFY_ERROR,
+        BUILD_ONCE,
+        VERIFY,
+        ADD_NAME,
+        ADD_ICON,
+        PUBLISH;
+    }
+
     private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
 
@@ -174,11 +178,18 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap2, Component.text(publishedMap.owner())));
     }
 
-    private int getPublishState() {
-        if (!map.isVerified()) return VERIFY;
-        if (map.settings().getName().isEmpty()) return ADD_NAME;
-        if (map.settings().getIcon() == null) return ADD_ICON;
-        return PUBLISH;
+    private PublishStage getPublishState() {
+        try {
+            mapService.getLatestSaveState(map.id(), map.owner());
+        } catch (MapService.NotFoundError e) {
+            return PublishStage.BUILD_ONCE;
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Player could not access save states when getting map publish state.");
+        }
+        if (!map.isVerified()) return PublishStage.VERIFY;
+        if (map.settings().getName().isEmpty()) return PublishStage.ADD_NAME;
+        if (map.settings().getIcon() == null) return PublishStage.ADD_ICON;
+        return PublishStage.PUBLISH;
     }
 
     // MAP NAME EDITING
@@ -760,14 +771,11 @@ public class EditMap extends View {
 
         // Tags
         var tags = map.settings().getTags();
-        var tagEnums = MapTags.Tag.values();
         for (int i = 0; i < mapTagsSwitches.length; i++) {
             mapTagsSwitches[i].setOption(tags.contains(MapTags.Tag.values()[i]) ? 1 : 0);
         }
-        System.out.println("mapTagsSwitches: " + Arrays.toString(mapTagsSwitches));
-        System.out.println("got map tags " + tags.toString());
 
-        publishSwitch.setOption(getPublishState());
+        publishSwitch.setOption(getPublishState().ordinal());
     }
 
     // ACTIONS TAB
