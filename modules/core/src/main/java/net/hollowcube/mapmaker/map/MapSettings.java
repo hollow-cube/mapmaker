@@ -156,10 +156,30 @@ public class MapSettings {
         }
     }
 
-    public void setSubVariant(@Nullable ParkourSubVariant subvariant) {
+    public @Nullable BuildingSubVariant getBuildingSubVariant() {
+        if (subvariant == null) return null;
+        try {
+            return BuildingSubVariant.valueOf(subvariant.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public void setParkourSubVariant(@Nullable ParkourSubVariant subvariant) {
         updateLock.lock();
         try {
             Check.argCondition(variant != MapVariant.PARKOUR, "Parkour subvariant can only be set for parkour maps");
+            this.subvariant = subvariant == null ? null : subvariant.name().toLowerCase();
+            updates.setSubVariant(this.subvariant);
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public void setBuildingSubVariant(@Nullable BuildingSubVariant subvariant) {
+        updateLock.lock();
+        try {
+            Check.argCondition(variant == MapVariant.PARKOUR, "Building subvariant can only be set for building maps");
             this.subvariant = subvariant == null ? null : subvariant.name().toLowerCase();
             updates.setSubVariant(this.subvariant);
         } finally {
