@@ -2,6 +2,10 @@
 /build/
 tools/compile/build
 
+bazel-*
+.idea
+.ijwb
+
 .DS_Store
 
 .idea
