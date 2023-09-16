@@ -46,6 +46,10 @@ public final class MapTags {
         public Component displayName() {
             return Component.translatable(this.translateKey);
         }
+
+        public TagType getType() {
+            return this.type;
+        }
     }
 
 }

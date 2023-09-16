@@ -142,6 +142,7 @@
             </box>
 
             <box width="9" align="ltr">
+                <!-- make the locked container in here -->
                 <button width="4" id="map_tags_tab_visual"
                         translationKey="gui.map_details.map_tags_tab.visual_tag"/>
                 <spacer width="1"/>
