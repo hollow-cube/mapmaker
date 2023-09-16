@@ -211,16 +211,6 @@
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
-                            id="map_type_map_pack"
-                            translationKey="map.type.map_pack"
-                            sprite="play_maps/details/tab_info/building/map_types/sv_map_pack_icon"/>
-                    <text width="8" height="1"
-                          id="map_type_map_pack_text"
-                          translationKey="map.type.map_pack"
-                          font="map_details_map_type" centered="false" shift="3"/>
-                </box>
-                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
-                    <button width="1" height="1"
                             id="map_type_building"
                             translationKey="gui.map_details.map_info_tab.type.building"
                             sprite="play_maps/details/tab_info/building/building_icon"/>

@@ -73,7 +73,6 @@ public class EditMap extends View {
     // BUILDING
     private @Outlet("building_subvariant_showcase_switch") Switch buildingSubvariantShowcaseSwitch;
     private @Outlet("building_subvariant_tutorial_switch") Switch buildingSubvariantTutorialSwitch;
-    private @Outlet("building_subvariant_map_pack_switch") Switch buildingSubvariantMapPackSwitch;
     private final Switch[] buildingSubvariantSwitches;
 
     // MAP TAGS
@@ -110,8 +109,7 @@ public class EditMap extends View {
         this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
                 parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
                 parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
-        this.buildingSubvariantSwitches = new Switch[]{buildingSubvariantShowcaseSwitch, buildingSubvariantTutorialSwitch,
-                buildingSubvariantMapPackSwitch};
+        this.buildingSubvariantSwitches = new Switch[]{buildingSubvariantShowcaseSwitch, buildingSubvariantTutorialSwitch};
         this.mapTagsSwitches = new Switch[]{mapTagCoOpSwitch, mapTagPuzzleSwitch, mapTagEscapeSwitch, mapTagMinigameSwitch,
                 mapTagTriviaSwitch, mapTagBossBattleSwitch, mapTagExplorationSwitch, mapTagAutoCompleteSwitch,
                 mapTagStrategySwitch, mapTagRecreationSwitch, mapTagTerrainSwitch, mapTagOrganicsSwitch,
@@ -288,6 +286,8 @@ public class EditMap extends View {
 
     // MAP TYPE SETTINGS
 
+    // PARKOUR
+
     @Action("map_type_tab_parkour")
     private void selectMapTypeParkourTab() {
         if (mapTypeTabSwitch.getOption() == 0) return;
@@ -312,52 +312,6 @@ public class EditMap extends View {
             }
         }));
     }
-
-    // BUILDING
-
-    @Action("building_subvariant_showcase_unset")
-    private void buildingSubVariantShowcaseUnset() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_showcase_set")
-    private void buildingSubVariantShowcaseSet() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_tutorial_unset")
-    private void buildingSubVariantTutorialUnset() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_tutorial_set")
-    private void buildingSubVariantTutorialSet() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_map_pack_unset")
-    private void buildingSubVariantMapPackUnset() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.MAP_PACK);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_map_pack_set")
-    private void buildingSubVariantMapPackSet() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.MAP_PACK);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    // PARKOUR
 
     @Action("parkour_subvariant_speedrun_unset")
     private void parkourSubVariantSpeedrunUnset() {
@@ -457,6 +411,8 @@ public class EditMap extends View {
         updateRequest();
     }
 
+    // BUILDING
+
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
         System.out.println("map_type_tab_building");
@@ -465,6 +421,34 @@ public class EditMap extends View {
         mapTypeTabSwitch.setOption(1);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_showcase_unset")
+    private void buildingSubVariantShowcaseUnset() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_showcase_set")
+    private void buildingSubVariantShowcaseSet() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_tutorial_unset")
+    private void buildingSubVariantTutorialUnset() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_tutorial_set")
+    private void buildingSubVariantTutorialSet() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
         updateElementsFromMap();
         updateRequest();
     }
@@ -734,6 +718,11 @@ public class EditMap extends View {
                 }
             }
             case BUILDING -> {
+                var subvariant = map.settings().getBuildingSubVariant();
+                for (int i = 0; i < buildingSubvariantSwitches.length; i++) {
+                    var selected = subvariant != null && subvariant.ordinal() == i;
+                    buildingSubvariantSwitches[i].setOption(selected ? 1 : 0);
+                }
 
             }
         }
