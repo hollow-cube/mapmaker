@@ -8,10 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.map.ParkourSubVariant;
-import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -47,6 +44,8 @@ public class MapDetailsView extends View {
 
     // MAP TYPES
     private @Outlet("map_type_switch") Switch mapTypeSwitch;
+
+    // PARKOUR
     private @Outlet("map_type_parkour_text") Text mapTypeParkourText;
     private @Outlet("map_type_speedrun_text") Text mapTypeSpeedrunText;
     private @Outlet("map_type_sectioned_text") Text mapTypeSectionedText;
@@ -55,7 +54,11 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_dropper_text") Text mapTypeDropperText;
     private @Outlet("map_type_one_jump_text") Text mapTypeOneJumpText;
     private @Outlet("map_type_informative_text") Text mapTypeInformativeText;
-    private @Outlet("map_type_building_text") Text mapTypeBuildingText;
+
+    // BUILDING
+    private @Outlet("map_type_showcase_text") Text mapTypeShowcaseText;
+    private @Outlet("map_type_tutorial_text") Text mapTypeTutorialText;
+    private @Outlet("map_type_map_pack_text") Text mapTypeMapPackText;
 
     // MAP TAGS - VISUAL
 
@@ -125,14 +128,25 @@ public class MapDetailsView extends View {
                 mapTypeInformativeText.setText("Informative Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(7);
             } else {
-                mapTypeParkourText.setText("Parkour", TextColor.color(0x15ADD3));
+                mapTypeParkourText.setText("Generic Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(0);
             }
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
-            mapTypeBuildingText.setText("Building (SubVariants TODO)", TextColor.color(0x0B9F0B));
-            mapTypeSwitch.setOption(8);
+            if (map.settings().getBuildingSubVariant() == BuildingSubVariant.SHOWCASE) {
+                mapTypeShowcaseText.setText("Building Showcase", TextColor.color(0x0B9F0B));
+                mapTypeSwitch.setOption(8);
+            } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.TUTORIAL) {
+                mapTypeShowcaseText.setText("Building Tutorial", TextColor.color(0x0B9F0B));
+                mapTypeSwitch.setOption(9);
+            } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.MAP_PACK) {
+                mapTypeShowcaseText.setText("Building Map Pack", TextColor.color(0x0B9F0B));
+                mapTypeSwitch.setOption(10);
+            } else {
+                mapTypeShowcaseText.setText("Generic Building", TextColor.color(0x0B9F0B));
+                mapTypeSwitch.setOption(11);
+            }
         }
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));

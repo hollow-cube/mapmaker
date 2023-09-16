@@ -116,18 +116,39 @@
 
                 <!-- BUILDING TAB -->
                 <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_building/container">
+                    <spacer width="2"/>
+                    <switch id="building_subvariant_showcase_switch">
+                        <button id="building_subvariant_showcase_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"
+                                sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_bg"/>
+                        <button id="building_subvariant_showcase_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"
+                                sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_selected"/>
+                    </switch>
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_showcase" width="1"
-                            translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
+                    <switch id="building_subvariant_tutorial_switch">
+                        <button id="building_subvariant_tutorial_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"
+                                sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_bg"/>
+                        <button id="building_subvariant_tutorial_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"
+                                sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_selected"/>
+                    </switch>
                     <spacer width="1"/>
-                    <button id="map_type_tab_building_tutorial" width="1"
-                            translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"/>
-                    <spacer width="1"/>
-                    <button id="map_type_tab_building_educational" width="1"
-                            translationKey="gui.create_maps.map_info_tab.select_type.building.educational"/>
-                    <spacer width="1"/>
-                    <button id="map_type_tab_building_map_pack" width="1"
-                            translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"/>
+                    <switch id="building_subvariant_map_pack_switch">
+                        <button id="building_subvariant_map_pack_unset"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"
+                                sprite="create_maps/tab_info/tab_building/sv_map_pack_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_map_pack_bg"/>
+                        <button id="building_subvariant_map_pack_set"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building.map_pack"
+                                sprite="create_maps/tab_info/tab_building/sv_map_pack_icon"
+                                backgroundSprite="create_maps/tab_info/tab_building/sv_map_pack_selected"/>
+                    </switch>
                 </box>
             </switch>
         </box>

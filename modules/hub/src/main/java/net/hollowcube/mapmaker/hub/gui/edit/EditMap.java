@@ -59,6 +59,8 @@ public class EditMap extends View {
     private @Outlet("map_type_tab_switch") Switch mapTypeTabSwitch;
 
     // MAP TYPE
+
+    // PARKOUR
     private @Outlet("parkour_subvariant_speedrun_switch") Switch parkourSubvariantSpeedrunSwitch;
     private @Outlet("parkour_subvariant_sectioned_switch") Switch parkourSubvariantSectionedSwitch;
     private @Outlet("parkour_subvariant_rankup_switch") Switch parkourSubvariantRankupSwitch;
@@ -67,6 +69,12 @@ public class EditMap extends View {
     private @Outlet("parkour_subvariant_one_jump_switch") Switch parkourSubvariantOneJumpSwitch;
     private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
     private final Switch[] parkourSubvariantSwitches;
+
+    // BUILDING
+    private @Outlet("building_subvariant_showcase_switch") Switch buildingSubvariantShowcaseSwitch;
+    private @Outlet("building_subvariant_tutorial_switch") Switch buildingSubvariantTutorialSwitch;
+    private @Outlet("building_subvariant_map_pack_switch") Switch buildingSubvariantMapPackSwitch;
+    private final Switch[] buildingSubvariantSwitches;
 
     // MAP TAGS
     private @Outlet("map_tags_tab_switch") Switch mapTagsTabSwitch;
@@ -102,6 +110,8 @@ public class EditMap extends View {
         this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
                 parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
                 parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
+        this.buildingSubvariantSwitches = new Switch[]{buildingSubvariantShowcaseSwitch, buildingSubvariantTutorialSwitch,
+                buildingSubvariantMapPackSwitch};
         this.mapTagsSwitches = new Switch[]{mapTagCoOpSwitch, mapTagPuzzleSwitch, mapTagEscapeSwitch, mapTagMinigameSwitch,
                 mapTagTriviaSwitch, mapTagBossBattleSwitch, mapTagExplorationSwitch, mapTagAutoCompleteSwitch,
                 mapTagStrategySwitch, mapTagRecreationSwitch, mapTagTerrainSwitch, mapTagOrganicsSwitch,
@@ -303,100 +313,146 @@ public class EditMap extends View {
         }));
     }
 
+    // BUILDING
+
+    @Action("building_subvariant_showcase_unset")
+    private void buildingSubVariantShowcaseUnset() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_showcase_set")
+    private void buildingSubVariantShowcaseSet() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_tutorial_unset")
+    private void buildingSubVariantTutorialUnset() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_tutorial_set")
+    private void buildingSubVariantTutorialSet() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_map_pack_unset")
+    private void buildingSubVariantMapPackUnset() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.MAP_PACK);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("building_subvariant_map_pack_set")
+    private void buildingSubVariantMapPackSet() {
+        map.settings().setBuildingSubVariant(BuildingSubVariant.MAP_PACK);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    // PARKOUR
+
     @Action("parkour_subvariant_speedrun_unset")
     private void parkourSubVariantSpeedrunUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.SPEEDRUN);
+        map.settings().setParkourSubVariant(ParkourSubVariant.SPEEDRUN);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_speedrun_set")
     private void parkourSubVariantSpeedrunSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_unset")
     private void parkourSubVariantSectionedUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.SECTIONED);
+        map.settings().setParkourSubVariant(ParkourSubVariant.SECTIONED);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_sectioned_set")
     private void parkourSubVariantSectionedSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_unset")
     private void parkourSubVariantRankupUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.RANKUP);
+        map.settings().setParkourSubVariant(ParkourSubVariant.RANKUP);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_rankup_set")
     private void parkourSubVariantRankupSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_unset")
     private void parkourSubVariantGauntletUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.GAUNTLET);
+        map.settings().setParkourSubVariant(ParkourSubVariant.GAUNTLET);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_gauntlet_set")
     private void parkourSubVariantGauntletSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_unset")
     private void parkourSubVariantDropperUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.DROPPER);
+        map.settings().setParkourSubVariant(ParkourSubVariant.DROPPER);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_dropper_set")
     private void parkourSubVariantDropperSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_unset")
     private void parkourSubVariantOneJumpUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.ONE_JUMP);
+        map.settings().setParkourSubVariant(ParkourSubVariant.ONE_JUMP);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_one_jump_set")
     private void parkourSubVariantOneJumpSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_informative_unset")
     private void parkourSubVariantInformativeUnset() {
-        map.settings().setSubVariant(ParkourSubVariant.INFORMATIVE);
+        map.settings().setParkourSubVariant(ParkourSubVariant.INFORMATIVE);
         updateElementsFromMap();
         updateRequest();
     }
 
     @Action("parkour_subvariant_informative_set")
     private void parkourSubVariantInformativeSet() {
-        map.settings().setSubVariant(null);
+        map.settings().setParkourSubVariant(null);
         updateElementsFromMap();
         updateRequest();
     }
