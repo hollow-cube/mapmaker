@@ -59,6 +59,7 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_showcase_text") Text mapTypeShowcaseText;
     private @Outlet("map_type_tutorial_text") Text mapTypeTutorialText;
     private @Outlet("map_type_map_pack_text") Text mapTypeMapPackText;
+    private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
     // MAP TAGS - VISUAL
 
@@ -138,13 +139,13 @@ public class MapDetailsView extends View {
                 mapTypeShowcaseText.setText("Building Showcase", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(8);
             } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.TUTORIAL) {
-                mapTypeShowcaseText.setText("Building Tutorial", TextColor.color(0x0B9F0B));
+                mapTypeTutorialText.setText("Building Tutorial", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(9);
             } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.MAP_PACK) {
-                mapTypeShowcaseText.setText("Building Map Pack", TextColor.color(0x0B9F0B));
+                mapTypeMapPackText.setText("Building Map Pack", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(10);
             } else {
-                mapTypeShowcaseText.setText("Generic Building", TextColor.color(0x0B9F0B));
+                mapTypeBuildingText.setText("Generic Building", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(11);
             }
         }
