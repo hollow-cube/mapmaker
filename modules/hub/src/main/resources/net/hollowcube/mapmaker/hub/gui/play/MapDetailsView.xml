@@ -191,11 +191,39 @@
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
+                            id="map_type_showcase"
+                            translationKey="map.type.showcase"/>
+                    <text width="8" height="1"
+                          id="map_type_showcase_text"
+                          translationKey="map.type.showcase"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_tutorial"
+                            translationKey="map.type.tutorial"/>
+                    <text width="8" height="1"
+                          id="map_type_tutorial_text"
+                          translationKey="map.type.tutorial"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_map_pack"
+                            translationKey="map.type.map_pack"/>
+                    <text width="8" height="1"
+                          id="map_type_map_pack_text"
+                          translationKey="map.type.map_pack"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
                             id="map_type_building"
-                            translationKey="map.type.building"/>
+                            translationKey="gui.map_details.map_info_tab.type.building"
+                            sprite="play_maps/details/tab_info/building/building_icon"/>
                     <text width="8" height="1"
                           id="map_type_building_text"
-                          translationKey="map.type.building"
+                          translationKey="gui.map_details.map_info_tab.type.building"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
             </switch>
