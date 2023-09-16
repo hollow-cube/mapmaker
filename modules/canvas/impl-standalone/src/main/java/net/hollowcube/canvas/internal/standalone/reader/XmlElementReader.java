@@ -1,6 +1,5 @@
 package net.hollowcube.canvas.internal.standalone.reader;
 
-import com.google.common.base.Splitter;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.*;
@@ -249,15 +248,15 @@ public class XmlElementReader {
 
             } else {
                 // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
-                var split = Splitter.on('@').splitToList(spriteName);
-                var material = Material.fromNamespaceId(split.get(0));
+                var split = spriteName.split("@");
+                var material = Material.fromNamespaceId(split[0]);
                 if (material == null) {
                     logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
                 var builder = ItemStack.builder(material);
-                if (split.size() > 1) {
-                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split.get(1))));
+                if (split.length > 1) {
+                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split[1])));
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build(), spritePos);
