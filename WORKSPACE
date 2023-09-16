@@ -46,22 +46,29 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
+        # Quality
         "org.jetbrains:annotations:24.0.1",
-        "com.google.code.gson:gson:2.10.1",
         "com.google.auto.service:auto-service:1.1.1",
         "com.google.auto.service:auto-service-annotations:1.1.1",
+
+        # Minestom
         "dev.hollowcube:minestom-ce:e9d0098418",
         "dev.hollowcube:polar:1.3.1",
-        "net.kyori:adventure-api:4.12.0",
-        "net.kyori:adventure-key:4.12.0",
-        "net.kyori:adventure-text-minimessage:4.12.0",
-        "net.kyori:adventure-text-serializer-plain:4.12.0",
+        "com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220",
+
+        # Misc
+        "com.google.code.gson:gson:2.10.1",
         "it.unimi.dsi:fastutil:8.5.12",
         "org.apache.kafka:kafka-clients:3.4.0",
         "org.spongepowered:configurate-core:4.1.2",
         "org.spongepowered:configurate-yaml:4.1.2",
-        "com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220",
         "com.miguelfonseca.completely:completely-core:0.9.0",
+
+        # Adventure
+        "net.kyori:adventure-api:4.12.0",
+        "net.kyori:adventure-key:4.12.0",
+        "net.kyori:adventure-text-minimessage:4.12.0",
+        "net.kyori:adventure-text-serializer-plain:4.12.0",
 
         # Helidon
         "io.helidon.health:helidon-health:3.0.2",
