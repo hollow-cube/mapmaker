@@ -192,7 +192,8 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_showcase"
-                            translationKey="map.type.showcase"/>
+                            translationKey="map.type.showcase"
+                            sprite="play_maps/details/tab_info/building/map_types/sv_showcase_icon"/>
                     <text width="8" height="1"
                           id="map_type_showcase_text"
                           translationKey="map.type.showcase"
@@ -201,7 +202,8 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_tutorial"
-                            translationKey="map.type.tutorial"/>
+                            translationKey="map.type.tutorial"
+                            sprite="play_maps/details/tab_info/building/map_types/sv_tutorial_icon"/>
                     <text width="8" height="1"
                           id="map_type_tutorial_text"
                           translationKey="map.type.tutorial"
@@ -210,7 +212,8 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
                     <button width="1" height="1"
                             id="map_type_map_pack"
-                            translationKey="map.type.map_pack"/>
+                            translationKey="map.type.map_pack"
+                            sprite="play_maps/details/tab_info/building/map_types/sv_map_pack_icon"/>
                     <text width="8" height="1"
                           id="map_type_map_pack_text"
                           translationKey="map.type.map_pack"
