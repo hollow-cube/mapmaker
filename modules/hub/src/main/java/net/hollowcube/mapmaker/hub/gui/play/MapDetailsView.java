@@ -141,12 +141,9 @@ public class MapDetailsView extends View {
             } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.TUTORIAL) {
                 mapTypeTutorialText.setText("Building Tutorial", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(9);
-            } else if (map.settings().getBuildingSubVariant() == BuildingSubVariant.MAP_PACK) {
-                mapTypeMapPackText.setText("Building Map Pack", TextColor.color(0x0B9F0B));
-                mapTypeSwitch.setOption(10);
             } else {
                 mapTypeBuildingText.setText("Generic Building", TextColor.color(0x0B9F0B));
-                mapTypeSwitch.setOption(11);
+                mapTypeSwitch.setOption(10);
             }
         }
 

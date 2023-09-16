@@ -20,7 +20,7 @@
       "predicate": {
         "custom_model_data": 3
       },
-      "model": "minecraft:item/hammer"
+      "model": "minecraft:item/hammer_3d"
     },
     {
       "predicate": {
