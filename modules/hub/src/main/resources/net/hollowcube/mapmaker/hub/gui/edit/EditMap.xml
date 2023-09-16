@@ -387,7 +387,7 @@
         </switch>
         <spacer/>
         <switch id="tab_tags_switch">
-            <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab"
+            <button id="tab_tags" translationKey="gui.create_maps.map_tags_tab"
                     sprite="create_maps/tab_tags/icon"
                     backgroundSprite="create_maps/tab_tags/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_tags_tab"

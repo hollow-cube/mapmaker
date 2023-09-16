@@ -256,7 +256,8 @@ public class MapSettings {
             if (this.tags == null) {
                 this.tags = new ArrayList<>();
             }
-            this.tags.add(tag);
+            if (!this.tags.contains(tag))
+                this.tags.add(tag);
             updates.setTags(this.tags);
         } finally {
             updateLock.unlock();
@@ -270,6 +271,34 @@ public class MapSettings {
                 this.tags.remove(tag);
                 updates.setTags(this.tags);
             }
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public void removeGameplayTags() {
+        updateLock.lock();
+        try {
+            if (this.tags == null) {
+                this.tags = new ArrayList<>();
+            }
+            this.tags = this.tags.stream().filter(
+                    tag -> tag.getType() == MapTags.TagType.VISUAL
+            ).toList();
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public void removeVisualTags() {
+        updateLock.lock();
+        try {
+            if (this.tags == null) {
+                this.tags = new ArrayList<>();
+            }
+            this.tags = this.tags.stream().filter(
+                    tag -> tag.getType() == MapTags.TagType.GAMEPLAY
+            ).toList();
         } finally {
             updateLock.unlock();
         }
