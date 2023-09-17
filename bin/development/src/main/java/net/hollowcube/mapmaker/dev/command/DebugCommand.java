@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.dev.command;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.dev.DevRuntime;
+import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;

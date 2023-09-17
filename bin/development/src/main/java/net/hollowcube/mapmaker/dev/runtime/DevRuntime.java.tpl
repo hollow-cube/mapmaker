@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.dev;
+package net.hollowcube.mapmaker.dev.runtime;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;

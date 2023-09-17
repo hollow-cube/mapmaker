@@ -18,3 +18,14 @@ def packer_bundle(name, srcs):
         """,
         tools = ["//bin/packer"],
     )
+
+    native.genrule(
+        name = "packer_%s_client" % name,
+        srcs = srcs,
+        outs = ["client.zip"],
+        cmd = """
+            $(location //bin/packer:packer)
+            cd build/packer/client && zip -r ../../../$(OUTS) .
+        """,
+        tools = ["//bin/packer"],
+    )

@@ -1,0 +1,22 @@
+load("//third_party:genfile.bzl", "genfile")
+
+genfile(
+    name = "dev_runtime_src",
+    output = "DevRuntime.java",
+    substitutions = {
+        "{MAPMAKER_VERSION}": "3.0.0-alpha",
+        "{MAPMAKER_COMMIT}": "bazel",
+        "{MINESTOM_VERSION}": "unknown",
+        "{RESOURCE_PACK_SHA}": "dev",
+    },
+    template = "DevRuntime.java.tpl",
+)
+
+java_library(
+    name = "runtime",
+    srcs = ["dev_runtime_src"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//modules/common",
+    ],
+)

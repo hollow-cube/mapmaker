@@ -12,7 +12,7 @@
     <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="net.hollowcube.mapmaker.dev.*" />
+        <option name="PATTERN" value="net.hollowcube.mapmaker.dev.runtime.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

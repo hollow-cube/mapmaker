@@ -7,5 +7,7 @@ bazel-genfiles
 WORKSPACE
 .bazelignore
 .bazelrc
+.run
 
+third_party/genfile.bzl
 bin/packer/packer.bzl
