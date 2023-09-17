@@ -1,8 +1,6 @@
 package net.hollowcube.map.world;
 
-import kotlin.Pair;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.MapServerBase;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
@@ -21,7 +19,10 @@ public class MapWorldManager {
     private static final System.Logger logger = System.getLogger(MapWorldManager.class.getName());
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final Map<Pair<String, Boolean>, Future<InternalMapWorld>> activeMaps = new ConcurrentHashMap<>();
+    private record InstanceId(String id, boolean isEditing) {
+    }
+
+    private final Map<InstanceId, Future<InternalMapWorld>> activeMaps = new ConcurrentHashMap<>();
     private final MapServer server;
 
     public MapWorldManager(@NotNull MapServer server) {
@@ -35,7 +36,7 @@ public class MapWorldManager {
             // Stop if there are still players in the instance
             if (event.getInstance().getPlayers().size() > 1) return;
 
-            var removed = activeMaps.remove(new Pair<>(world.map().id(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
+            var removed = activeMaps.remove(new InstanceId(world.map().id(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
             if (removed == null) return;
             event.getInstance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
                 // ok to use resultNow because we cannot close a world that is not loaded
@@ -48,7 +49,7 @@ public class MapWorldManager {
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {
         boolean isEditing = joinMapState == HubToMapBridge.JoinMapState.EDITING;
-        var activeWorld = activeMaps.get(new Pair<>(map.id(), isEditing));
+        var activeWorld = activeMaps.get(new InstanceId(map.id(), isEditing));
 
         // Create a new world if there is not one present
         if (activeWorld == null) {
@@ -57,7 +58,7 @@ public class MapWorldManager {
                 world.load();
                 return world;
             });
-            activeMaps.put(new Pair<>(map.id(), isEditing), activeWorld);
+            activeMaps.put(new InstanceId(map.id(), isEditing), activeWorld);
         }
 
         // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)

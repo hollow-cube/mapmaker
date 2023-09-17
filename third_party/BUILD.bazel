@@ -36,3 +36,14 @@ java_library(
         "@maven//:io_helidon_metrics_helidon_metrics_prometheus",
     ],
 )
+
+java_library(
+    name = "adventure_all",
+    exports = [
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_key",
+        "@maven//:net_kyori_adventure_text_minimessage",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+    ],
+)

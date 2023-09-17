@@ -1,0 +1,21 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "common",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    exports = [
+        "//third_party:auto_service",
+        "@maven//:org_jetbrains_annotations",
+        "@maven//:org_slf4j_slf4j_api",
+    ],
+    deps = [
+        "//third_party:adventure_all",
+        "//third_party:minestom",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:org_jetbrains_annotations",
+        "@maven//:org_slf4j_slf4j_api",
+    ],
+)

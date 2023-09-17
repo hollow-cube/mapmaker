@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.command;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.hub.find_a_new_home.legacy.LegacyCommand;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.SlotState;
@@ -46,9 +45,6 @@ public class MapCommand extends BaseHubCommand {
         addSubcommand(new EditCommand());
         addSubcommand(new PublishCommand());
         addSubcommand(new DeleteCommand());
-
-        // Legacy
-        addSubcommand(new LegacyCommand(server));
 
         setDefaultExecutor(generateUsage());
     }

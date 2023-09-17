@@ -36,12 +36,14 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
             return;
         }
 
+        //todo we should not be creating a distinct kafka consumer for each one of these. We only need to create one consumer and simply subscribe it to many topics.
+
         this.valueDeserializer = deserializer;
 
         var runtime = ServerRuntime.getRuntime();
         consumer = new KafkaConsumer<>(Map.of(
-                "client.id", runtime.hostname(),
-                "group.id", groupId,
+                "client.id", runtime.hostname() + "-" + topic,
+                "group.id", runtime.hostname(),
                 "bootstrap.servers", bootstrapServers
         ), new StringDeserializer(), new StringDeserializer());
         consumer.subscribe(List.of(topic));
