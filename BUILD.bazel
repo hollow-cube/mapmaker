@@ -21,6 +21,28 @@ default_java_toolchain(
     target_version = "20",
 )
 
+#load("//bin/packer:packer.bzl", "packer_bundle")
+#
+#packer_bundle(
+#    name = "dev_server_data",
+#    srcs = glob(include = [
+#        "resources/**/*",
+#    ]),
+#)
+
+# packer_bundle should generate the following:
+# - client resource pack (zip for dev) (packer_%s_client_deploy)
+# - server data (individual files) (%s_server)
+
+load("//bin/packer:packer.bzl", "packer_bundle")
+
+packer_bundle(
+    name = "development",
+    srcs = glob(include = [
+        "resources/**/*",
+    ]),
+)
+
 java_binary(
     name = "development",
     srcs = glob(include = [
@@ -29,7 +51,9 @@ java_binary(
     main_class = "net.hollowcube.mapmaker.dev.DevServer",
     resources = glob(include = [
         "bin/development/src/main/resources/**/*",
-    ]),
+    ]) + [
+        ":packer_development_server",
+    ],
     deps = [
         "//modules/canvas:api",
         "//modules/canvas:impl-standalone",
