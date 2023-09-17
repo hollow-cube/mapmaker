@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
+import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Object;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
 public class SpriteTransform {
     private static final Json5 json5 = new Json5();
@@ -34,44 +37,44 @@ public class SpriteTransform {
     }
 
     public void process(@NotNull PackContext context) throws IOException {
-        var serverSprites = new JsonArray();
+        JsonArray serverSprites = new JsonArray();
 
-        var guiBaseDir = context.resources().resolve("gui");
-        try (var guiFile = Files.walk(guiBaseDir)) {
-            var files = guiFile.sorted(Comparator.comparing(Path::toString)).toList();
-            for (var imageFile : files) {
+        Path guiBaseDir = context.resources().resolve("gui");
+        try (Stream<Path> guiFile = Files.walk(guiBaseDir)) {
+            List<Path> files = guiFile.sorted(Comparator.comparing(Path::toString)).toList();
+            for (Path imageFile : files) {
                 if (!imageFile.getFileName().toString().endsWith(".png")) continue;
-                var configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
+                Path configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
                 if (!Files.exists(configFile)) continue;
 
-                var name = guiBaseDir.relativize(imageFile).toString()
+                String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
-                var config = json5.parse(Files.readString(configFile)).getAsJson5Object();
+                Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 
                 if (config.get("type").getAsString().equals("sprite")) {
-                    var resultFontChar = new JsonObject();
-                    var serverSpriteConf = new JsonObject();
+                    JsonObject resultFontChar = new JsonObject();
+                    JsonObject serverSpriteConf = new JsonObject();
                     processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar, serverSpriteConf);
                     context.addFontCharacter(resultFontChar);
                     serverSprites.add(serverSpriteConf);
                 } else if (config.get("type").getAsString().equals("item")) {
 
-                    var image = ImageIO.read(imageFile.toFile());
-                    var newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                    var graphics = newImage.getGraphics();
+                    BufferedImage image = ImageIO.read(imageFile.toFile());
+                    BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                    Graphics graphics = newImage.getGraphics();
                     graphics.setColor(new Color(
                             ThreadLocalRandom.current().nextInt(0, 255),
                             ThreadLocalRandom.current().nextInt(0, 255),
                             ThreadLocalRandom.current().nextInt(0, 255),
                             255
                     ));
-                    var ofwidth = image.getWidth() / 4;
-                    var ofheight = image.getHeight() / 4;
+                    int ofwidth = image.getWidth() / 4;
+                    int ofheight = image.getHeight() / 4;
                     graphics.fillRect(ofwidth, ofheight, ofwidth * 3, ofwidth * 3);
                     image = newImage;
 
-                    var baos = new ByteArrayOutputStream();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ImageIO.write(image, "png", baos);
 
                     int cmd;
@@ -81,7 +84,7 @@ public class SpriteTransform {
                         cmd = context.addBasicItemTexture(name, Files.readAllBytes(imageFile));
                     }
 
-                    var serverSpriteConf = new JsonObject();
+                    JsonObject serverSpriteConf = new JsonObject();
                     serverSpriteConf.addProperty("name", name);
                     serverSpriteConf.addProperty("cmd", cmd);
                     serverSpriteConf.addProperty("width", 0);
@@ -91,11 +94,11 @@ public class SpriteTransform {
             }
         }
 
-        var serverSpritesPath = context.out().resolve("server").resolve("sprites.json");
+        Path serverSpritesPath = context.out().resolve("server").resolve("sprites.json");
         Files.createDirectories(serverSpritesPath.getParent());
 
-        var gson = new Gson();
-        var sprites = gson.toJson(serverSprites);
+        Gson gson = new Gson();
+        String sprites = gson.toJson(serverSprites);
         while (sprites.contains("\\\\")) {
             // How do i do this with regex???
             sprites = sprites.replace("\\\\", "\\");
@@ -104,7 +107,7 @@ public class SpriteTransform {
     }
 
     private void processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf, @NotNull JsonObject serverSpriteConf) throws IOException {
-        var image = ImageIO.read(new ByteArrayInputStream(data));
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 
         int width = image.getWidth();
         int height = image.getHeight();
@@ -112,8 +115,8 @@ public class SpriteTransform {
         int offX = 0;
 
         if (debug) {
-            var newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            var graphics = newImage.getGraphics();
+            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics graphics = newImage.getGraphics();
             graphics.setColor(new Color(
                     ThreadLocalRandom.current().nextInt(0, 255),
                     ThreadLocalRandom.current().nextInt(0, 255),
@@ -128,22 +131,22 @@ public class SpriteTransform {
         }
 
         if (conf.has("size")) {
-            var origin = conf.getAsJson5Array("size");
+            Json5Array origin = conf.getAsJson5Array("size");
             width = origin.get(0).getAsInt();
             height = origin.get(1).getAsInt();
         }
 
         if (conf.has("shift_y")) {
-            var shiftY = conf.get("shift_y").getAsInt();
-            var newImage = new BufferedImage(image.getWidth(), image.getHeight() + shiftY, BufferedImage.TYPE_INT_ARGB);
-            var graphics = newImage.getGraphics();
+            int shiftY = conf.get("shift_y").getAsInt();
+            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight() + shiftY, BufferedImage.TYPE_INT_ARGB);
+            Graphics graphics = newImage.getGraphics();
             graphics.drawImage(image, 0, shiftY, null);
             image = newImage;
             height += shiftY;
         }
 
         if (conf.has("origin")) {
-            var origin = conf.getAsJson5Array("origin");
+            Json5Array origin = conf.getAsJson5Array("origin");
             offX += origin.get(0).getAsInt();
             ascent += origin.get(1).getAsInt();
         }
@@ -152,12 +155,12 @@ public class SpriteTransform {
         // Minecraft will slice off any empty rows on the right side of font characters (so that bitmaps work
         // correctly as fonts with variable width), but this is bad for us because we want the textures to
         // stay as configured. We have a special "rightOffset" property to fix this.
-        var right = 0;
+        int right = 0;
         outer:
         for (int x = image.getWidth() - 1; x > 0; x--) {
             for (int y = 0; y < image.getHeight(); y++) {
-                var zz = image.getRGB(x, y);
-                var alpha = (zz >> 24) & 0xFF;
+                int zz = image.getRGB(x, y);
+                int alpha = (zz >> 24) & 0xFF;
                 if (alpha != 0) {
                     break outer;
                 }
@@ -165,9 +168,9 @@ public class SpriteTransform {
             right++;
         }
 
-        var baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(image, "png", baos);
-        var ref = ctx.writeTexture(null, name, baos.toByteArray());
+        String ref = ctx.writeTexture(null, name, baos.toByteArray());
 
         int rawFontChar;
         if (conf.has("char")) {
@@ -175,13 +178,13 @@ public class SpriteTransform {
         } else {
             rawFontChar = nextChar++;
         }
-        var fontChar = String.valueOf((char) rawFontChar);//String.format("\\u%04x", nextChar++);
+        String fontChar = String.valueOf((char) rawFontChar);//String.format("\\u%04x", nextChar++);
 
         fontConf.addProperty("type", "bitmap");
         fontConf.addProperty("file", ref);
         fontConf.addProperty("ascent", ascent);
         fontConf.addProperty("height", height);
-        var chars = new JsonArray();
+        JsonArray chars = new JsonArray();
         chars.add(fontChar);
         fontConf.add("chars", chars);
 

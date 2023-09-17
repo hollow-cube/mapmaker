@@ -58,6 +58,7 @@ maven_install(
 
         # Misc
         "com.google.code.gson:gson:2.10.1",
+        "de.marhali:json5-java:2.0.0",
         "it.unimi.dsi:fastutil:8.5.12",
         "org.apache.kafka:kafka-clients:3.4.0",
         "org.spongepowered:configurate-core:4.1.2",
