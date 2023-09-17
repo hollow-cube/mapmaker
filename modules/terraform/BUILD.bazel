@@ -1,0 +1,16 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "terraform",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//modules/common",
+        "//third_party:minestom",
+        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
+        "@maven//:io_github_jglrxavpok_hephaistos_common",
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:net_kyori_adventure_api",
+    ],
+)
