@@ -4,16 +4,14 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class MapWorldManager {
     private static final System.Logger logger = System.getLogger(MapWorldManager.class.getName());
@@ -36,14 +34,7 @@ public class MapWorldManager {
             // Stop if there are still players in the instance
             if (event.getInstance().getPlayers().size() > 1) return;
 
-            var removed = activeMaps.remove(new InstanceId(world.map().id(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
-            if (removed == null) return;
-            event.getInstance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
-                // ok to use resultNow because we cannot close a world that is not loaded
-                // and a loaded world will always have a completed future.
-                removed.resultNow().close();
-            }));
-
+            closeMap(world);
         });
     }
 
@@ -79,6 +70,35 @@ public class MapWorldManager {
             logger.log(System.Logger.Level.ERROR, "Failed to load world", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void forceShutdownMap(@NotNull String mapId) {
+        for (var entry : activeMaps.entrySet()) {
+            if (!entry.getKey().id.equals(mapId)) return;
+
+            try {
+                var world = entry.getValue().get();
+                logger.log(System.Logger.Level.WARNING, "Forcing shutdown of map world {} ({})", mapId, world);
+                closeMap(world);
+            } catch (ExecutionException | InterruptedException e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
+        }
+    }
+
+    private void closeMap(@NotNull MapWorld world) {
+        for (var player : world.players()) {
+            player.sendMessage(Component.text("The map you were playing has been closed."));
+            server.bridge().sendPlayerToHub(player);
+        }
+
+        var removed = activeMaps.remove(new InstanceId(world.map().id(), (world.flags() & MapWorld.FLAG_EDITING) != 0));
+        if (removed == null) return;
+        world.instance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
+            // ok to use resultNow because we cannot close a world that is not loaded
+            // and a loaded world will always have a completed future.
+            removed.resultNow().close();
+        }));
     }
 
     public void shutdown() {

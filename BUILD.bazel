@@ -68,11 +68,3 @@ java_binary(
         "@maven//:org_spongepowered_configurate_yaml",
     ],
 )
-
-#java_binary(
-#    name = "compile_tools",
-#    srcs = glob(include = ["tools/compile/src/main/java/**/*.java"]),
-#    deps = [
-#        "//third_party:auto_service",
-#    ],
-#)
