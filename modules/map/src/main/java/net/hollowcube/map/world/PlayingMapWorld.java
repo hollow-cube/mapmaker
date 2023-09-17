@@ -90,11 +90,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.scheduler().buildTask(this::updateSpectators)
                 .repeat(TaskSchedule.seconds(1))
                 .schedule();
-
-        // Controls player visibility
-        instance.scheduler().buildTask(this::updateViewership)
-                .repeat(TaskSchedule.tick(5))
-                .schedule();
     }
 
     @Override
@@ -169,14 +164,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setAllowFlying(false);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
-
-        player.updateViewableRule(p -> {
-            if (p.isInvisible()) return true;
-            return player.getDistanceSquared(p) > 3.5 * 3.5;
-        });
-
         player.getInventory().clear();
-        PlayingMapHotbar.applyToPlayer(this, player);
 
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
@@ -205,8 +193,6 @@ public class PlayingMapWorld implements InternalMapWorld {
     public @Blocking void removePlayer(@NotNull Player player, boolean save) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 
-        player.updateViewableRule((p) -> true);
-
         player.removeTag(TAG_PLAYING);
         player.removeTag(MapHooks.PLAYING); // Legacy
         player.setInvisible(false);
@@ -218,7 +204,6 @@ public class PlayingMapWorld implements InternalMapWorld {
             if (saveState == null) return;
 
             saveState.updatePlaytime();
-
 
             try {
                 var update = saveState.getUpdateRequest();
@@ -251,12 +236,6 @@ public class PlayingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Set<Player> players() {
         return Set.copyOf(activePlayers);
-    }
-
-    private void updateViewership() {
-        for (Player p : players()) {
-            p.updateViewableRule();
-        }
     }
 
     private void updateSpectators() {
