@@ -422,6 +422,12 @@
                     sprite="create_maps/verify_error"/>
             <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.build_once"
                     sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.play_longer"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.missing_finish_plate"
+                    sprite="create_maps/verify_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.bad_status_plate"
+                    sprite="create_maps/publish_error"/>
             <button id="verify" width="3" height="3" translationKey="gui.create_maps.verify_map"
                     sprite="create_maps/verify"/>
             <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name"
