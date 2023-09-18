@@ -63,6 +63,18 @@ public class EditMap extends View {
     // The order is determined by the order in which the elements exist in the GUI xml file.
     private @OutletGroup("map_tag_.+_switch") Switch[] mapTagsSwitches;
 
+    // MAP SETTINGS
+
+    private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
+
+    // VISUAL
+
+    // GAMEPLAY
+    private @Outlet("map_settings_nojump_switch") Switch mapSettingsNoJump;
+    private @Outlet("map_settings_nosprint_switch") Switch mapSettingsNoSprint;
+    private @Outlet("map_settings_onlysprint_switch") Switch mapSettingsOnlySprint;
+    private @Outlet("map_settings_nosneak_switch") Switch mapSettingsNoSneak;
+
     private MapData map;
     private int slot;
 
@@ -401,6 +413,90 @@ public class EditMap extends View {
         } else {
             map.settings().removeTag(tag);
         }
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    // MAP SETTING TABS
+
+    @Action("map_settings_tab_visual")
+    private void selectMapSettingsVisual() {
+        if (mapSettingsTabSwitch.getOption() == 0) return;
+        mapSettingsTabSwitch.setOption(0);
+    }
+
+    @Action("map_settings_tab_gameplay")
+    private void selectMapSettingsGameplay() {
+        if (mapSettingsTabSwitch.getOption() == 1) return;
+        mapSettingsTabSwitch.setOption(1);
+    }
+
+    // VISUAL SETTINGS
+
+    // GAMEPLAY SETTINGS
+
+    @Action("map_settings_nojump_unset")
+    private void mapSettingsNoJumpUnset() {
+        map.settings().setNoJump(true);
+        mapSettingsNoJump.setOption(1);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_nojump_set")
+    private void mapSettingsNoJumpSet() {
+        map.settings().setNoJump(false);
+        mapSettingsNoJump.setOption(0);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_nosprint_unset")
+    private void mapSettingsNoSprintUnset() {
+        map.settings().setNoSprint(true);
+        mapSettingsNoSprint.setOption(1);
+        mapSettingsOnlySprint.setOption(0);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_nosprint_set")
+    private void mapSettingsNoSprintSet() {
+        map.settings().setNoSprint(false);
+        mapSettingsNoSprint.setOption(0);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_onlysprint_unset")
+    private void mapSettingsOnlySprintUnset() {
+        map.settings().setOnlySprint(true);
+        mapSettingsOnlySprint.setOption(1);
+        mapSettingsNoSprint.setOption(0);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_onlysprint_set")
+    private void mapSettingsOnlySprintSet() {
+        map.settings().setOnlySprint(false);
+        mapSettingsOnlySprint.setOption(0);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_nosneak_unset")
+    private void mapSettingsNoSneakUnset() {
+        map.settings().setNoSneak(true);
+        mapSettingsNoSneak.setOption(1);
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    @Action("map_settings_nosneak_set")
+    private void mapSettingsNoSneakSet() {
+        map.settings().setNoSneak(false);
+        mapSettingsNoSneak.setOption(0);
         updateElementsFromMap();
         updateRequest();
     }
