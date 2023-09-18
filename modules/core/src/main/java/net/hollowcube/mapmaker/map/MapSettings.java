@@ -216,6 +216,8 @@ public class MapSettings {
         try {
             updates.setOnlySprint(onlySprint);
             this.onlySprint = onlySprint;
+            if (onlySprint)
+                setNoSprint(false);
         } finally {
             updateLock.unlock();
         }
@@ -230,6 +232,8 @@ public class MapSettings {
         try {
             updates.setNoSprint(noSprint);
             this.noSprint = noSprint;
+            if (noSprint)
+                setOnlySprint(false);
         } finally {
             updateLock.unlock();
         }
