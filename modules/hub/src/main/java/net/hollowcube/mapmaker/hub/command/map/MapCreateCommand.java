@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.command.map;
 
-import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
@@ -8,7 +7,6 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SlotState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
@@ -59,13 +57,13 @@ public class MapCreateCommand extends BaseHubCommand {
     }
 
     private void perform(@NotNull Player player, @NotNull MapPlayerData playerData, int slot) {
-        try {
-            var mapData = mapService.createMap(playerData, slot);
-            player.sendMessage(HubMessages.COMMAND_MAP_CREATE_SUCCESS.with(mapData.id(), slot));
-        } catch (Exception e) {
-            //todo handle known exception cases
-            MinecraftServer.getExceptionManager().handleException(e);
-            player.sendMessage(GenericMessages.COMMAND_UNKNOWN_ERROR);
+        var resp = mapService.createMap(playerData, slot);
+        switch (resp.errorCode()) {
+            case null -> {
+                player.sendMessage(HubMessages.COMMAND_MAP_CREATE_SUCCESS.with(resp.payload().id(), slot));
+            }
+            //todo handle known error cases
+            default -> resp.logError(player);
         }
     }
 
