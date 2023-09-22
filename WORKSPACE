@@ -42,6 +42,21 @@ load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
 
 rules_jvm_external_setup()
 
+http_archive(
+    name = "contrib_rules_jvm",
+    sha256 = "4d62589dc6a55e74bbe33930b826d593367fc777449a410604b2ad7c6c625ef7",
+    strip_prefix = "rules_jvm-0.19.0",
+    url = "https://github.com/bazel-contrib/rules_jvm/releases/download/v0.19.0/rules_jvm-v0.19.0.tar.gz",
+)
+
+load("@contrib_rules_jvm//:repositories.bzl", "contrib_rules_jvm_deps")
+
+contrib_rules_jvm_deps()
+
+load("@contrib_rules_jvm//:setup.bzl", "contrib_rules_jvm_setup")
+
+contrib_rules_jvm_setup()
+
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
@@ -83,6 +98,15 @@ maven_install(
         "io.prometheus:simpleclient:0.16.0",
         "io.prometheus:simpleclient_hotspot:0.16.0",
         "io.pyroscope:agent:0.11.1",
+
+        # Testing
+        "org.junit.jupiter:junit-jupiter-api:5.10.0",
+        "org.junit.jupiter:junit-jupiter-engine:5.10.0",
+        "org.junit.jupiter:junit-jupiter-params:5.10.0",
+        "org.junit.platform:junit-platform-suite-api:1.10.0",
+        "org.junit.platform:junit-platform-launcher:1.10.0",
+        "org.junit.platform:junit-platform-reporting:1.10.0",
+        "org.junit.platform:junit-platform-suite-engine:1.10.0",
 
         # Compiler plugin util
         "org.burningwave:core:12.62.7",

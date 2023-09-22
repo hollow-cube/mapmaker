@@ -34,16 +34,6 @@ public record Schematic(
         blocks = Arrays.copyOf(blocks, blocks.length);
     }
 
-    @Override
-    public Block @NotNull [] palette() {
-        return Arrays.copyOf(palette, palette.length);
-    }
-
-    @Override
-    public byte @NotNull [] blocks() {
-        return Arrays.copyOf(blocks, blocks.length);
-    }
-
     public @NotNull Point size(@NotNull Rotation rotation) {
         return CoordinateUtil.abs(CoordinateUtil.rotatePos(size, rotation));
     }

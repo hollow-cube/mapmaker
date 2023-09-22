@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_library")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
 
 java_library(
     name = "terraform",
@@ -12,5 +13,22 @@ java_library(
         "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
+    ],
+)
+
+java_junit5_test(
+    name = "terraform_test",
+    srcs = glob(include = ["src/test/java/**/*.java"]),
+    resources = glob(include = ["src/test/resources/**/*"]),
+    test_class = "net.hollowcube.terraform.TerraformTestSuite",
+    deps = [
+        ":terraform",
+        "//modules/common",
+        "//modules/test",
+        "//third_party:minestom",
+        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
     ],
 )
