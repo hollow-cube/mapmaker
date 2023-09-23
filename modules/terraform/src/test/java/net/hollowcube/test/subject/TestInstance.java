@@ -1,4 +1,4 @@
-package net.hollowcube.test.internal;
+package net.hollowcube.test.subject;
 
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;

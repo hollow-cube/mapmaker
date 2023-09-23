@@ -16,6 +16,15 @@ java_library(
     ],
 )
 
+java_binary(
+    name = "snapshot_viewer",
+    main_class = "net.hollowcube.test.snapshot.viewer.SnapshotViewerServer",
+    runtime_deps = [
+        "//modules/terraform/src/test/java/net/hollowcube/test/snapshot/viewer",
+        "//modules/test",
+    ],
+)
+
 java_junit5_test(
     name = "terraform_test",
     srcs = glob(include = ["src/test/java/**/*.java"]),

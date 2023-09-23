@@ -89,6 +89,7 @@ maven_install(
         # Helidon
         "io.helidon.health:helidon-health:3.0.2",
         "io.helidon.metrics:helidon-metrics-prometheus:3.0.2",
+        "io.helidon.webserver:helidon-webserver:3.0.2",
         "io.helidon.logging:helidon-logging-slf4j:3.0.2",
 
         # Logging/Monitoring
@@ -111,6 +112,7 @@ maven_install(
         # Compiler plugin util
         "org.burningwave:core:12.62.7",
     ],
+    fetch_sources = True,
     repositories = [
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",

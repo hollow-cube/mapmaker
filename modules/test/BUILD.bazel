@@ -3,6 +3,7 @@ load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS")
 java_library(
     name = "test",
     srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),
     visibility = ["//visibility:public"],
     exports = [
         "@maven//:org_jetbrains_annotations",

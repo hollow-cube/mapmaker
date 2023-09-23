@@ -4,9 +4,11 @@ import net.hollowcube.terraform.command.*;
 import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.mask.script.MaybeMask;
 import net.hollowcube.terraform.tool.ToolHandler;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.CommandCondition;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +18,12 @@ public final class Terraform {
     private Terraform() {
     }
 
-    public static void init(@NotNull CommandManager commandManager, @NotNull EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
+    public static void init(@NotNull CommandManager commandManager, @Nullable EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
+        if (eventNode == null) {
+            eventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+            MinecraftServer.getGlobalEventHandler().addChild(eventNode);
+        }
+
         // Root/Debug
         commandManager.register(new TerraformCommand(condition));
 
