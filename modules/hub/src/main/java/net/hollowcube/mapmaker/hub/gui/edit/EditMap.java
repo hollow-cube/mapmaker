@@ -149,9 +149,9 @@ public class EditMap extends View {
 
         // Send the player to the map
         try {
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
         } finally {
             player.closeInventory();
