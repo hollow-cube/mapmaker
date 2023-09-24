@@ -168,6 +168,7 @@ public class MapData {
                 return false;
 
             objects.add(object);
+            System.out.println("Added object " + object.toString());
             objectUsage += object.type().cost();
 
             // Add to update

@@ -59,7 +59,7 @@ public class BuildModeCommand extends BaseMapCommand {
 //        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 //        future = world.loadWorld();
 //        FutureResult.wrap(future.thenCompose(unused ->
-//                player.setInstance(world.instance(), pos)));
+//                player.setInstance(world.instance(), point)));
 //        player.setAllowFlying(true);
 //        player.setFlying(true);
 //        player.setGameMode(GameMode.CREATIVE);

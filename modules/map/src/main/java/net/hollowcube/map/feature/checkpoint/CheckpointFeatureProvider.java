@@ -12,6 +12,7 @@ import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -86,7 +87,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         // Reached a new checkpoint
         saveState.setCheckpoint(event.checkpointId());
-//        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
+        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 
@@ -115,16 +116,17 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         CompletableFuture<Void> future;
 
         var saveState = SaveState.fromPlayer(player);
-        var checkpoint = saveState.checkpoint();
-        if (checkpoint == null) {
+        var checkpointId = saveState.checkpoint();
+        if (checkpointId == null) {
             // No checkpoint set, return to spawn
             future = player.teleport(map.settings().getSpawnPoint());
         } else {
             // Return to checkpoint
-            player.sendMessage("you had a checkpoint, but this is not implemented. oopsie woopsie");
-//                    var checkpointPos = map.getPoi(checkpoint).getPos();
-//                    player.teleport(Pos.fromPoint(checkpointPos))
-//                            .exceptionally(FutureUtil::handleException);
+            var checkpoint = map.objects().stream().filter(obj -> obj.id().equals(checkpointId)).findFirst();
+            if (checkpoint != null) {
+                System.out.println("Found checkpoint " + checkpoint);
+                player.teleport(new Pos(checkpoint.get().point())).exceptionally(FutureUtil::handleException);
+            }
             future = CompletableFuture.completedFuture(null);
         }
 
@@ -137,6 +139,10 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     }
 
     private int getCheckpointResetHeight(@NotNull MapData map, @Nullable String checkpointId) {
+        var checkpoint = map.objects().stream().filter(obj -> obj.id().equals(checkpointId)).findFirst();
+        if (checkpoint == null)
+            System.out.println("Could not find checkpoint with id " + checkpointId +
+                    " in object list " + map.objects().toString());
 //        var checkpoint = map.getPoi(checkpointId);
 //        if (checkpoint != null && checkpoint.getOrDefault("active", false)) {
 //            return checkpoint.getOrDefault("resetHeight", checkpoint.getPos().blockY() - 5);

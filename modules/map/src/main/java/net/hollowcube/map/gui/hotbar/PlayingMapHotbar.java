@@ -3,10 +3,12 @@ package net.hollowcube.map.gui.hotbar;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
 import net.hollowcube.map.feature.checkpoint.CheckpointCache;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -125,6 +127,13 @@ public final class PlayingMapHotbar {
                         playingWorld.acceptPlayer(player, false);
                     }
 
+                }
+            }
+            case RETURN_TO_CHECKPOINT_CMD -> {
+                var playerData = PlayerDataV2.fromPlayer(player);
+
+                if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
+                    EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
                 }
             }
             case HUB_CMD -> {

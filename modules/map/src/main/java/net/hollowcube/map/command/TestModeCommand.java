@@ -58,7 +58,7 @@ public class TestModeCommand extends BaseMapCommand {
             testingMap.exitTestMode(player);
         }
 
-//        Pos pos = player.getPosition();
+//        Pos point = player.getPosition();
 
         // Create playing map world and send user to it
 //        var curr_world = MapWorld.fromInstance(player.getInstance());
@@ -69,7 +69,7 @@ public class TestModeCommand extends BaseMapCommand {
 //        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 //        future = world.loadWorld();
 //        FutureResult.wrap(future.thenCompose(unused ->
-//                player.setInstance(world.instance(), pos)));
+//                player.setInstance(world.instance(), point)));
 //        player.setAllowFlying(false);
 //        player.setFlying(false);
 //        player.setGameMode(GameMode.ADVENTURE);

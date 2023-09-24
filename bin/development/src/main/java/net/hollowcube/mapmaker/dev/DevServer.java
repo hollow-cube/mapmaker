@@ -370,7 +370,7 @@ public class DevServer {
 //        arm.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
 //        player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
 //
-//        var pos = new AtomicDouble(0);
+//        var point = new AtomicDouble(0);
 //        MinecraftServer.getSchedulerManager()
 //                .buildTask(() -> {
 //                    tubeMeta.setNotifyAboutChanges(false);
@@ -382,7 +382,7 @@ public class DevServer {
 //                    tubeMeta.setInterpolationStartDelta(1);
 //                    armMeta.setInterpolationStartDelta(1);
 //
-//                    var newRot = pos.addAndGet(180) % 360;
+//                    var newRot = point.addAndGet(180) % 360;
 //                    var rot = new Quaternion(new Vec(0, 1, 0), Math.toRadians(newRot));
 //                    tubeMeta.setLeftRotation(rot.into());
 //                    armMeta.setRightRotation(rot.into());
