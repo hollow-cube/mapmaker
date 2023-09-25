@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,16 +28,15 @@ public class PlayerInviteService {
     private static final Duration inviteExpirationTime = Duration.of(5, ChronoUnit.MINUTES);
     private static final Duration requestExpirationTime = Duration.of(1, ChronoUnit.MINUTES);
     private static MapWorldManager mwm;
-    private static MapService ms;
 
-    public static void init(MapWorldManager mapWorldManager, MapService mapService) {
+    public static void init(MapWorldManager mapWorldManager) {
         mwm = mapWorldManager;
-        ms = mapService;
     }
 
     public static void accept(@NotNull Player sender, @NotNull Player target) {
-        var inviteKey = new Invite(sender.getUuid(), target.getUuid());
-        var requestKey = new Request(sender.getUuid(), target.getUuid());
+        // Sender is the one accepting it
+        var inviteKey = new Invite(target.getUuid(), sender.getUuid());
+        var requestKey = new Request(target.getUuid(), sender.getUuid());
         var accepteeName = PlayerDataV2.fromPlayer(target).displayName();
 
         if (invites.get(inviteKey) != null && requests.get(requestKey) != null) {
@@ -51,27 +51,27 @@ public class PlayerInviteService {
                 invites.remove(inviteKey);
             }
         } else if (requests.get(requestKey) != null) {
-            acceptRequest(sender, target);
+            acceptRequest(target, sender);
         } else if (invites.get(inviteKey) != null) {
-            acceptInvite(sender, target);
+            acceptInvite(target, sender);
         } else {
             sender.sendMessage(Component.translatable("map.invite_and_request.cant_accept", accepteeName));
         }
     }
 
     public static void reject(@NotNull Player sender, @NotNull Player target) {
-        var inviteKey = new Invite(sender.getUuid(), target.getUuid());
-        var requestKey = new Request(sender.getUuid(), target.getUuid());
+        var inviteKey = new Invite(target.getUuid(), sender.getUuid());
+        var requestKey = new Request(target.getUuid(), sender.getUuid());
 
         if (invites.get(inviteKey) == null && requests.get(requestKey) == null) {
             sender.sendMessage(Component.translatable("map.invite_and_request.cant_reject"));
             return;
         }
         if (invites.get(inviteKey) != null) {
-            rejectInvite(sender, target);
+            rejectInvite(target, sender);
         }
         if (requests.get(requestKey) != null) {
-            rejectRequest(sender, target);
+            rejectRequest(target, sender);
         }
     }
 
@@ -225,9 +225,18 @@ public class PlayerInviteService {
         });
 
         requests.forEach((request, context) -> {
-            if (request.requesterUUID().equals(invalidater.getUuid()) || request.requesteeUUID().equals(invalidater.getUuid())) {
+            if (request.requesterUUID().equals(invalidater.getUuid())) {
                 requests.remove(request);
-                //invalidater.sendMessage(Component.translatable("map.request.invalidated")); //TODO make this send to the requester
+                Player target = MinecraftServer.getConnectionManager().getPlayer(request.requesteeUUID());
+                if (target != null) {
+                    target.sendMessage(Component.translatable("map.request.invalidated"));
+                }
+            } else if (request.requesteeUUID().equals(invalidater.getUuid())) {
+                requests.remove(request);
+                Player target = MinecraftServer.getConnectionManager().getPlayer(request.requesterUUID());
+                if (target != null) {
+                    target.sendMessage(Component.translatable("map.request.invalidated"));
+                }
             }
         });
     }
