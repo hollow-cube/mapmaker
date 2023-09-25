@@ -88,7 +88,6 @@ public class EditingMapWorld implements InternalMapWorld {
 
             var object = objectHandler.createObjectData(event.getBlockPosition());
             var added = map.addObject(object);
-            System.out.println("Added object " + object.toString());
             if (!added) {
                 event.setCancelled(true);
 

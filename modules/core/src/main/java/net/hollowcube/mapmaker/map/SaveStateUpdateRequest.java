@@ -16,9 +16,10 @@ public class SaveStateUpdateRequest {
     private String inventory = null;
     private String tfState = null;
     private String checkpoint = null;
+    private Pos checkpointPos = null;
 
     public boolean hasChanges() {
-        return completed != null || playtime != null || pos != null || inventory != null || tfState != null || checkpoint != null;
+        return completed != null || playtime != null || pos != null || inventory != null || tfState != null || checkpoint != null || checkpointPos != null;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
@@ -64,4 +65,8 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setCheckpointPos(@NotNull Pos checkpointPos) {
+        this.checkpointPos = checkpointPos;
+        return this;
+    }
 }

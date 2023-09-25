@@ -25,13 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class CheckpointFeatureProvider implements FeatureProvider {
 
-    // Marks the current reset height of a player. If they fall below it, they will be returned to their latest checkpoint, or the map spawn point.
+    // Marks the current reset height of a player. If they fall below it, they will be returned to their latest checkpoint, or the map spawn pos.
     private static final Tag<Integer> RESET_HEIGHT_TAG = Tag.Integer("mapmaker:checkpoint/reset_height");
     public static final int MINIMUM_RESET_HEIGHT = -64;
 
@@ -86,7 +87,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         if (event.checkpointId().equals(saveState.checkpoint())) return; // Already at this checkpoint
 
         // Reached a new checkpoint
-        saveState.setCheckpoint(event.checkpointId());
+        saveState.setCheckpoint(event.checkpointId(), player.getPosition());
         player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
@@ -120,26 +121,25 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         if (checkpointId == null) {
             // No checkpoint set, return to spawn
             future = player.teleport(map.settings().getSpawnPoint());
+            saveState.setPlaytime(0);
+            saveState.setPlayStartTime(System.currentTimeMillis());
+            saveState.setCompleted(false);
         } else {
-            // Return to checkpoint
-            var checkpoint = map.objects().stream().filter(obj -> obj.id().equals(checkpointId)).findFirst();
-            if (checkpoint != null) {
-                System.out.println("Found checkpoint " + checkpoint);
-                player.teleport(new Pos(checkpoint.get().point())).exceptionally(FutureUtil::handleException);
+            // Return to savestate at checkpoint
+            System.out.println("Player has savestate with checkpoint");
+            Pos pos;
+            if ((pos = saveState.checkpointPos()) != null) {
+                player.teleport(pos).exceptionally(FutureUtil::handleException);
             }
             future = CompletableFuture.completedFuture(null);
         }
-
-        saveState.setPlaytime(0);
-        saveState.setPlayStartTime(System.currentTimeMillis());
-        saveState.setCompleted(false);
 
         future.thenAccept(unused -> EventDispatcher.call(new MapPlayerInitEvent(event.mapWorld(), player, false)))
                 .exceptionally(FutureUtil::handleException);
     }
 
     private int getCheckpointResetHeight(@NotNull MapData map, @Nullable String checkpointId) {
-        var checkpoint = map.objects().stream().filter(obj -> obj.id().equals(checkpointId)).findFirst();
+        var checkpoint = map.getObject(checkpointId);
         if (checkpoint == null)
             System.out.println("Could not find checkpoint with id " + checkpointId +
                     " in object list " + map.objects().toString());

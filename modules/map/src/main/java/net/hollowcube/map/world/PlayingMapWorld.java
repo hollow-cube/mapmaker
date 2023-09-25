@@ -204,10 +204,10 @@ public class PlayingMapWorld implements InternalMapWorld {
             if (saveState == null) return;
 
             saveState.updatePlaytime();
+            saveState.setPos(player.getPosition());
 
             try {
                 var update = saveState.getUpdateRequest();
-                update.setCompleted(true);
 
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);

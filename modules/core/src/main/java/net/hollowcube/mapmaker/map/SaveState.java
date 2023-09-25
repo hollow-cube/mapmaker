@@ -46,6 +46,7 @@ public class SaveState {
 
     // Playing
     private String checkpoint = null;
+    private Pos checkpointPos = null;
 
     public SaveState() {
     }
@@ -135,10 +136,14 @@ public class SaveState {
     public @Nullable String checkpoint() {
         return checkpoint;
     }
-    public void setCheckpoint(@Nullable String checkpoint) {
+    public void setCheckpoint(@Nullable String checkpoint, @NotNull Pos pos) {
         this.checkpoint = checkpoint;
+        this.checkpointPos = pos;
         updates.setCheckpoint(checkpoint == null ? "" : checkpoint);
+        updates.setCheckpointPos(pos);
     }
+
+    public @Nullable Pos checkpointPos() { return checkpointPos; }
 
     // Utilities
 
