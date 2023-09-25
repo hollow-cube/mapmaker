@@ -88,3 +88,28 @@ regions and sources are stacked, some operations push changes to one or both
 
 - a transformation (eg rotate) pushes a new region and a new source (both offset by the transformation)
 - a mask pushes a new region (filtered by the mask), but not a new source
+
+# Pattern notes
+
+- Single block - `stone_stairs`
+    - Needs nothing
+- Random - `5%dirt,60%stone`
+    - Should this be seeded?
+- Random state - `*oak_log`
+    - Needs nothing
+- Clipboard
+    - Needs clipboard
+- Applying pattern
+    - Needs current state
+- Block tags
+- Sign text?
+- Player heads?
+- Blend
+    - Needs a mask as an argument
+- Type replace?
+    - Seems like its just a variant of applying pattern
+- Double plant
+    - Literally no idea, probably will ignore
+- Noise patterns -> seems like these should just be masks?
+
+

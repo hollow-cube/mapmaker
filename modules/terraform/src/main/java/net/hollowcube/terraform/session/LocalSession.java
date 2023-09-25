@@ -1,9 +1,11 @@
 package net.hollowcube.terraform.session;
 
+import net.hollowcube.terraform.TerraformV2;
 import net.hollowcube.terraform.action.ActionBuilder;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.history.Change;
+import net.hollowcube.terraform.task.Task;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -85,6 +87,10 @@ public class LocalSession {
         if (data != null && data.length != 0) deserialize(data);
     }
 
+    public @NotNull TerraformV2 terraform() {
+        return playerSession.terraform();
+    }
+
     public @NotNull Instance instance() {
         return instance;
     }
@@ -114,6 +120,10 @@ public class LocalSession {
 
     public @NotNull ActionBuilder action() {
         return new ActionBuilder(this);
+    }
+
+    public @NotNull Task.Builder buildTask(@NotNull String tag) {
+        return new Task.Builder(this, tag);
     }
 
 

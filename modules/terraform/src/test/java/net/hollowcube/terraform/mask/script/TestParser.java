@@ -1,12 +1,14 @@
 package net.hollowcube.terraform.mask.script;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestParser {
 
-    public static class TestBlockState {
+    @Nested
+    class TestBlockState {
         @Test
         public void testSingleState() {
             var parser = new Parser("stone");
@@ -124,7 +126,8 @@ public class TestParser {
         }
     }
 
-    public static class TestNot {
+    @Nested
+    class TestNot {
 
         @Test
         public void testNotNoFollow() {
@@ -155,7 +158,8 @@ public class TestParser {
 
     }
 
-    public static class TestInfix {
+    @Nested
+    class TestInfix {
 
         @Test
         public void testInfixNoFollow() {
@@ -211,7 +215,8 @@ public class TestParser {
         }
     }
 
-    public static class TestNamed {
+    @Nested
+    class TestNamed {
 
         @Test
         public void testHashAlone() {

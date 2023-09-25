@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.session;
 
+import net.hollowcube.terraform.TerraformV2;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.selection.Selection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static net.minestom.server.network.NetworkBuffer.SHORT;
-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 /**
  * Represents a player's Terraform session, responsible for holding all "global" state.
@@ -38,7 +37,7 @@ public class PlayerSession {
     public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
         var session = player.getTag(TAG);
         if (session == null) {
-            session = new PlayerSession(player);
+            session = new PlayerSession(TerraformV2.StaticAbuse.instance, player);
             player.setTag(TAG, session);
         }
         return session;
@@ -46,7 +45,7 @@ public class PlayerSession {
 
     public static @NotNull PlayerSession load(@NotNull Player player, byte[] data) {
         //todo do we want to overwrite the session if there is one present?
-        var session = new PlayerSession(player, data);
+        var session = new PlayerSession(TerraformV2.StaticAbuse.instance, player, data);
         player.setTag(TAG, session);
         return session;
     }
@@ -55,18 +54,26 @@ public class PlayerSession {
         return forPlayer(player).write();
     }
 
+    private final TerraformV2 terraform;
+
     private final Player player;
+    private PlayerCapabilities capabilities;
 
     private final Map<String, Clipboard> clipboards = new HashMap<>();
 
-    PlayerSession(@NotNull Player player) {
-        this(player, null);
+    PlayerSession(@NotNull TerraformV2 terraform, @NotNull Player player) {
+        this(terraform, player, null);
     }
 
-    PlayerSession(@NotNull Player player, byte @Nullable [] data) {
+    PlayerSession(@NotNull TerraformV2 terraform, @NotNull Player player, byte @Nullable [] data) {
+        this.terraform = terraform;
         this.player = player;
 
         if (data != null && data.length > 0) read(data);
+    }
+
+    public @NotNull TerraformV2 terraform() {
+        return terraform;
     }
 
     public @NotNull Player player() {
@@ -100,10 +107,9 @@ public class PlayerSession {
     /**
      * Checks if the player has a clipboard with the given name.
      *
-     * @see #clipboard(String) #clipboard(String) for details about clipboard lifecycle
-     *
      * @param name The case-insensitive name of the clipboard to check
      * @return True if there is an active clipboard with the given name, false otherwise
+     * @see #clipboard(String) #clipboard(String) for details about clipboard lifecycle
      */
     public boolean hasClipboard(@NotNull String name) {
         clipboards.values().removeIf(Clipboard::isEmpty);
@@ -117,12 +123,11 @@ public class PlayerSession {
      * {@link Clipboard#isEmpty()}. Empty clipboards will be removed automatically, and will never
      * show up in related get commands.
      *
+     * @param name The clipboard name to fetch
+     * @return The clipboard with the given name, or a new empty one
      * @implNote There is a race condition here. If this function is called, but the result
      * clipboard is not filled immediately, it could be removed if empty clipboards are pruned.
      * This can be fixed by hiding but not removing inactive clipboards (until save).
-     *
-     * @param name The clipboard name to fetch
-     * @return The clipboard with the given name, or a new empty one
      */
     public @NotNull Clipboard clipboard(@NotNull String name) {
         name = name.toLowerCase(Locale.ROOT);

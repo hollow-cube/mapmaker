@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomBlockEntitiesPacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
-import net.hollowcube.terraform.give_me_new_home.PaletteUtil;
+import net.hollowcube.terraform.util.PaletteUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.GameMode;
@@ -195,9 +195,9 @@ public class TerraformAxiom {
         int[] paletteData = new int[4096]; // Reused buffer
         var sectionChangeCache = new LongArrayList();
         for (var sectionUpdate : buffer.updates()) {
-            int chunkX = PaletteUtil.getX(sectionUpdate.index());
-            int sectionY = PaletteUtil.getY(sectionUpdate.index());
-            int chunkZ = PaletteUtil.getZ(sectionUpdate.index());
+            int chunkX = PaletteUtil.unpackX(sectionUpdate.index());
+            int sectionY = PaletteUtil.unpackY(sectionUpdate.index());
+            int chunkZ = PaletteUtil.unpackZ(sectionUpdate.index());
 
             // Ensure chunk is loaded
             var chunk = instance.getChunk(chunkX, chunkZ);

@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.command;
 
+import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
@@ -55,12 +56,23 @@ public final class RegionCommands {
             var pattern = context.get(patternArg);
             //todo validation if reqd later
 
-            session.action()
-                    .from(region)
-                    .set(pattern)
-                    .execute(summary -> {
-                        player.sendMessage(Component.translatable("command.terraform.set.success"));
-                    });
+            session.buildTask("set")
+                    .metadata() //todo
+                    .compute(world -> {
+                        var buffer = BlockBuffer.builder();
+                        for (var pos : region) {
+                            buffer.set(pos, pattern.stateId());
+                        }
+                        return buffer.build();
+                    })
+                    .submit();
+
+//            session.action()
+//                    .from(region)
+//                    .set(pattern)
+//                    .execute(summary -> {
+//                        player.sendMessage(Component.translatable("command.terraform.set.success"));
+//                    });
         }
     }
 

@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
 import net.hollowcube.terraform.compat.axiom.Axiom;
-import net.hollowcube.terraform.give_me_new_home.PaletteUtil;
+import net.hollowcube.terraform.util.PaletteUtil;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
@@ -50,14 +50,16 @@ public record AxiomClientSetBufferPacket(
     }
 
     public record BlockBuffer(
-        List<SectionUpdate> updates,
-        int overflow // Not part of the protocol. Present if there were more updates than are allowed in a single packet.
+            List<SectionUpdate> updates,
+            int overflow
+            // Not part of the protocol. Present if there were more updates than are allowed in a single packet.
     ) implements Buffer {
 
         public record SectionUpdate(
                 long index,
                 @NotNull Palette palette
-        ) {}
+        ) {
+        }
 
         private static final long MIN_POSITION_LONG = 0b1000000000000000000000000010000000000000000000000000100000000000L;
 
@@ -79,7 +81,7 @@ public record AxiomClientSetBufferPacket(
                     return new BlockBuffer(updates, 0);
                 }
 
-                var palette =  Palette.read(buffer, apiVersion);
+                var palette = Palette.read(buffer, apiVersion);
                 var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
                 System.out.println("BLOCK ENTITY COUNT: " + blockEntityCount);
 

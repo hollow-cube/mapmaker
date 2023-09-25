@@ -1,10 +1,11 @@
-package net.hollowcube.terraform.give_me_new_home;
+package net.hollowcube.terraform.util;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
 
 public final class PaletteUtil {
-    private PaletteUtil() {}
+    private PaletteUtil() {
+    }
 
     public static final int BLOCK_PALETTE_SIZE = 4096;
 
@@ -23,16 +24,20 @@ public final class PaletteUtil {
         MAX_BITS_PER_ENTRY = bpe;
     }
 
-    public static int getX(long packedPos) {
-        return (int) (packedPos >> 38); // Paper - simplify/inline
+    public static long packPos(int x, int y, int z) {
+        return (((long) x & 67108863L) << 38) | ((long) y & 4095L) | (((long) z & 67108863L) << 12);
     }
 
-    public static int getY(long packedPos) {
-        return (int) ((packedPos << 52) >> 52); // Paper - simplify/inline
+    public static int unpackX(long packedPos) {
+        return (int) (packedPos >> 38);
     }
 
-    public static int getZ(long packedPos) {
-        return (int) ((packedPos << 26) >> 38);  // Paper - simplify/inline
+    public static int unpackY(long packedPos) {
+        return (int) ((packedPos << 52) >> 52);
+    }
+
+    public static int unpackZ(long packedPos) {
+        return (int) ((packedPos << 26) >> 38);
     }
 
     public static long[] pack(int[] ints, int bitsPerEntry) {
@@ -54,7 +59,7 @@ public final class PaletteUtil {
     }
 
     public static void unpack(int[] out, long[] in, int bitsPerEntry) {
-        assert in.length != 0: "unpack input array is zero";
+        assert in.length != 0 : "unpack input array is zero";
 
         var intsPerLong = Math.floor(64d / bitsPerEntry);
         var intsPerLongCeil = (int) Math.ceil(intsPerLong);

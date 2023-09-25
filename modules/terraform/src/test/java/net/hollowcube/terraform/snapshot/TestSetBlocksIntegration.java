@@ -18,11 +18,11 @@ class TestSetBlocksIntegration {
         var instance = test.createEmptyInstance();
         var player = test.createPlayer(instance, new Pos(0, 0, 0));
 
-
         player.executeCommand("pos1 0 0 0");
         player.executeCommand("pos2 3 3 3");
         player.executeCommand("set stone");
 
         assertSnapshot(instance);
     }
+
 }

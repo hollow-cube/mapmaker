@@ -78,6 +78,6 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     @Override
     public void close() {
         if (handle != null) handle.cancel(false);
-        if (consumer != null) consumer.close();
+        if (consumer != null) consumer.close(); //todo this invalid, cannot be closed from another thread.
     }
 }
