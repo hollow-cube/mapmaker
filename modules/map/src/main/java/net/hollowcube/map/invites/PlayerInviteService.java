@@ -139,7 +139,7 @@ public class PlayerInviteService {
         var targetMap = MapWorld.forPlayerOptional(target);
         var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
-        if (senderMap == null) {
+        if (targetMap == null) {
             sender.sendMessage(Component.translatable("map.play.request.cant_send", targetDisplayName));
             return;
         } else if (senderMap == targetMap) {
@@ -149,19 +149,23 @@ public class PlayerInviteService {
         var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
         var now = Instant.now();
-        var val = new Context(now, senderMap.map().id());
+        var val = new Context(now, targetMap.map().id());
         if (context == null || Duration.between(context.time, now).compareTo(requestExpirationTime) > 0)
             requests.put(key, val);
 
         // build/play determined by map publish state
-        String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".request.";
-        sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(senderMap.map().name())));
-        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(senderMap.map().name())));
+        String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
+        sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(targetMap.map().name())));
+        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(targetMap.map().name())));
     }
 
     private static void acceptRequest(@NotNull Player sender, @NotNull Player target) {
+        // Sender and target are swapped around by accept()
         var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
+        if (context != null) {
+            System.out.println("Found context");
+        }
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
         if (context == null) {
             target.sendMessage(Component.translatable("map.request.no_join", senderDisplayName));
@@ -169,20 +173,20 @@ public class PlayerInviteService {
         }
         var now = Instant.now();
         var targetMap = MapWorld.forPlayerOptional(target);
-        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
 
         if (targetMap == null || !targetMap.map().id().equals(context.mapId())) {
-            sender.sendMessage(Component.translatable("map.invite.left_map", targetDisplayName));
+            target.sendMessage(Component.translatable("map.invite.left_map", senderDisplayName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
             target.sendMessage(Component.translatable("map.invite.expired"));
         } else {
             requests.remove(key);
+            var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
             // build/play determined by map publish state
             String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
-            sender.sendMessage(Component.translatable(translateString + "accepted", targetDisplayName, Component.text(targetMap.map().name())));
-            target.sendMessage(Component.translatable(translateString + "accept", senderDisplayName, Component.text(targetMap.map().name())));
+            sender.sendMessage(Component.translatable(translateString + "accepted", senderDisplayName, Component.text(targetMap.map().name())));
+            target.sendMessage(Component.translatable(translateString + "accept", targetDisplayName, Component.text(targetMap.map().name())));
             // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
-            mwm.joinMap(target, targetMap.map(), (targetMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
+            mwm.joinMap(sender, targetMap.map(), (targetMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }
     }
 
@@ -221,6 +225,10 @@ public class PlayerInviteService {
             if (invite.inviterUUID().equals(invalidater.getUuid())) {
                 invites.remove(invite);
                 invalidater.sendMessage(Component.translatable("map.invite.invalidated"));
+                Player target = MinecraftServer.getConnectionManager().getPlayer(invite.inviteeUUID());
+                if (target != null) {
+                    target.sendMessage(Component.translatable("map.invite.left_map"));
+                }
             }
         });
 
