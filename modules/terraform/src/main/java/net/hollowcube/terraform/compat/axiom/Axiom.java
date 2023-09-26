@@ -18,12 +18,14 @@ import java.util.Map;
 @SuppressWarnings("UnstableApiUsage")
 public class Axiom {
 
-    public static final int MIN_API_VERSION = 5;
-    public static final int MAX_API_VERSION = 5;
+    public static final int MIN_API_VERSION = 6;
+    public static final int MAX_API_VERSION = 6;
 
     // Config properties
 
-    /** The maximum number of sections which can be updated in a single (correlated) change. */
+    /**
+     * The maximum number of sections which can be updated in a single (correlated) change.
+     */
     public static final int MAX_SECTIONS_PER_UPDATE = Integer.getInteger("terraform.axiom.max_sections_per_update", 1024);
 
 
@@ -56,7 +58,9 @@ public class Axiom {
         TerraformAxiom.sendDisableMessage(player);
     }
 
-    /** All the axiom channels which the server will read from. */
+    /**
+     * All the axiom channels which the server will read from.
+     */
     static final List<String> INCOMING_CHANNELS = List.of(
             "axiom:hello", "axiom:set_gamemode",
             "axiom:set_fly_speed", "axiom:set_block",
@@ -65,9 +69,11 @@ public class Axiom {
             "axiom:request_block_entity"
     );
 
-    /** All the axiom channels which the server supports (will handle). */
+    /**
+     * All the axiom channels which the server supports (will handle).
+     */
     static final List<String> OUTGOING_CHANNELS = List.of(
-        "axiom:enable"
+            "axiom:enable"
 //        "axiom:initialize_hotbars",
 //        "axiom:set_editor_views",
 //        "axiom:block_entities"
@@ -99,7 +105,9 @@ public class Axiom {
         return reader.read(buffer, apiVersion);
     }
 
-    /** The block state sent in block buffers to indicate no change to the world. */
+    /**
+     * The block state sent in block buffers to indicate no change to the world.
+     */
     static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
 
     private Axiom() {

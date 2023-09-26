@@ -1,5 +1,6 @@
 load("@rules_java//java:defs.bzl", "java_library")
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("//third_party/rules_jmh:defs.bzl", "jmh_java_benchmarks")
 
 java_library(
     name = "terraform",
@@ -41,4 +42,10 @@ java_junit5_test(
         "@maven//:net_kyori_adventure_text_serializer_plain",
         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
     ],
+)
+
+jmh_java_benchmarks(
+    name = "terraform_bench",
+    srcs = glob(include = ["src/bench/java/**/*.java"]),
+    resources = glob(include = ["src/bench/resources/**/*"]),
 )

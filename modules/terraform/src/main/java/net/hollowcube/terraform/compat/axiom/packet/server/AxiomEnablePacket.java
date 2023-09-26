@@ -9,7 +9,6 @@ import static net.minestom.server.network.NetworkBuffer.*;
 @SuppressWarnings("UnstableApiUsage")
 public record AxiomEnablePacket(
         boolean enabled,
-        //todo world properties
         int maxBufferSize,
         boolean sendSourceInfo,
         boolean sendSourceSettings,
@@ -32,7 +31,6 @@ public record AxiomEnablePacket(
     public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
         buffer.write(BOOLEAN, enabled);
         if (enabled) {
-            buffer.write(BYTE, (byte) 0);
             buffer.write(INT, maxBufferSize);
             buffer.write(BOOLEAN, sendSourceInfo);
             buffer.write(BOOLEAN, sendSourceSettings);

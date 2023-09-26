@@ -144,6 +144,16 @@ Task should have the following:
 - Apply job
 - Has history? (true for all but undo/redo which do not write history entries)
 
+PERFORMANCE NOTE FOR BLOCK BUFFER
+Can have some specialized buffers:
+
+- If an area is provided (eg min and max pos), we can simply use an array for the sections and index them with offsets
+  from the min. This should be a huge performance boost
+- If an area is provided and it is a very small area, potentially it makes sense to have a single bigger palette (though
+  this might have worse iteration perf, need to test).
+
+need to have tests and benchmarks for these.
+
 ###### Permissions
 
 Use minecraft-like permissions, but have a permission provider for player sessions which is responsible for checking it.

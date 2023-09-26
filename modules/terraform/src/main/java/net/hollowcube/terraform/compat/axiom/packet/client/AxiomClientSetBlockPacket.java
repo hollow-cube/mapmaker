@@ -1,25 +1,51 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.terraform.util.ProtocolUtil;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetBlockPacket(
-        Point blockPosition,
-        Block block,
+        Map<Point, Block> blocks,
         boolean updateNeighbors,
+        int reason,
+        boolean breaking,
+        BlockHitResult blockHit,
+        Player.Hand hand,
         int sequence
 ) implements AxiomClientPacket {
 
+    record BlockHitResult(
+            @NotNull Point blockPos,
+            @NotNull Direction direction,
+            @NotNull Point cursorPosition,
+            boolean inside
+    ) {
+        public BlockHitResult(@NotNull NetworkBuffer buffer) {
+            this(buffer.read(BLOCK_POSITION), buffer.read(DIRECTION), buffer.read(VECTOR3), buffer.read(BOOLEAN));
+        }
+    }
+
     public AxiomClientSetBlockPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(BLOCK_POSITION),
-                Block.fromStateId((short) buffer.read(BLOCK_STATE).intValue()),
+        this(
+                ProtocolUtil.readMap(buffer,
+                        b -> b.read(BLOCK_POSITION),
+                        b -> Block.fromStateId((short) b.read(BLOCK_STATE).intValue())),
                 buffer.read(BOOLEAN),
-                buffer.read(INT));
+                buffer.read(VAR_INT),
+                buffer.read(BOOLEAN),
+                new BlockHitResult(buffer),
+                buffer.readEnum(Player.Hand.class),
+                buffer.read(VAR_INT)
+        );
     }
 
 }

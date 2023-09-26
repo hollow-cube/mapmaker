@@ -50,3 +50,5 @@ java_library(
         "@maven//:net_kyori_adventure_text_serializer_plain",
     ],
 )
+
+exports_files(["genfile.bzl"])

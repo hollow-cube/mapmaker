@@ -128,6 +128,8 @@ public final class TerraformImpl implements TerraformV2 {
                     var updateIndex = (((long) chunkX & 0x3FFFFF) << 42) | ((long) chunkY & 0xFFFFF) | (((long) chunkZ & 0x3FFFFF) << 20);
                     var packet = new MultiBlockChangePacket(updateIndex, sectionChangeCache.toLongArray());
                     chunk.sendPacketToViewers(packet); //todo these could be batched perhaps, maybe minestom does it on its own?
+
+                    //todo the client is super laggy when sending many of these, perhaps this should be iterated by vertical chunk and resend the entire chunk if there are enough sections changed
                 });
 
                 //todo append to history

@@ -83,7 +83,9 @@ public record AxiomClientSetBufferPacket(
 
                 var palette = Palette.read(buffer, apiVersion);
                 var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
-                System.out.println("BLOCK ENTITY COUNT: " + blockEntityCount);
+                if (blockEntityCount > 0) {
+                    System.out.println("BLOCK ENTITY COUNT: " + blockEntityCount);
+                }
 
                 updates.add(new SectionUpdate(index, palette));
             }

@@ -57,6 +57,10 @@ load("@contrib_rules_jvm//:setup.bzl", "contrib_rules_jvm_setup")
 
 contrib_rules_jvm_setup()
 
+load("//third_party/rules_jmh:defs.bzl", "rules_jmh_maven_deps")
+
+rules_jmh_maven_deps()
+
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(

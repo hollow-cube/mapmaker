@@ -12,6 +12,7 @@ final class BlockBufferBuilderImpl implements BlockBuffer.Builder {
     @Override
     public void set(int x, int y, int z, int value) {
         long sectionKey = PaletteUtil.packPos(x >> 4, y >> 4, z >> 4);
+        //todo how can this computeIfAbsent call be sped up? It is almost all of the time when building a big buffer
         Palette section = sectionData.computeIfAbsent(sectionKey, k -> new NaivePalette());
         if (section == null) {
             section = new NaivePalette();

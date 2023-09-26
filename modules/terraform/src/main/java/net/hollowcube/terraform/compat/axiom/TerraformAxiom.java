@@ -135,12 +135,15 @@ public class TerraformAxiom {
 
         try {
             var instance = player.getInstance();
-            if (packet.block() == null) {
-                logger.warn("Invalid block received from {}", player.getUuid());
-                return;
+
+            //todo use the other stuff here to do whatever fancy things.
+
+            for (var entry : packet.blocks().entrySet()) {
+                var blockPosition = entry.getKey();
+                var block = entry.getValue();
+                instance.setBlock(blockPosition, block, packet.updateNeighbors());
             }
 
-            instance.setBlock(packet.blockPosition(), packet.block(), packet.updateNeighbors());
         } finally {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
         }
