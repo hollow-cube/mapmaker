@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static net.minestom.server.network.NetworkBuffer.VAR_INT;
@@ -36,6 +37,15 @@ public final class ProtocolUtil {
             map.put(keyReader.apply(buffer), valueReader.apply(buffer));
         }
         return map;
+    }
+
+
+    public static byte[] makeArray(int initialCapacity, @NotNull Consumer<@NotNull NetworkBuffer> writing) {
+        NetworkBuffer writer = new NetworkBuffer(initialCapacity);
+        writing.accept(writer);
+        byte[] bytes = new byte[writer.writeIndex()];
+        writer.copyTo(0, bytes, 0, bytes.length);
+        return bytes;
     }
 
     private ProtocolUtil() {

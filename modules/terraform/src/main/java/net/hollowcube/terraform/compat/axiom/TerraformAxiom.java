@@ -2,8 +2,13 @@ package net.hollowcube.terraform.compat.axiom;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
+import net.hollowcube.terraform.compat.axiom.packet.server.AxiomAckWorldPropertyPacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomBlockEntitiesPacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
+import net.hollowcube.terraform.compat.axiom.world.property.Category;
+import net.hollowcube.terraform.compat.axiom.world.property.WidgetType;
+import net.hollowcube.terraform.compat.axiom.world.property.WorldPropertiesRegistry;
+import net.hollowcube.terraform.compat.axiom.world.property.WorldProperty;
 import net.hollowcube.terraform.util.PaletteUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -16,6 +21,7 @@ import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,6 +72,7 @@ public class TerraformAxiom {
 //            case "axiom:set_editor_views" -> {}
             case AxiomClientRequestBlockEntityPacket packet -> handleRequestBlockEntities(player, packet);
             case AxiomClientSetBufferPacket packet -> handleSetBuffer(player, packet);
+            case AxiomClientSetWorldPropertyPacket packet -> handleSetWorldProperty(player, packet);
         }
     }
 
@@ -91,6 +98,57 @@ public class TerraformAxiom {
 //            sendDisableMessage(player);
             Axiom.enable(player);
 //            sendEnableMessage(player);
+
+
+            var registry = WorldPropertiesRegistry.get(player.getInstance());
+            registry.add(
+                    new Category("terraform.test", false),
+                    WorldProperty.global(
+                            NamespaceID.from("terraform:test_checkbox"),
+                            "Test Checkbox", false,
+                            WidgetType.Checkbox(),
+                            (property, unused, value) -> {
+                                System.out.println("Checkbox: " + value);
+                                return true;
+                            }, false
+                    ),
+                    WorldProperty.global(
+                            NamespaceID.from("terraform:test_slider"),
+                            "Test Slider", false,
+                            WidgetType.Slider(0, 100),
+                            (property, unused, value) -> {
+                                System.out.println("Slider: " + value);
+                                return true;
+                            }, 0
+                    ),
+                    WorldProperty.global(
+                            NamespaceID.from("terraform:test_textbox"),
+                            "Test Text Box", false,
+                            WidgetType.TextBox(),
+                            (property, unused, value) -> {
+                                System.out.println("Text box: " + value);
+                                return true;
+                            }, ""
+                    ),
+                    WorldProperty.global(
+                            NamespaceID.from("terraform:test_button"),
+                            "Test Button", false,
+                            WidgetType.Button(),
+                            (property, unused, unused1) -> {
+                                System.out.println("Button");
+                                return false;
+                            }, null
+                    ),
+                    WorldProperty.global(
+                            NamespaceID.from("terraform:test_button_array"),
+                            "Test Button Array", false,
+                            WidgetType.ButtonArray("Option 1", "Option 2", "Option 3"),
+                            (property, unused, value) -> {
+                                System.out.println("Button Array: " + value);
+                                return true;
+                            }, 0
+                    )
+            );
         }
     }
 
@@ -189,6 +247,18 @@ public class TerraformAxiom {
                 case AxiomClientSetBufferPacket.BiomeBuffer biomeBuffer -> handleSetBiomeBuffer(player, biomeBuffer);
             }
         });
+    }
+
+    private static void handleSetWorldProperty(@NotNull Player player, @NotNull AxiomClientSetWorldPropertyPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
+        logger.warn("Received axiom:set_world_property from {}", player.getUuid());
+
+        var registry = WorldPropertiesRegistry.get(player.getInstance());
+        var handled = registry.handlePropertyChange(player, packet);
+        if (!handled) return;
+
+        var response = new AxiomAckWorldPropertyPacket(packet.sequenceId());
+        player.sendPacket(response.toPacket(player));
     }
 
     @Blocking

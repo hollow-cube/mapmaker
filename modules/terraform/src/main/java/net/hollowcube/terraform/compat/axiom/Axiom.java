@@ -90,7 +90,8 @@ public class Axiom {
             "axiom:set_block", AxiomClientSetBlockPacket::new,
             "axiom:teleport", AxiomClientTeleportPacket::new,
             "axiom:request_block_entity", AxiomClientRequestBlockEntityPacket::new,
-            "axiom:set_buffer", AxiomClientSetBufferPacket::new
+            "axiom:set_buffer", AxiomClientSetBufferPacket::new,
+            "axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new
     );
 
     public static @Nullable AxiomClientPacket readPacket(@NotNull PlayerPluginMessageEvent event) {
