@@ -157,3 +157,9 @@ need to have tests and benchmarks for these.
 ###### Permissions
 
 Use minecraft-like permissions, but have a permission provider for player sessions which is responsible for checking it.
+
+###### Compat requirements
+
+Axiom:
+
+- Needs to be able to store arbitrary data on the local session

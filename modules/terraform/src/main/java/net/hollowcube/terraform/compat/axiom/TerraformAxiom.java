@@ -55,13 +55,7 @@ public class TerraformAxiom {
         }
         if (!event.getIdentifier().startsWith("axiom:")) return;
 
-        var rawPacket = Axiom.readPacket(event);
-        if (rawPacket == null) {
-            logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
-            return;
-        }
-
-        switch (rawPacket) {
+        switch (Axiom.readPacket(event)) {
             case AxiomClientHelloPacket packet -> handleHelloMessage(player, packet);
             case AxiomClientSetGameModePacket packet -> handleSetGamemode(player, packet);
             case AxiomClientSetFlySpeedPacket packet -> handleSetFlySpeed(player, packet);
@@ -73,6 +67,7 @@ public class TerraformAxiom {
             case AxiomClientRequestBlockEntityPacket packet -> handleRequestBlockEntities(player, packet);
             case AxiomClientSetBufferPacket packet -> handleSetBuffer(player, packet);
             case AxiomClientSetWorldPropertyPacket packet -> handleSetWorldProperty(player, packet);
+            case null -> logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
         }
     }
 
@@ -153,7 +148,6 @@ public class TerraformAxiom {
     }
 
     static void sendEnableMessage(@NotNull Player player) {
-        // todo: world properties
         var packet = new AxiomEnablePacket(
                 true,
                 0x100000, // 1mb, todo: constant/configurable

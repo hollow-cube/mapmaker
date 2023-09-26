@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.hollowcube.terraform.util.PaletteUtil;
 import org.jetbrains.annotations.NotNull;
 
-final class BlockBufferBuilderImpl implements BlockBuffer.Builder {
+final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
 
     private final Long2ObjectMap<Palette> sectionData = new Long2ObjectArrayMap<>();
 
