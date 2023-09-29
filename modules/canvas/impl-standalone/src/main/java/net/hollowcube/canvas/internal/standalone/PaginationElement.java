@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class PaginationElement<T extends View> extends BaseElement implements Pagination {
     private final Class<T> itemClass;
@@ -117,6 +119,13 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
         var found = super.findById(id);
         if (found != null || page >= pageCache.size()) return found;
         return pageCache.get(page).findById(id);
+    }
+
+    @Override
+    public void collectById(@NotNull Predicate<String> predicate, @NotNull List<Element> result) {
+        super.collectById(predicate, result);
+        if (page < pageCache.size())
+            pageCache.get(page).collectById(predicate, result);
     }
 
     @Override

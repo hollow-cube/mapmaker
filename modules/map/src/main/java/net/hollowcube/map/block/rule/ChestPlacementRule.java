@@ -117,7 +117,7 @@ public class ChestPlacementRule extends BaseBlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        Block currBlock = placementState.block();
+        Block currBlock = super.block;
         switch (placementState.blockFace()) {
             case TOP, BOTTOM -> {
                 float yaw = placementState.playerPosition().yaw();

@@ -1,8 +1,8 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
-import net.hollowcube.common.util.FontUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Base class for elements that can contain other elements. By default, layout is done
@@ -124,6 +125,23 @@ public class ContainerElement extends BaseElement {
         }
 
         return null;
+    }
+
+    @Override
+    public void collectById(@NotNull Predicate<String> predicate, @NotNull List<Element> result) {
+        super.collectById(predicate, result);
+
+        for (var child : children) {
+            // If the child is a view, we only check that ID.
+            // This is to prevent searching inner views for IDs (aka implement id scoping).
+            if (child instanceof ViewContainer) {
+                if (child.id() != null && predicate.test(child.id()))
+                    result.add(child);
+                continue;
+            }
+
+            child.collectById(predicate, result);
+        }
     }
 
     public @NotNull List<@NotNull BaseElement> children() {

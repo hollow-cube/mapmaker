@@ -51,7 +51,8 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
         // player_head -> _head
         String rawType = name.substring(rawName.length());
 
-        return Block.fromNamespaceId(rawName + "_wall" + rawType);
+        return Block.fromNamespaceId(rawName + "_wall" + rawType)
+                .withHandler(block.handler());
     }
 
     /**
@@ -81,12 +82,13 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
                         |_ Value (String)
             See https://minecraft.fandom.com/wiki/Head#Block_data
          */
-        return block.withTag(Tag.NBT("SkullOwner"), NBT.Compound(tag -> {
-            Tag.UUID("Id").write(tag, skullOwner);
-            tag.set("Properties", NBT.Compound(propTag ->
-                    propTag.set("textures", NBT.List(NBTType.TAG_Compound,
-                            NBT.Compound(txTag -> txTag.setString("Value", textures))))));
-        }));
+        return block
+                .withTag(Tag.NBT("SkullOwner"), NBT.Compound(tag -> {
+                    Tag.UUID("Id").write(tag, skullOwner);
+                    tag.set("Properties", NBT.Compound(propTag ->
+                            propTag.set("textures", NBT.List(NBTType.TAG_Compound,
+                                    NBT.Compound(txTag -> txTag.setString("Value", textures))))));
+                }));
     }
 
 }

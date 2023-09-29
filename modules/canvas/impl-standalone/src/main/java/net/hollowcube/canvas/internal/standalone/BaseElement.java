@@ -6,7 +6,6 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
-import net.hollowcube.common.util.FontUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -16,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 public abstract class BaseElement implements Element {
     public static final ItemStack LOADING_ITEM = ItemStack.builder(Material.STICK)
@@ -129,6 +130,11 @@ public abstract class BaseElement implements Element {
         if (id.equals(this.id))
             return this;
         return null;
+    }
+
+    public void collectById(@NotNull Predicate<String> predicate, @NotNull List<Element> result) {
+        if (id != null && predicate.test(id))
+            result.add(this);
     }
 
     /**

@@ -4,7 +4,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
-public interface Text extends Element {
+public interface Text extends Element, Label {
 
     default void setText(@NotNull String text) {
         setText(text, NamedTextColor.WHITE);

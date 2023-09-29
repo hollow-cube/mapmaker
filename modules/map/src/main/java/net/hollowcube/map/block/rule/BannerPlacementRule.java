@@ -28,7 +28,7 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
             float yaw = playerPosition.yaw() + 180;
             int rotation = (int) (Math.round(yaw / 22.5d) % 16);
 
-            return withBannerData(placementState.block())
+            return withBannerData(block)
                     .withProperty("rotation", String.valueOf(rotation));
         }
 
@@ -43,7 +43,8 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
         // white_banner -> white
         String rawName = name.substring(0, name.lastIndexOf("_"));
 
-        return Block.fromNamespaceId(rawName + "_wall_banner");
+        return Block.fromNamespaceId(rawName + "_wall_banner")
+                .withHandler(block.handler());
     }
 
     private Block withBannerData(Block block/*, BannerMeta meta*/) {

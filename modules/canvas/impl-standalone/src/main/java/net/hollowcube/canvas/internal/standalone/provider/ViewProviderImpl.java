@@ -2,10 +2,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.ContextObject;
-import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.annotation.Signal;
+import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
@@ -15,7 +12,9 @@ import net.hollowcube.canvas.internal.standalone.reader.XmlElementReader;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class ViewProviderImpl implements ViewProvider {
 
@@ -77,21 +76,38 @@ public class ViewProviderImpl implements ViewProvider {
         try {
             for (var field : viewClass.getDeclaredFields()) {
                 var outlet = field.getAnnotation(Outlet.class);
-                if (outlet == null) continue;
+                if (outlet != null) {
+                    var name = outlet.value();
+                    var element = root.findById(name);
+                    Check.notNull(element, "Outlet not found: " + name);
 
-                var name = outlet.value();
-                var element = root.findById(name);
-                Check.notNull(element, "Outlet not found: " + name);
-
-                field.setAccessible(true); // NOSONAR
-                if (field.getType().isAssignableFrom(element.getClass())) {
-                    field.set(view, element); // NOSONAR
-                } else if (element instanceof ViewContainer viewContainer &&
-                        field.getType().isAssignableFrom(viewContainer.getAssociatedView().getClass())) {
-                    field.set(view, viewContainer.getAssociatedView()); // NOSONAR
-                } else {
-                    throw new RuntimeException("Outlet type mismatch: " + name);
+                    field.setAccessible(true); // NOSONAR
+                    if (field.getType().isAssignableFrom(element.getClass())) {
+                        field.set(view, element); // NOSONAR
+                    } else if (element instanceof ViewContainer viewContainer &&
+                            field.getType().isAssignableFrom(viewContainer.getAssociatedView().getClass())) {
+                        field.set(view, viewContainer.getAssociatedView()); // NOSONAR
+                    } else {
+                        throw new RuntimeException("Outlet type mismatch: " + name);
+                    }
                 }
+
+                var outletGroup = field.getAnnotation(OutletGroup.class);
+                if (outletGroup != null) {
+                    var pattern = Pattern.compile(outletGroup.value());
+                    var elements = new ArrayList<Element>();
+                    root.collectById(pattern.asMatchPredicate(), elements);
+
+                    Check.argCondition(!field.getType().isArray(), "OutletGroup must be an array type: " + field.getType());
+                    field.setAccessible(true); // NOSONAR
+
+                    var array = (Object[]) java.lang.reflect.Array.newInstance(field.getType().getComponentType(), elements.size());
+                    for (int i = 0; i < array.length; i++) {
+                        array[i] = elements.get(i);
+                    }
+                    field.set(view, array);
+                }
+
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);

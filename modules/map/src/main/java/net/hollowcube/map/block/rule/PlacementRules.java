@@ -1,9 +1,14 @@
 package net.hollowcube.map.block.rule;
 
+import net.hollowcube.map.block.handler.BannerBlockHandler;
+import net.hollowcube.map.block.handler.ChestBlockHandler;
+import net.hollowcube.map.block.handler.PlayerHeadBlockHandler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.utils.NamespaceID;
+
+import java.util.Objects;
 
 public final class PlacementRules {
 
@@ -115,8 +120,8 @@ public final class PlacementRules {
 
 
         // Chests
-        blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.CHEST));
-        blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.TRAPPED_CHEST));
+        blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.CHEST.withHandler(ChestBlockHandler.CHEST)));
+        blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.TRAPPED_CHEST.withHandler(ChestBlockHandler.TRAPPED_CHEST)));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.ENDER_CHEST, true));
 
         // Stairs
@@ -146,7 +151,9 @@ public final class PlacementRules {
         // Banners
         //todo completely broken
         for (var bannerId : BlockTags.MINECRAFT_BANNERS.getValues()) {
-            blockManager.registerBlockPlacementRule(new BannerPlacementRule(Block.fromNamespaceId(bannerId)));
+            var bannerBlock = Objects.requireNonNull(Block.fromNamespaceId(bannerId))
+                    .withHandler(BannerBlockHandler.INSTANCE);
+            blockManager.registerBlockPlacementRule(new BannerPlacementRule(bannerBlock));
         }
 
         // Slabs
@@ -156,7 +163,7 @@ public final class PlacementRules {
 
         // Head
         //todo completely broken
-        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.PLAYER_HEAD));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.PLAYER_HEAD.withHandler(PlayerHeadBlockHandler.INSTANCE)));
 
         // Button
         for (var buttonId : BlockTags.MINECRAFT_BUTTONS.getValues()) {

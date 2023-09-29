@@ -5,3 +5,4 @@ build --extra_toolchains=//:repository_default_toolchain_definition
 
 build --jvmopt --enable-preview
 build --jvmopt "--add-modules jdk.incubator.concurrent"
+build --jvmopt "--add-exports java.management/sun.management=ALL-UNNAMED"

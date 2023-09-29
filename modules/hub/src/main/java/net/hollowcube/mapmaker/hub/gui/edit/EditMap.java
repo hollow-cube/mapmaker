@@ -4,10 +4,7 @@ import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.ContextObject;
-import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.annotation.Signal;
+import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.MapDeletedEvent;
@@ -30,14 +27,10 @@ public class EditMap extends View {
     private @ContextObject HubToMapBridge bridge;
     private @ContextObject MapService mapService;
 
-    private @Outlet("slot_id") Text slotIdText;
+    private @OutletGroup("slot_id_.+") Text[] slotIds;
 
     private @Outlet("tab_switch") Switch tabSwitch;
-    private @Outlet("tab_info_switch") Switch tabInfoSwitch;
-    private @Outlet("tab_tags_switch") Switch tabTagsSwitch;
-    private @Outlet("tab_settings_switch") Switch tabSettingsSwitch;
-    private @Outlet("tab_actions_switch") Switch tabActionsSwitch;
-    private Switch[] tabSwitches;
+    private @OutletGroup("tab_.+_switch") Switch[] tabButtonSwitches;
 
     private enum PublishStage {
         VERIFY_ERROR,
@@ -59,61 +52,21 @@ public class EditMap extends View {
     private @Outlet("map_type_tab_switch") Switch mapTypeTabSwitch;
 
     // MAP TYPE
-
-    // PARKOUR
-    private @Outlet("parkour_subvariant_speedrun_switch") Switch parkourSubvariantSpeedrunSwitch;
-    private @Outlet("parkour_subvariant_sectioned_switch") Switch parkourSubvariantSectionedSwitch;
-    private @Outlet("parkour_subvariant_rankup_switch") Switch parkourSubvariantRankupSwitch;
-    private @Outlet("parkour_subvariant_gauntlet_switch") Switch parkourSubvariantGauntletSwitch;
-    private @Outlet("parkour_subvariant_dropper_switch") Switch parkourSubvariantDropperSwitch;
-    private @Outlet("parkour_subvariant_one_jump_switch") Switch parkourSubvariantOneJumpSwitch;
-    private @Outlet("parkour_subvariant_informative_switch") Switch parkourSubvariantInformativeSwitch;
-    private final Switch[] parkourSubvariantSwitches;
-
-    // BUILDING
-    private @Outlet("building_subvariant_showcase_switch") Switch buildingSubvariantShowcaseSwitch;
-    private @Outlet("building_subvariant_tutorial_switch") Switch buildingSubvariantTutorialSwitch;
-    private final Switch[] buildingSubvariantSwitches;
+    private @OutletGroup("parkour_subvariant_.+_switch") Switch[] parkourSubvariantSwitches;
+    private @OutletGroup("building_subvariant_.+_switch") Switch[] buildingSubvariantSwitches;
 
     // MAP TAGS
     private @Outlet("map_tags_tab_switch") Switch mapTagsTabSwitch;
-
-    // VISUAL
-    private @Outlet("map_tag_terrain_switch") Switch mapTagTerrainSwitch;
-    private @Outlet("map_tag_organics_switch") Switch mapTagOrganicsSwitch;
-    private @Outlet("map_tag_structure_switch") Switch mapTagStructureSwitch;
-    private @Outlet("map_tag_interior_switch") Switch mapTagInteriorSwitch;
-    private @Outlet("map_tag_music_switch") Switch mapTagMusicSwitch;
-    private @Outlet("map_tag_2d_switch") Switch mapTag2DSwitch;
-    private @Outlet("map_tag_recreation_switch") Switch mapTagRecreationSwitch;
-    private @Outlet("map_tag_story_switch") Switch mapTagStorySwitch;
-
-    //GAMEPLAY
-    private @Outlet("map_tag_coop_switch") Switch mapTagCoOpSwitch;
-    private @Outlet("map_tag_puzzle_switch") Switch mapTagPuzzleSwitch;
-    private @Outlet("map_tag_minigame_switch") Switch mapTagMinigameSwitch;
-    private @Outlet("map_tag_exploration_switch") Switch mapTagExplorationSwitch;
-    private @Outlet("map_tag_bossbattle_switch") Switch mapTagBossBattleSwitch;
-    private @Outlet("map_tag_autocomplete_switch") Switch mapTagAutoCompleteSwitch;
-    private @Outlet("map_tag_escape_switch") Switch mapTagEscapeSwitch;
-    private @Outlet("map_tag_trivia_switch") Switch mapTagTriviaSwitch;
-    private @Outlet("map_tag_strategy_switch") Switch mapTagStrategySwitch;
-    private final Switch[] mapTagsSwitches;
+    // WARNING! The order of the elements in this array MUST match the order of the enum constants in MapTags.Tag.
+    // The order is determined by the order in which the elements exist in the GUI xml file.
+    private @OutletGroup("map_tag_.+_switch") Switch[] mapTagsSwitches;
 
     private MapData map;
     private int slot;
 
     public EditMap(@NotNull Context context) {
         super(context);
-        this.tabSwitches = new Switch[]{tabInfoSwitch, tabTagsSwitch, tabSettingsSwitch, tabActionsSwitch};
-        this.parkourSubvariantSwitches = new Switch[]{parkourSubvariantSpeedrunSwitch, parkourSubvariantSectionedSwitch,
-                parkourSubvariantRankupSwitch, parkourSubvariantGauntletSwitch, parkourSubvariantDropperSwitch,
-                parkourSubvariantOneJumpSwitch, parkourSubvariantInformativeSwitch};
-        this.buildingSubvariantSwitches = new Switch[]{buildingSubvariantShowcaseSwitch, buildingSubvariantTutorialSwitch};
-        this.mapTagsSwitches = new Switch[]{mapTagCoOpSwitch, mapTagPuzzleSwitch, mapTagEscapeSwitch, mapTagMinigameSwitch,
-                mapTagTriviaSwitch, mapTagBossBattleSwitch, mapTagExplorationSwitch, mapTagAutoCompleteSwitch,
-                mapTagStrategySwitch, mapTagRecreationSwitch, mapTagTerrainSwitch, mapTagOrganicsSwitch,
-                mapTagStructureSwitch, mapTagInteriorSwitch, mapTag2DSwitch, mapTagMusicSwitch, mapTagStorySwitch};
+
         selectTab(0);
         setState(State.LOADING);
     }
@@ -122,7 +75,10 @@ public class EditMap extends View {
         this.map = map;
         this.slot = slot;
 
-        slotIdText.setText(String.format("Slot #%d", slot + 1));
+        for (var slotId : slotIds) {
+            slotId.setText(String.format("Slot #%d", slot + 1));
+            slotId.setArgs(Component.text(slot + 1));
+        }
 
         updateElementsFromMap();
         setState(State.ACTIVE);
@@ -415,7 +371,6 @@ public class EditMap extends View {
 
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
-        System.out.println("map_type_tab_building");
         if (mapTypeTabSwitch.getOption() == 1) return;
 
         mapTypeTabSwitch.setOption(1);
@@ -457,7 +412,6 @@ public class EditMap extends View {
 
     @Action("map_tags_tab_visual")
     private void selectMapTagVisual() {
-        System.out.println("map_tags_tab_visual");
         if (mapTagsTabSwitch.getOption() == 0) return;
         mapTagsTabSwitch.setOption(0);
     }
@@ -465,7 +419,6 @@ public class EditMap extends View {
     @Action("map_tags_tab_gameplay")
     private void selectMapTagGameplay() {
         if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
-            System.out.println("map_tags_tab_gameplay");
             if (mapTagsTabSwitch.getOption() == 1) return;
             mapTagsTabSwitch.setOption(1);
         }
@@ -583,7 +536,7 @@ public class EditMap extends View {
         tagClickHandler(MapTags.Tag.STORY, true);
     }
 
-    @Action("map_tag_recreation_set")
+    @Action("map_tag_story_set")
     private void mapTagStorySet() {
         tagClickHandler(MapTags.Tag.STORY, false);
     }
@@ -790,8 +743,8 @@ public class EditMap extends View {
 
     private void selectTab(int index) {
         tabSwitch.setOption(index);
-        for (int i = 0; i < tabSwitches.length; i++) {
-            tabSwitches[i].setOption(i == index ? 1 : 0);
+        for (int i = 0; i < tabButtonSwitches.length; i++) {
+            tabButtonSwitches[i].setOption(i == index ? 1 : 0);
         }
         // Default to visual tab if map is build type
         if (index == 1 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING))

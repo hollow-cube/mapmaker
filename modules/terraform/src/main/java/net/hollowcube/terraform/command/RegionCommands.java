@@ -59,7 +59,7 @@ public final class RegionCommands {
             session.buildTask("set")
                     .metadata() //todo
                     .compute(world -> {
-                        var buffer = BlockBuffer.builder();
+                        var buffer = BlockBuffer.builder(region.min(), region.max());
                         for (var pos : region) {
                             buffer.set(pos, pattern.stateId());
                         }
