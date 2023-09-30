@@ -98,6 +98,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new RequestCommand());
         commandManager.register(new AcceptCommand());
         commandManager.register(new RejectCommand());
+        commandManager.register(new RemoveCommand(bridge));
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
