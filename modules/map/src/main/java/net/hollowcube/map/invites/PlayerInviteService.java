@@ -81,16 +81,16 @@ public class PlayerInviteService {
             sender.sendMessage(Component.translatable("map.invite.no_map"));
             return;
         }
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
         if (!doesPlayerOwnMap(sender, senderMap)) {
-            sender.sendMessage(Component.translatable("map.invite.no_permission"));
+            sender.sendMessage(Component.translatable("map.invite.no_permission", targetDisplayName, Component.text(senderMap.map().name())));
             return;
         }
 
         var targetMap = MapWorld.forPlayerOptional(target);
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
-        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
         if (targetMap == senderMap) {
-            sender.sendMessage(Component.translatable("map.invite.same_map", targetDisplayName));
+            sender.sendMessage(Component.translatable("map.build.remove.same_map"));
             return;
         }
         var key = new Invite(sender.getUuid(), target.getUuid());
@@ -227,7 +227,7 @@ public class PlayerInviteService {
                 invalidater.sendMessage(Component.translatable("map.invite.invalidated"));
                 Player target = MinecraftServer.getConnectionManager().getPlayer(invite.inviteeUUID());
                 if (target != null) {
-                    target.sendMessage(Component.translatable("map.invite.left_map"));
+                    target.sendMessage(Component.translatable("map.invite.left_map", PlayerDataV2.fromPlayer(invalidater).displayName()));
                 }
             }
         });

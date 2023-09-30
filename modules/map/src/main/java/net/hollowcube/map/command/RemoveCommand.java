@@ -39,6 +39,12 @@ public class RemoveCommand extends BaseMapCommand {
         }
 
         var senderMap = MapWorld.forPlayerOptional((Player) sender);
+        var targetMap = MapWorld.forPlayerOptional((Player) target);
+        if (!(targetMap == senderMap)) {
+            sender.sendMessage(Component.translatable("map.build.remove.same_map"));
+            return;
+        }
+
         if (!(senderMap == null) && doesPlayerOwnMap((Player) sender, senderMap)) {
 
             try {
@@ -48,14 +54,14 @@ public class RemoveCommand extends BaseMapCommand {
                 }
 
                 bridge.sendPlayerToHub(target);
-                target.sendMessage(Component.translatable("map.building.removed", Component.text(((Player) sender).getUsername())));
-                sender.sendMessage(Component.translatable("map.building.remove", Component.text((target).getUsername())));
+                target.sendMessage(Component.translatable("map.build.removed", Component.text(((Player) sender).getUsername())));
+                sender.sendMessage(Component.translatable("map.build.remove", Component.text((target).getUsername())));
 
             } catch (Exception e) {
                 System.out.println(":(");
             }
         } else {
-            System.out.println("lol something went wrong");
+            sender.sendMessage(Component.translatable("map.build.cant_remove"));
         }
     }
 
