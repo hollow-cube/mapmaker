@@ -177,7 +177,7 @@ public class PlayerInviteService {
         if (targetMap == null || !targetMap.map().id().equals(context.mapId())) {
             target.sendMessage(Component.translatable("map.invite.left_map", senderDisplayName));
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
-            target.sendMessage(Component.translatable("map.invite.expired"));
+            target.sendMessage(Component.translatable("map.request.expired"));
         } else {
             requests.remove(key);
             var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
