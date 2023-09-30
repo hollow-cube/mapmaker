@@ -10,8 +10,8 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +53,7 @@ public class EditMapIconBase extends View {
         setState(Element.State.LOADING);
     }
 
-    public void setState(@NotNull PlayerDataV2 playerData, @NotNull State state, int slot, @Nullable String mapId) {
+    public void setState(@NotNull MapPlayerData playerData, @NotNull State state, int slot, @Nullable String mapId) {
         Check.argCondition(state == State.FULL && mapId == null, "mapId cannot be null if state is FULL");
         this.slot = slot;
         this.mapId = mapId;

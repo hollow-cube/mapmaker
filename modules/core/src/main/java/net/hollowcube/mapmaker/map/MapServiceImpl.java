@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.Response;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +13,7 @@ import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,25 +26,29 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
 
     private final String url;
+    private final String legacyUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
+        this.legacyUrl = String.format("%s/v1/internal/legacy/maps", url);
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull String authorizer, @NotNull String owner) {
-        logger.log(System.Logger.Level.INFO, "creating new map for " + owner);
-        var reqBody = GSON.toJson(Map.of("owner", owner));
+    public @NotNull Response<MapData> createMap(@NotNull MapPlayerData player, int slot) {
+        logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
+        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url))
-                .header(AUTHORIZER_HEADER, authorizer)
+                .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 200)
-            throw new InternalError("Failed to create map: " + res.body());
+//        if (res.statusCode() != 200)
+//            throw new InternalError("Failed to create map: " + res.body());
 
-        return GSON.fromJson(res.body(), MapData.class);
+        var resType = new TypeToken<Response<MapData>>() {
+        };
+        return GSON.fromJson(res.body(), resType);
     }
 
     @Override
@@ -103,16 +110,17 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 204 -> {/* update ok */}
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update map: " + res.body());
-        };
+        }
+        ;
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id) {
+    public void deleteMap(@NotNull MapPlayerData player, @NotNull String id) {
         logger.log(System.Logger.Level.INFO, "deleting map " + id);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + id))
-                .header(AUTHORIZER_HEADER, authorizer)
+                .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
@@ -150,7 +158,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         switch (res.statusCode()) {
             case 200 -> {/* deleted */}
             case 404 -> throw new NotFoundError(mapId);
-            default -> throw new InternalError("Failed to delete verification (" + res.statusCode() + "): " + res.body());
+            default ->
+                    throw new InternalError("Failed to delete verification (" + res.statusCode() + "): " + res.body());
         }
     }
 
@@ -320,5 +329,48 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 200) return; // Ok
         throw new InternalError("Failed to update savestate replay: " + res.body());
+    }
+
+    @Override
+    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapPlayerData.class); // Ok
+        throw new InternalError("Failed to get map player data: " + res.body());
+    }
+
+    @Override
+    public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(legacyUrl + "/" + playerId))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            //noinspection Convert2Diamond
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<LegacyMapInfo>>() {
+            });
+            case 404 -> List.of();
+            default -> throw new InternalError("Failed to get legacy maps: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(legacyUrl + "/" + playerId + "/" + legacyMapId + "/import"))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapData.WithSlot.class);
+            case 404 -> throw new MapService.NotFoundError(legacyMapId);
+            case 403 -> throw new MapService.NoPermissionError();
+            default -> throw new InternalError("Failed to import legacy map: " + res.body());
+        };
     }
 }

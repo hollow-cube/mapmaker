@@ -19,7 +19,7 @@ public class TimerFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
+        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0 || (world.flags() & MapWorld.FLAG_TESTING) != 0)
             return false;
 
         var settings = world.map().settings();

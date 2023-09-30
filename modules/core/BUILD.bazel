@@ -1,0 +1,25 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "core",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    exports = [
+        "@maven//:org_apache_kafka_kafka_clients",
+    ],
+    deps = [
+        "//modules/common",
+        "//third_party:minestom",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:dev_hollowcube_polar",
+        "@maven//:io_github_jglrxavpok_hephaistos_common",
+        "@maven//:io_prometheus_simpleclient",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:org_apache_kafka_kafka_clients",
+        "@maven//:org_spongepowered_configurate_core",
+        "@maven//:org_spongepowered_configurate_yaml",
+    ],
+)

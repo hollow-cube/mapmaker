@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
@@ -43,10 +45,10 @@ public final class FutureUtil {
     public static void assertThread() {
         var thread = Thread.currentThread();
         if (thread.isVirtual()) return;
-        var name = thread.getName();
-        if (name.contains("ForkJoinPool")) return;
+        if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
+            return;
 
-        throw new IllegalStateException("Unsafe blocking call " + name);
+        throw new IllegalStateException("Unsafe blocking call on '" + thread.getName() + "'");
     }
 
 }

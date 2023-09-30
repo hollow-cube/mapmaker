@@ -2,17 +2,19 @@ package net.hollowcube.mapmaker;
 
 import com.google.gson.*;
 import de.marhali.json5.Json5;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class LangMergeTransform {
     private static final System.Logger logger = System.getLogger(LangMergeTransform.class.getName());
@@ -23,17 +25,17 @@ public class LangMergeTransform {
     private final Map<String, String> replacements = new HashMap<>();
 
     public void init(@NotNull PackContext ctx, @NotNull SpriteTransform sprites) throws IOException {
-        var placeholders = json5.parse(Files.readString(ctx.resources().resolve("lang").resolve("placeholders.json5"))).getAsJson5Object();
-        for (var entry : placeholders.entrySet()) {
-            var key = entry.getKey();
-            var value = entry.getValue().getAsJson5Object();
-            var type = value.get("type").getAsString();
+        Json5Object placeholders = json5.parse(Files.readString(ctx.resources().resolve("lang").resolve("placeholders.json5"))).getAsJson5Object();
+        for (Map.Entry<String, Json5Element> entry : placeholders.entrySet()) {
+            String key = entry.getKey();
+            Json5Object value = entry.getValue().getAsJson5Object();
+            String type = value.get("type").getAsString();
 
             if (type.equals("raw")) {
                 replacements.put(key, value.get("value").getAsString());
             } else if (type.equals("sprite")) {
-                var ref = value.get("ref").getAsString();
-                var sprite = sprites.entries.get(ref);
+                String ref = value.get("ref").getAsString();
+                String sprite = sprites.entries.get(ref);
                 if (sprite == null) {
                     throw new RuntimeException("Unknown sprite: " + ref);
                 }
@@ -44,22 +46,22 @@ public class LangMergeTransform {
     }
 
     public void process(@NotNull PackContext context) throws IOException {
-        var keySources = new HashMap<String, String>();
-        var result = new JsonObject();
+        Map<String, String> keySources = new HashMap<>();
+        JsonObject result = new JsonObject();
 
-        try (var langFiles = Files.walk(context.resources().resolve("lang"))) {
-            var files = langFiles.sorted(Comparator.comparing(Path::toString)).toList();
-            for (var langFile : files) {
+        try (Stream<Path> langFiles = Files.walk(context.resources().resolve("lang"))) {
+            List<Path> files = langFiles.sorted(Comparator.comparing(Path::toString)).toList();
+            for (Path langFile : files) {
                 if (!langFile.getFileName().toString().endsWith(".properties")) continue;
 
                 System.out.println(langFile.toRealPath());
-                try (var is = Files.newInputStream(langFile)) {
-                    var properties = new Properties();
+                try (InputStream is = Files.newInputStream(langFile)) {
+                    Properties properties = new Properties();
                     properties.load(is);
 
-                    for (var entry : properties.entrySet()) {
-                        var key = entry.getKey().toString();
-                        var value = entry.getValue().toString();
+                    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                        String key = entry.getKey().toString();
+                        String value = entry.getValue().toString();
 
                         if (keySources.containsKey(key)) {
                             logger.log(System.Logger.Level.ERROR, String.format(
@@ -75,23 +77,23 @@ public class LangMergeTransform {
             }
         }
 
-        var outLangFile = context.out().resolve("server").resolve("en_US.json");
+        Path outLangFile = context.out().resolve("server").resolve("en_US.json");
         Files.createDirectories(outLangFile.getParent());
-        try (var os = Files.newBufferedWriter(outLangFile)) {
+        try (BufferedWriter os = Files.newBufferedWriter(outLangFile)) {
             new Gson().toJson(result, os);
         }
     }
 
     @SuppressWarnings("StringSplitter")
     private @NotNull JsonElement processValue(@NotNull String translation) {
-        var result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
         Pattern pattern = Pattern.compile("\\$(\\w+)");
         Matcher matcher = pattern.matcher(translation);
         while (matcher.find()) {
-            var key = matcher.group(1);
+            String key = matcher.group(1);
 
-            var value = replacements.get(key);
+            String value = replacements.get(key);
             if (value == null) {
                 logger.log(System.Logger.Level.ERROR, String.format(
                         "Unknown key: %s", key
@@ -104,8 +106,8 @@ public class LangMergeTransform {
 
         // Convert newlines to arrays
         if (result.indexOf("\n") != -1) {
-            var lines = result.toString().split("\n");
-            var array = new JsonArray();
+            String[] lines = result.toString().split("\n");
+            JsonArray array = new JsonArray();
             for (String line : lines) {
                 array.add(new JsonPrimitive(line));
             }

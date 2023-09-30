@@ -3,6 +3,8 @@ package net.hollowcube.tools.compile;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.*;
 import com.sun.tools.javac.api.BasicJavacTask;
+import com.sun.tools.javac.code.Attribute;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.Log;
 import org.burningwave.core.assembler.StaticComponentContainer;
@@ -11,6 +13,8 @@ import org.burningwave.core.function.ThrowingRunnable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 
+// MUST COMPILE WITH JAVA 11
+// This is a Bazel limitation in building `java_plugin` dependencies as far as I can tell.
 public class CompilePlugin implements Plugin {
 
     static {
@@ -33,8 +37,9 @@ public class CompilePlugin implements Plugin {
         // Do not run when compiling the "stripped" binary
         if (System.getenv("HOLLOWCUBE_STRIPPED_BINARY") != null) return;
 
-        if (t instanceof BasicJavacTask task) {
-            var log = Log.instance(task.getContext());
+        if (t instanceof BasicJavacTask) {
+            BasicJavacTask task = (BasicJavacTask) t;
+            Log log = Log.instance(task.getContext());
             task.addTaskListener(new PluginTaskListener(task, log));
             log.printRawLines(Log.WriterKind.NOTICE, "hello from hollow cube compile plugin");
         }
@@ -59,8 +64,9 @@ public class CompilePlugin implements Plugin {
                 e.getCompilationUnit().accept(new TreeScanner<Void, Void>() {
                     @Override
                     public Void visitClass(ClassTree node, Void unused) {
-                        var classDecl = (JCTree.JCClassDecl) node;
-                        if (classDecl.sym.isInterface() || !isBlockingClass(classDecl)) return super.visitClass(node, unused);
+                        JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) node;
+                        if (classDecl.sym.isInterface() || !isBlockingClass(classDecl))
+                            return super.visitClass(node, unused);
 
                         log.printRawLines(Log.WriterKind.ERROR, "Blocking class: " + classDecl.sym.name);
                         classDecl.accept(new BlockingClassRewriter(task.getContext(), log), null);
@@ -74,16 +80,16 @@ public class CompilePlugin implements Plugin {
         private boolean isBlockingClass(JCTree.JCClassDecl classDecl) {
 
             // If the class itself is annotated with @Blocking, its blocking.
-            for (var annotation : classDecl.sym.getAnnotationMirrors()) {
+            for (Attribute.Compound annotation : classDecl.sym.getAnnotationMirrors()) {
                 if (isBlockingAnnotation(annotation)) {
                     return true;
                 }
             }
 
             // If the superclass is annotated with @Blocking, its blocking.
-            var superclass = classDecl.sym.getSuperclass();
+            Type superclass = classDecl.sym.getSuperclass();
             while (superclass != null && superclass.getKind() != TypeKind.NONE) {
-                for (var annotation : superclass.tsym.getAnnotationMirrors()) {
+                for (Attribute.Compound annotation : superclass.tsym.getAnnotationMirrors()) {
                     if (!isBlockingAnnotation(annotation)) continue;
                     return true;
                 }
@@ -94,8 +100,8 @@ public class CompilePlugin implements Plugin {
             }
 
             // If any interface is annotated with @Blocking, its blocking.
-            for (var superInt : classDecl.sym.getInterfaces()) {
-                for (var annotation : superInt.tsym.getAnnotationMirrors()) {
+            for (Type superInt : classDecl.sym.getInterfaces()) {
+                for (Attribute.Compound annotation : superInt.tsym.getAnnotationMirrors()) {
                     if (!isBlockingAnnotation(annotation)) continue;
                     return true;
                 }

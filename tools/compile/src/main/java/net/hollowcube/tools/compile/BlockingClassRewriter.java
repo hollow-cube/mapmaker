@@ -10,6 +10,8 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.*;
 
+// MUST COMPILE WITH JAVA 11
+// This is a Bazel limitation in building `java_plugin` dependencies as far as I can tell.
 public class BlockingClassRewriter extends TreeScanner<Void, Void> {
     private final Context context;
     private final Log log;
@@ -35,7 +37,7 @@ public class BlockingClassRewriter extends TreeScanner<Void, Void> {
 
     @Override
     public Void visitMethod(MethodTree node, Void unused) {
-        var methodDecl = (JCTree.JCMethodDecl) node;
+        JCTree.JCMethodDecl methodDecl = (JCTree.JCMethodDecl) node;
 
         // Things to never modify
         boolean visitable = !methodDecl.name.toString().equals("<init>") && // Constructors
@@ -46,17 +48,17 @@ public class BlockingClassRewriter extends TreeScanner<Void, Void> {
         factory.at(methodDecl.body.pos);
 
         // Get an identifier referencing the FutureUtil class
-        var futureUtilIdent = factory.Ident(futureUtilClassName);
+        JCTree.JCIdent futureUtilIdent = factory.Ident(futureUtilClassName);
         futureUtilIdent.sym = futureUtilClass;
         futureUtilIdent.type = futureUtilIdent.sym.type;
 
         // Access the assertThread method on the FutureUtil class
-        var assertThreadField = factory.Select(futureUtilIdent, assertThreadMethodName);
+        JCTree.JCFieldAccess assertThreadField = factory.Select(futureUtilIdent, assertThreadMethodName);
         assertThreadField.sym = futureUtilClass.members().findFirst(assertThreadMethodName);
         assertThreadField.type = assertThreadField.sym.type;
 
         // Create the no args static method call
-        var call = factory.Apply(List.nil(), assertThreadField, List.nil());
+        JCTree.JCMethodInvocation call = factory.Apply(List.nil(), assertThreadField, List.nil());
         call.type = call.meth.type.getReturnType();
 
         // Finally prepend the method call to the function body (wrapped as a statement, not expr)

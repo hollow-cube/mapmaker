@@ -18,12 +18,8 @@ public class SetMapName extends View {
 
     private String input = "";
 
-    public SetMapName(@NotNull Context context) {
+    public SetMapName(@NotNull Context context, @NotNull String name) {
         super(context);
-        inputField.setArgs(Component.text(""));
-    }
-
-    public void showMap(@NotNull String name) {
         input = name;
         inputField.setArgs(Component.text(name));
     }

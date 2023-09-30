@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;

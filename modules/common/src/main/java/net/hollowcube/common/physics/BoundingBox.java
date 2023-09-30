@@ -59,7 +59,6 @@ public final class BoundingBox {
     }
 
     /**
-     *
      * @param x the X offset
      * @param y the Y offset
      * @param z the Z offset
@@ -70,7 +69,6 @@ public final class BoundingBox {
     }
 
     /**
-     *
      * @param x the X offset
      * @param y the Y offset
      * @param z the Z offset
@@ -137,14 +135,14 @@ public final class BoundingBox {
         for (double x = this.minX() + point.x(); x <= this.maxX() + point.x(); x++) {
             for (double y = this.minY() + point.y(); y <= this.maxY() + point.y(); y++) {
                 for (double z = this.minZ() + point.z(); z <= this.maxZ() + point.z(); z++) {
-                    blocks.add(new Vec((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z)));
+                    blocks.add(new Vec((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z)));
                 }
-                blocks.add(new Vec((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(this.maxX() + point.z())));
+                blocks.add(new Vec((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(this.maxX() + point.z())));
             }
-            blocks.add(new Vec((int)Math.floor(x), (int)Math.floor(this.maxY() + point.y()), (int)Math.floor(this.minZ() + point.z())));
+            blocks.add(new Vec((int) Math.floor(x), (int) Math.floor(this.maxY() + point.y()), (int) Math.floor(this.minZ() + point.z())));
         }
 
-        blocks.add(new Vec((int)Math.floor(this.maxX() + point.x()), (int)Math.floor(this.maxY() + point.y()), (int)Math.floor(this.maxZ() + point.z())));
+        blocks.add(new Vec((int) Math.floor(this.maxX() + point.x()), (int) Math.floor(this.maxY() + point.y()), (int) Math.floor(this.maxZ() + point.z())));
         return blocks;
     }
 

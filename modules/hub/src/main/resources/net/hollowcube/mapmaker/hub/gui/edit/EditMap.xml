@@ -3,18 +3,19 @@
 <component width="9" height="9" align="ttb">
     <switch id="tab_switch" width="9" height="5">
         <!-- INFO TAB -->
-        <box width="9" height="5" align="TTB">
-            <box width="9" height="1" sprite="create_maps/tab_info/header">
+        <box width="9" height="5" align="ttb">
+            <box width="9" height="1" align="ltr" sprite="create_maps/tab_info/header">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_info_tab.information"/>
-                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title" centered="true" />
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                      centered="true"/>
                 <!--        todo those last 2 buttons-->
                 <button translationKey="gui.create_maps.map_info_tab.manage_builders"
                         sprite="create_maps/tab_info/manage_builders"/>
                 <button translationKey="gui.create_maps.map_info_tab.invite_players"
                         sprite="create_maps/tab_info/invite_players"/>
             </box>
-            <box width="9" height="1">
+            <box width="9" height="1" align="ltr">
                 <!-- Shift by 19 to avoid the icon -->
                 <text id="map_name" width="8" translationKey="gui.create_maps.map_info_tab.change_name"
                       font="map_title" shift="19"/>
@@ -28,7 +29,7 @@
                 </switch>
             </box>
 
-            <box width="9">
+            <box width="9" align="ltr">
                 <button id="map_type_tab_parkour" width="3"
                         translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
                 <button id="map_type_tab_building" width="3"
@@ -37,7 +38,7 @@
             </box>
             <switch id="map_type_tab_switch" width="9" height="2">
                 <!-- PARKOUR TAB -->
-                <box width="9" height="2" sprite="create_maps/tab_info/tab_parkour/container">
+                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_parkour/container">
                     <!-- These names MUST be synced with the ParkourSubVariant enum -->
                     <!-- todo this is super repetitive, might be worth looking into scripting it after all -->
                     <spacer width="1"/>
@@ -114,7 +115,7 @@
                 </box>
 
                 <!-- BUILDING TAB -->
-                <box width="9" height="2" sprite="create_maps/tab_info/tab_building/container">
+                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_building/container">
                     <spacer width="1"/>
                     <button id="map_type_tab_building_showcase" width="1"
                             translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"/>
@@ -132,16 +133,211 @@
         </box>
 
         <!-- TAGS TAB -->
-        <box width="9" height="5" sprite="create_maps/tab_tags/container">
-            <box width="9" height="1">
+        <box width="9" height="5" sprite="create_maps/tab_tags/container" align="ttb">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                      centered="true"/>
             </box>
+
+            <box width="9" align="ltr">
+                <!-- make the locked container in here -->
+                <button width="4" id="map_tags_tab_visual"
+                        translationKey="gui.map_details.map_tags_tab.visual_tag"/>
+                <spacer width="1"/>
+                <button width="4" id="map_tags_tab_gameplay"
+                        translationKey="gui.map_details.map_tags_tab.gameplay_tag"/>
+            </box>
+            <switch id="map_tags_tab_switch" width="9" height="3">
+                <!-- VISUAL TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container" align="ltr">
+                    <!-- These names MUST be synced with the MapTags.java enum -->
+                    <spacer width="1"/>
+                    <switch id="map_tag_terrain_switch">
+                        <button id="map_tag_terrain_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.terrain"
+                                sprite="create_maps/tab_tags/tab_visual/tag_terrain_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_terrain_bg"/>
+                        <button id="map_tag_terrain_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.terrain"
+                                sprite="create_maps/tab_tags/tab_visual/tag_terrain_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_terrain_selected"/>
+                    </switch>
+                    <switch id="map_tag_organics_switch">
+                        <button id="map_tag_organics_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.organics"
+                                sprite="create_maps/tab_tags/tab_visual/tag_organics_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_organics_bg"/>
+                        <button id="map_tag_organics_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.organics"
+                                sprite="create_maps/tab_tags/tab_visual/tag_organics_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_organics_selected"/>
+                    </switch>
+                    <switch id="map_tag_structure_switch">
+                        <button id="map_tag_structure_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.structure"
+                                sprite="create_maps/tab_tags/tab_visual/tag_structure_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_structure_bg"/>
+                        <button id="map_tag_structure_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.structure"
+                                sprite="create_maps/tab_tags/tab_visual/tag_structure_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_structure_selected"/>
+                    </switch>
+                    <switch id="map_tag_interior_switch">
+                        <button id="map_tag_interior_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.interior"
+                                sprite="create_maps/tab_tags/tab_visual/tag_interior_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_interior_bg"/>
+                        <button id="map_tag_interior_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.interior"
+                                sprite="create_maps/tab_tags/tab_visual/tag_interior_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_interior_selected"/>
+                    </switch>
+                    <switch id="map_tag_music_switch">
+                        <button id="map_tag_music_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.music"
+                                sprite="create_maps/tab_tags/tab_visual/tag_music_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_music_bg"/>
+                        <button id="map_tag_music_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.music"
+                                sprite="create_maps/tab_tags/tab_visual/tag_music_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_music_selected"/>
+                    </switch>
+                    <switch id="map_tag_2d_switch">
+                        <button id="map_tag_2d_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.2d"
+                                sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_bg"/>
+                        <button id="map_tag_2d_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.2d"
+                                sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_selected"/>
+                    </switch>
+                    <switch id="map_tag_recreation_switch">
+                        <button id="map_tag_recreation_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.recreation"
+                                sprite="create_maps/tab_tags/tab_visual/tag_recreation_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_recreation_bg"/>
+                        <button id="map_tag_recreation_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.recreation"
+                                sprite="create_maps/tab_tags/tab_visual/tag_recreation_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_recreation_selected"/>
+                    </switch>
+                    <spacer width="2"/>
+                    <switch id="map_tag_story_switch">
+                        <button id="map_tag_story_unset"
+                                translationKey="gui.create_maps.map_tags_tab.visual.story"
+                                sprite="create_maps/tab_tags/tab_visual/tag_story_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_story_bg"/>
+                        <button id="map_tag_story_set"
+                                translationKey="gui.create_maps.map_tags_tab.visual.story"
+                                sprite="create_maps/tab_tags/tab_visual/tag_story_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_visual/tag_story_selected"/>
+                    </switch>
+                </box>
+                <!-- GAMEPLAY TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_tags/tab_gameplay/container" align="ltr">
+                    <!-- These names MUST be synced with MapTags.java enum -->
+                    <spacer width="1"/>
+                    <switch id="map_tag_coop_switch">
+                        <button id="map_tag_coop_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.coop"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_coop_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_coop_bg"/>
+                        <button id="map_tag_coop_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.coop"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_coop_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_coop_selected"/>
+                    </switch>
+                    <switch id="map_tag_puzzle_switch">
+                        <button id="map_tag_puzzle_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.puzzle"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_bg"/>
+                        <button id="map_tag_puzzle_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.puzzle"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_selected"/>
+                    </switch>
+                    <switch id="map_tag_minigame_switch">
+                        <button id="map_tag_minigame_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.minigame"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_minigame_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_minigame_bg"/>
+                        <button id="map_tag_minigame_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.minigame"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_minigame_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_minigame_selected"/>
+                    </switch>
+                    <switch id="map_tag_exploration_switch">
+                        <button id="map_tag_exploration_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.exploration"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_exploration_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_exploration_bg"/>
+                        <button id="map_tag_exploration_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.exploration"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_exploration_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_exploration_selected"/>
+                    </switch>
+                    <switch id="map_tag_bossbattle_switch">
+                        <button id="map_tag_bossbattle_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_bg"/>
+                        <button id="map_tag_bossbattle_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_selected"/>
+                    </switch>
+                    <switch id="map_tag_autocomplete_switch">
+                        <button id="map_tag_autocomplete_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_bg"/>
+                        <button id="map_tag_autocomplete_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_selected"/>
+                    </switch>
+                    <switch id="map_tag_escape_switch">
+                        <button id="map_tag_escape_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.escape"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_escape_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_escape_bg"/>
+                        <button id="map_tag_escape_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.escape"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_escape_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_escape_selected"/>
+                    </switch>
+                    <spacer width="2"/>
+                    <switch id="map_tag_trivia_switch">
+                        <button id="map_tag_trivia_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.trivia"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_trivia_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_trivia_bg"/>
+                        <button id="map_tag_trivia_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.trivia"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_trivia_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_trivia_selected"/>
+                    </switch>
+                    <switch id="map_tag_strategy_switch">
+                        <button id="map_tag_strategy_unset"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.strategy"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_strategy_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_strategy_bg"/>
+                        <button id="map_tag_strategy_set"
+                                translationKey="gui.create_maps.map_tags_tab.gameplay.strategy"
+                                sprite="create_maps/tab_tags/tab_gameplay/tag_strategy_icon"
+                                backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_strategy_selected"/>
+                    </switch>
+                </box>
+            </switch>
         </box>
 
         <!-- SETTINGS TAB -->
-        <box width="9" height="5" sprite="create_maps/tab_settings/container">
-            <box width="9" height="1">
+        <box width="9" height="5" sprite="create_maps/tab_settings/container" align="ttb">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_settings_tab.information"/>
             </box>
@@ -149,7 +345,7 @@
 
         <!-- ACTIONS TAB -->
         <box width="9" height="5" sprite="create_maps/tab_actions/container" align="ttb">
-            <box width="9" height="1">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_actions_tab.information"/>
                 <label width="5" translationKey="gui.create_maps.map_slot"/>
@@ -172,7 +368,8 @@
 
                 <box width="3" height="4" align="ttb">
                     <button width="3" height="2" translationKey="gui.create_maps.map_actions_tab.move_map"/>
-                    <button id="delete_map" width="3" height="2" translationKey="gui.create_maps.map_actions_tab.delete_map"/>
+                    <button id="delete_map" width="3" height="2"
+                            translationKey="gui.create_maps.map_actions_tab.delete_map"/>
                 </box>
 
             </box>
@@ -190,7 +387,7 @@
         </switch>
         <spacer/>
         <switch id="tab_tags_switch">
-            <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab"
+            <button id="tab_tags" translationKey="gui.create_maps.map_tags_tab"
                     sprite="create_maps/tab_tags/icon"
                     backgroundSprite="create_maps/tab_tags/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_tags_tab"
@@ -223,9 +420,19 @@
         <switch id="publish_switch" width="3" height="3">
             <button width="3" height="3" translationKey="gui.create_maps.verify_error"
                     sprite="create_maps/verify_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.build_once"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.play_longer"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.missing_finish_plate"
+                    sprite="create_maps/verify_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.bad_status_plate"
+                    sprite="create_maps/publish_error"/>
             <button id="verify" width="3" height="3" translationKey="gui.create_maps.verify_map"
                     sprite="create_maps/verify"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name_and_no_display_item"
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_display_item"
                     sprite="create_maps/publish_error"/>
             <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
                     sprite="create_maps/publish"/>

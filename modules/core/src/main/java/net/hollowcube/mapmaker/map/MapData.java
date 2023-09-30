@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -43,6 +44,10 @@ public class MapData {
     private List<PointOfInterest> pois;
     private transient final ReentrantLock poiLock = new ReentrantLock();
 
+    private int objectLimit = 100;
+    private List<ObjectData> objects = new ArrayList<>();
+    private transient int objectUsage = -1;
+
     public MapData() {
     }
 
@@ -60,11 +65,14 @@ public class MapData {
         this.publishedAt = publishedAt;
         this.pois = new ArrayList<>();
         this.maxPois = 100;
+        this.objectLimit = 100;
+        this.objects = new ArrayList<>();
     }
 
     public @NotNull String id() {
         return id;
     }
+
     public @NotNull String name() {
         var name = settings.getName();
         if (name.isEmpty())
@@ -143,6 +151,66 @@ public class MapData {
         }
     }
 
+    public int objectUsage() {
+        if (objectUsage == -1) {
+            objectUsage = objects.stream()
+                    .mapToInt(o -> o.type().cost())
+                    .sum();
+        }
+
+        return objectUsage;
+    }
+
+    public boolean addObject(@NotNull ObjectData object) {
+        settings.updateLock.lock();
+        try {
+            if (objectUsage() + object.type().cost() > objectLimit)
+                return false;
+
+            objects.add(object);
+            objectUsage += object.type().cost();
+
+            // Add to update
+            settings.updates.newObjects.add(object);
+            settings.updates.removedObjects.remove(object.id());
+
+            return true;
+        } finally {
+            settings.updateLock.unlock();
+        }
+    }
+
+    public boolean removeObject(@NotNull String id) {
+        settings.updateLock.lock();
+        try {
+            var removed = false;
+            var iter = objects.iterator();
+            while (iter.hasNext()) {
+                var object = iter.next();
+
+                if (object.id().equals(id)) {
+                    iter.remove();
+                    objectUsage = objectUsage() - object.type().cost();
+                    removed = true;
+
+                    settings.updates.removedObjects.add(id);
+                }
+            }
+
+            if (removed) {
+                settings.updates.newObjects.removeIf(p -> p.id().equals(id));
+            }
+
+            return removed;
+        } finally {
+            settings.updateLock.unlock();
+        }
+    }
+
+    public @NotNull List<ObjectData> objects() {
+        return List.copyOf(objects);
+    }
+
     public static @NotNull String formatPublishedId(long number) {
         // Pad zeros if necessary
         var numberString = new StringBuilder(String.valueOf(number));
@@ -156,5 +224,13 @@ public class MapData {
                 numberString.substring(3, 6) +
                 "-" +
                 numberString.substring(6);
+    }
+
+    public static class WithSlot extends MapData {
+        private int slot;
+
+        public int slot() {
+            return slot;
+        }
     }
 }

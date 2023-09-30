@@ -6,8 +6,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.HubHandler;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ public class CreateMap extends View {
 
     public static final String SIG_MAP_CREATED = "map_created";
 
-    private @ContextObject("handler") HubHandler mapHandler;
+    private @ContextObject MapService mapService;
 
     private @Outlet("submit") Label submitButton;
 
@@ -43,14 +43,25 @@ public class CreateMap extends View {
     private void handleSubmit(@NotNull Player player) {
         submitButton.setState(State.LOADING);
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
 
         // Dispatch request to create the map
         try {
-            var map = mapHandler.createMapForPlayerInSlot(playerData, slot);
-
-            performSignal(SIG_MAP_CREATED, slot, map);
-            submitButton.setState(State.ACTIVE);
+            var resp = mapService.createMap(playerData, slot);
+            switch (resp.errorCode()) {
+                case null -> {
+                    performSignal(SIG_MAP_CREATED, slot, resp.payload());
+                    submitButton.setState(State.ACTIVE);
+                }
+                //todo handle known error cases
+                default -> {
+                    resp.logError(player);
+                    player.closeInventory();
+                }
+            }
+//            var map = mapService.createMap(playerData, slot);
+//            performSignal(SIG_MAP_CREATED, slot, map);
+//            submitButton.setState(State.ACTIVE);
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "Failed to create map", e);
             MinecraftServer.getExceptionManager().handleException(e);

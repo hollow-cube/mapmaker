@@ -16,6 +16,7 @@ import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
@@ -47,8 +48,10 @@ public abstract class MapServerBase implements MapServer {
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
 
+    private final MapWorldManager mwm = new MapWorldManager(this);
     private final MapToHubBridge bridge;
 
+    private MapMgmtConsumerImpl mapMgmtConsumer;
     private List<FeatureProvider> features;
 
     private Controller guiController;
@@ -63,6 +66,10 @@ public abstract class MapServerBase implements MapServer {
     }
 
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
+
+        var kafkaConfig = config.get(KafkaConfig.class);
+        mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
+
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
         eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
         eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
@@ -105,6 +112,9 @@ public abstract class MapServerBase implements MapServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             for (var feature : ServiceLoader.load(FeatureProvider.class)) {
                 features.add(feature);
+                for (var blockHandler : feature.blockHandlers()) {
+                    BLOCK_MANAGER.registerHandler(blockHandler.getNamespaceId(), () -> blockHandler);
+                }
                 scope.fork(Executors.callable(() -> feature.init(config)));
             }
 
@@ -133,7 +143,9 @@ public abstract class MapServerBase implements MapServer {
         return features;
     }
 
-    private final MapWorldManager mwm = new MapWorldManager(this);
+    public @NotNull MapWorldManager worldManager() {
+        return mwm;
+    }
 
     @Override
     public @NotNull MapToHubBridge bridge() {
@@ -182,6 +194,7 @@ public abstract class MapServerBase implements MapServer {
     }
 
     public void shutdown() {
+        mapMgmtConsumer.close();
         mwm.shutdown();
     }
 

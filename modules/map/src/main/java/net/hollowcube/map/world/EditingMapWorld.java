@@ -1,8 +1,10 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.event.BlockItemPlaceEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
@@ -24,6 +26,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
@@ -78,6 +81,24 @@ public class EditingMapWorld implements InternalMapWorld {
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
+
+        eventNode.addListener(BlockItemPlaceEvent.class, event -> {
+            var handler = event.getBlock().handler();
+            if (!(handler instanceof ObjectBlockHandler objectHandler)) return;
+
+            var object = objectHandler.createObjectData(event.getBlockPosition());
+            var added = map.addObject(object);
+            if (!added) {
+                event.setCancelled(true);
+
+                var packet = new EffectPacket(2001, event.getBlockPosition(),
+                        event.getBlock().stateId(), false);
+                instance.sendGroupedPacket(packet);
+
+                event.getPlayer().sendMessage("no place");
+            }
+
+        });
     }
 
     @Override
@@ -156,14 +177,19 @@ public class EditingMapWorld implements InternalMapWorld {
         saveLock.lock();
         try {
             // Save the map settings
-            var settingsUpdate = map.settings().getUpdateRequest();
-            if (settingsUpdate.hasChanges()) {
-                //todo map worlds should have an "owner" which is the owner if they are present, otherwise
-                // it is the first trusted player to join the world. If someone leaves it should find a new
-                // "owner" of the world, or if it cannot (only invited people left), it should close the world.
-                server().mapService().updateMap(map.owner(), map.id(), settingsUpdate);
-                //todo handle errors from the service
-            }
+            map.settings().withUpdateRequest(updates -> {
+                try {
+                    //todo map worlds should have an "owner" which is the owner if they are present, otherwise
+                    // it is the first trusted player to join the world. If someone leaves it should find a new
+                    // "owner" of the world, or if it cannot (only invited people left), it should close the world.
+                    server().mapService().updateMap(map.owner(), map.id(), updates);
+                    return true;
+                } catch (Exception e) {
+                    logger.log(System.Logger.Level.ERROR, "Failed to save map settings for " + map.id(), e);
+                    MinecraftServer.getExceptionManager().handleException(e);
+                    return false;
+                }
+            });
 
             // Save the world data (if it is unverified only)
             if (map.verification() == MapVerification.UNVERIFIED) {
@@ -174,6 +200,7 @@ public class EditingMapWorld implements InternalMapWorld {
             // Save the players data
             for (var player : activePlayers) {
                 var playerData = PlayerDataV2.fromPlayer(player);
+
                 var saveState = SaveState.fromPlayer(player);
                 var update = updateSaveState(player, saveState);
                 server().mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
@@ -227,6 +254,7 @@ public class EditingMapWorld implements InternalMapWorld {
             player.setTag(SaveState.TAG, saveState);
 
             player.setGameMode(GameMode.CREATIVE);
+            saveState.setPlayStartTime(System.currentTimeMillis());
 
             // Read from player data
             var playerTfState = playerData.getTfState();
@@ -265,13 +293,14 @@ public class EditingMapWorld implements InternalMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
             try {
+
                 //todo handle these errors better
                 var playerData = PlayerDataV2.fromPlayer(player);
 
                 var saveStateUpdate = updateSaveState(player, saveState);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
 
-                playerData.setLastEditedMap(map.id());
+//                playerData.setLastEditedMap(map.id());
                 playerData.setTfState(PlayerSession.save(player));
                 server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
 

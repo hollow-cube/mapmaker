@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public record MapWorldCheckpointReachedEvent(
         @NotNull MapWorld mapWorld,
-        @NotNull Player player
-//        @NotNull MapData.POI checkpoint
+        @NotNull Player player,
+        @NotNull String checkpointId
 ) implements MapWorldEvent {
 
     @Override

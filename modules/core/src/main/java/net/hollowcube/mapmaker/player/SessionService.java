@@ -19,4 +19,7 @@ public interface SessionService {
         }
     }
 
+    class UnauthorizedError extends RuntimeException {
+    }
+
 }

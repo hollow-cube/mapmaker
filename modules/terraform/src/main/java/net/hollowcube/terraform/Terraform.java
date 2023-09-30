@@ -20,6 +20,17 @@ public final class Terraform {
         // Root/Debug
         commandManager.register(new TerraformCommand(condition));
 
+        /*
+
+        For actions:
+        - pipeline of actions
+        - move 10 on x: `with(world) -> set(region, air) -> set(transform(+10 on x, region), region(world)) -> apply(world)`
+        - set region to stone: `with(world) -> set(region, stone) -> apply(world)`
+
+
+
+         */
+
         // Selection
         commandManager.register(new SelectionCommands.Pos1(condition));
         commandManager.register(new SelectionCommands.Pos2(condition));

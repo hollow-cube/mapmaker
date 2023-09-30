@@ -2,8 +2,10 @@ package net.hollowcube.mapmaker.hub.command;
 
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.SlotState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.SlotState;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -33,7 +35,7 @@ public final class ExtraArguments {
                 .setSuggestionCallback((sender, context, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
 
-                    var playerData = PlayerDataV2.fromPlayer(player);
+                    var playerData = MapPlayerData.fromPlayer(player);
                     for (int i = 0; i < PlayerDataV2.MAX_MAP_SLOTS; i++) {
                         if (showAvailable == (playerData.getMapSlot(i) != null)) {
                             var entry = new SuggestionEntry(String.valueOf(i + 1));
@@ -64,7 +66,7 @@ public final class ExtraArguments {
                 .map((sender, value) -> {
                     if (!(sender instanceof Player player))
                         throw new ArgumentSyntaxException("Invalid map", value, ERR_INVALID_MAP_SLOT); //todo a more descriptive error
-                    var playerData = PlayerDataV2.fromPlayer(player);
+                    var playerData = MapPlayerData.fromPlayer(player);
 
                     try { // Try to parse as a slot
                         var slot = Integer.parseInt(value) - 1;
@@ -109,6 +111,20 @@ public final class ExtraArguments {
                     //todo publishedId
 
                     throw new ArgumentSyntaxException("Invalid map", value, ERR_INVALID_MAP_SLOT);
+                });
+    }
+
+    public static @NotNull Argument<String> PlayerNameWithCompletion(
+            @NotNull PlayerService playerService,
+            @NotNull String id
+    ) {
+        return ArgumentType.String(id)
+                .setSuggestionCallback((sender, context, suggestion) -> {
+                    var start = suggestion.getStart() - 1;
+                    var query = suggestion.getInput().substring(start, start + suggestion.getLength()).trim();
+                    playerService.getUsernameTabCompletions(query)
+                            .resultSafe()
+                            .forEach(entry -> suggestion.addEntry(new SuggestionEntry(entry.username())));
                 });
     }
 

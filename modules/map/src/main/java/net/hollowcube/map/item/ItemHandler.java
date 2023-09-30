@@ -1,6 +1,8 @@
 package net.hollowcube.map.item;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.world.MapWorld;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -8,11 +10,14 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagHandler;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -54,13 +59,23 @@ public abstract class ItemHandler {
         return Material.STICK;
     }
 
+    public @NotNull ItemStack buildItemStack(@Nullable NBTCompound nbt) {
+        var builder = ItemStack.builder(material());
+        var baseTranslationKey = String.format("item.%s.%s", id().namespace(), id().path());
+        builder.displayName(Component.translatable(baseTranslationKey + ".name"));
+        builder.lore(LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
+        updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
+        builder.meta(meta -> meta.customModelData(customModelData()));
+        return builder.build();
+    }
+
     /**
      * updateItemStack is responsible for updating the base item with any custom data based on NBT.
      * <p>
      * By default, the builder will have the name and lore set which can be overridden.
      * The custom model data is set after this function, and will overwrite any value set here.
      */
-    protected void updateItemStack(@NotNull ItemStack.Builder builder, @NotNull TagReadable data) {
+    protected void updateItemStack(@NotNull ItemStack.Builder builder, @NotNull TagHandler data) {
     }
 
     protected void leftClicked(@NotNull Click click) {

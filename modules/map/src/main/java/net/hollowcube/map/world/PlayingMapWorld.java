@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -91,11 +90,6 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.scheduler().buildTask(this::updateSpectators)
                 .repeat(TaskSchedule.seconds(1))
                 .schedule();
-
-        // Controls player visibility
-        instance.scheduler().buildTask(this::updateViewership)
-                .repeat(TaskSchedule.tick(5))
-                .schedule();
     }
 
     @Override
@@ -122,7 +116,6 @@ public class PlayingMapWorld implements InternalMapWorld {
     public void addScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode) {
         this.scopedNode.addChild(eventNode);
     }
-
 
     @Override
     public @NotNull Point spawnPoint() {
@@ -171,14 +164,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setAllowFlying(false);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
-
-        player.updateViewableRule(p -> {
-            if (p.isInvisible()) return true;
-            return player.getDistanceSquared(p) > 3.5 * 3.5;
-        });
-
         player.getInventory().clear();
-        PlayingMapHotbar.applyToPlayer(player);
 
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
         player.teleport(pos).join();
@@ -207,8 +193,6 @@ public class PlayingMapWorld implements InternalMapWorld {
     public @Blocking void removePlayer(@NotNull Player player, boolean save) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 
-        player.updateViewableRule((p) -> true);
-
         player.removeTag(TAG_PLAYING);
         player.removeTag(MapHooks.PLAYING); // Legacy
         player.setInvisible(false);
@@ -221,16 +205,12 @@ public class PlayingMapWorld implements InternalMapWorld {
 
             saveState.updatePlaytime();
 
-            var update = new SaveStateUpdateRequest();
-            update.setPlaytime(saveState.getPlaytime());
-            update.setCompleted(saveState.isCompleted());
-
             try {
+                var update = saveState.getUpdateRequest();
+                update.setCompleted(true);
+
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
-
-                playerData.setLastPlayedMap(map.id());
-                server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
 
                 logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
             } catch (Exception e) {
@@ -256,12 +236,6 @@ public class PlayingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Set<Player> players() {
         return Set.copyOf(activePlayers);
-    }
-
-    private void updateViewership() {
-        for (Player p : players()) {
-            p.updateViewableRule();
-        }
     }
 
     private void updateSpectators() {

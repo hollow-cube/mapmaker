@@ -1,6 +1,5 @@
 package net.hollowcube.canvas.internal.standalone.reader;
 
-import com.google.common.base.Splitter;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.*;
@@ -75,7 +74,7 @@ public class XmlElementReader {
     private @NotNull ViewContainer loadRoot(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("component"), "Root node must be 'component'");
         var elem = new ViewContainer(context, getId(node), getWidth(node), getHeight(node),
-                getEnum(node, "align", BoxContainer.Align.LTR));
+                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Component must have an alignment"));
         return applyTraits(node, loadChildren(node, elem));
     }
 
@@ -96,7 +95,7 @@ public class XmlElementReader {
     private @NotNull BaseElement loadBox(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("box"), "Node must be `box`");
         var elem = new BoxContainer(context, getId(node), getWidth(node), getHeight(node),
-                getEnum(node, "align", BoxContainer.Align.LTR));
+                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Box must have an alignment"));
         return applyTraits(node, loadChildren(node, elem));
     }
 
@@ -229,8 +228,6 @@ public class XmlElementReader {
                 spritePos = Integer.parseInt(rawSpritePos.getNodeValue());
             }
 
-            System.out.println(spriteName + spritePos);
-
             var sprite = Sprite.SPRITE_MAP.get(spriteName);
             if (sprite != null) {
                 if (sprite.fontChar() != 0) {
@@ -251,15 +248,15 @@ public class XmlElementReader {
 
             } else {
                 // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
-                var split = Splitter.on('@').splitToList(spriteName);
-                var material = Material.fromNamespaceId(split.get(0));
+                var split = spriteName.split("@");
+                var material = Material.fromNamespaceId(split[0]);
                 if (material == null) {
                     logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
                 var builder = ItemStack.builder(material);
-                if (split.size() > 1) {
-                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split.get(1))));
+                if (split.length > 1) {
+                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split[1])));
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build(), spritePos);
@@ -328,10 +325,10 @@ public class XmlElementReader {
         return attr.getNodeValue();
     }
 
-    private <E extends Enum<E>> @NotNull E getEnum(@NotNull Node node, @NotNull String name, @NotNull E def) {
+    private <E extends Enum<E>> @UnknownNullability E getEnum(@NotNull Class<E> clazz, @NotNull Node node, @NotNull String name, @UnknownNullability E def) {
         var value = getString(node, name, null);
         if (value == null) return def;
-        return Enum.valueOf(def.getDeclaringClass(), value.toUpperCase());
+        return Enum.valueOf(clazz, value.toUpperCase());
     }
 
 }

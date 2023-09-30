@@ -1,60 +1,37 @@
 package net.hollowcube.map.feature.checkpoint;
 
-import net.hollowcube.map.block.handler.AbstractPlateHandler;
-import net.hollowcube.map.block.handler.PointOfInterestHandlerMixin;
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
 import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
+import net.hollowcube.map.item.BlockItemHandler;
+import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.object.ObjectType;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.ArrayList;
 
-public class CheckpointPlateBlock extends AbstractPlateHandler implements PointOfInterestHandlerMixin {
+public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin {
+    public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:checkpoint_plate")
+            .requiredVariant(MapVariant.PARKOUR)
+            .build();
 
-    @Override
-    public @NotNull NamespaceID getNamespaceId() {
-        return NamespaceID.from("mapmaker:checkpoint_plate");
-    }
-
-    @Override
-    public @NotNull String poiType() {
-        return "mapmaker:checkpoint_plate";
-    }
+    public static final CheckpointPlateBlock INSTANCE = new CheckpointPlateBlock();
+    public static final Block VANILLA_BLOCK = Block.HEAVY_WEIGHTED_PRESSURE_PLATE;
+    public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE, VANILLA_BLOCK, CheckpointPlateBlock::updateItemStack);
 
     @Override
-    public @Nullable MapVariant requiredVariant() {
-        return MapVariant.PARKOUR;
+    public @NotNull ObjectType objectType() {
+        return OBJECT_TYPE;
     }
-
-    @Override
-    public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        var mapWorld = MapWorld.forPlayer(player);
-//        var checkpoint = mapWorld.map().getPoi(tick.getBlockPosition());
-//        EventDispatcher.call(new MapWorldCheckpointReachedEvent(mapWorld, player, checkpoint));
-    }
-
-//    @Override
-//    public void onPlace(@NotNull Placement placement) {
-//        System.out.println("PLACE");
-//        placement.getInstance().setBlock(placement.getBlockPosition(), placement.getBlock().withTag(Tag.Boolean("abc"), true));
-//        MapData map;
-//        if (placement instanceof PlayerPlacement pp) {
-//            map = MapWorld.forPlayer(pp.getPlayer()).map();
-//        } else {
-//             OK to choose the first editing world, the block is only placed in editing world.
-//            var world = MapWorld.unsafeFromInstance(placement.getInstance());
-//            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
-//            map = world.map();
-//        }
-//        map.addPOI(new MapData.POI(POI_TYPE, UUID.randomUUID().toString(), placement.getBlockPosition()));
-//    }
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
@@ -64,26 +41,31 @@ public class CheckpointPlateBlock extends AbstractPlateHandler implements PointO
         var player = interaction.getPlayer();
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return false;
 
-        player.sendMessage("edit checkpoint");
-
         // Open checkpoint settings GUI
-//        var checkpoint = world.map().getPoi(interaction.getBlockPosition());
-//        world.server().newOpenGUI(player, c -> new CheckpointSettingsView(c.with(Map.of("poi", checkpoint))));
+        world.server().newOpenGUI(player, c -> new CheckpointSettingsView(c,
+                interaction.getInstance(), interaction.getBlockPosition(), interaction.getBlock()));
 
         return true;
     }
 
-//    @Override
-//    public void onDestroy(@NotNull Destroy destroy) {
-//        MapData map;
-//        if (destroy instanceof PlayerDestroy pd) {
-//            map = MapWorld.forPlayer(pd.getPlayer()).map();
-//        } else {
-//             OK to choose the first editing world, the block is only placed in editing world.
-//            var world = MapWorld.unsafeFromInstance(destroy.getInstance());
-//            if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return;
-//            map = world.map();
-//        }
-//        map.removePOI(destroy.getBlockPosition());
-//    }
+    @Override
+    public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
+        var mapWorld = MapWorld.forPlayer(player);
+        var event = new MapWorldCheckpointReachedEvent(mapWorld, player, createObjectId(tick.getBlockPosition()));
+        EventDispatcher.call(event);
+    }
+
+    public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {
+        var args = new ArrayList<Component>();
+        var isEmpty = true;
+
+        int resetHeight = tag.getTag(CheckpointSetting.RESET_HEIGHT);
+        args.add(CheckpointSetting.RESET_HEIGHT_TEXT_FUNCTION.apply(resetHeight));
+        if (resetHeight != -1) isEmpty = false;
+
+        // If the NBT has settings, set the lore to the "with data" variant, otherwise leave the default.
+        if (!isEmpty) builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
+        builder.meta(m -> m.setTag(BlockItemHandler.BLOCK_DATA, tag.asCompound()));
+    }
+
 }

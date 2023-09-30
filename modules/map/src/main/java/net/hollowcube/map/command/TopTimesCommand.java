@@ -3,7 +3,9 @@ package net.hollowcube.map.command;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -15,6 +17,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -25,11 +28,23 @@ public class TopTimesCommand extends Command {
 
     public TopTimesCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("toptimes", "tt");
+        setCondition(this::isAvailable);
+
         this.playerService = playerService;
         this.mapService = mapService;
 
         setDefaultExecutor(this::showTopTimes);
         addSyntax(this::showTopTimesOfMap, mapIdArg);
+    }
+
+    private boolean isAvailable(@NotNull CommandSender sender, @Nullable String unused) {
+        if (!(sender instanceof Player player))
+            return false;
+
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return true; // The player is in the hub
+
+        return world.map().settings().getVariant() == MapVariant.PARKOUR;
     }
 
     private void showTopTimes(@NotNull CommandSender sender, @NotNull CommandContext unused) {
@@ -38,11 +53,11 @@ public class TopTimesCommand extends Command {
             return;
         }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = MapPlayerData.fromPlayer(player);
         // TODO Find a better method for determining if the player is in the hub
         if (player.getInstance().getDimensionName().equals("mapmaker:hub")) {
             // Player is in hub, check their last played
-            String mapId = playerData.getLastPlayedMap();
+            String mapId = playerData.lastPlayedMap();
             if (mapId == null || mapId.isBlank()) {
                 player.sendMessage(Component.text("Unable to check last played map times.", NamedTextColor.RED));
             } else {

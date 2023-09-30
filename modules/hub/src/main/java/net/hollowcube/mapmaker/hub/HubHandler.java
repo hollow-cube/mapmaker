@@ -2,15 +2,8 @@ package net.hollowcube.mapmaker.hub;
 
 import io.prometheus.client.Histogram;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.event.MapDeletedEvent;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataUpdateRequest;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.SlotState;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventDispatcher;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -53,34 +46,34 @@ public class HubHandler {
         this.mapService = mapService;
     }
 
-    @Blocking
-    public @NotNull MapData createMapForPlayer(@NotNull String owner) {
-        try (var ignored = createMapTime.startTimer()) {
-            return mapService.createMap(owner, owner);
-        }
-    }
-
-    @Blocking
-    public @NotNull MapData createMapForPlayerInSlot(@NotNull PlayerDataV2 playerData, int slot) {
-        try (var ignored = createMapForPlayerInSlotTime.startTimer()) {
-
-            // Ensure selected slot is available
-            var slotState = playerData.getSlotState(slot);
-            if (slotState == SlotState.LOCKED)
-                throw new MapSlotLockedError();
-            if (slotState == SlotState.FILLED)
-                throw new MapSlotInUseError();
-
-            // The updating player slot and creating map actions need to happen as a saga or 2pc at minimum
-            var map = createMapForPlayer(playerData.id());
-            playerData.setMapSlot(slot, map.id());
-
-            var req = new PlayerDataUpdateRequest().setMapSlots(playerData.getRawMapSlots());
-            server.playerService().updatePlayerData(playerData.id(), req);
-
-            return map;
-        }
-    }
+//    @Blocking
+//    public @NotNull MapData createMapForPlayer(@NotNull String owner) {
+//        try (var ignored = createMapTime.startTimer()) {
+//            return mapService.createMap(owner, owner);
+//        }
+//    }
+//
+//    @Blocking
+//    public @NotNull MapData createMapForPlayerInSlot(@NotNull MapPlayerData playerData, int slot) {
+//        try (var ignored = createMapForPlayerInSlotTime.startTimer()) {
+//
+//            // Ensure selected slot is available
+//            var slotState = playerData.getSlotState(slot);
+//            if (slotState == SlotState.LOCKED)
+//                throw new MapSlotLockedError();
+//            if (slotState == SlotState.FILLED)
+//                throw new MapSlotInUseError();
+//
+//            // The updating player slot and creating map actions need to happen as a saga or 2pc at minimum
+//            var map = createMapForPlayer(playerData.id());
+//            playerData.setMapSlot(slot, map.id());
+//
+//            var req = new PlayerDataUpdateRequest().setMapSlots(playerData.getRawMapSlots());
+//            server.playerService().updatePlayerData(playerData.id(), req);
+//
+//            return map;
+//        }
+//    }
 
 //
 //    /**
@@ -117,38 +110,38 @@ public class HubHandler {
 //        }
 //    }
 
-    public void deleteMap(@NotNull Player player, @NotNull String mapId) {
-        var playerData = PlayerDataV2.fromPlayer(player);
-        mapService.deleteMap(playerData.id(), mapId);
+//    public void deleteMap(@NotNull Player player, @NotNull String mapId) {
+//        var playerData = MapPlayerData.fromPlayer(player);
+//        mapService.deleteMap(playerData, mapId);
+//
+//        //todo in the future this should be a kafka message sent by the map service or something
+//        EventDispatcher.call(new MapDeletedEvent(mapId));
+//    }
 
-        //todo in the future this should be a kafka message sent by the map service or something
-        EventDispatcher.call(new MapDeletedEvent(mapId));
-    }
+//    public void playMap(@NotNull Player player, @NotNull String mapId) {
+//        try (var ignored = playMapTime.startTimer()) {
+//            var playerData = PlayerDataV2.fromPlayer(player);
+//            var map = server.mapService().getMap(playerData.id(), mapId);
+//
+//            if (!map.isPublished())
+//                throw new MapNotPublishedError();
+//
+//            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.PLAYING);
+//        }
+//    }
 
-    public void playMap(@NotNull Player player, @NotNull String mapId) {
-        try (var ignored = playMapTime.startTimer()) {
-            var playerData = PlayerDataV2.fromPlayer(player);
-            var map = server.mapService().getMap(playerData.id(), mapId);
-
-            if (!map.isPublished())
-                throw new MapNotPublishedError();
-
-            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.PLAYING);
-        }
-    }
-
-    public void editMap(@NotNull Player player, @NotNull String mapId) {
-        try (var ignored = editMapTime.startTimer()) {
-            var playerData = PlayerDataV2.fromPlayer(player);
-            var map = server.mapService().getMap(playerData.id(), mapId);
-
-            if (map.isPublished())
-                // todo you should perhaps just lose editing permission?
-                throw new MapIsPublishedError();
-
-            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.EDITING);
-        }
-    }
+//    public void editMap(@NotNull Player player, @NotNull String mapId) {
+//        try (var ignored = editMapTime.startTimer()) {
+//            var playerData = PlayerDataV2.fromPlayer(player);
+//            var map = server.mapService().getMap(playerData.id(), mapId);
+//
+//            if (map.isPublished())
+//                // todo you should perhaps just lose editing permission?
+//                throw new MapIsPublishedError();
+//
+//            server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.EDITING);
+//        }
+//    }
 
     public void spectateMap(@NotNull Player player, @NotNull String mapId) {
         server.bridge().joinMap(player, mapId, HubToMapBridge.JoinMapState.SPECTATING);

@@ -29,6 +29,10 @@
     "type": "sprite",
     "ref": "icon/lock"
   },
+  "EXCLAMATION": {
+    "type": "sprite",
+    "ref": "icon/exclamation"
+  },
   // Standard Colors
   // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
   "dark_gray": {

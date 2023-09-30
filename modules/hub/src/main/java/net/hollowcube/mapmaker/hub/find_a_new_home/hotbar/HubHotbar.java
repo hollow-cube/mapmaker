@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub.find_a_new_home.hotbar;
 
-import net.hollowcube.common.lang.LanguageProvider;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.gui.play.PlayMaps;
 import net.hollowcube.mapmaker.hub.gui.play.Query;
@@ -44,18 +44,18 @@ public final class HubHotbar {
             .addListener(ItemDropEvent.class, HubHotbar::handleItemDrop)
             .addListener(InventoryPreClickEvent.class, HubHotbar::handleItemClick);
 
-    private static final int PLAY_ITEM_CMD = 500;
+    private static final int PLAY_ITEM_CMD = 4;
     private static final int CREATE_ITEM_CMD = 3;
 
-    private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.NETHER_STAR)
+    private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.STICK)
             .displayName(Component.translatable("hotbar.lobby.play_maps.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.lobby.play_maps.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("hotbar.lobby.play_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
             .build();
 
     private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.STICK)
             .displayName(Component.translatable("hotbar.lobby.create_maps.name"))
-            .lore(LanguageProvider.optionalMultiTranslatable("hotbar.lobby.create_maps.lore", List.of()))
+            .lore(LanguageProviderV2.translateMulti("hotbar.lobby.create_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 

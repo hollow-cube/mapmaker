@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.HubHandler;
+import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class MapEntry extends View {
 
     private @ContextObject PlayerService playerService;
-    private @ContextObject HubHandler handler;
+    private @ContextObject HubToMapBridge bridge;
 
     private @Outlet("btn") Label label;
 
@@ -38,7 +38,7 @@ public class MapEntry extends View {
     @Action("btn")
     private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case START_SHIFT_CLICK -> handler.playMap(player, map.id());
+            case START_SHIFT_CLICK -> bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
             case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
         }
     }
@@ -50,43 +50,16 @@ public class MapEntry extends View {
         label.setItemSprite(ItemStack.of(icon == null ? Material.PAPER : icon));
 
         authorName = playerService.getPlayerDisplayName(map.owner());
+
         label.setArgs(
                 Component.text(map.publishedIdString()),
                 map.settings().getNameComponent(),
                 authorName,
                 map.getCompletionStateText(),
-                getDifficulty()
+                map.getDifficultyComponent(),
+                map.settings().getTagsComponent()
         );
 
         label.setState(State.ACTIVE);
     }
-
-    private @NotNull Component getDifficulty() {
-        if (map.getUniquePlays() < PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY)
-            return Component.translatable("gui.play_maps.map_display.difficulty.unknown");
-
-        return Component.translatable(
-                "gui.play_maps.map_display.difficulty." + getDifficultyName(),
-                Component.text(getClearRateString())
-        );
-    }
-
-    private @NotNull String getDifficultyName() {
-        var cr = map.getClearRate();
-        if (cr < 0.015) return "nightmare";
-        if (cr < 0.075) return "expert";
-        if (cr < 0.2) return "hard";
-        if (cr < 0.4) return "medium";
-        return "easy";
-    }
-
-    private @NotNull String getClearRateString() {
-        var cr = map.getClearRate() * 100;
-        if (cr >= 100) return "100";
-        else if (cr <= 0) return "0";
-        else if (cr >= 10) return String.format("%.1f", cr);
-        else if (cr >= 1) return String.format("%.2f", cr);
-        else return String.format("%.3f", cr);
-    }
-
 }

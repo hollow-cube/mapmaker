@@ -2,8 +2,11 @@ package net.hollowcube.map.feature;
 
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public interface FeatureProvider {
 
@@ -17,6 +20,10 @@ public interface FeatureProvider {
      * Global feature shutdown when a server stops.
      */
     default void shutdown() {
+    }
+
+    default @NotNull List<BlockHandler> blockHandlers() {
+        return List.of();
     }
 
     /**
