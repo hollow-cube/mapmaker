@@ -14,6 +14,9 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.command.AcceptCommand;
+import net.hollowcube.map.command.RejectCommand;
+import net.hollowcube.map.command.RequestCommand;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
@@ -202,6 +205,17 @@ public class DevServer {
             var playCommand = new PlayCommand(mapService, hubToMapBridge);
             hubCommandManager.register(playCommand);
             mapCommandManager.register(playCommand);
+
+            // Register Request/Accept/Reject to hub and map command managers
+            var requestCommand = new RequestCommand();
+            var acceptCommand = new AcceptCommand();
+            var rejectCommand = new RejectCommand();
+            hubCommandManager.register(requestCommand);
+            hubCommandManager.register(acceptCommand);
+            hubCommandManager.register(rejectCommand);
+            mapCommandManager.register(requestCommand);
+            mapCommandManager.register(acceptCommand);
+            mapCommandManager.register(rejectCommand);
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

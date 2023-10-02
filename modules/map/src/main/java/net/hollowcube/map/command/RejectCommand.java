@@ -18,6 +18,11 @@ public class RejectCommand extends Command {
     }
 
     private void reject(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            return;
+        }
+
         EntityFinder entityFinder = context.get("player");
         Player target = entityFinder.findFirstPlayer(sender);
 
@@ -31,6 +36,6 @@ public class RejectCommand extends Command {
             return;
         }
 
-        PlayerInviteService.reject((Player) sender, target);
+        PlayerInviteService.reject(player, target);
     }
 }

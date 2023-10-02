@@ -93,13 +93,19 @@ public class PlayerInviteService {
             sender.sendMessage(Component.translatable("map.build.remove.same_map"));
             return;
         }
+
         var key = new Invite(sender.getUuid(), target.getUuid());
         var context = invites.get(key);
         var now = Instant.now();
         var val = new Context(now, senderMap.map().id());
 
-        if (context == null || Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0)
+        if (context != null && Duration.between(context.time, now).compareTo(inviteExpirationTime) < 0) {
+            // if we already have a valid invite
+            sender.sendMessage(Component.translatable("map.invite.already_present", targetDisplayName));
+            return;
+        } else {
             invites.put(key, val);
+        }
 
         // build/play determined by map publish state
         String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".invite.";
@@ -150,8 +156,14 @@ public class PlayerInviteService {
         var context = requests.get(key);
         var now = Instant.now();
         var val = new Context(now, targetMap.map().id());
-        if (context == null || Duration.between(context.time, now).compareTo(requestExpirationTime) > 0)
+
+        if (context != null && Duration.between(context.time, now).compareTo(inviteExpirationTime) < 0) {
+            // if we already have a valid request
+            sender.sendMessage(Component.translatable("map.request.already_present", targetDisplayName));
+            return;
+        } else {
             requests.put(key, val);
+        }
 
         // build/play determined by map publish state
         String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";

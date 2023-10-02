@@ -18,7 +18,7 @@ public class RequestCommand extends Command {
     }
 
     private void request(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
         }
@@ -36,6 +36,6 @@ public class RequestCommand extends Command {
             return;
         }
 
-        PlayerInviteService.registerRequest((Player) sender, target);
+        PlayerInviteService.registerRequest(player, target);
     }
 }

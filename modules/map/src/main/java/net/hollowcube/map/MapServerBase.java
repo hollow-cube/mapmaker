@@ -95,9 +95,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new BuildModeCommand(this));
         commandManager.register(new TopTimesCommand(playerService(), mapService()));
         commandManager.register(new InviteCommand());
-        commandManager.register(new RequestCommand());
-        commandManager.register(new AcceptCommand());
-        commandManager.register(new RejectCommand());
+        // Request, Accept, Reject have been registered already in DevServer
         commandManager.register(new RemoveCommand(bridge));
 
         // Register features
