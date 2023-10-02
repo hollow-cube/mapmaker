@@ -19,8 +19,11 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.apache.kafka.common.cache.LRUCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +36,7 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LanguageProviderV2 {
+    private static final Logger logger = LoggerFactory.getLogger("LanguageProvider");
 
     private static final JsonObject langData;
 
@@ -52,10 +56,21 @@ public class LanguageProviderV2 {
     private static final Map<String, @Nullable ElementNode> componentCache = new ConcurrentHashMap<>();
     private static final Map<String, @Nullable List<ElementNode>> multiComponentCache = new ConcurrentHashMap<>();
 
-    public static @NotNull Component translate(@NotNull Component component) {
+    private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
+
+    public static @Nullable Component translate(@Nullable Component component) {
+        if (component == null) return null;
         if (!(component instanceof TranslatableComponent translatable)) {
-            return component;
+            // Minestom seems not to check for children so we do it here, but this is probably insanely slow for the 99% of cases we dont need it...
+            return component.children(component.children().stream()
+                    .map(LanguageProviderV2::translate)
+                    .toList());
         }
+
+        // Return from cache if present
+        var cached = expandedComponentCache.get(translatable);
+        if (cached != null) return cached;
+        logger.debug("Cache miss for {}", translatable.key());
 
         // Fetch the partially parsed minimessage tree, or return the translatable if we dont know about it,
         // for example we need to pass through `chat.type.text` and others.
@@ -66,7 +81,9 @@ public class LanguageProviderV2 {
         var args = translatable.args().stream()
                 .map(LanguageProviderV2::translate)
                 .toList();
-        return BASE_EMPTY.append(treeToComponent(partial, args));
+        var result = BASE_EMPTY.append(treeToComponent(partial, args));
+        expandedComponentCache.put(translatable, result);
+        return result;
     }
 
     public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<Component> args) {

@@ -1,0 +1,13 @@
+.ijwb
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-mapmaker
+bazel-genfiles
+WORKSPACE
+.bazelignore
+.bazelrc
+.run
+
+third_party/genfile.bzl
+bin/packer/packer.bzl

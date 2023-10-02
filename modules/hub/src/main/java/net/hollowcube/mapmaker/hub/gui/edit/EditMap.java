@@ -24,8 +24,6 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
@@ -44,6 +42,9 @@ public class EditMap extends View {
     private enum PublishStage {
         VERIFY_ERROR,
         BUILD_ONCE,
+        PLAY_LONGER,
+        MISSING_FINISH_PLATE,
+        BAD_STATUS_PLATE,
         VERIFY,
         ADD_NAME,
         ADD_ICON,
@@ -148,9 +149,9 @@ public class EditMap extends View {
 
         // Send the player to the map
         try {
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
         } finally {
             player.closeInventory();
@@ -178,13 +179,33 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap2, Component.text(publishedMap.owner())));
     }
 
+    private static final int MIN_PLAYTIME = 5 * 60 * 1000; // 5 minutes
+
     private PublishStage getPublishState() {
         try {
-            mapService.getLatestSaveState(map.id(), map.owner());
+            var ss = mapService.getLatestSaveState(map.id(), map.owner());
+            if (ss.getPlaytime() < MIN_PLAYTIME)
+                return PublishStage.PLAY_LONGER;
         } catch (MapService.NotFoundError e) {
             return PublishStage.BUILD_ONCE;
-        } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Player could not access save states when getting map publish state.");
+        }
+        if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            boolean found = false;
+            for (var object : map.objects()) {
+                if (object.type().id().equals("mapmaker:finish_plate")) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return PublishStage.MISSING_FINISH_PLATE;
+        } else {
+            for (var object : map.objects()) {
+                var objectId = object.type().id();
+                if (objectId.equals("mapmaker:checkpoint_plate") || objectId.equals("mapmaker:finish_plate")) {
+                    //todo this should be done using the required_variant property on the ObjectType in the future, not sure how to handle messaging then.
+                    return PublishStage.BAD_STATUS_PLATE;
+                }
+            }
         }
         if (!map.isVerified()) return PublishStage.VERIFY;
         if (map.settings().getName().isEmpty()) return PublishStage.ADD_NAME;
@@ -263,6 +284,7 @@ public class EditMap extends View {
 
         mapTypeTabSwitch.setOption(0);
         map.settings().setVariant(MapVariant.PARKOUR);
+        map.settings().removeVisualTags();
         updateElementsFromMap();
         updateRequest();
     }
@@ -386,22 +408,12 @@ public class EditMap extends View {
 
         mapTypeTabSwitch.setOption(1);
         map.settings().setVariant(MapVariant.BUILDING);
+        map.settings().removeGameplayTags();
         updateElementsFromMap();
-
-        async(() -> map.settings().withUpdateRequest(req -> {
-            //todo if update fails we should revert the name change and indicate to the user that it failed
-            try {
-                mapService.updateMap(player().getUuid().toString(), map.id(), req);
-                return true;
-            } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "Failed to update map name", e);
-                MinecraftServer.getExceptionManager().handleException(e);
-                return false;
-            }
-        }));
+        updateRequest();
     }
 
-    // MAP TAGS
+    // MAP TAG TABS
 
     @Action("map_tags_tab_visual")
     private void selectMapTagVisual() {
@@ -412,319 +424,220 @@ public class EditMap extends View {
 
     @Action("map_tags_tab_gameplay")
     private void selectMapTagGameplay() {
-        System.out.println("map_tags_tab_gameplay");
-        if (mapTagsTabSwitch.getOption() == 1) return;
-        mapTagsTabSwitch.setOption(1);
+        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
+            System.out.println("map_tags_tab_gameplay");
+            if (mapTagsTabSwitch.getOption() == 1) return;
+            mapTagsTabSwitch.setOption(1);
+        }
     }
 
-    // VISUAL
+    // TAG HELPER FUNCTIONS
+
+    private boolean canAddAnotherTag(MapTags.TagType tagType) {
+        var visualTags = map.settings().getTags().stream().filter(
+                tag -> tag.getType() == MapTags.TagType.VISUAL
+        ).toList();
+        if (map.settings().getVariant() == MapVariant.BUILDING) {
+            // Max 3 visual tags
+            return visualTags.size() < 3;
+        } else if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            // Max 2 visual and 2 gameplay tags
+            var gameplayTags = map.settings().getTags().stream().filter(
+                    tag -> tag.getType() == MapTags.TagType.GAMEPLAY
+            ).toList();
+            if (tagType.equals(MapTags.TagType.VISUAL) && visualTags.size() >= 2)
+                return false;
+            return !tagType.equals(MapTags.TagType.GAMEPLAY) || gameplayTags.size() < 2;
+        } else {
+            System.out.println("unsupported map variant type");
+        }
+        return true;
+    }
+
+    private void tagClickHandler(MapTags.Tag tag, boolean set) {
+        if (set) {
+            if (canAddAnotherTag(tag.getType())) {
+                map.settings().addTag(tag);
+            }
+        } else {
+            map.settings().removeTag(tag);
+        }
+        updateElementsFromMap();
+        updateRequest();
+    }
+
+    // VISUAL TAGS
 
     @Action("map_tag_terrain_unset")
     private void mapTagTerrainUnset() {
-        System.out.println("map_tag_terrain_unset");
-        mapTagTerrainSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.TERRAIN);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TERRAIN, true);
     }
 
     @Action("map_tag_terrain_set")
     private void mapTagTerrainSet() {
-        System.out.println("map_tag_terrain_set");
-        mapTagTerrainSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.TERRAIN);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TERRAIN, false);
     }
 
     @Action("map_tag_organics_unset")
     private void mapTagOrganicsUnset() {
-        System.out.println("map_tag_organics_unset");
-        mapTagOrganicsSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.ORGANICS);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.ORGANICS, true);
     }
 
     @Action("map_tag_organics_set")
     private void mapTagOrganicsSet() {
-        System.out.println("map_tag_organics_set");
-        mapTagOrganicsSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.ORGANICS);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.ORGANICS, false);
     }
 
     @Action("map_tag_structure_unset")
     private void mapTagStructureUnset() {
-        System.out.println("map_tag_structure_unset");
-        mapTagStructureSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.STRUCTURE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STRUCTURE, true);
     }
 
     @Action("map_tag_structure_set")
     private void mapTagStructureSet() {
-        System.out.println("map_tag_structure_set");
-        mapTagStructureSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.STRUCTURE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STRUCTURE, false);
     }
 
     @Action("map_tag_interior_unset")
     private void mapTagInteriorUnset() {
-        System.out.println("map_tag_interior_unset");
-        mapTagInteriorSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.INTERIOR);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.INTERIOR, true);
     }
 
     @Action("map_tag_interior_set")
     private void mapTagInteriorSet() {
-        System.out.println("map_tag_interior_set");
-        mapTagInteriorSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.INTERIOR);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.INTERIOR, false);
     }
 
     @Action("map_tag_music_unset")
     private void mapTagMusicUnset() { // TODO coming later
-//        System.out.println("map_tag_music_unset");
-//        mapTagMusicSwitch.setOption(1);
-//        map.settings().addTag(MapTags.Tag.MUSIC);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.MUSIC, true);
     }
 
     @Action("map_tag_music_set")
     private void mapTagMusicSet() { // TODO coming later
-//        System.out.println("map_tag_music_set");
-//        mapTagMusicSwitch.setOption(0);
-//        map.settings().removeTag(MapTags.Tag.MUSIC);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.MUSIC, false);
     }
 
     @Action("map_tag_2d_unset")
     private void mapTag2DUnset() {
-        System.out.println("map_tag_2d_unset");
-        mapTag2DSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.TWODIMENSIONAL);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TWODIMENSIONAL, true);
     }
 
     @Action("map_tag_2d_set")
     private void mapTag2DSet() {
-        System.out.println("map_tag_2d_set");
-        mapTag2DSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.TWODIMENSIONAL);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TWODIMENSIONAL, false);
     }
 
     @Action("map_tag_recreation_unset")
     private void mapTagRecreationUnset() {
-        System.out.println("map_tag_recreation_unset");
-        mapTag2DSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.RECREATION);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.RECREATION, true);
     }
 
     @Action("map_tag_recreation_set")
     private void mapTagRecreationSet() {
-        System.out.println("map_tag_recreation_set");
-        mapTagRecreationSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.RECREATION);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.RECREATION, false);
     }
 
     @Action("map_tag_story_unset")
     private void mapTagStoryUnset() {
-        System.out.println("map_tag_story_unset");
-        mapTagStorySwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.STORY);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STORY, true);
     }
 
     @Action("map_tag_recreation_set")
     private void mapTagStorySet() {
-        System.out.println("map_tag_recreation_set");
-        mapTagRecreationSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.STORY);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STORY, false);
     }
 
-    // GAMEPLAY
+    // GAMEPLAY TAGS
 
     @Action("map_tag_coop_unset")
     private void mapTagCoOpUnset() { // TODO coming later
-//        System.out.println("map_tag_coop_unset");
-//        mapTagCoOpSwitch.setOption(1);
-//        map.settings().addTag(MapTags.Tag.COOP);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.COOP, true);
     }
 
     @Action("map_tag_coop_set")
     private void mapTagCoOpSet() { // TODO coming later
-//        System.out.println("map_tag_coop_set");
-//        mapTagCoOpSwitch.setOption(0);
-//        map.settings().removeTag(MapTags.Tag.COOP);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.COOP, false);
     }
 
     @Action("map_tag_puzzle_unset")
     private void mapTagPuzzleUnset() {
-        System.out.println("map_tag_puzzle_unset");
-        mapTagPuzzleSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.PUZZLE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.PUZZLE, true);
     }
 
     @Action("map_tag_puzzle_set")
     private void mapTagPuzzleSet() {
-        System.out.println("map_tag_puzzle_set");
-        mapTagPuzzleSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.PUZZLE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.PUZZLE, false);
     }
 
     @Action("map_tag_minigame_unset")
     private void mapTagMinigameUnset() { // TODO coming later
-//        System.out.println("map_tag_minigame_unset");
-//        mapTagMinigameSwitch.setOption(1);
-//        map.settings().addTag(MapTags.Tag.MINIGAME);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.MINIGAME, true);
     }
 
     @Action("map_tag_minigame_set")
     private void mapTagMinigameSet() { // TODO coming later
-//        System.out.println("map_tag_minigame_set");
-//        mapTagMinigameSwitch.setOption(0);
-//        map.settings().removeTag(MapTags.Tag.MINIGAME);
-//        updateElementsFromMap();
-//        updateRequest();
+//        tagClickHandler(MapTags.Tag.MINIGAME, false);
     }
 
     @Action("map_tag_exploration_unset")
     private void mapTagExplorationUnset() {
-        System.out.println("map_tag_exploration_unset");
-        mapTagExplorationSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.EXPLORATION);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.EXPLORATION, true);
     }
 
     @Action("map_tag_exploration_set")
     private void mapTagExplorationSet() {
-        System.out.println("map_tag_exploration_set");
-        mapTagExplorationSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.EXPLORATION);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.EXPLORATION, false);
     }
 
     @Action("map_tag_bossbattle_unset")
     private void mapTagBossBattleUnset() {
-        System.out.println("map_tag_bossbattle_unset");
-        mapTagBossBattleSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.BOSSBATTLE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.BOSSBATTLE, true);
     }
 
     @Action("map_tag_bossbattle_set")
     private void mapTagBossBattleSet() {
-        System.out.println("map_tag_bossbattle_set");
-        mapTagBossBattleSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.BOSSBATTLE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.BOSSBATTLE, false);
     }
 
     @Action("map_tag_autocomplete_unset") // do this tag at all?
     private void mapTagAutoCompleteUnset() {
-        System.out.println("map_tag_autocomplete_unset");
-        mapTagAutoCompleteSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.AUTOCOMPLETE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.AUTOCOMPLETE, true);
     }
 
     @Action("map_tag_autocomplete_set")
     private void mapTagAutoCompleteSet() {
-        System.out.println("map_tag_autocomplete_set");
-        mapTagAutoCompleteSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.AUTOCOMPLETE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.AUTOCOMPLETE, false);
     }
 
     @Action("map_tag_escape_unset")
     private void mapTagEscapeUnset() {
-        System.out.println("map_tag_escape_unset");
-        mapTagEscapeSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.ESCAPE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.ESCAPE, true);
     }
 
     @Action("map_tag_escape_set")
     private void mapTagEscapeSet() {
-        System.out.println("map_tag_escape_set");
-        mapTagEscapeSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.ESCAPE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.ESCAPE, false);
     }
 
     @Action("map_tag_trivia_unset")
     private void mapTagTriviaUnset() {
-        System.out.println("map_tag_trivia_unset");
-        mapTagTriviaSwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.TRIVIA);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TRIVIA, true);
     }
 
     @Action("map_tag_trivia_set")
     private void mapTagTriviaSet() {
-        System.out.println("map_tag_trivia_set");
-        mapTagTriviaSwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.TRIVIA);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.TRIVIA, false);
     }
 
     @Action("map_tag_strategy_unset")
     private void mapTagStrategyUnset() {
-        System.out.println("map_tag_strategy_unset");
-        mapTagStrategySwitch.setOption(1);
-        map.settings().addTag(MapTags.Tag.TRIVIA);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STRATEGY, true);
     }
 
     @Action("map_tag_strategy_set")
     private void mapTagStrategySet() {
-        System.out.println("map_tag_strategy_set");
-        mapTagStrategySwitch.setOption(0);
-        map.settings().removeTag(MapTags.Tag.AUTOCOMPLETE);
-        updateElementsFromMap();
-        updateRequest();
+        tagClickHandler(MapTags.Tag.STRATEGY, false);
     }
 
     /**
@@ -769,7 +682,7 @@ public class EditMap extends View {
             }
         }
 
-        // Tags
+        // TAGS
         var tags = map.settings().getTags();
         for (int i = 0; i < mapTagsSwitches.length; i++) {
             mapTagsSwitches[i].setOption(tags.contains(MapTags.Tag.values()[i]) ? 1 : 0);
@@ -815,8 +728,8 @@ public class EditMap extends View {
         selectTab(0);
     }
 
-    @Action("tab_stats")
-    public void showStatsTab() {
+    @Action("tab_tags")
+    public void showTagsTab() {
         selectTab(1);
     }
 
@@ -835,6 +748,9 @@ public class EditMap extends View {
         for (int i = 0; i < tabSwitches.length; i++) {
             tabSwitches[i].setOption(i == index ? 1 : 0);
         }
+        // Default to visual tab if map is build type
+        if (index == 1 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING))
+            mapTagsTabSwitch.setOption(0);
     }
 
 }

@@ -24,6 +24,7 @@ import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
+import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
@@ -313,7 +314,7 @@ public class DevServer {
         var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
         if (!resourcePackHash.equals("dev")) {
             var url = String.format(RESOURCE_PACK_URL, runtime.commit());
-            System.out.println("Sending resource pack " + url + " (" + resourcePackHash + ")");
+            logger.info("Sending resource pack {} ({}) to {}", url, resourcePackHash, player.getUsername());
             player.setResourcePack(ResourcePack.forced(url, resourcePackHash));
         }
 

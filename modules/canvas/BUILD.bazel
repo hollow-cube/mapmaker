@@ -1,0 +1,27 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "api",
+    srcs = glob(include = ["api/src/main/java/**/*.java"]),
+    resources = glob(include = ["api/src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party:minestom",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)
+
+java_library(
+    name = "impl-standalone",
+    srcs = glob(include = ["impl-standalone/src/main/java/**/*.java"]),
+    resources = glob(include = ["impl-standalone/src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":api",
+        "//modules/common",
+        "//third_party:minestom",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:net_kyori_adventure_api",
+    ],
+)

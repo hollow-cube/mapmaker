@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.util.Response;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,11 +16,12 @@ public interface MapService {
      *
      * @return The created map
      */
-    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot);
+    @NotNull Response<MapData> createMap(@NotNull MapPlayerData player, int slot);
 
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
+
     @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
@@ -27,23 +29,32 @@ public interface MapService {
     void deleteMap(@NotNull MapPlayerData player, @NotNull String id);
 
     void beginVerification(@NotNull String authorizer, @NotNull String mapId);
+
     void deleteVerification(@NotNull String authorizer, @NotNull String mapId);
 
     @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id);
 
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
+
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 
     @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
 
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
+
     @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+
     @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
+
     @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
+
     void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+
     @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
+
     void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
@@ -51,6 +62,7 @@ public interface MapService {
     // Legacy
 
     @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);
+
     @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
 
     class NotFoundError extends RuntimeException {
