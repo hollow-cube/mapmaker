@@ -58,7 +58,7 @@ public class RemoveCommand extends BaseMapCommand {
                 sender.sendMessage(Component.translatable("map.build.remove", Component.text((target).getUsername())));
 
             } catch (Exception e) {
-                System.out.println(":(");
+                System.out.println("something went wrong when removing");
             }
         } else {
             sender.sendMessage(Component.translatable("map.build.cant_remove"));
