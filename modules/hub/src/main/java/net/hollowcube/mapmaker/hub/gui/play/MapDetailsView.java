@@ -58,7 +58,6 @@ public class MapDetailsView extends View {
     // BUILDING
     private @Outlet("map_type_showcase_text") Text mapTypeShowcaseText;
     private @Outlet("map_type_tutorial_text") Text mapTypeTutorialText;
-    private @Outlet("map_type_map_pack_text") Text mapTypeMapPackText;
     private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
     // MAP TAGS - VISUAL
