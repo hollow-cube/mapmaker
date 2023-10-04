@@ -24,9 +24,9 @@ public interface HubToMapBridge {
     void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState);
 
 
-    public enum JoinMapState {
+    enum JoinMapState {
         EDITING,
         PLAYING,
-        SPECTATING
+        SPECTATING,
     }
 }

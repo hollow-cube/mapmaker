@@ -102,9 +102,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new BuildModeCommand(this));
         commandManager.register(new TopTimesCommand(playerService(), mapService()));
         commandManager.register(new InviteCommand());
-        commandManager.register(new AcceptInviteCommand());
-        commandManager.register(new RejectInviteCommand());
-
+        // Request, Accept, Reject have been registered already in DevServer
+        commandManager.register(new RemoveCommand(bridge));
         // Register features
         var features = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
@@ -130,7 +129,7 @@ public abstract class MapServerBase implements MapServer {
                 "mapService", mapService()
         ));
 
-        PlayerInviteService.init(mwm, mapService());
+        PlayerInviteService.init(mwm);
     }
 
     @Override

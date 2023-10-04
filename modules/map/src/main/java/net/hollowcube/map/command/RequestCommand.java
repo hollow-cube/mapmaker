@@ -10,14 +10,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-public class InviteCommand extends Command {
-    public InviteCommand() {
-        super("invite");
-        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.invite.usage")));
-        addSyntax(this::invite, ArgumentType.Entity("player").onlyPlayers(true));
+public class RequestCommand extends Command {
+    public RequestCommand() {
+        super("request");
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.request.usage")));
+        addSyntax(this::request, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
-    private void invite(@NotNull CommandSender sender, @NotNull CommandContext context) {
+    private void request(@NotNull CommandSender sender, @NotNull CommandContext context) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.translatable("command.generic.player_only"));
             return;
@@ -36,6 +36,6 @@ public class InviteCommand extends Command {
             return;
         }
 
-        PlayerInviteService.registerInvite(player, target);
+        PlayerInviteService.registerRequest(player, target);
     }
 }

@@ -1,6 +1,7 @@
 package net.hollowcube.map.command;
 
 import net.hollowcube.map.invites.PlayerInviteService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -9,27 +10,32 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-public class RejectInviteCommand extends Command {
-    public RejectInviteCommand() {
+public class RejectCommand extends Command {
+    public RejectCommand() {
         super("reject");
-        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /reject <player>"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.translatable("command.reject.usage")));
         addSyntax(this::reject, ArgumentType.Entity("player").onlyPlayers(true));
     }
 
     private void reject(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.translatable("command.generic.player_only"));
+            return;
+        }
+
         EntityFinder entityFinder = context.get("player");
         Player target = entityFinder.findFirstPlayer(sender);
 
         if (target == sender) {
-            sender.sendMessage("You can't reject yourself!");
+            sender.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
 
         if (target == null) {
-            sender.sendMessage("That player is not online!");
+            sender.sendMessage(Component.translatable("generic.player_offline", Component.text(context.get("player").toString())));
             return;
         }
 
-        PlayerInviteService.rejectInvite(target, (Player) sender);
+        PlayerInviteService.reject(player, target);
     }
 }
