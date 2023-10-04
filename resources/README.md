@@ -11,7 +11,7 @@ and server.
 `_client` is a resource pack structure, used as the base for the resource pack (anything static can go there)
 
 
-In thoery we can generate a lot more if desired. For example, it is possible to look at the usages of each `TextElement`
+In theory, we can generate a lot more if desired. For example, it is possible to look at the usages of each `TextElement`
 and compute the offset required to sit at the given pixel position based on the X/Y position of the node.
 Similarly, we can compute the origin and shift values of the textures used based on their node positions.
 
