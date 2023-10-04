@@ -122,9 +122,8 @@ public final class ExtraArguments {
                 .setSuggestionCallback((sender, context, suggestion) -> {
                     var start = suggestion.getStart() - 1;
                     var query = suggestion.getInput().substring(start, start + suggestion.getLength()).trim();
-                    var r = playerService.getUsernameTabCompletions(query);
-                    r
-                            .result()
+                    playerService.getUsernameTabCompletions(query)
+                            .resultSafe()
                             .forEach(entry -> suggestion.addEntry(new SuggestionEntry(entry.username())));
                 });
     }

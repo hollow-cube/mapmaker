@@ -397,7 +397,7 @@
         </switch>
         <spacer/>
         <switch id="tab_tags_switch">
-            <button id="tab_stats" translationKey="gui.create_maps.map_tags_tab"
+            <button id="tab_tags" translationKey="gui.create_maps.map_tags_tab"
                     sprite="create_maps/tab_tags/icon"
                     backgroundSprite="create_maps/tab_tags/icon_bg_default"/>
             <button translationKey="gui.create_maps.map_tags_tab"
@@ -431,6 +431,12 @@
             <button width="3" height="3" translationKey="gui.create_maps.verify_error"
                     sprite="create_maps/verify_error"/>
             <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.build_once"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.play_longer"
+                    sprite="create_maps/publish_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.missing_finish_plate"
+                    sprite="create_maps/verify_error"/>
+            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.bad_status_plate"
                     sprite="create_maps/publish_error"/>
             <button id="verify" width="3" height="3" translationKey="gui.create_maps.verify_map"
                     sprite="create_maps/verify"/>

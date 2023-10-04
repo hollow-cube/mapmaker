@@ -1,0 +1,14 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_binary(
+    name = "packer",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    main_class = "net.hollowcube.mapmaker.Packer",
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:de_marhali_json5_java",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)

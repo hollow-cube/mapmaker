@@ -10,6 +10,7 @@ import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.event.EventFilter;
@@ -41,6 +42,8 @@ public class RecordingFeatureProvider implements FeatureProvider {
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
+            return false;
+        if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return false;
 
         world.addScopedEventNode(eventNode);

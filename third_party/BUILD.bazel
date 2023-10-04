@@ -1,0 +1,49 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
+package(default_visibility = ["//visibility:public"])
+
+# Auto service
+
+java_plugin(
+    name = "auto_service_processor",
+    processor_class = "com.google.auto.service.processor.AutoServiceProcessor",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@maven//:com_google_auto_service_auto_service",
+        "@maven//:com_google_auto_service_auto_service_annotations",
+    ],
+)
+
+java_library(
+    name = "auto_service",
+    exported_plugins = [":auto_service_processor"],
+    tags = ["maven:compile_only"],
+    exports = ["@maven//:com_google_auto_service_auto_service_annotations"],
+)
+
+# Aliases of dependency groups
+
+alias(
+    name = "minestom",
+    actual = "@maven//:dev_hollowcube_minestom_ce",
+)
+
+java_library(
+    name = "helidon",
+    exports = [
+        "@maven//:io_helidon_health_helidon_health",
+        "@maven//:io_helidon_logging_helidon_logging_slf4j",
+        "@maven//:io_helidon_metrics_helidon_metrics_prometheus",
+    ],
+)
+
+java_library(
+    name = "adventure_all",
+    exports = [
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_key",
+        "@maven//:net_kyori_adventure_text_minimessage",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+    ],
+)

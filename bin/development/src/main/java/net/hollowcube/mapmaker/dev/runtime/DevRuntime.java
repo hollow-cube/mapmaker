@@ -1,9 +1,12 @@
-package net.hollowcube.mapmaker.dev;
+package net.hollowcube.mapmaker.dev.runtime;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * File is intentionally NOT added to the Bazel project. It uses the template version.
+ */
 @AutoService(ServerRuntime.class)
 public class DevRuntime implements ServerRuntime {
 

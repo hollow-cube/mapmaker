@@ -47,9 +47,21 @@ public class CreateMap extends View {
 
         // Dispatch request to create the map
         try {
-            var map = mapService.createMap(playerData, slot);
-            performSignal(SIG_MAP_CREATED, slot, map);
-            submitButton.setState(State.ACTIVE);
+            var resp = mapService.createMap(playerData, slot);
+            switch (resp.errorCode()) {
+                case null -> {
+                    performSignal(SIG_MAP_CREATED, slot, resp.payload());
+                    submitButton.setState(State.ACTIVE);
+                }
+                //todo handle known error cases
+                default -> {
+                    resp.logError(player);
+                    player.closeInventory();
+                }
+            }
+//            var map = mapService.createMap(playerData, slot);
+//            performSignal(SIG_MAP_CREATED, slot, map);
+//            submitButton.setState(State.ACTIVE);
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "Failed to create map", e);
             MinecraftServer.getExceptionManager().handleException(e);

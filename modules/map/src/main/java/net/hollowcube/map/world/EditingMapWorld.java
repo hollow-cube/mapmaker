@@ -254,6 +254,7 @@ public class EditingMapWorld implements InternalMapWorld {
             player.setTag(SaveState.TAG, saveState);
 
             player.setGameMode(GameMode.CREATIVE);
+            saveState.setPlayStartTime(System.currentTimeMillis());
 
             // Read from player data
             var playerTfState = playerData.getTfState();
@@ -292,6 +293,7 @@ public class EditingMapWorld implements InternalMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
             try {
+
                 //todo handle these errors better
                 var playerData = PlayerDataV2.fromPlayer(player);
 
