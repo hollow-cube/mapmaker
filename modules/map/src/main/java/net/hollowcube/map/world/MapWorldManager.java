@@ -5,12 +5,14 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class MapWorldManager {
@@ -30,6 +32,16 @@ public class MapWorldManager {
             // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
             var world = MapWorld.unsafeFromInstance(event.getInstance());
             if (world == null) return;
+
+            // If the owner has left, boot all invited players
+            if (event.getPlayer().getUuid().equals(UUID.fromString(world.map().owner()))) {
+                for (var player : world.players()) {
+                    // I believe the owner is still considered on the players list when leaving, so check just in case
+                    if (player == event.getPlayer()) continue;
+                    player.sendMessage(Component.text("The owner has left the map.", NamedTextColor.RED));
+                    server.bridge().sendPlayerToHub(player);
+                }
+            }
 
             // Stop if there are still players in the instance
             if (event.getInstance().getPlayers().size() > 1) return;
