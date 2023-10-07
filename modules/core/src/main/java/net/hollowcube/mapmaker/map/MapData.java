@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.object.ObjectData;
-import net.hollowcube.mapmaker.util.CoordinateUtil;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -11,7 +8,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
@@ -36,13 +32,6 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
-
-    private record PointOfInterest(String type, Vec pos) {
-    }
-
-//    private int maxPois = 100; //todo once map service sets this default it can be unset here
-//    private List<PointOfInterest> pois;
-//    private transient final ReentrantLock poiLock = new ReentrantLock();
 
     private int objectLimit = 100;
     private List<ObjectData> objects = new ArrayList<>();
@@ -116,41 +105,6 @@ public class MapData {
         return publishedAt;
     }
 
-//    public boolean addPointOfInterest(@NotNull String type, @NotNull Point pos) {
-//        poiLock.lock();
-//        try {
-//            if (pois == null) pois = new ArrayList<>();
-//            if (pois.size() >= maxPois) return false;
-//
-//            pos = CoordinateUtil.floor(pos);
-//            removePointOfInterest(pos);
-//            pois.add(new PointOfInterest(type, Vec.fromPoint(pos)));
-//            return true;
-//        } finally {
-//            poiLock.unlock();
-//        }
-//    }
-//
-//    public @Nullable String removePointOfInterest(@NotNull Point pos) {
-//        poiLock.lock();
-//        try {
-//            if (pois == null) return null;
-//
-//            String removed = null;
-//            var iter = pois.iterator();
-//            while (iter.hasNext()) {
-//                var poi = iter.next();
-//                if (poi.pos.equals(pos)) {
-//                    iter.remove();
-//                    removed = poi.type;
-//                }
-//            }
-//            return removed;
-//        } finally {
-//            poiLock.unlock();
-//        }
-//    }
-
     public int objectUsage() {
         if (objectUsage == -1) {
             objectUsage = objects.stream()
@@ -168,7 +122,6 @@ public class MapData {
                 return false;
 
             objects.add(object);
-            System.out.println("Added object " + object.toString());
             objectUsage += object.type().cost();
 
             // Add to update

@@ -3,9 +3,10 @@ package net.hollowcube.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
+import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.entity.Player;
@@ -21,6 +22,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
+            .addListener(MapPlayerStartSpectatorEvent.class, this::initSpectatorPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::deinitPlayer);
 
     @Override
@@ -31,6 +33,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return false;
 
         world.addScopedEventNode(eventNode);
+
+        var itemRegistry = world.itemRegistry();
+        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
+        itemRegistry.registerSilent(ResetToCheckpointItem.INSTANCE);
+        itemRegistry.registerSilent(EnterSpectatorModeItem.INSTANCE);
+        itemRegistry.registerSilent(ExitSpectatorModeItem.INSTANCE);
+        itemRegistry.registerSilent(ResetSaveStateItem.INSTANCE);
+        itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
 
         // Controls player visibility
         world.instance().scheduler()
@@ -44,14 +54,36 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
         if (!MapHooks.isPlayerPlaying(player)) return;
-        if (!event.isFirstInit()) return;
 
-        PlayingMapHotbar.applyToPlayer(event.mapWorld(), player);
+        // Set the hotbar
+        var itemRegistry = event.mapWorld().itemRegistry();
+        var inventory = player.getInventory();
+        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        inventory.setItemStack(1, itemRegistry.getItemStack(ResetToCheckpointItem.ID, null));
+        inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+        inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
-        player.updateViewableRule(p -> {
-            if (p.isInvisible()) return true;
-            return player.getDistanceSquared(p) > 3.5 * 3.5;
-        });
+        if (event.isFirstInit()) {
+
+            player.updateViewableRule(p -> {
+                if (p.isInvisible()) return true;
+                return player.getDistanceSquared(p) > 3.5 * 3.5;
+            });
+
+        }
+    }
+
+    public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
+        var player = event.getPlayer();
+
+        // Set the hotbar
+        var itemRegistry = event.mapWorld().itemRegistry();
+        var inventory = player.getInventory();
+        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
+        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+
     }
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {

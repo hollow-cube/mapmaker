@@ -3,6 +3,7 @@ package net.hollowcube.map.block.rule;
 import net.hollowcube.map.block.handler.BannerBlockHandler;
 import net.hollowcube.map.block.handler.ChestBlockHandler;
 import net.hollowcube.map.block.handler.PlayerHeadBlockHandler;
+import net.hollowcube.map.block.handler.SkullBlockHandler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
@@ -162,8 +163,13 @@ public final class PlacementRules {
         }
 
         // Head
-        //todo completely broken
         blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.PLAYER_HEAD.withHandler(PlayerHeadBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.SKELETON_SKULL.withHandler(SkullBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.WITHER_SKELETON_SKULL.withHandler(SkullBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.ZOMBIE_HEAD.withHandler(SkullBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.CREEPER_HEAD.withHandler(SkullBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.DRAGON_HEAD.withHandler(SkullBlockHandler.INSTANCE)));
+        blockManager.registerBlockPlacementRule(new HeadPlacementRule(Block.PIGLIN_HEAD.withHandler(SkullBlockHandler.INSTANCE)));
 
         // Button
         for (var buttonId : BlockTags.MINECRAFT_BUTTONS.getValues()) {

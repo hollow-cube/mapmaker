@@ -4,7 +4,8 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.gui.hotbar.BuildingMapHotbar;
+import net.hollowcube.map.feature.play.item.MapDetailsItem;
+import net.hollowcube.map.feature.play.item.ReturnToHubItem;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
@@ -27,6 +28,10 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
         world.addScopedEventNode(eventNode);
 
+        var itemRegistry = world.itemRegistry();
+        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
+        itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
+
         return true;
     }
 
@@ -34,11 +39,13 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         var player = event.getPlayer();
         if (!MapHooks.isPlayerPlaying(player)) return;
 
-        player.setAllowFlying(true);
+        // Set the hotbar
+        var itemRegistry = event.mapWorld().itemRegistry();
+        var inventory = player.getInventory();
+        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
-        if (event.isFirstInit()) {
-            BuildingMapHotbar.applyToPlayer(event.mapWorld(), player);
-        }
+        player.setAllowFlying(true);
     }
 
 }

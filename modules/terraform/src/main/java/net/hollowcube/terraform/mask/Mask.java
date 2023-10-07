@@ -49,7 +49,7 @@ public interface Mask {
     // Impl
 
     /**
-     * Tests if this mask is allowed at the given point in the given {@link WorldView}.
+     * Tests if this mask is allowed at the given pos in the given {@link WorldView}.
      *
      * @return true to allow affecting the block, false to disallow
      */

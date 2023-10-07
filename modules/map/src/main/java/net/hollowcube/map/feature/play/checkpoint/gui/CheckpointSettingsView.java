@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.checkpoint.gui;
+package net.hollowcube.map.feature.play.checkpoint.gui;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
@@ -6,8 +6,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.feature.checkpoint.CheckpointPlateBlock;
-import net.hollowcube.map.feature.checkpoint.CheckpointSetting;
+import net.hollowcube.map.feature.play.checkpoint.CheckpointPlateBlock;
+import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;

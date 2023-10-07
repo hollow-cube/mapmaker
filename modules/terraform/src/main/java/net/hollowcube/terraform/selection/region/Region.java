@@ -1,9 +1,7 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.cui.ClientInterface;
-import net.hollowcube.terraform.cui.ClientRenderer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
@@ -27,12 +25,12 @@ public interface Region extends Iterable<@NotNull Point> {
     }
 
     /**
-     * Minimum rectangular bounding point (inclusive)
+     * Minimum rectangular bounding pos (inclusive)
      */
     @NotNull Point min();
 
     /**
-     * Maximum rectangular bounding point (exclusive)
+     * Maximum rectangular bounding pos (exclusive)
      */
     @NotNull Point max();
 

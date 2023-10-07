@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.mapsize;
+package net.hollowcube.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.feature.FeatureProvider;
@@ -15,8 +15,9 @@ public class MapSizeFeature implements FeatureProvider {
 
     private MapSize mapSize;
 
-    public MapSizeFeature() {}
-    
+    public MapSizeFeature() {
+    }
+
     private final EventNode<InstanceEvent> mapBoundaryNode = EventNode.type("mapmaker:feature/map-boundary", EventFilter.INSTANCE)
             .addListener(PlayerBlockPlaceEvent.class, this::onBlockPlace);
 
@@ -36,7 +37,8 @@ public class MapSizeFeature implements FeatureProvider {
     }
 
     @Override
-    public void cleanupMap(@NotNull MapWorld world) {}
+    public void cleanupMap(@NotNull MapWorld world) {
+    }
 
     private void onBlockPlace(PlayerBlockPlaceEvent event) {
         var block = event.getBlockPosition();

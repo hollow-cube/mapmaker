@@ -12,8 +12,8 @@ public class RayUtils {
         Vec bbOffMin = new Vec(collidableStatic.minX() - rayCentre.x() + staticCollidableOffset.x() - moving.width() / 2, collidableStatic.minY() - rayCentre.y() + staticCollidableOffset.y() - moving.height() / 2, collidableStatic.minZ() - rayCentre.z() + staticCollidableOffset.z() - moving.depth() / 2);
         Vec bbOffMax = new Vec(collidableStatic.maxX() - rayCentre.x() + staticCollidableOffset.x() + moving.width() / 2, collidableStatic.maxY() - rayCentre.y() + staticCollidableOffset.y() + moving.height() / 2, collidableStatic.maxZ() - rayCentre.z() + staticCollidableOffset.z() + moving.depth() / 2);
 
-        // This check is done in 2d. it can be visualised as a rectangle (the face we are checking), and a point.
-        // If the point is within the rectangle, we know the vector intersects the face.
+        // This check is done in 2d. it can be visualised as a rectangle (the face we are checking), and a pos.
+        // If the pos is within the rectangle, we know the vector intersects the face.
 
         double signumRayX = Math.signum(rayDirection.x());
         double signumRayY = Math.signum(rayDirection.y());

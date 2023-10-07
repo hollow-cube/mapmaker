@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.checkpoint;
+package net.hollowcube.map.feature.play.checkpoint;
 
 import net.hollowcube.mapmaker.util.TagUtil;
 import net.kyori.adventure.text.Component;
@@ -9,7 +9,9 @@ import java.util.function.Function;
 
 public class CheckpointSetting {
 
-    /** Reset height for the checkpoint, or -1 if unset. */
+    /**
+     * Reset height for the checkpoint, or -1 if unset.
+     */
     public static final Tag<Integer> RESET_HEIGHT = Tag.Integer("reset_height").defaultValue(-1);
     public static final Function<Integer, Component> RESET_HEIGHT_TEXT_FUNCTION = resetHeight -> resetHeight == -1
             ? Component.text("None", TextColor.color(0xFF2D2D))

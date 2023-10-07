@@ -1,8 +1,9 @@
-package net.hollowcube.map.feature;
+package net.hollowcube.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;

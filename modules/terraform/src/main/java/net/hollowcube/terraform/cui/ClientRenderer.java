@@ -34,11 +34,10 @@ public interface ClientRenderer {
      *
      * @param feature The feature to check
      * @return True if the feature is supported, false otherwise.
-     *
      * @apiNote Even if a feature is not supported, it is still completely valid to call relevant methods.
-     *          The renderer implementation should do its best to choose a similar fallback or ignore the
-     *          call entirely, but never return an error. For example, WorldEdit CUI does not support curves,
-     *          so it might fall back to the particle implementation of Bézier curves.
+     * The renderer implementation should do its best to choose a similar fallback or ignore the
+     * call entirely, but never return an error. For example, WorldEdit CUI does not support curves,
+     * so it might fall back to the particle implementation of Bézier curves.
      */
     boolean hasFeature(@NotNull Feature feature);
 
@@ -58,7 +57,7 @@ public interface ClientRenderer {
     }
 
     /**
-     * Renders a single point at the given {@link Point}.
+     * Renders a single pos at the given {@link Point}.
      * <p>
      * Requires {@link Feature#POINT} support.
      */

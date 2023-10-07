@@ -4,9 +4,9 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.gui.hotbar.PlayingMapHotbar;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -15,21 +15,20 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.play.TeamsPacket;
-import net.minestom.server.scoreboard.Team;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
@@ -45,12 +44,6 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
-
-    private static final Team PLAYING_TEAM = MinecraftServer.getTeamManager()
-            .createBuilder("playing-team")
-            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-            .seeInvisiblePlayers()
-            .build();
 
     private final MapServer server;
     private final MapData map;
@@ -82,10 +75,13 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
-        eventNode.addChild(PlayingMapHotbar.eventNode());
 
-        eventNode.addListener(PlayerBlockBreakEvent.class, this::preventBlockBreak); //todo move to some utility
-        eventNode.addListener(PlayerBlockPlaceEvent.class, this::preventBlockPlace); //todo move to some utility
+        //todo move the following to some utility
+        eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
 
         instance.scheduler().buildTask(this::updateSpectators)
                 .repeat(TaskSchedule.seconds(1))
@@ -153,34 +149,37 @@ public class PlayingMapWorld implements InternalMapWorld {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        player.setTag(SaveState.TAG, saveState);
 
         activePlayers.add(player);
         player.setTag(TAG_PLAYING, true);
         player.setTag(MapHooks.PLAYING, true); // Legacy
-        player.setTag(SaveState.TAG, saveState);
-        player.refreshCommands();
-        player.setTeam(PLAYING_TEAM);
-        player.setGameMode(GameMode.ADVENTURE);
-        player.setAllowFlying(false);
-        player.setInvisible(false);
-        player.setVelocity(Vec.ZERO);
-        player.getInventory().clear();
+
+        MapWorldHelpers.resetPlayer(player);
 
         var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
-        player.teleport(pos).join();
+        player.teleport(pos).join(); //todo should probably be done from elsewhere because it depends on checkpoints
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn));
         saveState.setPlayStartTime(System.currentTimeMillis());
 
-        if (firstSpawn)
-            player.sendMessage("Now playing " + map.settings().getName());
+        if (firstSpawn) player.sendMessage("Now playing " + map.settings().getName());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
+
+        player.setTag(TAG_PLAYING, false); // Sanity
+        player.setTag(MapHooks.PLAYING, false); // Sanity
+
         spectatingPlayers.add(player);
+
+        MapWorldHelpers.resetPlayer(player);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setInvisible(true);
+
+        instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));
+
         if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
         player.sendMessage("Now spectating " + map.settings().getName());
     }
@@ -194,10 +193,11 @@ public class PlayingMapWorld implements InternalMapWorld {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 
         player.removeTag(TAG_PLAYING);
-        player.removeTag(MapHooks.PLAYING); // Legacy
-        player.setInvisible(false);
+        player.removeTag(MapHooks.PLAYING);
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
+
+        MapWorldHelpers.resetPlayer(player);
 
         if (save) {
             var saveState = SaveState.optionalFromPlayer(player);
@@ -217,16 +217,7 @@ public class PlayingMapWorld implements InternalMapWorld {
                 logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
             }
         }
-
         player.removeTag(SaveState.TAG);
-    }
-
-    private void preventBlockBreak(PlayerBlockBreakEvent event) {
-        event.setCancelled(true);
-    }
-
-    private void preventBlockPlace(PlayerBlockPlaceEvent event) {
-        event.setCancelled(true);
     }
 
     private @NotNull String getDimensionName() {

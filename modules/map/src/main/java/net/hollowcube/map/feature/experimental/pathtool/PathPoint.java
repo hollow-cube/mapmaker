@@ -26,7 +26,7 @@ public class PathPoint {
 
         this.bb = new BoundingBox(
                 0.4, 0.4, 0.4
-//                this.point.add(0.4, 0.4, 0.4)////////
+//                this.pos.add(0.4, 0.4, 0.4)////////
         );
         this.bbStart = Vec.fromPoint(this.point).add(0.5, 0.3, 0.5);
     }

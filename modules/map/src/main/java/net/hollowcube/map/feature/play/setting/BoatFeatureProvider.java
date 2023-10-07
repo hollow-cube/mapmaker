@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.play;
+package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
@@ -23,7 +23,7 @@ public class BoatFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & (MapWorld.FLAG_PLAYING|MapWorld.FLAG_TESTING)) == 0)
+        if ((world.flags() & (MapWorld.FLAG_PLAYING | MapWorld.FLAG_TESTING)) == 0)
             return false;
 
         var settings = world.map().settings();

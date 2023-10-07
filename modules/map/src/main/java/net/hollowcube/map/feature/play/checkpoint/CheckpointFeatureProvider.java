@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.checkpoint;
+package net.hollowcube.map.feature.play.checkpoint;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -72,7 +71,8 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var saveState = SaveState.fromPlayer(player);
 
-        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
+        player.setTag(RESET_HEIGHT_TAG, 30);
+//        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
     }
 
     private void cleanupPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
@@ -88,7 +88,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         // Reached a new checkpoint
         saveState.setCheckpoint(event.checkpointId(), player.getPosition());
-        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
+//        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 
@@ -126,12 +126,14 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             saveState.setCompleted(false);
         } else {
             // Return to savestate at checkpoint
-            System.out.println("Player has savestate with checkpoint");
-            Pos pos;
-            if ((pos = saveState.checkpointPos()) != null) {
-                player.teleport(pos).exceptionally(FutureUtil::handleException);
+            Pos pos = saveState.checkpointPos();
+            if (pos != null) {
+                future = player.teleport(pos);
+            } else {
+                var cps = CheckpointCache.forInstance(event.getInstance());
+                var checkpoint = cps.getCheckpoint(checkpointId);
+                future = player.teleport(player.getPosition().withCoord(checkpoint.pos().add(0.5, 0, 0.5)));
             }
-            future = CompletableFuture.completedFuture(null);
         }
 
         future.thenAccept(unused -> EventDispatcher.call(new MapPlayerInitEvent(event.mapWorld(), player, false)))

@@ -29,7 +29,7 @@ public class SchematicBuilder {
         var pos = CoordinateUtil.floor(point);
         blockSet.put(pos, Objects.requireNonNull(block));
 //        if (block.isAir()) {
-//             If it's air, attempt to remove any existing value at that point.
+//             If it's air, attempt to remove any existing value at that pos.
 //            blockSet.remove(pos);
 //        } else {
 //        }

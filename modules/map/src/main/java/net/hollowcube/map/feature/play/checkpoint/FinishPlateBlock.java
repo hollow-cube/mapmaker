@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.checkpoint;
+package net.hollowcube.map.feature.play.checkpoint;
 
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.MapWorldCompleteEvent;

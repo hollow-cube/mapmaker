@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTType;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +28,8 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 
     @Override
     public boolean selectPrimary(@NotNull Point point, boolean explain) {
-        // Add a new curve with the given point as the first
-        // unless there is already a curve with the last point at this current point
+        // Add a new curve with the given pos as the first
+        // unless there is already a curve with the last pos at this current pos
         if (!curves.isEmpty() && curves.get(curves.size() - 1).last().sameBlock(point))
             return false;
 
@@ -47,11 +46,11 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 
     @Override
     public boolean selectSecondary(@NotNull Point point, boolean explain) {
-        // If this is the first point, a secondary selection acts the same as a primary one
+        // If this is the first pos, a secondary selection acts the same as a primary one
         if (curves.isEmpty()) return selectPrimary(point, explain);
 
-        // Add the given point to the last curve
-        // unless the last point of the last curve is the same as the given point
+        // Add the given pos to the last curve
+        // unless the last pos of the last curve is the same as the given pos
         var curve = curves.get(curves.size() - 1);
         if (curve.last().sameBlock(point)) return false;
         curve.addLast(point);
@@ -75,8 +74,6 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
     public @Nullable Region region() {
         return new BezierSurfaceRegion(List.copyOf(curves));
     }
-
-
 
 
     // Exposed details used by //loft remove
@@ -132,7 +129,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
             if (curves.isEmpty()) return;
 
 
-            // Add a point for every control point in every curve
+            // Add a pos for every control pos in every curve
             for (var curve : curves) {
                 for (var point : curve.points()) {
                     renderer.point(point);
@@ -185,7 +182,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 //                    linkedList.add(new Frame(VectorUtil.E(new ArrayList<Vector3>(a.getPoints()), n, true)));
 //                }
 
-                // this bit creates all the intermediate splines between each point set
+                // this bit creates all the intermediate splines between each pos set
 
 //                List<BezierSpline> allSplines = new ArrayList();
 //                for (int i = 0; i < n; ++i) {
@@ -321,7 +318,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         public @NotNull Curve withSize(int target) {
             if (target == 0 || target == size()) return new Curve(points);
 
-            // Add the same point {target} times
+            // Add the same pos {target} times
             if (size() == 1) {
                 return new Curve(Collections.nCopies(target, points.get(0)));
             }
@@ -338,7 +335,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
         }
 
         /**
-         * Returns a point at the given distance on the given segment. The segment is the integer part, the distance is the decimal part.
+         * Returns a pos at the given distance on the given segment. The segment is the integer part, the distance is the decimal part.
          */
         public @NotNull Point getSegmentPoint(double d) {
             BezierSegment segment;
@@ -368,13 +365,13 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 //        Double d = points.get(0).x();
 //        Double d2 = points.get(0).y();
 //        Double d3 = points.get(0).z();
-//        for (var point : points) {
-//            if (point.x() == d) continue;
+//        for (var pos : points) {
+//            if (pos.x() == d) continue;
 //            d = null;
 //            break;
 //        }
-//        for (var point : points) {
-//            if (point.blo() == d2) continue;
+//        for (var pos : points) {
+//            if (pos.blo() == d2) continue;
 //            d2 = null;
 //            break;
 //        }

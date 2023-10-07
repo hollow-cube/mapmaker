@@ -57,7 +57,7 @@ public class DripstonePlacementRule extends BaseBlockPlacementRule {
         if ("tip".equals(aboveThickness) || "tip_merge".equals(aboveThickness))
             return "frustum";
 
-        // At this point we know that there is a dripstone above, and that the dripstone is facing the same direction.
+        // At this pos we know that there is a dripstone above, and that the dripstone is facing the same direction.
         var belowPosition = blockPosition.add(0, direction ? -1 : 1, 0);
         var belowBlock = instance.getBlock(belowPosition, Block.Getter.Condition.TYPE);
 

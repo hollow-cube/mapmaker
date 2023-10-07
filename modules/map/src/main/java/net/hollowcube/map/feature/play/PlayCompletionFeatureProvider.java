@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.gui.CompletedMapView;
 import net.hollowcube.map.util.FireworkUtil;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -46,8 +45,6 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         if (world instanceof PlayingMapWorld pmw) {
             pmw.startSpectating(player, false);
         }
-
-        world.server().newOpenGUI(player, CompletedMapView::new);
 
         FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
 

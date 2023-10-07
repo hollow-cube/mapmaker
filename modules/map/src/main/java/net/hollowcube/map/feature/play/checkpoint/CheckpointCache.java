@@ -1,10 +1,11 @@
-package net.hollowcube.map.feature.checkpoint;
+package net.hollowcube.map.feature.play.checkpoint;
 
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,10 @@ public final class CheckpointCache {
 
     public boolean isEmpty() {
         return checkpoints.isEmpty();
+    }
+
+    public @UnknownNullability ObjectData getCheckpoint(@NotNull String id) {
+        return checkpoints.get(id);
     }
 
 }

@@ -51,7 +51,7 @@ public class PathData implements Viewable { //todo maybe should be Viewable?
 
         for (var point : points) {
             point.draw(builder, namespace);
-//            lineBuilder.point(point.point().add(0.5));
+//            lineBuilder.pos(pos.pos().add(0.5));
         }
 
         if (points.size() > 1) {
@@ -153,16 +153,16 @@ public class PathData implements Viewable { //todo maybe should be Viewable?
 //            return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
 //        }
 
-//        // Calculate the closest point on the line to the cylinder's start
+//        // Calculate the closest pos on the line to the cylinder's start
 //        double projection = cylDirection.dot(vecStart.sub(cylStart));
 //        Vec closestPoint = cylStart.add(cylDirection.mul(projection));
 //
-//        // Calculate the distance between the closest point and the cylinder's start
+//        // Calculate the distance between the closest pos and the cylinder's start
 //        double distanceToStart = closestPoint.distance(cylStart);
 //
-//        // Check if the closest point is within the cylinder's radius
+//        // Check if the closest pos is within the cylinder's radius
 //        if (distanceToStart <= radius) {
-//            // Check if the intersection point is within the cylinder's height
+//            // Check if the intersection pos is within the cylinder's height
 //            double vecLength = vecDirection.length();
 //            double t = projection / vecLength;
 //            double height = cylDirection.length();
@@ -248,14 +248,14 @@ public class PathData implements Viewable { //todo maybe should be Viewable?
 //        double t2 = (a * e - b * d) / denominator;
 //
 //        if (t1 < 0) {
-//            // Closest point on line 1 is before the start point
+//            // Closest pos on line 1 is before the start pos
 //            return w.length();
 //        } else if (t1 > 1) {
-//            // Closest point on line 1 is after the end point
+//            // Closest pos on line 1 is after the end pos
 //            Vec v2 = line2End.sub(line1End);
 //            return v2.length();
 //        } else {
-//            // Closest point on line 1 is within the line segment
+//            // Closest pos on line 1 is within the line segment
 //            Vec closestPointLine1 = line1Start.add(u.mul(t1));
 //            Vec closestPointLine2 = line2Start.add(v.mul(t2));
 //            return closestPointLine1.sub(closestPointLine2).length();

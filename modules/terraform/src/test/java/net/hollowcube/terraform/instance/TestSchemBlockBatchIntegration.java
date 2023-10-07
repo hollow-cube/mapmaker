@@ -59,14 +59,14 @@ class TestSchemBlockBatchIntegration {
 //        assertEquals(Block.TNT, instance.getBlock(25, 0, 0));
 //
 //        var blockCount = new AtomicInteger();
-//        schematic.apply(Rotation.NONE, (point, block) -> {
+//        schematic.apply(Rotation.NONE, (pos, block) -> {
 //            blockCount.incrementAndGet();
 //
-//            if (point.equals(Vec.ZERO)) {
-//                assertEquals(Vec.ZERO, point);
+//            if (pos.equals(Vec.ZERO)) {
+//                assertEquals(Vec.ZERO, pos);
 //                assertEquals(Block.STONE, block);
 //            } else {
-//                assertEquals(new Vec(25, 0, 0), point);
+//                assertEquals(new Vec(25, 0, 0), pos);
 //                assertEquals(Block.STONE, block);
 //            }
 //        });

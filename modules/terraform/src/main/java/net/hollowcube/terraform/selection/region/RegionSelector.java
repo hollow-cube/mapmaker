@@ -4,27 +4,26 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public interface RegionSelector {
 
     /**
-     * Adds/sets a primary selection point to the current region.
+     * Adds/sets a primary selection pos to the current region.
      *
      * @param explain If true, the change in selection will be "explained" to the player.
      *                If not updated, no explanation will be sent to the player.
      *                The CUI rendering will be updated regardless of this option.
-     * @return True if the point was added, false if it was not (nothing was changed)
+     * @return True if the pos was added, false if it was not (nothing was changed)
      */
     boolean selectPrimary(@NotNull Point point, boolean explain);
 
     /**
-     * Adds/sets a secondary selection point to the current region.
+     * Adds/sets a secondary selection pos to the current region.
      *
      * @param explain If true, the change in selection will be "explained" to the player.
      *                If not updated, no explanation will be sent to the player.
      *                The CUI rendering will be updated regardless of this option.
-     * @return True if the point was added, false if it was not (nothing was changed)
+     * @return True if the pos was added, false if it was not (nothing was changed)
      */
     boolean selectSecondary(@NotNull Point point, boolean explain);
 

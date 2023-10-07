@@ -1,9 +1,9 @@
-package net.hollowcube.map.feature.checkpoint;
+package net.hollowcube.map.feature.play.checkpoint;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
-import net.hollowcube.map.feature.checkpoint.gui.CheckpointSettingsView;
+import net.hollowcube.map.feature.play.checkpoint.gui.CheckpointSettingsView;
 import net.hollowcube.map.item.BlockItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.map.world.MapWorld;
@@ -64,7 +64,8 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         if (resetHeight != -1) isEmpty = false;
 
         // If the NBT has settings, set the lore to the "with data" variant, otherwise leave the default.
-        if (!isEmpty) builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
+        if (!isEmpty)
+            builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
         builder.meta(m -> m.setTag(BlockItemHandler.BLOCK_DATA, tag.asCompound()));
     }
 

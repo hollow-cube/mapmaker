@@ -40,7 +40,7 @@ public class LoftCommand extends Command {
 
         //todo these commands are basically just aliases, wonder if i could remove some of the duplicated logic,
         // eg turn //loft clear into just `/tf:sel clear loft`,
-        //    //loft frame and point into `/tf:pos1 loft` and `/tf:pos2 loft`
+        //    //loft frame and pos into `/tf:pos1 loft` and `/tf:pos2 loft`
     }
 
     static class Frame extends Command {
@@ -65,7 +65,7 @@ public class LoftCommand extends Command {
 
     static class Point extends Command {
         public Point() {
-            super("point", "p");
+            super("pos", "p");
 
             setDefaultExecutor(this::addPoint);
         }
@@ -104,9 +104,9 @@ public class LoftCommand extends Command {
                     ? selector.removePointClosestTo(player.getPosition())
                     : selector.removeLastPoint();
             if (removed) {
-                sender.sendMessage("removed a point blah blah");
+                sender.sendMessage("removed a pos blah blah");
             } else {
-                sender.sendMessage("blah no point to remove blah blah");
+                sender.sendMessage("blah no pos to remove blah blah");
             }
         }
     }

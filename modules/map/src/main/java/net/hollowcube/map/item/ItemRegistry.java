@@ -89,6 +89,20 @@ public class ItemRegistry {
         }
     }
 
+    /**
+     * Registers the item handler but without allowing it to be used in commands.
+     */
+    public void registerSilent(@NotNull ItemHandler itemHandler) {
+        //todo this is still allowing /give to work, need to fix.
+        try {
+            lock.lock();
+            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
+            customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler); // NOSONAR - It thinks put is deprecated
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable NBTCompound nbt) {
         return getItemStack(id.asString(), nbt);
     }
@@ -135,6 +149,7 @@ public class ItemRegistry {
             return;
         }
 
+        event.setCancelled(true);
         itemHandler.rightClicked(new ItemHandler.Click(
                 itemHandler,
                 player,
@@ -178,6 +193,7 @@ public class ItemRegistry {
         event.setCancelled(true);
         if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
+        event.setCancelled(true);
         var placeOffset = event.getBlockFace().toDirection();
         itemHandler.rightClicked(new ItemHandler.Click(
                 itemHandler,
