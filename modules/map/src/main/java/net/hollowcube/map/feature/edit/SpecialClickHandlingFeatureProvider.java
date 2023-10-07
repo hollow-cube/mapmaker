@@ -36,8 +36,9 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
     private void handleUseItem(PlayerUseItemOnBlockEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
 
+        var instance = event.getInstance();
         var itemStack = event.getItemStack();
-        var block = event.getInstance().getBlock(event.getPosition());
+        var block = instance.getBlock(event.getPosition());
 
         int strippedState;
         if ("false".equals(block.getProperty("waterlogged")) && itemStack.material().equals(Material.WATER_BUCKET)) {
@@ -59,7 +60,6 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             //todo make those a set of materials
             block = block.withProperty("has_book", "true");
         } else if (itemStack.material().equals(Material.FLINT_AND_STEEL)) {
-            var instance = event.getInstance();
             var placePos = event.getPosition().relative(event.getBlockFace());
 
             var posBelow = placePos.add(0, -1, 0);
@@ -69,6 +69,11 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             } else {
                 //todo more fire
             }
+        } else if (itemStack.material().equals(Material.WATER_BUCKET)) {
+            var waterPos = event.getPosition().relative(event.getBlockFace());
+            if (instance.getBlock(waterPos, Block.Getter.Condition.TYPE).isAir())
+                instance.setBlock(waterPos, Block.WATER);
+            return;
         } else return;
 
         //todo the block update isnt being sent correctly here, this is a minestom bug

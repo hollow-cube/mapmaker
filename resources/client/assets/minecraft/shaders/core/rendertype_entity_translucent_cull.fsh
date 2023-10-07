@@ -17,8 +17,6 @@ in vec4 normal;
 
 out vec4 fragColor;
 
-// color.a*100-99 < 0.7
-
 void main() {
     vec4 color = texture(Sampler0, texCoord0);
     if (color.a < 0.1) {
@@ -30,20 +28,6 @@ void main() {
         fragColor = color;
         return;
     }
-    //    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-    //    if (color.a < 0.1 || (vertexDistance < 1600 && (color.a > 0.90))) {
-    //        discard;
-    //    } else if (vertexDistance >= 1600 && abs(color.a*100-99) < 0.7) {
-    //        fragColor = vec4(texture(Sampler0, texCoord0).xyz, 1);
-    //        //        fragColor = ve;
-    //        //        discard;
-    //    } else {
-    //        fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-    //    }
-
-    //    if (vertexDistance < 1600) {
-    //        fragColor = vec4(1, 0, 0, 1);
-    //    }
 
     color *= vertexColor * ColorModulator;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
