@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.gui.play.PlayMaps;
 import net.hollowcube.mapmaker.hub.gui.play.Query;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -44,16 +45,16 @@ public final class HubHotbar {
             .addListener(ItemDropEvent.class, HubHotbar::handleItemDrop)
             .addListener(InventoryPreClickEvent.class, HubHotbar::handleItemClick);
 
-    private static final int PLAY_ITEM_CMD = 4;
-    private static final int CREATE_ITEM_CMD = 3;
+    private static final int PLAY_ITEM_CMD = BadSprite.SPRITE_MAP.get("tablet").cmd();
+    private static final int CREATE_ITEM_CMD = BadSprite.SPRITE_MAP.get("hammer").cmd();
 
-    private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.STICK)
+    private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
             .displayName(Component.translatable("hotbar.lobby.play_maps.name"))
             .lore(LanguageProviderV2.translateMulti("hotbar.lobby.play_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
             .build();
 
-    private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.STICK)
+    private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
             .displayName(Component.translatable("hotbar.lobby.create_maps.name"))
             .lore(LanguageProviderV2.translateMulti("hotbar.lobby.create_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
@@ -75,9 +76,10 @@ public final class HubHotbar {
 
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = HubWorld.fromInstance(player.getInstance()).server();
-        switch (customModelData) {
-            case PLAY_ITEM_CMD -> server.newOpenGUI(player, c -> new PlayMaps(c.with(Map.of("query", new Query()))));
-            case CREATE_ITEM_CMD -> server.newOpenGUI(player, CreateMaps::new);
+        if (customModelData == PLAY_ITEM_CMD) {
+            server.newOpenGUI(player, c -> new PlayMaps(c.with(Map.of("query", new Query()))));
+        } else if (customModelData == CREATE_ITEM_CMD) {
+            server.newOpenGUI(player, CreateMaps::new);
         }
     }
 
@@ -129,6 +131,7 @@ public final class HubHotbar {
     private static void handleItemDrop(@NotNull ItemDropEvent event) {
         event.setCancelled(true);
     }
+
     private static void handleItemClick(@NotNull InventoryPreClickEvent event) {
         event.setCancelled(true);
     }

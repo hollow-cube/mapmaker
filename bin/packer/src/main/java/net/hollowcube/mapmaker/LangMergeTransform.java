@@ -54,7 +54,6 @@ public class LangMergeTransform {
             for (Path langFile : files) {
                 if (!langFile.getFileName().toString().endsWith(".properties")) continue;
 
-                System.out.println(langFile.toRealPath());
                 try (InputStream is = Files.newInputStream(langFile)) {
                     Properties properties = new Properties();
                     properties.load(is);

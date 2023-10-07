@@ -25,7 +25,7 @@ def packer_bundle(name, srcs):
         outs = ["client.zip"],
         cmd = """
             $(location //bin/packer:packer)
-            cd build/packer/client && zip -r ../../../$(OUTS) .
+            cd build/packer/client && zip -rq ../../../$(OUTS) .
         """,
         tools = ["//bin/packer"],
     )

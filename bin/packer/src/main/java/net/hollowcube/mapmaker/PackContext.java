@@ -34,6 +34,9 @@ public class PackContext {
     private final JsonObject leatherArmorFile;
     private int leatherArmorCMD = 1;
 
+    private JsonArray serverSprites = new JsonArray();
+
+
     public PackContext(Path resources, Path out) throws IOException {
         this.resources = resources;
         this.out = out;
@@ -108,6 +111,16 @@ public class PackContext {
         return mapmakerRefBase + "item/" + name;
     }
 
+    public @NotNull String writeModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
+        name = minifyId(name);
+
+        Path path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, new Gson().toJson(model));
+
+        return mapmakerRefBase + "item/" + name;
+    }
+
     public void addFontCharacter(@NotNull JsonObject definition) {
         fontFile.getAsJsonArray("providers").add(definition);
     }
@@ -121,6 +134,21 @@ public class PackContext {
         override.addProperty("model", writeBasicModel(name, texture));
         leatherArmorFile.getAsJsonArray("overrides").add(override);
         return cmd;
+    }
+
+    public int addBasicItem(@NotNull String name, String model) throws IOException {
+        int cmd = leatherArmorCMD++;
+        JsonObject override = new JsonObject();
+        JsonObject predicate = new JsonObject();
+        predicate.addProperty("custom_model_data", cmd);
+        override.add("predicate", predicate);
+        override.addProperty("model", model);
+        leatherArmorFile.getAsJsonArray("overrides").add(override);
+        return cmd;
+    }
+
+    public JsonArray getServerSprites() {
+        return serverSprites;
     }
 
     public void cleanup() throws IOException {
@@ -139,6 +167,15 @@ public class PackContext {
 
         Path leatherArmorFile = rpMinecraftBase.resolve("models").resolve("item").resolve("diamond.json");
         Files.writeString(leatherArmorFile, gson.toJson(this.leatherArmorFile));
+
+        Path serverSpritesPath = out().resolve("server").resolve("sprites.json");
+        Files.createDirectories(serverSpritesPath.getParent());
+        String sprites = gson.toJson(serverSprites);
+        while (sprites.contains("\\\\")) {
+            // How do i do this with regex???
+            sprites = sprites.replace("\\\\", "\\");
+        }
+        Files.writeString(serverSpritesPath, sprites);
 
     }
 

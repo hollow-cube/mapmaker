@@ -15,18 +15,6 @@
         "custom_model_data": 2
       },
       "model": "minecraft:item/broken"
-    },
-    {
-      "predicate": {
-        "custom_model_data": 3
-      },
-      "model": "minecraft:item/hammer_3d"
-    },
-    {
-      "predicate": {
-        "custom_model_data": 4
-      },
-      "model": "minecraft:item/tablet_3d"
     }
   ]
 }

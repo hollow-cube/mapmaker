@@ -41,6 +41,10 @@ public class FontTransform {
         }
     }
 
+    public int getNextChar() {
+        return nextChar;
+    }
+
     public void process(@NotNull PackContext ctx) throws IOException {
         JsonObject output = new JsonObject();
 

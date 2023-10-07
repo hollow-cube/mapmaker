@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
@@ -37,8 +36,6 @@ public class SpriteTransform {
     }
 
     public void process(@NotNull PackContext context) throws IOException {
-        JsonArray serverSprites = new JsonArray();
-
         Path guiBaseDir = context.resources().resolve("gui");
         try (Stream<Path> guiFile = Files.walk(guiBaseDir)) {
             List<Path> files = guiFile.sorted(Comparator.comparing(Path::toString)).toList();
@@ -57,7 +54,7 @@ public class SpriteTransform {
                     JsonObject serverSpriteConf = new JsonObject();
                     processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar, serverSpriteConf);
                     context.addFontCharacter(resultFontChar);
-                    serverSprites.add(serverSpriteConf);
+                    context.getServerSprites().add(serverSpriteConf);
                 } else if (config.get("type").getAsString().equals("item")) {
 
                     BufferedImage image = ImageIO.read(imageFile.toFile());
@@ -89,21 +86,10 @@ public class SpriteTransform {
                     serverSpriteConf.addProperty("cmd", cmd);
                     serverSpriteConf.addProperty("width", 0);
                     serverSpriteConf.addProperty("offsetX", 0);
-                    serverSprites.add(serverSpriteConf);
+                    context.getServerSprites().add(serverSpriteConf);
                 }
             }
         }
-
-        Path serverSpritesPath = context.out().resolve("server").resolve("sprites.json");
-        Files.createDirectories(serverSpritesPath.getParent());
-
-        Gson gson = new Gson();
-        String sprites = gson.toJson(serverSprites);
-        while (sprites.contains("\\\\")) {
-            // How do i do this with regex???
-            sprites = sprites.replace("\\\\", "\\");
-        }
-        Files.writeString(serverSpritesPath, sprites);
     }
 
     private void processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf, @NotNull JsonObject serverSpriteConf) throws IOException {

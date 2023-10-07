@@ -47,6 +47,10 @@ public class Packer {
         fontTransform.init(ctx, spriteTransform);
         fontTransform.process(ctx);
 
+        ItemModelTransform itemModelTransform = new ItemModelTransform();
+        itemModelTransform.init(ctx, fontTransform);
+        itemModelTransform.process(ctx);
+
         ctx.cleanup();
 
     }
