@@ -75,18 +75,23 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
-    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action action) {
-        method.setAccessible(true); // NOSONAR
+    public void wireAction(@NotNull View view, @NotNull Object handler, @NotNull Action.Descriptor action) {
+        switch (handler) {
+            case Method method -> {
+                method.setAccessible(true); // NOSONAR
 
-        Consumer<PageRequest<T>> handleFunc = req -> {
-            try {
-                method.invoke(view, req);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                Consumer<PageRequest<T>> handleFunc = req -> {
+                    try {
+                        method.invoke(view, req);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+                pageHandler = !action.async() ? handleFunc :
+                        req -> Thread.startVirtualThread(() -> handleFunc.accept(req));
             }
-        };
-        pageHandler = !action.async() ? handleFunc :
-                req -> Thread.startVirtualThread(() -> handleFunc.accept(req));
+            default -> throw new UnsupportedOperationException("Unsupported action handler: " + handler);
+        }
     }
 
     @Override

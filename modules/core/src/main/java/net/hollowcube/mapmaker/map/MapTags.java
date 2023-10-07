@@ -14,35 +14,37 @@ public final class MapTags {
         // See the warning in EditMap for more details.
 
         // Visual
-        TERRAIN(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.terrain.name"),
-        ORGANICS(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.organics.name"),
-        STRUCTURE(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.structure.name"),
-        INTERIOR(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.interior.name"),
-        MUSIC(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.music.name"),
-        TWODIMENSIONAL(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.2D.name"),
-        RECREATION(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.recreation.name"),
-        STORY(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.story.name"),
+        TERRAIN(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.terrain.name", false),
+        ORGANICS(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.organics.name", false),
+        STRUCTURE(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.structure.name", false),
+        INTERIOR(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.interior.name", false),
+        MUSIC(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.music.name", true),
+        TWODIMENSIONAL(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.2D.name", false),
+        RECREATION(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.recreation.name", false),
+        STORY(TagType.VISUAL, "gui.create_maps.map_tags_tab.visual.story.name", false),
 
         // Gameplay
-        COOP(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.coop.name"),
-        PUZZLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.puzzle.name"),
-        MINIGAME(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.minigame.name"),
-        EXPLORATION(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.exploration.name"),
-        BOSSBATTLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.bossbattle.name"),
-        AUTOCOMPLETE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.auto-complete.name"),
-        ESCAPE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.escape.name"),
-        TRIVIA(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.trivia.name"),
-        STRATEGY(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.strategy.name"),
+        COOP(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.coop.name", true),
+        PUZZLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.puzzle.name", false),
+        MINIGAME(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.minigame.name", true),
+        EXPLORATION(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.exploration.name", false),
+        BOSSBATTLE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.bossbattle.name", false),
+        AUTOCOMPLETE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.auto-complete.name", false),
+        ESCAPE(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.escape.name", false),
+        TRIVIA(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.trivia.name", false),
+        STRATEGY(TagType.GAMEPLAY, "gui.create_maps.map_tags_tab.gameplay.strategy.name", false),
 
         // ADD YOUR NEW TAGS TO THE END OF THIS ENUM
         ;
 
         TagType type;
         String translateKey;
+        boolean disabled;
 
-        Tag(TagType type, String translateKey) {
+        Tag(TagType type, String translateKey, boolean disabled) {
             this.type = type;
             this.translateKey = translateKey;
+            this.disabled = disabled;
         }
 
         public Component displayName() {
@@ -51,6 +53,10 @@ public final class MapTags {
 
         public TagType getType() {
             return this.type;
+        }
+
+        public boolean isDisabled() {
+            return this.disabled;
         }
     }
 

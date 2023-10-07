@@ -14,7 +14,7 @@ public abstract class View implements Element {
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final Context context;
-    private final Element delegate;
+    private final ViewElement delegate;
 
 
     protected View(@NotNull Context context) {
@@ -60,9 +60,17 @@ public abstract class View implements Element {
         context.performSignal(name, args);
     }
 
+    // Manual Actions
+
+    public void addActionHandler(@NotNull String name, @NotNull Object handler) {
+        delegate.addActionHandler(name, handler);
+    }
+
     // Routing
 
-    /** Returns true if there is an available view to pop, false otherwise. */
+    /**
+     * Returns true if there is an available view to pop, false otherwise.
+     */
     public boolean canPopView() {
         return context.canPopView();
     }
@@ -106,7 +114,8 @@ public abstract class View implements Element {
 
     public interface AsyncRunnable {
         @Async.Execute
-        @Blocking void run() throws Exception;
+        @Blocking
+        void run() throws Exception;
     }
 
     @NonBlocking
@@ -121,7 +130,8 @@ public abstract class View implements Element {
     }
 
     public interface AsyncCallable<T> {
-        @Blocking T call() throws Exception;
+        @Blocking
+        T call() throws Exception;
     }
 
     protected <T> @NotNull Future<T> async(@NotNull AsyncCallable<T> func) {

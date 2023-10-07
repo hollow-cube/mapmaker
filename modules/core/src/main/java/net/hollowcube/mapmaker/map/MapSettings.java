@@ -84,11 +84,13 @@ public class MapSettings {
     public @NotNull String getName() {
         return name;
     }
+
     public @NotNull Component getNameComponent() {
         if (name == null || name.isEmpty())
             return Component.text(MapData.DEFAULT_NAME);
         return Component.text(name);
     }
+
     public @NotNull Component getTagsComponent() {
         var tags = getTags();
         var maxTags = Math.min(2, tags.size());
@@ -108,6 +110,7 @@ public class MapSettings {
             tagsLabel = tagsLabel.append(Component.text(String.format("+%s", tags.size() - currTagIdx)));
         return tagsLabel;
     }
+
     public void setName(@NotNull String name) {
         updateLock.lock();
         try {
@@ -117,9 +120,11 @@ public class MapSettings {
             updateLock.unlock();
         }
     }
+
     public @Nullable Material getIcon() {
         return icon;
     }
+
     public void setIcon(@NotNull Material icon) {
         updateLock.lock();
         try {
@@ -137,6 +142,7 @@ public class MapSettings {
     public @NotNull MapVariant getVariant() {
         return variant;
     }
+
     public void setVariant(@NotNull MapVariant type) {
         updateLock.lock();
         try {
@@ -190,6 +196,7 @@ public class MapSettings {
     public @NotNull Pos getSpawnPoint() {
         return spawnPoint;
     }
+
     public void setSpawnPoint(@NotNull Pos spawnPoint) {
         updateLock.lock();
         try {
@@ -203,6 +210,7 @@ public class MapSettings {
     public boolean isOnlySprint() {
         return onlySprint;
     }
+
     public void setOnlySprint(boolean onlySprint) {
         updateLock.lock();
         try {
@@ -212,9 +220,11 @@ public class MapSettings {
             updateLock.unlock();
         }
     }
+
     public boolean isNoSprint() {
         return noSprint;
     }
+
     public void setNoSprint(boolean noSprint) {
         updateLock.lock();
         try {
@@ -224,9 +234,11 @@ public class MapSettings {
             updateLock.unlock();
         }
     }
+
     public boolean isNoJump() {
         return noJump;
     }
+
     public void setNoJump(boolean noJump) {
         updateLock.lock();
         try {
@@ -236,9 +248,11 @@ public class MapSettings {
             updateLock.unlock();
         }
     }
+
     public boolean isNoSneak() {
         return noSneak;
     }
+
     public void setNoSneak(boolean noSneak) {
         updateLock.lock();
         try {
@@ -248,9 +262,11 @@ public class MapSettings {
             updateLock.unlock();
         }
     }
+
     public boolean isBoat() {
         return boat;
     }
+
     public void setBoat(boolean boat) {
         updateLock.lock();
         try {
@@ -316,9 +332,9 @@ public class MapSettings {
             if (this.tags == null) {
                 this.tags = new ArrayList<>();
             }
-            this.tags = this.tags.stream().filter(
+            this.tags = new ArrayList<>(this.tags.stream().filter(
                     tag -> tag.getType() == MapTags.TagType.GAMEPLAY
-            ).toList();
+            ).toList());
         } finally {
             updateLock.unlock();
         }

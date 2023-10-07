@@ -1,8 +1,11 @@
 package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.ViewElement;
+import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +16,7 @@ import java.util.function.Consumer;
 /**
  * ViewContainer is the {@link net.hollowcube.canvas.Element} which is represented by a {@link net.hollowcube.canvas.View}.
  */
-public class ViewContainer extends BoxContainer {
+public class ViewContainer extends BoxContainer implements ViewElement {
 
     private View associatedView;
 
@@ -56,6 +59,14 @@ public class ViewContainer extends BoxContainer {
         }
 
         super.performSignal(name, args);
+    }
+
+    @Override
+    public void addActionHandler(@NotNull String name, @NotNull Object handler) {
+        var element = findById(name);
+        Check.notNull(element, "Action not found: " + name);
+
+        element.wireAction(associatedView, handler, new Action.Descriptor(name, false));
     }
 
     @Override

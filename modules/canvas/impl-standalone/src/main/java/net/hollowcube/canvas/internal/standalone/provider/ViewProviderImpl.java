@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.ViewElement;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.ViewProvider;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 public class ViewProviderImpl implements ViewProvider {
 
     @Override
-    public @NotNull <T extends View> Element viewFor(
+    public @NotNull <T extends View> ViewElement viewFor(
             @NotNull Context context,
             @NotNull Class<? extends T> viewClass, @NotNull T view,
             @NotNull Runnable mount, @NotNull Runnable unmount) {
@@ -126,7 +127,7 @@ public class ViewProviderImpl implements ViewProvider {
             var element = root.findById(name);
             Check.notNull(element, "Action not found: " + name);
 
-            element.wireAction(view, method, action);
+            element.wireAction(view, method, new Action.Descriptor(action.value(), action.async()));
         }
     }
 

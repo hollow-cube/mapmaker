@@ -216,12 +216,12 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_music_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_music_selected"/>
                             </switch>
-                            <switch id="map_tag_2d_switch">
-                                <button id="map_tag_2d_unset"
+                            <switch id="map_tag_twodimensional_switch">
+                                <button id="map_tag_twodimensional_unset"
                                         translationKey="gui.create_maps.map_tags_tab.visual.2d"
                                         sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_bg"/>
-                                <button id="map_tag_2d_set"
+                                <button id="map_tag_twodimensional_set"
                                         translationKey="gui.create_maps.map_tags_tab.visual.2d"
                                         sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_selected"/>

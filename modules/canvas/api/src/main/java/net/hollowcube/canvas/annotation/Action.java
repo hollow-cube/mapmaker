@@ -1,5 +1,7 @@
 package net.hollowcube.canvas.annotation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,4 +16,7 @@ public @interface Action {
      * If set, the action function will be called in a virtual thread.
      */
     boolean async() default false;
+
+    record Descriptor(@NotNull String name, boolean async) {
+    }
 }

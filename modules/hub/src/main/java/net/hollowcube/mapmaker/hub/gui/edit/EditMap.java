@@ -21,6 +21,8 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
@@ -67,8 +69,82 @@ public class EditMap extends View {
     public EditMap(@NotNull Context context) {
         super(context);
 
+        setupSubvariantClickHandlers();
+        setupTagClickHandlers();
+
         selectTab(0);
         setState(State.LOADING);
+    }
+
+    private void setupSubvariantClickHandlers() {
+        // Parkour
+        for (var subvariant : ParkourSubVariant.values()) {
+            var name = subvariant.name().toLowerCase(Locale.ROOT);
+
+            // Unset handler to set the subvariant on click
+            addActionHandler(
+                    String.format("parkour_subvariant_%s_unset", name),
+                    Label.ActionHandler.lmb(player -> {
+                        map.settings().setParkourSubVariant(subvariant);
+                        updateElementsFromMap();
+                        updateRequest();
+                    })
+            );
+
+            // Set handler to unset the subvariant on click
+            addActionHandler(
+                    String.format("parkour_subvariant_%s_set", name),
+                    Label.ActionHandler.lmb(player -> {
+                        map.settings().setParkourSubVariant(null);
+                        updateElementsFromMap();
+                        updateRequest();
+                    })
+            );
+        }
+
+        // Building
+        for (var subvariant : BuildingSubVariant.values()) {
+            var name = subvariant.name().toLowerCase(Locale.ROOT);
+
+            // Unset handler to set the subvariant on click
+            addActionHandler(
+                    String.format("building_subvariant_%s_unset", name),
+                    Label.ActionHandler.lmb(player -> {
+                        map.settings().setBuildingSubVariant(subvariant);
+                        updateElementsFromMap();
+                        updateRequest();
+                    })
+            );
+
+            // Set handler to unset the subvariant on click
+            addActionHandler(
+                    String.format("building_subvariant_%s_set", name),
+                    Label.ActionHandler.lmb(player -> {
+                        map.settings().setBuildingSubVariant(null);
+                        updateElementsFromMap();
+                        updateRequest();
+                    })
+            );
+        }
+    }
+
+    private void setupTagClickHandlers() {
+        for (var mapTag : MapTags.Tag.values()) {
+            if (mapTag.isDisabled()) continue;
+            var name = mapTag.name().toLowerCase(Locale.ROOT);
+
+            // Unset handler to set the tag on click
+            addActionHandler(
+                    String.format("map_tag_%s_unset", name),
+                    Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, true))
+            );
+
+            // Set handler to unset the tag on click
+            addActionHandler(
+                    String.format("map_tag_%s_set", name),
+                    Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, false))
+            );
+        }
     }
 
     public void showMap(@NotNull MapData map, int slot) {
@@ -240,21 +316,6 @@ public class EditMap extends View {
         }));
     }
 
-    // MAP TYPE SETTINGS
-
-    // PARKOUR
-
-    @Action("map_type_tab_parkour")
-    private void selectMapTypeParkourTab() {
-        if (mapTypeTabSwitch.getOption() == 0) return;
-
-        mapTypeTabSwitch.setOption(0);
-        map.settings().setVariant(MapVariant.PARKOUR);
-        map.settings().removeVisualTags();
-        updateElementsFromMap();
-        updateRequest();
-    }
-
     private void updateRequest() {
         async(() -> map.settings().withUpdateRequest(req -> {
             //todo if update fails we should revert the name change and indicate to the user that it failed
@@ -269,105 +330,18 @@ public class EditMap extends View {
         }));
     }
 
-    @Action("parkour_subvariant_speedrun_unset")
-    private void parkourSubVariantSpeedrunUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.SPEEDRUN);
+    // MAP TYPE SETTINGS
+
+    @Action("map_type_tab_parkour")
+    private void selectMapTypeParkourTab() {
+        if (mapTypeTabSwitch.getOption() == 0) return;
+
+        mapTypeTabSwitch.setOption(0);
+        map.settings().setVariant(MapVariant.PARKOUR);
+        map.settings().removeVisualTags();
         updateElementsFromMap();
         updateRequest();
     }
-
-    @Action("parkour_subvariant_speedrun_set")
-    private void parkourSubVariantSpeedrunSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_sectioned_unset")
-    private void parkourSubVariantSectionedUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.SECTIONED);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_sectioned_set")
-    private void parkourSubVariantSectionedSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_rankup_unset")
-    private void parkourSubVariantRankupUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.RANKUP);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_rankup_set")
-    private void parkourSubVariantRankupSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_gauntlet_unset")
-    private void parkourSubVariantGauntletUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.GAUNTLET);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_gauntlet_set")
-    private void parkourSubVariantGauntletSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_dropper_unset")
-    private void parkourSubVariantDropperUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.DROPPER);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_dropper_set")
-    private void parkourSubVariantDropperSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_one_jump_unset")
-    private void parkourSubVariantOneJumpUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.ONE_JUMP);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_one_jump_set")
-    private void parkourSubVariantOneJumpSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_informative_unset")
-    private void parkourSubVariantInformativeUnset() {
-        map.settings().setParkourSubVariant(ParkourSubVariant.INFORMATIVE);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("parkour_subvariant_informative_set")
-    private void parkourSubVariantInformativeSet() {
-        map.settings().setParkourSubVariant(null);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    // BUILDING
 
     @Action("map_type_tab_building")
     private void selectMapTypeBuildingTab() {
@@ -376,34 +350,6 @@ public class EditMap extends View {
         mapTypeTabSwitch.setOption(1);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_showcase_unset")
-    private void buildingSubVariantShowcaseUnset() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_showcase_set")
-    private void buildingSubVariantShowcaseSet() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.SHOWCASE);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_tutorial_unset")
-    private void buildingSubVariantTutorialUnset() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("building_subvariant_tutorial_set")
-    private void buildingSubVariantTutorialSet() {
-        map.settings().setBuildingSubVariant(BuildingSubVariant.TUTORIAL);
         updateElementsFromMap();
         updateRequest();
     }
@@ -457,180 +403,6 @@ public class EditMap extends View {
         }
         updateElementsFromMap();
         updateRequest();
-    }
-
-    // VISUAL TAGS
-
-    @Action("map_tag_terrain_unset")
-    private void mapTagTerrainUnset() {
-        tagClickHandler(MapTags.Tag.TERRAIN, true);
-    }
-
-    @Action("map_tag_terrain_set")
-    private void mapTagTerrainSet() {
-        tagClickHandler(MapTags.Tag.TERRAIN, false);
-    }
-
-    @Action("map_tag_organics_unset")
-    private void mapTagOrganicsUnset() {
-        tagClickHandler(MapTags.Tag.ORGANICS, true);
-    }
-
-    @Action("map_tag_organics_set")
-    private void mapTagOrganicsSet() {
-        tagClickHandler(MapTags.Tag.ORGANICS, false);
-    }
-
-    @Action("map_tag_structure_unset")
-    private void mapTagStructureUnset() {
-        tagClickHandler(MapTags.Tag.STRUCTURE, true);
-    }
-
-    @Action("map_tag_structure_set")
-    private void mapTagStructureSet() {
-        tagClickHandler(MapTags.Tag.STRUCTURE, false);
-    }
-
-    @Action("map_tag_interior_unset")
-    private void mapTagInteriorUnset() {
-        tagClickHandler(MapTags.Tag.INTERIOR, true);
-    }
-
-    @Action("map_tag_interior_set")
-    private void mapTagInteriorSet() {
-        tagClickHandler(MapTags.Tag.INTERIOR, false);
-    }
-
-    @Action("map_tag_music_unset")
-    private void mapTagMusicUnset() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.MUSIC, true);
-    }
-
-    @Action("map_tag_music_set")
-    private void mapTagMusicSet() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.MUSIC, false);
-    }
-
-    @Action("map_tag_2d_unset")
-    private void mapTag2DUnset() {
-        tagClickHandler(MapTags.Tag.TWODIMENSIONAL, true);
-    }
-
-    @Action("map_tag_2d_set")
-    private void mapTag2DSet() {
-        tagClickHandler(MapTags.Tag.TWODIMENSIONAL, false);
-    }
-
-    @Action("map_tag_recreation_unset")
-    private void mapTagRecreationUnset() {
-        tagClickHandler(MapTags.Tag.RECREATION, true);
-    }
-
-    @Action("map_tag_recreation_set")
-    private void mapTagRecreationSet() {
-        tagClickHandler(MapTags.Tag.RECREATION, false);
-    }
-
-    @Action("map_tag_story_unset")
-    private void mapTagStoryUnset() {
-        tagClickHandler(MapTags.Tag.STORY, true);
-    }
-
-    @Action("map_tag_story_set")
-    private void mapTagStorySet() {
-        tagClickHandler(MapTags.Tag.STORY, false);
-    }
-
-    // GAMEPLAY TAGS
-
-    @Action("map_tag_coop_unset")
-    private void mapTagCoOpUnset() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.COOP, true);
-    }
-
-    @Action("map_tag_coop_set")
-    private void mapTagCoOpSet() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.COOP, false);
-    }
-
-    @Action("map_tag_puzzle_unset")
-    private void mapTagPuzzleUnset() {
-        tagClickHandler(MapTags.Tag.PUZZLE, true);
-    }
-
-    @Action("map_tag_puzzle_set")
-    private void mapTagPuzzleSet() {
-        tagClickHandler(MapTags.Tag.PUZZLE, false);
-    }
-
-    @Action("map_tag_minigame_unset")
-    private void mapTagMinigameUnset() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.MINIGAME, true);
-    }
-
-    @Action("map_tag_minigame_set")
-    private void mapTagMinigameSet() { // TODO coming later
-//        tagClickHandler(MapTags.Tag.MINIGAME, false);
-    }
-
-    @Action("map_tag_exploration_unset")
-    private void mapTagExplorationUnset() {
-        tagClickHandler(MapTags.Tag.EXPLORATION, true);
-    }
-
-    @Action("map_tag_exploration_set")
-    private void mapTagExplorationSet() {
-        tagClickHandler(MapTags.Tag.EXPLORATION, false);
-    }
-
-    @Action("map_tag_bossbattle_unset")
-    private void mapTagBossBattleUnset() {
-        tagClickHandler(MapTags.Tag.BOSSBATTLE, true);
-    }
-
-    @Action("map_tag_bossbattle_set")
-    private void mapTagBossBattleSet() {
-        tagClickHandler(MapTags.Tag.BOSSBATTLE, false);
-    }
-
-    @Action("map_tag_autocomplete_unset") // do this tag at all?
-    private void mapTagAutoCompleteUnset() {
-        tagClickHandler(MapTags.Tag.AUTOCOMPLETE, true);
-    }
-
-    @Action("map_tag_autocomplete_set")
-    private void mapTagAutoCompleteSet() {
-        tagClickHandler(MapTags.Tag.AUTOCOMPLETE, false);
-    }
-
-    @Action("map_tag_escape_unset")
-    private void mapTagEscapeUnset() {
-        tagClickHandler(MapTags.Tag.ESCAPE, true);
-    }
-
-    @Action("map_tag_escape_set")
-    private void mapTagEscapeSet() {
-        tagClickHandler(MapTags.Tag.ESCAPE, false);
-    }
-
-    @Action("map_tag_trivia_unset")
-    private void mapTagTriviaUnset() {
-        tagClickHandler(MapTags.Tag.TRIVIA, true);
-    }
-
-    @Action("map_tag_trivia_set")
-    private void mapTagTriviaSet() {
-        tagClickHandler(MapTags.Tag.TRIVIA, false);
-    }
-
-    @Action("map_tag_strategy_unset")
-    private void mapTagStrategyUnset() {
-        tagClickHandler(MapTags.Tag.STRATEGY, true);
-    }
-
-    @Action("map_tag_strategy_set")
-    private void mapTagStrategySet() {
-        tagClickHandler(MapTags.Tag.STRATEGY, false);
     }
 
     /**

@@ -13,7 +13,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -150,7 +149,7 @@ public abstract class BaseElement implements Element {
         return CLICK_DENY;
     }
 
-    public void wireAction(@NotNull View view, @NotNull Method method, @NotNull Action action) {
+    public void wireAction(@NotNull View view, @NotNull Object handler, @NotNull Action.Descriptor action) {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support actions.");
     }
 
