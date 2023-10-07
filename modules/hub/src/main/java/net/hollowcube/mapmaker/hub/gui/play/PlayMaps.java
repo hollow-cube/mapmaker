@@ -7,10 +7,12 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.hub.gui.edit.SetMapName;
 import net.hollowcube.mapmaker.hub.gui.play.simple.*;
 import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,6 +109,11 @@ public class PlayMaps extends View {
 
         sortPreset = SortPreset.RECENT;
         updateQuery(true);
+    }
+
+    @Action("map_query")
+    private @NonBlocking void beginSearchQuery() {
+        pushView(QueryMaps::new);
     }
 
     private void updateQuery(boolean refresh) {
