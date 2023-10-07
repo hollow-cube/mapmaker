@@ -9,13 +9,13 @@
         "custom_model_data": 1
       },
       "model": "item/water_bucket_1"
-    }
+    },
     {
       "predicate": {
         "custom_model_data": 2
       },
       "model": "item/water_bucket_2"
-    }
+    },
     {
       "predicate": {
         "custom_model_data": 3
