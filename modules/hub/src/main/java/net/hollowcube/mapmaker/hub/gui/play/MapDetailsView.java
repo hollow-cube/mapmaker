@@ -32,6 +32,15 @@ public class MapDetailsView extends View {
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
     private Switch[] tabSwitches;
 
+    // MAP QUALITIES
+    private @Outlet("quality_switch") Switch qualitySwitch;
+    private @Outlet("quality_unrated_text") Text qualityUnratedText;
+    private @Outlet("quality_good_text") Text qualityGoodText;
+    private @Outlet("quality_great_text") Text qualityGreatText;
+    private @Outlet("quality_excellent_text") Text qualityExcellentText;
+    private @Outlet("quality_outstanding_text") Text qualityOutstandingText;
+    private @Outlet("quality_masterpiece_text") Text qualityMasterpieceText;
+
     // MAP DIFFICULTIES
     private @Outlet("difficulty_switch") Switch difficultySwitch;
     private @Outlet("difficulty_none_text") Text difficultyNoneText;
@@ -80,6 +89,27 @@ public class MapDetailsView extends View {
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
 
+        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
+//        if(map.getQuality().equals("good")) {
+//            qualityGoodText.setText("Good", TextColor.color(0xF5DC3B));
+//            qualitySwitch.setOption(1);
+//        } else if(map.getQualityName().equals("great")) {
+//            qualityGreatText.setText("Great", TextColor.color(0x8CDB46));
+//            qualitySwitch.setOption(2);
+//        } else if(map.getQualityName().equals("excellent")) {
+//            qualityExcellentText.setText("Excellent", TextColor.color(0x81AFFF));
+//            qualitySwitch.setOption(3);
+//        } else if(map.getQualityName().equals("outstanding")) {
+//            qualityOutstandingText.setText("Outstanding", TextColor.color(0x78FFDF));
+//            qualitySwitch.setOption(4);
+//        } else if(map.getQualityName().equals("masterpiece")) {
+//            qualityMasterpieceText.setText("Masterpiece", TextColor.color(0xEE6EFF));
+//            qualitySwitch.setOption(5);
+//        } else {
+        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
+        qualitySwitch.setOption(0);
+//        }
+
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             Switch[] difficultySwitches = new Switch[]{difficultySwitch};
             rowOneSwitch.setOption(1);
@@ -99,6 +129,9 @@ public class MapDetailsView extends View {
                 } else if (map.getDifficultyName().equals("nightmare")) {
                     difficultyNightmareText.setText("Nightmare", TextColor.color(0xCC216D));
                     difficultySwitch.setOption(5);
+                } else {
+                    difficultyNoneText.setText("Unknown");
+                    difficultySwitch.setOption(0);
                 }
             } else {
                 difficultyNoneText.setText("Unknown");

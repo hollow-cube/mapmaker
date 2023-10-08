@@ -31,19 +31,23 @@
             <switch id="row_one" width="9" height="1">
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
                     <button width="1" height="1"
-                            id="quality_none"
-                            translationKey="map.quality.none"/>
+                            id="quality_unrated"
+                            translationKey="map.quality.unrated"
+                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="8" height="1"
-                          id="quality_none_text"
-                          translationKey="map.quality.none"/>
+                          id="quality_unrated_text"
+                          translationKey="gui.map_details.map_info_tab.quality.unrated"
+                          font="map_details_quality" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
                     <button width="1" height="1"
                             id="quality_unrated"
-                            translationKey="map.quality.unrated"/>
+                            translationKey="map.quality.unrated"
+                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="4" height="1"
-                          id="quality_none_text"
-                          translationKey="map.quality.unrated"/>
+                          id="quality_unrated_text"
+                          translationKey="gui.map_details.map_info_tab.quality.unrated"
+                          font="map_details_quality" centered="false" shift="3"/>
                     <switch id="difficulty_switch" width="4" height="1">
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
