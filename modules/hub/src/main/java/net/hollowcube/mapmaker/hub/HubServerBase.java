@@ -73,8 +73,8 @@ public abstract class HubServerBase implements HubServer {
         this.world = new HubWorld(this);
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
-        
-        commandManager.register(new MapV2Command(playerService(), mapService(), bridge()));
+
+        commandManager.register(new MapV2Command(playerService(), mapService(), bridge(), permManager()));
     }
 
     @Override

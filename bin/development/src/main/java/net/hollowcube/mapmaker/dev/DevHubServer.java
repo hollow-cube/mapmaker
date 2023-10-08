@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.dev;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubServerBase;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import org.jetbrains.annotations.NotNull;
@@ -13,17 +14,20 @@ public class DevHubServer extends HubServerBase {
     private final PlayerService playerService;
     private final SessionService sessionService;
     private final MapService mapService;
+    private final PermManager permManager;
 
     public DevHubServer(
             @NotNull HubToMapBridge bridge,
             @NotNull PlayerService playerService,
             @NotNull SessionService sessionService,
-            @NotNull MapService mapService
+            @NotNull MapService mapService,
+            @NotNull PermManager permManager
     ) {
         super(bridge);
         this.playerService = Objects.requireNonNull(playerService);
         this.sessionService = Objects.requireNonNull(sessionService);
         this.mapService = Objects.requireNonNull(mapService);
+        this.permManager = Objects.requireNonNull(permManager);
     }
 
     @Override
@@ -41,4 +45,8 @@ public class DevHubServer extends HubServerBase {
         return mapService;
     }
 
+    @Override
+    public @NotNull PermManager permManager() {
+        return permManager;
+    }
 }

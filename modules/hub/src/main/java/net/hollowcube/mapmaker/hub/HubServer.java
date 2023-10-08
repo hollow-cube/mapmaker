@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.minestom.server.entity.Player;
@@ -32,9 +33,7 @@ public interface HubServer {
 
     @NotNull MapService mapService();
 
-
-
-
+    @NotNull PermManager permManager();
 
 
     @NotNull HubWorld world();

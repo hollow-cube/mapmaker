@@ -51,4 +51,13 @@ java_library(
     ],
 )
 
+java_library(
+    name = "spicedb",
+    exports = [
+        "@maven//:com_authzed_api_authzed",
+        "@maven//:io_grpc_grpc_protobuf",
+        "@maven//:io_grpc_grpc_stub",
+    ],
+)
+
 exports_files(["genfile.bzl"])
