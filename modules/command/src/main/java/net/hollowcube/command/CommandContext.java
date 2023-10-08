@@ -22,4 +22,8 @@ public interface CommandContext {
     @NotNull CommandSender sender();
 
     <T> @UnknownNullability T get(@NotNull Argument<T> arg);
+
+    default boolean has(@NotNull Argument<?> arg) {
+        return get(arg) != null;
+    }
 }

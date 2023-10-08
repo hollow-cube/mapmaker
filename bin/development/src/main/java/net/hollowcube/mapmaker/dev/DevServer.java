@@ -9,6 +9,7 @@ import io.pyroscope.http.Format;
 import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -49,7 +50,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.PlayerSkin;
@@ -244,8 +244,8 @@ public class DevServer {
             packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
             MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
 
-            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
-            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
+//            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
+//            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
 
             var bridge = new DevServerBridge();
 
@@ -270,12 +270,12 @@ public class DevServer {
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var debugCommand = new DebugCommand(playerService);
-            hubCommandManager.register(debugCommand);
-            mapCommandManager.register(debugCommand);
+//            hubCommandManager.register(debugCommand);
+//            mapCommandManager.register(debugCommand);
 
             var playCommand = new PlayCommand(mapService, hubToMapBridge);
-            hubCommandManager.register(playCommand);
-            mapCommandManager.register(playCommand);
+//            hubCommandManager.register(playCommand);
+//            mapCommandManager.register(playCommand);
 
             var whereCommand = new WhereCommand();
             hubCommandManager.register(whereCommand);
@@ -293,12 +293,12 @@ public class DevServer {
             var requestCommand = new RequestCommand();
             var acceptCommand = new AcceptCommand();
             var rejectCommand = new RejectCommand();
-            hubCommandManager.register(requestCommand);
-            hubCommandManager.register(acceptCommand);
-            hubCommandManager.register(rejectCommand);
-            mapCommandManager.register(requestCommand);
-            mapCommandManager.register(acceptCommand);
-            mapCommandManager.register(rejectCommand);
+//            hubCommandManager.register(requestCommand);
+//            hubCommandManager.register(acceptCommand);
+//            hubCommandManager.register(rejectCommand);
+//            mapCommandManager.register(requestCommand);
+//            mapCommandManager.register(acceptCommand);
+//            mapCommandManager.register(rejectCommand);
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

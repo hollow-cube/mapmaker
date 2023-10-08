@@ -3,13 +3,13 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
-import net.hollowcube.mapmaker.hub.command.map.MapV2Command;
+import net.hollowcube.mapmaker.hub.command.v2.MapCommand;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -74,7 +74,7 @@ public abstract class HubServerBase implements HubServer {
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
 
-        commandManager.register(new MapV2Command(playerService(), mapService(), bridge(), permManager()));
+        commandManager.register(new MapCommand(playerService(), mapService(), bridge(), permManager()));
     }
 
     @Override
