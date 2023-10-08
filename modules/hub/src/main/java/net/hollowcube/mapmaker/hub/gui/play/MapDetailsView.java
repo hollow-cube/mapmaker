@@ -32,14 +32,14 @@ public class MapDetailsView extends View {
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
     private Switch[] tabSwitches;
 
-    // MAP QUALITIES
-    private @Outlet("quality_switch") Switch qualitySwitch;
+    // MAP QUALITIES (leave what is commented out, refer to line 92)
+//    private @Outlet("quality_switch") Switch qualitySwitch;
     private @Outlet("quality_unrated_text") Text qualityUnratedText;
-    private @Outlet("quality_good_text") Text qualityGoodText;
-    private @Outlet("quality_great_text") Text qualityGreatText;
-    private @Outlet("quality_excellent_text") Text qualityExcellentText;
-    private @Outlet("quality_outstanding_text") Text qualityOutstandingText;
-    private @Outlet("quality_masterpiece_text") Text qualityMasterpieceText;
+//    private @Outlet("quality_good_text") Text qualityGoodText;
+//    private @Outlet("quality_great_text") Text qualityGreatText;
+//    private @Outlet("quality_excellent_text") Text qualityExcellentText;
+//    private @Outlet("quality_outstanding_text") Text qualityOutstandingText;
+//    private @Outlet("quality_masterpiece_text") Text qualityMasterpieceText;
 
     // MAP DIFFICULTIES
     private @Outlet("difficulty_switch") Switch difficultySwitch;
@@ -89,7 +89,8 @@ public class MapDetailsView extends View {
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
 
-        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
+//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED
+//        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
 //        if(map.getQuality().equals("good")) {
 //            qualityGoodText.setText("Good", TextColor.color(0xF5DC3B));
 //            qualitySwitch.setOption(1);
@@ -106,8 +107,9 @@ public class MapDetailsView extends View {
 //            qualityMasterpieceText.setText("Masterpiece", TextColor.color(0xEE6EFF));
 //            qualitySwitch.setOption(5);
 //        } else {
+//        Default value for map quality (unrated)
         qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
-        qualitySwitch.setOption(0);
+//        qualitySwitch.setOption(0);
 //        }
 
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
