@@ -25,4 +25,10 @@ public interface PermManager {
         };
     }
 
+    default @NotNull net.hollowcube.command.CommandCondition createPlatformCondition2(@NotNull PlatformPerm perm) {
+        return (sender, context) -> sender instanceof Player && hasPlatformPermission((Player) sender, perm)
+                ? net.hollowcube.command.CommandCondition.ALLOW
+                : net.hollowcube.command.CommandCondition.HIDE;
+    }
+
 }

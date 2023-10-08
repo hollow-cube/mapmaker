@@ -8,6 +8,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//modules/command",
         "//modules/common",
         "//third_party:minestom",
         "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
@@ -34,6 +35,7 @@ java_junit5_test(
     test_class = "net.hollowcube.terraform.TerraformTestSuite",
     deps = [
         ":terraform",
+        "//modules/command",
         "//modules/common",
         "//modules/test",
         "//third_party:minestom",
@@ -51,6 +53,7 @@ jmh_java_benchmarks(
     resources = glob(include = ["src/bench/resources/**/*"]),
     deps = [
         ":terraform",
+        "//modules/command",
         "//modules/common",
         "//modules/test",
         "//third_party:minestom",

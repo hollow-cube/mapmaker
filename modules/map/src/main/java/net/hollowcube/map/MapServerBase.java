@@ -4,10 +4,11 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.block.rule.PlacementRules;
-import net.hollowcube.map.command.*;
+import net.hollowcube.map.command.BaseMapCommand;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteService;
@@ -21,7 +22,6 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
@@ -95,20 +95,20 @@ public abstract class MapServerBase implements MapServer {
         TerraformAxiom.init(terraformEvents, condition);
 
         // Register commands
-        commandManager.register(new HubCommand(bridge));
-        commandManager.register(new GiveCommand());
-        commandManager.register(new SetSpawnCommand());
-        commandManager.register(new SpawnCommand());
-        commandManager.register(new ClearInventoryCommand());
-        commandManager.register(new FlyCommand());
-        commandManager.register(new FlySpeedCommand());
-        commandManager.register(new TeleportCommand());
-        commandManager.register(new TestModeCommand(this));
-        commandManager.register(new BuildModeCommand(this));
-        commandManager.register(new TopTimesCommand(playerService(), mapService()));
-        commandManager.register(new InviteCommand());
+//        commandManager.register(new HubCommand(bridge));
+//        commandManager.register(new GiveCommand());
+//        commandManager.register(new SetSpawnCommand());
+//        commandManager.register(new SpawnCommand());
+//        commandManager.register(new ClearInventoryCommand());
+//        commandManager.register(new FlyCommand());
+//        commandManager.register(new FlySpeedCommand());
+//        commandManager.register(new TeleportCommand());
+//        commandManager.register(new TestModeCommand(this));
+//        commandManager.register(new BuildModeCommand(this));
+//        commandManager.register(new TopTimesCommand(playerService(), mapService()));
+//        commandManager.register(new InviteCommand());
         // Request, Accept, Reject have been registered already in DevServer
-        commandManager.register(new RemoveCommand(bridge));
+//        commandManager.register(new RemoveCommand(bridge));
         // Register features
         var features = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
