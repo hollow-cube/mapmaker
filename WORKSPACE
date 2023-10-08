@@ -83,6 +83,9 @@ maven_install(
         "org.spongepowered:configurate-core:4.1.2",
         "org.spongepowered:configurate-yaml:4.1.2",
         "com.miguelfonseca.completely:completely-core:0.9.0",
+        "com.authzed.api:authzed:0.5.0",
+        "io.grpc:grpc-protobuf:1.55.1",
+        "io.grpc:grpc-stub:1.55.1",
 
         # Adventure
         "net.kyori:adventure-api:4.12.0",

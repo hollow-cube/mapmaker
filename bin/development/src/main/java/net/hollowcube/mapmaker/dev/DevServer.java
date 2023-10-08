@@ -32,6 +32,8 @@ import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.metrics.Metric;
 import net.hollowcube.mapmaker.metrics.MetricType;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -142,6 +144,7 @@ public class DevServer {
     private PlayerService playerService;
     private SessionService sessionService;
     private MapService mapService;
+    private PermManager permManager;
 
     private DevHubServer hub;
     private DevMapServer maps;
@@ -223,6 +226,8 @@ public class DevServer {
         if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
         mapService = new MapServiceImpl(mapServiceUrl);
 
+        permManager = new PermManagerImpl("", "");
+
         var kafkaConfig = configProvider.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
         metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
@@ -239,9 +244,12 @@ public class DevServer {
             packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
             MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
 
+            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
+            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
+
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService);
+            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager);
             this.maps = new DevMapServer(bridge, playerService, sessionService, mapService);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
