@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.common ?>
 <component width="9" height="9" align="ttb">
-    <box id="tab_switch" width="9" height="5">
+    <switch id="tab_switch" width="9" height="5">
         <!-- INFO TAB -->
         <box width="9" height="5" align="ttb">
             <box width="9" height="1" align="ltr" sprite="create_maps/tab_info/header">

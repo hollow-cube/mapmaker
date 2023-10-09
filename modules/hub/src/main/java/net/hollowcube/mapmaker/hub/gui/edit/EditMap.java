@@ -30,8 +30,6 @@ public class EditMap extends View {
     private @ContextObject MapService mapService;
 
     private @OutletGroup("slot_id_.+") Text[] slotIds;
-
-    private @Outlet("tab_switch") Switch tabSwitch;
     private @OutletGroup("tab_.+_switch") Switch[] tabButtonSwitches;
 
     private enum PublishStage {
@@ -155,6 +153,24 @@ public class EditMap extends View {
             addActionHandler(
                     String.format("map_tag_%s_set", name),
                     Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, false))
+            );
+        }
+    }
+
+    private void setupSettingsClickHandlers() {
+        for (var mapSetting : MapSettings.Setting.values()) {
+            var name = mapSetting.name().toLowerCase(Locale.ROOT);
+
+            // Unset handler to set the setting on click
+            addActionHandler(
+                    String.format("map_setting_%s_unset", name),
+                    Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
+            );
+
+            // Set handler to unset the setting on click
+            addActionHandler(
+                    String.format("map_setting_%s_set", name),
+                    Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, false))
             );
         }
     }
