@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
 import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.command.example.FlipCommand;
+import net.hollowcube.command.example.ParentCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.PlayerLoginEvent;
@@ -26,14 +27,12 @@ public class DemoServer {
         var commandManager = new CommandManager();
         commandManager.register(new HelpCommand(commandManager));
         commandManager.register(new FlipCommand(null, null));
+        commandManager.register(new ParentCommand());
 
         var packetListener = MinecraftServer.getPacketListenerManager();
-        packetListener.setListener(ClientCommandChatPacket.class, (packet, player) -> {
-            commandManager.execute(player, packet.message());
-//            System.out.println("command execution: " + packet.message());
-        });
+        packetListener.setListener(ClientCommandChatPacket.class,
+                (packet, player) -> commandManager.execute(player, packet.message()));
         packetListener.setListener(ClientTabCompletePacket.class, (packet, player) -> {
-            System.out.println("command suggestion: " + packet.text());
             var result = commandManager.suggestions(player, packet.text().substring(1));
             if (result instanceof SuggestionResult.Success success) {
                 var response = new TabCompletePacket(
@@ -45,8 +44,6 @@ public class DemoServer {
                                 .toList()
                 );
                 player.sendPacket(response);
-            } else {
-                System.out.println("fail suggestion");
             }
         });
 

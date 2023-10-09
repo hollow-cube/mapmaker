@@ -21,7 +21,7 @@ public class PermManagerImpl implements PermManager {
 
     @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPerm perm) {
-        return false;
+        return true;
     }
 
     @Override

@@ -109,7 +109,7 @@ final class CommandContextImpl implements CommandContext {
     // Other API
 
     public void pushCommand(@NotNull Command command) {
-        System.out.println("PUSH COMMAND: " + command.name());
+//        System.out.println("PUSH COMMAND: " + command.name());
         this.commands.add(command);
     }
 
@@ -119,12 +119,12 @@ final class CommandContextImpl implements CommandContext {
     }
 
     public void pushSyntax(@NotNull Command.Syntax syntax) {
-        System.out.println("PUSH SYNTAX: " + (syntax.condition() != null ? "? " : "") + String.join(" ", syntax.args().stream().map(Object::toString).toList()));
+//        System.out.println("PUSH SYNTAX: " + (syntax.condition() != null ? "? " : "") + String.join(" ", syntax.args().stream().map(Object::toString).toList()));
         this.syntaxes.add(syntax);
     }
 
     public void pushArg(@NotNull Argument<?> arg) {
-        System.out.println("PUSH ARG: " + arg);
+//        System.out.println("PUSH ARG: " + arg);
         this.args.add(arg);
         this.argMarks.add(this.reader.mark());
     }
@@ -136,7 +136,7 @@ final class CommandContextImpl implements CommandContext {
     }
 
     public void pushArgValue(@Nullable Object value, @Nullable CommandExecutor overrideExecutor) {
-        System.out.println("PUSH ARG VALUE: " + value);
+//        System.out.println("PUSH ARG VALUE: " + value);
         this.argValues.add(value);
         this.overrideExecutor = overrideExecutor;
     }

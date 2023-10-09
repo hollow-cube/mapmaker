@@ -17,6 +17,7 @@ public abstract class Command {
 
     // Map of lower cased command name to subcommand.
     private final Map<String, Command> subcommands = new HashMap<>();
+    private final List<Command> uniqueSubcommands = new ArrayList<>();
     private final List<Syntax> syntaxes = new ArrayList<>();
     private CommandExecutor defaultExecutor = null;
 
@@ -36,11 +37,16 @@ public abstract class Command {
         return subcommands;
     }
 
+    public @NotNull Collection<Command> getUniqueSubcommands() {
+        return uniqueSubcommands;
+    }
+
     public void addSubcommand(@NotNull Command command) {
         var name = command.name().toLowerCase(Locale.ROOT);
         Check.argCondition(name.isEmpty(), "Subcommand name cannot be empty.");
         Check.argCondition(subcommands.containsKey(name), "Subcommand with name " + name + " already exists.");
         subcommands.put(name, command);
+        uniqueSubcommands.add(command);
     }
 
     public void setDefaultExecutor(@NotNull CommandExecutor executor) {
@@ -125,6 +131,10 @@ public abstract class Command {
         }
 
         return true;
+    }
+
+    public boolean isPlausiblyExecutable() {
+        return defaultExecutor != null || !syntaxes.isEmpty();
     }
 
     record Syntax(

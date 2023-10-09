@@ -43,9 +43,8 @@ public record CommandDoc(
         @Override
         public void render(@NotNull CommandSender sender, @NotNull List<String> path, @NotNull CommandDoc doc) {
             var builder = Component.text();
-            builder.append(Component.text("------ Help for /" + java.lang.String.join(" ", path) + " ------"));
-            if (doc.description != null)
-                builder.appendNewline().append(Component.text(doc.description));
+            var description = doc.description == null ? "NO DESCRIPTION PROVIDED" : doc.description;
+            builder.append(Component.text(description));
             builder.appendNewline().append(Component.text("ᴜѕᴀɢᴇ: /" + java.lang.String.join(" ", path)));
             if (doc.arguments != null && !doc.arguments.isEmpty()) {
                 for (var argument : doc.arguments) {

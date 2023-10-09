@@ -10,6 +10,7 @@ import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -244,6 +245,8 @@ public class DevServer {
             packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
             MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
 
+            hubCommandManager.register(new HelpCommand(hubCommandManager));
+            mapCommandManager.register(new HelpCommand(mapCommandManager));
 //            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
 //            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
 
