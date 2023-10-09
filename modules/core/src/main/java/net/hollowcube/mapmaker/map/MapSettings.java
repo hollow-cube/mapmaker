@@ -25,7 +25,42 @@ public class MapSettings {
 
     private Pos spawnPoint;
 
-    // Gameplay settings
+    // Settings
+    public enum SettingType {
+        GAMEPLAY,
+        VISUAL
+    }
+
+    public enum Setting {
+        // WARNING! Changing the variable names or order of these tags is dangerous.
+        // This enum must match the order of the setting declarations in the GUI xml file.
+        // See the warning in EditMap for more details.
+
+        // Visual
+
+        // Gameplay
+        ONLYSPRINT(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.only_sprint.name"),
+        NOSPRINT(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_sprint.selected.name"),
+        NOJUMP(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_jump.selected.name"),
+        NOSNEAK(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_sneak.name"),
+        ;
+
+        SettingType type;
+        String translateKey;
+
+        Setting(SettingType type, String translateKey) {
+            this.type = type;
+            this.translateKey = translateKey;
+        }
+
+        public Component displayName() {
+            return Component.translatable(this.translateKey);
+        }
+
+        public SettingType getType() {
+            return this.type;
+        }
+    }
     private boolean onlySprint = false;
     private boolean noSprint = false;
     private boolean noJump = false;
