@@ -6,6 +6,7 @@ import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ public class ResetSaveStateItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        player.sendMessage("TODO: reset save state");
+        player.sendMessage(Component.translatable("map.status.reset_confirmation.affirm"));
 
         var world = (PlayingMapWorld) MapWorld.forPlayer(player);
         //todo this cast is bad, should redo this whole thing
@@ -39,6 +40,7 @@ public class ResetSaveStateItem extends ItemHandler {
             saveState.setPlaytime(0);
             saveState.setPlayStartTime(System.currentTimeMillis());
             saveState.setCompleted(false);
+            saveState.setCheckpoint(null, world.map().settings().getSpawnPoint());
             player.teleport(world.map().settings().getSpawnPoint()).join();
             //todo this will not clear effects or anything, i guess the plate fp will have to do that
             player.setTag(MapHooks.PLAYING, true);
