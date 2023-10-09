@@ -44,7 +44,7 @@ public class CommandRewriter {
             if (suggestion != null) {
                 player.sendPacket(new TabCompletePacket(
                         packet.transactionId(),
-                        suggestion.start(),
+                        suggestion.start() + 1,
                         suggestion.length(),
                         suggestion.suggestions().stream()
                                 .map(suggestionEntry -> new TabCompletePacket.Match(suggestionEntry.replacement(), suggestionEntry.tooltip()))

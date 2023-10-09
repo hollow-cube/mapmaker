@@ -1,5 +1,7 @@
 package net.hollowcube.command;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentOptional;
 import net.hollowcube.command.arg.SuggestionResult;
@@ -33,6 +35,7 @@ public final class CommandManager {
 
     // Map of lower case command name to command impl.
     private final Map<String, Command> commands = new HashMap<>();
+    private final List<Command> uniqueCommands = new ArrayList<>();
 
     /**
      * Registers the given command.
@@ -46,6 +49,7 @@ public final class CommandManager {
             if (commands.containsKey(name))
                 throw new IllegalArgumentException("Command already registered: " + name);
             commands.put(name, command);
+            uniqueCommands.add(command);
         } finally {
             wlock.unlock();
         }
@@ -184,33 +188,55 @@ public final class CommandManager {
      * Returns the {@link DeclareCommandsPacket} for the given player.
      */
     public @NotNull DeclareCommandsPacket commandPacket(@NotNull CommandSender sender) {
-        //todo caching should be as aggressive as possible. For example, a server only command should be cached globally here because it is always single syntax greedy string.
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
-        var topLevel = new ArrayList<Integer>();
-        for (var command : commands.values()) {
-            var node = new DeclareCommandsPacket.Node();
-            node.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
-            node.name = command.name().toLowerCase(Locale.ROOT);
-            node.children = new int[1];
-            topLevel.add(nodes.size());
-            nodes.add(node);
+        var root = new DeclareCommandsPacket.Node();
+        nodes.add(root);
 
-            // Args greedy argumet
+        var rootNodes = new IntArrayList();
+        for (var command : uniqueCommands) {
+            rootNodes.addAll(buildCommandPacket(nodes, command));
+        }
+
+        root.children = rootNodes.toIntArray();
+        return new DeclareCommandsPacket(nodes, 0);
+        //todo caching should be as aggressive as possible. For example, a server only command should be cached globally here because it is always single syntax greedy string.
+    }
+
+    private IntList buildCommandPacket(@NotNull List<DeclareCommandsPacket.Node> nodes, @NotNull Command command) {
+        var cmds = new IntArrayList();
+
+        // Add the command node
+        var node = new DeclareCommandsPacket.Node();
+        node.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
+        node.name = command.name().toLowerCase(Locale.ROOT);
+        cmds.add(nodes.size());
+        nodes.add(node);
+        var nodeChildren = new IntArrayList();
+
+        // Add subcommands to the command node
+        for (var subcommand : command.getUniqueSubcommands()) {
+            nodeChildren.addAll(buildCommandPacket(nodes, subcommand));
+        }
+
+        // Add the greedy argument to the command node if there are any syntaxes or a default executor
+        //todo this plausibly executable call needs to take the command sender as an argument and eval all of the conditions
+        if (command.isPlausiblyExecutable()) {
             var args = new DeclareCommandsPacket.Node();
             args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
             args.name = "args";
             args.parser = "brigadier:string";
             args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
             args.suggestionsType = "minecraft:ask_server";
-            node.children[0] = nodes.size();
+            nodeChildren.add(nodes.size());
             nodes.add(args);
         }
 
-        var rootNode = new DeclareCommandsPacket.Node();
-        rootNode.children = topLevel.stream().mapToInt(i -> i).toArray();
-        nodes.add(rootNode);
+        node.children = nodeChildren.toIntArray();
 
-        return new DeclareCommandsPacket(nodes, nodes.size() - 1);
+        // Add redirects for aliases to the command
+        //todo
+
+        return cmds;
     }
 
 }
