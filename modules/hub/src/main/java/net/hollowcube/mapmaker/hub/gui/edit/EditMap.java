@@ -30,6 +30,7 @@ public class EditMap extends View {
     private @ContextObject MapService mapService;
 
     private @OutletGroup("slot_id_.+") Text[] slotIds;
+    private @Outlet("tab_switch") Switch tabSwitch;
     private @OutletGroup("tab_.+_switch") Switch[] tabButtonSwitches;
 
     private enum PublishStage {
@@ -81,6 +82,7 @@ public class EditMap extends View {
 
         setupSubvariantClickHandlers();
         setupTagClickHandlers();
+        setupSettingsClickHandlers();
 
         selectTab(0);
         setState(State.LOADING);
@@ -447,6 +449,35 @@ public class EditMap extends View {
         mapSettingsTabSwitch.setOption(1);
     }
 
+    private void settingClickHandler(MapSettings.Setting setting, boolean set) {
+        // TODO this is disgusting but I'm lazy, we should do this like tags as enum
+        if (set) {
+            if (setting.equals(MapSettings.Setting.NOSPRINT)) {
+                map.settings().setNoSprint(true);
+                map.settings().setOnlySprint(false);
+            } else if (setting.equals(MapSettings.Setting.ONLYSPRINT)) {
+                map.settings().setOnlySprint(true);
+                map.settings().setNoSprint(false);
+            } else if (setting.equals(MapSettings.Setting.NOJUMP)) {
+                map.settings().setNoJump(true);
+            } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
+                map.settings().setNoSneak(true);
+            }
+        } else {
+            if (setting.equals(MapSettings.Setting.NOSPRINT)) {
+                map.settings().setNoSprint(false);
+            } else if (setting.equals(MapSettings.Setting.ONLYSPRINT)) {
+                map.settings().setOnlySprint(false);
+            } else if (setting.equals(MapSettings.Setting.NOJUMP)) {
+                map.settings().setNoJump(false);
+            } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
+                map.settings().setNoSneak(false);
+            }
+        }
+        updateElementsFromMap();
+        updateRequest();
+    }
+
     // VISUAL SETTINGS
 
     // GAMEPLAY SETTINGS
@@ -569,6 +600,10 @@ public class EditMap extends View {
         for (int i = 0; i < mapTagsSwitches.length; i++) {
             mapTagsSwitches[i].setOption(tags.contains(MapTags.Tag.values()[i]) ? 1 : 0);
         }
+
+        // Settings
+        mapSettingsOnlySprint.setOption(map.settings().isOnlySprint() ? 0 : 1);
+        // TODO
 
         async(() -> {
             publishSwitch.setOption(getPublishState().ordinal());
