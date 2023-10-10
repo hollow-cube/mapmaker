@@ -9,6 +9,7 @@ import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.block.rule.PlacementRules;
 import net.hollowcube.map.command.BaseMapCommand;
+import net.hollowcube.map.command.v2.HubCommand;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteService;
@@ -95,7 +96,7 @@ public abstract class MapServerBase implements MapServer {
         TerraformAxiom.init(terraformEvents, condition);
 
         // Register commands
-//        commandManager.register(new HubCommand(bridge));
+        commandManager.register(new HubCommand(bridge));
 //        commandManager.register(new GiveCommand());
 //        commandManager.register(new SetSpawnCommand());
 //        commandManager.register(new SpawnCommand());

@@ -35,7 +35,7 @@ public class MapListCommand extends BaseHubCommand {
         this.mapService = mapService;
 
         this.targetArg = ExtraArguments.PlayerNameWithCompletion(playerService, "target");
-        var condition = permManager.createPlatformCondition(PlatformPerm.GLOBAL_MAP_ADMIN);
+        var condition = permManager.createPlatformCondition(PlatformPerm.MAP_ADMIN);
 
         setDefaultExecutor(wrap(this::listMapsSelf));
         addConditionalSyntax(condition, wrap(this::listMapsOther), targetArg);

@@ -86,6 +86,8 @@ maven_install(
         "com.authzed.api:authzed:0.5.0",
         "io.grpc:grpc-protobuf:1.55.1",
         "io.grpc:grpc-stub:1.55.1",
+        "com.google.protobuf:protobuf-java:3.24.4",
+        "com.github.ben-manes.caffeine:caffeine:3.1.8",
 
         # Adventure
         "net.kyori:adventure-api:4.12.0",
