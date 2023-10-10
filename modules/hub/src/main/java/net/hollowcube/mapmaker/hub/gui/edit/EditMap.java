@@ -458,7 +458,9 @@ public class EditMap extends View {
             mapTagsSwitches[i].setOption(tags.contains(MapTags.Tag.values()[i]) ? 1 : 0);
         }
 
-        publishSwitch.setOption(getPublishState().ordinal());
+        async(() -> {
+            publishSwitch.setOption(getPublishState().ordinal());
+        });
     }
 
     // ACTIONS TAB
