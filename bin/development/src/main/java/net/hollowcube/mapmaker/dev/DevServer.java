@@ -227,7 +227,7 @@ public class DevServer {
         if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
         mapService = new MapServiceImpl(mapServiceUrl);
 
-        permManager = new PermManagerImpl("", "");
+        permManager = new PermManagerImpl("localhost:50051", "supersecretkey");
 
         var kafkaConfig = configProvider.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me

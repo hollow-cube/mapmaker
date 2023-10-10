@@ -55,6 +55,8 @@ java_library(
     name = "spicedb",
     exports = [
         "@maven//:com_authzed_api_authzed",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_protobuf",
         "@maven//:io_grpc_grpc_stub",
     ],

@@ -37,7 +37,7 @@ public class MapListCommand extends Command {
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService)
                 .doc("The player to list maps for", "you");
-        var condition = permManager.createPlatformCondition2(PlatformPerm.GLOBAL_MAP_ADMIN);
+        var condition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
 
         description = "Get info about your map slots";
 
