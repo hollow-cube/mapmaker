@@ -358,51 +358,53 @@
         </box>
 
         <!-- SETTINGS TAB -->
-        <box width="9" height="1" align="ltr" sprite="create_maps/tab_settings/header">
-            <BackButton/>
-            <label translationKey="gui.create_maps.map_settings_tab.information"/>
-            <text id="slot_id_info" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
-                  centered="true"/>
-            <!--        todo those last 2 buttons-->
-            <button translationKey="gui.create_maps.map_settings_tab.reset"
-                    sprite="create_maps/tab_settings/reset_icon"/>
-            <button translationKey="gui.create_maps.map_settings_tab.filter"/>
-        </box>
+        <box width="9" height="5" align="ttb">
+            <box width="9" height="1" align="ltr" sprite="create_maps/tab_settings/header">
+                <BackButton/>
+                <label translationKey="gui.create_maps.map_settings_tab.information"/>
+                <text id="slot_id_info" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                      centered="true"/>
+                <!--        todo those last 2 buttons-->
+                <button translationKey="gui.create_maps.map_settings_tab.reset"
+                        sprite="create_maps/tab_settings/reset_icon"/>
+                <button translationKey="gui.create_maps.map_settings_tab.filter"/>
+            </box>
 
-        <box width="9" height="4" sprite="create_maps/tab_settings/container" align="ttb">
-            <spacer width="1"/>
-            <switch id="map_settings_nojump_switch">
-                <button id="map_settings_nojump_unset"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
-                <button id="map_settings_nojump_set"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
-            </switch>
-            <switch id="map_settings_nosprint_switch">
-                <button id="map_settings_nosprint_unset"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
-                <button id="map_settings_nosprint_set"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
-            </switch>
-            <switch id="map_settings_onlysprint_switch">
-                <button id="map_settings_onlysprint_unset"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
-                <button id="map_settings_onlysprint_set"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
-            </switch>
-            <switch id="map_settings_nosneak_switch">
-                <button id="map_settings_nosneak_unset"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
-                <button id="map_settings_nosneak_set"
-                        translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
-                        sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
-            </switch>
+            <box width="9" height="4" sprite="create_maps/tab_settings/container" align="ltr">
+                <spacer width="1"/>
+                <switch id="map_settings_nojump_switch">
+                    <button id="map_settings_nojump_unset"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
+                    <button id="map_settings_nojump_set"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
+                </switch>
+                <switch id="map_settings_nosprint_switch">
+                    <button id="map_settings_nosprint_unset"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
+                    <button id="map_settings_nosprint_set"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
+                </switch>
+                <switch id="map_settings_onlysprint_switch">
+                    <button id="map_settings_onlysprint_unset"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
+                    <button id="map_settings_onlysprint_set"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
+                </switch>
+                <switch id="map_settings_nosneak_switch">
+                    <button id="map_settings_nosneak_unset"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
+                    <button id="map_settings_nosneak_set"
+                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
+                </switch>
+            </box>
         </box>
 
         <!-- ACTIONS TAB -->

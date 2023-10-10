@@ -64,8 +64,6 @@ public class EditMap extends View {
 
     // MAP SETTINGS
 
-    private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
-
     // VISUAL
 
     // GAMEPLAY
@@ -165,13 +163,13 @@ public class EditMap extends View {
 
             // Unset handler to set the setting on click
             addActionHandler(
-                    String.format("map_setting_%s_unset", name),
+                    String.format("map_settings_%s_unset", name),
                     Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
             );
 
             // Set handler to unset the setting on click
             addActionHandler(
-                    String.format("map_setting_%s_set", name),
+                    String.format("map_settings_%s_set", name),
                     Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, false))
             );
         }
@@ -437,18 +435,6 @@ public class EditMap extends View {
 
     // MAP SETTING TABS
 
-    @Action("map_settings_tab_visual")
-    private void selectMapSettingsVisual() {
-        if (mapSettingsTabSwitch.getOption() == 0) return;
-        mapSettingsTabSwitch.setOption(0);
-    }
-
-    @Action("map_settings_tab_gameplay")
-    private void selectMapSettingsGameplay() {
-        if (mapSettingsTabSwitch.getOption() == 1) return;
-        mapSettingsTabSwitch.setOption(1);
-    }
-
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
         // TODO this is disgusting but I'm lazy, we should do this like tags as enum
         if (set) {
@@ -474,76 +460,6 @@ public class EditMap extends View {
                 map.settings().setNoSneak(false);
             }
         }
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    // VISUAL SETTINGS
-
-    // GAMEPLAY SETTINGS
-
-    @Action("map_settings_nojump_unset")
-    private void mapSettingsNoJumpUnset() {
-        map.settings().setNoJump(true);
-        mapSettingsNoJump.setOption(1);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_nojump_set")
-    private void mapSettingsNoJumpSet() {
-        map.settings().setNoJump(false);
-        mapSettingsNoJump.setOption(0);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_nosprint_unset")
-    private void mapSettingsNoSprintUnset() {
-        map.settings().setNoSprint(true);
-        mapSettingsNoSprint.setOption(1);
-        mapSettingsOnlySprint.setOption(0);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_nosprint_set")
-    private void mapSettingsNoSprintSet() {
-        map.settings().setNoSprint(false);
-        mapSettingsNoSprint.setOption(0);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_onlysprint_unset")
-    private void mapSettingsOnlySprintUnset() {
-        map.settings().setOnlySprint(true);
-        mapSettingsOnlySprint.setOption(1);
-        mapSettingsNoSprint.setOption(0);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_onlysprint_set")
-    private void mapSettingsOnlySprintSet() {
-        map.settings().setOnlySprint(false);
-        mapSettingsOnlySprint.setOption(0);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_nosneak_unset")
-    private void mapSettingsNoSneakUnset() {
-        map.settings().setNoSneak(true);
-        mapSettingsNoSneak.setOption(1);
-        updateElementsFromMap();
-        updateRequest();
-    }
-
-    @Action("map_settings_nosneak_set")
-    private void mapSettingsNoSneakSet() {
-        map.settings().setNoSneak(false);
-        mapSettingsNoSneak.setOption(0);
         updateElementsFromMap();
         updateRequest();
     }
@@ -602,8 +518,10 @@ public class EditMap extends View {
         }
 
         // Settings
-        mapSettingsOnlySprint.setOption(map.settings().isOnlySprint() ? 0 : 1);
-        // TODO
+        mapSettingsOnlySprint.setOption(map.settings().isOnlySprint() ? 1 : 0);
+        mapSettingsNoSprint.setOption(map.settings().isNoSprint() ? 1 : 0);
+        mapSettingsNoJump.setOption(map.settings().isNoJump() ? 1 : 0);
+        mapSettingsNoSneak.setOption(map.settings().isNoSneak() ? 1 : 0);
 
         async(() -> {
             publishSwitch.setOption(getPublishState().ordinal());
