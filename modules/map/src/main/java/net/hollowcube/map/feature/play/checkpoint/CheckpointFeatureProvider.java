@@ -71,8 +71,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var saveState = SaveState.fromPlayer(player);
 
-        player.setTag(RESET_HEIGHT_TAG, 30);
-//        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
+        player.setTag(RESET_HEIGHT_TAG, getCheckpointResetHeight(event.getMap(), saveState.checkpoint()));
     }
 
     private void cleanupPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
