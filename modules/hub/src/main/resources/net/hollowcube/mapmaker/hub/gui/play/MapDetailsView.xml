@@ -32,7 +32,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
                     <button width="1" height="1"
                             id="quality_unrated"
-                            translationKey="map.quality.unrated"
+                            translationKey="gui.map_details.map_info_tab.quality.unrated"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="8" height="1"
                           id="quality_unrated_text"
@@ -42,7 +42,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
                     <button width="1" height="1"
                             id="quality_unrated"
-                            translationKey="map.quality.unrated"
+                            translationKey="gui.map_details.map_info_tab.quality.unrated"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="4" height="1"
                           id="quality_unrated_text"

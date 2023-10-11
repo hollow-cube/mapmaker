@@ -21,9 +21,9 @@
     "type": "sprite",
     "ref": "icon/deny"
   },
-  "SYSTEM": {
+  "INFO": {
     "type": "sprite",
-    "ref": "icon/system"
+    "ref": "icon/info"
   },
   "LOCK": {
     "type": "sprite",
@@ -32,6 +32,50 @@
   "EXCLAMATION": {
     "type": "sprite",
     "ref": "icon/exclamation"
+  },
+  "PLUS": {
+    "type": "sprite",
+    "ref": "icon/plus"
+  },
+  "MINUS": {
+    "type": "sprite",
+    "ref": "icon/minus"
+  },
+  "CT1": {
+    "type": "sprite",
+    "ref": "icon/staff/ct1"
+  },
+  "CT2": {
+    "type": "sprite",
+    "ref": "icon/staff/ct2"
+  },
+  "CT3": {
+    "type": "sprite",
+    "ref": "icon/staff/ct3"
+  },
+  "MOD1": {
+    "type": "sprite",
+    "ref": "icon/staff/mod1"
+  },
+  "MOD2": {
+    "type": "sprite",
+    "ref": "icon/staff/mod2"
+  },
+  "MOD3": {
+    "type": "sprite",
+    "ref": "icon/staff/mod3"
+  },
+  "DEV1": {
+    "type": "sprite",
+    "ref": "icon/staff/dev1"
+  },
+  "DEV2": {
+    "type": "sprite",
+    "ref": "icon/staff/dev2"
+  },
+  "DEV3": {
+    "type": "sprite",
+    "ref": "icon/staff/dev3"
   },
   // Standard Colors
   // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
