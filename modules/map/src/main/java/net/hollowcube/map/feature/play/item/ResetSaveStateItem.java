@@ -28,7 +28,7 @@ public class ResetSaveStateItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        player.sendMessage(Component.translatable("map.status.reset_confirmation.affirm"));
+        player.sendMessage(Component.translatable("map.status.reset.confirm"));
 
         var world = (PlayingMapWorld) MapWorld.forPlayer(player);
         //todo this cast is bad, should redo this whole thing

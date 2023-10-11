@@ -108,7 +108,7 @@
     "type": "raw",
     "value": "#AC4BFF"
   },
-  // #30FBFF - Light Blue (Mod Rank, “You” in Direct Messaging Commands)
+  // #30FBFF - Light Blue (Mod Rank, “You” in Direct Messaging Commands, Info)
   "light_blue": {
     "type": "raw",
     "value": "#30FBFF"

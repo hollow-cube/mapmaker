@@ -37,7 +37,7 @@ public final class ClipboardCommands {
 
         private void handleCopySelection(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -80,7 +80,7 @@ public final class ClipboardCommands {
 
         private void handleCutSelection(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -125,7 +125,7 @@ public final class ClipboardCommands {
 
         private void handlePasteClipboard(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -140,7 +140,7 @@ public final class ClipboardCommands {
 
             var session = LocalSession.forPlayer(player);
             clipboard.apply(session, player.getPosition())
-                    .thenAccept(unused -> player.sendMessage("Done!"));
+                    .thenAccept(unused -> player.sendMessage(Component.translatable("command.terraform.paste.success")));
         }
     }
 
@@ -165,7 +165,7 @@ public final class ClipboardCommands {
 
             private void showClipboardList(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -196,7 +196,7 @@ public final class ClipboardCommands {
 
             private void handleClearClipboard(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -213,7 +213,7 @@ public final class ClipboardCommands {
 
             private void showErrorTodo(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -240,7 +240,7 @@ public final class ClipboardCommands {
 
             private void handleRotate(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -279,7 +279,7 @@ public final class ClipboardCommands {
 
             private void handleFlipAxes(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -288,7 +288,7 @@ public final class ClipboardCommands {
 
             private void handleFlipDirection(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 

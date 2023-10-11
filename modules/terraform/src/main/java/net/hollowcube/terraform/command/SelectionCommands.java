@@ -41,7 +41,7 @@ public final class SelectionCommands {
 
         private void handleSelectionUpdate(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -85,7 +85,7 @@ public final class SelectionCommands {
 
         private void handleSelectionUpdate(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -127,7 +127,7 @@ public final class SelectionCommands {
 
         private void handleSelectionUpdate(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -175,7 +175,7 @@ public final class SelectionCommands {
 
         private void handleSelectionUpdate(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -245,7 +245,7 @@ public final class SelectionCommands {
 
                 private void handleSelectRegionType(@NotNull CommandSender sender, @NotNull CommandContext context) {
                     if (!(sender instanceof Player player)) {
-                        sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                        sender.sendMessage(Component.translatable("generic.players_only"));
                         return;
                     }
 
@@ -278,7 +278,7 @@ public final class SelectionCommands {
 
             private void handleClear(@NotNull CommandSender sender, @NotNull CommandContext context) {
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                    sender.sendMessage(Component.translatable("generic.players_only"));
                     return;
                 }
 
@@ -314,7 +314,7 @@ public final class SelectionCommands {
 
         private void handleOutset(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -368,7 +368,7 @@ public final class SelectionCommands {
 
         private void handleInset(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -417,7 +417,7 @@ public final class SelectionCommands {
 
         private void handleChunk(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -456,7 +456,7 @@ public final class SelectionCommands {
 
         private void handleSize(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 

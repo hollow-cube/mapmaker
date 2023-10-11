@@ -39,7 +39,7 @@ public final class SchematicCommand extends Command {
 
         private void handleLoadSchem(@NotNull CommandSender sender, @NotNull CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 

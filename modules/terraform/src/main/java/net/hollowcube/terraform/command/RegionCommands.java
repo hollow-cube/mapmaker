@@ -34,7 +34,7 @@ public final class RegionCommands {
 
         private void handleSetRegionToPattern(CommandSender sender, CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -92,7 +92,7 @@ public final class RegionCommands {
 
         private void handleReplaceInRegion(CommandSender sender, CommandContext context) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("command.terraform.only_players"));
+                sender.sendMessage(Component.translatable("generic.players_only"));
                 return;
             }
 
@@ -107,7 +107,7 @@ public final class RegionCommands {
 
             var region = selection.region();
             if (region == null) {
-                player.sendMessage(Component.translatable("command.terraform.replace.no_selection"));
+                player.sendMessage(Component.translatable("command.terraform.no_selection"));
                 return;
             }
 
