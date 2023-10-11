@@ -18,6 +18,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
+@AutoService(FeatureProvider.class)
 public class NoSneakFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:player/nosneak", EventFilter.INSTANCE)
             .addListener(PlayerStartSneakingEvent.class, this::onStartSneaking);
