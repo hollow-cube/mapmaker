@@ -21,6 +21,7 @@ import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
+@AutoService(FeatureProvider.class)
 public class NoJumpFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nojump", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
@@ -44,7 +45,7 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!MapHooks.isPlayerPlaying(player)) return;
 
-        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -256, Integer.MAX_VALUE));
+        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Integer.MAX_VALUE));
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {

@@ -375,34 +375,42 @@
                 <switch id="map_settings_nojump_switch">
                     <button id="map_settings_nojump_unset"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_bg"/>
                     <button id="map_settings_nojump_set"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_selected"/>
                 </switch>
                 <switch id="map_settings_nosprint_switch">
                     <button id="map_settings_nosprint_unset"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_bg"/>
                     <button id="map_settings_nosprint_set"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_selected"/>
                 </switch>
                 <switch id="map_settings_onlysprint_switch">
                     <button id="map_settings_onlysprint_unset"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_bg"/>
                     <button id="map_settings_onlysprint_set"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_selected"/>
                 </switch>
                 <switch id="map_settings_nosneak_switch">
                     <button id="map_settings_nosneak_unset"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_bg"/>
                     <button id="map_settings_nosneak_set"
                             translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"/>
+                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_selected"/>
                 </switch>
             </box>
         </box>
