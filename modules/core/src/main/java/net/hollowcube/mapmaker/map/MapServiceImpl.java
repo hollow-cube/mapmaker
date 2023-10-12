@@ -99,10 +99,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
         logger.log(System.Logger.Level.INFO, "updating map " + id);
-        System.out.println("map has update: " + update.toString());
-        System.out.println("update add objects: " + update.newObjects);
         var reqBody = GSON.toJson(update);
-        System.out.println("reqBody: " + reqBody.toString());
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + id))

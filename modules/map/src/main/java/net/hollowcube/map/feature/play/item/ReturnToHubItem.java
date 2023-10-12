@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 public class ReturnToHubItem extends ItemHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReturnToHubItem.class);
 
@@ -33,6 +35,7 @@ public class ReturnToHubItem extends ItemHandler {
 
         try {
             player.sendMessage("Returning to hub");
+            player.removeTag(SPECTATOR_CHECKPOINT);
             if (world instanceof InternalMapWorld internalWorld) {
                 internalWorld.removePlayer(player);
             }

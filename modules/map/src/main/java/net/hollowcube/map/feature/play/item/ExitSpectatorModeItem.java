@@ -7,6 +7,10 @@ import net.hollowcube.map.world.PlayingMapWorld;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 public class ExitSpectatorModeItem extends ItemHandler {
 
     public static final String ID = "mapmaker:exit_spectator";
@@ -18,19 +22,22 @@ public class ExitSpectatorModeItem extends ItemHandler {
 
     @Override
     public @NotNull Material material() {
-        return Material.CLAY_BALL;
+        return Material.SLIME_BALL;
     }
 
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
+        player.removeTag(SPECTATOR_CHECKPOINT);
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
         //todo should not depend on implementation details of InternalMapWorld
 
         world.removePlayer(player);
         if (world instanceof PlayingMapWorld playingWorld) {
-            playingWorld.removePlayer(player, false);
-            playingWorld.acceptPlayer(player, true);
+            CompletableFuture.runAsync(() -> {
+                playingWorld.removePlayer(player, false);
+                playingWorld.acceptPlayer(player, true);
+            });
         }
     }
 
