@@ -48,46 +48,50 @@ public class SpriteTransform {
                         .replace(".png", "")
                         .replace("\\", "/");
                 System.out.println("processing " + name);
-                Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
+                try {
+                    Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 
-                if (config.get("type").getAsString().equals("sprite")) {
-                    JsonObject resultFontChar = new JsonObject();
-                    JsonObject serverSpriteConf = new JsonObject();
-                    processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar, serverSpriteConf);
-                    context.addFontCharacter(resultFontChar);
-                    context.getServerSprites().add(serverSpriteConf);
-                } else if (config.get("type").getAsString().equals("item")) {
+                    if (config.get("type").getAsString().equals("sprite")) {
+                        JsonObject resultFontChar = new JsonObject();
+                        JsonObject serverSpriteConf = new JsonObject();
+                        processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar, serverSpriteConf);
+                        context.addFontCharacter(resultFontChar);
+                        context.getServerSprites().add(serverSpriteConf);
+                    } else if (config.get("type").getAsString().equals("item")) {
 
-                    BufferedImage image = ImageIO.read(imageFile.toFile());
-                    BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                    Graphics graphics = newImage.getGraphics();
-                    graphics.setColor(new Color(
-                            ThreadLocalRandom.current().nextInt(0, 255),
-                            ThreadLocalRandom.current().nextInt(0, 255),
-                            ThreadLocalRandom.current().nextInt(0, 255),
-                            255
-                    ));
-                    int ofwidth = image.getWidth() / 4;
-                    int ofheight = image.getHeight() / 4;
-                    graphics.fillRect(ofwidth, ofheight, ofwidth * 3, ofwidth * 3);
-                    image = newImage;
+                        BufferedImage image = ImageIO.read(imageFile.toFile());
+                        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        Graphics graphics = newImage.getGraphics();
+                        graphics.setColor(new Color(
+                                ThreadLocalRandom.current().nextInt(0, 255),
+                                ThreadLocalRandom.current().nextInt(0, 255),
+                                ThreadLocalRandom.current().nextInt(0, 255),
+                                255
+                        ));
+                        int ofwidth = image.getWidth() / 4;
+                        int ofheight = image.getHeight() / 4;
+                        graphics.fillRect(ofwidth, ofheight, ofwidth * 3, ofwidth * 3);
+                        image = newImage;
 
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(image, "png", baos);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ImageIO.write(image, "png", baos);
 
-                    int cmd;
-                    if (debug) {
-                        cmd = context.addBasicItemTexture(name, baos.toByteArray());
-                    } else {
-                        cmd = context.addBasicItemTexture(name, Files.readAllBytes(imageFile));
+                        int cmd;
+                        if (debug) {
+                            cmd = context.addBasicItemTexture(name, baos.toByteArray());
+                        } else {
+                            cmd = context.addBasicItemTexture(name, Files.readAllBytes(imageFile));
+                        }
+
+                        JsonObject serverSpriteConf = new JsonObject();
+                        serverSpriteConf.addProperty("name", name);
+                        serverSpriteConf.addProperty("cmd", cmd);
+                        serverSpriteConf.addProperty("width", 0);
+                        serverSpriteConf.addProperty("offsetX", 0);
+                        context.getServerSprites().add(serverSpriteConf);
                     }
-
-                    JsonObject serverSpriteConf = new JsonObject();
-                    serverSpriteConf.addProperty("name", name);
-                    serverSpriteConf.addProperty("cmd", cmd);
-                    serverSpriteConf.addProperty("width", 0);
-                    serverSpriteConf.addProperty("offsetX", 0);
-                    context.getServerSprites().add(serverSpriteConf);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to process " + name, e);
                 }
             }
         }

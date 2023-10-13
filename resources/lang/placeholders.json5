@@ -1,216 +1,218 @@
 // The file holds placeholder data for the translations
 {
-  // Icons
-  "LMB": {
-    "type": "sprite",
-    "ref": "icon/mouse_left"
-  },
-  "SHIFT_LMB": {
-    "type": "sprite",
-    "ref": "icon/mouse_shift_left"
-  },
-  "CONFIRM": {
-    "type": "sprite",
-    "ref": "icon/confirm"
-  },
-  "WARNING": {
-    "type": "sprite",
-    "ref": "icon/warning"
-  },
-  "DENY": {
-    "type": "sprite",
-    "ref": "icon/deny"
-  },
-  "INFO": {
-    "type": "sprite",
-    "ref": "icon/info"
-  },
-  "LOCK": {
-    "type": "sprite",
-    "ref": "icon/lock"
-  },
-  "EXCLAMATION": {
-    "type": "sprite",
-    "ref": "icon/exclamation"
-  },
-  "PLUS": {
-    "type": "sprite",
-    "ref": "icon/plus"
-  },
-  "MINUS": {
-    "type": "sprite",
-    "ref": "icon/minus"
-  },
-  "CT1": {
-    "type": "sprite",
-    "ref": "icon/staff/ct1"
-  },
-  "CT2": {
-    "type": "sprite",
-    "ref": "icon/staff/ct2"
-  },
-  "CT3": {
-    "type": "sprite",
-    "ref": "icon/staff/ct3"
-  },
-  "MOD1": {
-    "type": "sprite",
-    "ref": "icon/staff/mod1"
-  },
-  "MOD2": {
-    "type": "sprite",
-    "ref": "icon/staff/mod2"
-  },
-  "MOD3": {
-    "type": "sprite",
-    "ref": "icon/staff/mod3"
-  },
-  "DEV1": {
-    "type": "sprite",
-    "ref": "icon/staff/dev1"
-  },
-  "DEV2": {
-    "type": "sprite",
-    "ref": "icon/staff/dev2"
-  },
-  "DEV3": {
-    "type": "sprite",
-    "ref": "icon/staff/dev3"
-  },
-  // Standard Colors
-  // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
-  "dark_gray": {
-    "type": "raw",
-    "value": "#696969"
-  },
-  // #B0B0B0 - Light Gray (Bland, Default Text for Lore and System Messages)
-  "light_gray": {
-    "type": "raw",
-    "value": "#B0B0B0"
-  },
-  // #CCCCCC - White Gray (Default User Chat Color, Arbitrary Text Highlight)
-  "white_gray": {
-    "type": "raw",
-    "value": "#CCCCCC"
-  },
-  // #F2F2F2 - White (Premium Chat Color, Important Text Highlight, GUI Tabs)
-  "white": {
-    "type": "raw",
-    "value": "#F2F2F2"
-  },
-  // #FF2D2D - Red (Admin Rank, Fail, Error, Cancel, Deny, Unavailable)
-  "red": {
-    "type": "raw",
-    "value": "#FF2D2D"
-  },
-  // #AC4BFF - Purple (Dev Rank)
-  "purple": {
-    "type": "raw",
-    "value": "#AC4BFF"
-  },
-  // #30FBFF - Light Blue (Mod Rank, “You” in Direct Messaging Commands, Info)
-  "light_blue": {
-    "type": "raw",
-    "value": "#30FBFF"
-  },
-  // #46FA32 - Lime (CT Rank, Success, Accept, Confirm, Available, Free, Easy Difficulty)
-  "lime": {
-    "type": "raw",
-    "value": "#46FA32"
-  },
-  // #FFE11C - Yellow (QA Icon, Status Update, In-Progress, Waiting, Pending, Warning, Medium Difficulty)
-  "yellow": {
-    "type": "raw",
-    "value": "#FFE11C"
-  },
-  // #FA8C34 - Orange (Hard Difficulty, Build Maps)
-  "orange": {
-    "type": "raw",
-    "value": "#FA8C34"
-  },
-  // #E6464F - Strawberry (Expert Difficulty)
-  "strawberry": {
-    "type": "raw",
-    "value": "#E6464F"
-  },
-  // #CC216D - Magenta (Nightmare Difficulty)
-  "magenta": {
-    "type": "raw",
-    "value": "#CC216D"
-  },
-  // #3490C9 - Cyan (Automated Message or Announcement, Staff Chat)
-  "cyan": {
-    "type": "raw",
-    "value": "#3490C9"
-  },
-  // #FFBC0F - Gold (Boost Maps, #1 Top Times)
+    // Icons
+    "LMB": {
+        "type": "sprite",
+        "ref": "icon/mouse_left"
+    },
+    "SHIFT_LMB": {
+        "type": "sprite",
+        "ref": "icon/mouse_shift_left"
+    },
+    "CONFIRM": {
+        "type": "sprite",
+        "ref": "icon/confirm"
+    },
+    "WARNING": {
+        "type": "sprite",
+        "ref": "icon/warning"
+    },
+    "DENY": {
+        "type": "sprite",
+        "ref": "icon/deny"
+    },
+    "INFO": {
+        "type": "sprite",
+        "ref": "icon/info"
+    },
+    "LOCK": {
+        "type": "sprite",
+        "ref": "icon/lock"
+    },
+    "EXCLAMATION": {
+        "type": "sprite",
+        "ref": "icon/exclamation"
+    },
+    "PLUS": {
+        "type": "sprite",
+        "ref": "icon/plus",
+        "no_shadow": true
+    },
+    "MINUS": {
+        "type": "sprite",
+        "ref": "icon/minus",
+        "no_shadow": true
+    },
+    "CT1": {
+        "type": "sprite",
+        "ref": "icon/staff/ct1"
+    },
+    "CT2": {
+        "type": "sprite",
+        "ref": "icon/staff/ct2"
+    },
+    "CT3": {
+        "type": "sprite",
+        "ref": "icon/staff/ct3"
+    },
+    "MOD1": {
+        "type": "sprite",
+        "ref": "icon/staff/mod1"
+    },
+    "MOD2": {
+        "type": "sprite",
+        "ref": "icon/staff/mod2"
+    },
+    "MOD3": {
+        "type": "sprite",
+        "ref": "icon/staff/mod3"
+    },
+    "DEV1": {
+        "type": "sprite",
+        "ref": "icon/staff/dev1"
+    },
+    "DEV2": {
+        "type": "sprite",
+        "ref": "icon/staff/dev2"
+    },
+    "DEV3": {
+        "type": "sprite",
+        "ref": "icon/staff/dev3"
+    },
+    // Standard Colors
+    // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
+    "dark_gray": {
+        "type": "raw",
+        "value": "#696969"
+    },
+    // #B0B0B0 - Light Gray (Bland, Default Text for Lore and System Messages)
+    "light_gray": {
+        "type": "raw",
+        "value": "#B0B0B0"
+    },
+    // #CCCCCC - White Gray (Default User Chat Color, Arbitrary Text Highlight)
+    "white_gray": {
+        "type": "raw",
+        "value": "#CCCCCC"
+    },
+    // #F2F2F2 - White (Premium Chat Color, Important Text Highlight, GUI Tabs)
+    "white": {
+        "type": "raw",
+        "value": "#F2F2F2"
+    },
+    // #FF2D2D - Red (Admin Rank, Fail, Error, Cancel, Deny, Unavailable)
+    "red": {
+        "type": "raw",
+        "value": "#FF2D2D"
+    },
+    // #AC4BFF - Purple (Dev Rank)
+    "purple": {
+        "type": "raw",
+        "value": "#AC4BFF"
+    },
+    // #30FBFF - Light Blue (Mod Rank, “You” in Direct Messaging Commands, Info)
+    "light_blue": {
+        "type": "raw",
+        "value": "#30FBFF"
+    },
+    // #46FA32 - Lime (CT Rank, Success, Accept, Confirm, Available, Free, Easy Difficulty)
+    "lime": {
+        "type": "raw",
+        "value": "#46FA32"
+    },
+    // #FFE11C - Yellow (QA Icon, Status Update, In-Progress, Waiting, Pending, Warning, Medium Difficulty)
+    "yellow": {
+        "type": "raw",
+        "value": "#FFE11C"
+    },
+    // #FA8C34 - Orange (Hard Difficulty, Build Maps)
+    "orange": {
+        "type": "raw",
+        "value": "#FA8C34"
+    },
+    // #E6464F - Strawberry (Expert Difficulty)
+    "strawberry": {
+        "type": "raw",
+        "value": "#E6464F"
+    },
+    // #CC216D - Magenta (Nightmare Difficulty)
+    "magenta": {
+        "type": "raw",
+        "value": "#CC216D"
+    },
+    // #3490C9 - Cyan (Automated Message or Announcement, Staff Chat)
+    "cyan": {
+        "type": "raw",
+        "value": "#3490C9"
+    },
+    // #FFBC0F - Gold (Boost Maps, #1 Top Times)
     "gold": {
-      "type": "raw",
-      "value": "#FFBC0F"
+        "type": "raw",
+        "value": "#FFBC0F"
     },
     // #808080 - Silver (#2 Top Times)
     "silver": {
-      "type": "raw",
-      "value": "#808080"
+        "type": "raw",
+        "value": "#808080"
     },
     // #CD7F32 - Bronze (#3 Top Times)
     "bronze": {
-      "type": "raw",
-      "value": "#CD7F32"
+        "type": "raw",
+        "value": "#CD7F32"
     },
-  // #FF9FFF - Light Pink (Cubits)
-  "light_pink": {
-    "type": "raw",
-    "value": "#FF9FFF"
-  },
-  // #3895FF - Azure (Map Maker Title)
-  "azure": {
-    "type": "raw",
-    "value": "#3895FF"
-  },
-  // #15ADD3 - Dark Cyan (Parkour Courses)
-  "dark_cyan": {
-    "type": "raw",
-    "value": "#15ADD3"
-  },
-  // #0B9F0B - Dark Green (Build Showcases)
-  "dark_green": {
-    "type": "raw",
-    "value": "#0B9F0B"
-  },
-  // #E72011 - Dark Red (Adventure Maps)
-  "dark_red": {
-    "type": "raw",
-    "value": "#E72011"
-  },
-  // #F04B3D - Light Red (Unrated Quality)
-  "light_red": {
-    "type": "raw",
-    "value": "#F04B3D"
-  },
-  // #F5DC3B - Lemon (Good Quality)
-  "lemon": {
-    "type": "raw",
-    "value": "#F5DC3B"
-  },
-  // #8CDB46 - Toxic Green (Great Quality)
-  "toxic_green": {
-    "type": "raw",
-    "value": "#8CDB46"
-  },
-  // #81AFFF - Sea Blue (Excellent Quality)
-  "sea_blue": {
-    "type": "raw",
-    "value": "#81AFFF"
-  },
-  // #78FFDF - Sky Blue (Outstanding Quality)
-  "sky_blue": {
-    "type": "raw",
-    "value": "#78FFDF"
-  },
-  // #EE6EFF - Pink (Masterpiece Quality)
-  "pink": {
-    "type": "raw",
-    "value": "#EE6EFF"
-  }
+    // #FF9FFF - Light Pink (Cubits)
+    "light_pink": {
+        "type": "raw",
+        "value": "#FF9FFF"
+    },
+    // #3895FF - Azure (Map Maker Title)
+    "azure": {
+        "type": "raw",
+        "value": "#3895FF"
+    },
+    // #15ADD3 - Dark Cyan (Parkour Courses)
+    "dark_cyan": {
+        "type": "raw",
+        "value": "#15ADD3"
+    },
+    // #0B9F0B - Dark Green (Build Showcases)
+    "dark_green": {
+        "type": "raw",
+        "value": "#0B9F0B"
+    },
+    // #E72011 - Dark Red (Adventure Maps)
+    "dark_red": {
+        "type": "raw",
+        "value": "#E72011"
+    },
+    // #F04B3D - Light Red (Unrated Quality)
+    "light_red": {
+        "type": "raw",
+        "value": "#F04B3D"
+    },
+    // #F5DC3B - Lemon (Good Quality)
+    "lemon": {
+        "type": "raw",
+        "value": "#F5DC3B"
+    },
+    // #8CDB46 - Toxic Green (Great Quality)
+    "toxic_green": {
+        "type": "raw",
+        "value": "#8CDB46"
+    },
+    // #81AFFF - Sea Blue (Excellent Quality)
+    "sea_blue": {
+        "type": "raw",
+        "value": "#81AFFF"
+    },
+    // #78FFDF - Sky Blue (Outstanding Quality)
+    "sky_blue": {
+        "type": "raw",
+        "value": "#78FFDF"
+    },
+    // #EE6EFF - Pink (Masterpiece Quality)
+    "pink": {
+        "type": "raw",
+        "value": "#EE6EFF"
+    }
 }

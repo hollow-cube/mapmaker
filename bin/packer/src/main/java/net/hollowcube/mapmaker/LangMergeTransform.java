@@ -39,6 +39,8 @@ public class LangMergeTransform {
                 if (sprite == null) {
                     throw new RuntimeException("Unknown sprite: " + ref);
                 }
+                boolean noShadow = value.has("no_shadow") && value.get("no_shadow").getAsBoolean();
+                if (noShadow) sprite = String.format("<#4e5c24>%s</#4e5c24>", sprite);
                 replacements.put(key, sprite);
             }
         }
