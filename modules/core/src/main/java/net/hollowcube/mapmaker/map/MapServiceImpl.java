@@ -68,6 +68,28 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest params) {
+        var endpoint = new StringBuilder(url + "/search?");
+        if (params.page() != -1) {
+            endpoint.append("page=").append(params.page()).append("&");
+            endpoint.append("page_size=").append(params.pageSize()).append("&");
+        }
+        if (params.owner() != null) {
+            endpoint.append("owner=").append(params.owner()).append("&");
+        }
+
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(endpoint.toString()))
+                .header(AUTHORIZER_HEADER, params.authorizer())
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapSearchResponse.class);
+            default -> throw new InternalError("Failed to search maps: " + res.body());
+        };
+    }
+
+    @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         logger.log(System.Logger.Level.INFO, "getting map " + id);
         var req = HttpRequest.newBuilder()

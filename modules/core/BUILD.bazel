@@ -10,6 +10,7 @@ java_library(
         "@maven//:org_apache_kafka_kafka_clients",
     ],
     deps = [
+        "//modules/canvas:api",
         "//modules/command",
         "//modules/common",
         "//third_party:minestom",

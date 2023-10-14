@@ -20,6 +20,8 @@ public interface MapService {
 
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
+    @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest request);
+
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 
     @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);

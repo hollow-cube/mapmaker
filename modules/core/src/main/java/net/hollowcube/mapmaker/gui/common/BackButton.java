@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.common;
+package net.hollowcube.mapmaker.gui.common;
 
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;

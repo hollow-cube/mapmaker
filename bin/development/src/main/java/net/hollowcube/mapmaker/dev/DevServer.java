@@ -16,9 +16,8 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map.command.*;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.command.PlayCommand;
+import net.hollowcube.mapmaker.command.old.PlayCommand;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.EmojisCommand;
@@ -253,7 +252,7 @@ public class DevServer {
             var bridge = new DevServerBridge();
 
             this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager);
-            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService);
+            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
             this.hubToMapBridge = bridge;
@@ -280,22 +279,22 @@ public class DevServer {
 //            hubCommandManager.register(playCommand);
 //            mapCommandManager.register(playCommand);
 
-            var whereCommand = new WhereCommand();
-            hubCommandManager.register(whereCommand);
-            mapCommandManager.register(whereCommand);
+//            var whereCommand = new WhereCommand();
+//            hubCommandManager.register(whereCommand);
+//            mapCommandManager.register(whereCommand);
 
-            var joinCommand = new JoinCommand();
-            hubCommandManager.register(joinCommand);
-            mapCommandManager.register(joinCommand);
+//            var joinCommand = new JoinCommand();
+//            hubCommandManager.register(joinCommand);
+//            mapCommandManager.register(joinCommand);
 
             var emojisCommand = new EmojisCommand();
             hubCommandManager.register(emojisCommand);
             mapCommandManager.register(emojisCommand);
 
             // Register Request/Accept/Reject to hub and map command managers
-            var requestCommand = new RequestCommand();
-            var acceptCommand = new AcceptCommand();
-            var rejectCommand = new RejectCommand();
+//            var requestCommand = new RequestCommand();
+//            var acceptCommand = new AcceptCommand();
+//            var rejectCommand = new RejectCommand();
 //            hubCommandManager.register(requestCommand);
 //            hubCommandManager.register(acceptCommand);
 //            hubCommandManager.register(rejectCommand);

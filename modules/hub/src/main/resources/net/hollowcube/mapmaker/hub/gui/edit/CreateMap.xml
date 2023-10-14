@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
-<?import net.hollowcube.mapmaker.hub.gui.common ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="9" align="ttb" sprite="create_maps/create/container">
     <box width="9" height="1" align="ltr">
-        <BackButton />
-        <label translationKey="gui.create_maps.new_map.information" />
+        <BackButton/>
+        <label translationKey="gui.create_maps.new_map.information"/>
     </box>
 
-    <spacer width="9" height="1" />
+    <spacer width="9" height="1"/>
 
     <box width="9" align="ltr">
         <spacer width="2"/>
@@ -25,7 +25,7 @@
         <button width="1" translationKey="gui.create_maps.new_map.size.colossal"/>
     </box>
 
-    <spacer width="9" height="1" />
+    <spacer width="9" height="1"/>
 
     <box width="9" align="ltr">
         <spacer width="2"/>
@@ -34,9 +34,9 @@
 
     <box width="9" height="3" align="ltr">
         <spacer height="3"/>
-        <spacer width="3" height="3" sprite="create_maps/big_button_closed" />
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed"/>
         <spacer height="3"/>
-        <spacer width="3" height="3" sprite="create_maps/big_button_closed" />
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed"/>
         <spacer height="3"/>
     </box>
 

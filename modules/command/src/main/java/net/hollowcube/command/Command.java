@@ -97,7 +97,7 @@ public abstract class Command {
         return new CommandDoc(name, description, simpleArgs, examples);
     }
 
-    protected static @NotNull CommandExecutor playerOnly(@NotNull CommandExecutor.Player executor) {
+    public static @NotNull CommandExecutor playerOnly(@NotNull CommandExecutor.Player executor) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage("Only players can execute this command."); //todo pluggable message I guess

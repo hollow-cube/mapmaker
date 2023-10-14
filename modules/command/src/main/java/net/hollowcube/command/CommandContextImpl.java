@@ -42,8 +42,13 @@ final class CommandContextImpl implements CommandContext {
     public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
         for (int i = 0; i < args.size(); i++) {
             if (args.get(i).id().equals(arg.id())) {
+                var value = argValues.get(i);
+                if (value instanceof Argument.DeferredValue<?> deferred) {
+                    value = deferred.get();
+                    argValues.set(i, value);
+                }
                 //noinspection unchecked
-                return (T) argValues.get(i);
+                return (T) value;
             }
         }
 
