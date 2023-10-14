@@ -33,6 +33,17 @@ public class ContainerElement extends BaseElement {
     }
 
     @Override
+    public boolean isAnyLoading() {
+        if (super.isAnyLoading()) return true;
+
+        for (var child : children) {
+            if (child.isAnyLoading()) return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public @Nullable ItemStack @NotNull [] getContents() {
         if (shouldDelegateDraw()) return super.getContents();
 

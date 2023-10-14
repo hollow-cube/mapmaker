@@ -71,6 +71,10 @@ public class InventoryViewHost {
         return inventory;
     }
 
+    public BaseElement getElement() {
+        return element;
+    }
+
     private void replaceInventory(@NotNull BaseElement newElement) {
         // Unmount old component if relevant
         Inventory oldInv = this.inventory;
@@ -142,6 +146,11 @@ public class InventoryViewHost {
 
         if (redrawTask != null) return;
         redrawTask = SCHEDULER.scheduleNextTick(this::drawCurrentElement);
+    }
+
+    public void runRedrawNow() {
+        if (redrawTask != null) redrawTask.cancel();
+        drawCurrentElement();
     }
 
     private void drawCurrentElement() {

@@ -37,6 +37,14 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
+    public boolean isAnyLoading() {
+        System.out.println("IS PAGINATION LOADING? " + (super.isAnyLoading() || page >= pageCache.size() || pageCache.get(page).isAnyLoading()));
+        if (super.isAnyLoading()) return true;
+        if (page >= pageCache.size()) return true;
+        return pageCache.get(page).isAnyLoading();
+    }
+
+    @Override
     public void reset() {
         page = 0;
         pageCache.clear();
@@ -88,7 +96,10 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
                     }
                 };
                 pageHandler = !action.async() ? handleFunc :
-                        req -> Thread.startVirtualThread(() -> handleFunc.accept(req));
+                        req -> Thread.startVirtualThread(() -> {
+                            setLoading(true);
+                            handleFunc.accept(req);
+                        });
             }
             default -> throw new UnsupportedOperationException("Unsupported action handler: " + handler);
         }
@@ -177,6 +188,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
                 pageCache.add(fetchPage, pageContainer);
 
                 // Redraw
+                setLoading(false);
                 performSignal(SIG_PAGE_CHANGED, page);
                 context.markDirty();
             });

@@ -35,7 +35,27 @@ public class ControllerImpl implements Controller {
 
         var context = new RenderableContext(rootContext, inventory, newContextObjects);
         inventory.pushView(viewProvider.apply(context));
-        player.openInventory(inventory.getHandle());
+        if (inventory.getElement().isAnyLoading()) {
+            Thread.startVirtualThread(() -> {
+                //todo this is a bit of a hack, should be revisited to make it event based (eg inventory notifies when its done loading)
+
+                var now = System.currentTimeMillis();
+                while (inventory.getElement().isAnyLoading() && System.currentTimeMillis() - now < 500) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                inventory.runRedrawNow();
+                player.openInventory(inventory.getHandle());
+            });
+        } else {
+            player.openInventory(inventory.getHandle());
+        }
+
+
     }
 
 }

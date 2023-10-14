@@ -183,6 +183,12 @@ public abstract class BaseElement implements Element {
         context.markDirty();
     }
 
+    /**
+     * Returns whether this or any child component is in a loading state.
+     */
+    public boolean isAnyLoading() {
+        return state == State.LOADING;
+    }
 
     public abstract @NotNull BaseElement clone(@NotNull ElementContext context);
 }
