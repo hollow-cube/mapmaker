@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
@@ -34,11 +33,11 @@ public class MapWorldManager {
             if (world == null) return;
 
             // If the owner has left, boot all invited players
-            if (event.getPlayer().getUuid().equals(UUID.fromString(world.map().owner()))) {
+            if (event.getPlayer().getUuid().equals(UUID.fromString(world.map().owner())) && !world.map().isPublished()) {
                 for (var player : world.players()) {
                     // I believe the owner is still considered on the players list when leaving, so check just in case
                     if (player == event.getPlayer()) continue;
-                    player.sendMessage(Component.text("The owner has left the map.", NamedTextColor.RED));
+                    player.sendMessage(Component.translatable("map.kicked"));
                     server.bridge().sendPlayerToHub(player);
                 }
             }

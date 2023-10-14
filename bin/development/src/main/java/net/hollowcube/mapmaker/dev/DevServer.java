@@ -14,9 +14,7 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map.command.AcceptCommand;
-import net.hollowcube.map.command.RejectCommand;
-import net.hollowcube.map.command.RequestCommand;
+import net.hollowcube.map.command.*;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
@@ -207,6 +205,14 @@ public class DevServer {
             var playCommand = new PlayCommand(mapService, hubToMapBridge);
             hubCommandManager.register(playCommand);
             mapCommandManager.register(playCommand);
+
+            var whereCommand = new WhereCommand();
+            hubCommandManager.register(whereCommand);
+            mapCommandManager.register(whereCommand);
+
+            var joinCommand = new JoinCommand();
+            hubCommandManager.register(joinCommand);
+            mapCommandManager.register(joinCommand);
 
             // Register Request/Accept/Reject to hub and map command managers
             var requestCommand = new RequestCommand();

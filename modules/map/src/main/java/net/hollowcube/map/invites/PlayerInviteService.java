@@ -31,6 +31,15 @@ public class PlayerInviteService {
         mwm = mapWorldManager;
     }
 
+    public static void join(@NotNull Player sender, @NotNull Player target) {
+        var targetMap = MapWorld.forPlayerOptional(target);
+        if (targetMap == null) {
+            sender.sendMessage(Component.translatable("command.join.only_playing"));
+        } else {
+            mwm.joinMap(sender, targetMap.map(), HubToMapBridge.JoinMapState.PLAYING);
+        }
+    }
+
     public static void accept(@NotNull Player sender, @NotNull Player target) {
         // Sender is the one accepting it
         var inviteKey = new Invite(target.getUuid(), sender.getUuid());
