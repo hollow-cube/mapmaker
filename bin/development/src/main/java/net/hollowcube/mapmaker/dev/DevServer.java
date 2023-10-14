@@ -33,8 +33,13 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
@@ -47,6 +52,7 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
+import net.minestom.server.sound.SoundEvent;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -56,11 +62,11 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
@@ -134,6 +140,41 @@ public class DevServer {
 
     private DevHubServer hub;
     private DevMapServer maps;
+
+    private Pattern onlinePlayersPattern = Pattern.compile("");
+    private static final Map<String, Component> EMOJIS;
+    private static final Sound TAG_DING = Sound.sound()
+            .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
+            .source(Sound.Source.PLAYER)
+            .volume(5)
+            .build();
+
+    static {
+        var raw = Map.ofEntries(
+                // Symbols
+                Map.entry("plus", "icon/plus"),
+                Map.entry("minus", "icon/minus"),
+                Map.entry("x", "icon/x_mark"),
+
+                // Faces
+                Map.entry("cool", "icon/emoji/cool"),
+                Map.entry("grin", "icon/emoji/grin"),
+                Map.entry("smile", "icon/emoji/smile"),
+                Map.entry("smirk", "icon/emoji/smirk"),
+
+                // Misc
+                Map.entry("crown", "icon/emoji/crown"),
+                Map.entry("grass", "icon/emoji/grass")
+        );
+
+        var result = new HashMap<String, Component>();
+        for (var entry : raw.entrySet()) {
+            var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(entry.getValue()), entry.getValue());
+            var hoverText = Component.text(":" + entry.getKey() + ":", NamedTextColor.WHITE);
+            result.put(entry.getKey(), Component.text(sprite.fontChar(), FontUtil.NO_SHADOW).hoverEvent(HoverEvent.showText(hoverText)));
+        }
+        EMOJIS = Map.copyOf(result);
+    }
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
@@ -233,6 +274,7 @@ public class DevServer {
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
             eventHandler.addListener(PlayerSkinInitEvent.class, this::handleSkinInit);
+            eventHandler.addListener(PlayerChatEvent.class, this::handleChatMessage);
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
@@ -298,6 +340,7 @@ public class DevServer {
             var playerData = PlayerDataV2.fromPlayer(player);
 
             Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
+            rebuildOnlinePlayersRegex();
 
             try {
                 //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
@@ -312,8 +355,59 @@ public class DevServer {
         event.setSkin(PlayerSkin.fromUuid(event.getPlayer().getUuid().toString()));
     }
 
+    private void handleChatMessage(PlayerChatEvent event) {
+        // Cancel the event, so we can send player specific versions ourselves
+        event.setCancelled(true);
+
+        // Replace emojis with their sprites
+        var baseMessage = Component.text(event.getMessage()).replaceText(TextReplacementConfig.builder()
+                .match(Pattern.compile(":([a-z\\-]+):"))
+                .replacement((match, builder) -> {
+                    var emoji = EMOJIS.get(match.group(1).toLowerCase(Locale.ROOT));
+                    if (emoji == null) return builder;
+                    return emoji;
+                })
+                .build());
+
+        var lowerMessage = event.getMessage().toLowerCase(Locale.ROOT);
+        for (var player : event.getRecipients()) {
+            var message = baseMessage;
+
+            // If they were tagged, send a ding effect and edit the message for them
+            if (lowerMessage.contains(player.getUsername().toLowerCase(Locale.ROOT))) {
+                if (!player.equals(event.getPlayer())) player.playSound(TAG_DING);
+                message = message.replaceText(TextReplacementConfig.builder()
+                        .match(Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE))
+                        .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
+                        .build());
+            }
+
+            player.sendMessage(Component.translatable(
+                    "chat.channel.global.default",
+                    PlayerDataV2.fromPlayer(event.getPlayer()).displayName(),
+                    message
+            ));
+        }
+
+    }
+
+    private void rebuildOnlinePlayersRegex() {
+        var builder = new StringBuilder();
+        builder.append("(?:^|\\s)(");
+        var first = true;
+        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            if (!first) builder.append("|");
+            builder.append(player.getUsername());
+            first = false;
+        }
+        builder.append(")");
+        onlinePlayersPattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
+    }
+
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
+
+        rebuildOnlinePlayersRegex();
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
         var player = event.getPlayer();
