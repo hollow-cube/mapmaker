@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.minestom.server.entity.Player;
@@ -22,6 +23,8 @@ public interface MapServer {
     @NotNull SessionService sessionService();
 
     @NotNull MapService mapService();
+
+    @NotNull PermManager permManager();
 
     @NotNull List<FeatureProvider> features();
 

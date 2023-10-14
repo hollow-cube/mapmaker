@@ -145,6 +145,9 @@ public final class CommandManager {
                         // If we hit a success, store the value and continue to the next argument.
                         context.pushArgValue(success.value(), null);
                     }
+                    case Argument.ParseDeferredSuccess<?> deferred -> {
+                        context.pushArgValue(deferred.value(), null);
+                    }
                     case Argument.ParseFailure<?> ignored -> {
 
                         var errorHandler = arg.errorHandler();

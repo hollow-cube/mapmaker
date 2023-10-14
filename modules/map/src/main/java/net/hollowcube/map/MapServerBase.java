@@ -4,12 +4,14 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.block.rule.PlacementRules;
 import net.hollowcube.map.command.BaseMapCommand;
 import net.hollowcube.map.command.v2.HubCommand;
+import net.hollowcube.map.command.v3.MapListCommandMixin;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteService;
@@ -17,6 +19,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
@@ -96,6 +99,10 @@ public abstract class MapServerBase implements MapServer {
         TerraformAxiom.init(terraformEvents, condition);
 
         // Register commands
+        var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
+        mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
+        commandManager.register(mapCommand);
+
         commandManager.register(new HubCommand(bridge));
 //        commandManager.register(new GiveCommand());
 //        commandManager.register(new SetSpawnCommand());

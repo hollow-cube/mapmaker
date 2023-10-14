@@ -114,10 +114,17 @@ public abstract class Argument<T> {
 
     public abstract @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader);
 
-    public sealed interface ParseResult<T> permits ParseSuccess, ParseFailure, ParsePartial {
+    public sealed interface ParseResult<T> permits ParseSuccess, ParseDeferredSuccess, ParseFailure, ParsePartial {
     }
 
     public record ParseSuccess<T>(T value) implements ParseResult<T> {
+    }
+
+    public interface DeferredValue<T> {
+        T get();
+    }
+
+    public record ParseDeferredSuccess<T>(DeferredValue<T> value) implements ParseResult<T> {
     }
 
     public record ParseFailure<T>() implements ParseResult<T> {

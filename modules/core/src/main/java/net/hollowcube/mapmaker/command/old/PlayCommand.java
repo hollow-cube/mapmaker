@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.command;
+package net.hollowcube.mapmaker.command.old;
 
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.MapData;

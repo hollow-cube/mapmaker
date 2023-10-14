@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<?import net.hollowcube.mapmaker.hub.gui.common ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.play ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/details/container">
     <!-- This is a little cursed, but its acceptable to have zero size elements and they will not affect layout. -->
