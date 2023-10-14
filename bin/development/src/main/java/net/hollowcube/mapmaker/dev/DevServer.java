@@ -325,6 +325,8 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
+        player.setAdditionalHearts(-20);
+
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
 //        TabLists.showPlayerGlobalTabList(player);
