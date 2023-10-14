@@ -5,14 +5,19 @@ import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class ResetToCheckpointItem extends ItemHandler {
 
     public static final String ID = "mapmaker:reset_to_checkpoint";
     public static final ResetToCheckpointItem INSTANCE = new ResetToCheckpointItem();
+
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
 
     private ResetToCheckpointItem() {
         super(ID, RIGHT_CLICK_ANY);
@@ -20,7 +25,12 @@ public class ResetToCheckpointItem extends ItemHandler {
 
     @Override
     public @NotNull Material material() {
-        return Material.RED_DYE;
+        return Material.DIAMOND;
+    }
+
+    @Override
+    public int customModelData() {
+        return SPRITE.cmd();
     }
 
     @Override

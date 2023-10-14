@@ -1,0 +1,32 @@
+package net.hollowcube.mapmaker.util;
+
+import org.jetbrains.annotations.NotNull;
+
+public final class NumberUtil {
+
+    /**
+     * formatCurrency will take a number and format it as a currency string. The string is at most 5 characters long
+     * with a max of 3 numbers, and an optional '.' and multiplier. The highest representable number is 999b, any number
+     * higher than that will show 999b.
+     *
+     * <p>For example: 1.23k, 1, 11, 10k, 100m, 200b</p>
+     */
+    public static @NotNull String formatCurrency(long value) {
+        //todo this method is wrong, it can create values like `100.1k`, but i am lazy and will fix later.
+        if (value > 999_999_999_999L) return "999n";
+        if (value > 999_999_999) return createTwoDecimal(value / 1_000_000_000f) + "b";
+        if (value > 999_999) return createTwoDecimal(value / 1_000_000f) + "m";
+        if (value > 999) return createTwoDecimal(value / 1_000f) + "k";
+        return String.valueOf(value);
+    }
+
+    private static @NotNull String createTwoDecimal(double value) {
+        var str = String.format("%.2f", value);
+        if (str.endsWith(".00")) return str.substring(0, str.length() - 3);
+        if (str.endsWith("0")) return str.substring(0, str.length() - 1);
+        return str;
+    }
+
+    private NumberUtil() {
+    }
+}

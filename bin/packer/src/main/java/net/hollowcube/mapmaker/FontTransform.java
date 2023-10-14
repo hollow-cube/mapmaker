@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 public class FontTransform {
     private static final Json5 json5 = new Json5();
     private final Map<String, List<String>> charmaps = new HashMap<>();
+    private final Map<String, Integer> ascents = new HashMap<>();
+    private final Map<String, Integer> heights = new HashMap<>();
 
     private int nextChar = 0;
 
@@ -37,7 +39,23 @@ public class FontTransform {
                 charmap.add(charset.getAsString());
             }
             charmaps.put("ascii", charmap);
+            ascents.put("ascii", 7);
+            heights.put("ascii", 8);
             charmaps.put("ascii_2x", charmap);
+            ascents.put("ascii_2x", 7);
+            heights.put("ascii_2x", 16);
+        }
+        try (InputStream is = getClass().getResourceAsStream("/currency.json")) {
+            if (is == null) throw new IOException("Failed to load currency.json");
+            Json5Array fontChars = json5.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8))
+                    .getAsJson5Object().getAsJson5Array("chars");
+            List<String> charmap = new ArrayList<>();
+            for (Json5Element charset : fontChars) {
+                charmap.add(charset.getAsString());
+            }
+            charmaps.put("currency", charmap);
+            ascents.put("currency", 5);
+            heights.put("currency", 6);
         }
     }
 
@@ -65,10 +83,8 @@ public class FontTransform {
                 fontEntry.addProperty("__name", name);
                 fontEntry.addProperty("type", "bitmap");
                 fontEntry.addProperty("file", "minecraft:font/" + type + ".png");
-                fontEntry.addProperty("ascent", 7 - config.get("y").getAsInt());
-                if (type.equals("ascii_2x")) {
-                    fontEntry.addProperty("height", 16);
-                }
+                fontEntry.addProperty("ascent", ascents.get(type) - config.get("y").getAsInt());
+                fontEntry.addProperty("height", heights.get(type));
 
                 JsonObject reverseCharMap = new JsonObject();
 

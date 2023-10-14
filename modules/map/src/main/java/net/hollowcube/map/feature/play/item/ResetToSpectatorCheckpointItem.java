@@ -1,8 +1,11 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
@@ -11,13 +14,20 @@ public class ResetToSpectatorCheckpointItem extends ItemHandler {
     public static final String ID = "mapmaker:reset_to_spectator_checkpoint";
     public static final ResetToSpectatorCheckpointItem INSTANCE = new ResetToSpectatorCheckpointItem();
 
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
+
     private ResetToSpectatorCheckpointItem() {
         super(ID, RIGHT_CLICK_ANY);
     }
 
     @Override
     public @NotNull Material material() {
-        return Material.RED_DYE;
+        return Material.DIAMOND;
+    }
+
+    @Override
+    public int customModelData() {
+        return SPRITE.cmd();
     }
 
     @Override

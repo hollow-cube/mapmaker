@@ -13,8 +13,9 @@ import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.Component;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -177,6 +178,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setInvisible(true);
+        ActionBar.forPlayer(player).addProvider(this::buildSpectatorWidget);
 
         instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));
 
@@ -196,6 +198,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.removeTag(MapHooks.PLAYING);
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
+        ActionBar.forPlayer(player).removeProvider(this::buildSpectatorWidget);
 
         MapWorldHelpers.resetPlayer(player);
 
@@ -229,9 +232,13 @@ public class PlayingMapWorld implements InternalMapWorld {
         return Set.copyOf(activePlayers);
     }
 
+    private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
+    }
+
     private void updateSpectators() {
         for (var player : spectatingPlayers) {
-            player.sendActionBar(Component.text(SPECTATOR_SPRITE.fontChar(), FontUtil.NO_SHADOW));
             player.setInvisible(true);
         }
     }

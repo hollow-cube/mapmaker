@@ -181,7 +181,7 @@ public class InventoryViewHost {
 
         inventory.replaceInventories(top, bottom);
 //        if (inventory.getInventoryType() != InventoryType.ANVIL)
-            inventory.setTitle(Component.text("", NamedTextColor.WHITE).append(titleBuilder.build()));
+        inventory.setTitle(Component.text("", NamedTextColor.WHITE).append(titleBuilder.build()));
         dirty = false;
         redrawTask = null;
     }

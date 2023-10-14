@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +68,32 @@ public final class FontUtil {
             Map.entry(124, 2), Map.entry(94, 6), Map.entry(8962, 6), Map.entry(184, 4),
             Map.entry(8230, 5)
     );
+
+    public static final Map<String, Int2IntMap> GLYPH_WIDTHS_V2;
+
+    static {
+        var result = new HashMap<String, Int2IntMap>();
+
+        var defaultGlyphs = new Int2IntArrayMap();
+        defaultGlyphs.putAll(GLYPH_WIDTHS);
+        result.put("ascii", defaultGlyphs);
+
+        var currencyGlyphs = new Int2IntArrayMap();
+        currencyGlyphs.putAll(Map.<Integer, Integer>ofEntries(
+//                Map.entry((int) '1', 0), Map.entry((int) '2', 0),
+//                Map.entry((int) '3', 0), Map.entry((int) '4', 0)
+                Map.entry((int) '1', 4), Map.entry((int) '2', 5),
+                Map.entry((int) '3', 5), Map.entry((int) '4', 5),
+                Map.entry((int) '5', 5), Map.entry((int) '6', 5),
+                Map.entry((int) '7', 5), Map.entry((int) '8', 5),
+                Map.entry((int) '9', 5), Map.entry((int) '0', 5),
+                Map.entry((int) 'k', 5), Map.entry((int) 'm', 6),
+                Map.entry((int) 'b', 5), Map.entry((int) '.', 2)
+        ));
+        result.put("currency", currencyGlyphs);
+
+        GLYPH_WIDTHS_V2 = Map.copyOf(result);
+    }
 
     public static final Map<String, Map<Character, Character>> fontmaps;
 
@@ -153,6 +180,22 @@ public final class FontUtil {
         for (int i = 0; i < text.length(); i++) {
             int codePoint = text.codePointAt(i);
             int glyphWidth = ALL_GLYPH_WIDTHS.getOrDefault(codePoint, -1);
+            if (glyphWidth == -1) {
+                throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
+            }
+            width += glyphWidth;
+        }
+        return width;
+    }
+
+    public static int measureText(@NotNull String font, @NotNull String text) {
+        var glyphWidths = GLYPH_WIDTHS_V2.get(font);
+        Check.notNull(glyphWidths, "Unknown font: " + font);
+
+        int width = 0;
+        for (int i = 0; i < text.length(); i++) {
+            int codePoint = text.codePointAt(i);
+            int glyphWidth = glyphWidths.getOrDefault(codePoint, -1);
             if (glyphWidth == -1) {
                 throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
             }

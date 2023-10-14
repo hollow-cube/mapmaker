@@ -49,7 +49,7 @@ public class TextElement extends ButtonElement implements Text {
         sb.color(color);
         if (centered) {
             int totalWidth = width() * 18 - 2; // take off 2 for the left and right padding
-            sb.pos(((totalWidth - textWidth) / 2) +(x * 18));
+            sb.pos(((totalWidth - textWidth) / 2) + (x * 18));
         } else {
             sb.pos(shift + (x * 16));
         }
