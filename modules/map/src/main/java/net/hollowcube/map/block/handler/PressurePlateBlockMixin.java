@@ -32,7 +32,7 @@ public interface PressurePlateBlockMixin extends BlockHandler {
                 player = entity.getTag(MapHooks.ASSOCIATED_PLAYER);
             } else continue;
 
-            if (!entity.getBoundingBox().intersectBox(centerPos.sub(entity.getPosition()), BOUNDING_BOX))
+            if (!BOUNDING_BOX.intersectBox(centerPos.sub(entity.getPosition()), entity.getBoundingBox()))
                 continue;
 
             // Player has stepped on the plate
