@@ -31,6 +31,7 @@ import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -325,7 +326,11 @@ public class DevServer {
         String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
-        player.setAdditionalHearts(-20);
+        var currencyDisplay = BadSprite.SPRITE_MAP.get("hud/currency_display").fontChar();
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            player.sendActionBar(Component.text(FontUtil.computeOffset(103) + currencyDisplay).color(FontUtil.NO_SHADOW));
+        }).repeat(1, net.minestom.server.utils.time.TimeUnit.SERVER_TICK).schedule();
+
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
