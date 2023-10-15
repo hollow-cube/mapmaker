@@ -388,10 +388,11 @@ public class DevServer {
             var message = baseMessage;
 
             // If they were tagged, send a ding effect and edit the message for them
-            if (lowerMessage.contains(player.getUsername().toLowerCase(Locale.ROOT))) {
+            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE);
+            if (namePattern.matcher(lowerMessage).find()) {
                 if (!player.equals(event.getPlayer())) player.playSound(TAG_DING);
                 message = message.replaceText(TextReplacementConfig.builder()
-                        .match(Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE))
+                        .match(namePattern)
                         .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
                         .build());
             }
