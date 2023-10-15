@@ -1,8 +1,10 @@
 package net.hollowcube.terraform.command;
 
+import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.helper.ArgumentSwizzle;
 import net.hollowcube.terraform.command.helper.ExtraArguments;
 import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
+import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
@@ -139,8 +141,18 @@ public final class ClipboardCommands {
             }
 
             var session = LocalSession.forPlayer(player);
-            clipboard.apply(session, player.getPosition())
-                    .thenAccept(unused -> player.sendMessage(Component.translatable("command.terraform.paste.success")));
+            session.buildTask("paste")
+                    .metadata()
+                    .compute(world -> {
+                        var buffer = BlockBuffer.builder();
+                        clipboard.getSchematic().apply(Rotation.NONE, (p, block) -> {
+                            buffer.set(p.add(player.getPosition()), block.stateId());
+                        });
+                        return buffer.build();
+                    })
+                    .submit();
+//            clipboard.apply(session, player.getPosition())
+//                    .thenAccept(unused -> player.sendMessage(Component.translatable("command.terraform.paste.success")));
         }
     }
 

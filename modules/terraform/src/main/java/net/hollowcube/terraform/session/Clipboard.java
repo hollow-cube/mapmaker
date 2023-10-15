@@ -55,6 +55,11 @@ public class Clipboard {
         this.transforms = new ArrayList<>();
     }
 
+    @Deprecated
+    public Schematic getSchematic() {
+        return schematic;
+    }
+
     public @NotNull CompletableFuture<Void> apply(@NotNull LocalSession session, @NotNull Point pos) {
         Check.stateCondition(isEmpty(), "Clipboard is empty");
         //todo rewrite to use actions and add to history stack
