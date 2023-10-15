@@ -70,7 +70,7 @@ public class CreateMaps extends View {
             var slot = slots[i];
 
             // If the slot is locked, show the lock icon
-            if (i >= playerData.unlockedMapSlots()) {
+            if (i >= playerData.unlockedSlots()) {
                 slot.setState(playerData, EditMapIconBase.State.LOCKED, i, null);
                 continue;
             }

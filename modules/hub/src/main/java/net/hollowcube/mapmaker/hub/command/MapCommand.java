@@ -344,7 +344,7 @@ public class MapCommand extends BaseHubCommand {
 
             var playerData = MapPlayerData.fromPlayer(player);
             if (playerData.getSlotState(slot) != SlotState.FILLED) {
-                if (slot < playerData.unlockedMapSlots()) {
+                if (slot < playerData.unlockedSlots()) {
                     player.sendMessage(Component.translatable("command.map.delete.slot_locked", Component.text(slot + 1)));
                 } else {
                     player.sendMessage(Component.translatable("command.map.delete.slot_not_in_use", Component.text(slot + 1)));

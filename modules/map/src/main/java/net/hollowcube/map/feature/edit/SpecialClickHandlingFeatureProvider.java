@@ -81,37 +81,41 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
     }
 
     private void handleShiftClick(PlayerBlockInteractEvent event) {
-        if (event.getHand() != Player.Hand.MAIN || !event.getPlayer().isSneaking()) return;
+        if (event.getHand() != Player.Hand.MAIN) return;
 
         var block = event.getBlock();
 
         String state;
-        if ((state = block.getProperty("lit")) != null) {
-            block = block.withProperty("lit", state.equals("true") ? "false" : "true");
-        } else if ((state = block.getProperty("extendable")) != null) {
-            block = block.withProperty("extendable", state.equals("true") ? "false" : "true");
-        } else if (block.id() == Block.FARMLAND.id()) {
-            state = block.getProperty("moisture");
-            block = block.withProperty("moisture", state.equals("7") ? "0" : "7");
-        } else if (BlockTags.MINECRAFT_TRAPDOORS.contains(block.namespace()) || BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
-            var open = Boolean.parseBoolean(block.getProperty("open"));
-            block = block.withProperty("open", String.valueOf(!open));
-        } else if (block.id() == Block.COMPOSTER.id()) {
-            var level = Integer.parseInt(block.getProperty("level"));
-            block = block.withProperty("level", String.valueOf((level + 1) % 9));
-        } else if (block.id() == Block.PISTON.id() || block.id() == Block.STICKY_PISTON.id()) {
-            var prop = Boolean.parseBoolean(block.getProperty("extended"));
-            block = block.withProperty("extended", String.valueOf(!prop));
-        } else if (BlockTags.MINECRAFT_SLABS.contains(block.namespace())) {
-            var type = block.getProperty("type");
-            block = block.withProperty("type", switch (type) {
-                case "bottom" -> "top";
-                case "top" -> "bottom";
-                default -> type;
-            });
-        } else if ((state = block.getProperty("has_book")) != null) {
-            block = block.withProperty("has_book", state.equals("true") ? "false" : "true");
-        } else return; // If we hit this then exit, otherwise we will update the block
+        if (event.getPlayer().isSneaking()) {
+            if ((state = block.getProperty("lit")) != null) {
+                block = block.withProperty("lit", state.equals("true") ? "false" : "true");
+            } else if ((state = block.getProperty("extendable")) != null) {
+                block = block.withProperty("extendable", state.equals("true") ? "false" : "true");
+            } else if (block.id() == Block.FARMLAND.id()) {
+                state = block.getProperty("moisture");
+                block = block.withProperty("moisture", state.equals("7") ? "0" : "7");
+            } else if (block.id() == Block.COMPOSTER.id()) {
+                var level = Integer.parseInt(block.getProperty("level"));
+                block = block.withProperty("level", String.valueOf((level + 1) % 9));
+            } else if (block.id() == Block.PISTON.id() || block.id() == Block.STICKY_PISTON.id()) {
+                var prop = Boolean.parseBoolean(block.getProperty("extended"));
+                block = block.withProperty("extended", String.valueOf(!prop));
+            } else if (BlockTags.MINECRAFT_SLABS.contains(block.namespace())) {
+                var type = block.getProperty("type");
+                block = block.withProperty("type", switch (type) {
+                    case "bottom" -> "top";
+                    case "top" -> "bottom";
+                    default -> type;
+                });
+            } else if ((state = block.getProperty("has_book")) != null) {
+                block = block.withProperty("has_book", state.equals("true") ? "false" : "true");
+            } else return; // If we hit this then exit, otherwise we will update the block
+        } else {
+            if (BlockTags.MINECRAFT_TRAPDOORS.contains(block.namespace()) || BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
+                var open = Boolean.parseBoolean(block.getProperty("open"));
+                block = block.withProperty("open", String.valueOf(!open));
+            }
+        }
 
         // Update the block in the world to the new state
         event.getInstance().setBlock(event.getBlockPosition(), block);

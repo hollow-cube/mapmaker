@@ -15,7 +15,7 @@ public class MapPlayerData {
     }
 
     private String id;
-    private int unlockedMapSlots = 5;
+    private int unlockedSlots = 5;
     private String[] mapSlots = new String[5];
     private String lastPlayedMap;
     private String lastEditedMap;
@@ -27,9 +27,9 @@ public class MapPlayerData {
         this.id = id;
     }
 
-    public MapPlayerData(@NotNull String id, int unlockedMapSlots, String[] mapSlots, @Nullable String lastPlayedMap, @Nullable String lastEditedMap) {
+    public MapPlayerData(@NotNull String id, int unlockedSlots, String[] mapSlots, @Nullable String lastPlayedMap, @Nullable String lastEditedMap) {
         this.id = id;
-        this.unlockedMapSlots = unlockedMapSlots;
+        this.unlockedSlots = unlockedSlots;
         this.mapSlots = mapSlots;
         this.lastPlayedMap = lastPlayedMap;
         this.lastEditedMap = lastEditedMap;
@@ -39,8 +39,8 @@ public class MapPlayerData {
         return id;
     }
 
-    public int unlockedMapSlots() {
-        return unlockedMapSlots;
+    public int unlockedSlots() {
+        return unlockedSlots;
     }
 
     public String[] mapSlots() {
@@ -56,14 +56,14 @@ public class MapPlayerData {
     }
 
     public void update(@NotNull MapPlayerData other) {
-        this.unlockedMapSlots = other.unlockedMapSlots;
+        this.unlockedSlots = other.unlockedSlots;
         this.mapSlots = other.mapSlots;
         this.lastPlayedMap = other.lastPlayedMap;
         this.lastEditedMap = other.lastEditedMap;
     }
 
     public @NotNull SlotState getSlotState(int slot) {
-        if (slot < 0 || slot >= unlockedMapSlots)
+        if (slot < 0 || slot >= unlockedSlots)
             return SlotState.LOCKED;
         if (slot >= mapSlots.length || mapSlots[slot] == null || mapSlots[slot].isEmpty())
             return SlotState.EMPTY;
@@ -71,7 +71,7 @@ public class MapPlayerData {
     }
 
     public @Nullable String getMapSlot(int slot) {
-        if (slot < 0 || slot >= unlockedMapSlots || slot >= mapSlots.length)
+        if (slot < 0 || slot >= unlockedSlots || slot >= mapSlots.length)
             return null;
         var mapId = mapSlots[slot];
         return mapId == null || mapId.isEmpty() ? null : mapId;
@@ -81,7 +81,7 @@ public class MapPlayerData {
     public String toString() {
         return "MapPlayerData[" +
                 "id='" + id + '\'' +
-                ", unlockedMapSlots=" + unlockedMapSlots +
+                ", unlockedSlots=" + unlockedSlots +
                 ", mapSlots=" + Arrays.toString(mapSlots) +
                 ", lastPlayedMap='" + lastPlayedMap + '\'' +
                 ", lastEditedMap='" + lastEditedMap + '\'' +

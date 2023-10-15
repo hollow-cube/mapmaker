@@ -48,6 +48,7 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
@@ -65,7 +66,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -443,15 +443,19 @@ public class DevServer {
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
         var currencyDisplay = BadSprite.SPRITE_MAP.get("hud/currency_display");
+        var currencyDisplayCreative = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");
         ActionBar.forPlayer(player).addProvider((p, builder) -> {
+            var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
+
             builder.pushColor(FontUtil.NO_SHADOW);
-            builder.pos(11).drawInPlace(currencyDisplay);
+            builder.pos(11).drawInPlace(hasExperienceBar ? currencyDisplay : currencyDisplayCreative);
 
             int MAX_TEXT_WIDTH = 22;
+            var font = hasExperienceBar ? "currency" : "currency_creative";
 
             var coinText = NumberUtil.formatCurrency(999);
-            builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
-            builder.pos(56).append("currency", "9.99b");
+            builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
+            builder.pos(56).append(font, "9.99b");
         });
 
         metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));

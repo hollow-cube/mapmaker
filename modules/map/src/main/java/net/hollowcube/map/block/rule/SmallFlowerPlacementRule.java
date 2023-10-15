@@ -13,10 +13,10 @@ public class SmallFlowerPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var existingBlock = placementState.instance().getBlock(placementState.placePosition(), Block.Getter.Condition.TYPE);
-        if (existingBlock.id() == Block.FLOWER_POT.id() && BlockTags.SMALL_FLOWERS.contains(block.namespace())) {
-            return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
-        }
-
-        return null;
+        if (existingBlock.id() == Block.FLOWER_POT.id()) {
+            if (BlockTags.POTTABLE_FLOWERS.contains(block.id()))
+                return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
+            return null;
+        } else return null;
     }
 }

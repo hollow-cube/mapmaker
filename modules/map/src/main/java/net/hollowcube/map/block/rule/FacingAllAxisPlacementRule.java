@@ -11,8 +11,11 @@ import java.util.Objects;
 public class FacingAllAxisPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACING = "facing";
 
-    public FacingAllAxisPlacementRule(@NotNull Block block) {
+    private final boolean invert;
+
+    public FacingAllAxisPlacementRule(@NotNull Block block, boolean invert) {
         super(block);
+        this.invert = invert;
     }
 
     @Override
@@ -21,9 +24,13 @@ public class FacingAllAxisPlacementRule extends BaseBlockPlacementRule {
 
         String facing;
         var pitch = playerPosition.pitch();
-        if (pitch < -45.0) facing = "down";
-        else if (pitch > 45.0) facing = "up";
-        else facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace().name().toLowerCase();
+        if (pitch < -45.0) facing = invert ? "up" : "down";
+        else if (pitch > 45.0) facing = invert ? "down" : "up";
+        else {
+            var facingFace = BlockFace.fromYaw(playerPosition.yaw());
+            if (!invert) facingFace = facingFace.getOppositeFace();
+            facing = facingFace.name().toLowerCase();
+        }
 
         return block.withProperty(PROP_FACING, facing);
     }

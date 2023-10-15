@@ -91,6 +91,7 @@ public final class FontUtil {
                 Map.entry((int) 'b', 5), Map.entry((int) '.', 2)
         ));
         result.put("currency", currencyGlyphs);
+        result.put("currency_creative", currencyGlyphs);
 
         GLYPH_WIDTHS_V2 = Map.copyOf(result);
     }

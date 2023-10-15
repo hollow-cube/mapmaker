@@ -88,17 +88,17 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.REPEATER, true));
 
         // All axis facing
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DISPENSER));
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DROPPER));
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.OBSERVER));
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.COMMAND_BLOCK));
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.CHAIN_COMMAND_BLOCK));
-        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.REPEATING_COMMAND_BLOCK));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DISPENSER, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DROPPER, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.OBSERVER, true));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.COMMAND_BLOCK, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.CHAIN_COMMAND_BLOCK, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.REPEATING_COMMAND_BLOCK, false));
 
         // Bell
         blockManager.registerBlockPlacementRule(new BellPlacementRule());
 
-        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD));
+        blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.LIGHTNING_ROD, true));
         blockManager.registerBlockPlacementRule(new ClickFacePlacementRule(Block.END_ROD, true));
 
         // Fences, Walls, and Gates
@@ -236,8 +236,8 @@ public final class PlacementRules {
 
         // Flower pot
         blockManager.registerBlockPlacementRule(new FlowerPotPlacementRule());
-        for (var flowerId : BlockTags.SMALL_FLOWERS.getValues()) {
-            blockManager.registerBlockPlacementRule(new SmallFlowerPlacementRule(Block.fromNamespaceId(flowerId)));
+        for (var flowerId : BlockTags.POTTABLE_FLOWERS) {
+            blockManager.registerBlockPlacementRule(new SmallFlowerPlacementRule(Block.fromBlockId(flowerId)));
         }
 
         // Terracotta

@@ -5,6 +5,7 @@ import net.minestom.server.gamedata.tags.Tag;
 import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.block.Block;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ public final class BlockTags {
     public static final Tag MINECRAFT_DOORS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:doors"));
 
     public static final Tag SMALL_FLOWERS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:small_flowers"));
+    public static final Tag FLOWER_POTS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:flower_pots"));
 
     public static final Tag MINECRAFT_BEDS = Objects.requireNonNull(TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, "minecraft:beds"));
 
@@ -67,5 +69,18 @@ public final class BlockTags {
             Block.PINK_STAINED_GLASS_PANE.id(),
             Block.IRON_BARS.id()
     );
+
+    public static final Set<Integer> POTTABLE_FLOWERS;
+
+    static {
+        var flowers = new HashSet<Integer>();
+        for (var flower : FLOWER_POTS.getValues()) {
+            if (flower.asString().equals("minecraft:flower_pot")) continue;
+            var block = Block.fromNamespaceId(flower.asString().replace("potted_", ""));
+            if (block == null) continue;
+            flowers.add(block.id());
+        }
+        POTTABLE_FLOWERS = Set.copyOf(flowers);
+    }
 
 }

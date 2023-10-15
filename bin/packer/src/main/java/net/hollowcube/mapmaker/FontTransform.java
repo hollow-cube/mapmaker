@@ -56,6 +56,9 @@ public class FontTransform {
             charmaps.put("currency", charmap);
             ascents.put("currency", 5);
             heights.put("currency", 6);
+            charmaps.put("currency_creative", charmap);
+            ascents.put("currency_creative", 5);
+            heights.put("currency_creative", 6);
         }
     }
 
