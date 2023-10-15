@@ -1,0 +1,284 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="10" align="ttb" sprite="play_maps/details/container">
+    <!-- This is a little cursed, but its acceptable to have zero size elements and they will not affect layout. -->
+    <switch id="variant_icon_switch" width="0" height="0">
+        <label width="1" height="1" translationKey="" sprite="play_maps/details/icon_variant_parkour"/>
+        <label width="0" height="0" translationKey="" sprite="play_maps/details/icon_variant_building"/>
+        <label width="0" height="0" translationKey="" sprite="play_maps/details/icon_variant_adventure"/>
+    </switch>
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="30"/>
+
+    <!-- Top bar -->
+
+    <!-- Map list -->
+    <switch id="tab_switch" width="9" height="5">
+        <!-- INFO TAB -->
+        <box width="9" height="5" align="ttb" sprite="play_maps/details/tab_info/container">
+            <box width="9" align="ltr">
+                <BackButton/>
+                <label translationKey="gui.map_details.map_info_tab.information"/>
+                <text id="author" width="5" translationKey="gui.map_details.creator_profile"
+                      font="map_details_author" centered="true"/>
+                <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
+                        sprite="play_maps/details/add_to_playlist"/>
+                <button translationKey="gui.map_details.map_info_tab.report_map"
+                        sprite="play_maps/details/report"/>
+            </box>
+
+            <switch id="row_one" width="9" height="1">
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
+                    <button width="1" height="1"
+                            id="quality_unrated"
+                            translationKey="gui.map_details.map_info_tab.quality.unrated"
+                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
+                    <text width="8" height="1"
+                          id="quality_unrated_text"
+                          translationKey="gui.map_details.map_info_tab.quality.unrated"
+                          font="map_details_quality" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
+                    <button width="1" height="1"
+                            id="quality_unrated"
+                            translationKey="gui.map_details.map_info_tab.quality.unrated"
+                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
+                    <text width="4" height="1"
+                          id="quality_unrated_text"
+                          translationKey="gui.map_details.map_info_tab.quality.unrated"
+                          font="map_details_quality" centered="false" shift="3"/>
+                    <switch id="difficulty_switch" width="4" height="1">
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_none"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.unknown"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/none_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_none_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.unknown"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_easy"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.easy"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/easy_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_easy_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.easy"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_medium"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.medium"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/medium_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_medium_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.medium"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_hard"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.hard"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/hard_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_hard_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.hard"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_expert"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.expert"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/expert_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_expert_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.expert"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                        <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
+                            <button width="1" height="1"
+                                    id="difficulty_nightmare"
+                                    translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
+                                    sprite="play_maps/details/tab_info/parkour/difficulty/nightmare_icon"/>
+                            <text width="3" height="1"
+                                  id="difficulty_nightmare_text"
+                                  translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
+                                  font="map_details_difficulty" centered="false" shift="13"/>
+                        </box>
+                    </switch>
+                </box>
+            </switch>
+            <switch id="map_type_switch" width="9" height="1">
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_parkour"
+                            translationKey="gui.map_details.map_info_tab.type.parkour"
+                            sprite="play_maps/details/tab_info/parkour/parkour_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_parkour_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_speedrun"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.speedrun"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_speedrun_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_speedrun_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.speedrun"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_sectioned"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.sectioned"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_sectioned_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_sectioned_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.sectioned"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_rankup"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.rankup"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_rankup_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_rankup_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.rankup"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_gauntlet"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.gauntlet"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_gauntlet_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_gauntlet_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.gauntlet"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_dropper"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.dropper"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_dropper_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_dropper_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.dropper"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_one_jump"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.one_jump"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_one_jump_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_one_jump_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.one_jump"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_informative"
+                            translationKey="gui.map_details.map_info_tab.type.parkour.informative"
+                            sprite="play_maps/details/tab_info/parkour/map_types/sv_informative_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_informative_text"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.informative"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_showcase"
+                            translationKey="map.type.showcase"
+                            sprite="play_maps/details/tab_info/building/map_types/sv_showcase_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_showcase_text"
+                          translationKey="map.type.showcase"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_tutorial"
+                            translationKey="map.type.tutorial"
+                            sprite="play_maps/details/tab_info/building/map_types/sv_tutorial_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_tutorial_text"
+                          translationKey="map.type.tutorial"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_row">
+                    <button width="1" height="1"
+                            id="map_type_building"
+                            translationKey="gui.map_details.map_info_tab.type.building"
+                            sprite="play_maps/details/tab_info/building/building_icon"/>
+                    <text width="8" height="1"
+                          id="map_type_building_text"
+                          translationKey="gui.map_details.map_info_tab.type.building"
+                          font="map_details_map_type" centered="false" shift="3"/>
+                </box>
+            </switch>
+        </box>
+
+        <!-- STATS TAB -->
+        <spacer width="9" height="5"/>
+
+        <!-- TIMES TAB -->
+        <spacer width="9" height="5"/>
+
+        <!-- REVIEWS TAB -->
+        <spacer width="9" height="5"/>
+    </switch>
+
+    <!-- Controls -->
+    <box width="9" align="ltr" sprite="create_maps/tab_container">
+        <spacer/>
+        <switch id="tab_info_switch">
+            <button id="tab_info" translationKey="gui.map_details.map_info_tab"
+                    sprite="play_maps/details/tab_info/icon"
+                    backgroundSprite="play_maps/details/tab_info/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_info_tab"
+                    sprite="play_maps/details/tab_info/icon_selected"/>
+        </switch>
+        <spacer/>
+        <switch id="tab_stats_switch">
+            <button id="tab_stats" translationKey="gui.map_details.map_stats_tab"
+                    sprite="play_maps/details/tab_stats/icon"
+                    backgroundSprite="play_maps/details/tab_stats/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_stats_tab"
+                    sprite="play_maps/details/tab_stats/icon_selected"/>
+        </switch>
+        <spacer/>
+        <switch id="tab_times_switch">
+            <button id="tab_times" translationKey="gui.map_details.top_times_tab"
+                    sprite="play_maps/details/tab_times/icon"
+                    backgroundSprite="play_maps/details/tab_times/icon_bg_default"/>
+            <button translationKey="gui.map_details.top_times_tab"
+                    sprite="play_maps/details/tab_times/icon_selected"/>
+        </switch>
+        <spacer/>
+        <switch id="tab_reviews_switch">
+            <button id="tab_reviews" translationKey="gui.map_details.map_reviews_tab"
+                    sprite="play_maps/details/tab_reviews/icon"
+                    backgroundSprite="play_maps/details/tab_reviews/icon_bg_default"/>
+            <button translationKey="gui.map_details.map_reviews_tab"
+                    sprite="play_maps/details/tab_reviews/icon_selected"/>
+        </switch>
+        <spacer/>
+    </box>
+
+    <!-- Big notable actions -->
+    <box width="9" height="3" align="ltr">
+        <button id="boost_map" width="3" height="3"
+                translationKey="gui.map_details.map_info.boost_map"/>
+        <button id="play_map" width="3" height="3"
+                translationKey="gui.map_details.play_map"/>
+        <button id="suggest_similar" width="3" height="3"
+                translationKey="gui.map_details.suggest_similar_maps"/>
+    </box>
+</component>
