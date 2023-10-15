@@ -274,6 +274,7 @@ public class EditingMapWorld implements InternalMapWorld {
                 }
             }
 
+            player.setFlying(saveState.isFlying());
             var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
             player.teleport(pos).join();
 
@@ -356,6 +357,7 @@ public class EditingMapWorld implements InternalMapWorld {
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
         saveState.updatePlaytime();
         saveState.setPos(player.getPosition());
+        saveState.setFlying(player.isFlying());
         saveState.setInventoryItems(List.of(player.getInventory().getItemStacks()));
         saveState.setTFState(LocalSession.save(player));
         return saveState.getUpdateRequest();

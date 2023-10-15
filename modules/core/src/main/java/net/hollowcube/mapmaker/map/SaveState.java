@@ -41,6 +41,7 @@ public class SaveState {
     private Pos pos = null;
 
     // Editing
+    private boolean isFlying = false;
     private String inventory = null; // base64 bytes
     private String tfState = null; // base64 bytes
 
@@ -66,9 +67,11 @@ public class SaveState {
     public @NotNull String id() {
         return id;
     }
+
     public @NotNull String playerId() {
         return playerId;
     }
+
     public @NotNull String mapId() {
         return mapId;
     }
@@ -80,6 +83,7 @@ public class SaveState {
     public @NotNull Instant created() {
         return created;
     }
+
     public @NotNull Instant lastModified() {
         return lastModified;
     }
@@ -87,6 +91,7 @@ public class SaveState {
     public boolean isCompleted() {
         return completed;
     }
+
     public void setCompleted(boolean completed) {
         updates.setCompleted(completed);
         this.completed = completed;
@@ -95,16 +100,20 @@ public class SaveState {
     public long getPlaytime() {
         return playtime;
     }
+
     public void setPlaytime(long playtime) {
         updates.setPlaytime(playtime);
         this.playtime = playtime;
     }
+
     public long getPlayStartTime() {
         return playStartTime;
     }
+
     public void setPlayStartTime(long playStartTime) {
         this.playStartTime = playStartTime;
     }
+
     public void updatePlaytime() {
         if (playStartTime == 0) return;
         setPlaytime(playtime + System.currentTimeMillis() - playStartTime);
@@ -120,14 +129,25 @@ public class SaveState {
         this.pos = pos;
     }
 
+    public boolean isFlying() {
+        return isFlying;
+    }
+
+    public void setFlying(boolean flying) {
+        updates.setFlying(flying);
+        isFlying = flying;
+    }
+
     public byte @Nullable [] inventory() {
         if (inventory == null) return null;
         return Base64.getDecoder().decode(inventory);
     }
+
     public byte @Nullable [] tfState() {
         if (tfState == null) return null;
         return Base64.getDecoder().decode(tfState);
     }
+
     public void setTFState(byte @NotNull [] tfstate) {
         this.tfState = Base64.getEncoder().encodeToString(tfstate);
         updates.setTfState(this.tfState);
@@ -136,6 +156,7 @@ public class SaveState {
     public @Nullable String checkpoint() {
         return checkpoint;
     }
+
     public void setCheckpoint(@Nullable String checkpoint, @NotNull Pos pos) {
         this.checkpoint = checkpoint;
         this.checkpointPos = pos;
@@ -143,7 +164,9 @@ public class SaveState {
         updates.setCheckpointPos(pos);
     }
 
-    public @Nullable Pos checkpointPos() { return checkpointPos; }
+    public @Nullable Pos checkpointPos() {
+        return checkpointPos;
+    }
 
     // Utilities
 

@@ -13,13 +13,14 @@ public class SaveStateUpdateRequest {
     private Boolean completed = null;
     private Long playtime = null;
     private Pos pos = null;
+    private Boolean isFlying = null;
     private String inventory = null;
     private String tfState = null;
     private String checkpoint = null;
     private Pos checkpointPos = null;
 
     public boolean hasChanges() {
-        return completed != null || playtime != null || pos != null || inventory != null || tfState != null || checkpoint != null || checkpointPos != null;
+        return completed != null || playtime != null || pos != null || isFlying != null || inventory != null || tfState != null || checkpoint != null || checkpointPos != null;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
@@ -34,6 +35,11 @@ public class SaveStateUpdateRequest {
 
     public @NotNull SaveStateUpdateRequest setPos(@NotNull Pos pos) {
         this.pos = pos;
+        return this;
+    }
+
+    public @NotNull SaveStateUpdateRequest setFlying(Boolean flying) {
+        isFlying = flying;
         return this;
     }
 

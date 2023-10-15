@@ -285,6 +285,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         var reqBody = GSON.toJson(update);
+        System.out.println("UPDATE REQ" + reqBody);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
