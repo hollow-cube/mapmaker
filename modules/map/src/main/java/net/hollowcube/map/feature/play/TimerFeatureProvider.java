@@ -30,9 +30,7 @@ public class TimerFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerInitEvent.class, this::handleStartPlaying)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying);
 
-    private final ActionBar.Provider actionBar = (player, builder) -> {
-
-    };
+    private final ActionBar.Provider actionBar = this::buildWidget;
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -49,11 +47,11 @@ public class TimerFeatureProvider implements FeatureProvider {
 
     private void handleStartPlaying(@NotNull MapPlayerInitEvent event) {
         if (!event.isFirstInit()) return;
-        ActionBar.forPlayer(event.player()).addProvider(this::buildWidget);
+        ActionBar.forPlayer(event.player()).addProvider(actionBar);
     }
 
     private void handleStopPlaying(@NotNull MapWorldPlayerStopPlayingEvent event) {
-        ActionBar.forPlayer(event.player()).removeProvider(this::buildWidget);
+        ActionBar.forPlayer(event.player()).removeProvider(actionBar);
     }
 
     private void buildWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {

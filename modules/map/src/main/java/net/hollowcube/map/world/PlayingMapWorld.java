@@ -63,6 +63,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         return true;
     });
 
+    private final ActionBar.Provider spectatingActionBarProvider = this::buildSpectatorWidget;
+
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
         this.map = map;
@@ -178,7 +180,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setInvisible(true);
-        ActionBar.forPlayer(player).addProvider(this::buildSpectatorWidget);
+        ActionBar.forPlayer(player).addProvider(spectatingActionBarProvider);
 
         instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));
 
@@ -198,7 +200,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.removeTag(MapHooks.PLAYING);
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
-        ActionBar.forPlayer(player).removeProvider(this::buildSpectatorWidget);
+        ActionBar.forPlayer(player).removeProvider(spectatingActionBarProvider);
 
         MapWorldHelpers.resetPlayer(player);
 
