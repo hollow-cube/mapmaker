@@ -62,6 +62,7 @@ public class MapSettings {
             return this.type;
         }
     }
+
     private boolean onlySprint = false;
     private boolean noSprint = false;
     private boolean noJump = false;
@@ -386,9 +387,9 @@ public class MapSettings {
             if (this.tags == null) {
                 this.tags = new ArrayList<>();
             }
-            this.tags = this.tags.stream().filter(
+            this.tags = new ArrayList<>(this.tags.stream().filter(
                     tag -> tag.getType() == MapTags.TagType.VISUAL
-            ).toList();
+            ).toList());
         } finally {
             updateLock.unlock();
         }
