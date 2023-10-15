@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
@@ -144,6 +145,34 @@ public class MapSettings {
         if (currTagIdx < tags.size())
             tagsLabel = tagsLabel.append(Component.text(String.format("+%s", tags.size() - currTagIdx)));
         return tagsLabel;
+    }
+
+    public @NotNull String getTagsString() {
+        var tags = getTags();
+        var initialTagCount = tags.size();
+        var tagsLength = FontUtil.measureText(tags.toString());
+        var maxLength = 139;
+
+        while (tagsLength > maxLength && !tags.isEmpty()) {
+            tags.remove(tags.size() - 1);
+            tagsLength = FontUtil.measureText(tags.toString());
+        }
+
+        StringBuilder tagsDisplay = new StringBuilder();
+        int removedTagCount = initialTagCount - tags.size();
+
+        for (int i = 0; i < tags.size(); i++) {
+            String tagName = tags.get(i).toString();
+            tagName = tagName.substring(0, 1).toUpperCase() + tagName.substring(1).toLowerCase();
+            tagsDisplay.append(tagName);
+            if (i < tags.size() - 1) {
+                tagsDisplay.append(", ");
+            } else if (i == tags.size() - 1 && removedTagCount > 0) {
+                tagsDisplay.append(", +").append(removedTagCount);
+            }
+        }
+
+        return tagsDisplay.toString();
     }
 
     public void setName(@NotNull String name) {

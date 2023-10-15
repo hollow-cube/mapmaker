@@ -69,9 +69,10 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_tutorial_text") Text mapTypeTutorialText;
     private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
-    // MAP TAGS - VISUAL
-
-    // MAP TAGS - GAMEPLAY
+    // MAP TAGS
+    private @Outlet("map_tags_switch") Switch mapTagsSwitch;
+    private @Outlet("no_map_tags_text") Text noMapTagsText;
+    private @Outlet("map_tags_text") Text mapTagsText;
 
     // GENERAL
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
@@ -88,6 +89,8 @@ public class MapDetailsView extends View {
         selectTab(0);
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
+
+        // MAP QUALITY
 
 //        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED
 //        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
@@ -111,6 +114,8 @@ public class MapDetailsView extends View {
         qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
 //        qualitySwitch.setOption(0);
 //        }
+
+        // MAP DIFFICULTY
 
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             Switch[] difficultySwitches = new Switch[]{difficultySwitch};
@@ -139,6 +144,8 @@ public class MapDetailsView extends View {
                 difficultyNoneText.setText("Unknown");
                 difficultySwitch.setOption(0);
             }
+
+            // MAP TYPE
 
             Switch[] mapTypeSwitches = new Switch[]{mapTypeSwitch};
             if (map.settings().getParkourSubVariant() == ParkourSubVariant.SPEEDRUN) {
@@ -180,6 +187,22 @@ public class MapDetailsView extends View {
                 mapTypeSwitch.setOption(10);
             }
         }
+
+        // MAG TAGS
+
+        Switch[] mapTagsSwitches = new Switch[]{mapTagsSwitch};
+
+        var tags = map.settings().getTagsString();
+
+        if (tags.isEmpty()) {
+            mapTagsSwitch.setOption(0);
+            noMapTagsText.setText("No Tags");
+        } else {
+            mapTagsSwitch.setOption(1);
+            mapTagsText.setText(tags);
+        }
+
+        // MAP SETTINGS
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
