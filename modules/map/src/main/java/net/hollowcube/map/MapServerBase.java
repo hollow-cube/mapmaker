@@ -70,6 +70,7 @@ public abstract class MapServerBase implements MapServer {
     }
 
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
+        MapServer.StaticAbuse.instance = this;
 
         var kafkaConfig = config.get(KafkaConfig.class);
         mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
@@ -139,7 +140,8 @@ public abstract class MapServerBase implements MapServer {
 
         this.guiController = Controller.make(Map.of(
                 "mapServer", this,
-                "mapService", mapService()
+                "mapService", mapService(),
+                "bridge", bridge()
         ));
 
         PlayerInviteService.init(mwm);

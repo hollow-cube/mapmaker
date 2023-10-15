@@ -16,6 +16,10 @@ import java.util.function.Function;
 
 public interface MapServer {
 
+    class StaticAbuse {
+        public static MapServer instance;
+    }
+
     @NotNull MapToHubBridge bridge();
 
     @NotNull PlayerService playerService();
