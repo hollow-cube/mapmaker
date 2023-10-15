@@ -17,10 +17,12 @@ import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -81,6 +83,7 @@ public class EditingMapWorld implements InternalMapWorld {
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
+        eventNode.addListener(InstanceTickEvent.class, this::tick);
 
         eventNode.addListener(BlockItemPlaceEvent.class, event -> {
             var handler = event.getBlock().handler();
@@ -361,5 +364,15 @@ public class EditingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull Set<Player> players() {
         return Set.copyOf(activePlayers);
+    }
+
+    public void tick(@NotNull InstanceTickEvent event) {
+        var minHeight = instance.getDimensionType().getMinY() - 20;
+
+        for (var player : activePlayers) {
+            if (player.getPosition().y() < minHeight) {
+                player.teleport(new Pos(map.settings().getSpawnPoint()));
+            }
+        }
     }
 }
