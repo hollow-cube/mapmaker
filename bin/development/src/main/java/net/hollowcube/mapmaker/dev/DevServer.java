@@ -28,6 +28,9 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.metrics.Metric;
+import net.hollowcube.mapmaker.metrics.MetricType;
+import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -62,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -141,6 +145,8 @@ public class DevServer {
     private DevHubServer hub;
     private DevMapServer maps;
 
+    private MetricWriter metricWriter;
+
     private Pattern onlinePlayersPattern = Pattern.compile("");
     private static final Map<String, Component> EMOJIS;
     private static final Sound TAG_DING = Sound.sound()
@@ -206,6 +212,7 @@ public class DevServer {
 
         var kafkaConfig = configProvider.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
+        metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
 
         // Start phase 2
         // Start hub and map server and bridge them.
@@ -439,6 +446,8 @@ public class DevServer {
             builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
             builder.pos(56).append("currency", "9.99b");
         });
+
+        metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
