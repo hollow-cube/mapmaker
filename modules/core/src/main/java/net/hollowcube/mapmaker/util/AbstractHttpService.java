@@ -25,6 +25,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
+            .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())

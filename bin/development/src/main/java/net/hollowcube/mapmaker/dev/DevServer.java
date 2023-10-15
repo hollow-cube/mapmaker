@@ -72,6 +72,13 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+/*
+
+map_created (topic in kafka): { timestamp: time, player_id: uuid, size: int }
+
+
+ */
+
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);

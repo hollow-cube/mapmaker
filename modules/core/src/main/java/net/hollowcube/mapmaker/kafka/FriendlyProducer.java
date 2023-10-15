@@ -40,7 +40,6 @@ public class FriendlyProducer implements AutoCloseable {
     public @Blocking void produce(@NotNull String topic, @NotNull String value) {
         if (producer == null) return;
 
-        //todo somehow send the message synchronously
         var future = new CompletableFuture<>();
         producer.send(new ProducerRecord<>(topic, value), (unused1, exception) -> {
             if (exception != null) {
