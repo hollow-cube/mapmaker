@@ -34,7 +34,8 @@ public class MapDetailsView extends View {
 
     // MAP QUALITIES (leave what is commented out, refer to line 92)
 //    private @Outlet("quality_switch") Switch qualitySwitch;
-    private @Outlet("quality_unrated_text") Text qualityUnratedText;
+    private @Outlet("quality_unrated_half_text") Text qualityUnratedHalfText;
+    private @Outlet("quality_unrated_full_text") Text qualityUnratedFullText;
 //    private @Outlet("quality_good_text") Text qualityGoodText;
 //    private @Outlet("quality_great_text") Text qualityGreatText;
 //    private @Outlet("quality_excellent_text") Text qualityExcellentText;
@@ -74,6 +75,11 @@ public class MapDetailsView extends View {
     private @Outlet("no_map_tags_text") Text noMapTagsText;
     private @Outlet("map_tags_text") Text mapTagsText;
 
+    // MAP SETTINGS
+    private @Outlet("map_settings_switch") Switch mapSettingsSwitch;
+    private @Outlet("no_map_settings_text") Text noMapSettingsText;
+    private @Outlet("map_settings_text") Text mapSettingsText;
+
     // GENERAL
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
@@ -92,7 +98,7 @@ public class MapDetailsView extends View {
 
         // MAP QUALITY
 
-//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED
+//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED. THIS ALSO NEEDS A SMALL REWORK.
 //        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
 //        if(map.getQuality().equals("good")) {
 //            qualityGoodText.setText("Good", TextColor.color(0xF5DC3B));
@@ -111,7 +117,7 @@ public class MapDetailsView extends View {
 //            qualitySwitch.setOption(5);
 //        } else {
 //        Default value for map quality (unrated)
-        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
+//        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
 //        qualitySwitch.setOption(0);
 //        }
 
@@ -120,6 +126,7 @@ public class MapDetailsView extends View {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             Switch[] difficultySwitches = new Switch[]{difficultySwitch};
             rowOneSwitch.setOption(1);
+            qualityUnratedHalfText.setText("Unrated", TextColor.color(0xF04B3D));
             if (map.getUniquePlays() > 1) { //todo make >1 later
                 if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
@@ -176,6 +183,7 @@ public class MapDetailsView extends View {
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
+            qualityUnratedFullText.setText("Unrated", TextColor.color(0xF04B3D));
             if (map.settings().getBuildingSubVariant() == BuildingSubVariant.SHOWCASE) {
                 mapTypeShowcaseText.setText("Building Showcase", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(8);
@@ -192,9 +200,11 @@ public class MapDetailsView extends View {
 
         Switch[] mapTagsSwitches = new Switch[]{mapTagsSwitch};
 
-        var tags = map.settings().getTagsString();
+        String tags = map.settings().getTagsString();
 
-        if (tags.isEmpty()) {
+        System.out.println(tags);
+
+        if (tags.equals("No Tags")) {
             mapTagsSwitch.setOption(0);
             noMapTagsText.setText("No Tags");
         } else {
@@ -203,6 +213,20 @@ public class MapDetailsView extends View {
         }
 
         // MAP SETTINGS
+
+        Switch[] mapSettingsSwitches = new Switch[]{mapSettingsSwitch};
+
+        String settings = map.settings().getSettingsString();
+
+        System.out.println(settings);
+
+        if (settings.equals("No Settings")) {
+            mapSettingsSwitch.setOption(0);
+            noMapSettingsText.setText("No Settings");
+        } else {
+            mapSettingsSwitch.setOption(1);
+            mapSettingsText.setText(settings);
+        }
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 

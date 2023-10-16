@@ -154,26 +154,77 @@ public class MapSettings {
         var tagsLength = FontUtil.measureText(tags.toString());
         var maxLength = 139;
 
-        while (tagsLength > maxLength && !tags.isEmpty()) {
+        if (tags.isEmpty()) {
+            return "No Tags";
+        }
+
+        while (tagsLength > maxLength) {
             tags.remove(tags.size() - 1);
             tagsLength = FontUtil.measureText(tags.toString());
         }
 
-        StringBuilder tagsDisplay = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         int removedTagCount = initialTagCount - tags.size();
 
         for (int i = 0; i < tags.size(); i++) {
-            String tagName = tags.get(i).toString();
-            tagName = tagName.substring(0, 1).toUpperCase() + tagName.substring(1).toLowerCase();
-            tagsDisplay.append(tagName);
+            String tagName = tags.get(i).displayName();
+            stringBuilder.append(tagName);
             if (i < tags.size() - 1) {
-                tagsDisplay.append(", ");
+                stringBuilder.append(", ");
             } else if (i == tags.size() - 1 && removedTagCount > 0) {
-                tagsDisplay.append(", +").append(removedTagCount);
+                stringBuilder.append(", +").append(removedTagCount);
             }
         }
 
-        return tagsDisplay.toString();
+        return stringBuilder.toString();
+    }
+
+    public @NotNull String getSettingsString() {
+        List<String> enabledSettings = new ArrayList<>();
+
+        if (isOnlySprint()) {
+            enabledSettings.add("Only Sprint");
+        }
+        if (isNoSprint()) {
+            enabledSettings.add("No Sprint");
+        }
+        if (isNoJump()) {
+            enabledSettings.add("No Jump");
+        }
+        if (isNoSneak()) {
+            enabledSettings.add("No Sneak");
+        }
+        if (isBoat()) {
+            enabledSettings.add("Boats");
+        }
+
+        if (enabledSettings.isEmpty()) {
+            return "No Settings";
+        }
+
+        var initialSettingCount = enabledSettings.size();
+        var settingsLength = FontUtil.measureText(String.join(", ", enabledSettings));
+        var maxLength = 139;
+
+        while (settingsLength > maxLength && !enabledSettings.isEmpty()) {
+            enabledSettings.remove(enabledSettings.size() - 1);
+            settingsLength = FontUtil.measureText(String.join(", ", enabledSettings));
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        int removedSettingCount = initialSettingCount - enabledSettings.size();
+
+        for (int i = 0; i < enabledSettings.size(); i++) {
+            String settingName = enabledSettings.get(i);
+            stringBuilder.append(settingName);
+            if (i < enabledSettings.size() - 1) {
+                stringBuilder.append(", ");
+            } else if (i == enabledSettings.size() - 1 && removedSettingCount > 0) {
+                stringBuilder.append(", +").append(removedSettingCount);
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     public void setName(@NotNull String name) {

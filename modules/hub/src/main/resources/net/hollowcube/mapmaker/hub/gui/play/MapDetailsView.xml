@@ -31,21 +31,21 @@
             <switch id="row_one" width="9" height="1">
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
                     <button width="1" height="1"
-                            id="quality_unrated"
+                            id="quality_unrated_full"
                             translationKey="gui.map_details.map_info_tab.quality.unrated"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="8" height="1"
-                          id="quality_unrated_text"
+                          id="quality_unrated_full_text"
                           translationKey="gui.map_details.map_info_tab.quality.unrated"
                           font="map_details_quality" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
                     <button width="1" height="1"
-                            id="quality_unrated"
+                            id="quality_unrated_half"
                             translationKey="gui.map_details.map_info_tab.quality.unrated"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="4" height="1"
-                          id="quality_unrated_text"
+                          id="quality_unrated_half_text"
                           translationKey="gui.map_details.map_info_tab.quality.unrated"
                           font="map_details_quality" centered="false" shift="3"/>
                     <!-- MAP DIFFICULTIES -->
@@ -247,6 +247,29 @@
                           id="map_tags_text"
                           translationKey="gui.map_details.map_info_tab.tags"
                           font="map_details_map_tags" centered="false" shift="3"/>
+                </box>
+            </switch>
+            <!-- MAP SETTINGS -->
+            <switch id="map_settings_switch" width="9" height="1">
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_settings">
+                    <button width="1" height="1"
+                            id="no_map_settings"
+                            translationKey="gui.map_details.map_info_tab.no_settings"
+                            sprite="play_maps/details/tab_info/no_settings_icon"/>
+                    <text width="8" height="1"
+                          id="no_map_settings_text"
+                          translationKey="gui.map_details.map_info_tab.no_settings"
+                          font="map_details_map_settings" centered="false" shift="3"/>
+                </box>
+                <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_settings">
+                    <button width="1" height="1"
+                            id="map_settings"
+                            translationKey="gui.map_details.map_info_tab.settings"
+                            sprite="play_maps/details/tab_info/setting_icon"/>
+                    <text width="8" height="1"
+                          id="map_settings_text"
+                          translationKey="gui.map_details.map_info_tab.settings"
+                          font="map_details_map_settings" centered="false" shift="3"/>
                 </box>
             </switch>
         </box>
