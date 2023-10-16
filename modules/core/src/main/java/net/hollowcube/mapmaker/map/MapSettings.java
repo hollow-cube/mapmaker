@@ -40,23 +40,21 @@ public class MapSettings {
         // Visual
 
         // Gameplay
-        ONLYSPRINT(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.only_sprint.name"),
-        NOSPRINT(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_sprint.selected.name"),
-        NOJUMP(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_jump.selected.name"),
-        NOSNEAK(SettingType.GAMEPLAY, "gui.create_maps.map_settings_tab.gameplay.no_sneak.name"),
+        ONLYSPRINT(SettingType.GAMEPLAY, "Only Sprint"),
+        NOSPRINT(SettingType.GAMEPLAY, "No Sprint"),
+        NOJUMP(SettingType.GAMEPLAY, "No Jump"),
+        NOSNEAK(SettingType.GAMEPLAY, "No Sneak"),
         ;
 
         SettingType type;
-        String translateKey;
+        String name;
 
-        Setting(SettingType type, String translateKey) {
+        Setting(SettingType type, String name) {
             this.type = type;
-            this.translateKey = translateKey;
+            this.name = name;
         }
 
-        public Component displayName() {
-            return Component.translatable(this.translateKey);
-        }
+        public String displayName() { return this.name; }
 
         public SettingType getType() {
             return this.type;

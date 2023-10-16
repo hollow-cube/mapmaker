@@ -49,9 +49,7 @@ public class MapUpdateRequest {
         this.spawnPoint = spawnPoint;
     }
 
-    public void setOnlySprint(boolean onlySprint) {
-        this.onlySprint = onlySprint;
-    }
+    public void setOnlySprint(boolean onlySprint) { this.onlySprint = onlySprint; }
     public void setNoSprint(boolean noSprint) {
         this.noSprint = noSprint;
     }

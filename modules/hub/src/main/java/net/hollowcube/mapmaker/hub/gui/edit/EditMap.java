@@ -573,7 +573,9 @@ public class EditMap extends View {
 
     @Action("tab_settings")
     public void showSettingsTab() {
-        selectTab(2);
+        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
+            selectTab(2);
+        } // TODO temp fix to not allow building maps to apply settings
     }
 
     @Action("tab_actions")
