@@ -17,6 +17,8 @@ public class SmallFlowerPlacementRule extends BaseBlockPlacementRule {
             if (BlockTags.POTTABLE_FLOWERS.contains(block.id()))
                 return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
             return null;
-        } else return null;
+        } else {
+            return block;
+        }
     }
 }
