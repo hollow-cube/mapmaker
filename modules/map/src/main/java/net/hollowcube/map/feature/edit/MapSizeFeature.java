@@ -29,8 +29,13 @@ public class MapSizeFeature implements FeatureProvider {
                 mapSize = MapSize.NORMAL;
             }
             world.addScopedEventNode(mapBoundaryNode);
-            world.instance().getWorldBorder().setCenter(0f, 0f);
-            world.instance().getWorldBorder().setDiameter(mapSize.size());
+
+            var worldBorder = world.instance().getWorldBorder();
+            worldBorder.setCenter(0f, 0f);
+            worldBorder.setDiameter(mapSize.size());
+            worldBorder.setWarningBlocks(5);
+            worldBorder.setWarningTime(5);
+
             return true;
         }
         return false;
