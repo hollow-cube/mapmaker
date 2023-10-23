@@ -114,7 +114,7 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             if (BlockTags.MINECRAFT_TRAPDOORS.contains(block.namespace()) || BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
                 var open = Boolean.parseBoolean(block.getProperty("open"));
                 block = block.withProperty("open", String.valueOf(!open));
-            }
+            } else return; // If we hit this then exit, otherwise we will update the block
         }
 
         // Update the block in the world to the new state
