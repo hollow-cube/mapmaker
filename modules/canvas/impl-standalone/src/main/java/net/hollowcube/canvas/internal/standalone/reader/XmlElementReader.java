@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.DepthAware;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
+import net.hollowcube.canvas.internal.standalone.trait.Loadable;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.canvas.internal.standalone.util.Debugger;
 import net.minestom.server.item.ItemStack;
@@ -197,6 +198,18 @@ public class XmlElementReader {
     // Traits
 
     private <T extends BaseElement> T applyTraits(@NotNull Node node, @NotNull T elem) {
+
+        // Loading
+        var loadingType = getString(node, "loader", null);
+        if (loadingType != null) {
+            if (elem instanceof Loadable trait) {
+                trait.setLoadingType(loadingType);
+            } else {
+                throw new IllegalArgumentException("Element does not support loading: " + elem.getClass().getSimpleName());
+            }
+        }
+
+        // Depth
         if (elem instanceof DepthAware trait) {
             trait.setZIndex(depth);
         }

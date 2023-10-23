@@ -24,7 +24,8 @@
             <spacer/>
         </box>
 
-        <pagination id="paging" width="7" height="5" child="MapEntry"/>
+        <pagination id="paging" width="7" height="5"
+                    loader="centered" child="MapEntry"/>
 
         <box height="5" align="ttb">
             <spacer/>

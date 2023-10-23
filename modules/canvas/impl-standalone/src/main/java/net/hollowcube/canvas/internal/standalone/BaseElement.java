@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
+import net.hollowcube.canvas.internal.standalone.trait.Loadable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -17,9 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-public abstract class BaseElement implements Element {
-    public static final ItemStack LOADING_ITEM = ItemStack.builder(Material.STICK)
+public abstract class BaseElement implements Element, Loadable {
+    public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
             .meta(meta -> meta.customModelData(2))
+            .build();
+    public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.builder(Material.STICK)
+            .meta(meta -> meta.customModelData(3))
             .build();
 
 
@@ -43,6 +47,7 @@ public abstract class BaseElement implements Element {
         this.width = other.width;
         this.height = other.height;
 
+        this.loadingType = other.loadingType;
         this.zIndex = other.zIndex;
         this.sprite = other.sprite;
         this.loadingSprite = other.loadingSprite;
@@ -99,7 +104,7 @@ public abstract class BaseElement implements Element {
     public @Nullable ItemStack @NotNull [] getContents() {
         var items = new ItemStack[width * height];
         if (state == State.LOADING && loadingSprite == null) {
-            Arrays.fill(items, LOADING_ITEM);
+            getLoadingContent(items);
         }
         return items;
     }
@@ -151,6 +156,28 @@ public abstract class BaseElement implements Element {
 
     public void wireAction(@NotNull View view, @NotNull Object handler, @NotNull Action.Descriptor action) {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support actions.");
+    }
+
+    // TRAIT: Loadable
+
+    private String loadingType = "default";
+
+    @Override
+    public void setLoadingType(@NotNull String loadingType) {
+        this.loadingType = loadingType;
+    }
+
+    private void getLoadingContent(ItemStack[] items) {
+        switch (loadingType) {
+            case "default" -> Arrays.fill(items, LOADING_BROKEN_ITEM);
+            case "centered" -> {
+                Arrays.fill(items, ItemStack.AIR);
+                int x = width / 2;
+                int y = height / 2;
+                items[x + (y * width)] = LOADING_SPINNER_ITEM;
+            }
+            default -> throw new IllegalStateException("Unknown loading type: " + loadingType);
+        }
     }
 
     // TRAIT: DepthAware

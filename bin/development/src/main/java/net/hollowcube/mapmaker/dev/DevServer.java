@@ -464,12 +464,32 @@ public class DevServer {
             int MAX_TEXT_WIDTH = 22;
             var font = hasExperienceBar ? "currency" : "currency_creative";
 
-            var coinText = NumberUtil.formatCurrency(999);
+            var coinText = NumberUtil.formatCurrency(0);
             builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
-            builder.pos(56).append(font, "9.99b");
+            var cubitText = NumberUtil.formatCurrency(0);
+            builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
+//            builder.pos(56).append(font, "9.99b");
         });
 
-        metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
+        Thread.startVirtualThread(() -> {
+            metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
+        });
+
+        player.setDisplayName(playerData.displayName());
+
+        var tabHeader = Component.text()
+                .appendNewline()
+                .append(Component.text("Hollow Cube")).appendNewline()
+                .append(Component.text("(todo logo and colors)"))
+                .appendNewline()
+                .build();
+        var tabFooter = Component.text()
+                .appendNewline()
+                .append(Component.text("ᴘʟᴀʏ.ʜᴏʟʟᴏᴡᴄᴜʙᴇ.ɴᴇᴛ")).appendNewline()
+                .append(Component.text("Closed Beta - " + runtime.shortCommit(), TextColor.color(0x696969)))
+                .appendNewline()
+                .build();
+        player.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);

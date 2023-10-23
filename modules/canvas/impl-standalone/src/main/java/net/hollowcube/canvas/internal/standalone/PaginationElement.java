@@ -38,7 +38,6 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
 
     @Override
     public boolean isAnyLoading() {
-        System.out.println("IS PAGINATION LOADING? " + (super.isAnyLoading() || page >= pageCache.size() || pageCache.get(page).isAnyLoading()));
         if (super.isAnyLoading()) return true;
         if (page >= pageCache.size()) return true;
         return pageCache.get(page).isAnyLoading();
