@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -255,9 +256,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId) {
+    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest"))
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?type=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());

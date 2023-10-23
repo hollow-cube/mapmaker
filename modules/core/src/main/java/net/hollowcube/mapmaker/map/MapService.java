@@ -45,7 +45,11 @@ public interface MapService {
 
     @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 
-    @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId);
+    default @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId) {
+        return getLatestSaveState(mapId, playerId, null);
+    }
+
+    @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type);
 
     @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
 

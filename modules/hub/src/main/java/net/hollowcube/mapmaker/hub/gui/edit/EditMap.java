@@ -251,7 +251,7 @@ public class EditMap extends View {
 
     private PublishStage getPublishState() {
         try {
-            var ss = mapService.getLatestSaveState(map.id(), map.owner());
+            var ss = mapService.getLatestSaveState(map.id(), map.owner(), SaveStateType.EDITING);
             var min_playtime = System.getenv("MIN_PLAYTIME") == null ? MIN_PLAYTIME : 0;
             if (ss.getPlaytime() < min_playtime)
                 return PublishStage.PLAY_LONGER;
