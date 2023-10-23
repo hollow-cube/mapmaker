@@ -41,6 +41,9 @@ public class RecordingFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
+        // DISABLE FOR NOW IT IS VERY BUGGY
+        if (true) return false;
+
         if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
             return false;
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
