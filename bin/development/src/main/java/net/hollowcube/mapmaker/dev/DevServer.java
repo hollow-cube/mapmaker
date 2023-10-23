@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
+import net.hollowcube.mapmaker.dev.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -71,13 +72,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-/*
-
-map_created (topic in kafka): { timestamp: time, player_id: uuid, size: int }
-
-
- */
 
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
@@ -155,7 +149,8 @@ public class DevServer {
     private MetricWriter metricWriter;
 
     private Pattern onlinePlayersPattern = Pattern.compile("");
-    private static final Map<String, Component> EMOJIS;
+    public static final Map<String, Component> EMOJIS;
+    public static final Map<String, List<String>> EMOJIS_BY_CATEGORY;
     private static final Sound TAG_DING = Sound.sound()
             .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
             .source(Sound.Source.PLAYER)
@@ -163,22 +158,27 @@ public class DevServer {
             .build();
 
     static {
-        var raw = Map.ofEntries(
-                // Symbols
+        var symbolEmojis = List.of(
                 Map.entry("plus", "icon/plus"),
                 Map.entry("minus", "icon/minus"),
-                Map.entry("x", "icon/x_mark"),
-
-                // Faces
+                Map.entry("x", "icon/x_mark")
+        );
+        var faceEmojis = List.of(
                 Map.entry("cool", "icon/emoji/cool"),
                 Map.entry("grin", "icon/emoji/grin"),
                 Map.entry("smile", "icon/emoji/smile"),
-                Map.entry("smirk", "icon/emoji/smirk"),
-
-                // Misc
+                Map.entry("smirk", "icon/emoji/smirk")
+        );
+        var miscEmojis = List.of(
                 Map.entry("crown", "icon/emoji/crown"),
                 Map.entry("grass", "icon/emoji/grass")
         );
+
+        var allEmojis = new ArrayList<Map.Entry<String, String>>();
+        allEmojis.addAll(symbolEmojis);
+        allEmojis.addAll(faceEmojis);
+        allEmojis.addAll(miscEmojis);
+        Map<String, String> raw = Map.ofEntries(allEmojis.toArray(Map.Entry[]::new));
 
         var result = new HashMap<String, Component>();
         for (var entry : raw.entrySet()) {
@@ -187,6 +187,12 @@ public class DevServer {
             result.put(entry.getKey(), Component.text(sprite.fontChar(), FontUtil.NO_SHADOW).hoverEvent(HoverEvent.showText(hoverText)));
         }
         EMOJIS = Map.copyOf(result);
+
+        var byCategory = new LinkedHashMap<String, List<String>>();
+        byCategory.put("ѕʏᴍʙᴏʟѕ", List.copyOf(symbolEmojis.stream().map(Map.Entry::getKey).toList()));
+        byCategory.put("ꜰᴀᴄᴇѕ", List.copyOf(faceEmojis.stream().map(Map.Entry::getKey).toList()));
+        byCategory.put("ᴍɪѕᴄ", List.copyOf(miscEmojis.stream().map(Map.Entry::getKey).toList()));
+        EMOJIS_BY_CATEGORY = byCategory;
     }
 
     @Blocking
@@ -270,6 +276,10 @@ public class DevServer {
             var joinCommand = new JoinCommand();
             hubCommandManager.register(joinCommand);
             mapCommandManager.register(joinCommand);
+
+            var emojisCommand = new EmojisCommand();
+            hubCommandManager.register(emojisCommand);
+            mapCommandManager.register(emojisCommand);
 
             // Register Request/Accept/Reject to hub and map command managers
             var requestCommand = new RequestCommand();
