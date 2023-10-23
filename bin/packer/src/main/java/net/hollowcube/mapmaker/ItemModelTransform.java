@@ -43,9 +43,9 @@ public class ItemModelTransform {
                 if (!"item_model".equals(type)) throw new IllegalArgumentException("Invalid item model type: " + type);
 
                 // Copy the textures
-                byte[] img2d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_2d.png")), 254);
+                byte[] img2d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_2d.png")), 221);
                 String tex2d = ctx.writeTexture("item", name + "_2d", img2d);
-                byte[] img3d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_3d.png")), 255);
+                byte[] img3d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_3d.png")), 225);
                 String tex3d = ctx.writeTexture("item", name + "_3d", img3d);
 
                 // Fix the 3d model
