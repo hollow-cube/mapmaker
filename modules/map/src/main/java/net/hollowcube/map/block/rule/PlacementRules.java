@@ -269,5 +269,7 @@ public final class PlacementRules {
 
         // Cave vines (glow berries)
         blockManager.registerBlockPlacementRule(new CaveVinesPlacementRule());
+
+        blockManager.registerBlockPlacementRule(new TwistingVinesPlacementRule());
     }
 }
