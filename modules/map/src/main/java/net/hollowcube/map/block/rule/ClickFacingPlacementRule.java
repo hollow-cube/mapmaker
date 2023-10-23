@@ -22,7 +22,7 @@ public class ClickFacingPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), invert ? BlockFace.TOP : BlockFace.BOTTOM);
-        return placementState.block().withProperty(PROP_FACING, directionFromBlockFace(blockFace));
+        return block.withProperty(PROP_FACING, directionFromBlockFace(blockFace));
     }
 
     private @NotNull String directionFromBlockFace(@NotNull BlockFace blockFace) {

@@ -5,10 +5,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.config.ConfigProvider;
-import net.hollowcube.map.block.handler.BannerBlockHandler;
-import net.hollowcube.map.block.handler.ChestBlockHandler;
-import net.hollowcube.map.block.handler.PlayerHeadBlockHandler;
-import net.hollowcube.map.block.handler.SignBlockHandler;
+import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.block.rule.PlacementRules;
 import net.hollowcube.map.command.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
@@ -84,6 +81,7 @@ public abstract class MapServerBase implements MapServer {
         BLOCK_MANAGER.registerHandler(PlayerHeadBlockHandler.ID, () -> PlayerHeadBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(ChestBlockHandler.CHEST.getNamespaceId(), () -> ChestBlockHandler.CHEST);
         BLOCK_MANAGER.registerHandler(ChestBlockHandler.TRAPPED_CHEST.getNamespaceId(), () -> ChestBlockHandler.TRAPPED_CHEST);
+        BLOCK_MANAGER.registerHandler(ShulkerBoxBlockHandler.ID, () -> ShulkerBoxBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(BannerBlockHandler.INSTANCE.getNamespaceId(), () -> BannerBlockHandler.INSTANCE);
         PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 

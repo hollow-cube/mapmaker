@@ -27,6 +27,8 @@ public class DebugCommand extends Command {
         addSyntax(this::handleDebugResourcePack, ArgumentType.Literal("rp"));
         addSyntax(this::handleDebugSelf, ArgumentType.Literal("self"));
         addSyntax(this::handleMapWorldDebug, ArgumentType.Literal("world"));
+
+        addSyntax(this::handleBlockDebug, ArgumentType.Literal("block"));
     }
 
     private void handleDebugResourcePack(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -71,5 +73,21 @@ public class DebugCommand extends Command {
 
         player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
         player.sendMessage("Type: " + world.getClass().getSimpleName());
+    }
+
+    private void handleBlockDebug(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
+            return;
+        }
+
+        var blockPosition = player.getTargetBlockPosition(5);
+        if (blockPosition == null) {
+            player.sendMessage("No block in range!");
+            return;
+        }
+
+        var block = player.getInstance().getBlock(blockPosition);
+        player.sendMessage("Block: " + block);
     }
 }

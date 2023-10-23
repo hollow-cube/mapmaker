@@ -1,9 +1,6 @@
 package net.hollowcube.map.block.rule;
 
-import net.hollowcube.map.block.handler.BannerBlockHandler;
-import net.hollowcube.map.block.handler.ChestBlockHandler;
-import net.hollowcube.map.block.handler.PlayerHeadBlockHandler;
-import net.hollowcube.map.block.handler.SkullBlockHandler;
+import net.hollowcube.map.block.handler.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
@@ -119,11 +116,14 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new ClickFacingPlacementRule(Block.LARGE_AMETHYST_BUD, true, false));
         blockManager.registerBlockPlacementRule(new ClickFacingPlacementRule(Block.AMETHYST_CLUSTER, true, false));
 
-
         // Chests
         blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.CHEST.withHandler(ChestBlockHandler.CHEST)));
         blockManager.registerBlockPlacementRule(new ChestPlacementRule(Block.TRAPPED_CHEST.withHandler(ChestBlockHandler.TRAPPED_CHEST)));
         blockManager.registerBlockPlacementRule(new FacingHorizontalPlacementRule(Block.ENDER_CHEST, true));
+        for (NamespaceID id : BlockTags.SHULKER_BOXES.getValues()) {
+            var block = Objects.requireNonNull(Block.fromNamespaceId(id)).withHandler(ShulkerBoxBlockHandler.INSTANCE);
+            blockManager.registerBlockPlacementRule(new ClickFacingPlacementRule(block, true, false));
+        }
 
         // Stairs
         //todo completely broken
