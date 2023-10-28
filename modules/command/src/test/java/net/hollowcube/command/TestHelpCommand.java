@@ -1,11 +1,11 @@
 package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.SuggestionEntry;
-import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.command.example.FlipCommand;
 import net.hollowcube.command.example.ListCommand;
 import net.hollowcube.command.example.ParentCommand;
+import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.suggestion.SuggestionEntry;
 import net.hollowcube.command.util.FakePlayer;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
@@ -37,44 +37,44 @@ class TestHelpCommand {
 
         @Test
         void emptyInputSuggestAll() {
-            var result = command.suggestCommand(player, emptyReader, "");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(4, success.suggestions().size());
+            var suggestion = new Suggestion(0, 0);
+            command.suggestCommand(player, emptyReader, suggestion, "");
+            assertEquals(4, suggestion.getEntries().size());
             assertArrayEquals(
                     new String[]{"flip", "help", "list", "parent"},
-                    success.suggestions().stream().map(SuggestionEntry::replacement).sorted().toArray(String[]::new)
+                    suggestion.getEntries().stream().map(SuggestionEntry::replacement).sorted().toArray(String[]::new)
             );
         }
 
         @Test
         void partialInputSuggestSingle() {
-            var result = command.suggestCommand(player, emptyReader, "fl");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(1, success.suggestions().size());
-            assertEquals("flip", success.suggestions().get(0).replacement());
+            var suggestion = new Suggestion(0, 0);
+            command.suggestCommand(player, emptyReader, suggestion, "fl");
+            assertEquals(1, suggestion.getEntries().size());
+            assertEquals("flip", suggestion.getEntries().get(0).replacement());
         }
 
         @Test
         void subcommandSuggestAll() {
-            var result = command.suggestCommand(player, emptyReader, "parent ");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(1, success.suggestions().size());
-            assertEquals("list", success.suggestions().get(0).replacement());
+            var suggestion = new Suggestion(0, 0);
+            command.suggestCommand(player, emptyReader, suggestion, "parent ");
+            assertEquals(1, suggestion.getEntries().size());
+            assertEquals("list", suggestion.getEntries().get(0).replacement());
         }
 
         @Test
         void subcommandSuggestFiltered() {
-            var result = command.suggestCommand(player, emptyReader, "parent l");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(1, success.suggestions().size());
-            assertEquals("list", success.suggestions().get(0).replacement());
+            var suggestion = new Suggestion(0, 0);
+            command.suggestCommand(player, emptyReader, suggestion, "parent l");
+            assertEquals(1, suggestion.getEntries().size());
+            assertEquals("list", suggestion.getEntries().get(0).replacement());
         }
 
         @Test
         void noMatchSuggestNothing() {
-            var result = command.suggestCommand(player, emptyReader, "nothing");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(0, success.suggestions().size());
+            var suggestion = new Suggestion(0, 0);
+            command.suggestCommand(player, emptyReader, suggestion, "nothing");
+            assertEquals(0, suggestion.getEntries().size());
         }
     }
 
@@ -116,5 +116,5 @@ class TestHelpCommand {
             assertEquals("list", resolved.command().name());
         }
     }
-    
+
 }

@@ -2,6 +2,8 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.command.TerraformCommand;
+import net.hollowcube.terraform.command.region.ReplaceCommand;
+import net.hollowcube.terraform.command.region.SetCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
 import net.hollowcube.terraform.command.selection.SelCommand;
@@ -50,8 +52,8 @@ public final class Terraform {
 //        commandManager.register(new SelectionCommands.Size(condition));
 
         // Region
-//        commandManager.register(new RegionCommands.Set(condition));
-//        commandManager.register(new RegionCommands.Replace(condition));
+        commandManager.register(new SetCommand());
+        commandManager.register(new ReplaceCommand());
 
         // History
 //        commandManager.register(new HistoryCommands.Undo(condition));

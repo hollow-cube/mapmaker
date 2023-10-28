@@ -1,10 +1,14 @@
 java_library(
     name = "demo",
     srcs = glob(["*.java"]),
+    resources = [
+        "//:packer_development_server",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//modules/command",
         "//modules/common",
+        "//modules/core",
         "//modules/terraform",
         "//third_party:helidon",
         "//third_party:minestom",

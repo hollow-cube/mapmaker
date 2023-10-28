@@ -1,6 +1,7 @@
 package net.hollowcube.command.arg;
 
 import net.hollowcube.command.CommandExecutor;
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -41,8 +42,8 @@ public class ArgumentOptional<T> extends Argument<T> {
     }
 
     @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        return arg.suggestions(sender, reader);
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
+        arg.suggestions(sender, reader, suggestion);
     }
 
     @Override

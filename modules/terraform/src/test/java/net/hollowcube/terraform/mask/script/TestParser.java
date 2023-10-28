@@ -11,7 +11,7 @@ public class TestParser {
     class TestBlockState {
         @Test
         public void testSingleState() {
-            var parser = new Parser("stone");
+            var parser = new MaskParser("stone");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -24,7 +24,7 @@ public class TestParser {
 
         @Test
         public void testSingleStateWithEmptyBrackets() {
-            var parser = new Parser("stone[]");
+            var parser = new MaskParser("stone[]");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -37,7 +37,7 @@ public class TestParser {
 
         @Test
         public void testSingleStateOnlyOpenBracket() {
-            var parser = new Parser("stone[");
+            var parser = new MaskParser("stone[");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -50,7 +50,7 @@ public class TestParser {
 
         @Test
         public void testSingleStateWithProp() {
-            var parser = new Parser("stone[facing=north]");
+            var parser = new MaskParser("stone[facing=north]");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -68,7 +68,7 @@ public class TestParser {
 
         @Test
         public void testPartialState() {
-            var parser = new Parser("stone[facing=]");
+            var parser = new MaskParser("stone[facing=]");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -86,7 +86,7 @@ public class TestParser {
 
         @Test
         public void testSingleStateWithProps() {
-            var parser = new Parser("stone[facing=north,a=b]");
+            var parser = new MaskParser("stone[facing=north,a=b]");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -109,7 +109,7 @@ public class TestParser {
 
         @Test
         public void testSingleStateTrailingComma() {
-            var parser = new Parser("stone[facing=north,]");
+            var parser = new MaskParser("stone[facing=north,]");
             var tree = assertDoesNotThrow(parser::parse);
             var blockState = assertInstanceOf(Tree.BlockState.class, tree);
             assertEquals(0, blockState.start());
@@ -131,7 +131,7 @@ public class TestParser {
 
         @Test
         public void testNotNoFollow() {
-            var parser = new Parser("!");
+            var parser = new MaskParser("!");
             var tree = assertDoesNotThrow(parser::parse);
             var not = assertInstanceOf(Tree.Prefix.class, tree);
             assertEquals(0, not.start());
@@ -142,7 +142,7 @@ public class TestParser {
 
         @Test
         public void testWithChild() {
-            var parser = new Parser("!stone");
+            var parser = new MaskParser("!stone");
             var tree = assertDoesNotThrow(parser::parse);
             var not = assertInstanceOf(Tree.Prefix.class, tree);
             assertEquals(0, not.start());
@@ -163,7 +163,7 @@ public class TestParser {
 
         @Test
         public void testInfixNoFollow() {
-            var parser = new Parser("stone|");
+            var parser = new MaskParser("stone|");
             var tree = assertDoesNotThrow(parser::parse);
             var or = assertInstanceOf(Tree.Infix.class, tree);
             assertEquals(0, or.start());
@@ -176,7 +176,7 @@ public class TestParser {
 
         @Test
         public void testInfixHappyCase() {
-            var parser = new Parser("stone|dirt");
+            var parser = new MaskParser("stone|dirt");
             var tree = assertDoesNotThrow(parser::parse);
             var or = assertInstanceOf(Tree.Infix.class, tree);
             assertEquals(0, or.start());
@@ -190,7 +190,7 @@ public class TestParser {
 
         @Test
         public void testInfixChain() {
-            var parser = new Parser("stone|dirt|grass");
+            var parser = new MaskParser("stone|dirt|grass");
             var tree = assertDoesNotThrow(parser::parse);
             var or = assertInstanceOf(Tree.Infix.class, tree);
             assertEquals(0, or.start());
@@ -206,7 +206,7 @@ public class TestParser {
 
         @Test
         public void testInfixInvalidOperator() {
-            var parser = new Parser("stone#dirt");
+            var parser = new MaskParser("stone#dirt");
             var tree = assertDoesNotThrow(parser::parse);
             var or = assertInstanceOf(Tree.Infix.class, tree);
             assertEquals(0, or.start());
@@ -220,7 +220,7 @@ public class TestParser {
 
         @Test
         public void testHashAlone() {
-            var parser = new Parser("#");
+            var parser = new MaskParser("#");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -230,7 +230,7 @@ public class TestParser {
 
         @Test
         public void testNamedNoArgs() {
-            var parser = new Parser("#foo");
+            var parser = new MaskParser("#foo");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -240,7 +240,7 @@ public class TestParser {
 
         @Test
         public void testNamedOpenBracketOnly() {
-            var parser = new Parser("#foo[");
+            var parser = new MaskParser("#foo[");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -251,7 +251,7 @@ public class TestParser {
 
         @Test
         public void testNamedOpenCloseBracket() {
-            var parser = new Parser("#foo[]");
+            var parser = new MaskParser("#foo[]");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -263,7 +263,7 @@ public class TestParser {
 
         @Test
         public void testNamedSinglePositionArg() {
-            var parser = new Parser("#foo[1]");
+            var parser = new MaskParser("#foo[1]");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -281,7 +281,7 @@ public class TestParser {
 
         @Test
         public void testNamedMultiPositionArg() {
-            var parser = new Parser("#foo[1,2,3]");
+            var parser = new MaskParser("#foo[1,2,3]");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());
@@ -301,7 +301,7 @@ public class TestParser {
 
         @Test
         public void testNamedSinglePositionArgNamed() {
-            var parser = new Parser("#foo[#bar]");
+            var parser = new MaskParser("#foo[#bar]");
             var tree = assertDoesNotThrow(parser::parse);
             var named = assertInstanceOf(Tree.Named.class, tree);
             assertEquals(0, named.start());

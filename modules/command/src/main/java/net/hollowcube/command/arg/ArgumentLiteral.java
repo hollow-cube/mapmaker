@@ -1,11 +1,11 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Locale;
 
 public class ArgumentLiteral extends Argument<String> {
@@ -25,11 +25,8 @@ public class ArgumentLiteral extends Argument<String> {
     }
 
     @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        int start = reader.pos();
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         var word = reader.readWord(WordType.ALPHANUMERIC).toLowerCase(Locale.ROOT);
-        if (literal.startsWith(word))
-            return new SuggestionResult.Success(start, word.length(), List.of(new SuggestionEntry(literal, null)));
-        return new SuggestionResult.Failure();
+        if (literal.startsWith(word)) suggestion.add(literal);
     }
 }

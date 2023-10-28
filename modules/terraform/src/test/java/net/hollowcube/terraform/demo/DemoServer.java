@@ -2,8 +2,10 @@ package net.hollowcube.terraform.demo;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -33,6 +35,9 @@ public class DemoServer {
 
     public static void main(String[] args) {
         var server = MinecraftServer.init();
+
+        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
+        MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
         var dimensionManager = MinecraftServer.getDimensionTypeManager();
         dimensionManager.addDimension(FULL_BRIGHT);

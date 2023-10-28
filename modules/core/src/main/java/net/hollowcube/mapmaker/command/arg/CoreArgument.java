@@ -1,8 +1,6 @@
 package net.hollowcube.mapmaker.command.arg;
 
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.SuggestionEntry;
-import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -14,8 +12,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public final class CoreArgument {
@@ -30,12 +26,10 @@ public final class CoreArgument {
                     var pd = new PlayerDataV2(UUID.randomUUID().toString(), raw, Component.text(raw));
                     return new Argument.ParseSuccess<>(pd);
                 },
-                /* Suggester */ (sender, reader, raw) -> {
-                    var results = new ArrayList<SuggestionEntry>();
+                /* Suggester */ (sender, reader, suggestion, raw) -> {
                     for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
-                        results.add(new SuggestionEntry(result.username(), null));
+                        suggestion.add(result.username());
                     }
-                    return new SuggestionResult.Success(reader.pos() - raw.length(), raw.length(), results);
                 }
         );
     }
@@ -43,12 +37,10 @@ public final class CoreArgument {
     public static @NotNull Argument<String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
         return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> new Argument.ParseSuccess<>(raw),
-                /* Suggester */ (sender, reader, raw) -> {
-                    var results = new ArrayList<SuggestionEntry>();
+                /* Suggester */ (sender, reader, suggestion, raw) -> {
                     for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
-                        results.add(new SuggestionEntry(result.username(), null));
+                        suggestion.add(result.username());
                     }
-                    return new SuggestionResult.Success(reader.pos() - raw.length(), raw.length(), results);
                 }
         );
     }
@@ -75,12 +67,12 @@ public final class CoreArgument {
                 /* Mapper */ (sender, raw) -> {
                     return new Argument.ParseSuccess<>(null);
                 },
-                /* Suggester */ (sender, reader, raw) -> {
+                /* Suggester */ (sender, reader, suggestion, raw) -> {
 //                    var results = new ArrayList<SuggestionEntry>();
 //                    for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
 //                        results.add(new SuggestionEntry(result.username(), null));
 //                    }
-                    return new SuggestionResult.Success(0, 0, List.of());
+//                    return new SuggestionResult.Success(0, 0, List.of());
                 }
         );
     }
@@ -120,10 +112,11 @@ public final class CoreArgument {
                     // Not a valid id so always fail
                     return new Argument.ParseFailure<>();
                 },
-                /* Suggester */ (sender, reader, raw) ->
+                /* Suggester */ (sender, reader, suggestion, raw) ->
                         // No suggestions, it is a published map so either the full id or published id.
                         // Either way not likely being typed out manually.
-                        new SuggestionResult.Success(0, 0, List.of())
+                {
+                }
         );
     }
 
@@ -136,12 +129,12 @@ public final class CoreArgument {
                 /* Mapper */ (sender, raw) -> {
                     return new Argument.ParseSuccess<>(null);
                 },
-                /* Suggester */ (sender, reader, raw) -> {
+                /* Suggester */ (sender, reader, suggestion, raw) -> {
 //                    var results = new ArrayList<SuggestionEntry>();
 //                    for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
 //                        results.add(new SuggestionEntry(result.username(), null));
 //                    }
-                    return new SuggestionResult.Success(0, 0, List.of());
+//                    return new SuggestionResult.Success(0, 0, List.of());
                 }
         );
     }

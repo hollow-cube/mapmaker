@@ -1,11 +1,10 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 final class ArgumentBool extends Argument<Boolean> {
     // This is case sensitive right now, which matches Brigadier, maybe should have an option to match case insensitively for server side only?
@@ -24,15 +23,13 @@ final class ArgumentBool extends Argument<Boolean> {
     }
 
     @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         var pos = reader.pos();
         var word = reader.readWord(WordType.ALPHANUMERIC);
         if ("true".startsWith(word)) {
-            return new SuggestionResult.Success(pos, word.length(), List.of(new SuggestionEntry("true", null)));
+            suggestion.add("true");
         } else if ("false".startsWith(word)) {
-            return new SuggestionResult.Success(pos, word.length(), List.of(new SuggestionEntry("false", null)));
-        } else {
-            return new SuggestionResult.Failure();
+            suggestion.add("false");
         }
     }
 

@@ -1,5 +1,5 @@
 # packer_bundle adds relevant rules for packer client and server data.
-def packer_bundle(name, srcs):
+def packer_bundle(name, srcs, visibility = None):
     native.genrule(
         name = "packer_%s_server" % name,
         srcs = srcs,
@@ -17,6 +17,7 @@ def packer_bundle(name, srcs):
         done
         """,
         tools = ["//bin/packer"],
+        visibility = visibility,
     )
 
     native.genrule(
@@ -28,4 +29,5 @@ def packer_bundle(name, srcs):
             cd build/packer/client && zip -rq ../../../$(OUTS) .
         """,
         tools = ["//bin/packer"],
+        visibility = visibility,
     )

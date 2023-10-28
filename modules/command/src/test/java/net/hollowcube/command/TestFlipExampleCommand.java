@@ -1,7 +1,6 @@
 package net.hollowcube.command;
 
 import net.hollowcube.command.arg.ArgumentAxis;
-import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.command.example.FlipCommand;
 import net.hollowcube.command.util.FakePlayer;
 import net.hollowcube.command.util.MockExecutor;
@@ -28,30 +27,26 @@ class TestFlipExampleCommand {
         @Test
         void emptyIsValid() {
             // Should be valid because the two args are both optional.
-            var result = manager.suggestions(new FakePlayer(), "flip");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(0, success.suggestions().size(), "expected 0, got: " + success.suggestions());
+            var suggestion = manager.suggestions(new FakePlayer(), "flip");
+            assertEquals(0, suggestion.getEntries().size(), "expected 0, got: " + suggestion.getEntries());
         }
 
         @Test
         void axisOnlySyntax() {
-            var result = manager.suggestions(new FakePlayer(), "flip ");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(3, success.suggestions().size(), "expected 3, got: " + success.suggestions()); // x | y | z
+            var suggestion = manager.suggestions(new FakePlayer(), "flip ");
+            assertEquals(3, suggestion.getEntries().size(), "expected 3, got: " + suggestion.getEntries()); // x | y | z
         }
 
         @Test
         void axisClipboardSyntax() {
-            var result = manager.suggestions(new FakePlayer(), "flip x clip");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(2, success.suggestions().size(), "expected 2, got: " + success.suggestions()); // x | y | z
+            var suggestion = manager.suggestions(new FakePlayer(), "flip x clip");
+            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries()); // x | y | z
         }
 
         @Test
         void clipboardOnlySyntax() {
-            var result = manager.suggestions(new FakePlayer(), "flip c");
-            var success = assertInstanceOf(SuggestionResult.Success.class, result);
-            assertEquals(2, success.suggestions().size(), "expected 2, got: " + success.suggestions()); // x | y | z
+            var suggestion = manager.suggestions(new FakePlayer(), "flip c");
+            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries()); // x | y | z
         }
 
     }

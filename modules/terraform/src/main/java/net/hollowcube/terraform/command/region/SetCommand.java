@@ -1,0 +1,50 @@
+package net.hollowcube.terraform.command.region;
+
+import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.command.util.TFArgument;
+import net.hollowcube.terraform.pattern.Pattern;
+import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public final class SetCommand extends Command {
+    private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
+
+    public SetCommand() {
+        super("set");
+
+        addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg, selectionArg);
+    }
+
+    public void handleSetRegionToPattern(@NotNull Player player, @NotNull CommandContext context) {
+        var selection = context.get(selectionArg);
+        var region = selection.region();
+        if (region == null) {
+            player.sendMessage(Component.translatable("terraform.generic.no_selection"));
+            return;
+        }
+
+        var pattern = context.get(patternArg);
+
+        // Execute the change
+        var session = LocalSession.forPlayer(player);
+        session.buildTask("set")
+                .metadata() //todo
+                .compute(world -> {
+                    var buffer = BlockBuffer.builder(region.min(), region.max());
+                    for (var pos : region) {
+                        //todo block entities
+                        buffer.set(pos, pattern.blockAt(world, pos).stateId());
+                    }
+                    return buffer.build();
+                })
+                .submit();
+
+    }
+}

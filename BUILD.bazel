@@ -28,6 +28,7 @@ packer_bundle(
     srcs = glob(include = [
         "resources/**/*",
     ]),
+    visibility = ["//visibility:public"],
 )
 
 java_binary(

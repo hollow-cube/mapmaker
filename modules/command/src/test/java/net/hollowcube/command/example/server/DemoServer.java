@@ -2,7 +2,6 @@ package net.hollowcube.command.example.server;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
-import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.command.example.FlipCommand;
 import net.hollowcube.command.example.ParentCommand;
 import net.minestom.server.MinecraftServer;
@@ -34,12 +33,12 @@ public class DemoServer {
                 (packet, player) -> commandManager.execute(player, packet.message()));
         packetListener.setListener(ClientTabCompletePacket.class, (packet, player) -> {
             var result = commandManager.suggestions(player, packet.text().substring(1));
-            if (result instanceof SuggestionResult.Success success) {
+            if (!result.isEmpty()) {
                 var response = new TabCompletePacket(
                         packet.transactionId(),
-                        success.start() + 1, // add one because of the '/' sent by the client
-                        success.length(),
-                        success.suggestions().stream()
+                        result.getStart() + 1, // add one because of the '/' sent by the client
+                        result.getLength(),
+                        result.getEntries().stream()
                                 .map(s -> new TabCompletePacket.Match(s.replacement(), s.tooltip()))
                                 .toList()
                 );

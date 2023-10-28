@@ -2,8 +2,7 @@ package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentInt;
-import net.hollowcube.command.arg.SuggestionEntry;
-import net.hollowcube.command.arg.SuggestionResult;
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
@@ -91,14 +90,13 @@ public class HelpCommand extends Command {
         return new Argument.ParseFailure<>();
     }
 
-    @NotNull SuggestionResult suggestCommand(@NotNull CommandSender sender, @NotNull StringReader rawReader, @NotNull String raw) {
+    void suggestCommand(@NotNull CommandSender sender, @NotNull StringReader rawReader, @NotNull Suggestion suggestion, @NotNull String raw) {
         // If there is no input, blanket suggest all commands
-        var suggestions = new ArrayList<SuggestionEntry>();
         if (raw.isEmpty()) {
             for (var key : commandManager.getCommands().keySet()) {
-                suggestions.add(new SuggestionEntry(key, null));
+                suggestion.add(key);
             }
-            return new SuggestionResult.Success(rawReader.pos(), 0, suggestions);
+            return;
         }
 
         // Otherwise, walk through the input to find a subcommand
@@ -115,17 +113,18 @@ public class HelpCommand extends Command {
                 // We are at the end, so we can suggest commands.
                 for (var entry : children.entrySet()) {
                     if (entry.getKey().startsWith(word)) {
-                        suggestions.add(new SuggestionEntry(entry.getKey(), null));
+                        suggestion.add(entry.getKey());
                     }
                 }
                 break;
             }
 
             // If we did not match a command, return no suggestions
-            if (command == null) return new SuggestionResult.Success(0, 0, List.of());
+            if (command == null) {
+                suggestion.clear();
+                return;
+            }
         }
-
-        return new SuggestionResult.Success(rawReader.pos() - word.length(), word.length(), suggestions);
     }
 
     void handleUnknownCommand(@NotNull CommandSender sender, @NotNull CommandContext context) {

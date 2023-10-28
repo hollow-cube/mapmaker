@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.demo;
 
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.arg.SuggestionResult;
+import net.hollowcube.command.suggestion.Suggestion;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.message.Messenger;
@@ -10,7 +10,6 @@ import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.play.TabCompletePacket;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -50,13 +49,13 @@ public class CommandRewriter {
     public void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
         Thread.startVirtualThread(() -> {
             final String text = packet.text();
-            final SuggestionResult.Success suggestion = getSuggestion(player, text);
-            if (suggestion != null) {
+            var suggestion = getSuggestion(player, text);
+            if (!suggestion.isEmpty()) {
                 player.sendPacket(new TabCompletePacket(
                         packet.transactionId(),
-                        suggestion.start() + 1,
-                        suggestion.length(),
-                        suggestion.suggestions().stream()
+                        suggestion.getStart() + 1,
+                        suggestion.getLength(),
+                        suggestion.getEntries().stream()
                                 .map(suggestionEntry -> new TabCompletePacket.Match(suggestionEntry.replacement(), suggestionEntry.tooltip()))
                                 .toList())
                 );
@@ -64,7 +63,7 @@ public class CommandRewriter {
         });
     }
 
-    private @Nullable SuggestionResult.Success getSuggestion(Player commandSender, String text) {
+    private @NotNull Suggestion getSuggestion(Player commandSender, String text) {
         if (text.startsWith("/")) {
             text = text.substring(1);
         }
@@ -76,9 +75,7 @@ public class CommandRewriter {
 //        }
 
         var commandManager = getCommandManagerForPlayer(commandSender);
-        if (commandManager.suggestions(commandSender, text) instanceof SuggestionResult.Success success)
-            return success;
-        return null;
+        return commandManager.suggestions(commandSender, text);
     }
 
     private @NotNull CommandManager getCommandManagerForPlayer(@NotNull Player player) {

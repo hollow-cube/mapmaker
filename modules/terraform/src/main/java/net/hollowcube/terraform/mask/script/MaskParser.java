@@ -6,10 +6,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Parser {
+public class MaskParser {
     private final Lexer lexer;
 
-    public Parser(@NotNull String source) {
+    public MaskParser(@NotNull String source) {
         this.lexer = new Lexer(source);
     }
 
