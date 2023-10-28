@@ -36,6 +36,7 @@ public class ControllerImpl implements Controller {
         var context = new RenderableContext(rootContext, inventory, newContextObjects);
         inventory.pushView(viewProvider.apply(context));
         if (inventory.getElement().isAnyLoading()) {
+            final long end1 = System.currentTimeMillis();
             Thread.startVirtualThread(() -> {
                 //todo this is a bit of a hack, should be revisited to make it event based (eg inventory notifies when its done loading)
 
@@ -50,6 +51,8 @@ public class ControllerImpl implements Controller {
 
                 inventory.runRedrawNow();
                 player.openInventory(inventory.getHandle());
+
+                final long end = System.currentTimeMillis();
             });
         } else {
             player.openInventory(inventory.getHandle());

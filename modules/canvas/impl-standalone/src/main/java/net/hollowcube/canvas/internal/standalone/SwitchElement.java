@@ -24,7 +24,7 @@ public class SwitchElement extends ContainerElement implements Switch, SpriteHol
 
     @Override
     public boolean isAnyLoading() {
-        return super.isAnyLoading() || children().get(state).isAnyLoading();
+        return this.getState() == State.LOADING || children().get(state).isAnyLoading();
     }
 
     @Override
