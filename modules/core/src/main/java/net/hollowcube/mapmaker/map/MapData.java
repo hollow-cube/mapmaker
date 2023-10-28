@@ -8,6 +8,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
@@ -183,6 +184,16 @@ public class MapData {
                 numberString.substring(3, 6) +
                 "-" +
                 numberString.substring(6);
+    }
+
+    public static long parsePublishedID(@NotNull String publishedId) {
+        class Holder {
+            static final Pattern ID_PATTERN = Pattern.compile("([0-9]{3})-([0-9]{3})-([0-9]{3})");
+        }
+
+        if (!Holder.ID_PATTERN.matcher(publishedId).matches())
+            throw new IllegalArgumentException("Invalid published ID format");
+        return Long.parseLong(publishedId.replace("-", ""));
     }
 
     public static class WithSlot extends MapData {

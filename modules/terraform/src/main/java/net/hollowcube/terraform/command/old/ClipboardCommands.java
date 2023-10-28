@@ -1,8 +1,8 @@
-package net.hollowcube.terraform.command;
+package net.hollowcube.terraform.command.old;
 
 import net.hollowcube.terraform.buffer.BlockBuffer;
-import net.hollowcube.terraform.command.helper.ArgumentSwizzle;
-import net.hollowcube.terraform.command.helper.ExtraArguments;
+import net.hollowcube.terraform.command.old.helper.ArgumentSwizzle;
+import net.hollowcube.terraform.command.old.helper.ExtraArguments;
 import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
 import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;

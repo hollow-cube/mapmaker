@@ -30,6 +30,11 @@ public class ArgumentOptional<T> extends Argument<T> {
     }
 
     @Override
+    public boolean isOptional() {
+        return true;
+    }
+
+    @Override
     public @NotNull ParseResult<T> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         if (!reader.canRead()) return new ParsePartial<>();
         return arg.parse(sender, reader);

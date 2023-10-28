@@ -1,0 +1,59 @@
+package net.hollowcube.terraform.demo;
+
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.HelpCommand;
+import net.hollowcube.terraform.Terraform;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.DimensionType;
+
+public class DemoServer {
+
+    public static final DimensionType FULL_BRIGHT = DimensionType.builder(NamespaceID.from("mapmaker:bright_dim"))
+            .ultrawarm(false)
+            .natural(true)
+            .piglinSafe(false)
+            .respawnAnchorSafe(false)
+            .bedSafe(true)
+            .raidCapable(true)
+            .skylightEnabled(true)
+            .ceilingEnabled(false)
+            .fixedTime(null)
+            .ambientLight(2.0f)
+            .height(384)
+            .minY(-64)
+            .logicalHeight(384)
+            .infiniburn(NamespaceID.from("minecraft:infiniburn_overworld"))
+            .build();
+
+    public static void main(String[] args) {
+        var server = MinecraftServer.init();
+
+        var dimensionManager = MinecraftServer.getDimensionTypeManager();
+        dimensionManager.addDimension(FULL_BRIGHT);
+
+        var instance = MinecraftServer.getInstanceManager().createInstanceContainer(FULL_BRIGHT);
+        instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
+
+        var commandManager = new CommandManager();
+        CommandRewriter.init(commandManager);
+        commandManager.register(new HelpCommand(commandManager));
+
+        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+        MinecraftServer.getGlobalEventHandler().addChild(terraformEventNode);
+        Terraform.init(commandManager, terraformEventNode, null);
+
+        MinecraftServer.getGlobalEventHandler()
+                .addListener(PlayerLoginEvent.class, event -> {
+                    event.setSpawningInstance(instance);
+                    event.getPlayer().setRespawnPoint(new Pos(0, 41, 0));
+                });
+
+        server.start("0.0.0.0", 25565);
+    }
+}

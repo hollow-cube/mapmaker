@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public abstract class Argument<T> {
 
@@ -30,6 +31,14 @@ public abstract class Argument<T> {
         return new ArgumentAxis(id);
     }
 
+    public static @NotNull ArgumentLiteral Literal(@NotNull String literal) {
+        return new ArgumentLiteral(literal);
+    }
+
+    public static @NotNull ArgumentRelativeVec3 RelativeVec3(@NotNull String id) {
+        return new ArgumentRelativeVec3(id);
+    }
+
     public static <T> @NotNull Argument<@Nullable T> Opt(@NotNull Argument<T> arg) {
         return new ArgumentOptional<>(arg);
     }
@@ -51,6 +60,7 @@ public abstract class Argument<T> {
 
     private final String id;
     private CommandExecutor errorHandler = null;
+    private Function<CommandSender, T> defaultProvider = null;
 
     // Documentation bits
     private String description = null;
@@ -100,6 +110,23 @@ public abstract class Argument<T> {
 
     public @Nullable String defaultName() {
         return defaultName;
+    }
+
+    public boolean isOptional() {
+        return defaultProvider != null;
+    }
+
+    public @NotNull Argument<T> defaultValue(@Nullable T value) {
+        return defaultValue(sender -> value);
+    }
+
+    public @NotNull Argument<T> defaultValue(@NotNull Function<CommandSender, T> provider) {
+        this.defaultProvider = provider;
+        return this;
+    }
+
+    public @Nullable T getDefaultValue(@NotNull CommandSender sender) {
+        return defaultProvider == null ? null : defaultProvider.apply(sender);
     }
 
     public <R> @NotNull Argument<R> map(@NotNull BiFunction<CommandSender, T, ParseResult<R>> mapper) {

@@ -1,7 +1,7 @@
-package net.hollowcube.terraform.command;
+package net.hollowcube.terraform.command.old;
 
 import net.hollowcube.terraform.buffer.BlockBuffer;
-import net.hollowcube.terraform.command.helper.ExtraArguments;
+import net.hollowcube.terraform.command.old.helper.ExtraArguments;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;

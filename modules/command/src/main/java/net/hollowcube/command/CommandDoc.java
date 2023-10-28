@@ -48,7 +48,7 @@ public record CommandDoc(
             builder.appendNewline().append(Component.text("ᴜѕᴀɢᴇ: /" + java.lang.String.join(" ", path)));
             if (doc.arguments != null && !doc.arguments.isEmpty()) {
                 for (var argument : doc.arguments) {
-                    builder.append(Component.text(" <" + argument.name + ">"));
+                    builder.append(Component.text(" " + (argument.optional ? "[" : "<") + argument.name + (argument.optional ? "]" : ">")));
                 }
                 builder.appendNewline().append(Component.text("ᴀʀɢᴜᴍᴇɴᴛѕ:"));
                 for (var argument : doc.arguments) {

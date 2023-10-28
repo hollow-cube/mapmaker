@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * communicate in any way. For example the dev server uses a singleton class as a bridge within the same process
  * however an alternative implementation may use a proxy, a REST API, asynchronous messaging, etc.
  */
-public interface MapToHubBridge {
+public interface MapToHubBridge extends ServerBridge {
 
     /**
      * Sends the given player back to a hub instance.

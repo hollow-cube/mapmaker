@@ -1,7 +1,7 @@
-package net.hollowcube.terraform.command;
+package net.hollowcube.terraform.command.old;
 
+import net.hollowcube.terraform.command.old.helper.TerraformCommand;
 import net.hollowcube.terraform.tool.ToolHandler;
-import net.hollowcube.terraform.command.helper.TerraformCommand;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;

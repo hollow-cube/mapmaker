@@ -58,31 +58,7 @@ public class MapListCommand extends Command {
             }
         }
 
-        showMapList(player, playerData);
-    }
-
-    private void showMapList(@NotNull Player player, @NotNull MapPlayerData playerData) {
         guiController.show(player, c -> new ListMapsView(c, playerData));
-
-//        for (var slot = 0; slot < PlayerDataV2.MAX_MAP_SLOTS; slot++) {
-//            var slotId = slot + 1;
-//            switch (playerData.getSlotState(slot)) {
-//                case FILLED -> {
-//                    var map = mapService.getMap(playerData.id(), Objects.requireNonNull(playerData.getMapSlot(slot)));
-//                    var message = Component.text("Slot " + slotId + " is '")
-//                            .append(Component.text(map.name())
-//                                    .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))
-//                                    .clickEvent(ClickEvent.copyToClipboard(map.id())))
-//                            .append(Component.text("' "))
-//                            .append(Component.text("(edit)")
-//                                    .hoverEvent(HoverEvent.showText(Component.text("Click to edit")))
-//                                    .clickEvent(ClickEvent.runCommand("/map edit " + map.id())));
-//                    player.sendMessage(message);
-//                }
-//                case EMPTY -> player.sendMessage("Slot " + slotId + " is empty.");
-//                case LOCKED -> player.sendMessage("Slot " + slotId + " is locked.");
-//            }
-//        }
     }
 
 }

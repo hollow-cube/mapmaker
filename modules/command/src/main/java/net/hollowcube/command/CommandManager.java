@@ -3,7 +3,6 @@ package net.hollowcube.command;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.ArgumentOptional;
 import net.hollowcube.command.arg.SuggestionResult;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
@@ -132,12 +131,14 @@ public final class CommandManager {
             }
 
             for (var arg : syntax.args()) {
-                // If we reached end of input, we can skip optional arguments.
-                if (!reader.canRead() && arg instanceof ArgumentOptional<?>) {
-                    continue;
-                }
 
                 context.pushArg(arg);
+                
+                // If we reached end of input, we can skip optional arguments.
+                if (!reader.canRead() && arg.isOptional()) {
+                    context.pushArgValue(arg.getDefaultValue(sender), null);
+                    continue;
+                }
 
                 var argMark = reader.mark();
                 switch (arg.parse(context.sender(), context.reader())) {
@@ -157,7 +158,7 @@ public final class CommandManager {
                         } else {
 
                             // If the argument is optional, we can try to skip it and continue to the next argument after it.
-                            if (arg instanceof ArgumentOptional<?>) {
+                            if (arg.isOptional()) {
                                 context.pushArgValue(null, null);
                                 reader.restore(argMark);
                                 continue;

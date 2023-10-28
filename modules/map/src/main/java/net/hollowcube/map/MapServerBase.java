@@ -20,6 +20,7 @@ import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
+import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
@@ -99,11 +100,14 @@ public abstract class MapServerBase implements MapServer {
 //        TerraformCompat.init(terraformEvents, condition);
         TerraformAxiom.init(terraformEvents, condition);
 
-        // Register commands
+        // Common commands
+        commandManager.register(new PlayCommand(mapService(), bridge()));
+
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
         commandManager.register(mapCommand);
 
+        // Map specific commands
         commandManager.register(new HubCommand(bridge));
 //        commandManager.register(new GiveCommand());
 //        commandManager.register(new SetSpawnCommand());
