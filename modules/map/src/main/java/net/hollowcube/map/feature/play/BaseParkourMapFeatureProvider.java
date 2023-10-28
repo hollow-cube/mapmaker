@@ -9,12 +9,10 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,12 +36,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var itemRegistry = world.itemRegistry();
         itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
-        itemRegistry.registerSilent(ResetToCheckpointItem.INSTANCE);
+        itemRegistry.registerSilent(ReturnToCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(EnterSpectatorModeItem.INSTANCE);
         itemRegistry.registerSilent(ExitSpectatorModeItem.INSTANCE);
         itemRegistry.registerSilent(ResetSaveStateItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
-        itemRegistry.registerSilent(ResetToSpectatorCheckpointItem.INSTANCE);
+        itemRegistry.registerSilent(ReturnToSpectatorCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(ToggleFlightItem.INSTANCE);
 
@@ -64,7 +62,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        inventory.setItemStack(1, itemRegistry.getItemStack(ResetToCheckpointItem.ID, null));
+        inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
         inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
         inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
@@ -86,7 +84,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        inventory.setItemStack(1, itemRegistry.getItemStack(ResetToSpectatorCheckpointItem.ID, null));
+        inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
         inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID, null));
         inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
         inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID, null));
