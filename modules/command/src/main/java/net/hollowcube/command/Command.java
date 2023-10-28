@@ -1,7 +1,6 @@
 package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.ArgumentOptional;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
@@ -79,6 +78,11 @@ public abstract class Command {
                     }
 
                     @Override
+                    public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
+                        return null;
+                    }
+
+                    @Override
                     public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
                         return null;
                     }
@@ -89,7 +93,7 @@ public abstract class Command {
             // Add the syntax args to the list
             for (var arg : syntax.args) {
                 simpleArgs.add(new CommandDoc.Argument(
-                        arg.id(), allOptional || arg instanceof ArgumentOptional<?>,
+                        arg.id(), allOptional || arg.isOptional(),
                         arg.defaultName(), arg.description()
                 ));
             }
@@ -146,7 +150,7 @@ public abstract class Command {
         public boolean allowsEmpty() {
             if (args.isEmpty()) return true;
             for (var arg : args) {
-                if (!(arg instanceof ArgumentOptional<?>)) return false;
+                if (!arg.isOptional()) return false;
             }
             return true;
         }

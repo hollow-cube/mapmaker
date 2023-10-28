@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
+import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -74,10 +75,15 @@ public abstract class HubServerBase implements HubServer {
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
 
+        // Common commands
+        commandManager.register(new PlayCommand(mapService(), bridge()));
+
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         commandManager.register(mapCommand);
 
-//        commandManager.register(new MapCommand(playerService(), mapService(), bridge(), permManager()));
+        // Hub specific commands
+        // ...
+
     }
 
     @Override

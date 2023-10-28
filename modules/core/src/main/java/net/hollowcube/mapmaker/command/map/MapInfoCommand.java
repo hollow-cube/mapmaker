@@ -25,7 +25,7 @@ public class MapInfoCommand extends Command {
     }
 
     private void handleMissingMapArg(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("map must be specified");
+        player.sendMessage("something went wrong");
     }
 
     private void showInfoAboutTarget(@NotNull Player player, @NotNull CommandContext context) {

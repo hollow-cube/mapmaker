@@ -1,6 +1,10 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.terraform.command.TerraformCommand;
+import net.hollowcube.terraform.command.selection.HPosCommand;
+import net.hollowcube.terraform.command.selection.PosCommand;
+import net.hollowcube.terraform.command.selection.SelCommand;
 import net.hollowcube.terraform.tool.ToolHandler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -21,6 +25,7 @@ public final class Terraform {
         }
 
         // Root/Debug
+        commandManager.register(new TerraformCommand());
 //        commandManager.register(new TerraformCommand(condition));
 
         /*
@@ -35,11 +40,10 @@ public final class Terraform {
          */
 
         // Selection
-//        commandManager.register(new SelectionCommands.Pos1(condition));
-//        commandManager.register(new SelectionCommands.Pos2(condition));
-//        commandManager.register(new SelectionCommands.HPos1(condition));
-//        commandManager.register(new SelectionCommands.HPos2(condition));
-//        commandManager.register(new SelectionCommands.Sel(condition));
+        commandManager.register(new PosCommand.Primary());
+        commandManager.register(new PosCommand.Secondary());
+        commandManager.register(new HPosCommand.Primary());
+        commandManager.register(new SelCommand());
 //        commandManager.register(new SelectionCommands.Outset(condition));
 //        commandManager.register(new SelectionCommands.Inset(condition));
 //        commandManager.register(new SelectionCommands.Chunk(condition));

@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.command;
+package net.hollowcube.terraform.command.old;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;

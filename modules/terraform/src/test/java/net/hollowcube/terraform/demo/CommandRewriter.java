@@ -1,8 +1,8 @@
-package net.hollowcube.mapmaker.dev.command;
+package net.hollowcube.terraform.demo;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.arg.SuggestionResult;
-import net.hollowcube.map.world.MapWorld;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
@@ -16,12 +16,21 @@ import java.util.UUID;
 
 public class CommandRewriter {
 
-    private final CommandManager hubCommandManager;
-    private final CommandManager mapCommandManager;
+    public static void init(@NotNull CommandManager commandManager) {
+        var rewriter = new CommandRewriter(commandManager);
 
-    public CommandRewriter(@NotNull CommandManager hubCommandManager, @NotNull CommandManager mapCommandManager) {
-        this.hubCommandManager = hubCommandManager;
-        this.mapCommandManager = mapCommandManager;
+        var connectionManager = MinecraftServer.getConnectionManager();
+        connectionManager.setPlayerProvider(rewriter::createPlayer);
+
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        packetListenerManager.setListener(ClientCommandChatPacket.class, rewriter::execCommand);
+        packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
+    }
+
+    private final CommandManager commandManager;
+
+    public CommandRewriter(@NotNull CommandManager commandManager) {
+        this.commandManager = commandManager;
     }
 
     public @NotNull Player createPlayer(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection connection) {
@@ -73,7 +82,7 @@ public class CommandRewriter {
     }
 
     private @NotNull CommandManager getCommandManagerForPlayer(@NotNull Player player) {
-        return MapWorld.forPlayerOptional(player) != null ? mapCommandManager : hubCommandManager;
+        return commandManager;
     }
 
     private class RewritingPlayer extends Player {

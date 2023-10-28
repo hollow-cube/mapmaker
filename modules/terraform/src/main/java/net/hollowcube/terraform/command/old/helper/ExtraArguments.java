@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.command.helper;
+package net.hollowcube.terraform.command.old.helper;
 
 import net.hollowcube.terraform.mask.script.MaskParseException;
 import net.hollowcube.terraform.mask.script.MaybeMask;

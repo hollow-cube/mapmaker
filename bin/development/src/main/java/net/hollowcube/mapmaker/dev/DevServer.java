@@ -16,11 +16,10 @@ import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.command.old.PlayCommand;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.dev.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -275,10 +274,6 @@ public class DevServer {
 //            hubCommandManager.register(debugCommand);
 //            mapCommandManager.register(debugCommand);
 
-            var playCommand = new PlayCommand(mapService, hubToMapBridge);
-//            hubCommandManager.register(playCommand);
-//            mapCommandManager.register(playCommand);
-
 //            var whereCommand = new WhereCommand();
 //            hubCommandManager.register(whereCommand);
 //            mapCommandManager.register(whereCommand);
@@ -287,9 +282,9 @@ public class DevServer {
 //            hubCommandManager.register(joinCommand);
 //            mapCommandManager.register(joinCommand);
 
-            var emojisCommand = new EmojisCommand();
-            hubCommandManager.register(emojisCommand);
-            mapCommandManager.register(emojisCommand);
+//            var emojisCommand = new EmojisCommand();
+//            hubCommandManager.register(emojisCommand);
+//            mapCommandManager.register(emojisCommand);
 
             // Register Request/Accept/Reject to hub and map command managers
 //            var requestCommand = new RequestCommand();
@@ -403,21 +398,42 @@ public class DevServer {
                 })
                 .build());
 
+        // If the message contains a map placeholder, and they are in a playing map, build the string to replace with
+        var sender = event.getPlayer();
+        if (event.getMessage().toLowerCase(Locale.ROOT).contains("[map]")) {
+            var world = MapWorld.forPlayerOptional(sender);
+            if (world == null || !world.map().isPublished()) {
+                sender.sendMessage(Component.text("You are not in a published map.")); //todo message
+                return;
+            }
+
+            var map = world.map();
+            baseMessage = baseMessage.replaceText(TextReplacementConfig.builder()
+                    .matchLiteral("[map]")
+                    //todo include more info + click to join
+                    //todo should also be a hypercube perk
+                    .replacement((match, unused) -> Component.text(map.name(), TextColor.color(0x15ADD3))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to join!")))
+                            .clickEvent(ClickEvent.runCommand("/play " + map.publishedId())))
+                    .build());
+
+        }
+
         var lowerMessage = event.getMessage().toLowerCase(Locale.ROOT);
-        for (var player : event.getRecipients()) {
+        for (var recipient : event.getRecipients()) {
             var message = baseMessage;
 
             // If they were tagged, send a ding effect and edit the message for them
-            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE);
+            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
             if (namePattern.matcher(lowerMessage).find()) {
-                if (!player.equals(event.getPlayer())) player.playSound(TAG_DING);
+                if (!recipient.equals(sender)) recipient.playSound(TAG_DING);
                 message = message.replaceText(TextReplacementConfig.builder()
                         .match(namePattern)
                         .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
                         .build());
             }
 
-            player.sendMessage(Component.translatable(
+            recipient.sendMessage(Component.translatable(
                     "chat.channel.global.default",
                     PlayerDataV2.fromPlayer(event.getPlayer()).displayName(),
                     message

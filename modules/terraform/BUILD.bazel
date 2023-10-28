@@ -28,6 +28,15 @@ java_binary(
     ],
 )
 
+java_binary(
+    name = "demo_server",
+    main_class = "net.hollowcube.terraform.demo.DemoServer",
+    runtime_deps = [
+        "//modules/terraform/src/test/java/net/hollowcube/terraform/demo",
+        "//modules/test",
+    ],
+)
+
 java_junit5_test(
     name = "terraform_test",
     srcs = glob(include = ["src/test/java/**/*.java"]),
