@@ -1,6 +1,7 @@
 package net.hollowcube.command.arg;
 
 import net.hollowcube.command.CommandExecutor;
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -42,21 +43,6 @@ public abstract class Argument<T> {
     public static <T> @NotNull Argument<@Nullable T> Opt(@NotNull Argument<T> arg) {
         return new ArgumentOptional<>(arg);
     }
-
-
-    // Instead of test, have parse and suggest
-    // suggestion just gets a reader as is now
-    // parse can return one of the following:
-    // - success + value T
-    // - fail (cannot possibly match)
-    // - partial match (can match, but not enough input yet. in this case we will provide suggestions)
-
-
-    // If we have the following syntax
-    // - opt[axis] opt[clipboard]
-    //
-    // During suggestion, if the input is "f" we will skip the axis because this cannot possibly match. We will then have the final arg and return suggestions for it.
-    // During execution, the same will happen. If the final entry is a partial result or fail, we can call its error handler
 
     private final String id;
     private CommandExecutor errorHandler = null;
@@ -139,7 +125,8 @@ public abstract class Argument<T> {
 
     public abstract @NotNull ParseResult<T> parse(@NotNull CommandSender sender, @NotNull StringReader reader);
 
-    public abstract @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader);
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
+    }
 
     public sealed interface ParseResult<T> permits ParseSuccess, ParseDeferredSuccess, ParseFailure, ParsePartial {
     }

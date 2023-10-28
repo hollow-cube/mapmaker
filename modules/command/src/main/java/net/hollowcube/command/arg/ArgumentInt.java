@@ -5,8 +5,6 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class ArgumentInt extends Argument<Integer> {
     private int min = Integer.MIN_VALUE;
     private int max = Integer.MAX_VALUE;
@@ -42,11 +40,5 @@ public class ArgumentInt extends Argument<Integer> {
             return new ParseFailure<>();
         }
         //todo
-    }
-
-    @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        //todo should suggest some numbers nearby the input I suppose
-        return new SuggestionResult.Success(0, 0, List.of());
     }
 }

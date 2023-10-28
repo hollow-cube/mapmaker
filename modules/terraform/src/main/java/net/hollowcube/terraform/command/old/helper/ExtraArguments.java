@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.old.helper;
 
 import net.hollowcube.terraform.mask.script.MaskParseException;
+import net.hollowcube.terraform.mask.script.MaskParser;
 import net.hollowcube.terraform.mask.script.MaybeMask;
-import net.hollowcube.terraform.mask.script.Parser;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -73,7 +73,7 @@ public final class ExtraArguments {
                 })
                 .map(str -> {
                     try {
-                        var tree = new Parser(str).parse();
+                        var tree = new MaskParser(str).parse();
                         return new MaybeMask.Mask(tree.toMask());
                     } catch (MaskParseException e) {
                         //todo really parse should never throw mask parse exception

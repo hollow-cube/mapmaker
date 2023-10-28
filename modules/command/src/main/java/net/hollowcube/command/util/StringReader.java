@@ -26,6 +26,10 @@ public final class StringReader {
         return pos;
     }
 
+    public int remaining() {
+        return string.length() - pos();
+    }
+
     public boolean canRead() {
         return pos < string.length();
     }

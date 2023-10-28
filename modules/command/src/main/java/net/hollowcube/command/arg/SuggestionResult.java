@@ -1,5 +1,6 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

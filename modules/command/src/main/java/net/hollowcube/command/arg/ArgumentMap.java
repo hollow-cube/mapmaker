@@ -1,5 +1,6 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ public class ArgumentMap<S, T> extends Argument<T> {
 
     @FunctionalInterface
     public interface Suggester<T> {
-        @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, T value);
+        void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion, T value);
     }
 
     private final Argument<S> source;
@@ -43,14 +44,16 @@ public class ArgumentMap<S, T> extends Argument<T> {
     }
 
     @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         // If no suggester is provided, immediately delegate to the source argument
-        if (suggester == null) return source.suggestions(sender, reader);
+        if (suggester == null) {
+            source.suggestions(sender, reader, suggestion);
+            return;
+        }
 
         // If there is a suggester, we need to parse the source first.
         var result = source.parse(sender, reader);
-        if (result instanceof Argument.ParseSuccess<S> success)
-            return suggester.suggestions(sender, reader, success.value());
-        return new SuggestionResult.Failure();
+        if (result instanceof Argument.ParseSuccess<S> success) //todo this will not work with deferred success
+            suggester.suggestions(sender, reader, suggestion, success.value());
     }
 }

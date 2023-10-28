@@ -3,7 +3,7 @@ package net.hollowcube.command;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.SuggestionResult;
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
@@ -65,14 +65,16 @@ public final class CommandManager {
      * @param input  The text input from the sender, assuming the cursor is at the end
      * @return Suggestions for the given input from the player
      */
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull String input) {
+    public @NotNull Suggestion suggestions(@NotNull CommandSender sender, @NotNull String input) {
         var context = expand(CommandContext.Pass.SUGGEST, sender, input);
-        if (context.isFailed()) return new SuggestionResult.Failure();
+        if (context.isFailed()) return Suggestion.EMPTY;
 
         var lastArg = context.resetToLastArg();
-        if (lastArg == null) return new SuggestionResult.Success(0, 0, List.of());
+        if (lastArg == null) return Suggestion.EMPTY;
 
-        return lastArg.suggestions(sender, context.reader());
+        var result = new Suggestion(context.reader().pos(), context.reader().remaining());
+        lastArg.suggestions(sender, context.reader(), result);
+        return result;
     }
 
     /**
@@ -133,7 +135,7 @@ public final class CommandManager {
             for (var arg : syntax.args()) {
 
                 context.pushArg(arg);
-                
+
                 // If we reached end of input, we can skip optional arguments.
                 if (!reader.canRead() && arg.isOptional()) {
                     context.pushArgValue(arg.getDefaultValue(sender), null);

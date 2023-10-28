@@ -1,11 +1,10 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class ArgumentAxis extends Argument<ArgumentAxis.Result> {
 
@@ -31,16 +30,11 @@ public class ArgumentAxis extends Argument<ArgumentAxis.Result> {
     }
 
     @Override
-    public @NotNull SuggestionResult suggestions(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        var pos = reader.pos();
+    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         var word = reader.readWord(WordType.ALPHANUMERIC);
-
-        var suggestions = new ArrayList<SuggestionEntry>();
-        if (!word.contains("x")) suggestions.add(new SuggestionEntry("x", null));
-        if (!word.contains("y")) suggestions.add(new SuggestionEntry("y", null));
-        if (!word.contains("z")) suggestions.add(new SuggestionEntry("z", null));
-
-        return new SuggestionResult.Success(pos + word.length(), 0, suggestions);
+        if (!word.contains("x")) suggestion.add("x");
+        if (!word.contains("y")) suggestion.add("y");
+        if (!word.contains("z")) suggestion.add("z");
     }
 
     @Override
