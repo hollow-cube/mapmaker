@@ -40,13 +40,13 @@ class TestFlipExampleCommand {
         @Test
         void axisClipboardSyntax() {
             var suggestion = manager.suggestions(new FakePlayer(), "flip x clip");
-            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries()); // x | y | z
+            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries());
         }
 
         @Test
         void clipboardOnlySyntax() {
             var suggestion = manager.suggestions(new FakePlayer(), "flip c");
-            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries()); // x | y | z
+            assertEquals(2, suggestion.getEntries().size(), "expected 2, got: " + suggestion.getEntries());
         }
 
     }
