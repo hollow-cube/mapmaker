@@ -134,13 +134,17 @@ public final class CommandManager {
 
             for (var arg : syntax.args()) {
 
-                context.pushArg(arg);
-
                 // If we reached end of input, we can skip optional arguments.
-                if (!reader.canRead() && arg.isOptional()) {
-                    context.pushArgValue(arg.getDefaultValue(sender), null);
+                if (!reader.canRead()) {
+                    if (arg.isOptional() && context.pass() == CommandContext.Pass.EXECUTE) {
+                        context.pushArg(arg);
+                        context.pushArgValue(arg.getDefaultValue(sender), null);
+                    }
+
                     continue;
                 }
+
+                context.pushArg(arg);
 
                 var argMark = reader.mark();
                 switch (arg.parse(context.sender(), context.reader())) {

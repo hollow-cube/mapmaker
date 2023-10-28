@@ -23,10 +23,7 @@ public class ArgumentWord extends Argument<String> {
     @Override
     public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.BRIGADIER);
-        if (values == null) {
-            if (word.isEmpty()) return new ParsePartial<>();
-            return new ParseSuccess<>(word);
-        }
+        if (values == null) return new ParseSuccess<>(word);
 
         boolean isPartial = false;
         for (var value : values) {

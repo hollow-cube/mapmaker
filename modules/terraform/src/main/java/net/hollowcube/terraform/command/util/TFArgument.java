@@ -40,7 +40,6 @@ public final class TFArgument {
                             suggestion.add(selectionName);
                         }
                     }
-
                 }
         ).defaultValue(sender -> {
             if (!(sender instanceof Player player)) return null;
@@ -49,14 +48,7 @@ public final class TFArgument {
     }
 
     public static @NotNull Argument<Pattern> Pattern(@NotNull String id) {
-        return Argument.Word(id).map(
-                /* Mapper */ (sender, raw) -> {
-                    return new Argument.ParseSuccess<>(null);
-                },
-                /* Suggestor */ (sender, reader, suggestion, raw) -> {
-
-                }
-        );
+        return new ArgumentPattern(id);
     }
 
     public static @NotNull Argument<Mask> Mask(@NotNull String id) {
