@@ -63,10 +63,10 @@ public abstract class MapServerBase implements MapServer {
 
     private final MapWorldManager mwm = new MapWorldManager(this);
     private final MapToHubBridge bridge;
+    private PlayerInviteService inviteService = new PlayerInviteServiceImpl(mwm);
 
     private MapMgmtConsumerImpl mapMgmtConsumer;
     private List<FeatureProvider> features;
-    private PlayerInviteService inviteService;
 
     private Controller guiController;
 
@@ -81,8 +81,6 @@ public abstract class MapServerBase implements MapServer {
 
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
-
-        inviteService = new PlayerInviteServiceImpl(mwm);
 
         var kafkaConfig = config.get(KafkaConfig.class);
         mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
