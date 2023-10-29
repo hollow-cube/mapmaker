@@ -96,7 +96,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
                 };
                 pageHandler = !action.async() ? handleFunc :
                         req -> Thread.startVirtualThread(() -> {
-                            setLoading(true);
+                            setState(State.LOADING);
                             handleFunc.accept(req);
                         });
             }
@@ -187,7 +187,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
                 pageCache.add(fetchPage, pageContainer);
 
                 // Redraw
-                setLoading(false);
+                setState(State.ACTIVE);
                 performSignal(SIG_PAGE_CHANGED, page);
                 context.markDirty();
             });
