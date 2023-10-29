@@ -16,38 +16,28 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public class QueryMaps extends View {
-    private @Outlet("switch") Switch switchElement;
-    private @ContextObject Query query;
+
+    private String query = null;
 
     private final Context context;
 
     public QueryMaps(@NotNull Context context) {
         super(context);
         this.context = context;
-
-        MinecraftServer.getPacketListenerManager().setListener(ClientNameItemPacket.class, (packet, player) -> query.query = packet.itemName());
-    }
-
-    @Action("toggle_search_mode")
-    private void toggleSearchMode(@NotNull Player player) {
-        query.isQueryMap = !query.isQueryMap;
-        player.sendMessage("IsQueryMap: " + query.isQueryMap);
-        switchElement.setOption( query.isQueryMap ? 1 : 0 );
     }
 
     @Action("confirmation")
     private void confirm_query() {
-        if (this.query.query.isBlank()) {
+        if (this.query == null || this.query.isBlank()) {
             popView();
         } else {
-            query.takeQuery = true;
-            var new_context = context.with(Map.of("query", query));
-            pushView(c -> new PlayMaps(new_context));
+            context.player().sendMessage("Query: " + this.query);
+            pushView(c -> new PlayMaps(context, this.query));
         }
     }
 
     @Signal(Element.SIG_ANVIL_INPUT)
     public void handleAnvilInput(@NotNull String input) {
-        this.query.query = input;
+        this.query = input;
     }
 }

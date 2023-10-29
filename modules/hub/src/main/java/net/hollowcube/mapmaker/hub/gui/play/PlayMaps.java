@@ -43,12 +43,18 @@ public class PlayMaps extends View {
 
     private SortPreset sortPreset = SortPreset.RECENT;
 
-    private @Nullable String searchQuery = null;
+    private final String searchQuery;
 
     public PlayMaps(@NotNull Context context) {
+        this(context, null);
+    }
+
+    public PlayMaps(@NotNull Context context, @Nullable String query) {
         super(context);
 
-        updateQuery(false);
+        this.searchQuery = query;
+        // Refresh if we have a query
+        updateQuery(this.searchQuery != null);
     }
 
     // Map type filter
@@ -111,7 +117,7 @@ public class PlayMaps extends View {
         updateQuery(true);
     }
 
-    @Action("map_query")
+    //@Action("map_query")
     private @NonBlocking void beginSearchQuery() {
         pushView(QueryMaps::new);
     }
@@ -134,7 +140,7 @@ public class PlayMaps extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, "");
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, searchQuery);
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
