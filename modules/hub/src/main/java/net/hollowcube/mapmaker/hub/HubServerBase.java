@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -79,6 +80,7 @@ public abstract class HubServerBase implements HubServer {
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
+        commandManager.register(new WhereCommand());
 
         commandManager.register(new RequestCommand(inviteService));
         commandManager.register(new RejectCommand(inviteService));
@@ -123,6 +125,7 @@ public abstract class HubServerBase implements HubServer {
         player.setPermissionLevel(4);
         player.teleport(HUB_SPAWN_POINT);
         player.sendActionBar(Component.empty());
+        player.setFlyingSpeed(0);
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
