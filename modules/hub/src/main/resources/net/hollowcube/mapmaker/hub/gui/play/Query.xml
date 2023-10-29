@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<component align="ltr">
+    <button id="map_query" translationKey="gui.play_maps.search_maps"
+            sprite="play_maps/search/filter/search_by_name"/>
+</component>

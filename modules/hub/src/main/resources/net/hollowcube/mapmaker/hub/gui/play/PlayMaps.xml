@@ -10,8 +10,7 @@
         <!-- TODO how to handle text written into the GUI? -->
         <spacer width="5"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
-        <button id="map_query" translationKey="gui.play_maps.search_by_name"
-                sprite="play_maps/search/filter/search_by_name"/>
+        <Query/>
     </box>
 
     <!-- Map list -->
