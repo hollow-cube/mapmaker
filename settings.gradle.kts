@@ -7,6 +7,7 @@ include(":tools:compile")
 include(":modules")
 // Standalone modules
 include(":modules:common")
+include(":modules:command")
 include(":modules:terraform")
 include(":modules:replay")
 include(":modules:chat")

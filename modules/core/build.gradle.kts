@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":modules:canvas:api"))
-    implementation(project(":modules:command"))
+    api(project(":modules:canvas:api"))
+    api(project(":modules:command"))
     implementation(project(":tools:compile"))
     annotationProcessor(project(":tools:compile"))
     testAnnotationProcessor(project(":tools:compile"))
@@ -17,6 +17,13 @@ dependencies {
     implementation(libs.polar)
 
     implementation("com.squareup.moshi:moshi:1.14.0")
+
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+
+    implementation("com.authzed.api:authzed:0.5.0")
+    implementation("io.grpc:grpc-protobuf:1.55.1")
+    implementation("io.grpc:grpc-stub:1.55.1")
+    implementation("com.google.protobuf:protobuf-java:3.24.4")
 }
 
 
