@@ -7,14 +7,12 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.gui.edit.SetMapName;
 import net.hollowcube.mapmaker.hub.gui.play.simple.*;
 import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -22,6 +20,7 @@ public class PlayMaps extends View {
 
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
+    private @ContextObject String query;
 
     private @Outlet("paging") Pagination pagination;
 
@@ -43,18 +42,10 @@ public class PlayMaps extends View {
 
     private SortPreset sortPreset = SortPreset.RECENT;
 
-    private final String searchQuery;
 
     public PlayMaps(@NotNull Context context) {
-        this(context, null);
-    }
-
-    public PlayMaps(@NotNull Context context, @Nullable String query) {
         super(context);
-
-        this.searchQuery = query;
-        // Refresh if we have a query
-        updateQuery(this.searchQuery != null);
+        updateQuery(false);
     }
 
     // Map type filter
@@ -140,7 +131,7 @@ public class PlayMaps extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, searchQuery);
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, query);
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
