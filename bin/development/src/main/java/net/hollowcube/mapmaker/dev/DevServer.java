@@ -20,6 +20,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
+import net.hollowcube.mapmaker.dev.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -277,31 +278,12 @@ public class DevServer {
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var debugCommand = new DebugCommand(playerService);
-//            hubCommandManager.register(debugCommand);
-//            mapCommandManager.register(debugCommand);
+            hubCommandManager.register(debugCommand);
+            mapCommandManager.register(debugCommand);
 
-//            var whereCommand = new WhereCommand();
-//            hubCommandManager.register(whereCommand);
-//            mapCommandManager.register(whereCommand);
-
-//            var joinCommand = new JoinCommand();
-//            hubCommandManager.register(joinCommand);
-//            mapCommandManager.register(joinCommand);
-
-//            var emojisCommand = new EmojisCommand();
-//            hubCommandManager.register(emojisCommand);
-//            mapCommandManager.register(emojisCommand);
-
-            // Register Request/Accept/Reject to hub and map command managers
-//            var requestCommand = new RequestCommand();
-//            var acceptCommand = new AcceptCommand();
-//            var rejectCommand = new RejectCommand();
-//            hubCommandManager.register(requestCommand);
-//            hubCommandManager.register(acceptCommand);
-//            hubCommandManager.register(rejectCommand);
-//            mapCommandManager.register(requestCommand);
-//            mapCommandManager.register(acceptCommand);
-//            mapCommandManager.register(rejectCommand);
+            var emojisCommand = new EmojisCommand();
+            hubCommandManager.register(emojisCommand);
+            mapCommandManager.register(emojisCommand);
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);

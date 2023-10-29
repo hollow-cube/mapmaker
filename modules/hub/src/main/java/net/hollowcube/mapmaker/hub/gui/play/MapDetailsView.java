@@ -198,29 +198,19 @@ public class MapDetailsView extends View {
 
         // MAG TAGS
 
-        Switch[] mapTagsSwitches = new Switch[]{mapTagsSwitch};
-
-        String tags = map.settings().getTagsString();
-
-        System.out.println(tags);
-
-        if (tags.equals("No Tags")) {
+        var tagsString = map.settings().getTagsString();
+        if (tagsString == null) {
             mapTagsSwitch.setOption(0);
             noMapTagsText.setText("No Tags");
         } else {
             mapTagsSwitch.setOption(1);
-            mapTagsText.setText(tags);
+            mapTagsText.setText(tagsString);
         }
 
         // MAP SETTINGS
 
-        Switch[] mapSettingsSwitches = new Switch[]{mapSettingsSwitch};
-
-        String settings = map.settings().getSettingsString();
-
-        System.out.println(settings);
-
-        if (settings.equals("No Settings")) {
+        var settings = map.settings().getSettingsString();
+        if (settings == null) {
             mapSettingsSwitch.setOption(0);
             noMapSettingsText.setText("No Settings");
         } else {

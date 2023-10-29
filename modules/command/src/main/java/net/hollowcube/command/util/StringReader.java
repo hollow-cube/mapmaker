@@ -65,4 +65,7 @@ public final class StringReader {
         }
     }
 
+    public String rawSince(int mark) {
+        return string.substring(mark, pos).trim();
+    }
 }

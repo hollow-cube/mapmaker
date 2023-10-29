@@ -19,7 +19,9 @@
     },
     "DENY": {
         "type": "sprite",
-        "ref": "icon/deny"
+        "ref": "icon/x_mark",
+        "no_shadow": true,
+        "trailing_space": 2
     },
     "INFO": {
         "type": "sprite",
@@ -36,12 +38,14 @@
     "PLUS": {
         "type": "sprite",
         "ref": "icon/plus",
-        "no_shadow": true
+        "no_shadow": true,
+        "trailing_space": 2
     },
     "MINUS": {
         "type": "sprite",
         "ref": "icon/minus",
-        "no_shadow": true
+        "no_shadow": true,
+        "trailing_space": 2
     },
     "CT1": {
         "type": "sprite",

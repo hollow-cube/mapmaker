@@ -54,7 +54,9 @@ public class MapSettings {
             this.name = name;
         }
 
-        public String displayName() { return this.name; }
+        public String displayName() {
+            return this.name;
+        }
 
         public SettingType getType() {
             return this.type;
@@ -146,14 +148,14 @@ public class MapSettings {
         return tagsLabel;
     }
 
-    public @NotNull String getTagsString() {
+    public @Nullable String getTagsString() {
         var tags = getTags();
         var initialTagCount = tags.size();
         var tagsLength = FontUtil.measureText(tags.toString());
         var maxLength = 139;
 
         if (tags.isEmpty()) {
-            return "No Tags";
+            return null;
         }
 
         while (tagsLength > maxLength) {
@@ -177,7 +179,7 @@ public class MapSettings {
         return stringBuilder.toString();
     }
 
-    public @NotNull String getSettingsString() {
+    public @Nullable String getSettingsString() {
         List<String> enabledSettings = new ArrayList<>();
 
         if (isOnlySprint()) {
@@ -197,7 +199,7 @@ public class MapSettings {
         }
 
         if (enabledSettings.isEmpty()) {
-            return "No Settings";
+            return null;
         }
 
         var initialSettingCount = enabledSettings.size();

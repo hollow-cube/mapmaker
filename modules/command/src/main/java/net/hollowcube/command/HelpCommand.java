@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.ArgumentInt;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +45,10 @@ public class HelpCommand extends Command {
     }
 
     private void showCommandList(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage("you have some commands available, in the future this will list them with pages and stuff.");
+        sender.sendMessage("available commands:");
+        for (var command : commandManager.getUniqueCommands()) {
+            sender.sendMessage(command.name());
+        }
     }
 
     private void showCommandHelp(@NotNull CommandSender sender, @NotNull CommandContext context) {
@@ -71,6 +75,7 @@ public class HelpCommand extends Command {
             if (reader.canRead()) {
                 // If there is more input, this must match a command exactly
                 command = children.get(word);
+                if (command == null) return new Argument.ParseFailure<>();
                 path.add(command.name());
             } else {
                 // We are at the end, so we must match a subcommand
@@ -128,7 +133,7 @@ public class HelpCommand extends Command {
     }
 
     void handleUnknownCommand(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage("INVALID YOU IDIOT");
+        sender.sendMessage(Component.translatable("command.help.unknown_command", Component.text(context.getRaw(commandArg))));
     }
 
 }

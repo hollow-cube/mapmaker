@@ -11,6 +11,7 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -64,6 +65,10 @@ public final class CommandManager {
 
     public @NotNull Map<String, Command> getCommands() {
         return Map.copyOf(commands);
+    }
+
+    public @NotNull List<Command> getUniqueCommands() {
+        return List.copyOf(uniqueCommands);
     }
 
     /**
@@ -152,7 +157,7 @@ public final class CommandManager {
                 if (!reader.canRead()) {
                     if (arg.isOptional() && context.pass() == CommandContext.Pass.EXECUTE) {
                         context.pushArg(arg);
-                        context.pushArgValue(arg.getDefaultValue(sender), null);
+                        context.pushArgValue("", arg.getDefaultValue(sender), null);
                     }
 
                     continue;
@@ -164,22 +169,23 @@ public final class CommandManager {
                 switch (arg.parse(context.sender(), context.reader())) {
                     case Argument.ParseSuccess<?> success -> {
                         // If we hit a success, store the value and continue to the next argument.
-                        context.pushArgValue(success.value(), null);
+                        context.pushArgValue(reader.rawSince(argMark), success.value(), null);
                     }
                     case Argument.ParseDeferredSuccess<?> deferred -> {
-                        context.pushArgValue(deferred.value(), null);
+                        context.pushArgValue(reader.rawSince(argMark), deferred.value(), null);
                     }
                     case Argument.ParseFailure<?> ignored -> {
 
                         var errorHandler = arg.errorHandler();
                         if (errorHandler != null) {
+                            context.pushArgValue(reader.rawSince(argMark), null, null);
                             // If there is an error handler, this syntax can be valid.
                             context.setOverrideExecutor(errorHandler);
                         } else {
 
                             // If the argument is optional, we can try to skip it and continue to the next argument after it.
                             if (arg.isOptional()) {
-                                context.pushArgValue(null, null);
+                                context.pushArgValue(reader.rawSince(argMark), null, null);
                                 reader.restore(argMark);
                                 continue;
                             }
@@ -191,7 +197,7 @@ public final class CommandManager {
                     }
                     case Argument.ParsePartial<?> ignored -> {
                         // If we hit a partial match, we must either be at the end or this is irrelevant (???)
-                        context.pushArgValue(null, arg.errorHandler());
+                        context.pushArgValue(reader.rawSince(argMark), null, arg.errorHandler());
                     }
                 }
             }
@@ -218,7 +224,7 @@ public final class CommandManager {
 
         var rootNodes = new IntArrayList();
         for (var command : uniqueCommands) {
-            rootNodes.addAll(buildCommandPacket(nodes, command));
+            rootNodes.addAll(buildCommandPacket(sender, nodes, command));
         }
 
         root.children = rootNodes.toIntArray();
@@ -226,8 +232,14 @@ public final class CommandManager {
         //todo caching should be as aggressive as possible. For example, a server only command should be cached globally here because it is always single syntax greedy string.
     }
 
-    private IntList buildCommandPacket(@NotNull List<DeclareCommandsPacket.Node> nodes, @NotNull Command command) {
+    private IntList buildCommandPacket(@Nullable CommandSender sender, @NotNull List<DeclareCommandsPacket.Node> nodes, @NotNull Command command) {
         var cmds = new IntArrayList();
+
+        // Eval the condition first to see if we should even continue
+        var commandCondition = command.condition();
+        if (commandCondition != null && commandCondition.test(sender, null) == CommandCondition.HIDE) {
+            return cmds;
+        }
 
         // Add the command node
         var node = new DeclareCommandsPacket.Node();
@@ -239,11 +251,10 @@ public final class CommandManager {
 
         // Add subcommands to the command node
         for (var subcommand : command.getUniqueSubcommands()) {
-            nodeChildren.addAll(buildCommandPacket(nodes, subcommand));
+            nodeChildren.addAll(buildCommandPacket(sender, nodes, subcommand));
         }
 
         // Add the greedy argument to the command node if there are any syntaxes or a default executor
-        //todo this plausibly executable call needs to take the command sender as an argument and eval all of the conditions
         if (command.isPlausiblyExecutable()) {
             var args = new DeclareCommandsPacket.Node();
             args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
@@ -258,6 +269,14 @@ public final class CommandManager {
         node.children = nodeChildren.toIntArray();
 
         // Add redirects for aliases to the command
+        for (var alias : command.aliases()) {
+            var redirect = new DeclareCommandsPacket.Node();
+            redirect.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, false, true, false);
+            redirect.name = alias.toLowerCase(Locale.ROOT);
+            redirect.redirectedNode = cmds.getInt(0);
+            cmds.add(nodes.size());
+            nodes.add(redirect);
+        }
         //todo
 
         return cmds;

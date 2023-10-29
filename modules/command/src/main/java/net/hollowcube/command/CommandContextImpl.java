@@ -20,6 +20,7 @@ final class CommandContextImpl implements CommandContext {
     private final List<Argument<?>> args = new ArrayList<>();
     private final List<Integer> argMarks = new ArrayList<>();
     private final List<Object> argValues = new ArrayList<>();
+    private final List<String> rawArgStrings = new ArrayList<>();
     private CommandExecutor overrideExecutor = null;
 
     public CommandContextImpl(@NotNull Pass pass, @NotNull CommandSender sender, @NotNull StringReader reader) {
@@ -40,7 +41,13 @@ final class CommandContextImpl implements CommandContext {
 
     @Override
     public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
-        return "todo_return_raw_args";
+        for (int i = 0; i < args.size(); i++) {
+            if (args.get(i).id().equals(arg.id())) {
+                return rawArgStrings.get(i);
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -88,12 +95,12 @@ final class CommandContextImpl implements CommandContext {
 
     // Mark/Restore
 
-    record Mark(int reader, int command, int syntaxes, int args, int argMarks, int argValeus,
+    record Mark(int reader, int command, int syntaxes, int args, int argMarks, int argValeus, int rawArgStrings,
                 CommandExecutor overrideExecutor) {
     }
 
     public @NotNull Mark mark() {
-        return new Mark(reader.mark(), commands.size(), syntaxes.size(), args.size(), argMarks.size(), argValues.size(), overrideExecutor);
+        return new Mark(reader.mark(), commands.size(), syntaxes.size(), args.size(), argMarks.size(), argValues.size(), rawArgStrings.size(), overrideExecutor);
     }
 
     public void restore(@NotNull Mark mark) {
@@ -112,6 +119,9 @@ final class CommandContextImpl implements CommandContext {
         }
         while (argValues.size() > mark.argValeus) {
             argValues.remove(argValues.size() - 1);
+        }
+        while (rawArgStrings.size() > mark.rawArgStrings) {
+            rawArgStrings.remove(rawArgStrings.size() - 1);
         }
         this.overrideExecutor = mark.overrideExecutor;
     }
@@ -145,8 +155,9 @@ final class CommandContextImpl implements CommandContext {
         return this.args.get(this.args.size() - 1);
     }
 
-    public void pushArgValue(@Nullable Object value, @Nullable CommandExecutor overrideExecutor) {
+    public void pushArgValue(@NotNull String raw, @Nullable Object value, @Nullable CommandExecutor overrideExecutor) {
         System.out.println("PUSH ARG VALUE: " + value);
+        this.rawArgStrings.add(raw);
         this.argValues.add(value);
         this.overrideExecutor = overrideExecutor;
     }
