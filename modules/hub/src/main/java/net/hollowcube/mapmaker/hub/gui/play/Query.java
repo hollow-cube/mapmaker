@@ -29,7 +29,7 @@ public class Query extends View {
         pushView(QueryMaps::new);
     }
 
-    /** Builds and updates the arg list of the query button. */
+    /** Updates the query button with your current query. */
     private @Blocking void updateLore() {
         if (query != null && !query.isBlank()) {
             searchButton.setArgs(Component.text(query, TextColor.color(0x30FBFF))); // Light Blue

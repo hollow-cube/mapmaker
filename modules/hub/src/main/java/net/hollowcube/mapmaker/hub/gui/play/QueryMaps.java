@@ -12,7 +12,6 @@ import java.util.Map;
 public class QueryMaps extends View {
 
     private String query = null;
-
     private final Context context;
 
     public QueryMaps(@NotNull Context context) {
@@ -25,7 +24,6 @@ public class QueryMaps extends View {
         if (this.query == null || this.query.isBlank()) {
             popView();
         } else {
-            context.player().sendMessage("Query: " + this.query);
             pushView(c -> new PlayMaps(context.with(Map.of("query", query))));
         }
     }
