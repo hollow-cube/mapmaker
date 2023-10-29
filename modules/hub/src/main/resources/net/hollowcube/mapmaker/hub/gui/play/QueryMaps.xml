@@ -1,10 +1,7 @@
 <component id="anvil" width="9" height="1" align="ltr">
     <box width="9" height="1" align="ltr">
         <label id="placeholder" width="1" translationKey="gui.generic.empty" sprite="diamond_pickaxe"/>
-        <switch id="switch">
-            <button id="toggle_search_mode" translationKey="author.todo" sprite="diamond_pickaxe"/>
-            <button id="toggle_search_mode" translationKey="map.todo" sprite="diamond_axe"/>
-        </switch>
+        <spacer width="1"/>
         <button id="confirmation" width="1" translationKey="confirm.todo" sprite="diamond_pickaxe"/>
     </box>
 </component>

@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.find_a_new_home.hotbar;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.gui.play.PlayMaps;
-import net.hollowcube.mapmaker.hub.gui.play.Query;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -77,7 +76,7 @@ public final class HubHotbar {
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         if (customModelData == PLAY_ITEM_CMD) {
-            server.newOpenGUI(player, c -> new PlayMaps(c.with(Map.of("query", new Query()))));
+            server.newOpenGUI(player, PlayMaps::new);
         } else if (customModelData == CREATE_ITEM_CMD) {
             server.newOpenGUI(player, CreateMaps::new);
         }
