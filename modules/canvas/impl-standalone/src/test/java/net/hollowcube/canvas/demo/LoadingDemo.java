@@ -16,14 +16,14 @@ public class LoadingDemo extends View {
     public LoadingDemo(@NotNull Context context) {
         super(context);
 
-        label.setLoading(true);
+        label.setState(State.LOADING);
         CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            label.setLoading(false);
+            label.setState(State.ACTIVE);
         }).exceptionally(FutureUtil::handleException);
     }
 

@@ -30,9 +30,6 @@ public interface Element extends ElementLike {
 
     @Nullable String id();
 
-    @Deprecated
-    void setLoading(boolean loading);
-
     @NotNull State getState();
 
     void setState(@NotNull State state);
