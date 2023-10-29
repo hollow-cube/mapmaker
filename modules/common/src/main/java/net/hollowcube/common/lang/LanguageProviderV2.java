@@ -70,7 +70,7 @@ public class LanguageProviderV2 {
         // Return from cache if present
         var cached = expandedComponentCache.get(translatable);
         if (cached != null) return cached;
-        logger.debug("Cache miss for {}", translatable.key());
+//        logger.debug("Cache miss for {}", translatable.key());
 
         // Fetch the partially parsed minimessage tree, or return the translatable if we dont know about it,
         // for example we need to pass through `chat.type.text` and others.
