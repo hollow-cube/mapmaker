@@ -35,11 +35,6 @@ public abstract class View implements Element {
     }
 
     @Override
-    public final void setLoading(boolean loading) {
-        delegate.setLoading(true);
-    }
-
-    @Override
     public final @NotNull State getState() {
         return delegate.getState();
     }

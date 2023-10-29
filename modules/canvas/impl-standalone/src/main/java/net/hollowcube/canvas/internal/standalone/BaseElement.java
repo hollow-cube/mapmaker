@@ -75,11 +75,6 @@ public abstract class BaseElement implements Element, Loadable {
     }
 
     @Override
-    public void setLoading(boolean loading) {
-        setState(loading ? State.LOADING : State.ACTIVE);
-    }
-
-    @Override
     public @NotNull State getState() {
         return state;
     }
