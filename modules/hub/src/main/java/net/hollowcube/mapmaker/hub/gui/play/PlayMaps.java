@@ -108,11 +108,6 @@ public class PlayMaps extends View {
         updateQuery(true);
     }
 
-    //@Action("map_query")
-    private @NonBlocking void beginSearchQuery() {
-        pushView(QueryMaps::new);
-    }
-
     private void updateQuery(boolean refresh) {
         parkourToggle.setSelected(parkour);
         buildingToggle.setSelected(building);
