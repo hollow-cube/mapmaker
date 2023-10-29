@@ -2,7 +2,11 @@ package net.hollowcube.terraform.task;
 
 import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.mask.Mask;
+import net.hollowcube.terraform.pattern.Pattern;
+import net.hollowcube.terraform.selection.region.Region;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A ComputeFunc is the lowest level primitive responsible for the compute phase of a {@link Task}.
@@ -11,6 +15,30 @@ import org.jetbrains.annotations.NotNull;
  */
 @FunctionalInterface
 public interface ComputeFunc {
+
+    static @NotNull ComputeFunc set(@NotNull Region region, @NotNull Pattern pattern) {
+        return world -> {
+            var buffer = BlockBuffer.builder(region.min(), region.max());
+            for (var pos : region) {
+                //todo block entities
+                buffer.set(pos, pattern.blockAt(world, pos).stateId());
+            }
+            return buffer.build();
+        };
+    }
+
+    static @NotNull ComputeFunc replace(@NotNull Region region, @Nullable Mask mask, @NotNull Pattern pattern) {
+        return world -> {
+            var buffer = BlockBuffer.builder(region.min(), region.max());
+            for (var pos : region) {
+                var block = world.getBlock(pos);
+                if (!mask.test(world, pos, block)) continue;
+                buffer.set(pos, pattern.blockAt(world, pos).stateId());
+                //todo block entities
+            }
+            return buffer.build();
+        };
+    }
 
     @NotNull BlockBuffer exec(@NotNull WorldView world);
 

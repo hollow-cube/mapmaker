@@ -16,19 +16,33 @@ public class TaskImpl implements Task {
 
     private final String id = generateId();
     private final String tag;
+    private final boolean dry;
+    private final boolean ephemeral;
 
     private State state = State.INIT;
 
     private ComputeFunc computeFunc;
     private BlockBuffer buffer; // Set after compute
+    private PostApplyFunc postApplyFunc;
 
-    public TaskImpl(@NotNull LocalSession session, @NotNull String tag, @Nullable ComputeFunc computeFunc, @Nullable BlockBuffer buffer) {
+    public TaskImpl(
+            @NotNull LocalSession session,
+            @NotNull String tag,
+            boolean dry,
+            boolean ephemeral,
+            @Nullable ComputeFunc computeFunc,
+            @Nullable BlockBuffer buffer,
+            @Nullable PostApplyFunc postApplyFunc
+    ) {
         this.session = session;
 
         this.tag = tag;
+        this.dry = dry;
+        this.ephemeral = ephemeral;
 
         this.computeFunc = computeFunc;
         this.buffer = buffer;
+        this.postApplyFunc = postApplyFunc;
     }
 
     @Override
@@ -44,6 +58,15 @@ public class TaskImpl implements Task {
     @Override
     public @NotNull String tag() {
         return tag;
+    }
+
+    @Override
+    public boolean isDryRun() {
+        return dry;
+    }
+
+    public boolean isEphemeral() {
+        return ephemeral;
     }
 
     @Override
@@ -71,6 +94,10 @@ public class TaskImpl implements Task {
 
     public void setBuffer(@NotNull BlockBuffer buffer) {
         this.buffer = buffer;
+    }
+
+    public @Nullable PostApplyFunc postApplyFunc() {
+        return postApplyFunc;
     }
 
     @Override

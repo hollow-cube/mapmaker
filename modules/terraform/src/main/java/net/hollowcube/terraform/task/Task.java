@@ -39,6 +39,8 @@ public interface Task {
      */
     @NotNull String tag();
 
+    boolean isDryRun();
+
     @NotNull State state();
 
     /**
@@ -58,8 +60,12 @@ public interface Task {
         private final LocalSession session;
         private final String tag;
 
+        private boolean dry = false;
+        private boolean ephemeral = false;
+
         private ComputeFunc computeFunc = null;
         private BlockBuffer buffer = null;
+        private PostApplyFunc postApplyFunc = null;
 
         @ApiStatus.Internal
         public Builder(@NotNull LocalSession session, @NotNull String tag) {
@@ -82,12 +88,27 @@ public interface Task {
             return this;
         }
 
+        public @NotNull Builder post(@NotNull PostApplyFunc postApplyFunc) {
+            this.postApplyFunc = postApplyFunc;
+            return this;
+        }
+
+        public @NotNull Builder ephemeral() {
+            this.ephemeral = true;
+            return this;
+        }
+
+        public @NotNull Task dryRun() {
+            this.dry = true;
+            return submit();
+        }
+
         public @NotNull Task submit() {
             Check.argCondition(computeFunc == null && buffer == null, "Must provide either a compute function or a buffer");
             Check.argCondition(computeFunc != null && buffer != null, "Cannot provide both a compute function and a buffer");
             var terraform = (TerraformImpl) session.terraform();
 
-            var task = new TaskImpl(session, tag, computeFunc, buffer);
+            var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
             terraform.submitTask(task);
             return task;
         }

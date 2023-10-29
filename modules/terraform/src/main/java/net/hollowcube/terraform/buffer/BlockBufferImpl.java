@@ -20,4 +20,12 @@ final class BlockBufferImpl implements BlockBuffer {
             consumer.accept(x, y, z, palette);
         });
     }
+
+    @Override
+    public long sizeBytes() {
+        long total = 0;
+        for (var palette : sectionData.values())
+            total += palette.sizeBytes();
+        return (int) total;
+    }
 }

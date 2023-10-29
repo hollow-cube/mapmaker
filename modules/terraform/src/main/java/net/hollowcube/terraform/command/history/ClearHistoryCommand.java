@@ -1,0 +1,21 @@
+package net.hollowcube.terraform.command.history;
+
+import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.terraform.session.LocalSession;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class ClearHistoryCommand extends Command {
+    public ClearHistoryCommand() {
+        super("clearhistory");
+
+        addSyntax(playerOnly(this::handleClearHistory));
+    }
+
+    private void handleClearHistory(@NotNull Player player, @NotNull CommandContext context) {
+        var session = LocalSession.forPlayer(player);
+        session.clearHistory();
+        player.sendMessage("history cleared");
+    }
+}

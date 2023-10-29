@@ -7,9 +7,11 @@ import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
@@ -57,6 +59,10 @@ public class DemoServer {
                 .addListener(PlayerLoginEvent.class, event -> {
                     event.setSpawningInstance(instance);
                     event.getPlayer().setRespawnPoint(new Pos(0, 41, 0));
+                })
+                .addListener(PlayerSpawnEvent.class, event -> {
+                    var player = event.getPlayer();
+                    player.setGameMode(GameMode.CREATIVE);
                 });
 
         server.start("0.0.0.0", 25565);

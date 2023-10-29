@@ -2,7 +2,6 @@ package net.hollowcube.terraform.action;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.terraform.action.edit.WorldView;
-import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.schem.Schematic;
@@ -106,15 +105,15 @@ public class ActionBuilder {
             i++;
         }
 
-        var updates = i;
-        //todo chunk batch should lock the chunk to do its work, the advantage is that we process different chunks in different threads.
-        var redoSchematic = applyBatch.getSchematic();
-        applyBatch.apply(realInstance)
-                .thenAccept(undoSchematic -> {
-                    session.remember(Change.of(undoSchematic, redoSchematic));
-                    callback.accept(new ActionSummary(updates));
-                })
-                .exceptionally(FutureUtil::handleException);
+//        var updates = i;
+//        //todo chunk batch should lock the chunk to do its work, the advantage is that we process different chunks in different threads.
+//        var redoSchematic = applyBatch.getSchematic();
+//        applyBatch.apply(realInstance)
+//                .thenAccept(undoSchematic -> {
+//                    session.remember(Change.of(undoSchematic, redoSchematic));
+//                    callback.accept(new ActionSummary(updates));
+//                })
+//                .exceptionally(FutureUtil::handleException);
     }
 
 }
