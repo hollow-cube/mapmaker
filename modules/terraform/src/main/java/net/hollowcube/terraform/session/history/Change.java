@@ -1,30 +1,35 @@
 package net.hollowcube.terraform.session.history;
 
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicReader;
+import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-
-import java.io.ByteArrayInputStream;
 
 public interface Change {
 
-    static @NotNull Change of(@NotNull Schematic undo, @NotNull Schematic redo) {
-        return new SchematicChange(undo, redo);
-    }
+    static @NotNull Change of(@NotNull BlockBuffer undo, @NotNull BlockBuffer redo) {
+        return new Change() {
+            @Override
+            public void undo(@NotNull LocalSession session) {
+                session.buildTask("undo")
+                        .metadata() //todo
+                        .buffer(undo)
+                        .ephemeral()
+                        .submit();
+            }
 
-    static @NotNull Change fromNBT(@NotNull NBTCompound nbt) {
-        return new SchematicChange(
-                SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("undo").copyArray())),
-                SchematicReader.read(new ByteArrayInputStream(nbt.getByteArray("redo").copyArray()))
-        );
+            @Override
+            public void redo(@NotNull LocalSession session) {
+                session.buildTask("redo")
+                        .metadata()
+                        .buffer(redo)
+                        .ephemeral()
+                        .submit();
+            }
+        };
     }
 
     void undo(@NotNull LocalSession session);
 
     void redo(@NotNull LocalSession session);
-
-    @NotNull NBTCompound toNBT();
 
 }

@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Pattern {
 
+    static @NotNull Pattern block(@NotNull Block block) {
+        return (world, blockPosition) -> block;
+    }
+
     @NotNull Block blockAt(@NotNull WorldView world, @NotNull Point blockPosition);
 
 }

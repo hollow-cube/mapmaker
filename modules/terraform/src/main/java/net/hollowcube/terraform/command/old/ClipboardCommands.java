@@ -3,9 +3,7 @@ package net.hollowcube.terraform.command.old;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.old.helper.ArgumentSwizzle;
 import net.hollowcube.terraform.command.old.helper.ExtraArguments;
-import net.hollowcube.terraform.give_me_new_home.instance.SchemBlockBatch;
 import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -18,7 +16,6 @@ import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.MathUtils;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -26,94 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ClipboardCommands {
     private ClipboardCommands() {
-    }
-
-    public static final class Copy extends Command {
-
-        public Copy(@Nullable CommandCondition condition) {
-            super("copy", "tf:copy");
-            setCondition(condition); //todo support from and to
-
-            setDefaultExecutor(this::handleCopySelection);
-        }
-
-        private void handleCopySelection(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("generic.players_only"));
-                return;
-            }
-
-            // Determine the target selection
-            //todo should have arg for this
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(Selection.DEFAULT);
-
-            var region = selection.region();
-            if (region == null) {
-                sender.sendMessage(Component.translatable("command.terraform.no_selection"));
-                return;
-            }
-
-            // Determine the target clipboard
-            //todo should have arg for this
-            var playerSession = PlayerSession.forPlayer(player);
-            var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-
-            session.action()
-                    .at(player.getPosition())
-                    .from(region)
-                    .toSchematic(schem -> {
-                        clipboard.setData(schem);
-                        sender.sendMessage(Component.translatable("command.terraform.copy.success"));
-                    });
-        }
-    }
-
-    public static final class Cut extends Command {
-        private final Argument<String> selectionArg = ExtraArguments.Selection("selection");
-
-        public Cut(@Nullable CommandCondition condition) {
-            super("cut", "tf:cut");
-            setCondition(condition);
-
-            setDefaultExecutor(this::handleCutSelection);
-            addSyntax(this::handleCutSelection, selectionArg);
-        }
-
-        private void handleCutSelection(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.translatable("generic.players_only"));
-                return;
-            }
-
-            // Determine the target selection
-            //todo should have arg for this
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(Selection.DEFAULT);
-
-            var region = selection.region();
-            if (region == null) {
-                sender.sendMessage(Component.translatable("command.terraform.no_selection"));
-                return;
-            }
-
-            // Determine the target clipboard
-            //todo should have arg for this
-            var playerSession = PlayerSession.forPlayer(player);
-            var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-
-            session.action()
-                    .at(player.getPosition())
-                    .from(region)
-                    .toSchematic(schem -> {
-                        clipboard.setData(schem);
-                        sender.sendMessage(Component.translatable("command.terraform.copy.success"));
-                    });
-
-            var batch = new SchemBlockBatch();
-            region.forEach(point -> batch.setBlock(point, Block.AIR));
-            batch.apply(player.getInstance()).join(); //todo do not join, use other systems, etc
-        }
     }
 
     public static final class Paste extends Command {
@@ -220,7 +129,7 @@ public final class ClipboardCommands {
                 }
 
                 // Clear the clipboard
-                clipboard.setData(null);
+                clipboard.clear();
             }
 
             private void showErrorTodo(@NotNull CommandSender sender, @NotNull CommandContext context) {

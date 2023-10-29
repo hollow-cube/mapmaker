@@ -3,11 +3,11 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.task.ComputeFunc;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -36,13 +36,9 @@ public final class SetCommand extends Command {
         var session = LocalSession.forPlayer(player);
         session.buildTask("set")
                 .metadata() //todo
-                .compute(world -> {
-                    var buffer = BlockBuffer.builder(region.min(), region.max());
-                    for (var pos : region) {
-                        //todo block entities
-                        buffer.set(pos, pattern.blockAt(world, pos).stateId());
-                    }
-                    return buffer.build();
+                .compute(ComputeFunc.set(region, pattern))
+                .post(result -> {
+                    player.sendMessage("finished setting " + result.blocksChanged() + " blocks");
                 })
                 .submit();
 

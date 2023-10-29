@@ -36,6 +36,9 @@ java_binary(
     srcs = glob(include = [
         "bin/development/src/main/java/**/*.java",
     ]),
+    jvm_flags = [
+        "-javaagent:net.hollowcube.terraform.util.agent.JavaAgent",
+    ],
     main_class = "net.hollowcube.mapmaker.dev.DevServer",
     resources = glob(include = [
         "bin/development/src/main/resources/**/*",

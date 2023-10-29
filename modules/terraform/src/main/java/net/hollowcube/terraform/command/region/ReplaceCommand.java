@@ -7,6 +7,8 @@ import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.task.ComputeFunc;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -33,24 +35,11 @@ public final class ReplaceCommand extends Command {
             return;
         }
 
-        player.sendMessage("mask: " + mask);
-        player.sendMessage("pattern: " + pattern);
-        player.sendMessage("selection: " + selection);
-
         // Execute the change
-//        var session = LocalSession.forPlayer(player);
-//        session.buildTask("replace")
-//                .metadata() //todo
-//                .compute(world -> {
-//                    var buffer = BlockBuffer.builder(region.min(), region.max());
-//                    for (var pos : region) {
-//                        var block = world.getBlock(pos);
-//                        if (!mask.test(world, pos, block)) continue;
-//                        buffer.set(pos, pattern.blockAt(world, pos).stateId());
-//                        //todo block entities
-//                    }
-//                    return buffer.build();
-//                })
-//                .submit();
+        var session = LocalSession.forPlayer(player);
+        session.buildTask("replace")
+                .metadata() //todo
+                .compute(ComputeFunc.replace(region, mask, pattern))
+                .submit();
     }
 }

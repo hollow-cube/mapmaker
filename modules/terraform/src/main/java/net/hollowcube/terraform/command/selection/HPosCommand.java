@@ -58,7 +58,7 @@ public sealed abstract class HPosCommand extends Command permits HPosCommand.Pri
 
     public static final class Secondary extends HPosCommand {
         public Secondary() {
-            super("pos2");
+            super("hpos2");
         }
 
         @Override

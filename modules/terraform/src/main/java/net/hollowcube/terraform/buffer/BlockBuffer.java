@@ -1,6 +1,10 @@
 package net.hollowcube.terraform.buffer;
 
+import net.hollowcube.terraform.math.CoordinateUtil;
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,6 +38,26 @@ public sealed interface BlockBuffer permits BlockBufferImpl {
 
     void forEachSection(@NotNull SectionConsumer consumer);
 
+    long sizeBytes();
+
+    default @NotNull Schematic toSchematic(@NotNull Point offset) {
+        final var builder = new SchematicBuilder();
+        builder.setOffset(CoordinateUtil.floor(offset));
+        forEachSection((cx, cy, cz, palette) -> {
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        var stateId = palette.get(x, y, z);
+                        if (stateId != Palette.UNSET) {
+                            var block = Block.fromStateId((short) stateId);
+                            builder.addBlock(cx * 16 + x, cy * 16 + y, cz * 16 + z, block);
+                        }
+                    }
+                }
+            }
+        });
+        return builder.build();
+    }
 
     @FunctionalInterface
     interface SectionConsumer {

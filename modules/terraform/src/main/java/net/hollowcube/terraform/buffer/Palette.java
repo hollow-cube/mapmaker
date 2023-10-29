@@ -7,4 +7,6 @@ public sealed interface Palette permits NaivePalette {
 
     void set(int x, int y, int z, int value);
 
+    long sizeBytes();
+
 }

@@ -2,6 +2,12 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.command.TerraformCommand;
+import net.hollowcube.terraform.command.clipboard.CopyCommand;
+import net.hollowcube.terraform.command.clipboard.CutCommand;
+import net.hollowcube.terraform.command.clipboard.PasteCommand;
+import net.hollowcube.terraform.command.history.ClearHistoryCommand;
+import net.hollowcube.terraform.command.history.RedoCommand;
+import net.hollowcube.terraform.command.history.UndoCommand;
 import net.hollowcube.terraform.command.region.ReplaceCommand;
 import net.hollowcube.terraform.command.region.SetCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
@@ -28,23 +34,12 @@ public final class Terraform {
 
         // Root/Debug
         commandManager.register(new TerraformCommand());
-//        commandManager.register(new TerraformCommand(condition));
-
-        /*
-
-        For actions:
-        - pipeline of actions
-        - move 10 on x: `with(world) -> set(region, air) -> set(transform(+10 on x, region), region(world)) -> apply(world)`
-        - set region to stone: `with(world) -> set(region, stone) -> apply(world)`
-
-
-
-         */
 
         // Selection
         commandManager.register(new PosCommand.Primary());
         commandManager.register(new PosCommand.Secondary());
         commandManager.register(new HPosCommand.Primary());
+        commandManager.register(new HPosCommand.Secondary());
         commandManager.register(new SelCommand());
 //        commandManager.register(new SelectionCommands.Outset(condition));
 //        commandManager.register(new SelectionCommands.Inset(condition));
@@ -56,14 +51,14 @@ public final class Terraform {
         commandManager.register(new ReplaceCommand());
 
         // History
-//        commandManager.register(new HistoryCommands.Undo(condition));
-//        commandManager.register(new HistoryCommands.Redo(condition));
-//        commandManager.register(new HistoryCommands.ClearHistory(condition));
+        commandManager.register(new UndoCommand());
+        commandManager.register(new RedoCommand());
+        commandManager.register(new ClearHistoryCommand());
 
         // Clipboard
-//        commandManager.register(new ClipboardCommands.Copy(condition));
-//        commandManager.register(new ClipboardCommands.Cut(condition));
-//        commandManager.register(new ClipboardCommands.Paste(condition));
+        commandManager.register(new CopyCommand());
+        commandManager.register(new CutCommand());
+        commandManager.register(new PasteCommand());
 //        commandManager.register(new ClipboardCommands.ClipboardCommand(condition));
 
         // Schematic
