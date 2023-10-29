@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":modules:canvas:api"))
+    implementation(project(":modules:command"))
     implementation(project(":tools:compile"))
     annotationProcessor(project(":tools:compile"))
     testAnnotationProcessor(project(":tools:compile"))
