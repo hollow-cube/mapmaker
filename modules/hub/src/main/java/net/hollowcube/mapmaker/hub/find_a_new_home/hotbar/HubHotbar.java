@@ -76,7 +76,7 @@ public final class HubHotbar {
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = HubWorld.fromInstance(player.getInstance()).server();
         if (customModelData == PLAY_ITEM_CMD) {
-            server.newOpenGUI(player, PlayMaps::new);
+            server.newOpenGUI(player, context -> new PlayMaps(context.with(Map.of("query", ""))));
         } else if (customModelData == CREATE_ITEM_CMD) {
             server.newOpenGUI(player, CreateMaps::new);
         }

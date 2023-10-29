@@ -4,29 +4,21 @@ import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class Query extends View {
+    private @ContextObject String query;
     private @Outlet("map_query") Label searchButton;
 
-    private final String query;
-
     public Query(@NotNull Context context) {
-        this(context, null);
-    }
-
-    public Query(@NotNull Context context, @Nullable String query) {
         super(context);
-        this.query = query;
 
         searchButton.setState(Element.State.LOADING);
         async(this::updateLore);
@@ -37,16 +29,12 @@ public class Query extends View {
         pushView(QueryMaps::new);
     }
 
-    /** Builds and updates the arg list of the map icon. */
+    /** Builds and updates the arg list of the query button. */
     private @Blocking void updateLore() {
-
-        if (query != null) {
-            searchButton.setArgs(LanguageProviderV2.translateMulti("gui.play_maps.search_maps.current_query.lore", List.of(Component.text(query))));
+        if (query != null && !query.isBlank()) {
+            searchButton.setArgs(Component.text(query, TextColor.color(0x30FBFF))); // Light Blue
         } else {
-            searchButton.setArgs(List.of(
-                    LanguageProviderV2.translateMulti("gui.play_maps.search_maps.current_query.default.lore", List.of()),
-                    LanguageProviderV2.translateMulti("gui.play_maps.search_maps.lore", List.of())
-            );
+            searchButton.setArgs(Component.text("None", TextColor.color(0xFF2D2D))); // Red
         }
         searchButton.setState(Element.State.ACTIVE);
     }

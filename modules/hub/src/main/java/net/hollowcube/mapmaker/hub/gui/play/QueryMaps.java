@@ -1,16 +1,10 @@
 package net.hollowcube.mapmaker.hub.gui.play;
 
 import net.hollowcube.canvas.Element;
-import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.ContextObject;
-import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -32,7 +26,7 @@ public class QueryMaps extends View {
             popView();
         } else {
             context.player().sendMessage("Query: " + this.query);
-            pushView(c -> new PlayMaps(context, this.query));
+            pushView(c -> new PlayMaps(context.with(Map.of("query", query))));
         }
     }
 
