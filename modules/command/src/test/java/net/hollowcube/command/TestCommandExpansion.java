@@ -24,6 +24,15 @@ class TestCommandExpansion {
     }
 
     @Test
+    void noCommandMatchingCondition() {
+        var cmd = new EmptyCommand();
+        cmd.setCondition(hide);
+        manager.register(cmd);
+        var context = expand("cmd");
+        assertTrue(context.isFailed());
+    }
+
+    @Test
     void empty() {
         var cmd = new EmptyCommand();
         manager.register(cmd);

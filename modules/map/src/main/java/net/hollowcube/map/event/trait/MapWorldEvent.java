@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface MapWorldEvent extends InstanceEvent {
 
-    @NotNull MapWorld getMapWorld();
+    @NotNull
+    MapWorld getMapWorld();
 
     default @NotNull MapData getMap() {
         return getMapWorld().map();

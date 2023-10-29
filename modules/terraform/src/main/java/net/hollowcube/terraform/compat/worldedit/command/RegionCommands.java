@@ -45,12 +45,12 @@ public final class RegionCommands {
                 return;
             }
 
-            session.action()
-                    .from(region)
-                    .set(block)
-                    .execute(summary -> {
-                        player.sendMessage(Component.translatable("command.worldedit.set.success"));
-                    });
+//            session.action()
+//                    .from(region)
+//                    .set(block)
+//                    .execute(summary -> {
+//                        player.sendMessage(Component.translatable("command.worldedit.set.success"));
+//                    });
         }
     }
 }

@@ -9,6 +9,7 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -45,9 +46,16 @@ public final class CommandManager {
         wlock.lock();
         try {
             var name = command.name().toLowerCase(Locale.ROOT);
-            if (commands.containsKey(name))
-                throw new IllegalArgumentException("Command already registered: " + name);
+            Check.argCondition(name.isEmpty(), "Command name cannot be empty.");
+            Check.argCondition(commands.containsKey(name), "Command already registered: " + name);
+            for (var alias : command.aliases()) {
+                Check.argCondition(alias.isEmpty(), "Command alias cannot be empty.");
+                Check.argCondition(commands.containsKey(alias.toLowerCase(Locale.ROOT)), "Command already registered: " + alias);
+            }
+
             commands.put(name, command);
+            for (var alias : command.aliases())
+                commands.put(alias.toLowerCase(Locale.ROOT), command);
             uniqueCommands.add(command);
         } finally {
             wlock.unlock();
@@ -103,6 +111,12 @@ public final class CommandManager {
     }
 
     private @NotNull CommandContextImpl expand(@NotNull CommandContextImpl context, @NotNull Command command) {
+        var commandCondition = command.condition();
+        if (commandCondition != null && commandCondition.test(context.sender(), context) == CommandCondition.HIDE) {
+            //todo support DENY
+            return context;
+        }
+
         context.pushCommand(command);
         var reader = context.reader();
         var sender = context.sender();

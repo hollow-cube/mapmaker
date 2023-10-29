@@ -19,13 +19,13 @@ import static net.hollowcube.map.world.InternalMapWorld.SELF_TAG;
 @SuppressWarnings({"PointlessBitwiseExpression"})
 public interface MapWorld {
 
-    static @NonBlocking
-    @NotNull MapWorld forPlayer(@NotNull Player player) {
+    @NonBlocking
+    static @NotNull MapWorld forPlayer(@NotNull Player player) {
         return Objects.requireNonNull(forPlayerOptional(player));
     }
 
-    static @NonBlocking
-    @Nullable MapWorld forPlayerOptional(@NotNull Player player) {
+    @NonBlocking
+    static @Nullable MapWorld forPlayerOptional(@NotNull Player player) {
         if (player.getInstance() == null) return null;
         var world = unsafeFromInstance(player.getInstance());
         if (world instanceof InternalMapWorld internalWorld) {
@@ -34,8 +34,8 @@ public interface MapWorld {
         return null;
     }
 
-    static @NonBlocking
-    @Nullable MapWorld unsafeFromInstance(@Nullable Instance instance) {
+    @NonBlocking
+    static @Nullable MapWorld unsafeFromInstance(@Nullable Instance instance) {
         if (instance == null) return null;
         return instance.getTag(SELF_TAG);
     }

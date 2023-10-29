@@ -38,6 +38,7 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -236,6 +237,11 @@ public class DevServer {
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 
+            KindaBadThingToFix.badbadbad = player -> {
+                var world = MapWorld.forPlayerOptional(player);
+                return world == null ? null : world.map();
+            };
+
             // Configure command rewriter
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             var rewriter = new CommandRewriter(hubCommandManager, mapCommandManager);
@@ -256,7 +262,7 @@ public class DevServer {
             bridge.setMapServer(maps);
             this.hubToMapBridge = bridge;
 
-            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager)));
+            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService())));
             scope.fork(FutureUtil.call(() -> this.maps.init(configProvider, mapCommandManager)));
 
             scope.join();

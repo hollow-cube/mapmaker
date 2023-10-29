@@ -1,8 +1,8 @@
 package net.hollowcube.map.gui.hotbar;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.command.TestModeCommand;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -52,9 +52,11 @@ public final class EditMapHotbar {
     }
 
     private static void handleItem(@NotNull Player player, int customModelData) {
-        var server = MapWorld.forPlayer(player).server();
+        var world = MapWorld.forPlayer(player);
         if (customModelData == TEST_MODE_CMD) {
-            TestModeCommand.enterTestMode(player, server);
+            if (world instanceof TestingMapWorld testingWorld) {
+                testingWorld.exitTestMode(player);
+            }
         }
     }
 }

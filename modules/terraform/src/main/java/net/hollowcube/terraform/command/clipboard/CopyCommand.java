@@ -44,7 +44,7 @@ public class CopyCommand extends Command {
                 .compute(ComputeFunc.set(region, Pattern.block(Block.AIR)))
                 .post(result -> {
                     player.sendMessage("copied " + result.blocksChanged() + " blocks to clipboard");
-                    clipboard.setData(result.undoBuffer().toSchematic(new Vec(pos.blockX(), pos.blockY(), pos.blockZ()).mul(-1)));
+                    clipboard.setData(result.undoBuffer().toSchematic(new Vec(-pos.blockX(), -pos.blockY(), -pos.blockZ())));
                 })
                 .dryRun();
     }

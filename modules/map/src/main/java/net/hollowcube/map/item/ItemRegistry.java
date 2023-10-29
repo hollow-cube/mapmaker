@@ -2,11 +2,9 @@ package net.hollowcube.map.item;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.tool.BuiltinTool;
-import net.minestom.server.command.builder.arguments.Argument;
-import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -32,28 +30,35 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ItemRegistry {
 
-    public static @NotNull Argument<@Nullable String> Argument(@NotNull String id) {
-        return ArgumentType.ResourceLocation(id)
-                .setSuggestionCallback((sender, context, suggestion) -> {
-                    if (!(sender instanceof Player player)) return;
-                    var mapWorld = MapWorld.forPlayerOptional(player);
-                    if (mapWorld == null) return;
-                    var itemRegistry = mapWorld.itemRegistry();
+    public static @NotNull Argument<@Nullable ItemStack> Argument(@NotNull String id) {
+        var word = Argument.Word(id);
+        return word.map(
+                /* mapper */ (sender, raw) -> {
+                    if (!(sender instanceof Player player)) return null;
+                    var world = MapWorld.forPlayerOptional(player);
+                    if (world == null) return null;
+                    var itemRegistry = world.itemRegistry();
 
-                    var input = suggestion.getInput().substring(suggestion.getStart() - 1).trim();
-                    for (var item : itemRegistry.suggestItems(input.isBlank() ? null : input)) {
+                    var suggestions = itemRegistry.suggestItems(raw);
+                    if (suggestions.isEmpty()) return new Argument.ParseFailure<>();
+                    if (suggestions.size() > 1) return new Argument.ParsePartial<>();
+                    return new Argument.ParseDeferredSuccess<>(
+                            () -> itemRegistry.getItemStack(suggestions.get(0), null));
+                },
+                /* suggester */ (sender, reader, suggestion, raw) -> {
+                    if (!(sender instanceof Player player)) return;
+                    var world = MapWorld.forPlayerOptional(player);
+                    if (world == null) return;
+                    var itemRegistry = world.itemRegistry();
+
+                    for (var item : itemRegistry.suggestItems(raw.isBlank() ? null : raw)) {
                         //todo if the item has a description somehow we could add it to the suggestion
-                        suggestion.addEntry(new SuggestionEntry(item));
+                        suggestion.add(item);
                     }
-                });
-//                .map((sender, value) -> {
-//                    if (!(sender instanceof Player player)) return null;
-//                    var mapWorld = MapWorld.optionalFromInstance(player.getInstance());
-//                    if (mapWorld == null) return null;
-//                    var itemRegistry = mapWorld.itemRegistry();
-//
-//                    return itemRegistry.parseItem(value);
-//                });
+                }
+        ).errorHandler((sender, context) -> {
+            sender.sendMessage("unknown item: " + context.getRaw(word));
+        });
     }
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:item/registry", EventFilter.INSTANCE)

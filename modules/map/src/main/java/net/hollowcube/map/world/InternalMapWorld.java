@@ -19,7 +19,6 @@ public interface InternalMapWorld extends MapWorld {
 
     /**
      * Loads the world. The world will not be marked active/ready for players until this future completes.
-     *
      */
     @Blocking
     void load();
@@ -28,7 +27,6 @@ public interface InternalMapWorld extends MapWorld {
      * Closes the world, including saving if relevant. When this method is called, the world is guaranteed not to have any new players added.
      * <p>
      * All players are guaranteed to be removed before calling this method.
-     *
      */
     @Blocking
     void close();

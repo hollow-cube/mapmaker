@@ -1,0 +1,27 @@
+package net.hollowcube.terraform.command.clipboard;
+
+import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.command.util.TFArgument;
+import net.hollowcube.terraform.session.Clipboard;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class ClipClearCommand extends Command {
+    private final Argument<Clipboard> clipboardArg = TFArgument.Clipboard("clipboard");
+
+    public ClipClearCommand() {
+        super("clear");
+
+        addSyntax(playerOnly(this::handleClearClipboard), clipboardArg);
+    }
+
+    private void handleClearClipboard(@NotNull Player player, @NotNull CommandContext context) {
+        var clipboard = context.get(clipboardArg);
+        clipboard.clear();
+
+        player.sendMessage("cleared clipboard");
+    }
+
+}

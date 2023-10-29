@@ -7,9 +7,11 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
+import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
+import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -58,7 +60,7 @@ public abstract class HubServerBase implements HubServer {
     }
 
     @Blocking
-    public void init(@NotNull CommandManager commandManager) {
+    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService) {
         StaticAbuse.instance = this;
         this.mapHandler = new HubHandler(this, mapService());
 
@@ -77,6 +79,12 @@ public abstract class HubServerBase implements HubServer {
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
+
+        commandManager.register(new RequestCommand(inviteService));
+        commandManager.register(new RejectCommand(inviteService));
+        commandManager.register(new InviteCommand(inviteService));
+        commandManager.register(new AcceptCommand(inviteService));
+        commandManager.register(new JoinCommand(inviteService));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         commandManager.register(mapCommand);
