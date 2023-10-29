@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub.command.v2.map;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;

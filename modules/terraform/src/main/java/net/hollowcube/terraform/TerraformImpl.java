@@ -1,16 +1,16 @@
 package net.hollowcube.terraform;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
-import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.buffer.Palette;
 import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
 import net.hollowcube.terraform.task.TaskResult;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.ThreadUtil;
-import net.minestom.server.instance.ChunkInvalidator;
+import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
@@ -34,7 +34,6 @@ public final class TerraformImpl implements TerraformV2 {
         threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
         threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
     }
-
 
     // Internal Task API
 
@@ -140,7 +139,7 @@ public final class TerraformImpl implements TerraformV2 {
                         var updateIndex = (((long) chunkX & 0x3FFFFF) << 42) | ((long) chunkY & 0xFFFFF) | (((long) chunkZ & 0x3FFFFF) << 20);
                         var packet = new MultiBlockChangePacket(updateIndex, sectionChangeCache.toLongArray());
                         chunk.sendPacketToViewers(packet); //todo these could be batched perhaps, maybe minestom does it on its own?
-                        ChunkInvalidator.invalidateChunk(chunk);
+                        ChunkHack.invalidateChunk(chunk);
                     }
 
                     //todo the client is super laggy when sending many of these, perhaps this should be iterated by vertical chunk and resend the entire chunk if there are enough sections changed

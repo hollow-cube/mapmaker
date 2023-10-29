@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.action.edit;
 
 import net.hollowcube.terraform.selection.region.CuboidRegion;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;

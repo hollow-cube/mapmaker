@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface CommandCondition {
+
     /**
      * Allows the command execution
      */

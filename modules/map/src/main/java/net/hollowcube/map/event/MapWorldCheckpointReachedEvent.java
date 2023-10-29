@@ -2,8 +2,6 @@ package net.hollowcube.map.event;
 
 import net.hollowcube.map.event.trait.MapWorldEvent;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.object.ObjectData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.compat.worldedit;
 
-import net.hollowcube.terraform.command.old.helper.AliasCommand;
 import net.hollowcube.terraform.compat.worldedit.command.RegionCommands;
+import net.hollowcube.terraform.give_me_new_home.helper.AliasCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.CommandCondition;

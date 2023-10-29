@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.terraform.TerraformV2;
-import net.hollowcube.terraform.action.ActionBuilder;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.history.Change;
@@ -117,10 +116,6 @@ public class LocalSession {
 
 
     // Action
-
-    public @NotNull ActionBuilder action() {
-        return new ActionBuilder(this);
-    }
 
     public @NotNull Task.Builder buildTask(@NotNull String tag) {
         return new Task.Builder(this, tag);

@@ -1,10 +1,10 @@
 package net.hollowcube.terraform.task;
 
-import net.hollowcube.terraform.action.edit.WorldView;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.Region;
+import net.hollowcube.terraform.task.edit.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

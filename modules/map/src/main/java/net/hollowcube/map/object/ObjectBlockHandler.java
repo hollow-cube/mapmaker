@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ObjectBlockHandler extends BlockHandler {
 
-    @NotNull ObjectType objectType();
+    @NotNull
+    ObjectType objectType();
 
     default @NotNull String createObjectId(@NotNull Point blockPosition) {
         return String.format("%s/%d_%d_%d", objectType().id(), blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());

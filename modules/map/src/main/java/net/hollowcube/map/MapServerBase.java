@@ -9,19 +9,27 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.block.rule.PlacementRules;
-import net.hollowcube.map.command.BaseMapCommand;
-import net.hollowcube.map.command.v2.HubCommand;
-import net.hollowcube.map.command.v3.MapListCommandMixin;
+import net.hollowcube.map.command.HubCommand;
+import net.hollowcube.map.command.MapListCommandMixin;
+import net.hollowcube.map.command.build.BuildCommand;
+import net.hollowcube.map.command.build.SetSpawnCommand;
+import net.hollowcube.map.command.build.TestCommand;
+import net.hollowcube.map.command.invite.RemoveCommand;
+import net.hollowcube.map.command.utility.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.invites.PlayerInviteService;
+import net.hollowcube.map.invites.PlayerInviteServiceImpl;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
+import net.hollowcube.mapmaker.command.TopTimesCommand;
+import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
@@ -58,6 +66,7 @@ public abstract class MapServerBase implements MapServer {
 
     private MapMgmtConsumerImpl mapMgmtConsumer;
     private List<FeatureProvider> features;
+    private PlayerInviteService inviteService;
 
     private Controller guiController;
 
@@ -72,6 +81,8 @@ public abstract class MapServerBase implements MapServer {
 
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
+
+        inviteService = new PlayerInviteServiceImpl(mwm);
 
         var kafkaConfig = config.get(KafkaConfig.class);
         mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
@@ -92,36 +103,43 @@ public abstract class MapServerBase implements MapServer {
         PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         // Terraform initialization
-        var condition = BaseMapCommand.createMapCondition(true);
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> MapWorld.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        Terraform.init(commandManager, terraformEvents, condition);
+        Terraform.init(commandManager, terraformEvents, null);
 //        TerraformCompat.init(terraformEvents, condition);
-        TerraformAxiom.init(terraformEvents, condition);
+        TerraformAxiom.init(terraformEvents, null);
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
+        commandManager.register(new WhereCommand());
+        commandManager.register(new TopTimesCommand(mapService(), playerService()));
+
+        commandManager.register(new RequestCommand(inviteService));
+        commandManager.register(new RejectCommand(inviteService));
+        commandManager.register(new InviteCommand(inviteService));
+        commandManager.register(new AcceptCommand(inviteService));
+        commandManager.register(new JoinCommand(inviteService));
+        commandManager.register(new RemoveCommand(bridge));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
         commandManager.register(mapCommand);
 
         // Map specific commands
-        commandManager.register(new HubCommand(bridge));
-//        commandManager.register(new GiveCommand());
-//        commandManager.register(new SetSpawnCommand());
-//        commandManager.register(new SpawnCommand());
-//        commandManager.register(new ClearInventoryCommand());
-//        commandManager.register(new FlyCommand());
-//        commandManager.register(new FlySpeedCommand());
-//        commandManager.register(new TeleportCommand());
-//        commandManager.register(new TestModeCommand(this));
-//        commandManager.register(new BuildModeCommand(this));
-//        commandManager.register(new TopTimesCommand(playerService(), mapService()));
-//        commandManager.register(new InviteCommand());
-        // Request, Accept, Reject have been registered already in DevServer
-//        commandManager.register(new RemoveCommand(bridge));
+        commandManager.register(new HubCommand(bridge, inviteService));
+
+        commandManager.register(new TestCommand());
+        commandManager.register(new BuildCommand());
+        commandManager.register(new SetSpawnCommand());
+
+        commandManager.register(new FlyCommand());
+        commandManager.register(new FlySpeedCommand());
+        commandManager.register(new ClearInventoryCommand());
+        commandManager.register(new SpawnCommand());
+        commandManager.register(new TeleportCommand());
+        commandManager.register(new GiveCommand());
+
         // Register features
         var features = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
@@ -147,8 +165,6 @@ public abstract class MapServerBase implements MapServer {
                 "mapService", mapService(),
                 "bridge", bridge()
         ));
-
-        PlayerInviteService.init(mwm);
     }
 
     @Override
@@ -166,6 +182,10 @@ public abstract class MapServerBase implements MapServer {
     @Override
     public @NotNull MapToHubBridge bridge() {
         return bridge;
+    }
+
+    public @NotNull PlayerInviteService inviteService() {
+        return inviteService;
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {

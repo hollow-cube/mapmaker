@@ -9,14 +9,15 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
 
 public class ArgumentPattern extends Argument<Pattern> {
-    private static final List<String> BLOCKS = Block.values().stream()
-            .map(Block::name).sorted().toList();
+    private static final List<NamespaceID> BLOCKS = Block.values().stream()
+            .map(Block::namespace).sorted().toList();
 
     ArgumentPattern(@NotNull String id) {
         super(id);
@@ -37,8 +38,8 @@ public class ArgumentPattern extends Argument<Pattern> {
     public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
         for (var block : BLOCKS) {
-            if (block.startsWith(word)) {
-                suggestion.add(block);
+            if (block.asString().startsWith(word) || block.path().startsWith(word)) {
+                suggestion.add(block.asString());
             }
 
             if (suggestion.getEntries().size() > 20) {

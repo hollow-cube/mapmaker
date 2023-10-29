@@ -20,6 +20,10 @@ public abstract class Argument<T> {
         return new ArgumentInt(id);
     }
 
+    public static @NotNull ArgumentFloat Float(@NotNull String id) {
+        return new ArgumentFloat(id);
+    }
+
     public static @NotNull ArgumentWord Word(@NotNull String id) {
         return new ArgumentWord(id);
     }
@@ -38,6 +42,10 @@ public abstract class Argument<T> {
 
     public static @NotNull ArgumentRelativeVec3 RelativeVec3(@NotNull String id) {
         return new ArgumentRelativeVec3(id);
+    }
+
+    public static @NotNull ArgumentEntity Entity(@NotNull String id) {
+        return new ArgumentEntity(id);
     }
 
     public static <T> @NotNull Argument<@Nullable T> Opt(@NotNull Argument<T> arg) {

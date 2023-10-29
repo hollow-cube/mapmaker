@@ -20,6 +20,11 @@ public class ArgumentWord extends Argument<String> {
         return this;
     }
 
+    public @NotNull ArgumentWord with(@NotNull List<String> values) {
+        this.values = List.copyOf(values);
+        return this;
+    }
+
     @Override
     public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.BRIGADIER);

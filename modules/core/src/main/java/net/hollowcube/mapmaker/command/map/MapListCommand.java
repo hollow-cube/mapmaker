@@ -4,7 +4,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.gui.play.ListMapsView;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;

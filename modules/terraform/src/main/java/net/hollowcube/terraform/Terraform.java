@@ -2,6 +2,7 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.command.TerraformCommand;
+import net.hollowcube.terraform.command.clipboard.ClipboardCommand;
 import net.hollowcube.terraform.command.clipboard.CopyCommand;
 import net.hollowcube.terraform.command.clipboard.CutCommand;
 import net.hollowcube.terraform.command.clipboard.PasteCommand;
@@ -13,6 +14,7 @@ import net.hollowcube.terraform.command.region.SetCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
 import net.hollowcube.terraform.command.selection.SelCommand;
+import net.hollowcube.terraform.command.tool.ToolCommand;
 import net.hollowcube.terraform.tool.ToolHandler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.condition.CommandCondition;
@@ -59,14 +61,14 @@ public final class Terraform {
         commandManager.register(new CopyCommand());
         commandManager.register(new CutCommand());
         commandManager.register(new PasteCommand());
-//        commandManager.register(new ClipboardCommands.ClipboardCommand(condition));
+        commandManager.register(new ClipboardCommand());
 
         // Schematic
-//        commandManager.register(new SchematicCommand(condition));
+        //todo
 
         // Tool
         var toolHandler = new ToolHandler();
-//        commandManager.register(new ToolCommand(condition, toolHandler));
+        commandManager.register(new ToolCommand(toolHandler));
         eventNode.addChild(toolHandler.eventNode());
 
     }
