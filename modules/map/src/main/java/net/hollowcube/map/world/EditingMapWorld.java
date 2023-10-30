@@ -256,6 +256,8 @@ public class EditingMapWorld implements InternalMapWorld {
             player.setTag(TAG_EDITING, true);
             player.setTag(SaveState.TAG, saveState);
 
+            MapWorldHelpers.resetPlayer(player);
+
             player.setGameMode(GameMode.CREATIVE);
             saveState.setPlayStartTime(System.currentTimeMillis());
 
