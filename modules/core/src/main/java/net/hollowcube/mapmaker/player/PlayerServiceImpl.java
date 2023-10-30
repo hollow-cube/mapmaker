@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.player;
 
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,24 +39,25 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Component getPlayerDisplayName(@NotNull String id) {
+    public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
         // If the player is online we have an up-to-date display name anyway
         var player = MinecraftServer.getConnectionManager().getPlayer(id);
         if (player != null) {
-            return PlayerDataV2.fromPlayer(player).displayName();
+            return PlayerDataV2.fromPlayer(player).displayName2();
         }
 
         //todo probably should have some basic cache here
 
         try (var $ = remoteFetchDisplayNameTime.startTimer()) {
             var req = HttpRequest.newBuilder()
-                    .uri(URI.create(url + "/players/" + id + "/displayname"))
+                    .uri(URI.create(url + "/players/" + id + "/displayname?v=2"))
                     .build();
             var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
-                case 200 -> GSON.fromJson(res.body(), Component.class);
-                case 404 -> Component.text("Unknown Player");
-                default -> throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
+                case 200 -> GSON.fromJson(res.body(), DisplayName.class);
+                case 404 -> new DisplayName(List.of());
+                default ->
+                        throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
             };
         }
     }

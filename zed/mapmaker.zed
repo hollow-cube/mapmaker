@@ -20,7 +20,6 @@ caveat audit_log_hack(never_set bool) {
 // If this feature gets added to SpiceDB, we can set these relationships statically
 // https://github.com/authzed/spicedb/issues/1266
 definition mapmaker/platform {
-
     relation hollowcube: mapmaker/player with audit_log_hack
     relation admin: mapmaker/player with audit_log_hack
     relation dev: mapmaker/player with audit_log_hack

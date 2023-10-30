@@ -175,7 +175,8 @@ public class DevServer {
         );
         var miscEmojis = List.of(
                 Map.entry("crown", "icon/emoji/crown"),
-                Map.entry("grass", "icon/emoji/grass")
+                Map.entry("grass", "icon/emoji/grass"),
+                Map.entry("sus", "icon/emoji/sus")
         );
 
         var allEmojis = new ArrayList<Map.Entry<String, String>>();

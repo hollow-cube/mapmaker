@@ -49,39 +49,39 @@
     },
     "CT1": {
         "type": "sprite",
-        "ref": "icon/staff/ct1"
+        "ref": "icon/staff/ct_1"
     },
     "CT2": {
         "type": "sprite",
-        "ref": "icon/staff/ct2"
+        "ref": "icon/staff/ct_2"
     },
     "CT3": {
         "type": "sprite",
-        "ref": "icon/staff/ct3"
+        "ref": "icon/staff/ct_3"
     },
     "MOD1": {
         "type": "sprite",
-        "ref": "icon/staff/mod1"
+        "ref": "icon/staff/mod_1"
     },
     "MOD2": {
         "type": "sprite",
-        "ref": "icon/staff/mod2"
+        "ref": "icon/staff/mod_2"
     },
     "MOD3": {
         "type": "sprite",
-        "ref": "icon/staff/mod3"
+        "ref": "icon/staff/mod_3"
     },
     "DEV1": {
         "type": "sprite",
-        "ref": "icon/staff/dev1"
+        "ref": "icon/staff/dev_1"
     },
     "DEV2": {
         "type": "sprite",
-        "ref": "icon/staff/dev2"
+        "ref": "icon/staff/dev_2"
     },
     "DEV3": {
         "type": "sprite",
-        "ref": "icon/staff/dev3"
+        "ref": "icon/staff/dev_3"
     },
     // Standard Colors
     // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
@@ -107,7 +107,7 @@
     // #FF2D2D - Red (Admin Rank, Fail, Error, Cancel, Deny, Unavailable)
     "red": {
         "type": "raw",
-        "value": "#FF2D2D"
+        "value": "#fa4141"
     },
     // #AC4BFF - Purple (Dev Rank)
     "purple": {

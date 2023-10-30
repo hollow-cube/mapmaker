@@ -29,7 +29,7 @@ public record LeaderboardData(
      * Converts the leaderboard data to a sendable list of components for a leaderboard.
      *
      * @param playerService Player service, used to look up player ids
-     * @param pad True to pad the leaderboard with empty lines
+     * @param pad           True to pad the leaderboard with empty lines
      * @return Entry text, or null if the leaderboard is empty.
      */
     @Blocking
@@ -46,7 +46,7 @@ public record LeaderboardData(
             var entry = top().get(i);
             maxNumWidth = Math.max(maxNumWidth, FontUtil.measureText(String.format("#%d ", entry.rank())));
 
-            var playerName = playerService.getPlayerDisplayName(entry.player());
+            var playerName = playerService.getPlayerDisplayName2(entry.player()).build();
             var playerNameText = PlainTextComponentSerializer.plainText().serialize(playerName);
             nameWidths[i] = FontUtil.measureText(playerNameText);
             maxNameWidth = Math.max(maxNameWidth, nameWidths[i] + FontUtil.measureText(" "));
@@ -68,7 +68,7 @@ public record LeaderboardData(
                 default -> COLOR_DEFAULT;
             }));
 
-            var playerName = playerService.getPlayerDisplayName(entry.player());
+            var playerName = playerService.getPlayerDisplayName2(entry.player()).build();
             comp.append(playerName).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])));
             comp.append(Component.text(" " + timeToFriendly(entry.score()), TextColor.color(0xf2f2f2)));
 

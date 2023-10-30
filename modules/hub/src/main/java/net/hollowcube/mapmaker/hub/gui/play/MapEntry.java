@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -43,13 +44,16 @@ public class MapEntry extends View {
         }
     }
 
-    /** Builds and updates the arg list of the map icon. */
+    /**
+     * Builds and updates the arg list of the map icon.
+     */
     private @Blocking void updateIcon() {
 
         var icon = map.settings().getIcon();
         label.setItemSprite(ItemStack.of(icon == null ? Material.PAPER : icon));
 
-        authorName = playerService.getPlayerDisplayName(map.owner());
+        authorName = playerService.getPlayerDisplayName2(map.owner())
+                .build(DisplayName.Context.PLAIN);
 
         label.setArgs(
                 Component.text(map.publishedIdString()),
