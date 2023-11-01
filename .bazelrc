@@ -1,7 +1,6 @@
 build --java_language_version=20
 build --tool_java_runtime_version=20
 build --java_runtime_version=zulu_20
-build --extra_toolchains=//:jdk20_macos_aarch64_definition --extra_toolchains=//:jdk20_macos_x64_definition --extra_toolchains=//:jdk20_linux_x64_definition --extra_toolchains=//:jdk20_windows_x64_definition
 
 build --jvmopt --enable-preview
 build --jvmopt "--add-modules jdk.incubator.concurrent"
