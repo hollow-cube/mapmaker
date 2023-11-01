@@ -1,4 +1,4 @@
-FROM eclipse-temurin:19-jre-ubi9-minimal
+FROM eclipse-temurin:20-jre-ubi9-minimal
 
 WORKDIR /app
 COPY ./development-all.jar /app/server.jar
