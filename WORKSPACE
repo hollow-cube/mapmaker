@@ -52,13 +52,13 @@ remote_java_repository(
     version = "20",
 )
 
-register_toolchains("//:jdk20_macos_aarch64_definition")
-
-register_toolchains("//:jdk20_macos_x64_definition")
-
-register_toolchains("//:jdk20_linux_x64_definition")
-
-register_toolchains("//:jdk20_windows_x64_definition")
+register_toolchains(
+    "//:azul_jdk20_definition",
+    #    "//:jdk20_linux_x64_definition",
+    #    "//:jdk20_macos_aarch64_definition",
+    #    "//:jdk20_macos_x64_definition",
+    #    "//:jdk20_windows_x64_definition",
+)
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
