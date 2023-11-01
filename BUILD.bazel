@@ -12,7 +12,7 @@ default_java_toolchain(
     name = "azul_jdk20",
     configuration = DEFAULT_TOOLCHAIN_CONFIGURATION,
     java_runtime = select({
-        "@platforms//os:macos": "@zulu_20_macos_aarch64//:jdk",  # todo arm support
+        "@platforms//os:macos": "@zulu_20_macos_aarch64//:jdk",  # todo x86 support
         "@platforms//os:linux": "@zulu_20_linux_x64//:jdk",
         "@platforms//os:windows": "@zulu_20_windows_x64//:jdk",
     }),
@@ -48,7 +48,6 @@ java_binary(
         ":packer_development_server",
     ],
     deps = [
-        "//bin/development/src/main/java/net/hollowcube/mapmaker/dev/runtime",
         "//modules/canvas:api",
         "//modules/canvas:impl-standalone",
         "//modules/common",

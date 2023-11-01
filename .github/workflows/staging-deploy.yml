@@ -74,12 +74,11 @@ jobs:
           SOURCE_DIR: out
 
       # Build server
+      - name: Prep runtime info
+        run: |
+          echo "commit_sha=${{ github.sha }}\nresource_pack_sha=${{ env.RESOURCE_PACK_SHA }}" >> bin/development/src/main/resources/runtime.properties
       - name: Build standalone binary
         run: bazel build //:development_deploy.jar
-        env:
-          HOLLOWCUBE_STRIPPED_BINARY: true
-          COMMIT_SHA: ${{ github.sha }}
-          RESOURCE_PACK_SHA: ${{ env.RESOURCE_PACK_SHA }}
 
       # Build and push docker image
       - run: cp bazel-bin/development_deploy.jar development-all.jar
