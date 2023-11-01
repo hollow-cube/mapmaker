@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
 @AutoService(ServerRuntime.class)
 public class DevRuntime implements ServerRuntime {
     private static final Logger logger = LoggerFactory.getLogger(DevRuntime.class);
@@ -18,19 +16,14 @@ public class DevRuntime implements ServerRuntime {
     private String resourcePackHash = "dev";
 
     public DevRuntime() {
-        try (var is = getClass().getResourceAsStream("/runtime.properties")) {
-            if (is == null) return;
+        var version = System.getenv("VERSION");
+        if (version != null) this.version = version;
 
-            var props = new Properties();
-            props.load(is);
+        var commit = System.getenv("COMMIT_SHA");
+        if (commit != null) this.commit = commit;
 
-            version = props.getOrDefault("version", "3.0.0").toString();
-            commit = props.getOrDefault("commit_sha", "dev").toString();
-            minestom = props.getOrDefault("minestom", "unknown").toString();
-            resourcePackHash = props.getOrDefault("resource_pack_hash", "dev").toString();
-        } catch (Exception e) {
-            logger.warn("Failed to load runtime properties", e);
-        }
+        var resourcePackHash = System.getenv("RESOURCE_PACK_HASH");
+        if (resourcePackHash != null) this.resourcePackHash = resourcePackHash;
     }
 
     @Override
