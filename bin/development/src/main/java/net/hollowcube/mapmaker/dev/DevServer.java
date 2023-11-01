@@ -503,7 +503,7 @@ public class DevServer {
         var tabFooter = Component.text()
                 .appendNewline()
                 .append(Component.text("ᴘʟᴀʏ.ʜᴏʟʟᴏᴡᴄᴜʙᴇ.ɴᴇᴛ")).appendNewline()
-                .append(Component.text("Closed Beta - " + runtime.shortCommit(), TextColor.color(0x696969)))
+                .append(Component.text("Closed Beta"))
                 .appendNewline()
                 .build();
         player.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);

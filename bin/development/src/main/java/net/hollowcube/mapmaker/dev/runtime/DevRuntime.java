@@ -16,13 +16,13 @@ public class DevRuntime implements ServerRuntime {
     private String resourcePackHash = "dev";
 
     public DevRuntime() {
-        var version = System.getenv("VERSION");
+        var version = System.getenv("MAPMAKER_VERSION");
         if (version != null) this.version = version;
 
-        var commit = System.getenv("COMMIT_SHA");
+        var commit = System.getenv("MAPMAKER_COMMIT_SHA");
         if (commit != null) this.commit = commit;
 
-        var resourcePackHash = System.getenv("RESOURCE_PACK_HASH");
+        var resourcePackHash = System.getenv("MAPMAKER_RESOURCE_PACK_HASH");
         if (resourcePackHash != null) this.resourcePackHash = resourcePackHash;
     }
 
