@@ -1,13 +1,41 @@
 load("//third_party:genfile.bzl", "genfile")
 
+genrule(
+    name = "resource_pack_sha",
+    outs = ["resource_pack_sha.txt"],
+    cmd = "\n".join([
+        "var=RESOURCE_PACK_SHA",
+        "val=$${var}",
+        "if [ -z \"$$val\" ]; then",
+        "    val=dev",
+        "    echo \"WARN: using default value dev for $$var, to change it export $$var before build.\" >&2",
+        "fi",
+        "echo \"$$val\" > $@",
+    ]),
+)
+
+genrule(
+    name = "short_commit",
+    outs = ["short_commit.txt"],
+    cmd = "\n".join([
+        "var=COMMIT_SHA",
+        "val=$${var}",
+        "if [ -z \"$$val\" ]; then",
+        "    val=dev",
+        "    echo \"WARN: using default value dev for $$var, to change it export $$var before build.\" >&2",
+        "fi",
+        "echo \"$$val\" > $@",
+    ]),
+)
+
 genfile(
     name = "dev_runtime_src",
     output = "DevRuntime.java",
     substitutions = {
         "{MAPMAKER_VERSION}": "3.0.0-alpha",
-        "{MAPMAKER_COMMIT}": "bazel",
+        "{MAPMAKER_COMMIT}": "$(location short_commit.txt)",
         "{MINESTOM_VERSION}": "unknown",
-        "{RESOURCE_PACK_SHA}": "dev",
+        "{RESOURCE_PACK_SHA}": "$(location resource_pack_sha.txt)",
     },
     template = "DevRuntime.java.tpl",
 )

@@ -6,20 +6,53 @@ remote_java_repository(
     sha256 = "a2eff6a940c2df3a2352278027e83f5959f34dcfc8663034fe92be0f1b91ce6f",
     strip_prefix = "zulu20.28.85-ca-jdk20.0.0-macosx_aarch64",
     target_compatible_with = [
-        "@platforms//cpu:aarch64",  # x86_64
-        "@platforms//os:macos",  # linux, windows
+        "@platforms//cpu:aarch64",
+        "@platforms//os:macos",
     ],
     url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-macosx_aarch64.tar.gz",
     version = "20",
 )
 
-# todo add the rest of these
-# https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-linux_aarch64.tar.gz
-# https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-linux_x64.tar.gz
-# https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-macosx_x64.tar.gz
-# https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-win_x64.zip
+remote_java_repository(
+    name = "zulu_20_macos_x64",
+    prefix = "zulu",
+    sha256 = "fde6cc17a194ea0d9b0c6c0cb6178199d8edfc282d649eec2c86a9796e843f86",
+    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-macosx_x64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-macosx_x64.tar.gz",
+    version = "20",
+)
 
-register_toolchains("//:repository_default_toolchain_definition")
+remote_java_repository(
+    name = "zulu_20_linux_x64",
+    prefix = "zulu",
+    sha256 = "0386418db7f23ae677d05045d30224094fc13423593ce9cd087d455069893bac",
+    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-linux_x64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-linux_x64.tar.gz",
+    version = "20",
+)
+
+remote_java_repository(
+    name = "zulu_20_windows_x64",
+    prefix = "zulu",
+    sha256 = "ac5f6a7d84dbbb0bb4d376feb331cc4c49a9920562f2a5e85b7a6b4863b10e1e",
+    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-win_x64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-win_x64.zip",
+    version = "20",
+)
+
+register_toolchains("//:jdk20_macos_aarch64_definition")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -73,7 +106,7 @@ maven_install(
         # Minestom
         "dev.hollowcube:minestom-ce:5bcc72b911",
         "dev.hollowcube:polar:1.3.1",
-        "com.github.mworzala.mc_debug_renderer:minestom:2c354a8e0859b765144d7c629c2a4d62b5f1d220",
+        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
         "com.google.code.gson:gson:2.10.1",

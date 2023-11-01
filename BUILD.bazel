@@ -1,24 +1,24 @@
 load("@rules_java//java:defs.bzl", "java_binary")
-load(
-    "@bazel_tools//tools/jdk:default_java_toolchain.bzl",
-    "BASE_JDK9_JVM_OPTS",
-    "DEFAULT_JAVACOPTS",
-    "DEFAULT_TOOLCHAIN_CONFIGURATION",
-    "default_java_toolchain",
+load("//:toolchain_util.bzl", "add_zulu_toolchain")
+
+add_zulu_toolchain(
+    name = "jdk20_macos_aarch64",
+    runtime = "@zulu_20_macos_aarch64//:jdk",
 )
 
-default_java_toolchain(
-    name = "repository_default_toolchain",
-    configuration = DEFAULT_TOOLCHAIN_CONFIGURATION,
-    java_runtime = "@zulu_20_macos_aarch64//:jdk",
-    javacopts = DEFAULT_JAVACOPTS + [
-        "--enable-preview",
-        "--add-modules",
-        "jdk.incubator.concurrent",
-    ],
-    jvm_opts = BASE_JDK9_JVM_OPTS + ["--enable-preview"],
-    source_version = "20",
-    target_version = "20",
+add_zulu_toolchain(
+    name = "jdk20_macos_x64",
+    runtime = "@zulu_20_macos_x64//:jdk",
+)
+
+add_zulu_toolchain(
+    name = "jdk20_linux_x64",
+    runtime = "@zulu_20_linux_x64//:jdk",
+)
+
+add_zulu_toolchain(
+    name = "jdk20_windows_x64",
+    runtime = "@zulu_20_windows_x64//:jdk",
 )
 
 load("//bin/packer:packer.bzl", "packer_bundle")

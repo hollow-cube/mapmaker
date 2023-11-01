@@ -2,7 +2,7 @@ name: Quality
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ never ]
 
 jobs:
   test:

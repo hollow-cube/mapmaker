@@ -113,6 +113,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new WhereCommand());
         commandManager.register(new TopTimesCommand(mapService(), playerService()));
 
+        System.out.println("Hello");
+
         commandManager.register(new RequestCommand(inviteService));
         commandManager.register(new RejectCommand(inviteService));
         commandManager.register(new InviteCommand(inviteService));

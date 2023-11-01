@@ -3,8 +3,9 @@ concurrency: Staging
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+
+
 
 jobs:
   docker-build:
@@ -24,26 +25,45 @@ jobs:
         with:
           token: ${{ secrets.VAULT_TOKEN }}
           path: global/resourcepackr2
+
       - uses: actions/checkout@v3
-      - name: Set up JDK 19
-        uses: actions/setup-java@v2
+      - name: Cache Bazel
+        uses: actions/cache@v3
         with:
-          java-version: 19
-          distribution: 'temurin'
-          cache: 'gradle'
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Setup gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      - name: Package resources
-        run: ./gradlew :bin:packer:run
-      - name: Zip resource pack
-        working-directory: build/packer
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+
+      #      - name: Set up JDK 19
+      #        uses: actions/setup-java@v2
+      #        with:
+      #          java-version: 19
+      #          distribution: 'temurin'
+      #          cache: 'gradle'
+      #      - name: Validate Gradle wrapper
+      #        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      #      - name: Setup gradle
+      #        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      #      - name: Package resources
+      #        run: ./gradlew :bin:packer:run
+      #      - name: Zip resource pack
+      #        working-directory: build/packer
+      #        run: |
+      #          mkdir -p out
+      #          cd client && zip -r ../out/mapmaker-${{ github.sha }}.zip .
+      #          echo "RESOURCE_PACK_SHA=$(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
+      #          echo "Resource pack sha-1: $(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_STEP_SUMMARY
+
+      # Build & Upload Resource Pack (todo this could be a separate step probably)
+      - name: Build resource pack
         run: |
+          bazel build //:packer_development_client
+          echo "RESOURCE_PACK_SHA=$(sha1sum bazel-bin/client.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
+          
           mkdir -p out
-          cd client && zip -r ../out/mapmaker-${{ github.sha }}.zip .
-          echo "RESOURCE_PACK_SHA=$(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
-          echo "Resource pack sha-1: $(sha1sum out/mapmaker-${{ github.sha }}.zip | cut -d ' ' -f1)" >> $GITHUB_STEP_SUMMARY
+          cp bazel-bin/client.zip out/mapmaker-${{ github.sha }}.zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
@@ -51,14 +71,18 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
           AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
-          SOURCE_DIR: build/packer/out
+          SOURCE_DIR: out
+
+      # Build server
       - name: Build standalone binary
-        run: ./gradlew :bin:development:shadowJar
+        run: bazel build //:development_deploy.jar
         env:
           HOLLOWCUBE_STRIPPED_BINARY: true
           COMMIT_SHA: ${{ github.sha }}
           RESOURCE_PACK_SHA: ${{ env.RESOURCE_PACK_SHA }}
-      - run: cp bin/development/build/libs/development-all.jar development-all.jar
+
+      # Build and push docker image
+      - run: cp bazel-bin/development_deploy.jar development-all.jar
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub

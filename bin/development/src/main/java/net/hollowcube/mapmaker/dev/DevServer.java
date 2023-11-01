@@ -87,6 +87,8 @@ public class DevServer {
     public static void main(String[] args) {
         long start = System.nanoTime();
 
+        System.out.println("Hello");
+
         System.setProperty("minestom.chunk-view-distance", "16");
         System.setProperty("minestom.command.async-virtual", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
