@@ -493,20 +493,8 @@ public class DevServer {
         });
 
         player.setDisplayName(playerData.displayName());
+        broadcastTabHeaderAndFooter();
 
-        var tabHeader = Component.text()
-                .appendNewline()
-                .append(Component.text("Hollow Cube")).appendNewline()
-                .append(Component.text("(todo logo and colors)"))
-                .appendNewline()
-                .build();
-        var tabFooter = Component.text()
-                .appendNewline()
-                .append(Component.text("ᴘʟᴀʏ.ʜᴏʟʟᴏᴡᴄᴜʙᴇ.ɴᴇᴛ")).appendNewline()
-                .append(Component.text("Closed Beta"))
-                .appendNewline()
-                .build();
-        player.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
@@ -583,6 +571,41 @@ public class DevServer {
 //                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
 //                .schedule();
 
+    }
+
+    private void broadcastTabHeaderAndFooter() {
+        var onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayers().size();
+        var playersText = onlinePlayers == 1 ? "ᴘʟᴀʏᴇʀ" : "ᴘʟᴀʏᴇʀѕ";
+        var playerCountText = FontUtil.rewrite("smallnums", "" + onlinePlayers);
+
+        var blueColor = TextColor.color(56, 140, 249);
+        var goldColor = TextColor.color(235, 188, 53);
+        var darkGrayColor = TextColor.color(0x696969);
+        var lightGrayColor = TextColor.color(0xB0B0B0); // or cccccc
+
+        var tabLogoSprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/tab/logo_outline"));
+//        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow") - FontUtil.measureText("Cube") + 2); //todo where is the missing 2 coming from
+//        var tabHeader = Component.text()
+//                .appendNewline()
+//                .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow", blueColor))).appendNewline()
+//                .append(Component.text(cubeOffset + "Cube", blueColor))
+//                .appendNewline()
+//                .build();
+        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 50); //todo where is the missing 2 coming from
+        var tabHeader = Component.text()
+                .appendNewline()
+                .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
+                .append(Component.text(cubeOffset + "ᴄʟᴏѕᴇᴅ ʙᴇᴛᴀ", darkGrayColor))
+                .appendNewline()
+                .build();
+        var tabFooter = Component.text()
+                .appendNewline()
+                .append(Component.text("ᴘʟᴀʏ.", lightGrayColor).append(Component.text("ʜᴏʟʟᴏᴡᴄᴜʙᴇ", goldColor)).append(Component.text(".ɴᴇᴛ", lightGrayColor))).appendNewline()
+                .append(Component.text(playerCountText, blueColor).append(Component.text(" " + playersText + " ᴏɴʟɪɴᴇ", darkGrayColor))).appendNewline()
+                .append(Component.text(FontUtil.computeOffset(125))) // Min width
+                .build();
+
+        Audiences.all().sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
     }
 
 }

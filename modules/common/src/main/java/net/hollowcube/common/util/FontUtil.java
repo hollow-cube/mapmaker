@@ -92,6 +92,7 @@ public final class FontUtil {
         ));
         result.put("currency", currencyGlyphs);
         result.put("currency_creative", currencyGlyphs);
+        result.put("smallnums", currencyGlyphs);
 
         GLYPH_WIDTHS_V2 = Map.copyOf(result);
     }
