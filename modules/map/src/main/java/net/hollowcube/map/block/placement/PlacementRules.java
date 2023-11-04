@@ -282,6 +282,7 @@ public final class PlacementRules {
         blockManager.registerBlockPlacementRule(new WeepingVinesPlacementRule());
         blockManager.registerBlockPlacementRule(new VinePlacementRule(Block.VINE, false));
         blockManager.registerBlockPlacementRule(new VinePlacementRule(Block.GLOW_LICHEN, true));
+        blockManager.registerBlockPlacementRule(new VinePlacementRule(Block.SCULK_VEIN, true));
 
         blockManager.registerBlockPlacementRule(new ChorusPlantPlacementRule());
     }
