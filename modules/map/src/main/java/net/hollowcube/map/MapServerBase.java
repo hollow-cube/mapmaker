@@ -8,7 +8,7 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.handler.*;
-import net.hollowcube.map.block.rule.PlacementRules;
+import net.hollowcube.map.block.placement.PlacementRules;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.MapListCommandMixin;
 import net.hollowcube.map.command.build.BuildCommand;

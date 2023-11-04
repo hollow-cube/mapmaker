@@ -2,7 +2,7 @@ package net.hollowcube.map.block.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.map.block.rule.BlockTags;
+import net.hollowcube.map.block.placement.BlockTags;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -62,6 +62,7 @@ public class SignBlockHandler implements BlockHandler {
     public static final SignBlockHandler INSTANCE = new SignBlockHandler();
 
     private static final Int2ObjectMap<String> DYE_MAP = new Int2ObjectArrayMap<>();
+
     static {
         DYE_MAP.put(Material.WHITE_DYE.id(), "white");
         DYE_MAP.put(Material.LIGHT_GRAY_DYE.id(), "light_gray");
@@ -81,7 +82,8 @@ public class SignBlockHandler implements BlockHandler {
         DYE_MAP.put(Material.PINK_DYE.id(), "pink");
     }
 
-    private SignBlockHandler() {}
+    private SignBlockHandler() {
+    }
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {

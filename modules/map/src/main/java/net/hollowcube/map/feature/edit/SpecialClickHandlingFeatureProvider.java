@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import net.hollowcube.map.block.rule.BlockTags;
+import net.hollowcube.map.block.placement.BlockTags;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.entity.Player;
@@ -118,6 +118,7 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
         }
 
         // Update the block in the world to the new state
+        event.setBlockingItemUse(true);
         event.getInstance().setBlock(event.getBlockPosition(), block);
     }
 
