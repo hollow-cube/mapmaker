@@ -1,6 +1,5 @@
-package net.hollowcube.mapmaker.hub.gui.play;
+package net.hollowcube.mapmaker.gui.play;
 
-import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -20,7 +19,7 @@ public class Query extends View {
     public Query(@NotNull Context context) {
         super(context);
 
-        searchButton.setState(Element.State.LOADING);
+        searchButton.setState(State.LOADING);
         async(this::updateLore);
     }
 
@@ -29,13 +28,15 @@ public class Query extends View {
         pushView(QueryMaps::new);
     }
 
-    /** Updates the query button with your current query. */
+    /**
+     * Updates the query button with your current query.
+     */
     private @Blocking void updateLore() {
         if (query != null && !query.isBlank()) {
             searchButton.setArgs(Component.text(query, TextColor.color(0x30FBFF))); // Light Blue
         } else {
             searchButton.setArgs(Component.text("None", TextColor.color(0xFF2D2D))); // Red
         }
-        searchButton.setState(Element.State.ACTIVE);
+        searchButton.setState(State.ACTIVE);
     }
 }

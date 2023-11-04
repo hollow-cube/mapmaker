@@ -61,7 +61,6 @@ public class FontUIBuilder {
     }
 
     private void appendRaw(@NotNull String text) {
-//        children.add(Component.text(text).color(color));
         builder.append(Component.text(text, color));
         this.color = NamedTextColor.WHITE;
     }

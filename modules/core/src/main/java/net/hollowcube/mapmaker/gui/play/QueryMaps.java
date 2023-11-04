@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.play;
+package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
@@ -24,7 +24,7 @@ public class QueryMaps extends View {
         if (this.query == null || this.query.isBlank()) {
             popView();
         } else {
-            pushView(c -> new PlayMaps(context.with(Map.of("query", query))));
+            pushView(c -> new PlayMapsView(context.with(Map.of("query", query))));
         }
     }
 

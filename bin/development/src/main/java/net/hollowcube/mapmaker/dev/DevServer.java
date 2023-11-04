@@ -361,6 +361,7 @@ public class DevServer {
 
             Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
             rebuildOnlinePlayersRegex();
+            broadcastTabHeaderAndFooter();
 
             try {
                 //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought

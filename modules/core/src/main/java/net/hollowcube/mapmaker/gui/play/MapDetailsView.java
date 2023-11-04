@@ -8,9 +8,12 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
@@ -23,7 +26,7 @@ import java.util.Objects;
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
-    private @ContextObject HubToMapBridge bridge;
+    private @ContextObject ServerBridge bridge;
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
@@ -34,7 +37,8 @@ public class MapDetailsView extends View {
 
     // MAP QUALITIES (leave what is commented out, refer to line 92)
 //    private @Outlet("quality_switch") Switch qualitySwitch;
-    private @Outlet("quality_unrated_text") Text qualityUnratedText;
+    private @Outlet("quality_unrated_half_text") Text qualityUnratedHalfText;
+    private @Outlet("quality_unrated_full_text") Text qualityUnratedFullText;
 //    private @Outlet("quality_good_text") Text qualityGoodText;
 //    private @Outlet("quality_great_text") Text qualityGreatText;
 //    private @Outlet("quality_excellent_text") Text qualityExcellentText;
@@ -69,9 +73,15 @@ public class MapDetailsView extends View {
     private @Outlet("map_type_tutorial_text") Text mapTypeTutorialText;
     private @Outlet("map_type_building_text") Text mapTypeBuildingText;
 
-    // MAP TAGS - VISUAL
+    // MAP TAGS
+    private @Outlet("map_tags_switch") Switch mapTagsSwitch;
+    private @Outlet("no_map_tags_text") Text noMapTagsText;
+    private @Outlet("map_tags_text") Text mapTagsText;
 
-    // MAP TAGS - GAMEPLAY
+    // MAP SETTINGS
+    private @Outlet("map_settings_switch") Switch mapSettingsSwitch;
+    private @Outlet("no_map_settings_text") Text noMapSettingsText;
+    private @Outlet("map_settings_text") Text mapSettingsText;
 
     // GENERAL
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
@@ -89,7 +99,9 @@ public class MapDetailsView extends View {
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
 
-//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED
+        // MAP QUALITY
+
+//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED. THIS ALSO NEEDS A SMALL REWORK.
 //        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
 //        if(map.getQuality().equals("good")) {
 //            qualityGoodText.setText("Good", TextColor.color(0xF5DC3B));
@@ -108,13 +120,15 @@ public class MapDetailsView extends View {
 //            qualitySwitch.setOption(5);
 //        } else {
 //        Default value for map quality (unrated)
-        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
+//        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
 //        qualitySwitch.setOption(0);
 //        }
 
+        // MAP DIFFICULTY
+
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
-            Switch[] difficultySwitches = new Switch[]{difficultySwitch};
             rowOneSwitch.setOption(1);
+            qualityUnratedHalfText.setText("Unrated", TextColor.color(0xF04B3D));
             if (map.getUniquePlays() > 1) { //todo make >1 later
                 if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
@@ -140,7 +154,7 @@ public class MapDetailsView extends View {
                 difficultySwitch.setOption(0);
             }
 
-            Switch[] mapTypeSwitches = new Switch[]{mapTypeSwitch};
+            // MAP TYPE
             if (map.settings().getParkourSubVariant() == ParkourSubVariant.SPEEDRUN) {
                 mapTypeSpeedrunText.setText("Speedrun Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(1);
@@ -169,6 +183,7 @@ public class MapDetailsView extends View {
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
+            qualityUnratedFullText.setText("Unrated", TextColor.color(0xF04B3D));
             if (map.settings().getBuildingSubVariant() == BuildingSubVariant.SHOWCASE) {
                 mapTypeShowcaseText.setText("Building Showcase", TextColor.color(0x0B9F0B));
                 mapTypeSwitch.setOption(8);
@@ -181,10 +196,40 @@ public class MapDetailsView extends View {
             }
         }
 
+        // MAG TAGS
+
+        var tagsString = map.settings().getTagsString();
+        if (tagsString == null) {
+            mapTagsSwitch.setOption(0);
+            noMapTagsText.setText("No Tags");
+        } else {
+            mapTagsSwitch.setOption(1);
+            mapTagsText.setText(tagsString);
+        }
+
+        // MAP SETTINGS
+
+        var settings = map.settings().getSettingsString();
+        if (settings == null) {
+            mapSettingsSwitch.setOption(0);
+            noMapSettingsText.setText("No Settings");
+        } else {
+            mapSettingsSwitch.setOption(1);
+            mapSettingsText.setText(settings);
+        }
+
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
-        var plainAuthorName = PlainTextComponentSerializer.plainText().serialize(authorName);
-        authorText.setText(plainAuthorName);
+        if (authorName instanceof TextComponent tc) {
+            //todo this is cursed code.
+            if (tc.content().isEmpty()) tc = (TextComponent) tc.children().get(0);
+            authorText.setText(tc.content(), Objects.requireNonNullElse(tc.color(), NamedTextColor.WHITE));
+        } else {
+            var plainAuthorName = PlainTextComponentSerializer.plainText().serialize(authorName);
+            authorText.setText(plainAuthorName, TextColor.color(0xB0B0B0));
+        }
+        authorText.setArgs(authorName);
+
     }
 
     @Action(value = "play_map", async = true)

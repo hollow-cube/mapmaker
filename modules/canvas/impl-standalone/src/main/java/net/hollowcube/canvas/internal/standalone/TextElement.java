@@ -46,7 +46,6 @@ public class TextElement extends ButtonElement implements Text {
         //todo we should only rewrite and measure the text once, not every time we draw it
         var textWidth = FontUtil.measureText(text);
 
-        sb.color(color);
         if (centered) {
             int totalWidth = width() * 18 - 2; // take off 2 for the left and right padding
             sb.pos(((totalWidth - textWidth) / 2) + (x * 18));
@@ -54,9 +53,9 @@ public class TextElement extends ButtonElement implements Text {
             sb.pos(shift + (x * 16));
         }
 
+//        sb.color(color); // COLOR LOOKS AWFUL DO NOT REENABLE
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         sb.append(FontUtil.rewrite(font, text), textWidth);
-
     }
 
     @Override

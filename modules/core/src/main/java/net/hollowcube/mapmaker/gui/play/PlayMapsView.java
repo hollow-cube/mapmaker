@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.play;
+package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
@@ -7,16 +7,15 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.gui.play.simple.*;
+import net.hollowcube.mapmaker.gui.play.simple.*;
 import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class PlayMaps extends View {
+public class PlayMapsView extends View {
 
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
@@ -43,7 +42,7 @@ public class PlayMaps extends View {
     private SortPreset sortPreset = SortPreset.RECENT;
 
 
-    public PlayMaps(@NotNull Context context) {
+    public PlayMapsView(@NotNull Context context) {
         super(context);
         updateQuery(false);
     }

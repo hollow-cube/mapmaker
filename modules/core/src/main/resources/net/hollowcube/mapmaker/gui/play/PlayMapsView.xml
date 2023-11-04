@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<?import net.hollowcube.mapmaker.hub.gui.play ?>
-<?import net.hollowcube.mapmaker.hub.gui.play.simple ?>
+<?import net.hollowcube.mapmaker.gui.play ?>
+<?import net.hollowcube.mapmaker.gui.play.simple ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/search/container">
     <!-- Top bar -->
     <box width="9" align="ltr">

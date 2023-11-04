@@ -96,6 +96,21 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     }
 
     @Override
+    public void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore) {
+        itemSprite = this.itemSprite.with(builder -> {
+            if (title != null) builder.displayName(title);
+            if (lore != null) builder.lore(lore);
+            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+        });
+        itemBlank = BLANK_ITEM.with(builder -> {
+            if (title != null) builder.displayName(title);
+            if (lore != null) builder.lore(lore);
+            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+        });
+        context.markDirty();
+    }
+
+    @Override
     public @NotNull LabelElement clone(@NotNull ElementContext context) {
         return new LabelElement(context, this);
     }

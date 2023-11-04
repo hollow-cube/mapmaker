@@ -24,6 +24,18 @@ public interface Label extends Element {
         setArgs(args.toArray(new Component[0]));
     }
 
+    /**
+     * This is a bad function which will make porting to a proxy based solution difficult,
+     * however I do not have an immediately easier way to do it.
+     *
+     * <p>When this is done on a proxy in Go, I would use text/template to render conditional parts.</p>
+     *
+     * @param title The item title, if present
+     * @param lore  The item lore, if present
+     */
+    @Deprecated
+    void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore);
+
     interface ActionHandler {
         static @NotNull ActionHandler lmb(@NotNull Consumer<Player> handler) {
             return (player, slot, clickType) -> {
