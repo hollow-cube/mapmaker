@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.player;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +51,8 @@ public record DisplayName(
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
                     var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("icon/staff/" + part.text), "unknown badge sprite " + part.text);
-                    builder.append(Component.text(sprite.fontChar() + FontUtil.computeOffset(1), FontUtil.NO_SHADOW));
+                    builder.append(Component.text(sprite.fontChar() + FontUtil.computeOffset(1), FontUtil.NO_SHADOW)
+                            .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
                 }
                 default -> throw new IllegalArgumentException("Unknown part type: " + part.type);
             }
