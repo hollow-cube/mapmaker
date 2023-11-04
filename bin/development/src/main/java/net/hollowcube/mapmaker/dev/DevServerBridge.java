@@ -42,11 +42,12 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
 
     @Override
     public @Blocking void sendPlayerToHub(@NotNull Player player) {
-
         var world = MapWorld.forPlayerOptional(player);
         if (world instanceof InternalMapWorld internalWorld) {
             internalWorld.removePlayer(player);
         }
+
+        if (!player.isOnline()) return;
         player.setInstance(hub.world().instance(), player.getPosition().withCoord(0.5, 4, 0.5)).join();
     }
 }
