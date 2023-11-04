@@ -7,7 +7,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +37,6 @@ public class ResetSaveStateItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        player.sendMessage(Component.translatable("map.status.reset.confirm"));
 
         var world = (PlayingMapWorld) MapWorld.forPlayer(player);
         //todo this cast is bad, should redo this whole thing

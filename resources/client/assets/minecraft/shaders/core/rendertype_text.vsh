@@ -32,9 +32,9 @@ void main() {
     vertexColor = Color * texelFetch(Sampler2, UV2 / 16, 0);
     texCoord0 = UV0;
 
-    if (Color == vec4(78/255., 92/255., 36/255., Color.a) && (Position.z == CHAT_TEXT || Position.z == OTHER_TEXT)) {
+    if (Color == vec4(78/255., 92/255., 36/255., Color.a)) { //  && (Position.z == CHAT_TEXT || Position.z == OTHER_TEXT)
         vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);// remove color from no shadow marker
-    } else if (Color == vec4(19/255., 23/255., 9/255., Color.a) && (Position.z == CHAT_SHADOW || Position.z == OTHER_SHADOW)) {
+    } else if (Color == vec4(19/255., 23/255., 9/255., Color.a)) { //  && (Position.z == CHAT_SHADOW || Position.z == OTHER_SHADOW)
         vertexColor = vec4(0);// remove shadow
     }
 
