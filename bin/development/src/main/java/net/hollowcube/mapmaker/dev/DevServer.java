@@ -492,8 +492,8 @@ public class DevServer {
             metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
         });
 
-        player.setDisplayName(playerData.displayName());
-        broadcastTabHeaderAndFooter();
+//        player.setDisplayName(playerData.displayName());
+//        broadcastTabHeaderAndFooter();
 
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
