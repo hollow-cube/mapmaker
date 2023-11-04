@@ -19,7 +19,8 @@ final class CommandContextImpl implements CommandContext {
     private final List<Command.Syntax> syntaxes = new ArrayList<>();
     private final List<Argument<?>> args = new ArrayList<>();
     private final List<Integer> argMarks = new ArrayList<>();
-    private final List<Object> argValues = new ArrayList<>();
+    // null indicates that the argument isnt present
+    private final List<Maybe<Object>> argValues = new ArrayList<>();
     private final List<String> rawArgStrings = new ArrayList<>();
     private CommandExecutor overrideExecutor = null;
 
@@ -52,19 +53,38 @@ final class CommandContextImpl implements CommandContext {
 
     @Override
     public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
+        var index = getArgIndex(arg);
+        if (index < 0) return null;
+
+        var maybeValue = argValues.get(index);
+        if (maybeValue == null) {
+            return null;
+        }
+
+        Object value = maybeValue.value();
+        if (value instanceof Argument.DeferredValue<?> deferred) {
+            value = deferred.get();
+            argValues.set(index, new Maybe<>(value));
+        }
+
+        //noinspection unchecked
+        return (T) value;
+    }
+
+    @Override
+    public boolean has(@NotNull Argument<?> arg) {
+        var index = getArgIndex(arg);
+        return index >= 0 && argValues.get(index) != null;
+    }
+
+    private int getArgIndex(@NotNull Argument<?> arg) {
         for (int i = 0; i < args.size(); i++) {
             if (args.get(i).id().equals(arg.id())) {
-                var value = argValues.get(i);
-                if (value instanceof Argument.DeferredValue<?> deferred) {
-                    value = deferred.get();
-                    argValues.set(i, value);
-                }
-                //noinspection unchecked
-                return (T) value;
+                return i;
             }
         }
 
-        return null;
+        return -1;
     }
 
     // Internal API
@@ -155,7 +175,7 @@ final class CommandContextImpl implements CommandContext {
         return this.args.get(this.args.size() - 1);
     }
 
-    public void pushArgValue(@NotNull String raw, @Nullable Object value, @Nullable CommandExecutor overrideExecutor) {
+    public void pushArgValue(@NotNull String raw, @Nullable Maybe<Object> value, @Nullable CommandExecutor overrideExecutor) {
         System.out.println("PUSH ARG VALUE: " + value);
         this.rawArgStrings.add(raw);
         this.argValues.add(value);
@@ -167,6 +187,15 @@ final class CommandContextImpl implements CommandContext {
     }
 
     public List<Object> argValues() {
-        return argValues;
+        return argValues.stream().map(v -> {
+            if (v == null) return null;
+            return v.value();
+        }).toList();
+    }
+
+    record Maybe<T>(T value) {
+        public boolean isPresent() {
+            return value != null;
+        }
     }
 }

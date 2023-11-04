@@ -7,7 +7,6 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapSearchRequest;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -27,13 +26,13 @@ public class ListMapsView extends View {
 
     private @Outlet("title") Text title;
 
-    private final MapPlayerData target;
+    private final String targetId;
 
-    public ListMapsView(@NotNull Context context, @NotNull MapPlayerData target) {
+    public ListMapsView(@NotNull Context context, @NotNull String targetId) {
         super(context);
-        this.target = target;
+        this.targetId = targetId;
 
-        if (player.getUuid().toString().equals(target.id())) {
+        if (player.getUuid().toString().equals(targetId)) {
             title.setText("Your Maps");
         } else {
             title.setText("todo's Maps");
@@ -55,7 +54,7 @@ public class ListMapsView extends View {
         try {
             var queryResult = mapService.searchMaps(MapSearchRequest.builder(player.getUuid().toString())
                     .page(request.page(), request.pageSize())
-                    .owner(target.id())
+                    .owner(targetId)
                     .build());
 
             var maps = new ArrayList<MapEntry>();

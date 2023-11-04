@@ -39,6 +39,20 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
+    public @NotNull String getPlayerId(@NotNull String idOrUsername) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + idOrUsername + "/id"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> res.body();
+            case 404 -> throw new NotFoundError();
+            default ->
+                    throw new SessionService.InternalError("Failed to get player id (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    @Override
     public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
         // If the player is online we have an up-to-date display name anyway
         var player = MinecraftServer.getConnectionManager().getPlayer(id);

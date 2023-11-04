@@ -109,6 +109,11 @@ public abstract class Command {
                     public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
                         return null;
                     }
+
+                    @Override
+                    public boolean has(@NotNull Argument<?> arg) {
+                        return false;
+                    }
                 });
                 if (eval != CommandCondition.ALLOW) continue;
             }

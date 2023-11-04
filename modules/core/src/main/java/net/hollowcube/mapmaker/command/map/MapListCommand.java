@@ -40,25 +40,22 @@ public class MapListCommand extends Command {
     }
 
     private void execute(@NotNull Player player, @NotNull CommandContext context) {
-        MapPlayerData playerData;
+        String targetId;
         if (!context.has(targetArg)) {
             // No target specified, use self
-            playerData = MapPlayerData.fromPlayer(player);
+            targetId = MapPlayerData.fromPlayer(player).id();
         } else {
             // Execute for the target, if they exist.
-            try {
-                var target = context.get(targetArg);
-                var onlinePlayer = CONNECTION_MANAGER.getPlayer(target);
-                if (onlinePlayer != null)
-                    playerData = MapPlayerData.fromPlayer(onlinePlayer);
-                else playerData = mapService.getMapPlayerData(target);
-            } catch (MapService.NotFoundError ignored) {
-                player.sendMessage("Player not found."); //todo
+            targetId = context.get(targetArg);
+            if (targetId == null) {
+                //todo this null check should be handled by the argument definition itself.
+                // However, using deferred success we wont know if it was an error until too late to trigger an error handler.
+                player.sendMessage("no such player: " + context.getRaw(targetArg));
                 return;
             }
         }
 
-        guiController.show(player, c -> new ListMapsView(c, playerData));
+        guiController.show(player, c -> new ListMapsView(c, targetId));
     }
 
 }

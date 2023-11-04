@@ -11,6 +11,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -34,9 +35,16 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
-        return Argument.Word(id).map(
-                /* Mapper */ (sender, raw) -> new Argument.ParseSuccess<>(raw),
+    public static @NotNull Argument<@Nullable String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
+        var word = Argument.Word(id);
+        return word.map(
+                /* Mapper */ (sender, raw) -> new Argument.ParseDeferredSuccess<>(() -> {
+                    try {
+                        return playerService.getPlayerId(raw);
+                    } catch (PlayerService.NotFoundError ignored) {
+                        return null;
+                    }
+                }),
                 /* Suggester */ (sender, reader, suggestion, raw) -> {
                     for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
                         suggestion.add(result.username());

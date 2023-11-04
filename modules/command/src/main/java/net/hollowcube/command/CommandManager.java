@@ -156,8 +156,10 @@ public final class CommandManager {
                 // If we reached end of input, we can skip optional arguments.
                 if (!reader.canRead()) {
                     if (arg.isOptional() && context.pass() == CommandContext.Pass.EXECUTE) {
+                        var defaultValue = arg.getDefaultValue(sender);
+
                         context.pushArg(arg);
-                        context.pushArgValue("", arg.getDefaultValue(sender), null);
+                        context.pushArgValue("", defaultValue == null ? null : new CommandContextImpl.Maybe<>(defaultValue), null);
                     }
 
                     continue;
@@ -169,10 +171,10 @@ public final class CommandManager {
                 switch (arg.parse(context.sender(), context.reader())) {
                     case Argument.ParseSuccess<?> success -> {
                         // If we hit a success, store the value and continue to the next argument.
-                        context.pushArgValue(reader.rawSince(argMark), success.value(), null);
+                        context.pushArgValue(reader.rawSince(argMark), new CommandContextImpl.Maybe<>(success.value()), null);
                     }
                     case Argument.ParseDeferredSuccess<?> deferred -> {
-                        context.pushArgValue(reader.rawSince(argMark), deferred.value(), null);
+                        context.pushArgValue(reader.rawSince(argMark), new CommandContextImpl.Maybe<>(deferred.value()), null);
                     }
                     case Argument.ParseFailure<?> ignored -> {
 
