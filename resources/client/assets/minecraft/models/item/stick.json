@@ -21,6 +21,12 @@
         "custom_model_data": 3
       },
       "model": "minecraft:item/loader_1"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "minecraft:item/lb_screen"
     }
   ]
 }

@@ -14,6 +14,7 @@ import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.world.MapWorld;
@@ -52,11 +53,18 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
+import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
@@ -257,6 +265,28 @@ public class DevServer {
             mapCommandManager.register(new HelpCommand(mapCommandManager));
 //            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
 //            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
+//
+//            var arg = Argument.RelativeVec3("pos");
+//            var command = new Command("fuck") {
+//            };
+//            command.addSyntax((sender, context) -> {
+//                var newPos = context.get(arg);
+//                System.out.println(newPos);
+//                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
+//            }, arg);
+//            hubCommandManager.register(command);
+//
+//            var arg2 = Argument.GreedyString("pos");
+//            var command2 = new Command("fuck2") {
+//            };
+//            command2.addSyntax((sender, context) -> {
+//                var newPos = context.get(arg2);
+//                System.out.println(newPos);
+//                var m = (TextDisplayMeta) lbTextEntity.getEntityMeta();
+//                m.setScale(new Vec(Double.parseDouble(newPos)));
+////                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
+//            }, arg2);
+//            hubCommandManager.register(command2);
 
             var bridge = new DevServerBridge();
 
@@ -447,6 +477,21 @@ public class DevServer {
         onlinePlayersPattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
     }
 
+    Entity screenEntity = new Entity(EntityType.ITEM_DISPLAY) {{
+        hasPhysics = false;
+        setNoGravity(true);
+    }};
+
+    Entity lbTextEntity = new Entity(EntityType.TEXT_DISPLAY) {{
+        hasPhysics = false;
+        setNoGravity(true);
+    }};
+
+    Entity lbTextEntity2 = new Entity(EntityType.TEXT_DISPLAY) {{
+        hasPhysics = false;
+        setNoGravity(true);
+    }};
+
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
@@ -495,6 +540,52 @@ public class DevServer {
 
         player.setDisplayName(playerData.displayName());
         broadcastTabHeaderAndFooter();
+
+        player.setAllowFlying(true);
+        var screenMeta = (ItemDisplayMeta) screenEntity.getEntityMeta();
+        screenMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(4)));
+        System.out.println(player.getPosition());
+        screenEntity.setInstance(player.getInstance(), new Pos(-1, 49, -24)).join(); // should be -1
+        screenMeta.setScale(new Vec(16, 16, 16));
+        screenMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(10)).into());
+
+        var lbTextMeta = (TextDisplayMeta) lbTextEntity.getEntityMeta();
+        lbTextMeta.setText(Component.text()
+                .append(Component.text("Leaderboard", NamedTextColor.GOLD)).appendNewline()
+                .append(Component.text("#1 notmattw 100000")).appendNewline()
+                .append(Component.text("#2 notmattw 100000")).appendNewline()
+                .append(Component.text("#3 notmattw 100000")).appendNewline()
+                .append(Component.text("#4 notmattw 100000")).appendNewline()
+                .append(Component.text("#5 notmattw 100000")).appendNewline()
+                .append(Component.text("#6 notmattw 100000")).appendNewline()
+                .append(Component.text("#7 notmattw 100000")).appendNewline()
+                .append(Component.text("#8 notmattw 100000")).appendNewline()
+                .append(Component.text("#9 notmattw 100000")).appendNewline()
+                .append(Component.text("#0 notmattw 100000"))
+                .build());
+        lbTextMeta.setBackgroundColor(0);
+        lbTextEntity.setInstance(player.getInstance(), new Pos(5.97, 44, -25.4, 90, 0)).join();
+        lbTextMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
+        lbTextMeta.setScale(new Vec(1.75));
+
+        var lbTextMeta2 = (TextDisplayMeta) lbTextEntity2.getEntityMeta();
+        lbTextMeta2.setText(Component.text()
+                .append(Component.text("Leaderboard", NamedTextColor.GOLD)).appendNewline()
+                .append(Component.text("#1 notmattw 100000")).appendNewline()
+                .append(Component.text("#2 notmattw 100000")).appendNewline()
+                .append(Component.text("#3 notmattw 100000")).appendNewline()
+                .append(Component.text("#4 notmattw 100000")).appendNewline()
+                .append(Component.text("#5 notmattw 100000")).appendNewline()
+                .append(Component.text("#6 notmattw 100000")).appendNewline()
+                .append(Component.text("#7 notmattw 100000")).appendNewline()
+                .append(Component.text("#8 notmattw 100000")).appendNewline()
+                .append(Component.text("#9 notmattw 100000")).appendNewline()
+                .append(Component.text("#0 notmattw 100000"))
+                .build());
+        lbTextMeta2.setBackgroundColor(0);
+        lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 44, -19.8, 90, 0)).join();
+        lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
+        lbTextMeta2.setScale(new Vec(1.75));
 
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
