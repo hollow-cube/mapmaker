@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.hollowcube.map.block.placement.BlockTags;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -12,8 +13,12 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.Material;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @AutoService(FeatureProvider.class)
 public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
@@ -83,6 +88,8 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
     private void handleShiftClick(PlayerBlockInteractEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
 
+        var instance = event.getInstance();
+        var blockPosition = event.getBlockPosition();
         var block = event.getBlock();
 
         String state;
@@ -114,12 +121,50 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             if (BlockTags.MINECRAFT_TRAPDOORS.contains(block.namespace()) || BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
                 var open = Boolean.parseBoolean(block.getProperty("open"));
                 block = block.withProperty("open", String.valueOf(!open));
+            } else if (BlockTags.MINECRAFT_DOORS.contains(block.namespace())) {
+                var open = Boolean.parseBoolean(block.getProperty("open"));
+
+                var isTopHalf = block.getProperty("half").equalsIgnoreCase("upper");
+                var otherPosition = blockPosition.add(0, isTopHalf ? -1 : 1, 0);
+                var otherBlock = instance.getBlock(otherPosition);
+
+                instance.setBlock(otherPosition, otherBlock.withProperty("open", String.valueOf(!open)));
+                block = block.withProperty("open", String.valueOf(!open));
+            } else if (block.id() == Block.PISTON.id() || block.id() == Block.STICKY_PISTON.id()) {
+                var isExtended = Boolean.parseBoolean(block.getProperty("extended"));
+
+                var facing = block.getProperty("facing");
+                var otherPosition = blockPosition.relative(switch (facing) {
+                    case "up" -> BlockFace.TOP;
+                    case "down" -> BlockFace.BOTTOM;
+                    case "north" -> BlockFace.NORTH;
+                    case "south" -> BlockFace.SOUTH;
+                    case "west" -> BlockFace.WEST;
+                    case "east" -> BlockFace.EAST;
+                    default -> throw new IllegalStateException("unreachable");
+                });
+                var otherBlock = instance.getBlock(otherPosition);
+
+                if (isExtended) {
+                    if (otherBlock.id() == Block.PISTON_HEAD.id() && otherBlock.getProperty("facing").equals(facing)) {
+                        instance.setBlock(otherPosition, Block.AIR);
+                        instance.playSound(Sound.sound(SoundEvent.BLOCK_PISTON_CONTRACT, Sound.Source.BLOCK, 0.5f, ThreadLocalRandom.current().nextFloat() * 0.25f + 0.6f), blockPosition);
+                    }
+                } else {
+                    if (otherBlock.id() != Block.AIR.id()) return;
+
+                    instance.setBlock(otherPosition, Block.PISTON_HEAD.withProperty("facing", facing)
+                            .withProperty("type", String.valueOf(block.id() == Block.STICKY_PISTON.id() ? "sticky" : "normal")));
+                    instance.playSound(Sound.sound(SoundEvent.BLOCK_PISTON_EXTEND, Sound.Source.BLOCK, 0.5f, ThreadLocalRandom.current().nextFloat() * 0.25f + 0.6f), blockPosition);
+                }
+
+                block = block.withProperty("extended", String.valueOf(!isExtended));
             } else return; // If we hit this then exit, otherwise we will update the block
         }
 
         // Update the block in the world to the new state
         event.setBlockingItemUse(true);
-        event.getInstance().setBlock(event.getBlockPosition(), block);
+        instance.setBlock(event.getBlockPosition(), block);
     }
 
     static {

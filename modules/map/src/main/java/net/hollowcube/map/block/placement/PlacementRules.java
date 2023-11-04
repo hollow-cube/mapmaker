@@ -88,6 +88,8 @@ public final class PlacementRules {
         // All axis facing
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DISPENSER, false));
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.DROPPER, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.PISTON, false));
+        blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.STICKY_PISTON, false));
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.OBSERVER, true));
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.COMMAND_BLOCK, false));
         blockManager.registerBlockPlacementRule(new FacingAllAxisPlacementRule(Block.CHAIN_COMMAND_BLOCK, false));
