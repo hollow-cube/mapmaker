@@ -545,7 +545,7 @@ public class DevServer {
         var screenMeta = (ItemDisplayMeta) screenEntity.getEntityMeta();
         screenMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(4)));
         System.out.println(player.getPosition());
-        screenEntity.setInstance(player.getInstance(), new Pos(-1, 49, -24)).join(); // should be -1
+        screenEntity.setInstance(player.getInstance(), new Pos(-1, 46, -24)).join(); // should be -1
         screenMeta.setScale(new Vec(16, 16, 16));
         screenMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(10)).into());
 
@@ -564,7 +564,7 @@ public class DevServer {
                 .append(Component.text("#0 notmattw 100000"))
                 .build());
         lbTextMeta.setBackgroundColor(0);
-        lbTextEntity.setInstance(player.getInstance(), new Pos(5.97, 44, -25.4, 90, 0)).join();
+        lbTextEntity.setInstance(player.getInstance(), new Pos(5.97, 41, -25.4, 90, 0)).join();
         lbTextMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
         lbTextMeta.setScale(new Vec(1.75));
 
@@ -583,7 +583,7 @@ public class DevServer {
                 .append(Component.text("#0 notmattw 100000"))
                 .build());
         lbTextMeta2.setBackgroundColor(0);
-        lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 44, -19.8, 90, 0)).join();
+        lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 41, -19.8, 90, 0)).join();
         lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
         lbTextMeta2.setScale(new Vec(1.75));
 

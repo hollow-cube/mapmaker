@@ -11,4 +11,4 @@ env:
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
   MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
 
-  MAPMAKER_SPAWN_MAP_ID: "b210fa07-d64c-4100-a2db-1426c35b7533"
+  MAPMAKER_SPAWN_MAP_ID: "hcspawn.polar"
