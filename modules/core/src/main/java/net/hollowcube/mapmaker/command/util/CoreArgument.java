@@ -85,6 +85,10 @@ public final class CoreArgument {
         );
     }
 
+    public static @NotNull Argument<String> NewMapArg(@NotNull String id, @NotNull MapService mapService) {
+        return new MapIdArgument(id, mapService);
+    }
+
     /**
      * PlayableMap returns an argument for a playable map according to the player context.
      *

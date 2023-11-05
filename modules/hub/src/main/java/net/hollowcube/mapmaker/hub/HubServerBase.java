@@ -30,7 +30,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.SchedulerManager;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -106,9 +105,7 @@ public abstract class HubServerBase implements HubServer {
 
         // Map of the week
         var motwTimer = new CountdownTimer(world.instance());
-        SCHEDULER_MANAGER.scheduleTask(motwTimer,
-                TaskSchedule.seconds(motwTimer.timeToNextMinute()),
-                TaskSchedule.minutes(1), ExecutionType.SYNC);
+        SCHEDULER_MANAGER.submitTask(motwTimer, ExecutionType.SYNC);
     }
 
     @Override

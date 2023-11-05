@@ -70,7 +70,7 @@ public class PermManagerImpl implements PermManager {
                 .build();
         var res = svc.checkPermission(req);
         var state = res.getPermissionship() != CheckPermissionResponse.Permissionship.PERMISSIONSHIP_NO_PERMISSION;
-        logger.info("platform perm check: {} {} -> {} ({})", playerId, perm, state, res);
+        logger.info("platform perm check: {} {} -> {}", playerId, perm, state);
         return state;
     }
 

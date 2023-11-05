@@ -166,7 +166,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn));
         saveState.setPlayStartTime(System.currentTimeMillis());
 
-        if (firstSpawn) player.sendMessage("Now playing " + map.settings().getName());
+//        if (firstSpawn) player.sendMessage("Now playing " + map.settings().getName());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
@@ -185,7 +185,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));
 
         if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
-        player.sendMessage("Now spectating " + map.settings().getName());
+//        player.sendMessage("Now spectating " + map.settings().getName());
     }
 
     @Override

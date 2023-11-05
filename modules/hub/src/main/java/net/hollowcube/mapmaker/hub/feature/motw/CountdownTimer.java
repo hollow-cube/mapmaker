@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.feature.motw;
 
 import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.DayOfWeek;
@@ -8,21 +9,19 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+import java.util.function.Supplier;
 
-public class CountdownTimer implements Runnable {
+public class CountdownTimer implements Supplier<TaskSchedule> {
     private final Instance instance;
 
     private int[] digits = new int[]{-1, -1, -1, -1, -1};
 
     public CountdownTimer(@NotNull Instance instance) {
         this.instance = instance;
-
-        // Run once immediately to preconfigure the timer
-        run();
     }
 
     @Override
-    public void run() {
+    public TaskSchedule get() {
         var remaining = (int) timeToNextWeek();
 
         var days = remaining / 60 / 24;
@@ -40,6 +39,8 @@ public class CountdownTimer implements Runnable {
             // Update the schematic
             CountdownUtil.applySchematic(instance, i, digits[i]);
         }
+
+        return TaskSchedule.seconds(timeToNextMinute());
     }
 
     public long timeToNextMinute() {

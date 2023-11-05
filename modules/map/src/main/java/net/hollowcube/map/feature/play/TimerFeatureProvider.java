@@ -60,15 +60,18 @@ public class TimerFeatureProvider implements FeatureProvider {
         var saveState = SaveState.fromPlayer(player);
         var time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
 
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-        long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
-
-        var text = String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+        var text = formatPlaytime(time);
 
         builder.pushColor(FontUtil.NO_SHADOW);
         builder.pos(-TIMER_CONTAINER.width() / 2).drawInPlace(TIMER_CONTAINER);
         builder.pos(-TIMER_CONTAINER.width() / 2 + 19).append(text);
+    }
+
+    public static String formatPlaytime(long time) {
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
+        long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
+        return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
     }
 
     private void sendTimerActionBar(@NotNull MapWorld world) {
@@ -80,11 +83,7 @@ public class TimerFeatureProvider implements FeatureProvider {
             var saveState = SaveState.fromPlayer(player);
             var time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
 
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-            long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
-
-            var a = String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+            var a = formatPlaytime(time);
             text.append(a);
 
             player.sendActionBar(Component.text(text.toString(), TextColor.color(78, 92, 36)));

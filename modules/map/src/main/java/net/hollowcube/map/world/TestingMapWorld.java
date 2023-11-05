@@ -132,8 +132,8 @@ public class TestingMapWorld implements InternalMapWorld {
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
 
-        if (firstSpawn)
-            player.sendMessage("Now testing " + map().settings().getName());
+//        if (firstSpawn)
+//            player.sendMessage("Now testing " + map().settings().getName());
     }
 
     @Override

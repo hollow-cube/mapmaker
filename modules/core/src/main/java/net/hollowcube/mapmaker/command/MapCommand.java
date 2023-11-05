@@ -5,6 +5,7 @@ import net.hollowcube.command.Command;
 import net.hollowcube.mapmaker.command.map.MapInfoCommand;
 import net.hollowcube.mapmaker.command.map.MapLeaderboardCommand;
 import net.hollowcube.mapmaker.command.map.MapListCommand;
+import net.hollowcube.mapmaker.command.map.MapLookupCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -25,10 +26,15 @@ public class MapCommand extends Command {
     ) {
         super("map");
 
+        // Default commands
         addSubcommand(this.list = new MapListCommand(guiController, playerService, mapService));
         addSubcommand(this.info = new MapInfoCommand(mapService, permManager));
 
+        // Permissioned commands
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
+
+        // Testing
+        addSubcommand(new MapLookupCommand(mapService));
     }
 
 }
