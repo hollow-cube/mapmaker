@@ -42,6 +42,8 @@ public interface MapService {
 
     @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
 
+    void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId);
+
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
 

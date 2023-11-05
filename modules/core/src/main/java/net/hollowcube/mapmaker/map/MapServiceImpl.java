@@ -250,6 +250,23 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
+        var uri = url + "/" + mapId + "/leaderboard/playtime";
+        if (playerId != null) uri += "?playerId=" + playerId;
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.discarding());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to delete playtime leaderboard: " + res.body());
+        }
+    }
+
+    @Override
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
