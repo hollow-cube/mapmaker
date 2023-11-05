@@ -3,9 +3,11 @@ package net.hollowcube.terraform.buffer;
 import net.hollowcube.terraform.math.CoordinateUtil;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A BlockBuffer is a serializable set of section palettes that can be applied to a world.
@@ -15,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public sealed interface BlockBuffer permits BlockBufferImpl {
 
-    static @NotNull Builder builder() {
-        return new NaiveBlockBufferBuilder();
+    static @NotNull Builder builder(@Nullable WorldView world) {
+        return new NaiveBlockBufferBuilder(world);
     }
 
     /**
@@ -32,8 +34,8 @@ public sealed interface BlockBuffer permits BlockBufferImpl {
      * @param pos2 The second position (inclusive)
      * @return A new block buffer builder
      */
-    static @NotNull Builder builder(@NotNull Point pos1, @NotNull Point pos2) {
-        return new BoundedBlockBufferBuilder(pos1, pos2);
+    static @NotNull Builder builder(@Nullable WorldView world, @NotNull Point pos1, @NotNull Point pos2) {
+        return new BoundedBlockBufferBuilder(world, pos1, pos2);
     }
 
     void forEachSection(@NotNull SectionConsumer consumer);

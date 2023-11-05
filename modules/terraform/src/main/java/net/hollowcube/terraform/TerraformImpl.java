@@ -58,8 +58,8 @@ public final class TerraformImpl implements TerraformV2 {
                 task.setState(Task.State.COMPUTE);
                 long start = System.nanoTime();
 
-                var world = WorldView.instance(task.session().instance());
-                var buffer = task.computeFunc().exec(world);
+                var world = WorldView.instance(task, task.session().instance());
+                var buffer = task.computeFunc().exec(task, world);
                 task.setBuffer(buffer);
 
                 logger.debug("{}: compute complete in {}ms ({})", task, (System.nanoTime() - start) / 1_000_000d, Format.formatBytes(buffer.sizeBytes()));
@@ -89,7 +89,7 @@ public final class TerraformImpl implements TerraformV2 {
                 final var paletteData = new int[4096]; // Reused buffer
                 final var indexCache = new AtomicInteger(0);
 
-                final var undoBufferBuilder = BlockBuffer.builder();
+                final var undoBufferBuilder = BlockBuffer.builder(null); //todo add compute buffer min + max here
 
                 buffer.forEachSection((chunkX, chunkY, chunkZ, palette) -> {
                     var chunk = instance.getChunk(chunkX, chunkZ);
@@ -154,9 +154,14 @@ public final class TerraformImpl implements TerraformV2 {
                 task.setState(Task.State.COMPLETE);
                 logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - start) / 1_000_000d);
 
+                var result = new TaskResult(undoBuffer, buffer, changeCount.get(), task.attributes());
+                if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
+                    var cui = task.session().cui();
+                    cui.sendMessage("terrform.warn.border_taint");
+                }
+
                 var postApplyFunc = task.postApplyFunc();
                 if (postApplyFunc != null) {
-                    var result = new TaskResult(undoBuffer, buffer, changeCount.get());
                     postApplyFunc.exec(result);
                 }
             } catch (Throwable t) {

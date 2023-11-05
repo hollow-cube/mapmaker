@@ -6,7 +6,7 @@ class TestNaiveBlockBufferBuilder extends BaseBufferBuilderTest {
 
     @Override
     @NotNull BlockBuffer.Builder createBuilder() {
-        return new NaiveBlockBufferBuilder();
+        return new NaiveBlockBufferBuilder(null);
     }
 
 }

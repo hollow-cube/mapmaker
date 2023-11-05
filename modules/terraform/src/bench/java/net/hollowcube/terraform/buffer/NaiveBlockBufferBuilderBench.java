@@ -13,7 +13,7 @@ public class NaiveBlockBufferBuilderBench {
 
         @Setup(Level.Iteration)
         public void setup() {
-            buffer = new NaiveBlockBufferBuilder();
+            buffer = new NaiveBlockBufferBuilder(null);
         }
     }
 

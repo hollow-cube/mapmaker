@@ -11,6 +11,7 @@ class TestBoundedBlockBufferBuilder extends BaseBufferBuilderTest {
     @Override
     @NotNull BlockBuffer.Builder createBuilder() {
         return new BoundedBlockBufferBuilder(
+                null,
                 new Vec(-100, -100, -100),
                 new Vec(100, 100, 100)
         );
@@ -18,7 +19,7 @@ class TestBoundedBlockBufferBuilder extends BaseBufferBuilderTest {
 
     @Test
     void testPosOutsideBoundary() {
-        var buffer = new BoundedBlockBufferBuilder(Vec.ZERO, Vec.ZERO);
+        var buffer = new BoundedBlockBufferBuilder(null, Vec.ZERO, Vec.ZERO);
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 for (int z = -2; z <= 2; z++) {

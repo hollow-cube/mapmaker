@@ -1,20 +1,28 @@
 package net.hollowcube.terraform.buffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
+import net.hollowcube.terraform.task.Task;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.PaletteUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.hollowcube.terraform.math.CoordinateUtil.*;
 
 final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
+    private @Nullable WorldView world;
     private final Point min, max; // Absolute min/max
     private final Point smin, smax; // Section min/max
     private final Palette[] sectionData;
 
-    public BoundedBlockBufferBuilder(@NotNull Point pos1, @NotNull Point pos2) {
+    private boolean hasBorderTaint = false;
+
+
+    public BoundedBlockBufferBuilder(@Nullable WorldView world, @NotNull Point pos1, @NotNull Point pos2) {
+        this.world = world;
         this.min = floor(min(pos1, pos2));
         this.max = floor(max(pos1, pos2));
         this.smin = toRelative(min);
@@ -34,6 +42,15 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
     @Override
     public void set(@NotNull Point point, int value) {
         Check.argCondition(!contains(point), "Point {0} is not within the bounds of this builder ({1} to {2})", point, min, max);
+
+        // Ensure the position is within the world border
+        if (world != null && !world.contains(point.blockX(), point.blockY(), point.blockZ())) {
+            if (!hasBorderTaint) {
+                hasBorderTaint = true;
+                world.task().addAttribute(Task.ATT_BORDER_TAINT);
+            }
+            return;
+        }
 
         var section = toRelative(point);
         var sectionIndex = (section.blockX() - smin.blockX())

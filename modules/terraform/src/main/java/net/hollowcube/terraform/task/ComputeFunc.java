@@ -17,8 +17,8 @@ import org.jetbrains.annotations.Nullable;
 public interface ComputeFunc {
 
     static @NotNull ComputeFunc set(@NotNull Region region, @NotNull Pattern pattern) {
-        return world -> {
-            var buffer = BlockBuffer.builder(region.min(), region.max());
+        return (task, world) -> {
+            var buffer = BlockBuffer.builder(world, region.min(), region.max());
             for (var pos : region) {
                 //todo block entities
                 buffer.set(pos, pattern.blockAt(world, pos).stateId());
@@ -28,8 +28,8 @@ public interface ComputeFunc {
     }
 
     static @NotNull ComputeFunc replace(@NotNull Region region, @Nullable Mask mask, @NotNull Pattern pattern) {
-        return world -> {
-            var buffer = BlockBuffer.builder(region.min(), region.max());
+        return (task, world) -> {
+            var buffer = BlockBuffer.builder(world, region.min(), region.max());
             for (var pos : region) {
                 var block = world.getBlock(pos);
                 if (!mask.test(world, pos, block)) continue;
@@ -40,6 +40,6 @@ public interface ComputeFunc {
         };
     }
 
-    @NotNull BlockBuffer exec(@NotNull WorldView world);
+    @NotNull BlockBuffer exec(@NotNull Task task, @NotNull WorldView world);
 
 }

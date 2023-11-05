@@ -20,6 +20,8 @@ import org.jetbrains.annotations.UnknownNullability;
  */
 public interface Task {
 
+    @NotNull String ATT_BORDER_TAINT = "terraform:border_taint";
+
     enum State {
         INIT, QUEUED, COMPUTE, APPLY, COMPLETE, FAILED
     }
@@ -55,6 +57,8 @@ public interface Task {
      * finished the compute phase. A null check is equivalent tochecking whether {@link #state()} >= APPLY.
      */
     @UnknownNullability BlockBuffer buffer();
+
+    void addAttribute(@NotNull String attribute);
 
     class Builder {
         private final LocalSession session;

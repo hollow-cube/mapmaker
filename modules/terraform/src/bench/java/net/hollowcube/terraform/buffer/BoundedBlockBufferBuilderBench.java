@@ -14,7 +14,7 @@ public class BoundedBlockBufferBuilderBench {
 
         @Setup(Level.Iteration)
         public void setup() {
-            buffer = new BoundedBlockBufferBuilder(Vec.ZERO, new Vec(55, 55, 55));
+            buffer = new BoundedBlockBufferBuilder(null, Vec.ZERO, new Vec(55, 55, 55));
         }
     }
 

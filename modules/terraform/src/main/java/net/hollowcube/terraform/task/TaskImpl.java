@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @ApiStatus.Internal
@@ -24,6 +26,8 @@ public class TaskImpl implements Task {
     private ComputeFunc computeFunc;
     private BlockBuffer buffer; // Set after compute
     private PostApplyFunc postApplyFunc;
+
+    private final Set<String> attributes = new HashSet<>();
 
     public TaskImpl(
             @NotNull LocalSession session,
@@ -98,6 +102,15 @@ public class TaskImpl implements Task {
 
     public @Nullable PostApplyFunc postApplyFunc() {
         return postApplyFunc;
+    }
+
+    @Override
+    public void addAttribute(@NotNull String attribute) {
+        this.attributes.add(attribute);
+    }
+
+    public @NotNull Set<String> attributes() {
+        return attributes;
     }
 
     @Override
