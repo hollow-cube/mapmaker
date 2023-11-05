@@ -1,25 +1,30 @@
+
+
 // Role definitions for the entirety of mapmaker. There is a single platform
 // for all of mapmaker, always with the id "0".
 //
 // If this feature gets added to SpiceDB, we can set these relationships statically
 // https://github.com/authzed/spicedb/issues/1266
 definition mapmaker/platform {
-
     relation hollowcube: mapmaker/player
     relation admin: mapmaker/player
     relation dev: mapmaker/player
     relation mod: mapmaker/player
     relation crt: mapmaker/player
 
-    // Gives admin permission on all maps
+    // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
     permission global_map_superadmin = hollowcube
     permission global_map_admin = mod + dev + admin
+    // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
 
     permission prefix_hollowcube = hollowcube
     permission prefix_admin = admin
     permission prefix_dev = dev
     permission prefix_mod = mod
     permission prefix_crt = crt
+
+    // Platform map permissions
+    permission map_admin = global_map_admin + global_map_superadmin
 
     permission ip_ban_player = mod + admin
     permission ban_player = mod + admin + hollowcube

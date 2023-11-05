@@ -1,0 +1,7004 @@
+{
+  "textures": {
+    "1awughfaiuwg": "block/bedrock",
+    "a": "block/oak_sapling",
+    "9": "block/stripped_oak_log",
+    "3": "block/grass_block_side",
+    "d": "block/oak_door_top",
+    "4": "block/grass_block_side_overlay",
+    "8": "block/stripped_oak_log_top",
+    "7": "block/mud_bricks",
+    "1": "block/dirt",
+    "6": "block/cornflower",
+    "c": "block/oak_door_bottom",
+    "b": "block/black_concrete",
+    "5": "block/spruce_planks",
+    "2": "block/grass_block_top"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#5",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#5",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:spruce_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003edouble}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#5",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#5",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:spruce_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003edouble}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        3.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "tintindex": 0
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3"
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#4",
+          "tintindex": 0
+        }
+      },
+      "_block": "minecraft:grass_block{properties\u003d{snowy\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.05,
+        1.0,
+        0.5
+      ],
+      "to": [
+        1.95,
+        2.0,
+        0.5
+      ],
+      "rotation": {
+        "origin": [
+          1.5,
+          1.5,
+          0.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.5,
+        1.0,
+        0.05
+      ],
+      "to": [
+        1.5,
+        2.0,
+        0.95
+      ],
+      "rotation": {
+        "origin": [
+          1.5,
+          1.5,
+          0.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:mud_bricks{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.05,
+        1.0,
+        0.5
+      ],
+      "to": [
+        3.95,
+        2.0,
+        0.5
+      ],
+      "rotation": {
+        "origin": [
+          3.5,
+          1.5,
+          0.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.5,
+        1.0,
+        0.05
+      ],
+      "to": [
+        3.5,
+        2.0,
+        0.95
+      ],
+      "rotation": {
+        "origin": [
+          3.5,
+          1.5,
+          0.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.05,
+        1.0,
+        1.5
+      ],
+      "to": [
+        4.95,
+        2.0,
+        1.5
+      ],
+      "rotation": {
+        "origin": [
+          4.5,
+          1.5,
+          1.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:oak_sapling{properties\u003d{stage\u003d\u003e0}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.5,
+        1.0,
+        1.05
+      ],
+      "to": [
+        4.5,
+        2.0,
+        1.95
+      ],
+      "rotation": {
+        "origin": [
+          4.5,
+          1.5,
+          1.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:oak_sapling{properties\u003d{stage\u003d\u003e0}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#b",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#b",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:black_concrete{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.8125,
+        1.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            3.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c",
+          "rotation": 90
+        },
+        "south": {
+          "uv": [
+            3,
+            0,
+            0,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            3,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:oak_door{properties\u003d{hinge\u003d\u003eleft, half\u003d\u003elower, powered\u003d\u003efalse, facing\u003d\u003ewest, open\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        3.0
+      ],
+      "to": [
+        2.0,
+        2.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        3.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        1.0,
+        3.0
+      ],
+      "to": [
+        4.0,
+        2.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.05,
+        1.0,
+        3.5
+      ],
+      "to": [
+        4.95,
+        2.0,
+        3.5
+      ],
+      "rotation": {
+        "origin": [
+          4.5,
+          1.5,
+          3.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:oak_sapling{properties\u003d{stage\u003d\u003e0}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.5,
+        1.0,
+        3.05
+      ],
+      "to": [
+        4.5,
+        2.0,
+        3.95
+      ],
+      "rotation": {
+        "origin": [
+          4.5,
+          1.5,
+          3.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:oak_sapling{properties\u003d{stage\u003d\u003e0}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.05,
+        1.0,
+        4.5
+      ],
+      "to": [
+        1.95,
+        2.0,
+        4.5
+      ],
+      "rotation": {
+        "origin": [
+          1.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.5,
+        1.0,
+        4.05
+      ],
+      "to": [
+        1.5,
+        2.0,
+        4.95
+      ],
+      "rotation": {
+        "origin": [
+          1.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.05,
+        1.0,
+        4.5
+      ],
+      "to": [
+        2.95,
+        2.0,
+        4.5
+      ],
+      "rotation": {
+        "origin": [
+          2.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.5,
+        1.0,
+        4.05
+      ],
+      "to": [
+        2.5,
+        2.0,
+        4.95
+      ],
+      "rotation": {
+        "origin": [
+          2.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.05,
+        1.0,
+        4.5
+      ],
+      "to": [
+        3.95,
+        2.0,
+        4.5
+      ],
+      "rotation": {
+        "origin": [
+          3.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.5,
+        1.0,
+        4.05
+      ],
+      "to": [
+        3.5,
+        2.0,
+        4.95
+      ],
+      "rotation": {
+        "origin": [
+          3.5,
+          1.5,
+          4.5
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#6"
+        }
+      },
+      "_block": "minecraft:cornflower{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        2.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.5,
+        0.5
+      ],
+      "to": [
+        2.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:mud_bricks{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        2.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.5,
+        0.5
+      ],
+      "to": [
+        4.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#b",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#b",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#b",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:black_concrete{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.8125,
+        2.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            13.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#d",
+          "rotation": 90
+        },
+        "south": {
+          "uv": [
+            3,
+            0,
+            0,
+            16
+          ],
+          "texture": "#d"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            3,
+            16
+          ],
+          "texture": "#d"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#d"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#d"
+        }
+      },
+      "_block": "minecraft:oak_door{properties\u003d{hinge\u003d\u003eleft, half\u003d\u003eupper, powered\u003d\u003efalse, facing\u003d\u003ewest, open\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        3.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        3.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        4.0
+      ],
+      "to": [
+        2.0,
+        2.5,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.5,
+        4.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        4.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        4.0
+      ],
+      "to": [
+        3.0,
+        2.5,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.5,
+        4.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        4.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        4.0
+      ],
+      "to": [
+        4.0,
+        2.5,
+        5.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.5,
+        4.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        4.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#7",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#7"
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:mud_bricks{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        3.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.5,
+        1.5
+      ],
+      "to": [
+        2.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        3.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.5,
+        1.5
+      ],
+      "to": [
+        3.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        3.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.5,
+        1.5
+      ],
+      "to": [
+        4.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        4.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        4.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        4.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:stripped_oak_log{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.0,
+        3.0
+      ],
+      "to": [
+        2.0,
+        3.5,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.5,
+        3.0
+      ],
+      "to": [
+        2.0,
+        4.0,
+        3.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        3.0
+      ],
+      "to": [
+        3.0,
+        3.5,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.5,
+        3.0
+      ],
+      "to": [
+        3.0,
+        4.0,
+        3.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "to": [
+        4.0,
+        3.5,
+        4.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.5,
+        3.0
+      ],
+      "to": [
+        4.0,
+        4.0,
+        3.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.25,
+        4.0,
+        0.25
+      ],
+      "to": [
+        2.75,
+        5.0,
+        0.75
+      ],
+      "faces": {
+        "down": {
+          "texture": "#7",
+          "uv": [
+            12.0,
+            12.0,
+            4.0,
+            4.0
+          ]
+        },
+        "up": {
+          "texture": "#7",
+          "uv": [
+            12.0,
+            12.0,
+            4.0,
+            4.0
+          ]
+        },
+        "north": {
+          "texture": "#7",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#7",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        }
+      },
+      "__comment": "Center post",
+      "_block": "minecraft:mud_brick_wall{properties\u003d{east\u003d\u003enone, waterlogged\u003d\u003efalse, south\u003d\u003enone, north\u003d\u003enone, west\u003d\u003enone, up\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        4.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        4.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        4.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        4.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        4.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        4.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#5"
+        }
+      },
+      "_block": "minecraft:spruce_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003ebottom}, nbt\u003dnull, handler\u003dnull}"
+    }
+  ],
+  "display": {
+    "fixed": {
+      "scale": [
+        4,
+        4,
+        4
+      ],
+      "rotation": [
+        -90,
+        0,
+        0
+      ],
+      "translation": [
+        22,
+        22,
+        -32
+      ]
+    }
+  }
+}

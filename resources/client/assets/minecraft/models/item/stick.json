@@ -27,6 +27,12 @@
         "custom_model_data": 4
       },
       "model": "minecraft:item/lb_screen"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "minecraft:item/sm_house"
     }
   ]
 }

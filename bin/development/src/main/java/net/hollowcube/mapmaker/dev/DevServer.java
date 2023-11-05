@@ -69,6 +69,7 @@ import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.timer.TaskSchedule;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -82,6 +83,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -496,6 +498,13 @@ public class DevServer {
         setNoGravity(true);
     }};
 
+    Entity smallHouseEntity = new Entity(EntityType.ITEM_DISPLAY) {{
+        hasPhysics = false;
+        setNoGravity(true);
+    }};
+
+    private boolean isStuffGoing = false;
+
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
@@ -545,10 +554,8 @@ public class DevServer {
         player.setDisplayName(playerData.displayName());
         broadcastTabHeaderAndFooter();
 
-        player.setAllowFlying(true);
         var screenMeta = (ItemDisplayMeta) screenEntity.getEntityMeta();
         screenMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(4)));
-        System.out.println(player.getPosition());
         screenEntity.setInstance(player.getInstance(), new Pos(-1, 46, -24)).join(); // should be -1
         screenMeta.setScale(new Vec(16, 16, 16));
         screenMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(10)).into());
@@ -590,6 +597,33 @@ public class DevServer {
         lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 41, -19.8, 90, 0)).join();
         lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
         lbTextMeta2.setScale(new Vec(1.75));
+
+        var smallHouseMeta = (ItemDisplayMeta) smallHouseEntity.getEntityMeta();
+        smallHouseMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(5)));
+        smallHouseMeta.setScale(new Vec(4));
+        smallHouseEntity.setInstance(player.getInstance(), new Pos(-38 + 0.5, 43, 54 + 0.5, 0, -90)).join();
+//        smallHouseEntity.setInstance(player.getInstance(), player.getPosition().add(0, 5, 0)).join();
+        smallHouseMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
+//        smallHouseMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into());
+
+
+        if (!isStuffGoing) {
+            isStuffGoing = true;
+
+            final var target = new AtomicInteger();
+            final int duration = 5;
+            MinecraftServer.getSchedulerManager().submitTask(() -> {
+                smallHouseMeta.setNotifyAboutChanges(false);
+
+                smallHouseMeta.setInterpolationStartDelta(0);
+                smallHouseMeta.setInterpolationDuration(duration * 20);
+//            smallHouseMeta.setTranslation(new Vec(0, ThreadLocalRandom.current().nextInt(5), 0));
+                smallHouseMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(target.getAndAdd(90))).into());
+
+                smallHouseMeta.setNotifyAboutChanges(true);
+                return TaskSchedule.seconds(duration);
+            });
+        }
 
 
 //        Scoreboards.showPlayerLobbyScoreboard(player);
