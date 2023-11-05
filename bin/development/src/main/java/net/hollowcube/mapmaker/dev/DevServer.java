@@ -238,7 +238,11 @@ public class DevServer {
         if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
         mapService = new MapServiceImpl(mapServiceUrl);
 
-        permManager = new PermManagerImpl("localhost:50051", "supersecretkey");
+        var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
+        if (spicedbUrl == null) spicedbUrl = "localhost:50051";
+        var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
+        if (spicedbToken == null) spicedbToken = "supersecretkey";
+        permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
 
         var kafkaConfig = configProvider.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
