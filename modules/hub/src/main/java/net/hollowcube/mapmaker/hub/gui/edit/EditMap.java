@@ -63,6 +63,7 @@ public class EditMap extends View {
     private @OutletGroup("map_tag_.+_switch") Switch[] mapTagsSwitches;
 
     // MAP SETTINGS
+    private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
 
     // VISUAL
 
@@ -379,6 +380,10 @@ public class EditMap extends View {
         mapTypeTabSwitch.setOption(1);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
+        map.settings().setOnlySprint(false);
+        map.settings().setNoSprint(false);
+        map.settings().setNoJump(false);
+        map.settings().setNoSneak(false);
         updateElementsFromMap();
         updateRequest();
     }
@@ -393,10 +398,8 @@ public class EditMap extends View {
 
     @Action("map_tags_tab_gameplay")
     private void selectMapTagGameplay() {
-        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
-            if (mapTagsTabSwitch.getOption() == 1) return;
+            if (mapTagsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
             mapTagsTabSwitch.setOption(1);
-        }
     }
 
     // TAG HELPER FUNCTIONS
@@ -435,6 +438,18 @@ public class EditMap extends View {
     }
 
     // MAP SETTING TABS
+
+    @Action("map_settings_tab_visual")
+    private void selectMapSettingVisual() {
+        if (mapSettingsTabSwitch.getOption() == 0) return;
+        mapSettingsTabSwitch.setOption(0);
+    }
+
+    @Action("map_settings_tab_gameplay")
+    private void selectMapSettingGameplay() {
+            if (mapSettingsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
+            mapSettingsTabSwitch.setOption(1);
+    }
 
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
         // TODO this is disgusting but I'm lazy, we should do this like tags as enum
@@ -572,11 +587,7 @@ public class EditMap extends View {
     }
 
     @Action("tab_settings")
-    public void showSettingsTab() {
-        if (!(map.settings().getVariant() == MapVariant.BUILDING)) {
-            selectTab(2);
-        } // TODO temp fix to not allow building maps to apply settings
-    }
+    public void showSettingsTab() { selectTab(2); }
 
     @Action("tab_actions")
     public void showActionsTab() {

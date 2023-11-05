@@ -4,6 +4,10 @@
     <box width="9" height="1" align="ltr">
         <BackButton/>
         <label translationKey="gui.create_maps.new_map.information"/>
+        <text id="world_gen_text" width="5" translationKey="gui.create_maps.new_map.title" font="slot_title"
+              centered="true"/>
+        <button translationKey="gui.create_maps.new_map.reset_to_default"/>
+        <button translationKey="gui.create_maps.new_map.more_options"/>
     </box>
 
     <spacer width="9" height="1"/>

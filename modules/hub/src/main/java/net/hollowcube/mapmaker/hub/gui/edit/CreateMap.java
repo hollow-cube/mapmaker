@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
@@ -20,6 +21,8 @@ public class CreateMap extends View {
     private @ContextObject MapService mapService;
 
     private @Outlet("submit") Label submitButton;
+
+    private @Outlet("world_gen_text") Text worldGenText;
 
     private int slot;
 

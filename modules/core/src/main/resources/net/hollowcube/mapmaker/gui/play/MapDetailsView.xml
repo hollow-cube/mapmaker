@@ -198,21 +198,21 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_showcase"
-                            translationKey="map.type.showcase"
+                            translationKey="gui.map_details.map_info_tab.type.building.showcase"
                             sprite="play_maps/details/tab_info/building/map_types/sv_showcase_icon"/>
                     <text width="8" height="1"
                           id="map_type_showcase_text"
-                          translationKey="map.type.showcase"
+                          translationKey="gui.map_details.map_info_tab.type.building.showcase"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_tutorial"
-                            translationKey="map.type.tutorial"
+                            translationKey="gui.map_details.map_info_tab.type.building.tutorial"
                             sprite="play_maps/details/tab_info/building/map_types/sv_tutorial_icon"/>
                     <text width="8" height="1"
                           id="map_type_tutorial_text"
-                          translationKey="map.type.tutorial"
+                          translationKey="gui.map_details.map_info_tab.type.building.tutorial"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">

@@ -149,15 +149,17 @@
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
                 <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
+                <button translationKey="gui.create_maps.map_tags_tab.reset"/>
+                <button translationKey="gui.create_maps.map_tags_tab.filter"/>
             </box>
 
             <box width="9" align="ltr">
                 <!-- make the locked container in here -->
                 <button width="4" id="map_tags_tab_visual"
-                        translationKey="gui.map_details.map_tags_tab.visual_tag"/>
+                        translationKey="gui.create_maps.map_tags_tab.visual_tags"/>
                 <spacer width="1"/>
                 <button width="4" id="map_tags_tab_gameplay"
-                        translationKey="gui.map_details.map_tags_tab.gameplay_tag"/>
+                        translationKey="gui.create_maps.map_tags_tab.gameplay_tags"/>
             </box>
             <switch id="map_tags_tab_switch" width="9" height="3">
                 <!-- VISUAL TAB -->
@@ -358,61 +360,78 @@
         </box>
 
         <!-- SETTINGS TAB -->
-        <box width="9" height="5" align="ttb">
-            <box width="9" height="1" align="ltr" sprite="create_maps/tab_settings/header">
+        <box width="9" height="5" sprite="create_maps/tab_settings/container" align="ttb">
+            <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_settings_tab.information"/>
-                <text id="slot_id_info" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
-                <!--        todo those last 2 buttons-->
-                <button translationKey="gui.create_maps.map_settings_tab.reset"
-                        sprite="create_maps/tab_settings/reset_icon"/>
+                <button translationKey="gui.create_maps.map_settings_tab.reset"/>
                 <button translationKey="gui.create_maps.map_settings_tab.filter"/>
             </box>
 
-            <box width="9" height="4" sprite="create_maps/tab_settings/container" align="ltr">
+            <box width="9" align="ltr">
+                <!-- make the locked container in here -->
+                <button width="4" id="map_settings_tab_visual"
+                        translationKey="gui.create_maps.map_settings_tab.visual_settings"/>
                 <spacer width="1"/>
-                <switch id="map_settings_nojump_switch">
-                    <button id="map_settings_nojump_unset"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_bg"/>
-                    <button id="map_settings_nojump_set"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_selected"/>
-                </switch>
-                <switch id="map_settings_nosprint_switch">
-                    <button id="map_settings_nosprint_unset"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_bg"/>
-                    <button id="map_settings_nosprint_set"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_selected"/>
-                </switch>
-                <switch id="map_settings_onlysprint_switch">
-                    <button id="map_settings_onlysprint_unset"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_bg"/>
-                    <button id="map_settings_onlysprint_set"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_selected"/>
-                </switch>
-                <switch id="map_settings_nosneak_switch">
-                    <button id="map_settings_nosneak_unset"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_bg"/>
-                    <button id="map_settings_nosneak_set"
-                            translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
-                            sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
-                            backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_selected"/>
-                </switch>
+                <button width="4" id="map_settings_tab_gameplay"
+                        translationKey="gui.create_maps.map_settings_tab.gameplay_settings"/>
             </box>
+            <switch id="map_settings_tab_switch" width="9" height="3">
+                <!-- VISUAL TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_settings/tab_visual/container" align="ltr">
+                    <spacer width="1"/>
+                    <box width="7" height="2" align="ttb">
+                        <box width="7" height="1" align="ltr">
+                        </box>
+                    </box>
+                </box>
+                <!-- GAMEPLAY TAB -->
+                <box width="9" height="3" sprite="create_maps/tab_settings/tab_gameplay/container" align="ltr">
+                    <spacer width="1"/>
+                    <switch id="map_settings_onlysprint_switch">
+                        <button id="map_settings_onlysprint_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_bg"/>
+                        <button id="map_settings_onlysprint_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_selected"/>
+                    </switch>
+                    <switch id="map_settings_nosprint_switch">
+                        <button id="map_settings_nosprint_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_bg"/>
+                        <button id="map_settings_nosprint_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_selected"/>
+                    </switch>
+                    <switch id="map_settings_nosneak_switch">
+                        <button id="map_settings_nosneak_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_bg"/>
+                        <button id="map_settings_nosneak_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_selected"/>
+                    </switch>
+                    <switch id="map_settings_nojump_switch">
+                        <button id="map_settings_nojump_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_bg"/>
+                        <button id="map_settings_nojump_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_selected"/>
+                    </switch>
+                </box>
+            </switch>
         </box>
 
         <!-- ACTIONS TAB -->
