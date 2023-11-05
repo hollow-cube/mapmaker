@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -20,6 +21,8 @@ import java.util.function.Function;
  * Used internally to manage components of the MapMaker hub.
  */
 public interface HubServer {
+    
+    Tag<Boolean> DOUBLE_JUMP_TAG = Tag.Boolean("mapmaker:hub-double-jump").defaultValue(true);
 
     class StaticAbuse {
         public static HubServer instance;

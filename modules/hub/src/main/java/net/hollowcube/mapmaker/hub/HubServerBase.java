@@ -10,10 +10,14 @@ import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
+import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -24,6 +28,9 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.SchedulerManager;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +39,8 @@ import java.util.function.Function;
 
 public abstract class HubServerBase implements HubServer {
     //todo one readiness check should be ensuring the world is loaded
+
+    private static final SchedulerManager SCHEDULER_MANAGER = MinecraftServer.getSchedulerManager();
 
     static {
         // Idk why the static initializer is not triggering from other usages
@@ -44,7 +53,7 @@ public abstract class HubServerBase implements HubServer {
 
     private Controller guiController;
 
-    private final Tag<Boolean> DOUBLE_JUMP_TAG = Tag.Boolean("mapmaker:hub-double-jump");
+    private final Tag<Boolean> DOUBLE_JUMP_COOLDOWN_TAG = Tag.Boolean("mapmaker:hub-double-jump-cooldown");
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
             .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn)
@@ -89,11 +98,17 @@ public abstract class HubServerBase implements HubServer {
         commandManager.register(new JoinCommand(inviteService));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
+        mapCommand.addSubcommand(new MapLegacyCommand(mapService(), permManager()));
         commandManager.register(mapCommand);
 
         // Hub specific commands
-        // ...
+        commandManager.register(new HubFlyCommand(permManager()));
 
+        // Map of the week
+        var motwTimer = new CountdownTimer(world.instance());
+        SCHEDULER_MANAGER.scheduleTask(motwTimer,
+                TaskSchedule.seconds(motwTimer.timeToNextMinute()),
+                TaskSchedule.minutes(1), ExecutionType.SYNC);
     }
 
     @Override
@@ -134,15 +149,15 @@ public abstract class HubServerBase implements HubServer {
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+        if (!player.getTag(HubServer.DOUBLE_JUMP_TAG)) return; // Explicitly disabled to allow normal flight
         player.setFlying(false);
-        if (player.hasTag(DOUBLE_JUMP_TAG)) return;
+        if (player.hasTag(DOUBLE_JUMP_COOLDOWN_TAG)) return;
 
         var boostVelocity = player.getPosition().direction().mul(20.0).withY(20.0);
         player.setVelocity(boostVelocity);
-        player.setTag(DOUBLE_JUMP_TAG, true);
+        player.setTag(DOUBLE_JUMP_COOLDOWN_TAG, true);
         player.setAllowFlying(false);
     }
-
 
     private final int LOWER_X_BOUND = Integer.getInteger("mapmaker.hub.lower-x-bound", -250);
     private final int LOWER_Y_BOUND = Integer.getInteger("mapmaker.hub.lower-y-bound", -30);
@@ -156,8 +171,8 @@ public abstract class HubServerBase implements HubServer {
     private final Vec upperHubCoord = new Vec(UPPER_X_BOUND, UPPER_Y_BOUND, UPPER_Z_BOUND);
 
     private void handlePlayerMovement(@NotNull PlayerMoveEvent event) {
-        if (event.isOnGround() && event.getPlayer().hasTag(DOUBLE_JUMP_TAG)) {
-            event.getPlayer().removeTag(DOUBLE_JUMP_TAG);
+        if (event.isOnGround() && event.getPlayer().hasTag(DOUBLE_JUMP_COOLDOWN_TAG)) {
+            event.getPlayer().removeTag(DOUBLE_JUMP_COOLDOWN_TAG);
             event.getPlayer().setAllowFlying(true);
         }
 

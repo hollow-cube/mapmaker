@@ -41,6 +41,8 @@ public class ArgumentWord extends Argument<String> {
 
     @Override
     public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
+        if (values == null) return;
+
         var word = reader.readWord(WordType.ALPHANUMERIC);
         for (var value : values) {
             if (value.startsWith(word)) {

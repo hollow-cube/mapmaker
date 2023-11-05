@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.action.edit;
 
 import net.hollowcube.terraform.selection.region.CuboidRegion;
+import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -38,6 +39,16 @@ public class MockWorldView implements WorldView {
     @Override
     public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Condition condition) {
         return blockAccessor.getBlock(x, y, z, condition);
+    }
+
+    @Override
+    public @NotNull Task task() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean contains(int x, int y, int z) {
+        return true;
     }
 
     public static class Builder {

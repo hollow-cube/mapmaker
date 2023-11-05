@@ -1,36 +1,35 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
-import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
+import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.command.builder.arguments.Argument;
-import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
-public class MapLegacyListCommand extends BaseHubCommand {
-    private final Argument<UUID> playerArg = ArgumentType.UUID("player"); //todo support names too, and offline players -- this is a weird query tho need to get a list of all potential legacy players
+public class MapLegacyListCommand extends Command {
+    private final Argument<String> playerArg = Argument.Word("player");
 
     private final MapService mapService;
 
-    public MapLegacyListCommand(@NotNull MapService mapService) {
+    public MapLegacyListCommand(@NotNull MapService mapService, @NotNull PermManager permManager) {
         super("list");
         this.mapService = mapService;
 
-        //todo usage
+        var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
 
-        addSyntax(wrap(this::listMaps));
-        addSyntax(wrap(this::listMaps), playerArg);
+        addSyntax(playerOnly(this::listLegacyMaps));
+        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
     }
 
-    private void listMaps(@NotNull Player player, @NotNull CommandContext context) {
+    private void listLegacyMaps(@NotNull Player player, @NotNull CommandContext context) {
         var target = player.getUuid().toString();
-        if (context.has(playerArg)) target = context.get(playerArg).toString();
+        if (context.has(playerArg)) target = context.get(playerArg);
 
         try {
             var playerData = PlayerDataV2.fromPlayer(player);

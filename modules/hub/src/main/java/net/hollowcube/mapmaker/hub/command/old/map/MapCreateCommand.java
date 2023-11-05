@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.command.map;
+package net.hollowcube.mapmaker.hub.command.old.map;
 
 import net.hollowcube.mapmaker.hub.command.BaseHubCommand;
 import net.hollowcube.mapmaker.hub.command.ExtraArguments;

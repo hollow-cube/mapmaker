@@ -1,5 +1,6 @@
 dependencies {
     implementation(project(":modules:core"))
+    implementation(project(":modules:terraform")) // Included for schematics
     implementation(project(":modules:canvas:api"))
     runtimeOnly(project(":modules:canvas:impl-standalone"))
 
