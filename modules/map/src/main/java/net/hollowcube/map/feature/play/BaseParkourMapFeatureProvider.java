@@ -9,12 +9,17 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.Duration;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -61,19 +66,29 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-        inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
-        inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
-        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+        if ((event.getMapWorld().flags() & MapWorld.FLAG_TESTING) != 0) {
+            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        } else {
+            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+            inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
+            inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+            inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+            inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+        }
 
         if (event.isFirstInit()) {
-
             player.updateViewableRule(p -> {
                 if (p.isInvisible()) return true;
                 return player.getDistanceSquared(p) > 3.5 * 3.5;
             });
 
+            //todo this should happen async i guess
+            var authorName = event.getMapWorld().server().playerService().getPlayerDisplayName2(event.mapWorld().map().owner()).build();
+            player.showTitle(Title.title(
+                    Component.text(event.mapWorld().map().settings().getName()),
+                    Component.text("by ", TextColor.color(0xCCCCCC)).append(authorName),
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(2000), Duration.ofMillis(500))
+            ));
         }
     }
 
