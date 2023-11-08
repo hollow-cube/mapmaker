@@ -48,14 +48,14 @@ public final class HubHotbar {
     private static final int CREATE_ITEM_CMD = BadSprite.SPRITE_MAP.get("hammer").cmd();
 
     private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
-            .displayName(Component.translatable("hotbar.lobby.play_maps.name"))
-            .lore(LanguageProviderV2.translateMulti("hotbar.lobby.play_maps.lore", List.of()))
+            .displayName(Component.translatable("item.mapmaker.play_maps.name"))
+            .lore(LanguageProviderV2.translateMulti("item.mapmaker.play_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
             .build();
 
     private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
-            .displayName(Component.translatable("hotbar.lobby.create_maps.name"))
-            .lore(LanguageProviderV2.translateMulti("hotbar.lobby.create_maps.lore", List.of()))
+            .displayName(Component.translatable("item.mapmaker.create_maps.name"))
+            .lore(LanguageProviderV2.translateMulti("item.mapmaker.create_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 

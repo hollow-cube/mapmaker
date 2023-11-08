@@ -40,4 +40,5 @@ public class ToggleFlightItem extends ItemHandler {
     public int customModelData() {
         return SPRITE_ON.cmd(); //todo how to switch
     }
+    // TODO also needs to switch translation keys so it says something in the item name like Flight: ON or Flight: OFF
 }

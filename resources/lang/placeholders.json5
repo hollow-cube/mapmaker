@@ -9,6 +9,16 @@
         "type": "sprite",
         "ref": "icon/mouse_shift_left"
     },
+    "RMB": {
+        "type": "sprite",
+        "ref": "icon/mouse_right"
+    },
+    "RMB_ITEM": {
+        "type": "sprite",
+        "ref": "icon/mouse_right",
+        "no_shadow": true,
+        "trailing_space": 2
+    },
     "CONFIRM": {
         "type": "sprite",
         "ref": "icon/confirm"
