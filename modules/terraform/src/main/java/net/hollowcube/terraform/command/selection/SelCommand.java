@@ -26,7 +26,7 @@ public final class SelCommand extends Command {
 
     private void handleClearSelection(@NotNull Player player, @NotNull CommandContext context) {
         context.get(selectionArg).clear();
-        player.sendMessage("todo cleared selection");
+        player.sendMessage(Component.translatable("terraform.sel.clear"));
     }
 
     private final class SetTypeCommand extends Command {
@@ -41,7 +41,7 @@ public final class SelCommand extends Command {
 
         private void handleSetType(@NotNull Player player, @NotNull CommandContext context) {
             context.get(selectionArg).setType(regionType);
-            player.sendMessage(Component.translatable("command.terraform.sel.type.set",
+            player.sendMessage(Component.translatable("terraform.sel.type.set",
                     Component.text(regionType.name().toLowerCase())));
         }
     }

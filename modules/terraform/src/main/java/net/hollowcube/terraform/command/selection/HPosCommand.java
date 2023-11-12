@@ -51,7 +51,7 @@ public sealed abstract class HPosCommand extends Command permits HPosCommand.Pri
         protected void performSelection(@NotNull Player player, @NotNull Selection selection, @NotNull Point point) {
             var changed = selection.selectPrimary(point, true);
             if (!changed) {
-                player.sendMessage(Component.translatable("command.terraform.pos1.already_set"));
+                player.sendMessage(Component.translatable("terraform.pos1.already_set"));
             }
         }
     }
@@ -65,7 +65,7 @@ public sealed abstract class HPosCommand extends Command permits HPosCommand.Pri
         protected void performSelection(@NotNull Player player, @NotNull Selection selection, @NotNull Point point) {
             var changed = selection.selectSecondary(point, true);
             if (!changed) {
-                player.sendMessage(Component.translatable("command.terraform.pos2.already_set"));
+                player.sendMessage(Component.translatable("terraform.pos2.already_set"));
             }
         }
     }

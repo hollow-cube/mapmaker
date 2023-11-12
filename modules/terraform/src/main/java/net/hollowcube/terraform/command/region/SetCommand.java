@@ -38,7 +38,7 @@ public final class SetCommand extends Command {
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, pattern))
                 .post(result -> {
-                    player.sendMessage("finished setting " + result.blocksChanged() + " blocks");
+                    player.sendMessage(Component.translatable("terraform.selection.set", Component.translatable(String.valueOf(result.blocksChanged()))));
                 })
                 .submit();
 

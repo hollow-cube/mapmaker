@@ -3,6 +3,7 @@ package net.hollowcube.terraform.command.clipboard;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.terraform.session.PlayerSession;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,12 +20,12 @@ public class ClipListCommand extends Command {
         var clipboards = session.clipboardNames();
 
         if (clipboards.isEmpty()) {
-            player.sendMessage("no clipboards");
+            player.sendMessage("terraform.clipboard.list.none");
             return;
         }
 
         for (var clipboard : session.clipboardNames()) {
-            player.sendMessage(clipboard);
+            player.sendMessage(Component.translatable("terraform.clipboard.list", Component.translatable(clipboard)));
         }
     }
 

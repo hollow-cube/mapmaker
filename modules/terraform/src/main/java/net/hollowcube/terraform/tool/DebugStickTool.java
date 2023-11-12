@@ -72,7 +72,7 @@ public class DebugStickTool implements BuiltinTool {
         }
 
         click.updateItemStack(b -> b.setTag(TAG_PROPERTY, newProperty));
-        player.sendActionBar(Component.text("selected \"" + newProperty + "\" (" + block.getProperty(newProperty) + ")"));
+        player.sendActionBar(Component.text("Selected \"" + newProperty + "\" (" + block.getProperty(newProperty) + ")"));
     }
 
     @Override

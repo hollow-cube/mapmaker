@@ -216,11 +216,11 @@ public class EditingMapWorld implements InternalMapWorld {
             }
 
             if (isAutoSave) {
-                instance.sendMessage(Component.text("World saved!"));
+                instance.sendMessage(Component.translatable("build.world.save.success"));
             }
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "Failed to save world " + map.id(), e);
-            instance.sendMessage(Component.text("Failed to save world! your world is now in an inconsistent state because this error was not properly handled. oops!"));
+            instance.sendMessage(Component.translatable("build.world.save.failure"));
         } finally {
             saveLock.unlock();
         }
@@ -286,7 +286,7 @@ public class EditingMapWorld implements InternalMapWorld {
             }
 
             if (firstSpawn)
-                player.sendMessage("Now editing " + map.settings().getName() + " " + map.verification());
+                player.sendMessage(Component.translatable("build.world.load.first", Component.translatable(map.settings().getName())));
         }
 
         player.refreshCommands(); //todo this should just be done on every instance change

@@ -157,7 +157,7 @@ public final class TerraformImpl implements TerraformV2 {
                 var result = new TaskResult(undoBuffer, buffer, changeCount.get(), task.attributes());
                 if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
                     var cui = task.session().cui();
-                    cui.sendMessage("terrform.warn.border_taint");
+                    cui.sendMessage("terraform.warn.border_exceeded");
                 }
 
                 var postApplyFunc = task.postApplyFunc();

@@ -39,7 +39,7 @@ public class WandTool implements BuiltinTool {
         var blockPosition = click.blockPosition();
         var changed = selection.selectPrimary(blockPosition, true);
         if (!changed) {
-            player.sendMessage(Component.translatable("command.terraform.pos1.already_set"));
+            player.sendMessage(Component.translatable("terraform.pos1.already_set"));
         }
     }
 
@@ -54,7 +54,7 @@ public class WandTool implements BuiltinTool {
         var blockPosition = click.blockPosition();
         var changed = selection.selectSecondary(blockPosition, true);
         if (!changed) {
-            player.sendMessage(Component.translatable("command.terraform.pos2.already_set"));
+            player.sendMessage(Component.translatable("terraform.pos2.already_set"));
         }
     }
 

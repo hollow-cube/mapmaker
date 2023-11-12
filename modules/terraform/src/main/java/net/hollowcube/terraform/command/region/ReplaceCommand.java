@@ -40,6 +40,9 @@ public final class ReplaceCommand extends Command {
         session.buildTask("replace")
                 .metadata() //todo
                 .compute(ComputeFunc.replace(region, mask, pattern))
+                .post(result -> {
+                    player.sendMessage(Component.translatable("terraform.selection.replace", Component.translatable(String.valueOf(result.blocksChanged()))));
+                })
                 .submit();
     }
 }

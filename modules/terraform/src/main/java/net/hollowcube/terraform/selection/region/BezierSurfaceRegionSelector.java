@@ -37,7 +37,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 
         updateRender();
         if (explain) cui.sendMessage(
-                "command.worldedit.bezier.explain.primary",
+                "terraform.bezier.explain.primary",
                 point.blockX(), point.blockY(), point.blockZ()
         );
 
@@ -57,7 +57,7 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
 
         updateRender();
         if (explain) cui.sendMessage(
-                "command.worldedit.bezier.explain.secondary",
+                "terraform.bezier.explain.secondary",
                 point.blockX(), point.blockY(), point.blockZ()
         );
 

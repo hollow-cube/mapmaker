@@ -21,7 +21,9 @@
     },
     "CONFIRM": {
         "type": "sprite",
-        "ref": "icon/confirm"
+        "ref": "icon/confirm",
+        "no_shadow": true,
+        "trailing_space": 2
     },
     "WARNING": {
         "type": "sprite",
@@ -35,7 +37,9 @@
     },
     "INFO": {
         "type": "sprite",
-        "ref": "icon/info"
+        "ref": "icon/info",
+        "no_shadow": true,
+        "trailing_space": 2
     },
     "LOCK": {
         "type": "sprite",
@@ -54,6 +58,12 @@
     "MINUS": {
         "type": "sprite",
         "ref": "icon/minus",
+        "no_shadow": true,
+        "trailing_space": 2
+    },
+    "NOTE": {
+        "type": "sprite",
+        "ref": "icon/note",
         "no_shadow": true,
         "trailing_space": 2
     },

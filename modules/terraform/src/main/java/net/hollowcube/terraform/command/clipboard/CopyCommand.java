@@ -43,7 +43,7 @@ public class CopyCommand extends Command {
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, Pattern.block(Block.AIR)))
                 .post(result -> {
-                    player.sendMessage("copied " + result.blocksChanged() + " blocks to clipboard");
+                    player.sendMessage(Component.translatable("terraform.copy", Component.translatable(String.valueOf(result.blocksChanged()))));
                     clipboard.setData(result.undoBuffer().toSchematic(new Vec(-pos.blockX(), -pos.blockY(), -pos.blockZ())));
                 })
                 .dryRun();

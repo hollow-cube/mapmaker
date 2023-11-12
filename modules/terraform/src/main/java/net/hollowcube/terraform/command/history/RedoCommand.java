@@ -4,6 +4,7 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +22,6 @@ public class RedoCommand extends Command {
 
         var session = LocalSession.forPlayer(player);
         int undone = session.redo(targetCount);
-        player.sendMessage("Redid " + undone + " changes.");
+        player.sendMessage(Component.translatable("terraform.history.redo", Component.translatable(String.valueOf(undone))));
     }
 }
