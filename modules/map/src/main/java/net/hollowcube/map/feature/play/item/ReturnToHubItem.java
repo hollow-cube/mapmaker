@@ -43,7 +43,7 @@ public class ReturnToHubItem extends ItemHandler {
         var world = MapWorld.forPlayer(player);
 
         try {
-            player.sendMessage("Returning to hub");
+            //player.sendMessage("Returning to hub");
             player.removeTag(SPECTATOR_CHECKPOINT);
             if (world instanceof InternalMapWorld internalWorld) {
                 internalWorld.removePlayer(player);

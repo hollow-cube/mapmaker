@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +20,7 @@ public class HubFlyCommand extends Command {
 
     private void handleToggleFly(@NotNull Player player, @NotNull CommandContext context) {
         var newValue = !player.getTag(HubServer.DOUBLE_JUMP_TAG);
-        player.sendMessage("set flight to " + (newValue ? "off" : "on"));
+        player.sendMessage(Component.translatable("command.fly.hub", Component.translatable(newValue ? "off" : "on")));
         player.setTag(HubServer.DOUBLE_JUMP_TAG, newValue);
         player.setFlyingSpeed(newValue ? 0f : 0.05f);
     }

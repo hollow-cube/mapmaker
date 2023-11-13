@@ -4,6 +4,7 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.terraform.tool.ToolHandler;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;
@@ -27,7 +28,7 @@ public class ToolCreateCommand extends Command {
         var toolType = context.get(builtinToolArg);
         var toolItem = toolHandler.createBuiltinTool(toolType);
         smartAddToolItem(player, toolItem);
-        player.sendMessage("created tool blah blah");
+        player.sendMessage(Component.translatable("tool.create", Component.translatable(toolType)));
     }
 
     private void smartAddToolItem(@NotNull Player player, @NotNull ItemStack itemStack) {

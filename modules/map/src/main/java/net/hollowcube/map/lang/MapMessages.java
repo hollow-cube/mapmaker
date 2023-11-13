@@ -8,7 +8,7 @@ public enum MapMessages implements MessagesBase {
     CHECKPOINT_REACHED("play.checkpoint.reached"),
 
     // Commands
-    COMMAND_CLEAR_INVENTORY_SUCCESS("command.clearinventory.success"),
+    COMMAND_CLEAR_INVENTORY_SUCCESS("command.clear_inventory.success"),
     COMMAND_FLY_ENABLED("command.fly.enabled"),
     COMMAND_FLY_DISABLED("command.fly.disabled"),
     COMMAND_FLY_SPEED_CHANGED("command.flyspeed.changed"),
@@ -17,7 +17,7 @@ public enum MapMessages implements MessagesBase {
     COMMAND_GIVE_NOT_ENOUGH_SPACE("command.give.not_enough_space"),
     COMMAND_GIVE_SUCCESS("command.give.success"),
 
-    COMMAND_SETSPAWN_SUCCESS("command.setspawn.success"),
+    COMMAND_SETSPAWN_SUCCESS("command.set_spawn.success"),
 
     // Misc
     SCHEMATIC_UPLOAD_SUCCESS("map.schematic.upload.success"),

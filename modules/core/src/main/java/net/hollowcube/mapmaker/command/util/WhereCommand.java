@@ -32,23 +32,26 @@ public class WhereCommand extends Command {
         var senderMap = KindaBadThingToFix.getMapFromCurrentWorld(player);
         if (player.equals(target)) {
             if (senderMap == null) {
-                player.sendMessage("youre in the hub");
-            } else {
-                player.sendMessage("youre in a map: " + senderMap.name());
+                player.sendMessage(Component.translatable("command.where.self.hub"));
+            } else if (senderMap.isPublished()) {
+                player.sendMessage(Component.translatable("command.where.self.playing" + senderMap.name()));
+            } else if (!senderMap.isPublished()) {
+                player.sendMessage(Component.translatable("command.where.self.building" + senderMap.name()));
+                return;
             }
-            return;
-        }
 
-        // Otherwise find the other players info
-        var targetMap = KindaBadThingToFix.getMapFromCurrentWorld(target);
-        if (targetMap == null) {
-            player.sendMessage(Component.translatable("generic.in_hub", Component.translatable(target.getUsername())));
-        } else if (targetMap == senderMap) {
-            player.sendMessage(Component.translatable("generic.same_map", Component.translatable(target.getUsername())));
-        } else if (targetMap.isPublished()) {
-            player.sendMessage(Component.translatable("command.where.playing", Component.translatable(target.getUsername()), Component.translatable(targetMap.name())));
-        } else if (!targetMap.isPublished()) {
-            player.sendMessage(Component.translatable("command.where.building", Component.translatable(target.getUsername())));
-        } else throw new IllegalStateException("unreachable");
+            // Otherwise find the other players info
+            var targetMap = KindaBadThingToFix.getMapFromCurrentWorld(target);
+            if (targetMap == null) {
+                player.sendMessage(Component.translatable("command.where.hub", Component.translatable(target.getUsername())));
+            } else if (targetMap == senderMap) {
+                player.sendMessage(Component.translatable("command.where.same_map", Component.translatable(target.getUsername())));
+            } else if (targetMap.isPublished()) {
+                player.sendMessage(Component.translatable("command.where.playing", Component.translatable(target.getUsername()), Component.translatable(targetMap.name())));
+            } else if (!targetMap.isPublished()) {
+                player.sendMessage(Component.translatable("command.where.building", Component.translatable(target.getUsername())));
+            } else throw new IllegalStateException("unreachable");
+            player.sendMessage(Component.translatable("generic.unknown_error"));
+        }
     }
 }

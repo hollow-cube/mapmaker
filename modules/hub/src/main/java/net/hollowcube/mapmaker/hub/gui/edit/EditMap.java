@@ -566,9 +566,9 @@ public class EditMap extends View {
 
             showInfoTab();
             performSignal(CreateMaps.SIG_RESET);
-            player.sendMessage("deleted");
+            player.sendMessage(Component.translatable("command.map.delete.success"));
         } catch (Exception e) {
-            player.sendMessage("failed to delete map");
+            player.sendMessage(Component.translatable("command.map.delete.failure"));
             logger.log(System.Logger.Level.ERROR, "failed to delete map", e);
             player.closeInventory();
         }

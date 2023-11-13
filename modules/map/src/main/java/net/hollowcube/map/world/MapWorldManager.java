@@ -99,7 +99,7 @@ public class MapWorldManager {
 
     private void closeMap(@NotNull MapWorld world) {
         for (var player : world.players()) {
-            player.sendMessage(Component.text("The map you were playing has been closed."));
+            player.sendMessage(Component.translatable("map.closed"));
             server.bridge().sendPlayerToHub(player);
         }
 

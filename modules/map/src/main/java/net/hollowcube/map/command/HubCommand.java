@@ -31,7 +31,7 @@ public class HubCommand extends Command {
     private void returnToHub(@NotNull Player player, @NotNull CommandContext context) {
         try {
             //todo this code is duplicated hella
-            player.sendMessage("Returning to hub");
+            //player.sendMessage("Returning to hub");
 
             var world = MapWorld.forPlayerOptional(player);
             if (world instanceof InternalMapWorld internalWorld) {

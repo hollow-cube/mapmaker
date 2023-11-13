@@ -33,6 +33,8 @@ public class PlayCommand extends Command {
 
     private void handleDefault(@NotNull Player player, @NotNull CommandContext context) {
         player.sendMessage("todo this should open the map search gui");
+        //var server = HubWorld.fromInstance(player.getInstance()).server(); TODO properly
+        //server.newOpenGUI(player, context -> new PlayMapsView(context.with(Map.of("query", ""))));
     }
 
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
