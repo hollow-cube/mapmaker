@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
@@ -99,7 +100,7 @@ public final class CommandManager {
     public void execute(@NotNull CommandSender sender, @NotNull String input) {
         var context = expand(CommandContext.Pass.EXECUTE, sender, input);
         if (!context.hasCommand()) {
-            sender.sendMessage("no such command"); //todo
+            sender.sendMessage(Component.translatable("command.not_found"));
             return;
         }
         if (context.isFailed()) return; //todo, allow handling? log? something?
