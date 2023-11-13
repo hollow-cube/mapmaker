@@ -30,9 +30,9 @@ public class MapDetailsView extends View {
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
-//    private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
+    private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
     private @Outlet("tab_times_switch") Switch tabTimesSwitch;
-//    private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
+    private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
     private Switch[] tabSwitches;
 
     // MAP QUALITIES (leave what is commented out, refer to line 92)
@@ -94,7 +94,7 @@ public class MapDetailsView extends View {
         super(context);
         this.map = map;
 
-        this.tabSwitches = new Switch[]{tabInfoSwitch, tabTimesSwitch};
+        this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};
         selectTab(0);
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
@@ -253,7 +253,7 @@ public class MapDetailsView extends View {
 
     @Action("tab_stats")
     public void showStatsTab() {
-        selectTab(1);
+//        selectTab(1);
     }
 
     @Action("tab_times")
@@ -263,7 +263,7 @@ public class MapDetailsView extends View {
 
     @Action("tab_reviews")
     public void showReviewsTab() {
-        selectTab(3);
+//        selectTab(3);
     }
 
     private void selectTab(int index) {

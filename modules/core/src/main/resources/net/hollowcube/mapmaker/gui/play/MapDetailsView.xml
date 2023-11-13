@@ -275,11 +275,13 @@
         </box>
 
         <!-- STATS TAB -->
+        <spacer width="9" height="5"/>
 
         <!-- TIMES TAB -->
         <spacer width="9" height="5"/>
 
         <!-- REVIEWS TAB -->
+        <spacer width="9" height="5"/>
     </switch>
 
     <!-- Controls -->
