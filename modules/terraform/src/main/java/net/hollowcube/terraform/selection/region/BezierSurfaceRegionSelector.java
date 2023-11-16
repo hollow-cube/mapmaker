@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.cui.ClientInterface;
-import net.hollowcube.terraform.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;

@@ -5,7 +5,7 @@ import com.mattworzala.debug.Layer;
 import com.mattworzala.debug.shape.LineShape;
 import com.mattworzala.debug.shape.Shape;
 import com.mattworzala.debug.shape.SplineShape;
-import net.hollowcube.terraform.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;

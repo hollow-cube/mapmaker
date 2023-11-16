@@ -1,24 +1,30 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.cui.ClientInterface;
-import net.hollowcube.terraform.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CuboidRegionSelector implements RegionSelector {
+    public static final Factory FACTORY = new Factory("cuboid", CuboidRegionSelector::new);
+    private static final byte DATA_VERSION = 1;
+
     private final ClientInterface cui;
-    private final String selectionId;
 
     private Point pos1 = null;
     private Point pos2 = null;
 
     public CuboidRegionSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
         this.cui = cui;
-        this.selectionId = selectionId;
+    }
+
+    public CuboidRegionSelector(@NotNull ClientInterface cui) {
+        this.cui = cui;
     }
 
     @Override
@@ -72,17 +78,17 @@ public class CuboidRegionSelector implements RegionSelector {
     private void updateRender() {
         var renderer = cui.renderer();
 
-        renderer.begin(selectionId);
+        renderer.begin("cuboid"); //todo the ClientInterface should hide this detail. One should be created per selector
         if (pos1 != null && pos2 != null) {
             renderer.cuboid(
                     CoordinateUtil.min(pos1, pos2),
                     CoordinateUtil.max(pos1, pos2).add(1, 1, 1)
             );
         }
-        renderer.end(selectionId);
+        renderer.end("cuboid");
     }
 
-    @Override
+    // TODO: Refactor me into explicit expand/contract operations
     public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
         if (pos1 == null || pos2 == null) return;
 
@@ -143,12 +149,16 @@ public class CuboidRegionSelector implements RegionSelector {
 
     @Override
     public void write(@NotNull NetworkBuffer buffer) {
+        buffer.write(NetworkBuffer.BYTE, DATA_VERSION);
         buffer.writeOptional(NetworkBuffer.VECTOR3, pos1);
         buffer.writeOptional(NetworkBuffer.VECTOR3, pos2);
     }
 
     @Override
     public void read(@NotNull NetworkBuffer buffer) {
+        byte version = buffer.read(NetworkBuffer.BYTE);
+        Check.stateCondition(version > DATA_VERSION, "Unsupported data version: " + version);
+
         pos1 = buffer.readOptional(NetworkBuffer.VECTOR3);
         pos2 = buffer.readOptional(NetworkBuffer.VECTOR3);
     }

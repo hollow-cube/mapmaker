@@ -1,8 +1,7 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.terraform.buffer.BlockBuffer;
-import net.hollowcube.terraform.math.AffineTransform;
 import net.hollowcube.terraform.schem.*;
+import net.hollowcube.terraform.util.math.AffineTransform;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
@@ -26,7 +25,6 @@ public class Clipboard {
 
     private final String name;
 
-    private BlockBuffer buffer = null;
     private Schematic schematic = null; // The current block data stored in this clipboard.
     private List<AffineTransform> transforms; // The transforms, applied in list order.
 
@@ -57,19 +55,9 @@ public class Clipboard {
         this.schematic = schematic;
     }
 
-    public void setData(@Nullable BlockBuffer buffer) {
-        clear();
-        this.buffer = buffer;
-    }
-
     public void clear() {
-        this.buffer = null;
         this.schematic = null;
         this.transforms = new ArrayList<>();
-    }
-
-    public BlockBuffer getAsBuffer() {
-        return buffer;
     }
 
     @Deprecated

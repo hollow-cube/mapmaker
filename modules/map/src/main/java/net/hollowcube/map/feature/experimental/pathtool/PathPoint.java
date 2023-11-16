@@ -5,7 +5,7 @@ import com.mattworzala.debug.shape.Shape;
 import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.common.physics.RayUtils;
 import net.hollowcube.common.physics.SweepResult;
-import net.hollowcube.terraform.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;

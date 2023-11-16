@@ -1,9 +1,9 @@
 package net.hollowcube.terraform.buffer;
 
-import net.hollowcube.terraform.math.CoordinateUtil;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.hollowcube.terraform.task.edit.WorldView;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;

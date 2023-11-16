@@ -32,7 +32,7 @@ import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.TerraformOldInit;
 import net.hollowcube.terraform.compat.axiom.TerraformAxiom;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -104,7 +104,7 @@ public abstract class MapServerBase implements MapServer {
         var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
                 instance -> MapWorld.unsafeFromInstance(instance) != null);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        Terraform.init(commandManager, terraformEvents, null);
+        TerraformOldInit.init(commandManager, terraformEvents, null);
 //        TerraformCompat.init(terraformEvents, condition);
         TerraformAxiom.init(terraformEvents, null);
 

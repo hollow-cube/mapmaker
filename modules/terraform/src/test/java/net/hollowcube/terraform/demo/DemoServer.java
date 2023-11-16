@@ -4,12 +4,14 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.TerraformOldInit;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
@@ -36,6 +38,8 @@ public class DemoServer {
             .build();
 
     public static void main(String[] args) {
+        System.setProperty("terraform.debug.markers", "true");
+
         var server = MinecraftServer.init();
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -53,9 +57,17 @@ public class DemoServer {
 
         var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEventNode);
-        Terraform.init(commandManager, terraformEventNode, null);
+        TerraformOldInit.init(commandManager, terraformEventNode, null);
+
+        var terraform = Terraform.builder()
+                .module(Terraform.BASE_MODULE)
+                .build();
 
         MinecraftServer.getGlobalEventHandler()
+                .addListener(AsyncPlayerPreLoginEvent.class, event -> {
+                    // Use username as session ID here because we are in offline mode
+                    terraform.initPlayerSession(event.getPlayer(), event.getUsername());
+                })
                 .addListener(PlayerLoginEvent.class, event -> {
                     event.setSpawningInstance(instance);
                     event.getPlayer().setRespawnPoint(new Pos(0, 41, 0));
@@ -63,6 +75,9 @@ public class DemoServer {
                 .addListener(PlayerSpawnEvent.class, event -> {
                     var player = event.getPlayer();
                     player.setGameMode(GameMode.CREATIVE);
+
+                    //todo this is not a safe call. it blocks the tick thread during instance change.
+                    terraform.initLocalSession(player, player.getInstance().getUniqueId().toString());
                 });
 
         server.start("0.0.0.0", 25565);

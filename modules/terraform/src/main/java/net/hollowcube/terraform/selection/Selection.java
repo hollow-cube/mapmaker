@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import static net.minestom.server.network.NetworkBuffer.STRING;
 
 @SuppressWarnings("UnstableApiUsage")
-public class Selection {
+public final class Selection {
     public static final @NotNull String DEFAULT = "default";
 
     private final LocalSession session;
@@ -20,7 +20,7 @@ public class Selection {
 
     private RegionSelector selector;
     private Region.Type regionType;
-    private Region cachedRegion = null;
+    private Region cachedRegion = null; // Never serialized
 
     public Selection(@NotNull LocalSession session, @NotNull String name) {
         this(session, name, Region.Type.CUBOID);
@@ -90,7 +90,7 @@ public class Selection {
 
     @Deprecated //todo delete me or change the mechanism
     public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-        selector.changeSize(delta, changeVertical, changeHorizontal);
+//        selector.changeSize(delta, changeVertical, changeHorizontal);
     }
 
     // Serialization

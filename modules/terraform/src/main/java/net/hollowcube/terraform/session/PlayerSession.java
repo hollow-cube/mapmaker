@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.terraform.TerraformV2;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
 import net.kyori.adventure.text.Component;
@@ -8,15 +8,17 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
+import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
 /**
@@ -30,50 +32,43 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
  */
 @SuppressWarnings({"UnstableApiUsage"})
 public class PlayerSession {
-    public static final int STATE_VERSION = 1;
+    private static final Logger logger = LoggerFactory.getLogger(PlayerSession.class);
 
-    public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
-
+    /**
+     * Returns the {@link PlayerSession} for the given player.
+     *
+     * @throws NullPointerException if the player does not have a session.
+     */
     public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
-        var session = player.getTag(TAG);
-        if (session == null) {
-            session = new PlayerSession(TerraformV2.StaticAbuse.instance, player);
-            player.setTag(TAG, session);
-        }
-        return session;
+        return Objects.requireNonNull(player.getTag(TAG), "Player session not initialized");
     }
 
-    public static @NotNull PlayerSession load(@NotNull Player player, byte[] data) {
-        //todo do we want to overwrite the session if there is one present?
-        var session = new PlayerSession(TerraformV2.StaticAbuse.instance, player, data);
-        player.setTag(TAG, session);
-        return session;
-    }
+    @ApiStatus.Internal
+    public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
+    private static final int STATE_VERSION = 1;
 
-    public static byte @NotNull [] save(@NotNull Player player) {
-        return forPlayer(player).write();
-    }
-
-    private final TerraformV2 terraform;
-
+    private final Terraform terraform;
+    private final String id;
     private final Player player;
     private PlayerCapabilities capabilities;
 
     private final Map<String, Clipboard> clipboards = new HashMap<>();
 
-    PlayerSession(@NotNull TerraformV2 terraform, @NotNull Player player) {
-        this(terraform, player, null);
-    }
-
-    PlayerSession(@NotNull TerraformV2 terraform, @NotNull Player player, byte @Nullable [] data) {
+    @ApiStatus.Internal
+    public PlayerSession(@NotNull Terraform terraform, @NotNull String id, @NotNull Player player, byte @Nullable [] data) {
         this.terraform = terraform;
+        this.id = id;
         this.player = player;
 
         if (data != null && data.length > 0) read(data);
     }
 
-    public @NotNull TerraformV2 terraform() {
+    public @NotNull Terraform terraform() {
         return terraform;
+    }
+
+    public @NotNull String id() {
+        return id;
     }
 
     public @NotNull Player player() {
@@ -143,20 +138,21 @@ public class PlayerSession {
         return Set.copyOf(clipboards.keySet());
     }
 
-
     // Serialization
-    //todo document this format somewhere
+    // Note: No data is compressed. A storage implementation MAY choose to compress the data before writing it.
 
-    private byte @NotNull [] write() {
-        //todo compress
+    @ApiStatus.Internal
+    public byte @NotNull [] write() {
         return NetworkBuffer.makeArray(buffer -> {
             buffer.write(SHORT, (short) STATE_VERSION);
 
             buffer.writeCollection(clipboards.values(), (b, c) -> c.write(b));
+            insertMarker(buffer);
         });
     }
 
-    private void read(byte @NotNull [] data) {
+    @ApiStatus.Internal
+    public void read(byte @NotNull [] data) {
         var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
 
         var version = buffer.read(SHORT);
@@ -164,7 +160,9 @@ public class PlayerSession {
 
         var clipboards = buffer.readCollection(Clipboard::new);
         clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
+        assertMarker(buffer, "clipboards");
 
+        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 
 }

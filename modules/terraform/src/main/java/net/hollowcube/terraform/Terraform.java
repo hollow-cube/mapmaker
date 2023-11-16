@@ -1,75 +1,62 @@
 package net.hollowcube.terraform;
 
-import net.hollowcube.command.CommandManager;
-import net.hollowcube.terraform.command.TerraformCommand;
-import net.hollowcube.terraform.command.clipboard.ClipboardCommand;
-import net.hollowcube.terraform.command.clipboard.CopyCommand;
-import net.hollowcube.terraform.command.clipboard.CutCommand;
-import net.hollowcube.terraform.command.clipboard.PasteCommand;
-import net.hollowcube.terraform.command.history.ClearHistoryCommand;
-import net.hollowcube.terraform.command.history.RedoCommand;
-import net.hollowcube.terraform.command.history.UndoCommand;
-import net.hollowcube.terraform.command.region.ReplaceCommand;
-import net.hollowcube.terraform.command.region.SetCommand;
-import net.hollowcube.terraform.command.selection.HPosCommand;
-import net.hollowcube.terraform.command.selection.PosCommand;
-import net.hollowcube.terraform.command.selection.SelCommand;
-import net.hollowcube.terraform.command.tool.ToolCommand;
-import net.hollowcube.terraform.tool.ToolHandler;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.condition.CommandCondition;
-import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.trait.InstanceEvent;
+import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.session.PlayerSession;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public final class Terraform {
-    private Terraform() {
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * TerraformV2 is the root of a Terraform instance.
+ * <p>
+ * It should be created once for an entire server
+ */
+public sealed interface Terraform permits TerraformImpl {
+    @NotNull TerraformModule BASE_MODULE = new BaseModule();
+
+    static @NotNull Builder builder() {
+        return new Builder();
     }
 
-    public static void init(@NotNull CommandManager commandManager, @Nullable EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
-        if (eventNode == null) {
-            eventNode = EventNode.type("terraform", EventFilter.INSTANCE);
-            MinecraftServer.getGlobalEventHandler().addChild(eventNode);
+
+    // Sessions
+    // todo: By default terraform should auto-init a player session when you join the game (pre login event)
+    // todo: By default terraform should auto-init a local session when you enter an instance
+
+    /**
+     * Creates a {@link PlayerSession} for the given {@link Player},
+     * loading data from storage if available.
+     *
+     * <p>This call may block the current thread, it is the callers responsibility to call it in a safe point.</p>
+     */
+    @Blocking
+    void initPlayerSession(@NotNull Player player, @NotNull String playerId);
+
+    /**
+     * Creates a {@link LocalSession} for the given {@link Player}, loading data from storage if available.
+     *
+     * <p>The player must already have a {@link PlayerSession} and be inside an {@link Instance}</p>
+     *
+     * <p>This call may block the current thread, it is the callers responsibility to call it in a safe point.</p>
+     */
+    @Blocking
+    void initLocalSession(@NotNull Player player, @NotNull String sessionId);
+
+
+    class Builder {
+        private final List<TerraformModule> modules = new ArrayList<>();
+
+        public @NotNull Builder module(@NotNull TerraformModule module) {
+            modules.add(module);
+            return this;
         }
 
-        // Root/Debug
-        commandManager.register(new TerraformCommand());
-
-        // Selection
-        commandManager.register(new PosCommand.Primary());
-        commandManager.register(new PosCommand.Secondary());
-        commandManager.register(new HPosCommand.Primary());
-        commandManager.register(new HPosCommand.Secondary());
-        commandManager.register(new SelCommand());
-//        commandManager.register(new SelectionCommands.Outset(condition));
-//        commandManager.register(new SelectionCommands.Inset(condition));
-//        commandManager.register(new SelectionCommands.Chunk(condition));
-//        commandManager.register(new SelectionCommands.Size(condition));
-
-        // Region
-        commandManager.register(new SetCommand());
-        commandManager.register(new ReplaceCommand());
-
-        // History
-        commandManager.register(new UndoCommand());
-        commandManager.register(new RedoCommand());
-        commandManager.register(new ClearHistoryCommand());
-
-        // Clipboard
-        commandManager.register(new CopyCommand());
-        commandManager.register(new CutCommand());
-        commandManager.register(new PasteCommand());
-        commandManager.register(new ClipboardCommand());
-
-        // Schematic
-        //todo
-
-        // Tool
-        var toolHandler = new ToolHandler();
-        commandManager.register(new ToolCommand(toolHandler));
-        eventNode.addChild(toolHandler.eventNode());
-
+        public @NotNull Terraform build() {
+            return new TerraformImpl(List.copyOf(modules));
+        }
     }
 }

@@ -10,7 +10,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static net.hollowcube.terraform.math.CoordinateUtil.*;
+import static net.hollowcube.terraform.util.math.CoordinateUtil.*;
 
 final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
     private @Nullable WorldView world;

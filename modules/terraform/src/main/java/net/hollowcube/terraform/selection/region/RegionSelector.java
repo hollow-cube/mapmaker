@@ -1,11 +1,18 @@
 package net.hollowcube.terraform.selection.region;
 
+import net.hollowcube.terraform.cui.ClientInterface;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
+@SuppressWarnings("UnstableApiUsage")
 public interface RegionSelector {
+
+    record Factory(@NotNull String id, @NotNull Function<ClientInterface, RegionSelector> factory) {
+    }
 
     /**
      * Adds/sets a primary selection pos to the current region.
@@ -37,20 +44,24 @@ public interface RegionSelector {
      */
     @Nullable Region region();
 
-    /**
-     * Changes the size of the region by the specified amount.
-     *
-     * @param delta            The amount to change the size of the region by. If the number is negative, it will shrink, if it is positive, the region will grow
-     * @param changeVertical   If the size change should modify the selection in the vertical direction (+/- y coordinate). True to modify, false to not
-     * @param changeHorizontal If the size change should modify the selection in the horizontal directions (+/- x and z coordinates). True to modify, false to not
-     */
-    @Deprecated //todo would rather explicit expand/contract methods which operate on xyz
-    default void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-        throw new UnsupportedOperationException();
-    }
+    // Modification
 
+    //todo expand, contract on xyz individually.
+
+    // Serialization
+
+    /**
+     * Write this region selector data to the given {@link NetworkBuffer}.
+     *
+     * <p>Implementations are responsible for handling format changes internally (eg using a version number).</p>
+     */
     void write(@NotNull NetworkBuffer buffer);
 
+    /**
+     * Read this region selector data from the given {@link NetworkBuffer}.
+     *
+     * <p>Implementations are responsible for handling format changes internally (eg using a version number).</p>
+     */
     void read(@NotNull NetworkBuffer buffer);
 
 }

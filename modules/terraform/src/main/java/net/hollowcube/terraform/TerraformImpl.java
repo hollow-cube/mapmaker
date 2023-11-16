@@ -3,36 +3,84 @@ package net.hollowcube.terraform;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.buffer.Palette;
+import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.session.history.Change;
+import net.hollowcube.terraform.storage.TerraformStorage;
+import net.hollowcube.terraform.storage.TerraformStorageNoop;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
 import net.hollowcube.terraform.task.TaskResult;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.ThreadUtil;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ApiStatus.Internal
-public final class TerraformImpl implements TerraformV2 {
-    private static final Logger logger = LoggerFactory.getLogger(TerraformV2.class);
+public final class TerraformImpl implements Terraform {
+    private static final Logger logger = LoggerFactory.getLogger(Terraform.class);
 
+    private final TerraformRegistry registry;
+    private final TerraformStorage storage;
+
+    // Tasks
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
 
-    TerraformImpl() {
-        threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
-        threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
+    TerraformImpl(@NotNull Collection<TerraformModule> modules) {
+        this.registry = new TerraformRegistry(modules);
+        this.storage = new TerraformStorageNoop();
+
+        this.threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
+        this.threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
+    }
+
+    public @NotNull TerraformRegistry registry() {
+        return registry;
+    }
+
+    // Sessions
+
+    @Override
+    public void initPlayerSession(@NotNull Player player, @NotNull String playerId) {
+        //todo handle exceptions here i guess
+        Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
+
+        var sessionData = storage.loadPlayerSession(player, playerId);
+        var session = new PlayerSession(this, playerId, player, sessionData);
+        logger.debug("Created session for {} ({}) withData={}", player.getUuid(), player.getUsername(),
+                sessionData != null && sessionData.length > 0);
+        player.setTag(PlayerSession.TAG, session);
+    }
+
+    @Override
+    public void initLocalSession(@NotNull Player player, @NotNull String sessionId) {
+        //todo handle exceptions here i guess
+        var instance = Objects.requireNonNull(player.getInstance(), "Player must be in an instance");
+        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
+        Check.stateCondition(instance.hasTag(tag), "Player already has a local session");
+
+        var playerSession = PlayerSession.forPlayer(player);
+        var sessionData = storage.loadLocalSession(player, playerSession.id(), sessionId);
+        var session = new LocalSession(playerSession, instance, sessionData);
+        logger.debug("Created local session for {} ({}) withData={}", player.getUuid(), player.getUsername(),
+                sessionData != null && sessionData.length > 0);
+        instance.setTag(tag, session);
     }
 
     // Internal Task API
