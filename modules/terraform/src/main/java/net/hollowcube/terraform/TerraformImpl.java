@@ -7,7 +7,6 @@ import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.storage.TerraformStorage;
-import net.hollowcube.terraform.storage.TerraformStorageMemory;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
 import net.hollowcube.terraform.task.TaskResult;
@@ -42,9 +41,11 @@ public final class TerraformImpl implements Terraform {
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
 
-    TerraformImpl(@NotNull Collection<TerraformModule> modules) {
+    TerraformImpl(@NotNull Collection<TerraformModule> modules, @NotNull String storage) {
         this.registry = new TerraformRegistry(modules);
-        this.storage = new TerraformStorageMemory();
+
+        var storageFactory = Objects.requireNonNull(this.registry.storage(storage), "Storage not found: " + storage);
+        this.storage = storageFactory.newStorageFunc().get();
 
         this.threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
         this.threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));

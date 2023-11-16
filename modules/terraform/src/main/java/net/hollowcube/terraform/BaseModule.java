@@ -2,6 +2,8 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.selection.region.RegionSelector;
+import net.hollowcube.terraform.storage.TerraformStorage;
+import net.hollowcube.terraform.storage.TerraformStorageMemory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -16,4 +18,8 @@ final class BaseModule implements TerraformModule {
         return Set.of(CuboidRegionSelector.FACTORY);
     }
 
+    @Override
+    public @NotNull Set<TerraformStorage.Factory> storageTypes() {
+        return Set.of(TerraformStorageMemory.FACTORY);
+    }
 }

@@ -61,14 +61,20 @@ public sealed interface Terraform permits TerraformImpl {
 
     class Builder {
         private final List<TerraformModule> modules = new ArrayList<>();
+        private String storage = "memory";
 
         public @NotNull Builder module(@NotNull TerraformModule module) {
             modules.add(module);
             return this;
         }
 
+        public @NotNull Builder storage(@NotNull String storage) {
+            this.storage = storage;
+            return this;
+        }
+
         public @NotNull Terraform build() {
-            return new TerraformImpl(List.copyOf(modules));
+            return new TerraformImpl(List.copyOf(modules), storage);
         }
     }
 }

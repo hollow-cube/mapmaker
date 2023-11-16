@@ -19,6 +19,7 @@ import net.hollowcube.map.command.utility.*;
 import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteServiceImpl;
+import net.hollowcube.map.terraform.MapServerModule;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
@@ -73,6 +74,8 @@ public abstract class MapServerBase implements MapServer {
     // Terraform
     private final Terraform terraform = Terraform.builder()
             .module(Terraform.BASE_MODULE)
+            .module(new MapServerModule())
+            .storage("http")
             .build();
 
     static {

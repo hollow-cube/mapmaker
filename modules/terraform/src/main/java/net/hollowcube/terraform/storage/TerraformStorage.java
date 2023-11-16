@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Storage API for Terraform.
@@ -18,12 +19,14 @@ import java.util.List;
 @Blocking
 public interface TerraformStorage {
 
+    record Factory(@NotNull String name, @NotNull Supplier<TerraformStorage> newStorageFunc) {
+    }
+
     // Sessions
 
     /**
      * Loads the player session data for the given player and player ID if it exists.
      *
-     * @param player   The player for which to load the session.
      * @param playerId The ID of the player (not necessarily the player UUID).
      * @return The player session data, or null if there is no saved data.
      */
