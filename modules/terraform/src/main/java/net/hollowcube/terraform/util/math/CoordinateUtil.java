@@ -3,6 +3,7 @@ package net.hollowcube.terraform.util.math;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
@@ -29,6 +30,24 @@ public final class CoordinateUtil {
                 Math.max(a.y(), b.y()),
                 Math.max(a.z(), b.z())
         );
+    }
+
+
+    public static @NotNull Direction directionFromView(@NotNull Pos pos) {
+        float pitch = pos.pitch(), yaw = pos.yaw();
+        if (pitch <= -45) {
+            return Direction.UP;
+        } else if (pitch >= 45) {
+            return Direction.DOWN;
+        } else if (yaw >= -45 && yaw < 45) {
+            return Direction.SOUTH;
+        } else if (yaw >= 45 && yaw < 135) {
+            return Direction.WEST;
+        } else if (yaw >= -135 && yaw < -45) {
+            return Direction.EAST;
+        } else {
+            return Direction.NORTH;
+        }
     }
 
     public static @NotNull NBTCompound toNBT(@NotNull Point pos) {

@@ -194,11 +194,18 @@ public final class TerraformImpl implements Terraform {
                             if (newBlockState == Palette.UNSET) {
                                 paletteData[paletteIndex] = stateId;
                             } else {
-                                changeCount.incrementAndGet();
                                 paletteData[paletteIndex] = newBlockState;
-                                sectionChangeCache.add(((long) newBlockState << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
+
+                                // Only send a client update if the block was actually modified (and for change counter)
+                                if (stateId != newBlockState) {
+                                    changeCount.incrementAndGet();
+                                    sectionChangeCache.add(((long) newBlockState << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
+                                }
 
                                 // Save old state for undo batch
+                                // Note that we save regardless of whether the block was actually modified,
+                                // this is because undo-ing should change it in case the block changed after
+                                // the apply.
                                 undoBufferBuilder.set(
                                         (chunkX << 4) + sx,
                                         (chunkY << 4) + sy,

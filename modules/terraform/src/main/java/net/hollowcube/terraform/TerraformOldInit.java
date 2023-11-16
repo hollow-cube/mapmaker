@@ -11,6 +11,8 @@ import net.hollowcube.terraform.command.history.RedoCommand;
 import net.hollowcube.terraform.command.history.UndoCommand;
 import net.hollowcube.terraform.command.region.ReplaceCommand;
 import net.hollowcube.terraform.command.region.SetCommand;
+import net.hollowcube.terraform.command.region.SmearCommand;
+import net.hollowcube.terraform.command.region.StackCommand;
 import net.hollowcube.terraform.command.schem.SchemCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
@@ -53,6 +55,8 @@ public final class TerraformOldInit {
         // Region
         commandManager.register(new SetCommand());
         commandManager.register(new ReplaceCommand());
+        commandManager.register(new StackCommand());
+        commandManager.register(new SmearCommand());
 
         // History
         commandManager.register(new UndoCommand());
