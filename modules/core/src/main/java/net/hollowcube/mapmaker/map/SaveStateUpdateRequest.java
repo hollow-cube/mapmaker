@@ -15,12 +15,11 @@ public class SaveStateUpdateRequest {
     private Pos pos = null;
     private Boolean isFlying = null;
     private String inventory = null;
-    private String tfState = null;
     private String checkpoint = null;
     private Pos checkpointPos = null;
 
     public boolean hasChanges() {
-        return completed != null || playtime != null || pos != null || isFlying != null || inventory != null || tfState != null || checkpoint != null || checkpointPos != null;
+        return completed != null || playtime != null || pos != null || isFlying != null || inventory != null || checkpoint != null || checkpointPos != null;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
@@ -55,15 +54,6 @@ public class SaveStateUpdateRequest {
             this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.writeCollection(NetworkBuffer.ITEM, items)));
         }
         return this;
-    }
-
-    public @NotNull SaveStateUpdateRequest setTFState(@NotNull byte[] tfstate) {
-        this.tfState = Base64.getEncoder().encodeToString(tfstate);
-        return this;
-    }
-
-    public void setTfState(String tfState) {
-        this.tfState = tfState;
     }
 
     public @NotNull SaveStateUpdateRequest setCheckpoint(@NotNull String checkpoint) {

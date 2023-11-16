@@ -5,9 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Base64;
 import java.util.List;
 
 public class PlayerDataV2 {
@@ -26,8 +24,6 @@ public class PlayerDataV2 {
     @SerializedName("display_name_v2")
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private PlayerSettings settings = new PlayerSettings();
-
-    private String tfState = null; // base64 bytes
 
     public PlayerDataV2() {
     }
@@ -63,14 +59,4 @@ public class PlayerDataV2 {
         return settings;
     }
 
-    public byte @Nullable [] getTfState() {
-        if (tfState == null) return null;
-        return Base64.getDecoder().decode(tfState);
-    }
-
-    public void setTfState(byte @Nullable [] tfState) {
-        if (tfState == null) this.tfState = null;
-        else this.tfState = Base64.getEncoder().encodeToString(tfState);
-        updates.setTfState(this.tfState);
-    }
 }

@@ -43,7 +43,6 @@ public class SaveState {
     // Editing
     private boolean isFlying = false;
     private String inventory = null; // base64 bytes
-    private String tfState = null; // base64 bytes
 
     // Playing
     private String checkpoint = null;
@@ -141,16 +140,6 @@ public class SaveState {
     public byte @Nullable [] inventory() {
         if (inventory == null) return null;
         return Base64.getDecoder().decode(inventory);
-    }
-
-    public byte @Nullable [] tfState() {
-        if (tfState == null) return null;
-        return Base64.getDecoder().decode(tfState);
-    }
-
-    public void setTFState(byte @NotNull [] tfstate) {
-        this.tfState = Base64.getEncoder().encodeToString(tfstate);
-        updates.setTfState(this.tfState);
     }
 
     public @Nullable String checkpoint() {

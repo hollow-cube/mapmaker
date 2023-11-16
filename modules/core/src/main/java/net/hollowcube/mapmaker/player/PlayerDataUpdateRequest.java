@@ -10,8 +10,6 @@ public class PlayerDataUpdateRequest {
     private List<String> ipHistory = null;
     private Instant lastOnline = null;
 
-    private String tfState = null; // base64 bytes
-
     public @NotNull PlayerDataUpdateRequest setUsername(String username) {
         this.username = username;
         return this;
@@ -25,10 +23,6 @@ public class PlayerDataUpdateRequest {
     public @NotNull PlayerDataUpdateRequest setLastOnline(Instant lastOnline) {
         this.lastOnline = lastOnline;
         return this;
-    }
-
-    public void setTfState(String tfState) {
-        this.tfState = tfState;
     }
 
 }

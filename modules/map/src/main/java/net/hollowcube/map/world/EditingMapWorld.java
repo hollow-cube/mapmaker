@@ -12,8 +12,7 @@ import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.terraform.session.PlayerSession;
+import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -49,6 +48,7 @@ public class EditingMapWorld implements InternalMapWorld {
     private static final int MAP_AUTOSAVE_INTERVAL_SEC = 60 * 5; // 5 minutes
 
     private final MapServer server;
+    private final Terraform terraform;
     private final MapData map;
     private int flags = 0;
 
@@ -71,6 +71,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
+        this.terraform = server.terraform();
         this.map = map;
         this.flags |= FLAG_EDITING;
 
@@ -209,9 +210,9 @@ public class EditingMapWorld implements InternalMapWorld {
                 server().mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
                 //todo handle errors
 
-                var playerSessionState = PlayerSession.save(player);
-                playerData.setTfState(playerSessionState);
-                server().playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
+                // Save terraform state
+                terraform.saveLocalSession(player, false);
+                terraform.savePlayerSession(player, false);
                 //todo handle errors here too
             }
 
@@ -258,14 +259,12 @@ public class EditingMapWorld implements InternalMapWorld {
 
             MapWorldHelpers.resetPlayer(player);
 
+            // Load Terraform State
+            terraform.initPlayerSession(player, playerData.id());
+            terraform.initLocalSession(player, playerData.id());
+
             player.setGameMode(GameMode.CREATIVE);
             saveState.setPlayStartTime(System.currentTimeMillis());
-
-            // Read from player data
-            var playerTfState = playerData.getTfState();
-            if (playerTfState != null) {
-                PlayerSession.load(player, playerTfState);
-            }
 
             // Read from savestate
             player.getInventory().clear();
@@ -279,11 +278,6 @@ public class EditingMapWorld implements InternalMapWorld {
             player.setFlying(saveState.isFlying());
             var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
             player.teleport(pos).join();
-
-            if (saveState.tfState() != null) {
-                var session = LocalSession.load(player, saveState.tfState());
-                logger.log(System.Logger.Level.INFO, "Loaded tf state (selections={0})", session.selectionNames().size());
-            }
 
             if (firstSpawn)
                 player.sendMessage(Component.translatable("build.world.load.first", Component.translatable(map.settings().getName())));
@@ -306,9 +300,12 @@ public class EditingMapWorld implements InternalMapWorld {
                 var saveStateUpdate = updateSaveState(player, saveState);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
 
+                // Save terraform state
+                terraform.saveLocalSession(player, true);
+                terraform.savePlayerSession(player, true);
+
+                //todo
 //                playerData.setLastEditedMap(map.id());
-                playerData.setTfState(PlayerSession.save(player));
-                server.playerService().updatePlayerData(playerData.id(), playerData.getUpdateRequest());
 
                 logger.log(System.Logger.Level.INFO, "Updated data for {0}", player.getUuid());
             } catch (Exception e) {
@@ -361,7 +358,6 @@ public class EditingMapWorld implements InternalMapWorld {
         saveState.setPos(player.getPosition());
         saveState.setFlying(player.isFlying());
         saveState.setInventoryItems(List.of(player.getInventory().getItemStacks()));
-        saveState.setTFState(LocalSession.save(player));
         return saveState.getUpdateRequest();
     }
 
