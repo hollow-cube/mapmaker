@@ -23,5 +23,6 @@ public class HubFlyCommand extends Command {
         player.sendMessage(Component.translatable("command.fly.hub", Component.translatable(newValue ? "off" : "on")));
         player.setTag(HubServer.DOUBLE_JUMP_TAG, newValue);
         player.setFlyingSpeed(newValue ? 0f : 0.05f);
+        if (newValue) player.setFlying(false);
     }
 }
