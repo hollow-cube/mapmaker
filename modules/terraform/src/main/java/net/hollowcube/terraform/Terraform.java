@@ -36,6 +36,9 @@ public sealed interface Terraform permits TerraformImpl {
     @Blocking
     void initPlayerSession(@NotNull Player player, @NotNull String playerId);
 
+    @Blocking
+    void savePlayerSession(@NotNull Player player, boolean drop);
+
     /**
      * Creates a {@link LocalSession} for the given {@link Player}, loading data from storage if available.
      *
@@ -45,6 +48,9 @@ public sealed interface Terraform permits TerraformImpl {
      */
     @Blocking
     void initLocalSession(@NotNull Player player, @NotNull String sessionId);
+
+    @Blocking
+    void saveLocalSession(@NotNull Player player, boolean drop);
 
 
     class Builder {

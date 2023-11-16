@@ -7,7 +7,7 @@ import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.storage.TerraformStorage;
-import net.hollowcube.terraform.storage.TerraformStorageNoop;
+import net.hollowcube.terraform.storage.TerraformStorageMemory;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
 import net.hollowcube.terraform.task.TaskResult;
@@ -44,7 +44,7 @@ public final class TerraformImpl implements Terraform {
 
     TerraformImpl(@NotNull Collection<TerraformModule> modules) {
         this.registry = new TerraformRegistry(modules);
-        this.storage = new TerraformStorageNoop();
+        this.storage = new TerraformStorageMemory();
 
         this.threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
         this.threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
@@ -61,11 +61,21 @@ public final class TerraformImpl implements Terraform {
         //todo handle exceptions here i guess
         Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
 
-        var sessionData = storage.loadPlayerSession(player, playerId);
+        var sessionData = storage.loadPlayerSession(playerId);
         var session = new PlayerSession(this, playerId, player, sessionData);
+        player.setTag(PlayerSession.TAG, session);
         logger.debug("Created session for {} ({}) withData={}", player.getUuid(), player.getUsername(),
                 sessionData != null && sessionData.length > 0);
-        player.setTag(PlayerSession.TAG, session);
+    }
+
+    @Override
+    public void savePlayerSession(@NotNull Player player, boolean drop) {
+        var session = PlayerSession.forPlayer(player);
+        var sessionData = session.write();
+        storage.savePlayerSession(session.id(), sessionData);
+        if (drop) player.removeTag(PlayerSession.TAG);
+        logger.debug("Saved session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
+                drop, Format.formatBytes(sessionData.length));
     }
 
     @Override
@@ -76,11 +86,24 @@ public final class TerraformImpl implements Terraform {
         Check.stateCondition(instance.hasTag(tag), "Player already has a local session");
 
         var playerSession = PlayerSession.forPlayer(player);
-        var sessionData = storage.loadLocalSession(player, playerSession.id(), sessionId);
-        var session = new LocalSession(playerSession, instance, sessionData);
+        var sessionData = storage.loadLocalSession(playerSession.id(), sessionId);
+        var session = new LocalSession(playerSession, sessionId, instance, sessionData);
+        instance.setTag(tag, session);
         logger.debug("Created local session for {} ({}) withData={}", player.getUuid(), player.getUsername(),
                 sessionData != null && sessionData.length > 0);
-        instance.setTag(tag, session);
+    }
+
+    @Override
+    public void saveLocalSession(@NotNull Player player, boolean drop) {
+        var instance = Objects.requireNonNull(player.getInstance(), "Player must be in an instance");
+        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
+
+        var session = Objects.requireNonNull(instance.getTag(tag), "Local session not initialized");
+        var sessionData = session.write();
+        storage.saveLocalSession(session.playerId(), session.id(), sessionData);
+        if (drop) instance.removeTag(tag);
+        logger.debug("Saved local session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
+                drop, Format.formatBytes(sessionData.length));
     }
 
     // Internal Task API

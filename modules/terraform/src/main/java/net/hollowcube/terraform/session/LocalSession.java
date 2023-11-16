@@ -10,6 +10,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class LocalSession {
     }
 
     private final PlayerSession playerSession;
+    private final String id;
     private final Instance instance;
 
     private final Map<String, Selection> selections = new HashMap<>();
@@ -53,12 +55,9 @@ public class LocalSession {
     private final List<Change> history = new ArrayList<>();
     private int historyPointer = 0;
 
-    public LocalSession(@NotNull PlayerSession playerSession, @NotNull Instance instance) {
-        this(playerSession, instance, null);
-    }
-
-    public LocalSession(@NotNull PlayerSession playerSession, @NotNull Instance instance, byte @Nullable [] data) {
+    public LocalSession(@NotNull PlayerSession playerSession, @NotNull String id, @NotNull Instance instance, byte @Nullable [] data) {
         this.playerSession = playerSession;
+        this.id = id;
         this.instance = instance;
 
         selections.put(Selection.DEFAULT, new Selection(this, Selection.DEFAULT));
@@ -69,6 +68,14 @@ public class LocalSession {
 
     public @NotNull Terraform terraform() {
         return playerSession.terraform();
+    }
+
+    public @NotNull String id() {
+        return id;
+    }
+
+    public @NotNull String playerId() {
+        return playerSession.id();
     }
 
     public @NotNull Instance instance() {
@@ -161,8 +168,8 @@ public class LocalSession {
     // Serialization
     // Note: No data is compressed. A storage implementation MAY choose to compress the data before writing it.
 
-    private byte @NotNull [] serialize() {
-        //todo compress
+    @ApiStatus.Internal
+    public byte @NotNull [] write() {
         return NetworkBuffer.makeArray(buffer -> {
             buffer.write(SHORT, (short) STATE_VERSION);
 
@@ -196,5 +203,4 @@ public class LocalSession {
 
         assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
-
 }

@@ -9,9 +9,12 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
@@ -78,6 +81,16 @@ public class DemoServer {
 
                     //todo this is not a safe call. it blocks the tick thread during instance change.
                     terraform.initLocalSession(player, player.getInstance().getUniqueId().toString());
+                })
+                .addListener(RemoveEntityFromInstanceEvent.class, event -> {
+                    if (!(event.getEntity() instanceof Player player)) return;
+
+                    //todo this is not a safe call. it blocks the tick thread during instance change.
+                    terraform.saveLocalSession(player, true);
+                })
+                .addListener(PlayerDisconnectEvent.class, event -> {
+                    //todo this is not a safe call. it blocks the tick thread during instance change.
+                    terraform.savePlayerSession(event.getPlayer(), true);
                 });
 
         server.start("0.0.0.0", 25565);
