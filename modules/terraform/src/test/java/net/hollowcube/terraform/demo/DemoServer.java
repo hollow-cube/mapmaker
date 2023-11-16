@@ -58,13 +58,13 @@ public class DemoServer {
         CommandRewriter.init(commandManager);
         commandManager.register(new HelpCommand(commandManager));
 
-        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
-        MinecraftServer.getGlobalEventHandler().addChild(terraformEventNode);
-        TerraformOldInit.init(commandManager, terraformEventNode, null);
-
         var terraform = Terraform.builder()
                 .module(Terraform.BASE_MODULE)
                 .build();
+
+        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+        MinecraftServer.getGlobalEventHandler().addChild(terraformEventNode);
+        TerraformOldInit.init(commandManager, terraformEventNode, null, terraform);
 
         MinecraftServer.getGlobalEventHandler()
                 .addListener(AsyncPlayerPreLoginEvent.class, event -> {

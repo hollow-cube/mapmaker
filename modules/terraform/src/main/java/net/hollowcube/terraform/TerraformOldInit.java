@@ -11,6 +11,7 @@ import net.hollowcube.terraform.command.history.RedoCommand;
 import net.hollowcube.terraform.command.history.UndoCommand;
 import net.hollowcube.terraform.command.region.ReplaceCommand;
 import net.hollowcube.terraform.command.region.SetCommand;
+import net.hollowcube.terraform.command.schem.SchemCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
 import net.hollowcube.terraform.command.selection.SelCommand;
@@ -29,7 +30,7 @@ public final class TerraformOldInit {
     private TerraformOldInit() {
     }
 
-    public static void init(@NotNull CommandManager commandManager, @Nullable EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition) {
+    public static void init(@NotNull CommandManager commandManager, @Nullable EventNode<InstanceEvent> eventNode, @Nullable CommandCondition condition, @NotNull Terraform terraform) {
         if (eventNode == null) {
             eventNode = EventNode.type("terraform", EventFilter.INSTANCE);
             MinecraftServer.getGlobalEventHandler().addChild(eventNode);
@@ -65,7 +66,7 @@ public final class TerraformOldInit {
         commandManager.register(new ClipboardCommand());
 
         // Schematic
-        //todo
+        commandManager.register(new SchemCommand());
 
         // Tool
         var toolHandler = new ToolHandler();

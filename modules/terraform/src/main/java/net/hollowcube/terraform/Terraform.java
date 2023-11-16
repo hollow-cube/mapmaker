@@ -2,6 +2,7 @@ package net.hollowcube.terraform;
 
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
+import net.hollowcube.terraform.storage.TerraformStorage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Blocking;
@@ -21,6 +22,11 @@ public sealed interface Terraform permits TerraformImpl {
     static @NotNull Builder builder() {
         return new Builder();
     }
+
+
+    @NotNull TerraformRegistry registry();
+
+    @NotNull TerraformStorage storage();
 
 
     // Sessions

@@ -1,9 +1,13 @@
 package net.hollowcube.terraform.storage;
 
+import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.terraform.schem.SchematicHeader;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Storage API for Terraform.
@@ -13,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
  */
 @Blocking
 public interface TerraformStorage {
+
+    // Sessions
 
     /**
      * Loads the player session data for the given player and player ID if it exists.
@@ -47,4 +53,26 @@ public interface TerraformStorage {
      */
     void saveLocalSession(@NotNull String playerId, @NotNull String instanceId, byte @NotNull [] session);
 
+    // Schematics
+
+    @NotNull List<@NotNull SchematicHeader> listSchematics(@NotNull String playerId);
+
+    @Nullable Schematic loadSchematicData(@NotNull String playerId, @NotNull String name);
+
+    enum SchematicCreateResult {
+        //this is lazy i guess
+        SUCCESS,
+        DUPLICATE_ENTRY, // Schematic with the same (normalized) name exists, never returned if overwrite is true
+        SIZE_LIMIT_EXCEEDED, // Schematic is too large
+        ENTRY_LIMIT_EXCEEDED, // Player has too many schematics
+    }
+
+    @NotNull SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite);
+
+    enum SchematicDeleteResult {
+        SUCCESS,
+        NOT_FOUND,
+    }
+
+    @NotNull SchematicDeleteResult deleteSchematic(@NotNull String playerId, @NotNull String name);
 }

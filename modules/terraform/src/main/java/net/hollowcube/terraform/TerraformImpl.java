@@ -50,8 +50,14 @@ public final class TerraformImpl implements Terraform {
         this.threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
     }
 
+    @Override
     public @NotNull TerraformRegistry registry() {
         return registry;
+    }
+
+    @Override
+    public @NotNull TerraformStorage storage() {
+        return storage;
     }
 
     // Sessions
@@ -105,6 +111,7 @@ public final class TerraformImpl implements Terraform {
         logger.debug("Saved local session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
                 drop, Format.formatBytes(sessionData.length));
     }
+
 
     // Internal Task API
 
