@@ -30,7 +30,7 @@ public final class PlacementRules {
         register(BlockTags.LOGS, AxisPlacementRule::new);
         register(BlockTags.STAIRS, StairPlacementRule::new);
         register(BlockTags.SLABS, SlabPlacementRule::new);
-        register(BlockTags.TERRACOTTA, b -> new FacingHorizontalPlacementRule(b, true));
+        register(BlockTags.GLAZED_TERRACOTTA, b -> new FacingHorizontalPlacementRule(b, true));
 
         register(BlockTags.FENCES, FencePlacementRule::new);
         register(BlockTags.FENCE_GATES, FenceGatePlacementRule::new);

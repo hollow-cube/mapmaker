@@ -33,6 +33,24 @@ public final class BlockTags {
     public static final Collection<NamespaceID> BANNERS = builtin("minecraft:banners");
     public static final Collection<NamespaceID> DOORS = builtin("minecraft:doors");
     public static final Collection<NamespaceID> TERRACOTTA = builtin("minecraft:terracotta");
+    public static final Collection<NamespaceID> GLAZED_TERRACOTTA = create(
+            Block.WHITE_GLAZED_TERRACOTTA,
+            Block.ORANGE_GLAZED_TERRACOTTA,
+            Block.MAGENTA_GLAZED_TERRACOTTA,
+            Block.LIGHT_BLUE_GLAZED_TERRACOTTA,
+            Block.YELLOW_GLAZED_TERRACOTTA,
+            Block.LIME_GLAZED_TERRACOTTA,
+            Block.PINK_GLAZED_TERRACOTTA,
+            Block.GRAY_GLAZED_TERRACOTTA,
+            Block.LIGHT_GRAY_GLAZED_TERRACOTTA,
+            Block.CYAN_GLAZED_TERRACOTTA,
+            Block.PURPLE_GLAZED_TERRACOTTA,
+            Block.BLUE_GLAZED_TERRACOTTA,
+            Block.BROWN_GLAZED_TERRACOTTA,
+            Block.GREEN_GLAZED_TERRACOTTA,
+            Block.RED_GLAZED_TERRACOTTA,
+            Block.BLACK_GLAZED_TERRACOTTA
+    );
     public static final Collection<NamespaceID> SMALL_FLOWERS = builtin("minecraft:small_flowers");
     public static final Collection<NamespaceID> FLOWER_POTS = builtin("minecraft:flower_pots");
     public static final Collection<NamespaceID> BEDS = builtin("minecraft:beds");
