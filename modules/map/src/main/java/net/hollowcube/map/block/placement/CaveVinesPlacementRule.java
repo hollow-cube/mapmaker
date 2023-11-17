@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class CaveVinesPlacementRule extends BaseBlockPlacementRule {
 
-    public CaveVinesPlacementRule() {
-        super(Block.CAVE_VINES);
+    public CaveVinesPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

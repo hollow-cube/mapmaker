@@ -10,8 +10,8 @@ public class SmallDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
     private static final String PROP_HALF = "half"; // lower/upper
 
-    public SmallDripleafPlacementRule() {
-        super(Block.SMALL_DRIPLEAF.withProperty(PROP_HALF, "upper"), true);
+    public SmallDripleafPlacementRule(@NotNull Block block) {
+        super(block.withProperty(PROP_HALF, "upper"), true);
     }
 
     @Override

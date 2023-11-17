@@ -15,8 +15,8 @@ public class DripstonePlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_VERTICAL_DIRECTION = "vertical_direction"; // Tip, frustum, middle(0 or more), base
     private static final String PROP_THICKNESS = "thickness";
 
-    public DripstonePlacementRule() {
-        super(Block.POINTED_DRIPSTONE);
+    public DripstonePlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

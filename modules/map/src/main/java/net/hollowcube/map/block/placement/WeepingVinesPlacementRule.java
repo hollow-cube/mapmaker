@@ -7,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class WeepingVinesPlacementRule extends BaseBlockPlacementRule {
 
-    public WeepingVinesPlacementRule() {
-        super(Block.WEEPING_VINES);
+    public WeepingVinesPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

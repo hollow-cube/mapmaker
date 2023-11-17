@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +15,7 @@ public class SmallFlowerPlacementRule extends BaseBlockPlacementRule {
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var existingBlock = placementState.instance().getBlock(placementState.placePosition(), Block.Getter.Condition.TYPE);
         if (existingBlock.id() == Block.FLOWER_POT.id()) {
-            if (BlockTags.POTTABLE_FLOWERS.contains(block.id()))
+            if (BlockTags.POTTABLE_FLOWERS.contains(block.namespace()))
                 return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
             return null;
         } else {

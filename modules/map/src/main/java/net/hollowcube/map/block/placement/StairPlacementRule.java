@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -61,7 +62,7 @@ public class StairPlacementRule extends BaseBlockPlacementRule {
         for (int i = 0; i < 4; i++) {
             var blockFace = orderedFaces[i];
             var relativeBlock = instance.getBlock(blockPos.relative(blockFace), Block.Getter.Condition.TYPE);
-            if (!BlockTags.MINECRAFT_STAIRS.contains(relativeBlock.namespace())) continue; // Non-stairs never connect
+            if (!BlockTags.STAIRS.contains(relativeBlock.namespace())) continue; // Non-stairs never connect
 
             var relativeFacing = BlockFace.valueOf(relativeBlock.getProperty(PROP_FACING).toUpperCase());
             if (facing.isSimilar(blockFace)) {

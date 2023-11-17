@@ -15,8 +15,8 @@ public class TripwirePlacementRule extends BaseBlockPlacementRule {
             BlockFace.WEST
     );
 
-    public TripwirePlacementRule() {
-        super(Block.TRIPWIRE);
+    public TripwirePlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

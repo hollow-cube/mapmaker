@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import net.hollowcube.map.block.placement.BlockTags;
+import net.hollowcube.map.block.BlockTags;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.sound.Sound;
@@ -107,7 +107,7 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             } else if (block.id() == Block.PISTON.id() || block.id() == Block.STICKY_PISTON.id()) {
                 var prop = Boolean.parseBoolean(block.getProperty("extended"));
                 block = block.withProperty("extended", String.valueOf(!prop));
-            } else if (BlockTags.MINECRAFT_SLABS.contains(block.namespace())) {
+            } else if (BlockTags.SLABS.contains(block.namespace())) {
                 var type = block.getProperty("type");
                 block = block.withProperty("type", switch (type) {
                     case "bottom" -> "top";
@@ -118,10 +118,10 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
                 block = block.withProperty("has_book", state.equals("true") ? "false" : "true");
             } else return; // If we hit this then exit, otherwise we will update the block
         } else {
-            if (BlockTags.MINECRAFT_TRAPDOORS.contains(block.namespace()) || BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
+            if (BlockTags.TRAPDOORS.contains(block.namespace()) || BlockTags.FENCE_GATES.contains(block.namespace()) || block.id() == Block.BARREL.id()) {
                 var open = Boolean.parseBoolean(block.getProperty("open"));
                 block = block.withProperty("open", String.valueOf(!open));
-            } else if (BlockTags.MINECRAFT_DOORS.contains(block.namespace())) {
+            } else if (BlockTags.DOORS.contains(block.namespace())) {
                 var open = Boolean.parseBoolean(block.getProperty("open"));
 
                 var isTopHalf = block.getProperty("half").equalsIgnoreCase("upper");

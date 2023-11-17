@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
 
-    public BigDripleafPlacementRule() {
-        super(Block.BIG_DRIPLEAF, true);
+    public BigDripleafPlacementRule(@NotNull Block block) {
+        super(block, true);
     }
 
     @Override

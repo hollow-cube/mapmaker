@@ -12,8 +12,8 @@ public class GrindstonePlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACING = "facing";
     private static final String PROP_FACE = "face"; // wall/floor/ceiling
 
-    public GrindstonePlacementRule() {
-        super(Block.GRINDSTONE);
+    public GrindstonePlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

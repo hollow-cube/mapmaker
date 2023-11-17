@@ -7,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class TwistingVinesPlacementRule extends BaseBlockPlacementRule {
 
-    public TwistingVinesPlacementRule() {
-        super(Block.TWISTING_VINES);
+    public TwistingVinesPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

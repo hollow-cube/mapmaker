@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;

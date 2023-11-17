@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class SignPlacementRule extends BaseBlockPlacementRule {
+public class StandingSignPlacementRule extends BaseBlockPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.WEST,
@@ -22,7 +22,7 @@ public class SignPlacementRule extends BaseBlockPlacementRule {
 
     private final Block wallBlock;
 
-    public SignPlacementRule(@NotNull Block block) {
+    public StandingSignPlacementRule(@NotNull Block block) {
         super(block.withHandler(SignBlockHandler.INSTANCE));
 
         var type = block.namespace().path().replace("_sign", "");

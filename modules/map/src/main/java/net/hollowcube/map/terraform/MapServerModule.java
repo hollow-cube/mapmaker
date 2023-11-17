@@ -1,14 +1,18 @@
 package net.hollowcube.map.terraform;
 
-import net.hollowcube.map.block.handler.BannerBlockHandler;
+import net.hollowcube.map.block.BlockTags;
+import net.hollowcube.map.block.handler.*;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 public class MapServerModule implements TerraformModule {
 
@@ -27,7 +31,28 @@ public class MapServerModule implements TerraformModule {
     public @NotNull Map<@NotNull Short, @NotNull Block> blockStateOverrides() {
         var overrides = new HashMap<Short, Block>();
 
-        overrides.put(Block.BLUE_WALL_BANNER.stateId(), Block.BLUE_WALL_BANNER.withHandler(BannerBlockHandler.INSTANCE));
+        BiConsumer<Block, BlockHandler> override = (block, handler) -> {
+            for (var state : block.possibleStates()) {
+                overrides.put(state.stateId(), state.withHandler(handler));
+            }
+        };
+
+        for (var banner : BlockTags.BANNERS) {
+            override.accept(Objects.requireNonNull(Block.fromNamespaceId(banner)), BannerBlockHandler.INSTANCE);
+        }
+        override.accept(Block.CHEST, ChestBlockHandler.CHEST);
+        override.accept(Block.TRAPPED_CHEST, ChestBlockHandler.TRAPPED_CHEST);
+        override.accept(Block.PLAYER_HEAD, PlayerHeadBlockHandler.INSTANCE);
+        override.accept(Block.PLAYER_WALL_HEAD, PlayerHeadBlockHandler.INSTANCE);
+        for (var skull : BlockTags.SKULLS) {
+            override.accept(Objects.requireNonNull(Block.fromNamespaceId(skull)), SkullBlockHandler.INSTANCE);
+        }
+        for (var shulkerBox : BlockTags.SHULKER_BOXES) {
+            override.accept(Objects.requireNonNull(Block.fromNamespaceId(shulkerBox)), ShulkerBoxBlockHandler.INSTANCE);
+        }
+        for (var sign : BlockTags.ALL_SIGNS) {
+            override.accept(Objects.requireNonNull(Block.fromNamespaceId(sign)), SignBlockHandler.INSTANCE);
+        }
 
         return overrides;
     }

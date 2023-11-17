@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +56,6 @@ public class DoorPlacementRule extends FacingHorizontalPlacementRule {
     }
 
     private boolean isDoor(Block toCheck) {
-        return BlockTags.MINECRAFT_DOORS.contains(toCheck.namespace());
+        return BlockTags.DOORS.contains(toCheck.namespace());
     }
 }

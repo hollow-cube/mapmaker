@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -51,7 +52,7 @@ public class FenceGatePlacementRule extends FacingHorizontalPlacementRule {
     }
 
     public static boolean isConnectableGate(@NotNull Block block, @NotNull BlockFace fenceFace) {
-        if (!BlockTags.MINECRAFT_FENCE_GATES.contains(block.namespace()))
+        if (!BlockTags.FENCE_GATES.contains(block.namespace()))
             return false;
 
         var facing = BlockFace.valueOf(block.getProperty("facing").toUpperCase());

@@ -1,12 +1,13 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FlowerPotPlacementRule extends BaseBlockPlacementRule {
-    protected FlowerPotPlacementRule() {
-        super(Block.FLOWER_POT);
+    public FlowerPotPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

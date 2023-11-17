@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -124,6 +125,6 @@ public class WallPlacementRule extends BaseBlockPlacementRule {
     }
 
     private boolean isConnectable(@NotNull Block block) {
-        return BlockTags.WALLS.contains(block.namespace()) || BlockTags.PANES.contains(block.id());
+        return BlockTags.WALLS.contains(block.namespace()) || BlockTags.GLASS_PANES.contains(block.namespace()) || block.id() == Block.IRON_BARS.id();
     }
 }

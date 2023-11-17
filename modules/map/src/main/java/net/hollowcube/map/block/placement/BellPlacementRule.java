@@ -14,8 +14,8 @@ public class BellPlacementRule extends BaseBlockPlacementRule {
     private static final String FACING = "facing";
     private static final String ATTACHMENT = "attachment";
 
-    public BellPlacementRule() {
-        super(Block.BELL);
+    public BellPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

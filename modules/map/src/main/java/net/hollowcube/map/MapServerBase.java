@@ -7,8 +7,8 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.block.PlacementRules;
 import net.hollowcube.map.block.handler.*;
-import net.hollowcube.map.block.placement.PlacementRules;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.MapListCommandMixin;
 import net.hollowcube.map.command.build.BuildCommand;
@@ -99,7 +99,7 @@ public abstract class MapServerBase implements MapServer {
 //        eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
 
         // Placement rules
-        PlacementRules.init();
+        PlacementRules.init(terraform);
         BLOCK_MANAGER.registerHandler(SignBlockHandler.ID, () -> SignBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(PlayerHeadBlockHandler.ID, () -> PlayerHeadBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(ChestBlockHandler.CHEST.getNamespaceId(), () -> ChestBlockHandler.CHEST);

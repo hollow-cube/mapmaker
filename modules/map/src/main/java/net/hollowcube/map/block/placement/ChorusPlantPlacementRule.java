@@ -14,8 +14,8 @@ public final class ChorusPlantPlacementRule extends BaseBlockPlacementRule {
     private static final int PLANT_ID = Block.CHORUS_PLANT.id();
     private static final int FLOWER_ID = Block.CHORUS_FLOWER.id();
 
-    public ChorusPlantPlacementRule() {
-        super(Block.CHORUS_PLANT);
+    public ChorusPlantPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override

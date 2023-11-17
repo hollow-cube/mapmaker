@@ -2,7 +2,7 @@ package net.hollowcube.map.block.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.map.block.placement.BlockTags;
+import net.hollowcube.map.block.BlockTags;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -109,7 +109,7 @@ public class SignBlockHandler implements BlockHandler {
         var instance = interaction.getInstance();
 
         boolean isFront;
-        if (BlockTags.MINECRAFT_STANDING_SIGNS.contains(block.namespace())) {
+        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
             var playerPos = Vec.fromPoint(player.getPosition());
             var blockCenterPos = Vec.fromPoint(blockPosition).add(0.5f);
             var angle = Math.toDegrees(Math.atan2(blockCenterPos.z() - playerPos.z(), blockCenterPos.x() - playerPos.x()));

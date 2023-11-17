@@ -1,5 +1,6 @@
 package net.hollowcube.map.block.placement;
 
+import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -35,7 +36,7 @@ public class PanePlacementRule extends BaseBlockPlacementRule {
             var neighbor = instance.getBlock(blockPosition.relative(blockFace));
 
             var neighborFaceIsSolid = neighbor.registry().collisionShape().isOccluded(block.registry().collisionShape(), blockFace.getOppositeFace());
-            var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || BlockTags.PANES.contains(neighbor.id()) || BlockTags.WALLS.contains(neighbor.namespace()));
+            var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || BlockTags.GLASS_PANES.contains(neighbor.namespace()) || BlockTags.WALLS.contains(neighbor.namespace()) || neighbor.id() == Block.IRON_BARS.id());
             block = block.withProperty(blockFace.name().toLowerCase(), String.valueOf(canConnect));
         }
         return block;

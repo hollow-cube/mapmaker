@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 public class SnowPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_LAYERS = "layers";
 
-    public SnowPlacementRule() {
-        super(Block.SNOW);
+    public SnowPlacementRule(@NotNull Block block) {
+        super(block);
     }
 
     @Override
