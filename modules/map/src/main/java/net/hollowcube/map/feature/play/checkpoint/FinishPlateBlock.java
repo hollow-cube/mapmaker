@@ -12,6 +12,9 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class FinishPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin {
     public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:finish_plate")
             .requiredVariant(MapVariant.PARKOUR)
@@ -19,6 +22,8 @@ public class FinishPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
 
     public static final FinishPlateBlock INSTANCE = new FinishPlateBlock();
     public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
+
+    private final Set<Player> playersOnPlate = new HashSet<>();
 
     @Override
     public @NotNull ObjectType objectType() {
@@ -28,6 +33,11 @@ public class FinishPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.forPlayer(player), player));
+    }
+
+    @Override
+    public @NotNull Set<Player> getPlayersOnPlate() {
+        return playersOnPlate;
     }
 
 }

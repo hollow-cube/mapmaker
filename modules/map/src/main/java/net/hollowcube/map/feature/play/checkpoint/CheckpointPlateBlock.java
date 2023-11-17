@@ -18,6 +18,8 @@ import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin {
     public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:checkpoint_plate")
@@ -27,6 +29,8 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
     public static final CheckpointPlateBlock INSTANCE = new CheckpointPlateBlock();
     public static final Block VANILLA_BLOCK = Block.HEAVY_WEIGHTED_PRESSURE_PLATE;
     public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE, VANILLA_BLOCK, CheckpointPlateBlock::updateItemStack);
+
+    private final Set<Player> playersOnPlate = new HashSet<>();
 
     @Override
     public @NotNull ObjectType objectType() {
@@ -53,6 +57,11 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         var mapWorld = MapWorld.forPlayer(player);
         var event = new MapWorldCheckpointReachedEvent(mapWorld, player, createObjectId(tick.getBlockPosition()));
         EventDispatcher.call(event);
+    }
+
+    @Override
+    public @NotNull Set<Player> getPlayersOnPlate() {
+        return playersOnPlate;
     }
 
     public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {

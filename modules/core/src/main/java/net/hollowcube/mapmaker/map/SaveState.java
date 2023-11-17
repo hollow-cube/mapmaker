@@ -94,6 +94,12 @@ public class SaveState {
     public void setCompleted(boolean completed) {
         updates.setCompleted(completed);
         this.completed = completed;
+
+        // If completing, update the playtime for the final time.
+        if (completed) {
+            updatePlaytime();
+            playStartTime = 0;
+        }
     }
 
     public long getPlaytime() {

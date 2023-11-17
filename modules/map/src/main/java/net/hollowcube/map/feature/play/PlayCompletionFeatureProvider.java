@@ -41,7 +41,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
 
         var saveState = SaveState.fromPlayer(player);
-        saveState.setCompleted(true);
+        saveState.setCompleted(true); // Also stops recording time here
 
         var bestSaveState = world.server().mapService().getBestSaveState(world.map().id(), player.getUuid().toString());
 
