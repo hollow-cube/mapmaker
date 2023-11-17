@@ -3,6 +3,7 @@ package net.hollowcube.map.command.utility;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
@@ -22,11 +23,11 @@ public class TeleportCommand extends Command {
     private void handleTeleportToTarget(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(targetArg).findFirstPlayer(player);
         if (target == null) {
-            player.sendMessage("That player is not online or doesn't exist!");
+            player.sendMessage(Component.translatable("generic.player_offline", Component.translatable(player.getUsername())));
             return;
         }
         if (player.equals(target)) {
-            player.sendMessage("You can't teleport to yourself!");
+            player.sendMessage(Component.translatable("teleport.self"));
             return;
         }
 
@@ -34,13 +35,13 @@ public class TeleportCommand extends Command {
         var playerInstance = player.getInstance();
         var targetInstance = target.getInstance();
         if (!playerInstance.equals(targetInstance)) {
-            player.sendMessage("That player isn't in your current build world!");
+            player.sendMessage(Component.translatable("teleport.not_same_map"));
             return;
         }
 
         // Actually do the teleport
         player.teleport(target.getPosition()).thenRun(() -> {
-            player.sendMessage("Teleported to " + target.getUsername() + ".");
+            player.sendMessage(Component.translatable("teleport.success", Component.translatable(target.getUsername())));
         });
     }
 }

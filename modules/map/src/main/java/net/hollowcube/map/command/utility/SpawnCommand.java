@@ -3,6 +3,7 @@ package net.hollowcube.map.command.utility;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.map.world.MapWorld;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,9 +22,9 @@ public class SpawnCommand extends Command {
         var world = MapWorld.forPlayer(player);
         if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             player.teleport(world.map().settings().getSpawnPoint());
-            player.sendMessage("Teleported to spawn");
+            player.sendMessage(Component.translatable("teleport.spawn"));
         } else {
-            player.sendMessage("idk how spawn works in playing maps");
+            player.sendMessage("idk how spawn works in playing maps"); //TODO
         }
     }
 
