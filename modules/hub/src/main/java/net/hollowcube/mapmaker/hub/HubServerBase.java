@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
+import net.hollowcube.mapmaker.hub.feature.misc.CyberpunkStatDisplay;
 import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -106,6 +107,10 @@ public abstract class HubServerBase implements HubServer {
         // Map of the week
         var motwTimer = new CountdownTimer(world.instance());
         SCHEDULER_MANAGER.submitTask(motwTimer, ExecutionType.SYNC);
+
+        // Misc hub stuff
+        var hubStatDisplay = new CyberpunkStatDisplay(this);
+        SCHEDULER_MANAGER.submitTask(hubStatDisplay, ExecutionType.SYNC);
     }
 
     @Override
