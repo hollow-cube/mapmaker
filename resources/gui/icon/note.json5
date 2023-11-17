@@ -1,6 +1,9 @@
 {
     "type": "sprite",
     // Overrides the size
-    "size": [8, 10],
-    "origin": [0, 8]
+    //    "size": [8, 10],
+    "origin": [
+        0,
+        7
+    ]
 }

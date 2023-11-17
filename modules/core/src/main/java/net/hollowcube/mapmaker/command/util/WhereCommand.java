@@ -52,6 +52,6 @@ public class WhereCommand extends Command {
         } else if (!targetMap.isPublished()) {
             player.sendMessage(Component.translatable("command.where.building", Component.translatable(target.getUsername())));
         } else throw new IllegalStateException("unreachable");
-        player.sendMessage(Component.translatable("generic.unknown_error"));
+        //player.sendMessage(Component.translatable("generic.unknown_error"));
     }
 }
