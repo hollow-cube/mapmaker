@@ -17,7 +17,8 @@ public enum WordType {
                     || c >= 'A' && c <= 'Z'
                     || c >= 'a' && c <= 'z'
                     || c == '_' || c == '-'
-                    || c == '.' || c == '+';
+                    || c == '.' || c == '+'
+                    || c == ':'; //todo not sure about this last one
         }
     },
     GREEDY {

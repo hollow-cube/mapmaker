@@ -130,6 +130,7 @@ public class ItemRegistry {
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
+        System.out.println(normalFilter);
         return allItemNames.stream()
                 .filter(name -> name.asString().startsWith(normalFilter)
                         || name.path().startsWith(normalFilter))
