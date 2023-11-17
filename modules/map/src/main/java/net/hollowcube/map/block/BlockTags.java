@@ -79,7 +79,8 @@ public final class BlockTags {
             Block.TALL_GRASS,
             Block.ROSE_BUSH,
             Block.LILAC,
-            Block.SUNFLOWER
+            Block.SUNFLOWER,
+            Block.LARGE_FERN
     );
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {
