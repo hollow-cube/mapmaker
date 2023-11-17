@@ -54,10 +54,10 @@ public class PersonalizedMapData extends MapData {
 
     public @NotNull String getDifficultyName() {
         var cr = getClearRate();
-        if (cr < 0.015) return "nightmare";
-        if (cr < 0.075) return "expert";
-        if (cr < 0.2) return "hard";
-        if (cr < 0.4) return "medium";
+        if (cr < 0.05) return "nightmare";
+        if (cr < 0.25) return "expert";
+        if (cr < 0.5) return "hard";
+        if (cr < 0.75) return "medium";
         return "easy";
     }
 
