@@ -2,6 +2,7 @@ package net.hollowcube.terraform.command.util;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
@@ -85,8 +86,8 @@ public final class TFArgument {
         });
     }
 
-    public static @NotNull Argument<Pattern> Pattern(@NotNull String id) {
-        return new ArgumentPattern(id);
+    public static @NotNull Argument<Pattern> Pattern(@NotNull String id, @NotNull Terraform tf) {
+        return new ArgumentPattern(id, tf);
     }
 
     public static @NotNull Argument<Mask> Mask(@NotNull String id) {

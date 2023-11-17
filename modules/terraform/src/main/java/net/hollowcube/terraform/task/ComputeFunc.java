@@ -21,7 +21,7 @@ public interface ComputeFunc {
             var buffer = BlockBuffer.builder(world, region.min(), region.max());
             for (var pos : region) {
                 //todo block entities
-                buffer.set(pos, pattern.blockAt(world, pos).stateId());
+                buffer.set(pos, pattern.blockAt(world, pos));
             }
             return buffer.build();
         };

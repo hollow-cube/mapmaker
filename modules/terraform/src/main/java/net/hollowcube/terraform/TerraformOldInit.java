@@ -53,8 +53,8 @@ public final class TerraformOldInit {
 //        commandManager.register(new SelectionCommands.Size(condition));
 
         // Region
-        commandManager.register(new SetCommand());
-        commandManager.register(new ReplaceCommand());
+        commandManager.register(new SetCommand(terraform));
+        commandManager.register(new ReplaceCommand(terraform));
         commandManager.register(new StackCommand());
         commandManager.register(new SmearCommand());
 

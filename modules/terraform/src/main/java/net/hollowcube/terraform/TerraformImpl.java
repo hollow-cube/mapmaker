@@ -2,7 +2,6 @@ package net.hollowcube.terraform;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.terraform.buffer.BlockBuffer;
-import net.hollowcube.terraform.buffer.Palette;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.session.history.Change;
@@ -173,11 +172,11 @@ public final class TerraformImpl implements Terraform {
                 buffer.forEachSection((chunkX, chunkY, chunkZ, palette) -> {
                     var chunk = instance.getChunk(chunkX, chunkZ);
                     if (chunk == null) {
-                        // Chunk is not loaded, todo should probably notify player
+                        // Chunk is not loaded
                         logger.warn("{}: reference to unloaded chunk at {}, {}", task, chunkX, chunkZ);
-                        chunk = instance.loadChunk(chunkX, chunkZ).join();
-//                        return;
+                        chunk = instance.loadChunk(chunkX, chunkZ).join(); // We are in apply thread, its fine to block
                     }
+                    final var chunkRef = chunk; // Final var for lambda
 
                     sectionChangeCache.clear();
 
@@ -191,21 +190,25 @@ public final class TerraformImpl implements Terraform {
                             var paletteIndex = indexCache.getAndIncrement();
                             var newBlockState = palette.get(sx, sy, sz);
 
-                            if (newBlockState == Palette.UNSET) {
+                            if (newBlockState == null) {
                                 paletteData[paletteIndex] = stateId;
                             } else {
-                                paletteData[paletteIndex] = newBlockState;
+                                paletteData[paletteIndex] = newBlockState.stateId();
+                                if (newBlockState.handler() != null || newBlockState.hasNbt()) {
+                                    chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
+                                }
 
                                 // Only send a client update if the block was actually modified (and for change counter)
-                                if (stateId != newBlockState) {
+                                if (stateId != newBlockState.stateId()) {
                                     changeCount.incrementAndGet();
-                                    sectionChangeCache.add(((long) newBlockState << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
+                                    sectionChangeCache.add(((long) newBlockState.stateId() << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
                                 }
 
                                 // Save old state for undo batch
                                 // Note that we save regardless of whether the block was actually modified,
                                 // this is because undo-ing should change it in case the block changed after
                                 // the apply.
+                                //todo we need to save block entities here too
                                 undoBufferBuilder.set(
                                         (chunkX << 4) + sx,
                                         (chunkY << 4) + sy,

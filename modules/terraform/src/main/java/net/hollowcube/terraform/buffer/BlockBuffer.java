@@ -49,10 +49,10 @@ public sealed interface BlockBuffer permits BlockBufferImpl {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     for (int x = 0; x < 16; x++) {
-                        var stateId = palette.get(x, y, z);
-                        if (stateId != Palette.UNSET) {
-                            var block = Block.fromStateId((short) stateId);
-                            builder.addBlock(cx * 16 + x, cy * 16 + y, cz * 16 + z, block);
+                        var blockState = palette.get(x, y, z);
+                        if (blockState != null) {
+//                            var block = Block.fromStateId((short) stateId);
+                            builder.addBlock(cx * 16 + x, cy * 16 + y, cz * 16 + z, blockState);
                         }
                     }
                 }
@@ -80,6 +80,18 @@ public sealed interface BlockBuffer permits BlockBufferImpl {
          * Set the block at the given (absolute) coordinate to the given value
          */
         default void set(@NotNull Point point, int value) {
+            set(point.blockX(), point.blockY(), point.blockZ(), value);
+        }
+
+        /**
+         * Set the block at the given (absolute) coordinate to the given value
+         */
+        void set(int x, int y, int z, @NotNull Block value);
+
+        /**
+         * Set the block at the given (absolute) coordinate to the given value
+         */
+        default void set(@NotNull Point point, @NotNull Block value) {
             set(point.blockX(), point.blockY(), point.blockZ(), value);
         }
 

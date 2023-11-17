@@ -4,6 +4,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
@@ -19,15 +20,20 @@ public class ArgumentPattern extends Argument<Pattern> {
     private static final List<NamespaceID> BLOCKS = Block.values().stream()
             .map(Block::namespace).sorted().toList();
 
-    ArgumentPattern(@NotNull String id) {
+    private final Terraform tf;
+
+    ArgumentPattern(@NotNull String id, @NotNull Terraform tf) {
         super(id);
+        this.tf = tf;
     }
 
     @Override
     public @NotNull ParseResult<Pattern> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.GREEDY);
         try {
-            var blockState = ArgumentBlockState.staticParse(word);
+            var rawBlockState = ArgumentBlockState.staticParse(word);
+            // Remap the block state using the registry, todo just rework this whole thing to use tf registry to start.
+            var blockState = tf.registry().blockState(rawBlockState.stateId());
             return new ParseSuccess<>((world, blockPosition) -> blockState);
         } catch (ArgumentSyntaxException e) {
             return new ParsePartial<>();

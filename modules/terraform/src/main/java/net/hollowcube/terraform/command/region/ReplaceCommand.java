@@ -3,6 +3,7 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
@@ -15,11 +16,13 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ReplaceCommand extends Command {
     private final Argument<Mask> maskArg = TFArgument.Mask("mask");
-    private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
+    private final Argument<Pattern> patternArg;
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
-    public ReplaceCommand() {
+    public ReplaceCommand(@NotNull Terraform tf) {
         super("replace");
+
+        patternArg = TFArgument.Pattern("pattern", tf);
 
         addSyntax(playerOnly(this::handleReplaceMaskInRegion), maskArg, patternArg, selectionArg);
     }

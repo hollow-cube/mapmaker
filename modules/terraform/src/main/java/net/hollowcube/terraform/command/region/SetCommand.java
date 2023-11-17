@@ -3,6 +3,7 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
@@ -13,11 +14,13 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class SetCommand extends Command {
-    private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
+    private final Argument<Pattern> patternArg;
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
-    public SetCommand() {
+    public SetCommand(@NotNull Terraform tf) {
         super("set");
+
+        this.patternArg = TFArgument.Pattern("pattern", tf);
 
         addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg, selectionArg);
     }
