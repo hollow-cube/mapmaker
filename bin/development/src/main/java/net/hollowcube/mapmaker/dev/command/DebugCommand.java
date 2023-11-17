@@ -22,13 +22,13 @@ public class DebugCommand extends Command {
 
 //        setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
 
-        addSyntax(playerOnly(this::handleReloadCommands), Argument.Literal("reload-commands"));
+//        addSyntax(playerOnly(this::handleReloadCommands), Argument.Literal("reload-commands"));
 
 //        addSyntax(playerOnly(this::handleDebugResourcePack), Argument.Literal("rp"));
 //        addSyntax(playerOnly(this::handleDebugSelf), Argument.Literal("self"));
 //        addSyntax(playerOnly(this::handleMapWorldDebug), Argument.Literal("world"));
 
-//        addSyntax(playerOnly(this::handleBlockDebug), Argument.Literal("block"));
+        addSyntax(playerOnly(this::handleBlockDebug), Argument.Literal("block"));
 
     }
 
