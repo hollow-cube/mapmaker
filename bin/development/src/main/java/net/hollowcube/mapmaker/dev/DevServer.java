@@ -412,13 +412,15 @@ public class DevServer {
         event.setSkin(PlayerSkin.fromUuid(event.getPlayer().getUuid().toString()));
     }
 
+    private static final Pattern EMOJI_REGEX = Pattern.compile(":([a-zA-Z\\-]+):");
+
     private void handleChatMessage(PlayerChatEvent event) {
         // Cancel the event, so we can send player specific versions ourselves
         event.setCancelled(true);
 
         // Replace emojis with their sprites
         var baseMessage = Component.text(event.getMessage()).replaceText(TextReplacementConfig.builder()
-                .match(Pattern.compile(":([a-z\\-]+):"))
+                .match(EMOJI_REGEX)
                 .replacement((match, builder) -> {
                     var emoji = EMOJIS.get(match.group(1).toLowerCase(Locale.ROOT));
                     if (emoji == null) return builder;
