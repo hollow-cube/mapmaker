@@ -25,7 +25,7 @@ public class Query extends View {
 
     @Action("map_query")
     private @NonBlocking void beginSearchQuery() {
-        pushView(QueryMaps::new);
+        pushView(QueryMapsView::new);
     }
 
     /**

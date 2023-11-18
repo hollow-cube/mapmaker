@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class QueryMaps extends View {
+public class QueryMapsView extends View {
 
     private String query = null;
     private final Context context;
 
-    public QueryMaps(@NotNull Context context) {
+    public QueryMapsView(@NotNull Context context) {
         super(context);
         this.context = context;
     }
