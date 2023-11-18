@@ -44,6 +44,7 @@ public final class PlacementRules {
         register(BlockTags.BANNERS, BannerPlacementRule::new);
         register(BlockTags.STANDING_SIGNS, StandingSignPlacementRule::new);
         register(BlockTags.BEDS, BedPlacementRule::new);
+        register(BlockTags.ANVILS, AnvilPlacementRule::new);
 
         register(Block.FLOWER_POT, FlowerPotPlacementRule::new);
         register(BlockTags.POTTABLE_FLOWERS, SmallFlowerPlacementRule::new);
