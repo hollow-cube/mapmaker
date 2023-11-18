@@ -17,6 +17,9 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * {@link net.hollowcube.map.feature.play.NoSneakFeatureProvider} is also enabled to prevent sneaking in only sprint maps.
+ */
 @AutoService(FeatureProvider.class)
 public class OnlySprintFeatureProvider implements FeatureProvider {
     private static final Tag<Point> ONLY_SPRINT_TAG = Tag.Transient("onlysprint");

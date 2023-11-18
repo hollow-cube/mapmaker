@@ -627,19 +627,6 @@ public class DevServer {
             });
         }
 
-        player.sendMessage(Component.text()
-                .append(Component.text(BadSprite.SPRITE_MAP.get("icon/x_mark").fontChar(), FontUtil.NO_SHADOW).append(Component.text("notmattw")))
-                .appendNewline()
-                .append(Component.text(BadSprite.SPRITE_MAP.get("icon/info").fontChar(), FontUtil.NO_SHADOW).append(Component.text("notmattw")))
-                .appendNewline()
-                .append(Component.text(BadSprite.SPRITE_MAP.get("icon/warning").fontChar(), FontUtil.NO_SHADOW).append(Component.text("notmattw")))
-                .appendNewline()
-                .append(Component.text(BadSprite.SPRITE_MAP.get("icon/confirm").fontChar(), FontUtil.NO_SHADOW).append(Component.text("notmattw")))
-                .appendNewline()
-                .append(Component.text(BadSprite.SPRITE_MAP.get("icon/deny").fontChar(), FontUtil.NO_SHADOW).append(Component.text("notmattw")))
-                .build());
-
-
 //        Scoreboards.showPlayerLobbyScoreboard(player);
 //        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
 //        TabLists.showPlayerGlobalTabList(player);

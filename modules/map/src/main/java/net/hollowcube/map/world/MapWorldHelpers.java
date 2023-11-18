@@ -32,7 +32,6 @@ class MapWorldHelpers {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Load each feature in parallel
             var features = world.server().features();
-            System.out.println("features " + features.toString());
             var enabledFutures = new Future[features.size()];
             for (int i = 0; i < features.size(); i++) {
                 var feature = features.get(i);

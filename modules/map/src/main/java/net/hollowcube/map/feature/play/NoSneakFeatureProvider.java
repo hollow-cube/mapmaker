@@ -14,6 +14,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
+// Also enabled for only sprint maps to prevent sneaking
 @AutoService(FeatureProvider.class)
 public class NoSneakFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:player/nosneak", EventFilter.INSTANCE)
@@ -25,7 +26,7 @@ public class NoSneakFeatureProvider implements FeatureProvider {
             return false;
 
         var settings = world.map().settings();
-        if (settings.getVariant() != MapVariant.PARKOUR || !settings.isNoSneak())
+        if (settings.getVariant() != MapVariant.PARKOUR || (!settings.isNoSneak() && !settings.isOnlySprint()))
             return false;
 
         world.addScopedEventNode(eventNode);
@@ -45,6 +46,6 @@ public class NoSneakFeatureProvider implements FeatureProvider {
         var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
         //todo sound effect for sneaking
-        player.sendMessage("No sneaking!");
+//        player.sendMessage("No sneaking!");
     }
 }
