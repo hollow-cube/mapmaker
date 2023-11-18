@@ -74,6 +74,7 @@ class MapWorldHelpers {
         player.setTeam(MAP_TEAM);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(false);
+        player.setFlying(false);
         player.setFlyingSpeed(0.05f);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
