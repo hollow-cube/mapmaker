@@ -155,6 +155,7 @@ public class MapDetailsView extends View {
             }
 
             // MAP TYPE
+
             if (map.settings().getParkourSubVariant() == ParkourSubVariant.SPEEDRUN) {
                 mapTypeSpeedrunText.setText("Speedrun Parkour", TextColor.color(0x15ADD3));
                 mapTypeSwitch.setOption(1);
@@ -217,6 +218,8 @@ public class MapDetailsView extends View {
             mapSettingsSwitch.setOption(1);
             mapSettingsText.setText(settings);
         }
+
+        // GENERIC
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 

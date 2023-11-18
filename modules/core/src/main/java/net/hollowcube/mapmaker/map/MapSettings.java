@@ -179,6 +179,26 @@ public class MapSettings {
         return stringBuilder.toString();
     }
 
+//    public @Nullable String getTagsFullString() {
+//        var tags = getTags();
+//
+//        if (tags.isEmpty()) {
+//            return null;
+//        }
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//
+//        for (int i = 0; i < tags.size(); i++) {
+//            String tagName = tags.get(i).displayName();
+//            stringBuilder.append(tagName);
+//            if (i < tags.size() - 1) {
+//                stringBuilder.append(", ");
+//            }
+//        }
+//
+//        return stringBuilder.toString();
+//    }
+
     public @Nullable String getSettingsString() {
         List<String> enabledSettings = new ArrayList<>();
 
@@ -226,6 +246,42 @@ public class MapSettings {
 
         return stringBuilder.toString();
     }
+
+//    public @Nullable String getSettingsFullString() {
+//        List<String> enabledSettings = new ArrayList<>();
+//
+//        if (isOnlySprint()) {
+//            enabledSettings.add("Only Sprint");
+//        }
+//        if (isNoSprint()) {
+//            enabledSettings.add("No Sprint");
+//        }
+//        if (isNoJump()) {
+//            enabledSettings.add("No Jump");
+//        }
+//        if (isNoSneak()) {
+//            enabledSettings.add("No Sneak");
+//        }
+//        if (isBoat()) {
+//            enabledSettings.add("Boats");
+//        }
+//
+//        if (enabledSettings.isEmpty()) {
+//            return null;
+//        }
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//
+//        for (int i = 0; i < enabledSettings.size(); i++) {
+//            String settingName = enabledSettings.get(i);
+//            stringBuilder.append(settingName);
+//            if (i < enabledSettings.size() - 1) {
+//                stringBuilder.append(", ");
+//            }
+//        }
+//
+//        return stringBuilder.toString();
+//    }
 
     public void setName(@NotNull String name) {
         updateLock.lock();
