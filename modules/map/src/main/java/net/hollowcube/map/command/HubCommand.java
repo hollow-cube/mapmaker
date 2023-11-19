@@ -21,7 +21,7 @@ public class HubCommand extends Command {
     private final PlayerInviteService inviteService;
 
     public HubCommand(@NotNull MapToHubBridge bridge, PlayerInviteService inviteService) {
-        super("hub", "leave", "lobby");
+        super("hub", "leave", "l", "lobby");
         this.bridge = bridge;
         this.inviteService = inviteService;
 
