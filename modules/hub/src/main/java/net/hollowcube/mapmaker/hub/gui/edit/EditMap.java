@@ -7,15 +7,15 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.event.MapDeletedEvent;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
@@ -28,6 +28,7 @@ public class EditMap extends View {
 
     private @ContextObject HubToMapBridge bridge;
     private @ContextObject MapService mapService;
+    private @ContextObject PlayerService playerService;
 
     private @OutletGroup("slot_id_.+") Text[] slotIds;
     private @Outlet("tab_switch") Switch tabSwitch;
@@ -242,10 +243,13 @@ public class EditMap extends View {
             publishButton.setState(State.ACTIVE);
         }
 
-        EventDispatcher.call(new MapDeletedEvent(map.id())); //todo this event is still scuffed
+        // In case back is used, we need to reset the map details view
         performSignal(CreateMaps.SIG_RESET);
+
+        // Open the map details view for the newly published map
+        var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
         PersonalizedMapData publishedMap2 = new PersonalizedMapData(map, PersonalizedMapData.Progress.NONE);
-        pushView(c -> new MapDetailsView(c, publishedMap2, Component.text(publishedMap.owner())));
+        pushView(c -> new MapDetailsView(c, publishedMap2, authorName.build(DisplayName.Context.PLAIN)));
     }
 
     private static final int MIN_PLAYTIME = 5 * 60 * 1000; // 5 minutes
@@ -398,8 +402,8 @@ public class EditMap extends View {
 
     @Action("map_tags_tab_gameplay")
     private void selectMapTagGameplay() {
-            if (mapTagsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
-            mapTagsTabSwitch.setOption(1);
+        if (mapTagsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
+        mapTagsTabSwitch.setOption(1);
     }
 
     // TAG HELPER FUNCTIONS
@@ -447,8 +451,8 @@ public class EditMap extends View {
 
     @Action("map_settings_tab_gameplay")
     private void selectMapSettingGameplay() {
-            if (mapSettingsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
-            mapSettingsTabSwitch.setOption(1);
+        if (mapSettingsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
+        mapSettingsTabSwitch.setOption(1);
     }
 
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
@@ -587,7 +591,9 @@ public class EditMap extends View {
     }
 
     @Action("tab_settings")
-    public void showSettingsTab() { selectTab(2); }
+    public void showSettingsTab() {
+        selectTab(2);
+    }
 
     @Action("tab_actions")
     public void showActionsTab() {
