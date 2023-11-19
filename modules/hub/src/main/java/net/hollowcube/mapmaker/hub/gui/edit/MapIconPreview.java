@@ -16,29 +16,31 @@ public class MapIconPreview extends View {
     private @Outlet("label") Label label;
 
     private final Material material;
+    private final String labelText;
 
     public MapIconPreview(@NotNull Context context, @NotNull Material material) {
         super(context);
         this.material = material;
+        this.labelText = material.name();
 
         label.setItemSprite(ItemStack.of(material));
-        label.setArgs(Component.text(material.name()));
+        label.setArgs(Component.text(labelText));
     }
 
-    private static final String NO_RESULT_LABEL = "No Results Found!";
-    private static final ItemStack NO_RESULT_ITEM = ItemStack.of(Material.BARRIER);
-
-    public MapIconPreview(@NotNull Context context) { //TODO sprite instead of item
+    public MapIconPreview(@NotNull Context context) {
         super(context);
         this.material = Material.BARRIER;
+        this.labelText = "No Results Found!";
 
-        label.setItemSprite(NO_RESULT_ITEM);
-        label.setArgs(Component.text(NO_RESULT_LABEL));
+        label.setItemSprite(ItemStack.of(Material.BARRIER));
+        label.setArgs(Component.text(labelText));
     }
 
     @Action("label")
     private void handleSelect() {
+        if (labelText.equals("No Results Found!")) {
+            return;
+        }
         performSignal(SIG_SELECTED, material);
     }
-
 }

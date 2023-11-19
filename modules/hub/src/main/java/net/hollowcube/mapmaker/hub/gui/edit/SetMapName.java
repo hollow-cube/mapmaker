@@ -37,7 +37,13 @@ public class SetMapName extends View {
 
     @Action("output")
     public void handleAccept() {
-        popView(SIG_UPDATE_NAME, input);
+        String trimmedInput = input.trim();
+
+        if (!trimmedInput.isEmpty()) {
+            popView(SIG_UPDATE_NAME, trimmedInput);
+        } else {
+            popView(SIG_UPDATE_NAME, "");
+        }
     }
 
 }

@@ -17,7 +17,6 @@ public class MapData {
     public static final List<String> SPAWN_MAP_PLAYERS = List.of(
             "e6c3e11c-1166-4dcd-ad59-c12e386b00bd", // Nixotica
             "aceb326f-da15-45bc-bf2f-11940c21780c", // notmattw
-            "dbe21059-5b0b-4312-aa12-830dc540ad04", // Seth28
             "a3634428-40a0-45b3-8583-a3b5813d64c5", // SethPRG
             "b6496267-8dfe-485c-982f-85871ae4cbe4", // Tamto
             "3e66e238-ec72-49bb-b9dc-6a8a83d0aae6", // ArcaneWarrior

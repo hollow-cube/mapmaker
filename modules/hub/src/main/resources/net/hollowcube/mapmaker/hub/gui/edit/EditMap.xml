@@ -48,7 +48,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_bg"/>
                         <button id="parkour_subvariant_speedrun_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_selected"/>
                     </switch>
@@ -58,7 +58,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_bg"/>
                         <button id="parkour_subvariant_sectioned_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_selected"/>
                     </switch>
@@ -68,7 +68,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_bg"/>
                         <button id="parkour_subvariant_rankup_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_selected"/>
                     </switch>
@@ -78,7 +78,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_bg"/>
                         <button id="parkour_subvariant_gauntlet_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_selected"/>
                     </switch>
@@ -88,7 +88,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_bg"/>
                         <button id="parkour_subvariant_dropper_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_selected"/>
                     </switch>
@@ -98,7 +98,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_bg"/>
                         <button id="parkour_subvariant_one_jump_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_selected"/>
                     </switch>
@@ -108,7 +108,7 @@
                                 sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_bg"/>
                         <button id="parkour_subvariant_informative_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative.already_selected"
                                 sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
                                 backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_selected"/>
                     </switch>

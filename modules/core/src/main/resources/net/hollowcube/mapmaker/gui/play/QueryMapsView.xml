@@ -1,7 +1,7 @@
-<component id="anvil" width="9" height="1" align="ltr">
+<component id="anvil" width="9" height="1" align="ltr" sprite="play_maps/search/filter/name/container">
     <box width="9" height="1" align="ltr">
-        <label id="placeholder" width="1" translationKey="gui.generic.empty" sprite="diamond_pickaxe"/>
+        <button id="input" translationKey="gui.generic.empty"/>
         <spacer width="1"/>
-        <button id="confirmation" width="1" translationKey="confirm.todo" sprite="diamond_pickaxe"/>
+        <button id="output" width="1" translationKey="gui.generic.empty"/>
     </box>
 </component>

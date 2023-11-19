@@ -19,7 +19,9 @@ public class QueryMapsView extends View {
         this.context = context;
     }
 
-    @Action("confirmation")
+    @Action("input") public void handleBackButton() { popView(); }
+
+    @Action("output")
     private void confirm_query() {
         if (this.query == null || this.query.isBlank()) {
             popView();
