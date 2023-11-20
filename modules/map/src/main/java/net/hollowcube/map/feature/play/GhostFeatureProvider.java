@@ -28,12 +28,12 @@ public class GhostFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
-            return false;
+//        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
+//            return false;
+//
+//        world.addScopedEventNode(eventNode);
 
-        world.addScopedEventNode(eventNode);
-
-        return true;
+        return false;
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
@@ -51,4 +52,12 @@ public final class FutureUtil {
         throw new IllegalStateException("Unsafe blocking call on '" + thread.getName() + "'");
     }
 
+    public static <T> @Nullable T getUnchecked(@Nullable Future<T> future) {
+        if (future == null) return null;
+        try {
+            return future.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
