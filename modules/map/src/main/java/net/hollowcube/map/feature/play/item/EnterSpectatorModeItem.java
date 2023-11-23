@@ -5,6 +5,7 @@ import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,11 +36,16 @@ public class EnterSpectatorModeItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
-        //todo should not depend on implementation details of InternalMapWorld
+        var playerPosition = player.getPosition().sub(0, 0.01, 0);
+        var block = MapWorld.forPlayer(player).instance().getBlock(playerPosition);
 
-        world.removePlayer(player);
-        if (world instanceof PlayingMapWorld playingWorld) {
-            playingWorld.startSpectating(player, false);
+        if (block.isSolid()) { //TODO this doesn't function on the edge of a full block, nor on fences, candles, etc.
+            if (world instanceof PlayingMapWorld playingWorld) {
+                world.removePlayer(player);
+                playingWorld.startSpectating(player, false);
+            }
+        } else {
+            player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
         }
     }
 
