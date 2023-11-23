@@ -52,7 +52,6 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         // Sender is the one accepting it
         var inviteKey = new Invite(target.getUuid(), sender.getUuid());
         var requestKey = new Request(target.getUuid(), sender.getUuid());
-        var accepteeName = PlayerDataV2.fromPlayer(target).displayName();
 
         if (invites.get(inviteKey) != null && requests.get(requestKey) != null) {
             // Whichever came later wins
@@ -70,7 +69,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         } else if (invites.get(inviteKey) != null) {
             acceptInvite(target, sender);
         } else {
-            sender.sendMessage(Component.translatable("map.invite_and_request.cant_accept", accepteeName));
+            sender.sendMessage(Component.translatable("map.invite_and_request.cant_accept"));
         }
     }
 
@@ -99,15 +98,16 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             return;
         }
         var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
-        if (!doesPlayerOwnMap(sender, senderMap)) {
+        if (!doesPlayerOwnMap(sender, senderMap) && !senderMap.map().isPublished()) {
             sender.sendMessage(Component.translatable("map.invite.no_permission", targetDisplayName, Component.text(senderMap.map().name())));
             return;
         }
 
         var targetMap = MapWorld.forPlayerOptional(target);
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        var senderName = Component.text(PlayerDataV2.fromPlayer(sender).username());
         if (targetMap == senderMap) {
-            sender.sendMessage(Component.translatable("map.build.remove.same_map"));
+            sender.sendMessage(Component.translatable("map.invite.same_map"));
             return;
         }
 
@@ -127,7 +127,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         // build/play determined by map publish state
         String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".invite.";
         sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(senderMap.map().name())));
-        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(senderMap.map().name())));
+        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(senderMap.map().name()), senderName));
     }
 
     private void acceptInvite(@NotNull Player sender, @NotNull Player target) {
@@ -163,6 +163,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         var targetMap = MapWorld.forPlayerOptional(target);
         var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
+        var senderName = Component.text(PlayerDataV2.fromPlayer(sender).username());
         if (targetMap == null) {
             sender.sendMessage(Component.translatable("map.play.request.cant_send", targetDisplayName));
             return;
@@ -186,7 +187,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         // build/play determined by map publish state
         String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
         sender.sendMessage(Component.translatable(translateString + "sent", targetDisplayName, Component.text(targetMap.map().name())));
-        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(targetMap.map().name())));
+        target.sendMessage(Component.translatable(translateString + "pending", senderDisplayName, Component.text(targetMap.map().name()), senderName));
     }
 
     private void acceptRequest(@NotNull Player sender, @NotNull Player target) {
@@ -213,8 +214,8 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
             // build/play determined by map publish state
             String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
-            sender.sendMessage(Component.translatable(translateString + "accepted", senderDisplayName, Component.text(targetMap.map().name())));
-            target.sendMessage(Component.translatable(translateString + "accept", targetDisplayName, Component.text(targetMap.map().name())));
+            sender.sendMessage(Component.translatable(translateString + "accepted", targetDisplayName, Component.text(targetMap.map().name())));
+            target.sendMessage(Component.translatable(translateString + "accept", senderDisplayName, Component.text(targetMap.map().name())));
             // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
             mwm.joinMap(sender, targetMap.map(), (targetMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }

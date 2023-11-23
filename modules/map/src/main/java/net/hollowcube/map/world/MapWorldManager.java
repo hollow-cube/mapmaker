@@ -100,6 +100,7 @@ public class MapWorldManager {
     private void closeMap(@NotNull MapWorld world) {
         for (var player : world.players()) {
             player.sendMessage(Component.translatable("map.closed"));
+            //TODO this gets called when someone requests to join someone's map when playing, which is weird behavior
             server.bridge().sendPlayerToHub(player);
         }
 
