@@ -3,6 +3,7 @@ package net.hollowcube.map.block.handler;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.map.block.BlockTags;
+import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -143,7 +144,10 @@ public class SignBlockHandler implements BlockHandler {
 
         // Handle editing the sign
         var packet = new OpenSignEditorPacket(blockPosition, isFront);
-        player.sendPacket(packet);
+        var playerMap = MapWorld.forPlayerOptional(player);
+        if (!(playerMap == null) && !playerMap.map().isPublished()) {
+            player.sendPacket(packet);
+        }
         return true;
     }
 

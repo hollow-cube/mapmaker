@@ -1,4 +1,4 @@
-<component id="anvil" width="9" height="1" align="ltr" sprite="play_maps/search/filter/name/container">
+<component id="anvil" width="9" height="5" align="ltr" sprite="play_maps/search/filter/name/container">
     <box width="9" height="1" align="ltr">
         <button id="input" translationKey="gui.generic.empty"/>
         <spacer width="1"/>
