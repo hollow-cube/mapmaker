@@ -21,6 +21,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
@@ -42,7 +43,8 @@ public final class HubHotbar {
             .addListener(PlayerUseItemEvent.class, HubHotbar::handleUseItem)
             .addListener(EntityAttackEvent.class, HubHotbar::handleHitPlayer)
             .addListener(ItemDropEvent.class, HubHotbar::handleItemDrop)
-            .addListener(InventoryPreClickEvent.class, HubHotbar::handleItemClick);
+            .addListener(InventoryPreClickEvent.class, HubHotbar::handleItemClick)
+            .addListener(PlayerSwapItemEvent.class, HubHotbar::handleSwapItem);
 
     private static final int PLAY_ITEM_CMD = BadSprite.SPRITE_MAP.get("tablet").cmd();
     private static final int CREATE_ITEM_CMD = BadSprite.SPRITE_MAP.get("hammer").cmd();
@@ -132,6 +134,10 @@ public final class HubHotbar {
     }
 
     private static void handleItemClick(@NotNull InventoryPreClickEvent event) {
+        event.setCancelled(true);
+    }
+
+    private static void handleSwapItem(@NotNull PlayerSwapItemEvent event) {
         event.setCancelled(true);
     }
 
