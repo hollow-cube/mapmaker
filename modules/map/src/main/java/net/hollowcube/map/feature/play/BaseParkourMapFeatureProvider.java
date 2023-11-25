@@ -3,6 +3,7 @@ package net.hollowcube.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
@@ -23,7 +24,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapPlayerStartSpectatorEvent.class, this::initSpectatorPlayer)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::deinitPlayer);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::deinitPlayer)
+            .addListener(MapPlayerStartFinishedEvent.class, this::initFinishedPlayer);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -98,6 +100,18 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID, null));
         inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
         inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID, null));
+        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+
+    }
+
+    public void initFinishedPlayer(@NotNull MapPlayerStartFinishedEvent event) {
+        var player = event.getPlayer();
+
+        // Set the hotbar
+        var itemRegistry = event.mapWorld().itemRegistry();
+        var inventory = player.getInventory();
+        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
     }

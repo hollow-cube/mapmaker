@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
+import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
@@ -42,6 +43,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
 
     private static final BadSprite SPECTATOR_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/spectator"));
+    private static final BadSprite FINISHED_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/finished"));
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
@@ -64,6 +66,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     });
 
     private final ActionBar.Provider spectatingActionBarProvider = this::buildSpectatorWidget;
+    private final ActionBar.Provider finishedActionBarProvider = this::buildFinishedWidget;
 
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         this.server = server;
@@ -188,6 +191,25 @@ public class PlayingMapWorld implements InternalMapWorld {
 //        player.sendMessage("Now spectating " + map.settings().getName());
     }
 
+    public @Blocking void startFinished(@NotNull Player player, boolean teleport) {
+
+        player.setTag(TAG_PLAYING, false); // Sanity
+        player.setTag(MapHooks.PLAYING, false); // Sanity
+
+        spectatingPlayers.add(player);
+
+        MapWorldHelpers.resetPlayer(player);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setAllowFlying(true);
+        player.setInvisible(true);
+        ActionBar.forPlayer(player).addProvider(finishedActionBarProvider);
+
+        instance.eventNode().call(new MapPlayerStartFinishedEvent(this, player));
+
+        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
+//        player.sendMessage("Now spectating " + map.settings().getName());
+    }
+
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
         removePlayer(player, true);
@@ -201,6 +223,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         activePlayers.remove(player);
         spectatingPlayers.remove(player);
         ActionBar.forPlayer(player).removeProvider(spectatingActionBarProvider);
+        ActionBar.forPlayer(player).removeProvider(finishedActionBarProvider);
 
         MapWorldHelpers.resetPlayer(player);
 
@@ -237,6 +260,11 @@ public class PlayingMapWorld implements InternalMapWorld {
     private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
         builder.pushColor(FontUtil.NO_SHADOW);
         builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
+    }
+
+    private void buildFinishedWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
     }
 
     private void updateSpectators() {

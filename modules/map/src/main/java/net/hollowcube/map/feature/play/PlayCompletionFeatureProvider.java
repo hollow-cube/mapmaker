@@ -72,7 +72,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         // This will also cause their savestate to be written to DB
         world.removePlayer(player);
         if (world instanceof PlayingMapWorld pmw) {
-            pmw.startSpectating(player, false);
+            pmw.startFinished(player, false);
         }
 
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
