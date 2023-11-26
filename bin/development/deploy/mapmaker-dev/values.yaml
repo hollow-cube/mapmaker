@@ -2,10 +2,10 @@ env:
   PROMETHEUS_DISABLE_CREATED_SERIES: "true"
 
 image:
-  repository: registry.hollowcube.dev/mapmaker-dev
+  repository: mworzala/mapmaker-dev
   pullPolicy: Always
 imagePullSecrets:
-  - name: regcred
+  - name: dockerio
 
 podAnnotations: { }
 
@@ -22,7 +22,7 @@ resources: { }
   #   cpu: 100m
   #   memory: 128Mi
   # requests:
-  #   cpu: 100m
+#   cpu: 100m
 #   memory: 128Mi
 
 nodeSelector: { }
