@@ -25,6 +25,8 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
@@ -48,6 +50,7 @@ public final class HubHotbar {
 
     private static final int PLAY_ITEM_CMD = BadSprite.SPRITE_MAP.get("tablet").cmd();
     private static final int CREATE_ITEM_CMD = BadSprite.SPRITE_MAP.get("hammer").cmd();
+    private static final int CREATE_ITEM_CMD2 = BadSprite.SPRITE_MAP.get("hammer").cmd() + 1000;
 
     private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
             .displayName(Component.translatable("item.mapmaker.play_maps.name"))
@@ -61,6 +64,12 @@ public final class HubHotbar {
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 
+    private static final ItemStack CREATE_MAPS_ITEM2 = ItemStack.builder(Material.DIAMOND)
+            .displayName(Component.translatable("item.mapmaker.create_maps.name"))
+            .lore(LanguageProviderV2.translateMulti("item.mapmaker.create_maps.lore", List.of()))
+            .meta(meta -> meta.customModelData(CREATE_ITEM_CMD2))
+            .build();
+
     public static @NotNull EventNode<InstanceEvent> eventNode() {
         return eventNode;
     }
@@ -68,6 +77,7 @@ public final class HubHotbar {
     public static void applyToPlayer(@NotNull Player player) {
         player.getInventory().setItemStack(0, PLAY_MAPS_ITEM);
         player.getInventory().setItemStack(1, CREATE_MAPS_ITEM);
+        player.getInventory().setItemStack(2, CREATE_MAPS_ITEM2);
     }
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
@@ -81,6 +91,8 @@ public final class HubHotbar {
             server.newOpenGUI(player, context -> new PlayMapsView(context.with(Map.of("query", ""))));
         } else if (customModelData == CREATE_ITEM_CMD) {
             server.newOpenGUI(player, CreateMaps::new);
+        } else if (customModelData == CREATE_ITEM_CMD2) {
+            player.openInventory(new Inventory(InventoryType.CHEST_6_ROW, Component.text("Test Inventory")));
         }
     }
 
