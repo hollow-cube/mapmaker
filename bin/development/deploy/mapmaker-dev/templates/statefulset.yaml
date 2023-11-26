@@ -38,6 +38,8 @@ spec:
             httpGet:
               path: /ready
               port: 9124
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
           {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
