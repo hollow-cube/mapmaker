@@ -206,6 +206,8 @@ public class MapDetailsView extends View {
         } else {
             mapTagsSwitch.setOption(1);
             mapTagsText.setText(tagsString);
+            var tagsFullString = map.settings().getTagsFullString();
+            mapTagsText.setArgs(Component.text(tagsFullString));
         }
 
         // MAP SETTINGS
@@ -217,6 +219,8 @@ public class MapDetailsView extends View {
         } else {
             mapSettingsSwitch.setOption(1);
             mapSettingsText.setText(settings);
+            var settingsFullString = map.settings().getSettingsFullString();
+            mapSettingsText.setArgs(Component.text(settingsFullString));
         }
 
         // GENERIC

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class MapSettings {
 
@@ -149,55 +150,49 @@ public class MapSettings {
     }
 
     public @Nullable String getTagsString() {
-        var tags = getTags();
-        var initialTagCount = tags.size();
-        var tagsLength = FontUtil.measureText(tags.toString());
+        List<String> tags = getTags().stream().map(tag -> tag.name).collect(Collectors.toList());
+
+        var tagsLength = FontUtil.measureText(String.join(", ", tags));
         var maxLength = 139;
 
-        if (tags.isEmpty()) {
-            return null;
-        }
+        var initialTagsCount = tags.size();
 
-        while (tagsLength > maxLength) {
+        while (tagsLength > maxLength && !tags.isEmpty()) {
             tags.remove(tags.size() - 1);
-            tagsLength = FontUtil.measureText(tags.toString());
+            tagsLength = FontUtil.measureText(String.join(", ", tags));
         }
 
         StringBuilder stringBuilder = new StringBuilder();
-        int removedTagCount = initialTagCount - tags.size();
+        int removedTagsCount = initialTagsCount - tags.size();
 
         for (int i = 0; i < tags.size(); i++) {
-            String tagName = tags.get(i).displayName();
-            stringBuilder.append(tagName);
+            String tagsName = tags.get(i);
+            stringBuilder.append(tagsName);
             if (i < tags.size() - 1) {
                 stringBuilder.append(", ");
-            } else if (i == tags.size() - 1 && removedTagCount > 0) {
-                stringBuilder.append(", +").append(removedTagCount);
+            } else if (i == tags.size() - 1 && removedTagsCount > 0) {
+                stringBuilder.append(", +").append(removedTagsCount);
             }
         }
 
         return stringBuilder.toString();
     }
 
-//    public @Nullable String getTagsFullString() {
-//        var tags = getTags();
-//
-//        if (tags.isEmpty()) {
-//            return null;
-//        }
-//
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        for (int i = 0; i < tags.size(); i++) {
-//            String tagName = tags.get(i).displayName();
-//            stringBuilder.append(tagName);
-//            if (i < tags.size() - 1) {
-//                stringBuilder.append(", ");
-//            }
-//        }
-//
-//        return stringBuilder.toString();
-//    }
+    public String getTagsFullString() {
+        List<String> tags = getTags().stream().map(tag -> tag.name).toList();
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < tags.size(); i++) {
+            String tagsName = tags.get(i);
+            stringBuilder.append(tagsName);
+            if (i < tags.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
+    }
 
     public @Nullable String getSettingsString() {
         List<String> enabledSettings = new ArrayList<>();
@@ -247,41 +242,41 @@ public class MapSettings {
         return stringBuilder.toString();
     }
 
-//    public @Nullable String getSettingsFullString() {
-//        List<String> enabledSettings = new ArrayList<>();
-//
-//        if (isOnlySprint()) {
-//            enabledSettings.add("Only Sprint");
-//        }
-//        if (isNoSprint()) {
-//            enabledSettings.add("No Sprint");
-//        }
-//        if (isNoJump()) {
-//            enabledSettings.add("No Jump");
-//        }
-//        if (isNoSneak()) {
-//            enabledSettings.add("No Sneak");
-//        }
-//        if (isBoat()) {
-//            enabledSettings.add("Boats");
-//        }
-//
-//        if (enabledSettings.isEmpty()) {
-//            return null;
-//        }
-//
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        for (int i = 0; i < enabledSettings.size(); i++) {
-//            String settingName = enabledSettings.get(i);
-//            stringBuilder.append(settingName);
-//            if (i < enabledSettings.size() - 1) {
-//                stringBuilder.append(", ");
-//            }
-//        }
-//
-//        return stringBuilder.toString();
-//    }
+    public String getSettingsFullString() {
+        List<String> enabledSettings = new ArrayList<>();
+
+        if (isOnlySprint()) {
+            enabledSettings.add("Only Sprint");
+        }
+        if (isNoSprint()) {
+            enabledSettings.add("No Sprint");
+        }
+        if (isNoJump()) {
+            enabledSettings.add("No Jump");
+        }
+        if (isNoSneak()) {
+            enabledSettings.add("No Sneak");
+        }
+        if (isBoat()) {
+            enabledSettings.add("Boats");
+        }
+
+        if (enabledSettings.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < enabledSettings.size(); i++) {
+            String settingName = enabledSettings.get(i);
+            stringBuilder.append(settingName);
+            if (i < enabledSettings.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
+    }
 
     public void setName(@NotNull String name) {
         updateLock.lock();
