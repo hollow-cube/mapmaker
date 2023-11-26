@@ -10,7 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class FlySpeedCommand extends Command {
-    private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f).defaultValue(1.0f);
+    private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f)
+            .defaultValue(1.0f)
+            .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
 
     public FlySpeedCommand() {
         super("flyspeed");

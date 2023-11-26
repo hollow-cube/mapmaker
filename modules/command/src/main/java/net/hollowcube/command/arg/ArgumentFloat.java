@@ -34,6 +34,7 @@ public class ArgumentFloat extends Argument<Float> {
         var word = reader.readWord(WordType.ALPHANUMERIC);
         try {
             var value = Float.parseFloat(word);
+            if (Float.isNaN(value) || Float.isInfinite(value)) return new ParseFailure<>();
             if (value < min || value > max) return new ParseFailure<>();
             return new ParseSuccess<>(value);
         } catch (NumberFormatException e) {
