@@ -245,4 +245,20 @@ public final class FontUtil {
         return sb.toString();
     }
 
+    /**
+     * Strips all "invalid" characters for use by players. The returned string may be empty, but will never be null.
+     *
+     * <p>Currently this is a subset of ASCII but we may allow others in the future.</p>
+     *
+     * <p>If this is changed, the Go version in `common-go` must also be changed.</p>
+     *
+     * @param input The string to sanitize
+     * @return The sanitized string
+     */
+    public static @NotNull String stripInvalidChars(@NotNull String input) {
+        return input.codePoints().filter(i -> i >= 0x20 && i <= 0x7E)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
 }

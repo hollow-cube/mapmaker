@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,12 @@ public class SetMapName extends View {
 
     @Signal(Element.SIG_ANVIL_INPUT)
     public void handleAnvilInput(@NotNull String input) {
-        this.input = input;
+        this.input = FontUtil.stripInvalidChars(input);
+
+        // If the name has changed, update the input field to reflect the trimmed string
+        if (!this.input.equals(input)) {
+            inputField.setArgs(Component.text(this.input));
+        }
 //        outputField.setArgs(Component.text(input));
     }
 

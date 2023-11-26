@@ -418,8 +418,11 @@ public class DevServer {
         // Cancel the event, so we can send player specific versions ourselves
         event.setCancelled(true);
 
+        var strippedMessage = FontUtil.stripInvalidChars(event.getMessage()).trim();
+        if (strippedMessage.isBlank()) return;
+
         // Replace emojis with their sprites
-        var baseMessage = Component.text(event.getMessage()).replaceText(TextReplacementConfig.builder()
+        var baseMessage = Component.text(strippedMessage).replaceText(TextReplacementConfig.builder()
                 .match(EMOJI_REGEX)
                 .replacement((match, builder) -> {
                     var emoji = EMOJIS.get(match.group(1).toLowerCase(Locale.ROOT));
