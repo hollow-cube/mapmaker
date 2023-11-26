@@ -194,7 +194,7 @@ public class EditMap extends View {
     private @Blocking void editMap(@NotNull Player player) {
         try {
             if (map.verification() != MapVerification.UNVERIFIED) {
-                player.sendMessage("there was verification progress but you deleted it by editing the map again, oops");
+                player.sendMessage(Component.translatable("progress.verification.lost"));
 
                 var playerData = PlayerDataV2.fromPlayer(player);
                 mapService.deleteVerification(playerData.id(), map.id());
@@ -202,7 +202,7 @@ public class EditMap extends View {
 
             bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            player.sendMessage(Component.translatable("edit.map.failure"));
             MinecraftServer.getExceptionManager().handleException(e);
         } finally {
             player.closeInventory();
@@ -456,6 +456,10 @@ public class EditMap extends View {
     }
 
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
+        if(map.isVerified()) {
+            player().sendMessage(Component.translatable("settings.verify.error"));
+            return;
+        }
         // TODO this is disgusting but I'm lazy, we should do this like tags as enum
         if (set) {
             if (setting.equals(MapSettings.Setting.NOSPRINT)) {
