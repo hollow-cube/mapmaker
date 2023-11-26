@@ -36,10 +36,8 @@ public class EnterSpectatorModeItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
-        var playerPosition = player.getPosition().sub(0, 0.01, 0);
-        var block = MapWorld.forPlayer(player).instance().getBlock(playerPosition);
 
-        if (block.isSolid()) { //TODO this doesn't function on the edge of a full block, nor on fences, candles, etc.
+        if (player.isOnGround()) {
             if (world instanceof PlayingMapWorld playingWorld) {
                 world.removePlayer(player);
                 playingWorld.startSpectating(player, false);
