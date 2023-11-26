@@ -32,7 +32,7 @@ public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
     private static final BenchmarkManager BENCHMARK_MANAGER = MinecraftServer.getBenchmarkManager();
 
     private static final double MAX_TICK_MS = 50;
-    private static final double MAX_MEMORY_MB = 1024;
+    private static final double MAX_MEMORY_MB = 1024 * 3;
     private static final double MAX_WIDTH = 2.48;
 
     private final AtomicReference<TickMonitor> LAST_TICK = new AtomicReference<>();
