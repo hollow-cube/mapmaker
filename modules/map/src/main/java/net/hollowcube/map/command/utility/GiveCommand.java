@@ -12,11 +12,14 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.map.util.MapCondition.mapFilter;
+
 public class GiveCommand extends Command {
     private final Argument<ItemStack> itemArg = ItemRegistry.Argument("item");
 
     public GiveCommand() {
         super("give");
+        setCondition(mapFilter(false, true, false));
 
         addSyntax(playerOnly(this::handleGiveItem), itemArg);
     }
