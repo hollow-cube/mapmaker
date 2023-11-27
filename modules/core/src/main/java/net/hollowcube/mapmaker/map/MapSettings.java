@@ -152,6 +152,10 @@ public class MapSettings {
     public @Nullable String getTagsString() {
         List<String> tags = getTags().stream().map(tag -> tag.name).collect(Collectors.toList());
 
+        if (tags.isEmpty()) {
+            return null;
+        }
+
         var tagsLength = FontUtil.measureText(String.join(", ", tags));
         var maxLength = 139;
 
