@@ -78,7 +78,8 @@ public class HubWorld {
         } else {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
-                instance.setChunkLoader(new PolarLoader(is));
+//                instance.setChunkLoader(new PolarLoader(is));
+                //todo
             } catch (IOException e) {
                 MinecraftServer.getExceptionManager().handleException(e);
             }

@@ -25,7 +25,7 @@ java_library(
 
 alias(
     name = "minestom",
-    actual = "@maven//:dev_hollowcube_minestom_ce",
+    actual = "@maven//:dev_hollowcube_minestom_ce_snapshots",
 )
 
 java_library(

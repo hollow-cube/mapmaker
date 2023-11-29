@@ -4,7 +4,6 @@ import net.minestom.server.entity.*;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
-import net.minestom.server.network.packet.server.play.SpawnPlayerPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,21 +29,19 @@ public class PlaybackPlayer extends Entity {
 
     @Override
     public void updateNewViewer(@NotNull Player player) {
-        super.updateNewViewer(player);
-
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
         if (skinTexture != null && skinSignature != null) {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
                 0, GameMode.SURVIVAL, null, null);
+        player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
-        player.sendPackets(
-                new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry),
-                new SpawnPlayerPacket(getEntityId(), getUuid(), getPosition()),
-                // Enable skin layers
-                new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127)))
-        );
+        // Spawn the player entity
+        super.updateNewViewer(player);
+
+        // Enable skin layers
+        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
         setInvisible(true);
     }
 
