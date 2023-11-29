@@ -68,7 +68,8 @@ public class PathData implements Viewable { //todo maybe should be Viewable?
             }
         }
 
-        sendPacketToViewers(builder.build().getPacket());
+        //todo need to update debug renderer to 1.20.2
+//        sendPacketToViewers(builder.build().getPacket());
     }
 
     @Override
