@@ -16,7 +16,7 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
@@ -37,11 +37,13 @@ public class TerraformAxiom {
     private static final GlobalEventHandler GLOBAL_EVENTS = MinecraftServer.getGlobalEventHandler();
 
     public static void init(@NotNull EventNode<? extends InstanceEvent> eventNode, @Nullable CommandCondition condition) {
-        GLOBAL_EVENTS.addListener(PlayerLoginEvent.class, TerraformAxiom::handlePlayerLogin);
+        GLOBAL_EVENTS.addListener(AsyncPlayerConfigurationEvent.class, TerraformAxiom::handlePlayerConfig);
         GLOBAL_EVENTS.addListener(PlayerPluginMessageEvent.class, TerraformAxiom::handlePluginMessage);
     }
 
-    private static void handlePlayerLogin(@NotNull PlayerLoginEvent event) {
+    private static void handlePlayerConfig(@NotNull AsyncPlayerConfigurationEvent event) {
+        if (!event.isFirstConfig()) return;
+
         var player = event.getPlayer();
         player.sendPluginMessage("minecraft:register", String.join("\0", Axiom.INCOMING_CHANNELS));
         //todo minestom needs a way to register incoming plugin messages so multiple sources can do it at once.

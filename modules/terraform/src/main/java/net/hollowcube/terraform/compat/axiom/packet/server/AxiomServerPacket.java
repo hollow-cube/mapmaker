@@ -4,14 +4,14 @@ import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.play.PluginMessagePacket;
+import net.minestom.server.network.packet.server.common.PluginMessagePacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
  * AxiomServerPacket is a {@link net.minestom.server.network.packet.server.play.PluginMessagePacket} with strict types.
- *
+ * <p>
  * It allows the use of {@link net.minestom.server.entity.Player#sendPacket(SendablePacket)} which is convenient.
  */
 @SuppressWarnings("UnstableApiUsage")

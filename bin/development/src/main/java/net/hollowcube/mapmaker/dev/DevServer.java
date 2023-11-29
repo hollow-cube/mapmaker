@@ -65,6 +65,7 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
@@ -333,7 +334,7 @@ public class DevServer {
 
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
-            eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
+            eventHandler.addListener(AsyncPlayerConfigurationEvent.class, this::handleConfig);
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
             eventHandler.addListener(PlayerSkinInitEvent.class, this::handleSkinInit);
@@ -398,7 +399,7 @@ public class DevServer {
         }
     }
 
-    private void handleLogin(PlayerLoginEvent event) {
+    private void handleConfig(@NotNull AsyncPlayerConfigurationEvent event) {
         logger.info("login - {}", event.getPlayer().getUsername());
 
         event.setSpawningInstance(hub.world().instance());
@@ -500,7 +501,7 @@ public class DevServer {
         var builder = new StringBuilder();
         builder.append("(?:^|\\s)(");
         var first = true;
-        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+        for (var player : MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY)) {
             if (!first) builder.append("|");
             builder.append(player.getUsername());
             first = false;
@@ -731,7 +732,7 @@ public class DevServer {
     }
 
     private void broadcastTabHeaderAndFooter() {
-        var onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayers().size();
+        var onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayerCount();
         var playersText = onlinePlayers == 1 ? "ᴘʟᴀʏᴇʀ" : "ᴘʟᴀʏᴇʀѕ";
         var playerCountText = FontUtil.rewrite("smallnums", "" + onlinePlayers);
 
