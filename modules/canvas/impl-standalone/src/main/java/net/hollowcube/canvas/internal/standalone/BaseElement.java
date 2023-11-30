@@ -112,17 +112,10 @@ public abstract class BaseElement implements Element, Loadable {
     protected void drawBackgroundSprite(@NotNull FontUIBuilder sb, int x, int y) {
         if (state == State.ACTIVE && sprite != null) {
             sb.draw(sprite, x);
-//            sb.append(FontUtil.computeOffset(sprite.offsetX() + (x * 18)));
-//            sb.append(sprite.fontChar());
-//            sb.append(FontUtil.computeOffset(-(sprite.offsetX() + sprite.width() + 1 + (x * 18))));
-//            System.out.println("DREW");
         }
 
         if (state == State.LOADING && loadingSprite != null) {
             sb.draw(loadingSprite, 0);
-//            sb.append(FontUtil.computeOffset(loadingSprite.offsetX()));
-//            sb.append(loadingSprite.fontChar());
-//            sb.append(FontUtil.computeOffset(-(loadingSprite.offsetX() + loadingSprite.width())));
         }
     }
 

@@ -119,8 +119,8 @@ public final class HubHotbar {
     private static void doBonkAnimation(TextDisplayMeta meta) {
         meta.setNotifyAboutChanges(false);
         meta.setText(Component.text("BONK!", NamedTextColor.RED));
-        meta.setInterpolationDuration(3);
-        meta.setInterpolationStartDelta(0);
+        meta.setTransformationInterpolationDuration(3);
+        meta.setTransformationInterpolationStartDelta(0);
         if (meta.getScale().x() == 0.75) {
             meta.setScale(new Vec(1.5, 1.5, 1));
         } else {

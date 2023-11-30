@@ -12,6 +12,7 @@ import net.hollowcube.polar.PolarReader;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -78,17 +79,14 @@ public class HubWorld {
         } else {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
-//                instance.setChunkLoader(new PolarLoader(is));
-                //todo
+                instance.setChunkLoader(new PolarLoader(is));
             } catch (IOException e) {
                 MinecraftServer.getExceptionManager().handleException(e);
             }
         }
 
-        var loadingChunks = new ArrayList<CompletableFuture<Void>>();
-        ChunkUtils.forChunksInRange(0, 0, 16, (x, z) ->
-                loadingChunks.add(instance.loadChunk(x, z).thenRun(() -> {
-                })));
+        var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
+        ChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
                 .thenRun(() -> logger.log(System.Logger.Level.INFO, "Loaded spawn chunks"));
 

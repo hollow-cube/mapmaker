@@ -115,9 +115,7 @@ public class SnapshotViewerServer {
             try {
                 // Respond immediately, we don't want to hold up the test run and never report info back.
 //                var content = ;
-                System.out.println("two");
                 res.status(200).send();
-                System.out.println("3");
 
                 ChunkUtils.forChunksInRange(0, 0, 5,
                         (x, z) -> instance.getChunk(x, z).reset());
@@ -180,8 +178,6 @@ public class SnapshotViewerServer {
                 throw new RuntimeException(e);
             }
         });
-//        System.out.println("helllo");
-
     }
 
     private void handleHelloRequest(@NotNull ServerRequest req, @NotNull ServerResponse res) {

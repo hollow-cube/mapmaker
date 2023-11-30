@@ -28,7 +28,6 @@ public final class CheckpointCache {
         for (var object : world.map().objects()) {
             if (object.type() == CheckpointPlateBlock.OBJECT_TYPE) {
                 checkpoints.put(object.id(), object);
-                logger.debug("Adding checkpoint to world: {}", object);
             }
         }
 
