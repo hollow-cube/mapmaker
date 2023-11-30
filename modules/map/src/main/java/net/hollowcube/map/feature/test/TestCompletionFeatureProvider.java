@@ -22,7 +22,6 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
         if ((world.flags() & MapWorld.FLAG_TESTING) == 0)
             return false;
 
-        System.out.println("init for world " + world);
         var eventNode = EventNode.type("map-completion/test", EventFilter.INSTANCE);
         eventNode.addListener(MapWorldCompleteEvent.class, FutureUtil.virtual(this::handleMapCompletion));
         world.addScopedEventNode(eventNode);

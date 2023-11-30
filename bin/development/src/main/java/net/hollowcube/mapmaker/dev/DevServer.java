@@ -280,7 +280,6 @@ public class DevServer {
 //            };
 //            command.addSyntax((sender, context) -> {
 //                var newPos = context.get(arg);
-//                System.out.println(newPos);
 //                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
 //            }, arg);
 //            hubCommandManager.register(command);
@@ -290,7 +289,6 @@ public class DevServer {
 //            };
 //            command2.addSyntax((sender, context) -> {
 //                var newPos = context.get(arg2);
-//                System.out.println(newPos);
 //                var m = (TextDisplayMeta) lbTextEntity.getEntityMeta();
 //                m.setScale(new Vec(Double.parseDouble(newPos)));
 ////                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
@@ -644,8 +642,8 @@ public class DevServer {
             MinecraftServer.getSchedulerManager().submitTask(() -> {
                 smallHouseMeta.setNotifyAboutChanges(false);
 
-                smallHouseMeta.setInterpolationStartDelta(0);
-                smallHouseMeta.setInterpolationDuration(duration * 20);
+                smallHouseMeta.setTransformationInterpolationStartDelta(0);
+                smallHouseMeta.setTransformationInterpolationDuration(duration * 20);
 //            smallHouseMeta.setTranslation(new Vec(0, ThreadLocalRandom.current().nextInt(5), 0));
                 smallHouseMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(target.getAndAdd(90))).into());
 
@@ -742,13 +740,6 @@ public class DevServer {
         var lightGrayColor = TextColor.color(0xB0B0B0); // or cccccc
 
         var tabLogoSprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/tab/logo_outline"));
-//        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow") - FontUtil.measureText("Cube") + 2); //todo where is the missing 2 coming from
-//        var tabHeader = Component.text()
-//                .appendNewline()
-//                .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow", blueColor))).appendNewline()
-//                .append(Component.text(cubeOffset + "Cube", blueColor))
-//                .appendNewline()
-//                .build();
         var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 50); //todo where is the missing 2 coming from
         var tabHeader = Component.text()
                 .appendNewline()
