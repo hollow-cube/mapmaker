@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public final class Autocompletors {
 
@@ -51,13 +52,23 @@ public final class Autocompletors {
     }
 
     static {
+        var blacklist = Set.of(
+                Material.AIR, // Obvious
+                Material.BUNDLE, // Adds a slot lore element
+                // Stuff that glows
+                Material.DEBUG_STICK, Material.NETHER_STAR, Material.EXPERIENCE_BOTTLE, Material.LIGHT,
+                Material.ENCHANTED_GOLDEN_APPLE, Material.ENCHANTED_BOOK, Material.END_CRYSTAL,
+                // Stuff that moves
+                Material.SCULK_SENSOR, Material.CALIBRATED_SCULK_SENSOR, Material.RECOVERY_COMPASS
+        );
+
         for (var material : Material.values()) {
-            if (material.id() == Material.AIR.id()) continue;
+            if (blacklist.contains(material)) continue;
             materials.add(new IndexableMaterial(material));
         }
     }
 
-    public static @NotNull List<Material> material(@NotNull String input, int limit) {
+    public static @NotNull List<Material> mapIconMaterial(@NotNull String input, int limit) {
         return materials.search(input, limit).stream().map(IndexableMaterial::material).toList();
     }
 

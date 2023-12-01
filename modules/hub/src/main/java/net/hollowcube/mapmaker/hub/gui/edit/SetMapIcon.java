@@ -54,7 +54,7 @@ public class SetMapIcon extends View {
     @Action("page")
     private void createPage(@NotNull Pagination.PageRequest<MapIconPreview> request) {
         var result = new ArrayList<MapIconPreview>();
-        for (var suggestion : Autocompletors.material(input, request.pageSize())) {
+        for (var suggestion : Autocompletors.mapIconMaterial(input, request.pageSize())) {
             result.add(new MapIconPreview(request.context(), suggestion));
         }
 

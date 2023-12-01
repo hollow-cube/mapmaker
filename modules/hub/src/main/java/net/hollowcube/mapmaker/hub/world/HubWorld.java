@@ -1,20 +1,14 @@
 package net.hollowcube.mapmaker.hub.world;
 
 import net.hollowcube.common.util.ExtraTags;
-import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarReader;
-import net.hollowcube.polar.PolarWorld;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
@@ -91,7 +85,8 @@ public class HubWorld {
 
         var loadingChunks = new ArrayList<CompletableFuture<Void>>();
         ChunkUtils.forChunksInRange(0, 0, 16, (x, z) ->
-                loadingChunks.add(instance.loadChunk(x, z).thenRun(() -> {})));
+                loadingChunks.add(instance.loadChunk(x, z).thenRun(() -> {
+                })));
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
                 .thenRun(() -> logger.log(System.Logger.Level.INFO, "Loaded spawn chunks"));
     }
