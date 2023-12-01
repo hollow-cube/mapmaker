@@ -8,24 +8,24 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import org.apache.kafka.common.metrics.stats.Min;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerInviteServiceImpl implements PlayerInviteService {
 
-    private record Invite(UUID inviterUUID, UUID inviteeUUID) {
-    }
+    private record Invite(UUID inviterUUID, UUID inviteeUUID) {}
 
-    private record Request(UUID requesterUUID, UUID requesteeUUID) {
-    }
+    private record Request(UUID requesterUUID, UUID requesteeUUID) {}
 
-    private record Context(Instant time, String mapId) {
-    }
+    private record Context(Instant time, String mapId) {}
 
     private final MapWorldManager mwm;
     private final ConcurrentHashMap<Invite, Context> invites = new ConcurrentHashMap<>();
@@ -44,6 +44,72 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             sender.sendMessage(Component.translatable("command.join.only_playing"));
         } else {
             mwm.joinMap(sender, targetMap.map(), HubToMapBridge.JoinMapState.PLAYING);
+        }
+    }
+
+    @Override
+    public void accept(@NotNull Player sender) {
+        // If we only have the sender, search for 1 appropriate match (uuid).
+        // Fail if we have more than one
+        // Find valid matches
+        List<Invite> inviteList = new ArrayList<>();
+        List<Request> requestList = new ArrayList<>();
+        Request currentRequest = null;
+        for (Invite invite : invites.keySet()) {
+            if (invite.inviteeUUID.equals(sender.getUuid())) {
+                inviteList.add(invite);
+                if (inviteList.size() > 1) {
+                    if (!inviteList.get(0).inviterUUID.equals(invite.inviterUUID)) {
+                        sender.sendMessage("You have multiple invites, please specify which player to accept from."); // TODO Translate
+                        return;
+                    }
+                }
+            }
+        }
+        for (Request request : requests.keySet()) {
+            if (request.requesterUUID.equals(sender.getUuid())) {
+                requestList.add(request);
+                if (requestList.size() > 1) {
+                    if (!requestList.get(0).requesteeUUID.equals(request.requesteeUUID)) {
+                        sender.sendMessage("You have multiple requests, please specify which player to accept from."); // TODO Translate
+                        return;
+                    }
+                }
+            }
+        }
+        // We know that the invite list and request list have the same inviterUUIDs/requesteeUUID, so we need to compare the lists (if necessary)
+        if (!inviteList.isEmpty() && !requestList.isEmpty()) {
+            // Compare
+            if (!inviteList.get(0).inviterUUID.equals(requestList.get(0).requesteeUUID)) {
+                sender.sendMessage("You have an distinct request and invite, please specify which player to accept from."); // TODO Translate
+                return;
+            }
+            Player target = MinecraftServer.getConnectionManager().getPlayer(inviteList.get(0).inviterUUID);
+            if (target == null) {
+                sender.sendMessage("Invalid invite, inviter is offline."); // TODO Translate
+                return;
+            }
+            acceptInvite(sender, target);
+            for (Request request : requestList) {
+                requests.remove(request);
+            }
+        } else if (!inviteList.isEmpty()) {
+            Player target = MinecraftServer.getConnectionManager().getPlayer(inviteList.get(0).inviterUUID);
+            if (target == null) {
+                sender.sendMessage("Invalid invite, inviter is offline."); // TODO Translate
+                return;
+            }
+            acceptInvite(sender, target);
+        } else if (!requestList.isEmpty()) {
+            Player target = MinecraftServer.getConnectionManager().getPlayer(requestList.get(0).requesteeUUID);
+            if (target == null) {
+                sender.sendMessage("Invalid request, inviter is offline."); // TODO Translate
+                return;
+            }
+            acceptRequest(sender, target);
+        } else {
+            // Nothing to accept
+            sender.sendMessage(Component.translatable("map.invite_and_request.cant_accept"));
         }
     }
 
@@ -147,7 +213,6 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         } else if (Duration.between(context.time, now).compareTo(inviteExpirationTime) > 0) {
             target.sendMessage("map.invite.expired");
         } else {
-            invites.remove(key);
             // build/play determined by map publish state
             String translateString = "map." + (senderMap.map().isPublished() ? "play" : "build") + ".invite.";
             sender.sendMessage(Component.translatable(translateString + "accepted", targetDisplayName, Component.text(senderMap.map().name())));
@@ -155,6 +220,8 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
             mwm.joinMap(target, senderMap.map(), (senderMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }
+        // Remove if they left the map, it expired, or it was successful
+        invites.remove(key);
     }
 
     @Override
@@ -207,7 +274,6 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         } else if (Duration.between(context.time, now).compareTo(requestExpirationTime) > 0) {
             target.sendMessage(Component.translatable("map.request.expired"));
         } else {
-            requests.remove(key);
             var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName();
             // build/play determined by map publish state
             String translateString = "map." + (targetMap.map().isPublished() ? "play" : "build") + ".request.";
@@ -216,6 +282,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             // We can use senderMap.map instead of retrieving from the map service again because we know the ids are equal from the above clause
             mwm.joinMap(sender, targetMap.map(), (targetMap.map().isPublished() ? HubToMapBridge.JoinMapState.PLAYING : HubToMapBridge.JoinMapState.EDITING));
         }
+        requests.remove(key);
     }
 
     private void rejectInvite(@NotNull Player sender, @NotNull Player target) {
@@ -246,36 +313,6 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
             sender.sendMessage(Component.translatable("map.play.request.denied", PlayerDataV2.fromPlayer(target).displayName(), Component.text(targetMap.map().name())));
             requests.remove(key);
         }
-    }
-
-    @Override
-    public void invalidateInvitesAndRequests(@NotNull Player invalidater) {
-        invites.forEach((invite, context) -> {
-            if (invite.inviterUUID().equals(invalidater.getUuid())) {
-                invites.remove(invite);
-                invalidater.sendMessage(Component.translatable("map.invite.invalidated"));
-                Player target = MinecraftServer.getConnectionManager().getPlayer(invite.inviteeUUID());
-                if (target != null) {
-                    target.sendMessage(Component.translatable("map.invite.left_map", PlayerDataV2.fromPlayer(invalidater).displayName()));
-                }
-            }
-        });
-
-        requests.forEach((request, context) -> {
-            if (request.requesterUUID().equals(invalidater.getUuid())) {
-                requests.remove(request);
-                Player target = MinecraftServer.getConnectionManager().getPlayer(request.requesteeUUID());
-                if (target != null) {
-                    target.sendMessage(Component.translatable("map.request.invalidated"));
-                }
-            } else if (request.requesteeUUID().equals(invalidater.getUuid())) {
-                requests.remove(request);
-                Player target = MinecraftServer.getConnectionManager().getPlayer(request.requesterUUID());
-                if (target != null) {
-                    target.sendMessage(Component.translatable("map.request.invalidated"));
-                }
-            }
-        });
     }
 
     private boolean doesPlayerOwnMap(@NotNull Player player, @NotNull MapWorld mapWorld) {
