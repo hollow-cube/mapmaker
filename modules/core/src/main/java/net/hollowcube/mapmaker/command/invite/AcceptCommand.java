@@ -19,7 +19,12 @@ public class AcceptCommand extends Command {
         super("accept");
         this.inviteService = inviteService;
 
+        addSyntax(playerOnly(this::handleDefaultAccept));
         addSyntax(playerOnly(this::handleAccept), targetArg);
+    }
+
+    private void handleDefaultAccept(@NotNull Player player, @NotNull CommandContext context) {
+            inviteService.accept(player);
     }
 
     private void handleAccept(@NotNull Player player, @NotNull CommandContext context) {

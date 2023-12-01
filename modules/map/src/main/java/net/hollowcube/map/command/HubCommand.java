@@ -37,7 +37,6 @@ public class HubCommand extends Command {
             if (world instanceof InternalMapWorld internalWorld) {
                 internalWorld.removePlayer(player);
             }
-            inviteService.invalidateInvitesAndRequests(player);
             bridge.sendPlayerToHub(player);
         } catch (Exception e) {
             logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());

@@ -7,6 +7,8 @@ public interface PlayerInviteService {
 
     void join(@NotNull Player sender, @NotNull Player target);
 
+    void accept(@NotNull Player sender);
+
     void accept(@NotNull Player sender, @NotNull Player target);
 
     void reject(@NotNull Player sender, @NotNull Player target);
@@ -14,7 +16,5 @@ public interface PlayerInviteService {
     void registerInvite(@NotNull Player sender, @NotNull Player target);
 
     void registerRequest(@NotNull Player sender, @NotNull Player target);
-
-    void invalidateInvitesAndRequests(@NotNull Player invalidater);
 
 }
