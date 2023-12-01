@@ -67,6 +67,12 @@ public class MapWorldManager {
         try {
             var world = activeWorld.get(); // wait for the world to load
 
+            // If the player is already in a map, remove them from it.
+            var currentWorld = MapWorld.forPlayerOptional(player);
+            if (currentWorld instanceof InternalMapWorld imw) {
+                imw.removePlayer(player);
+            }
+
             // spawn in minestom instance & then notify world
             player.setInstance(world.instance(), world.spawnPoint()).join();
             // Have the spectate functionality extracted to InternalMapWorld (probably)

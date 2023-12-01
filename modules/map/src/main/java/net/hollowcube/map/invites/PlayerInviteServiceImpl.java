@@ -194,9 +194,6 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
         // Sender and target are swapped around by accept()
         var key = new Request(sender.getUuid(), target.getUuid());
         var context = requests.get(key);
-        if (context != null) {
-            System.out.println("Found context");
-        }
         var senderDisplayName = PlayerDataV2.fromPlayer(sender).displayName();
         if (context == null) {
             target.sendMessage(Component.translatable("map.request.no_join", senderDisplayName));

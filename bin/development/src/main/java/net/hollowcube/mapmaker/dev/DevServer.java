@@ -511,6 +511,7 @@ public class DevServer {
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
+        System.out.println("FIRST SPAWN " + event.getPlayer().getUsername());
 
         rebuildOnlinePlayersRegex();
 
