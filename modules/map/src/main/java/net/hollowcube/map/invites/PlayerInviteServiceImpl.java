@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import org.apache.kafka.common.metrics.stats.Min;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
