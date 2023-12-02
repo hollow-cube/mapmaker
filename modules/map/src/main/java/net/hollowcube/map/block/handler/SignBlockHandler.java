@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static net.hollowcube.map.block.handler.BlockHandlerHelpers.applyStoredBlockData;
+
 public class SignBlockHandler implements BlockHandler {
     private record SignData(
             boolean hasGlowingText,
@@ -95,6 +97,10 @@ public class SignBlockHandler implements BlockHandler {
     public void onPlace(@NotNull Placement placement) {
         if (!(placement instanceof PlayerPlacement p)) return;
 
+        // If the sign had NBT data attached, apply it to the block
+        if (applyStoredBlockData(p)) return;
+
+        // Otherwise, open the sign editor
         var blockPosition = placement.getBlockPosition();
         var packet = new OpenSignEditorPacket(blockPosition, true);
         p.getPlayer().sendPacket(packet);
