@@ -4,7 +4,9 @@ import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +63,13 @@ public final class Selection {
     }
 
     public boolean selectPrimary(@NotNull Point point, boolean explain) {
-        if (selector.selectPrimary(point, explain)) {
+        // Clamp the position to the world (border and height) of our instance.
+        var clamped = clampPointToWorld(point);
+        if (explain && !point.equals(clamped)) {
+            session.cui().sendMessage("terraform.warn.border_exceeded");
+        }
+
+        if (selector.selectPrimary(clamped, explain)) {
             cachedRegion = null;
             return true;
         }
@@ -69,7 +77,13 @@ public final class Selection {
     }
 
     public boolean selectSecondary(@NotNull Point point, boolean explain) {
-        if (selector.selectSecondary(point, explain)) {
+        // Clamp the position to the world (border and height) of our instance.
+        var clamped = clampPointToWorld(point);
+        if (explain && !point.equals(clamped)) {
+            session.cui().sendMessage("terraform.warn.border_exceeded");
+        }
+
+        if (selector.selectSecondary(clamped, explain)) {
             cachedRegion = null;
             return true;
         }
@@ -100,5 +114,17 @@ public final class Selection {
         buffer.write(STRING, name);
         buffer.writeEnum(Region.Type.class, regionType);
         selector.write(buffer);
+    }
+
+    private @NotNull Point clampPointToWorld(@NotNull Point point) {
+        var instance = session.instance();
+        var border = instance.getWorldBorder();
+
+        var radius = border.getDiameter() / 2;
+        return new Vec(
+                MathUtils.clamp(point.x(), border.getCenterX() - radius, border.getCenterX() + radius - 1),
+                MathUtils.clamp(point.y(), instance.getDimensionType().getMinY(), instance.getDimensionType().getMaxY() - 1),
+                MathUtils.clamp(point.z(), border.getCenterZ() - radius, border.getCenterZ() + radius - 1)
+        );
     }
 }
