@@ -147,7 +147,7 @@
             <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_tags_tab.information"/>
-                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                <text id="slot_id_tags" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <button translationKey="gui.create_maps.map_tags_tab.reset"/>
                 <button translationKey="gui.create_maps.map_tags_tab.filter"/>
@@ -364,7 +364,7 @@
             <box width="9" height="1" align="ltr">
                 <BackButton/>
                 <label translationKey="gui.create_maps.map_settings_tab.information"/>
-                <text id="slot_id" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
+                <text id="slot_id_settings" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <button translationKey="gui.create_maps.map_settings_tab.reset"/>
                 <button translationKey="gui.create_maps.map_settings_tab.filter"/>

@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ public class CreateMap extends View {
 
     private @Outlet("submit") Label submitButton;
 
-    private @Outlet("world_gen_text") Text worldGenText;
+    private @Outlet("slot_id_create") Text slotIdText;
 
     private int slot;
 
@@ -39,6 +40,8 @@ public class CreateMap extends View {
 
     public void setSlot(int slot) {
         this.slot = slot;
+        slotIdText.setText(String.format("Slot #%d", slot + 1));
+        slotIdText.setArgs(Component.text(slot + 1));
         setState(State.ACTIVE);
     }
 
