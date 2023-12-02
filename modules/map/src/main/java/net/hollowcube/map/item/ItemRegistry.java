@@ -45,7 +45,7 @@ public class ItemRegistry {
                         // Look for exact match and succeed, otherwise fail if we have more than one suggestion and we aren't sure
                         ItemStack stack = itemRegistry.getItemStack(raw, null);
                         if (stack != null) {
-                            new Argument.ParseSuccess<>(stack);
+                            return new Argument.ParseSuccess<>(stack);
                         } else {
                             return new Argument.ParsePartial<>();
                         }
