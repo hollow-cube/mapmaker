@@ -41,9 +41,16 @@ public class ItemRegistry {
 
                     var suggestions = itemRegistry.suggestItems(raw);
                     if (suggestions.isEmpty()) return new Argument.ParseFailure<>();
-                    if (suggestions.size() > 1) return new Argument.ParsePartial<>();
-                    return new Argument.ParseDeferredSuccess<>(
-                            () -> itemRegistry.getItemStack(suggestions.get(0), null));
+                    if (suggestions.size() > 1) {
+                        // Look for exact match and succeed, otherwise fail if we have more than one suggestion and we aren't sure
+                        ItemStack stack = itemRegistry.getItemStack(raw, null);
+                        if (stack != null) {
+                            new Argument.ParseSuccess<>(stack);
+                        } else {
+                            return new Argument.ParsePartial<>();
+                        }
+                    }
+                    return new Argument.ParseSuccess<>(itemRegistry.getItemStack(suggestions.get(0), null));
                 },
                 /* suggester */ (sender, reader, suggestion, raw) -> {
                     if (!(sender instanceof Player player)) return;
@@ -57,7 +64,7 @@ public class ItemRegistry {
                     }
                 }
         ).errorHandler((sender, context) -> {
-            sender.sendMessage("unknown item: " + context.getRaw(word));
+            sender.sendMessage("unknown item: " + context.getRaw(word)); // todo translate
         });
     }
 
