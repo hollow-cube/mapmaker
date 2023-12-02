@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FriendlyProducer implements AutoCloseable {
     private static final System.Logger logger = System.getLogger(FriendlyProducer.class.getName());
@@ -31,8 +32,9 @@ public class FriendlyProducer implements AutoCloseable {
             return;
         }
 
+        //todo we should only have a single friendly producer per server probably.
         producer = new KafkaProducer<>(Map.of(
-                "client.id", ServerRuntime.getRuntime().hostname(),
+                "client.id", ServerRuntime.getRuntime().hostname() + "-" + ThreadLocalRandom.current().nextInt(1000),
                 "bootstrap.servers", bootstrapServers
         ), new StringSerializer(), new StringSerializer());
     }

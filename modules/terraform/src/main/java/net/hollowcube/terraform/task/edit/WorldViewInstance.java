@@ -20,8 +20,9 @@ public record WorldViewInstance(@NotNull Task task, @NotNull Instance instance) 
 
     static boolean fastBorderTest(@NotNull WorldBorder border, int x, int y, int z) {
         final double radius = border.getDiameter() / 2d;
-        final boolean checkX = x <= border.getCenterX() + radius && x >= border.getCenterX() - radius;
-        final boolean checkZ = z <= border.getCenterZ() + radius && z >= border.getCenterZ() - radius;
+        // Use < on the positive end because we have block positions and it would include one outside the actual border.
+        final boolean checkX = x < border.getCenterX() + radius && x >= border.getCenterX() - radius;
+        final boolean checkZ = z < border.getCenterZ() + radius && z >= border.getCenterZ() - radius;
         return checkX && checkZ;
     }
 }
