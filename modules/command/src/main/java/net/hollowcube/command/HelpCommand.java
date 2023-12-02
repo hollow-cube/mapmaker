@@ -47,6 +47,8 @@ public class HelpCommand extends Command {
     private void showCommandList(@NotNull CommandSender sender, @NotNull CommandContext context) {
         sender.sendMessage("available commands:");
         for (var command : commandManager.getUniqueCommands()) {
+            if (!testCondition(command, sender)) continue;
+
             sender.sendMessage(command.name());
         }
     }
@@ -75,12 +77,15 @@ public class HelpCommand extends Command {
             if (reader.canRead()) {
                 // If there is more input, this must match a command exactly
                 command = children.get(word);
-                if (command == null) return new Argument.ParseFailure<>();
+                if (command == null || !testCondition(command, sender))
+                    return new Argument.ParseFailure<>();
                 path.add(command.name());
             } else {
                 // We are at the end, so we must match a subcommand
                 boolean isPartial = false;
                 for (var entry : children.entrySet()) {
+                    if (!testCondition(entry.getValue(), sender)) continue;
+
                     if (entry.getKey().equals(word)) {
                         // Exact match, we are done.
                         return new Argument.ParseSuccess<>(new ResolvedCommand(path, entry.getValue()));
@@ -98,8 +103,9 @@ public class HelpCommand extends Command {
     void suggestCommand(@NotNull CommandSender sender, @NotNull StringReader rawReader, @NotNull Suggestion suggestion, @NotNull String raw) {
         // If there is no input, blanket suggest all commands
         if (raw.isEmpty()) {
-            for (var key : commandManager.getCommands().keySet()) {
-                suggestion.add(key);
+            for (var entry : commandManager.getCommands().entrySet()) {
+                if (!testCondition(entry.getValue(), sender)) continue;
+                suggestion.add(entry.getKey());
             }
             return;
         }
@@ -114,9 +120,12 @@ public class HelpCommand extends Command {
             if (reader.canRead()) {
                 // If there is more input, this must match a command exactly
                 command = children.get(word);
+                if (!testCondition(command, sender)) command = null;
             } else {
                 // We are at the end, so we can suggest commands.
                 for (var entry : children.entrySet()) {
+                    if (!testCondition(entry.getValue(), sender)) continue;
+
                     if (entry.getKey().startsWith(word)) {
                         suggestion.add(entry.getKey());
                     }
@@ -134,6 +143,14 @@ public class HelpCommand extends Command {
 
     void handleUnknownCommand(@NotNull CommandSender sender, @NotNull CommandContext context) {
         sender.sendMessage(Component.translatable("command.help.unknown_command", Component.text(context.getRaw(commandArg))));
+    }
+
+    private boolean testCondition(@NotNull Command command, @NotNull CommandSender sender) {
+        var condition = command.condition();
+        if (condition == null) return true;
+
+        var eval = condition.test(sender, CommandContext.fake(sender));
+        return eval == CommandCondition.ALLOW;
     }
 
 }

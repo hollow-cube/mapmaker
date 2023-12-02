@@ -456,7 +456,7 @@ public class EditMap extends View {
     }
 
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
-        if(map.isVerified()) {
+        if (map.isVerified()) {
             player().sendMessage(Component.translatable("settings.verify.error"));
             return;
         }

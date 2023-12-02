@@ -7,7 +7,6 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 
@@ -89,32 +88,7 @@ public abstract class Command {
         for (var syntax : syntaxes) {
             if (syntax.condition != null) {
                 //todo
-                var eval = syntax.condition.test(sender, new CommandContext() {
-                    @Override
-                    public @NotNull Pass pass() {
-                        return Pass.SUGGEST;
-                    }
-
-                    @Override
-                    public @NotNull CommandSender sender() {
-                        return sender;
-                    }
-
-                    @Override
-                    public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
-                        return null;
-                    }
-
-                    @Override
-                    public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean has(@NotNull Argument<?> arg) {
-                        return false;
-                    }
-                });
+                var eval = syntax.condition.test(sender, CommandContext.fake(sender));
                 if (eval != CommandCondition.ALLOW) continue;
             }
 

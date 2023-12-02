@@ -26,4 +26,33 @@ public interface CommandContext {
     <T> @UnknownNullability T get(@NotNull Argument<T> arg);
 
     boolean has(@NotNull Argument<?> arg);
+
+    static @NotNull CommandContext fake(@NotNull CommandSender sender) {
+        return new CommandContext() {
+            @Override
+            public @NotNull Pass pass() {
+                return Pass.SUGGEST;
+            }
+
+            @Override
+            public @NotNull CommandSender sender() {
+                return sender;
+            }
+
+            @Override
+            public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
+                return null;
+            }
+
+            @Override
+            public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
+                return null;
+            }
+
+            @Override
+            public boolean has(@NotNull Argument<?> arg) {
+                return false;
+            }
+        };
+    }
 }
