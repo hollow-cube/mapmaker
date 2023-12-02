@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.feature.misc.CyberpunkStatDisplay;
 import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
@@ -103,6 +104,7 @@ public abstract class HubServerBase implements HubServer {
 
         // Hub specific commands
         commandManager.register(new HubFlyCommand(permManager()));
+        commandManager.register(new HubSpawnCommand(this));
 
         // Map of the week
         var motwTimer = new CountdownTimer(world.instance());
@@ -183,6 +185,13 @@ public abstract class HubServerBase implements HubServer {
                 playerPos.y() < lowerHubCoord.y() || playerPos.y() > upperHubCoord.y() ||
                 playerPos.z() < lowerHubCoord.z() || playerPos.z() > upperHubCoord.z()) {
             event.getPlayer().teleport(HUB_SPAWN_POINT);
+        }
+    }
+
+    public void teleportToSpawn(@NotNull Player player) {
+        // Check to see if we're in the same world
+        if (player.getInstance().equals(world.instance())) {
+            player.teleport(HUB_SPAWN_POINT);
         }
     }
 }
