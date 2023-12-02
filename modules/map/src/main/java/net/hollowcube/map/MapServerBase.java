@@ -16,7 +16,6 @@ import net.hollowcube.map.command.build.SetSpawnCommand;
 import net.hollowcube.map.command.build.TestCommand;
 import net.hollowcube.map.command.invite.RemoveCommand;
 import net.hollowcube.map.command.utility.*;
-import net.hollowcube.map.event.MapWorldUnregisterEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteServiceImpl;
 import net.hollowcube.map.terraform.MapServerModule;
@@ -34,7 +33,6 @@ import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.terraform.Terraform;
-import net.hollowcube.terraform.TerraformOldInit;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -54,17 +52,21 @@ import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import static net.hollowcube.map.util.MapCondition.eventFilter;
+import static net.hollowcube.map.util.MapCondition.mapFilter;
+
 public abstract class MapServerBase implements MapServer {
     private static final PacketListenerManager PACKET_LISTENER_MANAGER = MinecraftServer.getPacketListenerManager();
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
 
     private static final System.Logger logger = System.getLogger(MapServerBase.class.getName());
 
-    private final EventNode<Event> eventNode = EventNode.all("mapmaker:map");
+    private final EventNode<Event> eventNode = EventNode.all("mapmaker:map")
+            .addListener(PlayerSpawnEvent.class, this::handleSpawn);
 
     private final MapWorldManager mwm = new MapWorldManager(this);
     private final MapToHubBridge bridge;
-    private PlayerInviteService inviteService = new PlayerInviteServiceImpl(mwm);
+    private final PlayerInviteService inviteService = new PlayerInviteServiceImpl(mwm);
 
     private MapMgmtConsumerImpl mapMgmtConsumer;
     private List<FeatureProvider> features;
@@ -72,11 +74,7 @@ public abstract class MapServerBase implements MapServer {
     private Controller guiController;
 
     // Terraform
-    private final Terraform terraform = Terraform.builder()
-            .module(Terraform.BASE_MODULE)
-            .module(new MapServerModule())
-            .storage("http")
-            .build();
+    private Terraform terraform;
 
     static {
         // Idk why the static initializer is not triggering from other usages
@@ -90,13 +88,25 @@ public abstract class MapServerBase implements MapServer {
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
 
+        var globalEventHandler = MinecraftServer.getGlobalEventHandler();
+        globalEventHandler.addChild(eventNode);
+
+        // Terraform initialization
+        var terraformEvents = EventNode.event("mapmaker:map/terraform", EventFilter.INSTANCE,
+                eventFilter(false, true, false));
+        globalEventHandler.addChild(terraformEvents);
+        terraform = Terraform.builder()
+                .rootEventNode(terraformEvents)
+                .rootCommandManager(commandManager)
+                .globalCommandCondition(mapFilter(false, true, false))
+                .module(Terraform.BASE_MODULE)
+                .module(new MapServerModule())
+                .storage("http")
+                .build();
+
+        // Map management update listener
         var kafkaConfig = config.get(KafkaConfig.class);
         mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
-
-        MinecraftServer.getGlobalEventHandler().addChild(eventNode);
-        eventNode.addListener(PlayerSpawnEvent.class, this::handleSpawn);
-        eventNode.addListener(MapWorldUnregisterEvent.class, this::handleMapUnregister);
-//        eventNode.addListener(PlayerBlockPlaceEvent.class, EditWorldPlaceBlockEvent::handleBlockPlacement);
 
         // Placement rules
         PlacementRules.init(terraform);
@@ -107,14 +117,6 @@ public abstract class MapServerBase implements MapServer {
         BLOCK_MANAGER.registerHandler(ShulkerBoxBlockHandler.ID, () -> ShulkerBoxBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(BannerBlockHandler.INSTANCE.getNamespaceId(), () -> BannerBlockHandler.INSTANCE);
         PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
-
-        // Terraform initialization
-        var terraformEvents = EventNode.value("mapmaker:map/terraform", EventFilter.INSTANCE,
-                instance -> MapWorld.unsafeFromInstance(instance) != null);
-        MinecraftServer.getGlobalEventHandler().addChild(terraformEvents);
-        TerraformOldInit.init(commandManager, terraformEvents, null, terraform);
-//        TerraformCompat.init(terraformEvents, condition);
-//        TerraformAxiom.init(terraformEvents, null);
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
@@ -220,21 +222,6 @@ public abstract class MapServerBase implements MapServer {
 //        }
     }
 
-    private void handleMapUnregister(@NotNull MapWorldUnregisterEvent event) {
-//        var activeMaps = maps.get(event.getMap().getId());
-//        if (activeMaps == null) {
-//            // Something went wrong and the instance is not registered
-//            logger.log(System.Logger.Level.ERROR, "Attempted to unregister {}, but it was not registered.", event.getMap().getId());
-//            return;
-//        }
-//
-//        var removed = activeMaps.remove(event.mapWorld().getClass());
-//        if (removed == null) {
-//            // Something went wrong and the instance is not registered
-//            logger.log(System.Logger.Level.ERROR, "Attempted to unregister {}, but it was not registered.", event.getMap().getId());
-//        }
-    }
-
     @Override
     public void newOpenGUI(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
         guiController.show(player, viewProvider);
@@ -244,6 +231,5 @@ public abstract class MapServerBase implements MapServer {
         mapMgmtConsumer.close();
         mwm.shutdown();
     }
-
 
 }

@@ -4,14 +4,11 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.terraform.Terraform;
-import net.hollowcube.terraform.TerraformOldInit;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -61,10 +58,6 @@ public class DemoServer {
         var terraform = Terraform.builder()
                 .module(Terraform.BASE_MODULE)
                 .build();
-
-        var terraformEventNode = EventNode.type("terraform", EventFilter.INSTANCE);
-        MinecraftServer.getGlobalEventHandler().addChild(terraformEventNode);
-        TerraformOldInit.init(commandManager, terraformEventNode, null, terraform);
 
         MinecraftServer.getGlobalEventHandler()
                 .addListener(AsyncPlayerPreLoginEvent.class, event -> {

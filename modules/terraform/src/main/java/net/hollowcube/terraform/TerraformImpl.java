@@ -1,6 +1,8 @@
 package net.hollowcube.terraform;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
+import net.hollowcube.command.CommandCondition;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -12,13 +14,18 @@ import net.hollowcube.terraform.task.TaskResult;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.ThreadUtil;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +35,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public final class TerraformImpl implements Terraform {
     private static final Logger logger = LoggerFactory.getLogger(Terraform.class);
 
+    final EventNode<InstanceEvent> eventNode;
     private final TerraformRegistry registry;
     private final TerraformStorage storage;
 
@@ -40,8 +49,19 @@ public final class TerraformImpl implements Terraform {
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
 
-    TerraformImpl(@NotNull Collection<TerraformModule> modules, @NotNull String storage) {
-        this.registry = new TerraformRegistry(modules);
+    TerraformImpl(
+            @NotNull Collection<Supplier<TerraformModule>> modules, @NotNull String storage,
+            @Nullable EventNode<InstanceEvent> eventNode,
+            @NotNull CommandManager commandManager, @Nullable CommandCondition commandCondition
+    ) {
+        // Set the eventNode or register a new one.
+        if (eventNode != null) this.eventNode = eventNode;
+        else {
+            this.eventNode = EventNode.type("terraform", EventFilter.INSTANCE);
+            MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
+        }
+
+        this.registry = new TerraformRegistry(this, modules, commandManager, commandCondition);
 
         var storageFactory = Objects.requireNonNull(this.registry.storage(storage), "Storage not found: " + storage);
         this.storage = storageFactory.newStorageFunc().get();

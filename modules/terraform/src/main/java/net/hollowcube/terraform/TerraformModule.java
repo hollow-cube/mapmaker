@@ -1,7 +1,10 @@
 package net.hollowcube.terraform;
 
+import net.hollowcube.command.Command;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +26,20 @@ public interface TerraformModule {
     }
 
     default @NotNull Set<TerraformStorage.Factory> storageTypes() {
+        return Set.of();
+    }
+
+    default @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
+        return Set.of();
+    }
+
+    /**
+     * Returns any commands to register.
+     *
+     * @param terraform The terraform instance being loaded. <b>Note that the instance has
+     *                  not been fully initialized at this point, it should only be stored.</b>
+     */
+    default @NotNull Set<Command> commands(@NotNull Terraform terraform) {
         return Set.of();
     }
 
