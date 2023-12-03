@@ -25,6 +25,9 @@ public class PlayerDataV2 {
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private PlayerSettings settings = new PlayerSettings();
 
+    private int coins = 0;
+    private int cubits = 0;
+
     public PlayerDataV2() {
     }
 
@@ -57,6 +60,14 @@ public class PlayerDataV2 {
 
     public @NotNull PlayerSettings settings() {
         return settings;
+    }
+
+    public int coins() {
+        return coins;
+    }
+
+    public int cubits() {
+        return cubits;
     }
 
 }

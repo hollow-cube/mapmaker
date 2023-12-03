@@ -511,7 +511,6 @@ public class DevServer {
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
-        System.out.println("FIRST SPAWN " + event.getPlayer().getUsername());
 
         rebuildOnlinePlayersRegex();
 
@@ -545,9 +544,9 @@ public class DevServer {
             int MAX_TEXT_WIDTH = 22;
             var font = hasExperienceBar ? "currency" : "currency_creative";
 
-            var coinText = NumberUtil.formatCurrency(0);
+            var coinText = NumberUtil.formatCurrency(playerData.coins());
             builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
-            var cubitText = NumberUtil.formatCurrency(0);
+            var cubitText = NumberUtil.formatCurrency(playerData.cubits());
             builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
 //            builder.pos(56).append(font, "9.99b");
         });
