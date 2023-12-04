@@ -273,6 +273,12 @@ public class MapDetailsView extends View {
 //        selectTab(3);
     }
 
+    @Action("information")
+    public void showInformation(@NotNull Player player) {
+        player.closeInventory();
+        player.sendMessage(Component.translatable("gui.map_details.map_info_tab.published_id", Component.translatable(map.publishedIdString())));
+    }
+
     private void selectTab(int index) {
         tabSwitch.setOption(index);
         for (int i = 0; i < tabSwitches.length; i++) {

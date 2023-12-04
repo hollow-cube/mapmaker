@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.gui.play.simple.*;
 import net.hollowcube.mapmaker.map.MapService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -133,7 +134,8 @@ public class PlayMapsView extends View {
             }
             request.respond(maps, queryResult.nextPage());
         } catch (Exception e) {
-            //todo feedback to user that it went wrong. Right now will load forever
+            player.closeInventory();
+            player.sendMessage(Component.translatable("generic.unknown_error"));
             MinecraftServer.getExceptionManager().handleException(e);
         }
     }

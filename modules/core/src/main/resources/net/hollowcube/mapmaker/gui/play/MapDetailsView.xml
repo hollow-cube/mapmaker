@@ -19,7 +19,7 @@
         <box width="9" height="5" align="ttb" sprite="play_maps/details/tab_info/container">
             <box width="9" align="ltr">
                 <BackButton/>
-                <label translationKey="gui.map_details.map_info_tab.information"/>
+                <button id="information" translationKey="gui.map_details.map_info_tab.information"/>
                 <text id="author" width="5" translationKey="gui.map_details.creator_profile"
                       font="map_details_author" centered="true"/>
                 <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
