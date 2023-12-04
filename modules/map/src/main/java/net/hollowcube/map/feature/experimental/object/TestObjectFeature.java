@@ -17,7 +17,7 @@ public class TestObjectFeature implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
+        if ((world.flags() & MapWorld.FLAG_EDITING) != 0 && false) {
             world.itemRegistry().register(TestObjectBlock.ITEM);
             return true;
         }

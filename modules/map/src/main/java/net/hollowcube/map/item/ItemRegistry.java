@@ -8,12 +8,15 @@ import net.hollowcube.terraform.tool.BuiltinTool;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceTickEvent;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,10 +71,14 @@ public class ItemRegistry {
         });
     }
 
+    private static final Tag<Boolean> TRIGGER_TAG = Tag.Transient("mapmaker:triggered");
+
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:item/registry", EventFilter.INSTANCE)
-            .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItemOnBlock)
+            .addListener(PlayerBlockInteractEvent.class, this::handleUseItemOnBlock)
             .addListener(PlayerUseItemEvent.class, this::handleUseItem)
-            .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock);
+            .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock)
+            .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
+            .addListener(InstanceTickEvent.class, this::handleInstanceTick);
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
@@ -137,13 +144,18 @@ public class ItemRegistry {
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
-        System.out.println(normalFilter);
         return allItemNames.stream()
                 .filter(name -> name.asString().startsWith(normalFilter)
                         || name.path().startsWith(normalFilter))
                 .limit(20)
                 .map(NamespaceID::asString)
                 .toList();
+    }
+
+    private void handleInstanceTick(@NotNull InstanceTickEvent event) {
+        for (var player : event.getInstance().getPlayers()) {
+            player.removeTag(TRIGGER_TAG);
+        }
     }
 
     private void handleUseItem(@NotNull PlayerUseItemEvent event) {
@@ -155,13 +167,12 @@ public class ItemRegistry {
 
         if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_AIR)) return;
 
+        // For some dumb reason this is triggered when right clicking on a block,
+        // so is playerUseItemOnBlockEvent so we filter this one out.
         var player = event.getPlayer();
-        if (player.getTargetBlockPosition(5) != null) {
-            // For some dumb reason this is triggered when right clicking on a block, so is playerUseItemOnBlockEvent
-            // so we filter this one out.
-            return;
-        }
+        if (player.getTag(TRIGGER_TAG) != null) return;
 
+        player.setTag(TRIGGER_TAG, true);
         event.setCancelled(true);
         itemHandler.rightClicked(new ItemHandler.Click(
                 itemHandler,
@@ -173,25 +184,49 @@ public class ItemRegistry {
         ));
     }
 
-    private void handleUseItemOnBlock(@NotNull PlayerUseItemOnBlockEvent event) {
+    private void handleUseItemOnBlock(@NotNull PlayerBlockInteractEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
 
-        var cmd = event.getItemStack().meta().getCustomModelData();
+        var player = event.getPlayer();
+        var itemStack = player.getItemInHand(event.getHand());
+        var cmd = itemStack.meta().getCustomModelData();
         var itemHandler = customModelDataToItemHandler.get(cmd);
         if (itemHandler == null) return;
 
-        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
+        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK) || player.getTag(TRIGGER_TAG) != null) return;
 
+        event.setBlockingItemUse(true);
+        player.setTag(TRIGGER_TAG, true);
         var placeOffset = event.getBlockFace().toDirection();
         itemHandler.rightClicked(new ItemHandler.Click(
-                itemHandler,
-                event.getPlayer(),
-                event.getItemStack(),
-                event.getHand(),
-                event.getPosition(),
-                event.getPosition().add(placeOffset.normalX(), placeOffset.normalY(), placeOffset.normalZ()),
+                itemHandler, player,
+                itemStack, event.getHand(),
+                event.getBlockPosition(),
+                event.getBlockPosition().add(placeOffset.normalX(), placeOffset.normalY(), placeOffset.normalZ()),
                 event.getBlockFace(),
                 null
+        ));
+    }
+
+    private void handleUseItemOnEntity(@NotNull PlayerEntityInteractEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+
+        var player = event.getPlayer();
+        var itemStack = player.getItemInHand(event.getHand());
+        var cmd = itemStack.meta().getCustomModelData();
+        var itemHandler = customModelDataToItemHandler.get(cmd);
+        if (itemHandler == null) return;
+
+        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY) || player.getTag(TRIGGER_TAG) != null) return;
+
+        player.setTag(TRIGGER_TAG, true);
+        itemHandler.rightClicked(new ItemHandler.Click(
+                itemHandler, player,
+                itemStack, event.getHand(),
+                null,
+                null,
+                null,
+                event.getTarget()
         ));
     }
 

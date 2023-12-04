@@ -19,7 +19,7 @@ public class PathToolFeatureHandler implements FeatureProvider {
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         // Only enabled in editing worlds.
-        if ((world.flags() & MapWorld.FLAG_EDITING) == 0)
+        if ((world.flags() & MapWorld.FLAG_EDITING) == 0 || true)
             return false;
 
         world.itemRegistry().register(PATH_TOOL_ITEM);
