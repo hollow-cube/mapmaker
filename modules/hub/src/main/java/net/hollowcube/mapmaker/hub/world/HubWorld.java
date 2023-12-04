@@ -45,7 +45,7 @@ public class HubWorld {
     public HubWorld(@NotNull HubServer server) {
         this.server = server;
 
-        instance = new MapInstance();
+        instance = new MapInstance("mapmaker:hub");
         instance.setTag(MARKER, true);
         instance.setTag(THIS_TAG, this);
         instance.setGenerator(HubGenerators.stoneWorld());

@@ -77,7 +77,7 @@ public class EditingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-        instance = new MapInstance();
+        instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 

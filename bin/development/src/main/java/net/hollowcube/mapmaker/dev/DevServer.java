@@ -63,7 +63,6 @@ import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
@@ -386,11 +385,8 @@ public class DevServer {
     }
 
     private void handleLogin(PlayerLoginEvent event) {
-        Instance instance = hub.world().instance();
-        Pos pos = new Pos(0.5, 40, 0.5, 90, 0);
-        event.setSpawningInstance(instance);
-        event.getPlayer().setRespawnPoint(pos);
-        event.getPlayer().setDeathLocation(instance.getDimensionType(), pos);
+        event.setSpawningInstance(hub.world().instance());
+        event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5, 90, 0));
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -707,6 +703,7 @@ public class DevServer {
 //                .delay(5, net.minestom.server.utils.time.TimeUnit.SECOND)
 //                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
 //                .schedule();
+
     }
 
     private void broadcastTabHeaderAndFooter() {

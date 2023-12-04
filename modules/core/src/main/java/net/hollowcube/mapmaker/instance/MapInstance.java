@@ -61,12 +61,12 @@ public class MapInstance extends InstanceContainer {
      */
 
 
-    public MapInstance() {
-        this(DimensionTypes.FULL_BRIGHT);
+    public MapInstance(@NotNull String dimensionName) {
+        this(dimensionName, DimensionTypes.FULL_BRIGHT);
     }
 
-    public MapInstance(@NotNull DimensionType dimensionType) {
-        super(UUID.randomUUID(), dimensionType, null, dimensionType.getName());
+    public MapInstance(@NotNull String dimensionName, @NotNull DimensionType dimensionType) {
+        super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
 
         setTimeRate(0); //todo eventually this should be a map setting
 
