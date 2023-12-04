@@ -7,12 +7,14 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,10 +30,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     private final String url;
     private final String legacyUrl;
+    private final String perfdumpUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
         this.legacyUrl = String.format("%s/v1/internal/legacy/maps", url);
+        this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
 
     @Override
@@ -412,5 +416,21 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 403 -> throw new MapService.NoPermissionError();
             default -> throw new InternalError("Failed to import legacy map: " + res.body());
         };
+    }
+
+    @Override
+    public void uploadPerfdump(@NotNull String name, @NotNull Path file) {
+        try {
+            var req = HttpRequest.newBuilder()
+                    .method("PUT", HttpRequest.BodyPublishers.ofFile(file))
+                    .uri(URI.create(perfdumpUrl + "/" + name))
+                    .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
+                    .build();
+            var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 200) return; // Ok
+            throw new InternalError("Failed to upload perfdump: " + res.body());
+        } catch (FileNotFoundException e) {
+            throw new InternalError(e);
+        }
     }
 }

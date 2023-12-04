@@ -20,18 +20,17 @@ caveat audit_log_hack(never_set bool) {
 // If this feature gets added to SpiceDB, we can set these relationships statically
 // https://github.com/authzed/spicedb/issues/1266
 definition mapmaker/platform {
-    relation hollowcube: mapmaker/player with audit_log_hack
     relation admin: mapmaker/player with audit_log_hack
     relation dev: mapmaker/player with audit_log_hack
     relation mod: mapmaker/player with audit_log_hack
     relation crt: mapmaker/player
 
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
-    permission global_map_superadmin = hollowcube
-    permission global_map_admin = mod + dev + admin
+    permission global_map_superadmin = admin
+    permission global_map_admin = mod + dev
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
 
-    permission prefix_hollowcube = hollowcube
+    permission prefix_hollowcube = admin
     permission prefix_admin = admin
     permission prefix_dev = dev
     permission prefix_mod = mod
@@ -41,7 +40,7 @@ definition mapmaker/platform {
     permission map_admin = global_map_admin + global_map_superadmin
 
     permission ip_ban_player = mod + admin
-    permission ban_player = mod + admin + hollowcube
+    permission ban_player = mod + admin
     permission mute_player = ban_player
 }
 
@@ -52,7 +51,7 @@ definition mapmaker/player {}
 // the organization).
 //
 // Organization maps have some differences from normal maps, namely:
-// - They can only be accessed by platform/hollowcube members
+// - They can only be accessed by platform/admin members
 // - They cannot be published
 definition mapmaker/organization {
     relation platform: mapmaker/platform

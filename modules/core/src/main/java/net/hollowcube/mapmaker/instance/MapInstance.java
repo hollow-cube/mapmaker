@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.instance;
 
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
+import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarWorld;
 import net.hollowcube.polar.PolarWriter;
@@ -9,9 +10,9 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
@@ -21,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MapInstance extends InstanceContainer {
@@ -59,8 +61,6 @@ public class MapInstance extends InstanceContainer {
      */
 
 
-
-
     public MapInstance() {
         this(DimensionTypes.FULL_BRIGHT);
     }
@@ -73,12 +73,7 @@ public class MapInstance extends InstanceContainer {
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
 //        setChunkSupplier(LightingChunk::new);
-        setChunkLoader(new PolarLoader(new PolarWorld(
-                PolarWorld.LATEST_VERSION,
-                PolarWorld.CompressionType.ZSTD,
-                (byte) -4, (byte) 19,
-                new ArrayList<>()
-        )));
+        setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);
 
@@ -89,6 +84,16 @@ public class MapInstance extends InstanceContainer {
         try {
             var loader = new PolarLoader(new ByteArrayInputStream(worldData));
             setChunkLoader(loader);
+
+            // Load all the chunks immediately
+            var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
+            loader.world().chunks().forEach(chunk -> {
+                loadingChunks.add(loadChunk(chunk.x(), chunk.z()));
+            });
+            CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
+
+            // Delete the polar world to avoid the second copy of the world data
+            setChunkLoader(NoopChunkLoader.INSTANCE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -96,9 +101,19 @@ public class MapInstance extends InstanceContainer {
 
     @Blocking
     public byte @NotNull [] save() {
+        // Since we deleted the loader we need a new one
+        var loader = new PolarLoader(new PolarWorld());
+        setChunkLoader(loader);
+
         saveChunksToStorage().join();
-        var polarWorld = ((PolarLoader) getChunkLoader()).world();
-        return PolarWriter.write(polarWorld);
+
+        var polarWorld = loader.world();
+        var worldData = PolarWriter.write(polarWorld);
+
+        // Reset to noop
+        setChunkLoader(NoopChunkLoader.INSTANCE);
+
+        return worldData;
     }
 
     public void unload() {

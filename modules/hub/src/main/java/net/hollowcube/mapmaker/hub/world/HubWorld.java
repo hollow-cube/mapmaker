@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarReader;
 import net.minestom.server.MinecraftServer;
@@ -89,6 +90,9 @@ public class HubWorld {
                 })));
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
                 .thenRun(() -> logger.log(System.Logger.Level.INFO, "Loaded spawn chunks"));
+
+        // Since we never save this world, delete the polar world and associated copy of the world
+        instance.setChunkLoader(NoopChunkLoader.INSTANCE);
     }
 
     private void preventBlockBreak(PlayerBlockBreakEvent event) {

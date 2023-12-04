@@ -316,7 +316,7 @@ public class DevServer {
         // Load all facets & other misc startup tasks like setting up some events & minestom properties
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var debugCommand = new DebugCommand(playerService);
+            var debugCommand = new DebugCommand(playerService, permManager, mapService);
             hubCommandManager.register(debugCommand);
             mapCommandManager.register(debugCommand);
 

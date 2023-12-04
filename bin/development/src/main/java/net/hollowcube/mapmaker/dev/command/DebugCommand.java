@@ -1,35 +1,41 @@
 package net.hollowcube.mapmaker.dev.command;
 
 import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DebugCommand extends Command {
     private final PlayerService playerService;
 
-    public DebugCommand(@NotNull PlayerService playerService) {
+    public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService) {
         super("debug");
         this.playerService = playerService;
 
-//        setDefaultExecutor((sender, context) -> sender.sendMessage("Debug command :O"));
+        // Sys command is restricted
+        addSubcommand(new SysCommand(permManager, mapService));
 
-//        addSyntax(playerOnly(this::handleReloadCommands), Argument.Literal("reload-commands"));
+        // Mapmaker stuff
+        subcommand("rp", playerOnly(this::handleDebugResourcePack), null);
+        subcommand("self", playerOnly(this::handleDebugSelf), null);
+        subcommand("world", playerOnly(this::handleMapWorldDebug), null);
 
-//        addSyntax(playerOnly(this::handleDebugResourcePack), Argument.Literal("rp"));
-//        addSyntax(playerOnly(this::handleDebugSelf), Argument.Literal("self"));
-//        addSyntax(playerOnly(this::handleMapWorldDebug), Argument.Literal("world"));
+        // Minestom stuff
+        subcommand("block", playerOnly(this::handleBlockDebug), null);
 
-        addSyntax(playerOnly(this::handleBlockDebug), Argument.Literal("block"));
-
+//        addSyntax((sender, context) -> sender.sendMessage("Debug command :O"));
     }
 
     private void handleDebugResourcePack(@NotNull Player player, @NotNull CommandContext context) {
@@ -72,8 +78,12 @@ public class DebugCommand extends Command {
         player.sendMessage("Block: " + block);
     }
 
-    private void handleReloadCommands(@NotNull Player player, @NotNull CommandContext context) {
-        player.refreshCommands();
-        player.sendMessage("Reloaded commands!");
+    private @NotNull Command subcommand(@NotNull String name, @NotNull CommandExecutor handler, @Nullable CommandCondition condition) {
+        var cmd = new Command(name) {
+        };
+        cmd.setCondition(condition);
+        cmd.addSyntax(handler);
+        addSubcommand(cmd);
+        return cmd;
     }
 }
