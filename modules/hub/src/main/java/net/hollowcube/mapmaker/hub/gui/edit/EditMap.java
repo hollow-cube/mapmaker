@@ -244,6 +244,9 @@ public class EditMap extends View {
         }
 
         // In case back is used, we need to reset the map details view
+        // We have to "predict" that the map will be removed by the async update sent over Kafka,
+        // which has most likely not arrived yet.
+        MapPlayerData.fromPlayer(player).mapSlots()[slot] = null;
         performSignal(CreateMaps.SIG_RESET);
 
         // Open the map details view for the newly published map
@@ -252,7 +255,7 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap2, authorName.build(DisplayName.Context.PLAIN)));
     }
 
-    private static final int MIN_PLAYTIME = 5 * 60 * 1000; // 5 minutes
+    private static final int MIN_PLAYTIME = Integer.getInteger("map.min.playtime", 5 * 60 * 1000); // 5 minutes
 
     private PublishStage getPublishState() {
         try {
