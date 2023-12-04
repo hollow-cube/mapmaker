@@ -65,9 +65,9 @@ public final class Selection {
     public boolean selectPrimary(@NotNull Point point, boolean explain) {
         // Clamp the position to the world (border and height) of our instance.
         var clamped = clampPointToWorld(point);
-        if (explain && !point.equals(clamped)) {
-            session.cui().sendMessage("terraform.warn.border_exceeded");
-        }
+        //if (explain && !point.equals(clamped)) {
+            //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO I think I misinterpreted what this message was supposed to be. I still don't know what it is for tbh lol
+        //}
 
         if (selector.selectPrimary(clamped, explain)) {
             cachedRegion = null;
@@ -79,9 +79,9 @@ public final class Selection {
     public boolean selectSecondary(@NotNull Point point, boolean explain) {
         // Clamp the position to the world (border and height) of our instance.
         var clamped = clampPointToWorld(point);
-        if (explain && !point.equals(clamped)) {
-            session.cui().sendMessage("terraform.warn.border_exceeded");
-        }
+        //if (explain && !point.equals(clamped)) {
+            //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO same as above
+        //}
 
         if (selector.selectSecondary(clamped, explain)) {
             cachedRegion = null;
