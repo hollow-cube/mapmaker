@@ -36,6 +36,5 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
-        System.out.println("player spectator checkpoint is: " + player.getTag(SPECTATOR_CHECKPOINT).toString());
     }
 }

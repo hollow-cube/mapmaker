@@ -210,6 +210,10 @@ public class PlayingMapWorld implements InternalMapWorld {
 //        player.sendMessage("Now spectating " + map.settings().getName());
     }
 
+    public @Blocking boolean isSpectating(@NotNull Player player) {
+        return spectatingPlayers.contains(player);
+    }
+
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
         removePlayer(player, true);

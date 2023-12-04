@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 public class EnterSpectatorModeItem extends ItemHandler {
 
     public static final String ID = "mapmaker:enter_spectator";
@@ -40,6 +42,7 @@ public class EnterSpectatorModeItem extends ItemHandler {
         if (player.isOnGround()) {
             if (world instanceof PlayingMapWorld playingWorld) {
                 world.removePlayer(player);
+                player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
                 playingWorld.startSpectating(player, false);
             }
         } else {

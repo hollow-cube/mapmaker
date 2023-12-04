@@ -10,6 +10,7 @@ import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.coordinate.Pos;
@@ -26,6 +27,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -96,8 +99,15 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
-            if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
             var world = MapWorld.forPlayer(player);
+
+            if (world instanceof PlayingMapWorld playingMapWorld) { //TODO for sure a better way to do this lol
+                if (playingMapWorld.isSpectating(player) && player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
+                    var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+                    if (checkpoint != null)
+                        player.teleport(checkpoint);
+                }
+            } else if (!MapHooks.isPlayerPlaying(player)) continue; // Player is not playing the map
 
             var resetHeight = player.getTag(RESET_HEIGHT_TAG);
             if (resetHeight == null) continue; // No reset height set (something went wrong probably)
