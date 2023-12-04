@@ -32,7 +32,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
                     <button width="1" height="1"
                             id="quality_unrated_full"
-                            translationKey="gui.map_details.map_info_tab.quality.unrated"
+                            translationKey="gui.map_details.map_info_tab.quality_description"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="8" height="1"
                           id="quality_unrated_full_text"
@@ -42,7 +42,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
                     <button width="1" height="1"
                             id="quality_unrated_half"
-                            translationKey="gui.map_details.map_info_tab.quality.unrated"
+                            translationKey="gui.map_details.map_info_tab.quality_description"
                             sprite="play_maps/details/tab_info/quality/unrated_icon"/>
                     <text width="4" height="1"
                           id="quality_unrated_half_text"
@@ -53,7 +53,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_none"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.unknown"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/none_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_none_text"
@@ -63,7 +63,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_easy"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.easy"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/easy_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_easy_text"
@@ -73,7 +73,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_medium"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.medium"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/medium_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_medium_text"
@@ -83,7 +83,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_hard"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.hard"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/hard_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_hard_text"
@@ -93,7 +93,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_expert"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.expert"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/expert_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_expert_text"
@@ -103,7 +103,7 @@
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">
                             <button width="1" height="1"
                                     id="difficulty_nightmare"
-                                    translationKey="gui.map_details.map_info_tab.difficulty.nightmare"
+                                    translationKey="gui.map_details.map_info_tab.difficulty_description"
                                     sprite="play_maps/details/tab_info/parkour/difficulty/nightmare_icon"/>
                             <text width="3" height="1"
                                   id="difficulty_nightmare_text"
@@ -118,17 +118,17 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_parkour"
-                            translationKey="gui.map_details.map_info_tab.type.parkour"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/parkour_icon"/>
                     <text width="8" height="1"
                           id="map_type_parkour_text"
-                          translationKey="gui.map_details.map_info_tab.type.parkour"
+                          translationKey="gui.map_details.map_info_tab.type.parkour.generic"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_speedrun"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.speedrun"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_speedrun_icon"/>
                     <text width="8" height="1"
                           id="map_type_speedrun_text"
@@ -138,7 +138,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_sectioned"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.sectioned"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_sectioned_icon"/>
                     <text width="8" height="1"
                           id="map_type_sectioned_text"
@@ -148,7 +148,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_rankup"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.rankup"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_rankup_icon"/>
                     <text width="8" height="1"
                           id="map_type_rankup_text"
@@ -158,7 +158,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_gauntlet"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.gauntlet"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_gauntlet_icon"/>
                     <text width="8" height="1"
                           id="map_type_gauntlet_text"
@@ -168,7 +168,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_dropper"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.dropper"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_dropper_icon"/>
                     <text width="8" height="1"
                           id="map_type_dropper_text"
@@ -178,7 +178,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_one_jump"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.one_jump"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_one_jump_icon"/>
                     <text width="8" height="1"
                           id="map_type_one_jump_text"
@@ -188,7 +188,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_informative"
-                            translationKey="gui.map_details.map_info_tab.type.parkour.informative"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/parkour/map_types/sv_informative_icon"/>
                     <text width="8" height="1"
                           id="map_type_informative_text"
@@ -198,7 +198,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_showcase"
-                            translationKey="gui.map_details.map_info_tab.type.building.showcase"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/building/map_types/sv_showcase_icon"/>
                     <text width="8" height="1"
                           id="map_type_showcase_text"
@@ -208,7 +208,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_tutorial"
-                            translationKey="gui.map_details.map_info_tab.type.building.tutorial"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/building/map_types/sv_tutorial_icon"/>
                     <text width="8" height="1"
                           id="map_type_tutorial_text"
@@ -218,11 +218,11 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_map_type">
                     <button width="1" height="1"
                             id="map_type_building"
-                            translationKey="gui.map_details.map_info_tab.type.building"
+                            translationKey="gui.map_details.map_info_tab.type_description"
                             sprite="play_maps/details/tab_info/building/building_icon"/>
                     <text width="8" height="1"
                           id="map_type_building_text"
-                          translationKey="gui.map_details.map_info_tab.type.building"
+                          translationKey="gui.map_details.map_info_tab.type.building.generic"
                           font="map_details_map_type" centered="false" shift="3"/>
                 </box>
             </switch>
@@ -241,7 +241,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_tags">
                     <button width="1" height="1"
                             id="map_tags"
-                            translationKey="gui.map_details.map_info_tab.tags"
+                            translationKey="gui.map_details.map_info_tab.tags_description"
                             sprite="play_maps/details/tab_info/tag_icon"/>
                     <text width="8" height="1"
                           id="map_tags_text"
@@ -264,7 +264,7 @@
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_settings">
                     <button width="1" height="1"
                             id="map_settings"
-                            translationKey="gui.map_details.map_info_tab.settings"
+                            translationKey="gui.map_details.map_info_tab.settings_description"
                             sprite="play_maps/details/tab_info/setting_icon"/>
                     <text width="8" height="1"
                           id="map_settings_text"

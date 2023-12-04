@@ -23,10 +23,12 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
@@ -84,6 +86,7 @@ public class EditingMapWorld implements InternalMapWorld {
         eventNode.addChild(itemRegistry.eventNode());
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
+        eventNode.addListener(PlayerUseItemEvent.class, this::preventSuspiciousStew);
         eventNode.addListener(InstanceTickEvent.class, this::tick);
 
         eventNode.addListener(BlockItemPlaceEvent.class, event -> {
@@ -346,6 +349,14 @@ public class EditingMapWorld implements InternalMapWorld {
         ItemStack item = event.getPlayer().getItemInMainHand();
         if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {
             event.setCancelled(true);
+        }
+    }
+
+    private void preventSuspiciousStew(PlayerUseItemEvent event) {
+        ItemStack itemStack = event.getItemStack();
+
+        if (itemStack.material() == Material.SUSPICIOUS_STEW) {
+                event.setCancelled(true);
         }
     }
 
