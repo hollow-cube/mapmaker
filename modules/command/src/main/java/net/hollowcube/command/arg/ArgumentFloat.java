@@ -31,7 +31,7 @@ public class ArgumentFloat extends Argument<Float> {
 
     @Override
     public @NotNull ParseResult<Float> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        var word = reader.readWord(WordType.ALPHANUMERIC);
+        var word = reader.readWord(WordType.BRIGADIER);
         try {
             var value = Float.parseFloat(word);
             if (Float.isNaN(value) || Float.isInfinite(value)) return new ParseFailure<>();
