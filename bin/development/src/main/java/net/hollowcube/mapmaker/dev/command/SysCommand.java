@@ -46,8 +46,7 @@ public class SysCommand extends Command {
 
         String apPath;
         try {
-            var basePath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/async-profiler/profiler.sh");
-//            var basePath = Path.of("./async-profiler/profiler.sh");
+            var basePath = Path.of("./async-profiler/profiler.sh");
             if (Files.exists(basePath)) {
                 apPath = basePath.toRealPath().toString();
             } else {
