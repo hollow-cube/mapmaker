@@ -53,6 +53,7 @@ public class MapServerModule implements TerraformModule {
         for (var sign : BlockTags.ALL_SIGNS) {
             override.accept(Objects.requireNonNull(Block.fromNamespaceId(sign)), SignBlockHandler.INSTANCE);
         }
+        override.accept(Block.CONDUIT, ConduitBlockHandler.INSTANCE);
 
         return overrides;
     }

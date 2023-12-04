@@ -116,6 +116,8 @@ public abstract class MapServerBase implements MapServer {
         BLOCK_MANAGER.registerHandler(ChestBlockHandler.TRAPPED_CHEST.getNamespaceId(), () -> ChestBlockHandler.TRAPPED_CHEST);
         BLOCK_MANAGER.registerHandler(ShulkerBoxBlockHandler.ID, () -> ShulkerBoxBlockHandler.INSTANCE);
         BLOCK_MANAGER.registerHandler(BannerBlockHandler.INSTANCE.getNamespaceId(), () -> BannerBlockHandler.INSTANCE);
+        BLOCK_MANAGER.registerHandler(ConduitBlockHandler.INSTANCE.getNamespaceId(), () -> ConduitBlockHandler.INSTANCE);
+
         PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         // Common commands

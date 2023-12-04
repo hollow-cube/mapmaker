@@ -132,6 +132,7 @@ public final class PlacementRules {
         register(Block.GRINDSTONE, GrindstonePlacementRule::new);
         register(Block.POINTED_DRIPSTONE, DripstonePlacementRule::new);
         register(Block.SNOW, SnowPlacementRule::new);
+        register(Block.CONDUIT, ConduitPlacementRule::new);
 
         //
         // ==== WARNING ====
