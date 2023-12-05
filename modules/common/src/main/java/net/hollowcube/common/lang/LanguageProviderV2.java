@@ -99,6 +99,19 @@ public class LanguageProviderV2 {
                 .toList();
     }
 
+    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<Component> args) {
+        var partials = translateMulti(key, args);
+        if (partials.isEmpty()) return Component.empty();
+        if (partials.size() == 1) return partials.get(0);
+
+        var result = Component.text();
+        result.append(partials.get(0));
+        for (int i = 1; i < partials.size(); i++)
+            result.appendNewline().append(partials.get(i));
+        return result.build();
+    }
+
+
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
 
     private static final Pattern ARG_PATTERN = Pattern.compile("<[0-9]+>");

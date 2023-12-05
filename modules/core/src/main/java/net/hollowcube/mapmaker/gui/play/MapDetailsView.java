@@ -7,10 +7,13 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,12 +24,14 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
     private @ContextObject ServerBridge bridge;
+    private @ContextObject PlayerService playerService;
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
@@ -273,10 +278,17 @@ public class MapDetailsView extends View {
 //        selectTab(3);
     }
 
-    @Action("information")
+    @Action(value = "information", async = true)
     public void showInformation(@NotNull Player player) {
         player.closeInventory();
-        player.sendMessage(Component.translatable("gui.map_details.map_info_tab.published_id", Component.translatable(map.publishedIdString())));
+
+        var authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
+        player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
+                Component.text(map.id()),
+                Component.text(map.publishedIdString()),
+                Component.text(map.name()),
+                authorName
+        )));
     }
 
     private void selectTab(int index) {
