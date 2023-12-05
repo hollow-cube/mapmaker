@@ -182,7 +182,8 @@ public class DevServer {
                 Map.entry("cool", "icon/emoji/cool"),
                 Map.entry("grin", "icon/emoji/grin"),
                 Map.entry("smile", "icon/emoji/smile"),
-                Map.entry("smirk", "icon/emoji/smirk")
+                Map.entry("smirk", "icon/emoji/smirk"),
+                Map.entry("poop", "icon/emoji/poop")
         );
         var miscEmojis = List.of(
                 Map.entry("crown", "icon/emoji/crown"),
