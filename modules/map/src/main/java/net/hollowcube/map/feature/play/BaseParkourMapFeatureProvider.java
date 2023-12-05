@@ -1,6 +1,7 @@
 package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
@@ -10,6 +11,7 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -48,6 +50,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_SPECTATOR);
         itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_TESTING);
         itemRegistry.registerSilent(ToggleFlightItem.INSTANCE);
+        itemRegistry.registerSilent(RateMapItem.INSTANCE);
 
         // Controls player visibility
         world.instance().scheduler()
@@ -75,7 +78,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
+            if (MapFeatureFlags.RATE_MAP.test(PlayerDataV2.fromPlayer(player).id())) {
+                inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+            }
+
             inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+
             inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }

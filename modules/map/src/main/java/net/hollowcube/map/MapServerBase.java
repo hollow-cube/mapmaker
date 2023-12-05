@@ -173,6 +173,7 @@ public abstract class MapServerBase implements MapServer {
         this.guiController = Controller.make(Map.of(
                 "mapServer", this,
                 "mapService", mapService(),
+                "playerService", playerService(),
                 "bridge", bridge()
         ));
     }
