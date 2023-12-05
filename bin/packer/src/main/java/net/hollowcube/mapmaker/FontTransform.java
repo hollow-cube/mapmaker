@@ -60,6 +60,21 @@ public class FontTransform {
             ascents.put("currency_creative", 5);
             heights.put("currency_creative", 6);
         }
+        try (InputStream is = getClass().getResourceAsStream("/small.json")) {
+            if (is == null) throw new IOException("Failed to load small.json");
+            Json5Array fontChars = json5.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8))
+                    .getAsJson5Object().getAsJson5Array("chars");
+            List<String> charmap = new ArrayList<>();
+            for (Json5Element charset : fontChars) {
+                charmap.add(charset.getAsString());
+            }
+            charmaps.put("small", charmap);
+            ascents.put("small", 7);
+            heights.put("small", 8);
+            charmaps.put("small_tall", charmap);
+            ascents.put("small_tall", 24);
+            heights.put("small_tall", 24);
+        }
     }
 
     public int getNextChar() {

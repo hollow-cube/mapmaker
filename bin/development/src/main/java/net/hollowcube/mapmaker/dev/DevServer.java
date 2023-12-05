@@ -538,8 +538,10 @@ public class DevServer {
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
         // Alpha watermark
-        String watermarkString = String.format("MapMaker %s+%s, Not representative of final product", runtime.version(), runtime.shortCommit());
+        String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+        player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
+                .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
         var currencyDisplay = BadSprite.SPRITE_MAP.get("hud/currency_display");
         var currencyDisplayCreative = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");

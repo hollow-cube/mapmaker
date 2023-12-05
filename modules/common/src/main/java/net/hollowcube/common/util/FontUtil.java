@@ -94,6 +94,24 @@ public final class FontUtil {
         result.put("currency_creative", currencyGlyphs);
         result.put("smallnums", currencyGlyphs);
 
+        var smallGlyphs = new Int2IntArrayMap();
+        smallGlyphs.putAll(Map.<Integer, Integer>ofEntries(
+                Map.entry((int) 'a', 6), Map.entry((int) 'b', 6),
+                Map.entry((int) 'c', 6), Map.entry((int) 'd', 6),
+                Map.entry((int) 'e', 6), Map.entry((int) 'f', 6),
+                Map.entry((int) 'g', 6), Map.entry((int) 'h', 6),
+                Map.entry((int) 'i', 4), Map.entry((int) 'j', 6),
+                Map.entry((int) 'k', 6), Map.entry((int) 'l', 6),
+                Map.entry((int) 'm', 6), Map.entry((int) 'n', 6),
+                Map.entry((int) 'o', 6), Map.entry((int) 'p', 6),
+                Map.entry((int) 'q', 6), Map.entry((int) 'r', 6),
+                Map.entry((int) 's', 6), Map.entry((int) 't', 6),
+                Map.entry((int) 'u', 6), Map.entry((int) 'v', 6),
+                Map.entry((int) 'w', 6), Map.entry((int) 'x', 6),
+                Map.entry((int) 'y', 6), Map.entry((int) 'z', 6)
+        ));
+        result.put("small_bossbar_line2", currencyGlyphs);
+
         GLYPH_WIDTHS_V2 = Map.copyOf(result);
     }
 

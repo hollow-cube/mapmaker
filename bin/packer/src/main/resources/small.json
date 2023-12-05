@@ -1,0 +1,9 @@
+{
+  "chars": [
+    "abcdef",
+    "ghijkl",
+    "mnopqr",
+    "stuvwx",
+    "yz\u0000\u0000\u0000\u0000"
+  ]
+}
