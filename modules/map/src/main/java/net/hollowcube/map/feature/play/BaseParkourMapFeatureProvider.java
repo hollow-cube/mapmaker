@@ -43,8 +43,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         itemRegistry.registerSilent(ExitSpectatorModeItem.INSTANCE);
         itemRegistry.registerSilent(ResetSaveStateItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
+        itemRegistry.registerSilent(ExitTestModeItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToSpectatorCheckpointItem.INSTANCE);
-        itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE);
+        itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_SPECTATOR);
+        itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_TESTING);
         itemRegistry.registerSilent(ToggleFlightItem.INSTANCE);
 
         // Controls player visibility
@@ -65,6 +67,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var inventory = player.getInventory();
         if ((event.getMapWorld().flags() & MapWorld.FLAG_TESTING) != 0) {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+            inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
+            inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_TESTING, null));
+
+            inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+            inventory.setItemStack(8, itemRegistry.getItemStack(ExitTestModeItem.ID, null));
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
@@ -97,7 +104,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
         inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
-        inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID, null));
+        inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_SPECTATOR, null));
         inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
         inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));

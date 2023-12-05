@@ -99,7 +99,8 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
-            var world = MapWorld.forPlayer(player);
+            var world = MapWorld.forPlayerOptional(player);
+            if (world == null) continue;
 
             if (world instanceof PlayingMapWorld playingMapWorld) { //TODO for sure a better way to do this lol
                 if (playingMapWorld.isSpectating(player) && player.getPosition().y() < MINIMUM_RESET_HEIGHT) {

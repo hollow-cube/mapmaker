@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 class MapWorldHelpers {
     private MapWorldHelpers() {
     }
@@ -78,6 +80,7 @@ class MapWorldHelpers {
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
         player.getInventory().clear();
+        player.removeTag(SPECTATOR_CHECKPOINT);
         player.refreshCommands();
     }
 

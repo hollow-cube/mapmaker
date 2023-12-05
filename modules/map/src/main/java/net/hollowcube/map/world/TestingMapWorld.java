@@ -56,8 +56,10 @@ public class TestingMapWorld implements InternalMapWorld {
         this.instance = parent.instance();
         // do NOT set self tag, the instance is "officially" owned by the editing world.
 
-        this.itemRegistry = new ItemRegistry();
         this.instance.eventNode().addChild(eventNode);
+
+        this.itemRegistry = new ItemRegistry();
+        eventNode.addChild(itemRegistry.eventNode());
     }
 
     @Override

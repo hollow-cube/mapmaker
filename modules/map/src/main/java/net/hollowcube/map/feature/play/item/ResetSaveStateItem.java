@@ -3,6 +3,7 @@ package net.hollowcube.map.feature.play.item;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -38,7 +39,7 @@ public class ResetSaveStateItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
 
-        var world = (PlayingMapWorld) MapWorld.forPlayer(player);
+        var world = (InternalMapWorld) MapWorld.forPlayer(player);
         //todo this cast is bad, should redo this whole thing
 
         // Delete the save state
@@ -56,7 +57,9 @@ public class ResetSaveStateItem extends ItemHandler {
             //todo this will not clear effects or anything, i guess the plate fp will have to do that
         } else {
             // The player has no save state because they are spectating, so just re-add them to the server
-            world.removePlayer(player, false);
+            if (world instanceof PlayingMapWorld playingWorld)
+                playingWorld.removePlayer(player, false);
+            else world.removePlayer(player);
             world.acceptPlayer(player, true);
         }
     }

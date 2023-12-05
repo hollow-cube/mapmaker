@@ -13,13 +13,15 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
 
     public static Tag<Pos> SPECTATOR_CHECKPOINT = Tag.Transient("mapmaker:spectator_checkpoint");
 
-    public static final String ID = "mapmaker:set_spectator_checkpoint";
-    public static final SetSpectatorCheckpointItem INSTANCE = new SetSpectatorCheckpointItem();
+    public static final String ID_SPECTATOR = "mapmaker:set_spectator_checkpoint";
+    public static final SetSpectatorCheckpointItem INSTANCE_SPECTATOR = new SetSpectatorCheckpointItem(ID_SPECTATOR);
+    public static final String ID_TESTING = "mapmaker:set_testing_checkpoint";
+    public static final SetSpectatorCheckpointItem INSTANCE_TESTING = new SetSpectatorCheckpointItem(ID_TESTING);
 
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/set_checkpoint"));
 
-    private SetSpectatorCheckpointItem() {
-        super(ID, RIGHT_CLICK_ANY);
+    private SetSpectatorCheckpointItem(@NotNull String id) {
+        super(id, RIGHT_CLICK_ANY);
     }
 
     @Override

@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="4" align="ttb">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.checkpoint.information"/>
+
+        <label width="5" translationKey="gui.checkpoint.summary"
+               sprite="minecraft:heavy_weighted_pressure_plate"/>
+
+        <!--        <button translationKey="gui.checkpoint.executor"-->
+        <!--                sprite="minecraft:nether_star"/>-->
+        <!--        <button id="pick_up" translationKey="gui.checkpoint.pick_up"-->
+        <!--                sprite="minecraft:minecart"/>-->
+    </box>
+
+    <!-- Spacing -->
+    <spacer width="9" height="1"/>
+
+    <!-- Buttons -->
+    <box width="9" height="1" align="ltr">
+        <spacer width="1" height="1"/>
+
+        <button id="rating_1" width="1" height="1" translationKey="gui.map_rating.rating_1"
+                sprite="rate_map/rating_1"/>
+
+        <button id="rating_2" width="1" height="1" translationKey="gui.map_rating.rating_2"
+                sprite="rate_map/rating_2"/>
+
+        <button id="rating_3" width="1" height="1" translationKey="gui.map_rating.rating_3"
+                sprite="rate_map/rating_3"/>
+
+        <button id="rating_4" width="1" height="1" translationKey="gui.map_rating.rating_4"
+                sprite="rate_map/rating_4"/>
+
+        <button id="rating_5" width="1" height="1" translationKey="gui.map_rating.rating_5"
+                sprite="rate_map/rating_5"/>
+
+        <button id="rating_6" width="1" height="1" translationKey="gui.map_rating.rating_6"
+                sprite="rate_map/rating_6"/>
+
+        <button id="rating_7" width="1" height="1" translationKey="gui.map_rating.rating_7"
+                sprite="rate_map/rating_7"/>
+    </box>
+</component>
