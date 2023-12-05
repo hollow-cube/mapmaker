@@ -21,7 +21,7 @@ public class ExitTestModeItem extends ItemHandler {
     public static final String ID = "mapmaker:exit_test_mode";
     public static final ExitTestModeItem INSTANCE = new ExitTestModeItem();
 
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_hub"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/exit_test_mode"));
 
     private ExitTestModeItem() {
         super(ID, RIGHT_CLICK_ANY);
