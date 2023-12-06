@@ -21,7 +21,7 @@ public class BellPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
         Block.Getter instance = placementState.instance();
-        Block block = placementState.block();
+        Block block = this.block;
         int x = placementState.placePosition().blockX();
         int y = placementState.placePosition().blockY();
         int z = placementState.placePosition().blockZ();
