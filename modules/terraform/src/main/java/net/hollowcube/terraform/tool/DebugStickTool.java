@@ -62,7 +62,7 @@ public class DebugStickTool implements BuiltinTool {
 
         var instance = click.instance();
         var blockPosition = click.blockPosition();
-        var block = instance.getBlock(blockPosition, Block.Getter.Condition.TYPE);
+        var block = instance.getBlock(blockPosition, Block.Getter.Condition.TYPE); // Never set the block so fine to exclude handler
 
         var oldProperty = itemStack.getTag(TAG_PROPERTY);
         var newProperty = selectProperty(block, oldProperty, true);
@@ -83,7 +83,7 @@ public class DebugStickTool implements BuiltinTool {
 
         var instance = click.instance();
         var blockPosition = click.blockPosition();
-        var block = instance.getBlock(blockPosition, Block.Getter.Condition.TYPE);
+        var block = instance.getBlock(blockPosition); // Must include handler because we reset the block
 
         // Get the old property or select the first one
         var oldProperty = itemStack.getTag(TAG_PROPERTY);
@@ -112,7 +112,7 @@ public class DebugStickTool implements BuiltinTool {
      * Selects the next property from the given block, or null if there are no properties on the block.
      *
      * @param block The block to select the next property from
-     * @param old The last selected property, will use the next one or the first if not found
+     * @param old   The last selected property, will use the next one or the first if not found
      * @return The next property (looping), or null if there are no properties on the block
      */
     private @Nullable String selectProperty(@NotNull Block block, @Nullable String old, boolean inc) {
