@@ -126,6 +126,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+        if (MapFeatureFlags.RATE_MAP.test(PlayerDataV2.fromPlayer(player).id())) {
+            inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+        }
+
         inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 

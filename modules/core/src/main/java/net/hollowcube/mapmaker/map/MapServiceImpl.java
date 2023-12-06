@@ -376,6 +376,33 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public int getMapRating(@NotNull String mapId, @NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + mapId + "/ratings/" + playerId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+
+        record MapRating(int rating) {
+        }
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapRating.class).rating(); // Ok
+        if (res.statusCode() == 404) return -1; // Not found
+        throw new InternalError("Failed to get map rating: " + res.body());
+    }
+
+    @Override
+    public void setMapRating(@NotNull String mapId, @NotNull String playerId, int rating) {
+        var req = HttpRequest.newBuilder()
+                .method("PUT", HttpRequest.BodyPublishers.ofString("{\"rating\":" + rating + "}"))
+                .uri(URI.create(url + "/" + mapId + "/ratings/" + playerId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return; // Ok
+        throw new InternalError("Failed to set map rating: " + res.body());
+    }
+
+    @Override
     public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/players/" + playerId))

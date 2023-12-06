@@ -12,6 +12,7 @@ import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
@@ -72,6 +73,9 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.server = server;
         this.map = map;
         this.flags |= FLAG_PLAYING;
+        if (map.verification() == MapVerification.PENDING) {
+            this.flags |= FLAG_VERIFYING;
+        }
 
         instance = new MapInstance(getDimensionName());
         instance.setGenerator(MapGenerators.voidWorld());

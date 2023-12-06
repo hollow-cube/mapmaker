@@ -43,6 +43,7 @@ public interface MapWorld {
     int FLAG_EDITING = 1 << 0;
     int FLAG_PLAYING = 1 << 1;
     int FLAG_TESTING = 1 << 2;
+    int FLAG_VERIFYING = 1 << 3;
 
     @NotNull MapServer server();
 

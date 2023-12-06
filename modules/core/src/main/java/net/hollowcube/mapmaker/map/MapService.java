@@ -69,6 +69,11 @@ public interface MapService {
 
     void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
+    // -1 == not rated
+    int getMapRating(@NotNull String mapId, @NotNull String playerId);
+
+    void setMapRating(@NotNull String mapId, @NotNull String playerId, int rating);
+
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
 
     // Legacy

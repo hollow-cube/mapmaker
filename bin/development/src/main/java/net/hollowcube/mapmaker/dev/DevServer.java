@@ -324,14 +324,6 @@ public class DevServer {
             hubCommandManager.register(emojisCommand);
             mapCommandManager.register(emojisCommand);
 
-//            var abc = new Command("abc") {
-//            };
-//            abc.setDefaultExecutor((sender, context) -> {
-//                var player = sender.asPlayer();
-//                hub.newOpenGUI(player, MapRatingView::new);
-//            });
-//            hubCommandManager.register(abc);
-
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
             eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);

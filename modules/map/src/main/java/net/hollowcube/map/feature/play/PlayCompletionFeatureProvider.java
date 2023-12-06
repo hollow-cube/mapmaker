@@ -2,10 +2,12 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.gui.RateMapView;
 import net.hollowcube.map.util.FireworkUtil;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -87,6 +89,16 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         }
 
         FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
+
+        // Show the review GUI for the player if they have not submitted a rating yet
+        if (MapFeatureFlags.RATE_MAP.test(player.getUuid().toString())) {
+            if (MapRatingFeatureProvider.isMapRatable(world)) {
+                var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
+                if (lastRating == null || lastRating == -1) {
+                    world.server().newOpenGUI(player, c -> new RateMapView(c, world.map().id()));
+                }
+            }
+        }
     }
 
 }

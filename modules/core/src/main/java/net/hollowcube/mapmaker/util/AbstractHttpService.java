@@ -39,6 +39,7 @@ public abstract class AbstractHttpService {
 
     protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
         try {
+            logger.log(System.Logger.Level.DEBUG, "{0} {1}", req.method(), req.uri());
             var res = httpClient.send(req, handler);
             if (res.statusCode() == 403) {
                 // We simply convert auth issues to 404s

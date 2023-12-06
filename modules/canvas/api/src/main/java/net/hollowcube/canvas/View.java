@@ -58,7 +58,11 @@ public abstract class View implements Element {
     // Manual Actions
 
     public void addActionHandler(@NotNull String name, @NotNull Object handler) {
-        delegate.addActionHandler(name, handler);
+        delegate.addActionHandler(name, handler, false);
+    }
+
+    public void addAsyncActionHandler(@NotNull String name, @NotNull Object handler) {
+        delegate.addActionHandler(name, handler, true);
     }
 
     // Routing

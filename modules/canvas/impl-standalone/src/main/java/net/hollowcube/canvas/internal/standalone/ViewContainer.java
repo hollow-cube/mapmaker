@@ -62,11 +62,11 @@ public class ViewContainer extends BoxContainer implements ViewElement {
     }
 
     @Override
-    public void addActionHandler(@NotNull String name, @NotNull Object handler) {
+    public void addActionHandler(@NotNull String name, @NotNull Object handler, boolean async) {
         var element = findById(name);
         Check.notNull(element, "Action not found: " + name);
 
-        element.wireAction(associatedView, handler, new Action.Descriptor(name, false));
+        element.wireAction(associatedView, handler, new Action.Descriptor(name, async));
     }
 
     @Override
