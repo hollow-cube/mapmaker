@@ -24,9 +24,10 @@ public final class BlockTags {
     public static final Collection<NamespaceID> FENCES = builtin("minecraft:fences");
     public static final Collection<NamespaceID> WOODEN_FENCES = builtin("minecraft:wooden_fences");
     public static final Collection<NamespaceID> FENCE_GATES = builtin("minecraft:fence_gates");
-    public static final Collection<NamespaceID> ALL_SIGNS = builtin("minecraft:all_signs");
-    public static final Collection<NamespaceID> WALL_SIGNS = builtin("minecraft:wall_signs");
+    public static final Collection<NamespaceID> SIGNS = builtin("minecraft:signs"); // Standing + wall signs
+    public static final Collection<NamespaceID> ALL_HANGING_SIGNS = builtin("minecraft:all_hanging_signs"); // Ceiling + wall hanging signs
     public static final Collection<NamespaceID> STANDING_SIGNS = builtin("minecraft:standing_signs");
+    public static final Collection<NamespaceID> CEILING_HANGING_SIGNS = builtin("minecraft:ceiling_hanging_signs");
     public static final Collection<NamespaceID> ANVILS = builtin("minecraft:anvil");
     public static final Collection<NamespaceID> TRAPDOORS = builtin("minecraft:trapdoors");
     public static final Collection<NamespaceID> CANDLES = builtin("minecraft:candles");

@@ -9,6 +9,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -25,7 +26,8 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("special-click-handler", EventFilter.INSTANCE)
             .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItem)
-            .addListener(PlayerBlockInteractEvent.class, this::handleShiftClick);
+            .addListener(PlayerBlockInteractEvent.class, this::handleShiftClick)
+            .addListener(PlayerBlockBreakEvent.class, this::handleBlockBreak);
 //            .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock);
 
     private static final Int2IntArrayMap STRIP_MAP;
@@ -165,6 +167,12 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
         // Update the block in the world to the new state
         event.setBlockingItemUse(true);
         instance.setBlock(event.getBlockPosition(), block);
+    }
+
+    private void handleBlockBreak(@NotNull PlayerBlockBreakEvent event) {
+        var block = event.getBlock();
+        if ("true".equals(block.getProperty("waterlogged")))
+            event.setResultBlock(Block.WATER);
     }
 
     static {

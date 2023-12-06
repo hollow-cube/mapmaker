@@ -43,6 +43,7 @@ public final class PlacementRules {
         register(BlockTags.BUTTONS, ButtonPlacementRule::new);
         register(BlockTags.BANNERS, BannerPlacementRule::new);
         register(BlockTags.STANDING_SIGNS, StandingSignPlacementRule::new);
+        register(BlockTags.CEILING_HANGING_SIGNS, NoopPlacementRule::new); //TODO: Hanging sign placements
         register(BlockTags.BEDS, BedPlacementRule::new);
         register(BlockTags.ANVILS, AnvilPlacementRule::new);
 
@@ -126,13 +127,17 @@ public final class PlacementRules {
         register(Block.TRIPWIRE_HOOK, TripwireHookPlacementRule::new);
         register(Block.TRIPWIRE, TripwirePlacementRule::new);
 
+        register(Block.CONDUIT, WaterloggedPlacementRule::new);
+        register(Block.DECORATED_POT, WaterloggedPlacementRule::new); //todo
+        register(Block.SPAWNER, NoopPlacementRule::new);
+        register(Block.END_PORTAL, NoopPlacementRule::new);
+
         // Annoying single use wall of shame >:(
 
         register(Block.BELL, BellPlacementRule::new);
         register(Block.GRINDSTONE, GrindstonePlacementRule::new);
         register(Block.POINTED_DRIPSTONE, DripstonePlacementRule::new);
         register(Block.SNOW, SnowPlacementRule::new);
-        register(Block.CONDUIT, ConduitPlacementRule::new);
 
         //
         // ==== WARNING ====

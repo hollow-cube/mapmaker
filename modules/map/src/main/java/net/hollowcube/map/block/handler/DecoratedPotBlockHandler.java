@@ -4,18 +4,15 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
-public class SkullBlockHandler implements BlockHandler {
-    private static final Tag<@Nullable String> NOTE_BLOCK_SOUND = Tag.String("note_block_sound");
+public class DecoratedPotBlockHandler implements BlockHandler {
 
-    public static final NamespaceID ID = NamespaceID.from("minecraft:skull");
-    public static final SkullBlockHandler INSTANCE = new SkullBlockHandler();
+    private static final NamespaceID ID = NamespaceID.from("minecraft:decorated_pot");
 
-    private SkullBlockHandler() {
+    DecoratedPotBlockHandler() {
     }
 
     @Override
@@ -25,7 +22,8 @@ public class SkullBlockHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(NOTE_BLOCK_SOUND);
+        //todo patterns
+        return List.of();
     }
 
 }

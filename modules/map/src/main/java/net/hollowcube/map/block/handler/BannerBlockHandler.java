@@ -11,9 +11,8 @@ import java.util.List;
 public class BannerBlockHandler implements BlockHandler {
 
     private static final NamespaceID ID = NamespaceID.from("minecraft:banner");
-    public static final BannerBlockHandler INSTANCE = new BannerBlockHandler();
 
-    private BannerBlockHandler() {
+    BannerBlockHandler() {
     }
 
     @Override
@@ -23,6 +22,7 @@ public class BannerBlockHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+        //todo patterns
         return List.of();
     }
 

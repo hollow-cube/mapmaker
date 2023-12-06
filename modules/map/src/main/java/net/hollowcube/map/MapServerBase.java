@@ -8,7 +8,6 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.block.PlacementRules;
-import net.hollowcube.map.block.handler.*;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.MapListCommandMixin;
 import net.hollowcube.map.command.build.BuildCommand;
@@ -40,8 +39,6 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.BlockManager;
-import net.minestom.server.listener.manager.PacketListenerManager;
-import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +53,6 @@ import static net.hollowcube.map.util.MapCondition.eventFilter;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public abstract class MapServerBase implements MapServer {
-    private static final PacketListenerManager PACKET_LISTENER_MANAGER = MinecraftServer.getPacketListenerManager();
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
 
     private static final System.Logger logger = System.getLogger(MapServerBase.class.getName());
@@ -110,15 +106,6 @@ public abstract class MapServerBase implements MapServer {
 
         // Placement rules
         PlacementRules.init(terraform);
-        BLOCK_MANAGER.registerHandler(SignBlockHandler.ID, () -> SignBlockHandler.INSTANCE);
-        BLOCK_MANAGER.registerHandler(PlayerHeadBlockHandler.ID, () -> PlayerHeadBlockHandler.INSTANCE);
-        BLOCK_MANAGER.registerHandler(ChestBlockHandler.CHEST.getNamespaceId(), () -> ChestBlockHandler.CHEST);
-        BLOCK_MANAGER.registerHandler(ChestBlockHandler.TRAPPED_CHEST.getNamespaceId(), () -> ChestBlockHandler.TRAPPED_CHEST);
-        BLOCK_MANAGER.registerHandler(ShulkerBoxBlockHandler.ID, () -> ShulkerBoxBlockHandler.INSTANCE);
-        BLOCK_MANAGER.registerHandler(BannerBlockHandler.INSTANCE.getNamespaceId(), () -> BannerBlockHandler.INSTANCE);
-        BLOCK_MANAGER.registerHandler(ConduitBlockHandler.INSTANCE.getNamespaceId(), () -> ConduitBlockHandler.INSTANCE);
-
-        PACKET_LISTENER_MANAGER.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));

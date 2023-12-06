@@ -1,6 +1,5 @@
 package net.hollowcube.map.block.placement;
 
-import net.hollowcube.map.block.handler.SignBlockHandler;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -23,11 +22,11 @@ public class StandingSignPlacementRule extends BaseBlockPlacementRule {
     private final Block wallBlock;
 
     public StandingSignPlacementRule(@NotNull Block block) {
-        super(block.withHandler(SignBlockHandler.INSTANCE));
+        super(block);
 
-        var type = block.namespace().path().replace("_sign", "");
-        this.wallBlock = Block.fromNamespaceId(String.format("minecraft:%s_wall_sign", type))
-                .withHandler(SignBlockHandler.INSTANCE);
+        var wallBlockId = String.format("minecraft:%s_wall_sign", block.namespace().path().replace("_sign", ""));
+        this.wallBlock = Objects.requireNonNull(Block.fromNamespaceId(wallBlockId))
+                .withNbt(block.nbt()).withHandler(block.handler());
     }
 
     @Override

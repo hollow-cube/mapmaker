@@ -14,9 +14,8 @@ public class PlayerHeadBlockHandler implements BlockHandler {
 
 
     public static final NamespaceID ID = NamespaceID.from("minecraft:player_head");
-    public static final PlayerHeadBlockHandler INSTANCE = new PlayerHeadBlockHandler();
 
-    private PlayerHeadBlockHandler() {
+    PlayerHeadBlockHandler() {
     }
 
     @Override
@@ -26,6 +25,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+        //todo head data
         return List.of(NOTE_BLOCK_SOUND);
     }
 

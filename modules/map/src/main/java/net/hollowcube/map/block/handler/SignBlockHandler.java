@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.map.block.BlockTags;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.BlockHandler;
@@ -61,12 +62,12 @@ public class SignBlockHandler implements BlockHandler {
     private static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER)
             .defaultValue(new SignData(false, "black", new Component[0]));
 
-    public static final NamespaceID ID = NamespaceID.from("minecraft:sign");
-    public static final SignBlockHandler INSTANCE = new SignBlockHandler();
-
     private static final Int2ObjectMap<String> DYE_MAP = new Int2ObjectArrayMap<>();
 
     static {
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        packetListenerManager.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
+
         DYE_MAP.put(Material.WHITE_DYE.id(), "white");
         DYE_MAP.put(Material.LIGHT_GRAY_DYE.id(), "light_gray");
         DYE_MAP.put(Material.GRAY_DYE.id(), "gray");
@@ -85,12 +86,15 @@ public class SignBlockHandler implements BlockHandler {
         DYE_MAP.put(Material.PINK_DYE.id(), "pink");
     }
 
-    private SignBlockHandler() {
+    private final NamespaceID id;
+
+    SignBlockHandler(@NotNull String id) {
+        this.id = NamespaceID.from(id);
     }
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
-        return ID;
+        return id;
     }
 
     @Override
@@ -168,7 +172,8 @@ public class SignBlockHandler implements BlockHandler {
 
         var blockPosition = packet.blockPosition();
         var block = instance.getBlock(blockPosition);
-        if (block.handler() != SignBlockHandler.INSTANCE) return;
+        if (block.handler() != BlockHandlers.SIGN && block.handler() != BlockHandlers.HANGING_SIGN)
+            return;
 
         var tag = packet.isFrontText() ? FRONT_TEXT : BACK_TEXT;
         var signData = block.getTag(tag);
