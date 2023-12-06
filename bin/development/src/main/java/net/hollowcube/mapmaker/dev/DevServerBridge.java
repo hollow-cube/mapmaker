@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
     private HubServer hub = null;
@@ -22,6 +23,12 @@ public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
 
     public void setMapServer(@NotNull MapServer map) {
         this.mapServer = map;
+    }
+
+    @Override
+    public @Nullable String getCurrentMap(@NotNull Player player) {
+        var world = MapWorld.forPlayerOptional(player);
+        return world == null ? null : world.map().id();
     }
 
     //
