@@ -33,6 +33,7 @@ public class DebugCommand extends Command {
         subcommand("world", playerOnly(this::handleMapWorldDebug), null);
 
         // Minestom stuff
+        subcommand("commands", playerOnly(this::handleCommandsDebug), null);
         subcommand("block", playerOnly(this::handleBlockDebug), null);
 
 //        addSyntax((sender, context) -> sender.sendMessage("Debug command :O"));
@@ -65,6 +66,11 @@ public class DebugCommand extends Command {
 
         player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
         player.sendMessage("Type: " + world.getClass().getSimpleName());
+    }
+
+    private void handleCommandsDebug(@NotNull Player player, @NotNull CommandContext context) {
+        player.refreshCommands();
+        player.sendMessage("Commands refreshed!");
     }
 
     private void handleBlockDebug(@NotNull Player player, @NotNull CommandContext context) {

@@ -120,22 +120,19 @@ public class TestingMapWorld implements InternalMapWorld {
 
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
 
-        var startingPos = player.getPosition();
-        player.teleport(startingPos);
-        player.refreshCommands();
-
         activePlayers.add(player);
         player.setTag(TAG_TESTING, true);
         player.setTag(MapHooks.PLAYING, true); // For compatibility
         player.setTag(SaveState.TAG, saveState);
 
-        player.getInventory().clear();
+        MapWorldHelpers.resetPlayer(player);
+
         player.setGameMode(GameMode.ADVENTURE);
 
-        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
+        var startingPos = player.getPosition();
+        player.teleport(startingPos);
 
-//        if (firstSpawn)
-//            player.sendMessage("Now testing " + map().settings().getName());
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
     }
 
     @Override
