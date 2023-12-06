@@ -76,6 +76,21 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
             } else {
                 //todo more fire
             }
+        } else if (itemStack.material().equals(Material.WOODEN_HOE) || itemStack.material().equals(Material.STONE_HOE)
+                || itemStack.material().equals(Material.IRON_HOE) || itemStack.material().equals(Material.GOLDEN_HOE)
+                || itemStack.material().equals(Material.DIAMOND_HOE) || itemStack.material().equals(Material.NETHERITE_HOE)) {
+            if (block.id() == Block.DIRT.id() || block.id() == Block.GRASS_BLOCK.id() || block.id() == Block.DIRT_PATH.id()) {
+                block = Block.FARMLAND;
+            } else if (block.id() == Block.ROOTED_DIRT.id() || block.id() == Block.COARSE_DIRT.id()) {
+                block = Block.DIRT;
+            }
+        } else if (itemStack.material().equals(Material.WOODEN_SHOVEL) || itemStack.material().equals(Material.STONE_SHOVEL)
+                || itemStack.material().equals(Material.IRON_SHOVEL) || itemStack.material().equals(Material.GOLDEN_SHOVEL)
+                || itemStack.material().equals(Material.DIAMOND_SHOVEL) || itemStack.material().equals(Material.NETHERITE_SHOVEL)) {
+            if (block.id() == Block.GRASS_BLOCK.id() || block.id() == Block.DIRT.id() || block.id() == Block.MYCELIUM.id()
+                    || block.id() == Block.PODZOL.id() || block.id() == Block.COARSE_DIRT.id() || block.id() == Block.ROOTED_DIRT.id()) {
+                block = Block.DIRT_PATH;
+            }
         } else if (itemStack.material().equals(Material.WATER_BUCKET)) {
             var waterPos = event.getPosition().relative(event.getBlockFace());
             if (instance.getBlock(waterPos, Block.Getter.Condition.TYPE).isAir())
