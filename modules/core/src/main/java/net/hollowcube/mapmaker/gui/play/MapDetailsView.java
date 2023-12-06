@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.map.*;
@@ -246,6 +247,14 @@ public class MapDetailsView extends View {
 
     @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
+        // Do not allow players to join maps if they are already in the same map
+        var currentWorld = MapWorld.forPlayerOptional(player);
+        if (currentWorld != null && currentWorld.map().id().equals(map.id())) {
+            player.sendMessage(Component.translatable("gui.map_details.already_in_map"));
+            player.closeInventory();
+            return;
+        }
+
         try {
             bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
             player.closeInventory();
