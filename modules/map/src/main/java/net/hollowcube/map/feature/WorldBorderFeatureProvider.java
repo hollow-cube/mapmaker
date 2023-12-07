@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 @AutoService(FeatureProvider.class)
 public class WorldBorderFeatureProvider implements FeatureProvider {
 
-
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         var mapSize = world.map().settings().getSize();
@@ -19,8 +18,12 @@ public class WorldBorderFeatureProvider implements FeatureProvider {
         var worldBorder = world.instance().getWorldBorder();
         worldBorder.setCenter(0f, 0f);
         worldBorder.setDiameter(mapSize.size());
-        worldBorder.setWarningBlocks(5);
-        worldBorder.setWarningTime(5);
+
+        // Only add the red border if the map is an editing map
+        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
+            worldBorder.setWarningBlocks(5);
+            worldBorder.setWarningTime(5);
+        }
 
         return true;
     }
