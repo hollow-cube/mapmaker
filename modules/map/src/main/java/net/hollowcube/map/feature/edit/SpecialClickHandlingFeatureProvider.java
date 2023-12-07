@@ -66,15 +66,16 @@ public class SpecialClickHandlingFeatureProvider implements FeatureProvider {
         } else if (block.id() == Block.LECTERN.id() && (itemStack.material().equals(Material.BOOK) || itemStack.material().equals(Material.WRITABLE_BOOK) || itemStack.material().equals(Material.WRITTEN_BOOK))) {
             //todo make those a set of materials
             block = block.withProperty("has_book", "true");
-        } else if (itemStack.material().equals(Material.FLINT_AND_STEEL)) {
+        } else if (itemStack.material().equals(Material.FLINT_AND_STEEL) || itemStack.material().equals(Material.FIRE_CHARGE)) {
             var placePos = event.getPosition().relative(event.getBlockFace());
 
             var posBelow = placePos.add(0, -1, 0);
-            if (instance.getBlock(posBelow, Block.Getter.Condition.TYPE).isSolid()) {
+            if (instance.getBlock(posBelow, Block.Getter.Condition.TYPE).id() == Block.SOUL_SAND.id()
+                    || instance.getBlock(posBelow, Block.Getter.Condition.TYPE).id() == Block.SOUL_SOIL.id() ) {
+                instance.setBlock(placePos, Block.SOUL_FIRE);
+            } else if (instance.getBlock(posBelow, Block.Getter.Condition.TYPE).isSolid()) {
                 // If solid block below, always place the fire on that
                 instance.setBlock(placePos, Block.FIRE);
-            } else {
-                //todo more fire
             }
         } else if (itemStack.material().equals(Material.WOODEN_HOE) || itemStack.material().equals(Material.STONE_HOE)
                 || itemStack.material().equals(Material.IRON_HOE) || itemStack.material().equals(Material.GOLDEN_HOE)
