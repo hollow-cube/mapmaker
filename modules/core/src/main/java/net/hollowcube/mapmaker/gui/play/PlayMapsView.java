@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
@@ -22,6 +23,7 @@ public class PlayMapsView extends View {
     private @ContextObject Player player;
     private @ContextObject String query;
 
+    private @Outlet("pageText") Text pageText;
     private @Outlet("paging") Pagination pagination;
 
     private @Outlet("parkour") AbstractToggle parkourToggle;
@@ -133,6 +135,10 @@ public class PlayMapsView extends View {
                 maps.add(new MapEntry(request.context(), map));
             }
             request.respond(maps, queryResult.nextPage());
+
+            var pageNum = Component.text(request.page());
+            pageText.setText("Page " + pageNum);
+            pageText.setArgs(Component.translatable("gui.play_maps.page", pageNum));
         } catch (Exception e) {
             player.closeInventory();
             player.sendMessage(Component.translatable("generic.unknown_error"));
