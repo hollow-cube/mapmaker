@@ -6,12 +6,16 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public final class CheckpointCache {
+    private static final Logger logger = LoggerFactory.getLogger(CheckpointCache.class);
+
     private static final Tag<CheckpointCache> TAG = Tag.Transient("mapmaker:checkpoint/cache");
 
     public static @NotNull CheckpointCache forInstance(@NotNull Instance instance) {
@@ -24,7 +28,7 @@ public final class CheckpointCache {
         for (var object : world.map().objects()) {
             if (object.type() == CheckpointPlateBlock.OBJECT_TYPE) {
                 checkpoints.put(object.id(), object);
-                System.out.println("Adding checkpoint to world: " + object.toString());
+                logger.debug("Adding checkpoint to world: {}", object);
             }
         }
 

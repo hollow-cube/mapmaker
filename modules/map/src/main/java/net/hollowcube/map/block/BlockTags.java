@@ -103,7 +103,6 @@ public final class BlockTags {
             Block.LARGE_FERN
     );
     public static final Collection<NamespaceID> ANY_WITH_LIT = createFromProperty("lit");
-
     public static Collection<NamespaceID> FARMLAND_CONVERTABLE = create(Block.DIRT, Block.GRASS, Block.DIRT_PATH);
     public static Collection<NamespaceID> DIRT_CONVERTABLE = create(Block.ROOTED_DIRT, Block.COARSE_DIRT);
     public static Collection<NamespaceID> DIRT_PATH_CONVERTABLE = create(
@@ -117,6 +116,11 @@ public final class BlockTags {
     public static Collection<NamespaceID> CORAL_FAN = create(
             Block.TUBE_CORAL_FAN, Block.BRAIN_CORAL_FAN, Block.BUBBLE_CORAL_FAN,
             Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN
+    );
+    public static final Collection<NamespaceID> GROWABLE = create( //todo for bonemeal
+            Block.TORCHFLOWER_CROP, Block.MELON_STEM, Block.PUMPKIN_STEM,
+            Block.WHEAT, Block.CARROTS, Block.NETHER_WART, Block.POTATOES,
+            Block.PITCHER_CROP, Block.BEETROOTS, Block.COCOA
     );
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {
@@ -148,7 +152,6 @@ public final class BlockTags {
                 set.add(block.namespace());
             }
         }
-        System.out.println("BLOCKS WITH PROP " + property + ": " + set);
         return Set.copyOf(set);
     }
 
