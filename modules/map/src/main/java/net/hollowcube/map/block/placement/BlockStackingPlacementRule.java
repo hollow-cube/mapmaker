@@ -17,10 +17,12 @@ public class BlockStackingPlacementRule extends BaseBlockPlacementRule {
     public static final String TURTLE_EGGS_PROPERTY = "eggs";
 
     private final String property;
+    private final boolean canBeWaterlogged;
 
     public BlockStackingPlacementRule(@NotNull Block block, @NotNull String property) {
         super(block);
         this.property = property;
+        this.canBeWaterlogged = block.getProperty("waterlogged") != null;
     }
 
     @Override
@@ -32,12 +34,19 @@ public class BlockStackingPlacementRule extends BaseBlockPlacementRule {
             if (amount == MAX_AMOUNT) return null;
             return existingBlock.withProperty(property, String.valueOf(amount + 1));
         }
+
+        if (canBeWaterlogged) {
+            var waterlogged = String.valueOf(existingBlock.id() == Block.WATER.id());
+            return block.withProperty("waterlogged", waterlogged);
+        }
+
         return block;
     }
 
     @Override
     public boolean isSelfReplaceable(@NotNull Replacement replacement) {
-        var block = replacement.block();
-        return Integer.parseInt(block.properties().get(property)) != MAX_AMOUNT;
+        if (replacement.material().isBlock() && replacement.material().block().id() == this.block.id())
+            return Integer.parseInt(replacement.block().properties().get(property)) != MAX_AMOUNT;
+        return false;
     }
 }
