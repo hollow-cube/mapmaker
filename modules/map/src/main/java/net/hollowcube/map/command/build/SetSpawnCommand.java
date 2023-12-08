@@ -41,6 +41,11 @@ public class SetSpawnCommand extends Command {
     }
 
     private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
+        if (!player.getInstance().getWorldBorder().isInside(newSpawnPoint)) {
+            player.sendMessage(Component.translatable("command.set_spawn.out_of_world"));
+            return;
+        }
+
         var map = MapWorld.forPlayer(player).map();
         map.settings().setSpawnPoint(newSpawnPoint);
         player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
