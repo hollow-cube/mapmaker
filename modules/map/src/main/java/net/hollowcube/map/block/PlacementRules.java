@@ -127,10 +127,13 @@ public final class PlacementRules {
         register(Block.TRIPWIRE_HOOK, TripwireHookPlacementRule::new);
         register(Block.TRIPWIRE, TripwirePlacementRule::new);
 
-        register(Block.CONDUIT, WaterloggedPlacementRule::new);
         register(Block.DECORATED_POT, WaterloggedPlacementRule::new); //todo
         register(Block.SPAWNER, NoopPlacementRule::new);
         register(Block.END_PORTAL, NoopPlacementRule::new);
+
+        register(Block.CONDUIT, WaterloggedPlacementRule::new);
+        register(BlockTags.CORAL, WaterloggedPlacementRule::new);
+        register(BlockTags.CORAL_FAN, WaterloggedPlacementRule::new); //todo needs wall placement
 
         // Annoying single use wall of shame >:(
 

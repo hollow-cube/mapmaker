@@ -101,6 +101,22 @@ public final class BlockTags {
             Block.SUNFLOWER,
             Block.LARGE_FERN
     );
+    public static final Collection<NamespaceID> ANY_WITH_LIT = createFromProperty("lit");
+
+    public static Collection<NamespaceID> FARMLAND_CONVERTABLE = create(Block.DIRT, Block.GRASS, Block.DIRT_PATH);
+    public static Collection<NamespaceID> DIRT_CONVERTABLE = create(Block.ROOTED_DIRT, Block.COARSE_DIRT);
+    public static Collection<NamespaceID> DIRT_PATH_CONVERTABLE = create(
+            Block.GRASS_BLOCK, Block.DIRT, Block.MYCELIUM,
+            Block.PODZOL, Block.COARSE_DIRT, Block.ROOTED_DIRT
+    );
+    public static Collection<NamespaceID> CORAL = create(
+            Block.TUBE_CORAL, Block.BRAIN_CORAL, Block.BUBBLE_CORAL,
+            Block.FIRE_CORAL, Block.HORN_CORAL
+    );
+    public static Collection<NamespaceID> CORAL_FAN = create(
+            Block.TUBE_CORAL_FAN, Block.BRAIN_CORAL_FAN, Block.BUBBLE_CORAL_FAN,
+            Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN
+    );
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {
         var tag = MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, name);
@@ -121,6 +137,17 @@ public final class BlockTags {
         for (var b : blocks.get()) {
             set.add(b.namespace());
         }
+        return Set.copyOf(set);
+    }
+
+    private static @NotNull Collection<NamespaceID> createFromProperty(@NotNull String property) {
+        var set = new HashSet<NamespaceID>();
+        for (var block : Block.values()) {
+            if (block.getProperty(property) != null) {
+                set.add(block.namespace());
+            }
+        }
+        System.out.println("BLOCKS WITH PROP " + property + ": " + set);
         return Set.copyOf(set);
     }
 

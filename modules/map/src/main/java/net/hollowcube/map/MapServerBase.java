@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.MapListCommandMixin;
@@ -104,8 +105,12 @@ public abstract class MapServerBase implements MapServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
 
-        // Placement rules
+        // Block/item rules
         PlacementRules.init(terraform);
+        var interactionEvents = EventNode.event("mapmaker:map/interaction", EventFilter.INSTANCE,
+                eventFilter(false, true, false));
+        globalEventHandler.addChild(interactionEvents);
+        InteractionRules.register(interactionEvents);
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
