@@ -62,7 +62,6 @@ public class InteractionRules {
         // Try to apply a block rule first, if present
         var block = event.getBlock();
         var rule = blockRules.get(block.id());
-        System.out.println("handleBlockInteractV2 " + rule);
         if (rule != null && rule.sneakState().test(player.isSneaking())) {
             var interaction = new BlockInteractionRule.Interaction(
                     player, event.getInstance(), event.getBlockPosition(),

@@ -6,8 +6,10 @@ import net.hollowcube.map.block.BlockTags;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
@@ -118,21 +120,8 @@ public class SignBlockHandler implements BlockHandler {
         var blockPosition = interaction.getBlockPosition();
         var block = interaction.getBlock();
         var instance = interaction.getInstance();
-
-        boolean isFront;
-        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
-            var playerPos = Vec.fromPoint(player.getPosition());
-            var blockCenterPos = Vec.fromPoint(blockPosition).add(0.5f);
-            var angle = Math.toDegrees(Math.atan2(blockCenterPos.z() - playerPos.z(), blockCenterPos.x() - playerPos.x()));
-
-            var blockRotation = Integer.parseInt(block.getProperty("rotation"));
-            var adjustedAngle = angle - (blockRotation * 22.5) + 360;
-
-            isFront = adjustedAngle < 0;
-        } else {
-            System.out.println("NOT A SIGN " + block.name());
-            return false;
-        }
+        var isFront = isFacingFront(block, blockPosition, player);
+        System.out.println("IS_FRONT: " + isFront);
 
         if (itemStack.material().equals(Material.GLOW_INK_SAC)) {
             var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
@@ -181,5 +170,46 @@ public class SignBlockHandler implements BlockHandler {
         block = block.withTag(tag, new SignData(signData.hasGlowingText, signData.color, lines));
 
         instance.setBlock(blockPosition, block);
+    }
+
+    private boolean isFacingFront(@NotNull Block block, @NotNull Point blockPosition, @NotNull Player player) {
+        var relative = player.getPosition().sub(blockPosition.add(getBlockCenter(block)));
+        return Math.abs(wrapDegrees((Math.atan2(relative.z(), relative.x()) * 57.2957763671875) - 90f - getBlockAngle(block))) <= 90f;
+    }
+
+    private Point getBlockCenter(@NotNull Block block) {
+        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
+            return new Vec(0.5);
+        } else if (BlockTags.WALL_SIGNS.contains(block.namespace())) {
+            var shape = block.registry().collisionShape();
+            return shape.relativeStart().add(shape.relativeEnd()).div(2); // TODO THIS IS NOT PERFECT
+        } else {
+            throw new IllegalStateException("unreachable");
+        }
+    }
+
+    private double getBlockAngle(@NotNull Block block) {
+        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
+            return Integer.parseInt(block.getProperty("rotation")) * 22.5;
+        } else if (BlockTags.WALL_SIGNS.contains(block.namespace())) {
+            // TODO: move this block face to direction to some common util
+            return switch (block.getProperty("facing")) {
+                case "south" -> 0;
+                case "west" -> 90;
+                case "north" -> 180;
+                case "east" -> 270;
+                case "down", "up" -> 270; // This case is from vanilla
+                default -> throw new IllegalStateException("unreachable");
+            };
+        } else {
+            throw new IllegalStateException("unreachable");
+        }
+    }
+
+    public static double wrapDegrees(double angle) {
+        double wrapped = angle % 360.0;
+        if (wrapped >= 180.0) wrapped -= 360.0;
+        if (wrapped < -180.0) wrapped += 360.0;
+        return wrapped;
     }
 }

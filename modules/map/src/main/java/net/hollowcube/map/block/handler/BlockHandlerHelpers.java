@@ -21,10 +21,12 @@ final class BlockHandlerHelpers {
         if (blockData == null) return false;
 
         // Block data was present, apply it
-        placement.getInstance().setBlock(
-                placement.getBlockPosition(),
-                placement.getBlock().withNbt(blockData)
-        );
+        // Note that we refetch the block from instance rather than use the one in `placement`. This is because the
+        // one in `placement` was not updated after the placement rule changed it.
+        // todo this is realistically a Minestom bug that should be fixed
+        var instance = placement.getInstance();
+        var block = instance.getBlock(placement.getBlockPosition());
+        instance.setBlock(placement.getBlockPosition(), block.withNbt(blockData));
         return true;
     }
 
