@@ -12,6 +12,11 @@ public class PistonInteractionRule implements BlockInteractionRule {
     public static final PistonInteractionRule INSTANCE = new PistonInteractionRule();
 
     @Override
+    public @NotNull SneakState sneakState() {
+        return SneakState.SNEAKING;
+    }
+
+    @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
