@@ -33,6 +33,7 @@ public class InteractionRules {
         block(Block.COMPOSTER, new ComposterInteractionRule());
         block(Block.PISTON, PistonInteractionRule.INSTANCE);
         block(Block.STICKY_PISTON, PistonInteractionRule.INSTANCE);
+        block(Block.RESPAWN_ANCHOR, new RespawnAnchorInteractionRule());
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
