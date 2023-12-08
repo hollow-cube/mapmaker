@@ -7,11 +7,10 @@
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.play_maps.simple.information"/>
-        <!-- TODO how to handle text written into the GUI? -->
-        <spacer width="5"/>
+        <text id="pageText" width="5" height="1" translationKey="gui.play_maps.page"
+              font="play_maps_page" centered="true"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
         <Query/>
-    </box>
 
     <!-- Map list -->
     <box width="9" height="5" align="ltr">
