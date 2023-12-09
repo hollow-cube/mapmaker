@@ -4,6 +4,8 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -15,10 +17,12 @@ public class JoinCommand extends Command {
             .singleEntity(true).onlyPlayers(true));
 
     private final PlayerInviteService inviteService;
+    private final PermManager permManager;
 
-    public JoinCommand(@NotNull PlayerInviteService inviteService) {
+    public JoinCommand(@NotNull PlayerInviteService inviteService, @NotNull PermManager permManager) {
         super("join");
         this.inviteService = inviteService;
+        this.permManager = permManager;
 
         addSyntax(playerOnly(this::handleJoin), targetArg);
     }
@@ -41,10 +45,10 @@ public class JoinCommand extends Command {
             player.sendMessage(Component.translatable("command.join.hub", Component.translatable(target.getUsername())));
         } else if (targetMap == senderMap) {
             player.sendMessage(Component.translatable("command.join.same_map", Component.translatable(target.getUsername())));
+        } else if (targetMap.isPublished() || permManager.hasPlatformPermission(player, PlatformPerm.MAP_ADMIN)) {
+            inviteService.join(player, target);
         } else if (!targetMap.isPublished()) {
             player.sendMessage(Component.translatable("command.join.building", Component.translatable(target.getUsername())));
-        } else if (targetMap.isPublished()) {
-            inviteService.join(player, target);
         } else {
             player.sendMessage(Component.translatable("generic.unknown_error"));
         }

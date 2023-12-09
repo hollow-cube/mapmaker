@@ -121,7 +121,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new RejectCommand(inviteService));
         commandManager.register(new InviteCommand(inviteService));
         commandManager.register(new AcceptCommand(inviteService));
-        commandManager.register(new JoinCommand(inviteService));
+        commandManager.register(new JoinCommand(inviteService, permManager()));
         commandManager.register(new RemoveCommand(bridge));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());

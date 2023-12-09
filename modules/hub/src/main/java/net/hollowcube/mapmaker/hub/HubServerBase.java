@@ -96,7 +96,7 @@ public abstract class HubServerBase implements HubServer {
         commandManager.register(new RejectCommand(inviteService));
         commandManager.register(new InviteCommand(inviteService));
         commandManager.register(new AcceptCommand(inviteService));
-        commandManager.register(new JoinCommand(inviteService));
+        commandManager.register(new JoinCommand(inviteService, permManager()));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.addSubcommand(new MapLegacyCommand(mapService(), permManager()));
