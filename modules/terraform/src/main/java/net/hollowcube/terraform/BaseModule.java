@@ -9,10 +9,7 @@ import net.hollowcube.terraform.command.clipboard.PasteCommand;
 import net.hollowcube.terraform.command.history.ClearHistoryCommand;
 import net.hollowcube.terraform.command.history.RedoCommand;
 import net.hollowcube.terraform.command.history.UndoCommand;
-import net.hollowcube.terraform.command.region.ReplaceCommand;
-import net.hollowcube.terraform.command.region.SetCommand;
-import net.hollowcube.terraform.command.region.SmearCommand;
-import net.hollowcube.terraform.command.region.StackCommand;
+import net.hollowcube.terraform.command.region.*;
 import net.hollowcube.terraform.command.schem.SchemCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
@@ -68,6 +65,7 @@ final class BaseModule implements TerraformModule {
                 // Region
                 new SetCommand(terraform), new ReplaceCommand(terraform),
                 new StackCommand(), new SmearCommand(),
+                new MoveCommand(),
 
                 // History
                 new UndoCommand(), new RedoCommand(),
