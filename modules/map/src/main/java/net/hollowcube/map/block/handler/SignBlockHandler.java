@@ -121,6 +121,11 @@ public class SignBlockHandler implements BlockHandler {
         var instance = interaction.getInstance();
         var isFront = isFacingFront(block, blockPosition, player);
 
+        MapWorld world = MapWorld.forPlayerOptional(player);
+        if (world != null && (world.flags() & MapWorld.FLAG_EDITING) == 0) {
+            return false;
+        }
+
         if (itemStack.material().equals(Material.GLOW_INK_SAC)) {
             var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
             signData = new SignData(!signData.hasGlowingText, signData.color, signData.lines);
