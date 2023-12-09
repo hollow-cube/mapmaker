@@ -27,10 +27,7 @@ import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.map.MapPlayerData;
-import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.metrics.Metric;
 import net.hollowcube.mapmaker.metrics.MetricType;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
@@ -447,7 +444,7 @@ public class DevServer {
                     //todo should also be a hypercube perk
                     .replacement((match, unused) -> Component.text(map.name(), TextColor.color(0x15ADD3))
                             .hoverEvent(HoverEvent.showText(Component.text("Click to join!")))
-                            .clickEvent(ClickEvent.runCommand("/play " + map.publishedId())))
+                            .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId()))))
                     .build());
 
         }

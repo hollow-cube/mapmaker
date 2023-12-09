@@ -38,7 +38,6 @@ public class MapCommand extends BaseHubCommand {
 
         // Playing
         addSubcommand(new InfoCommand());
-        addSubcommand(new PlayCommand());
 
         // Building
         addSubcommand(new CreateCommand());
@@ -91,43 +90,6 @@ public class MapCommand extends BaseHubCommand {
 //                        sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(err.message())));
 //                    });
         }
-    }
-
-    public class PlayCommand extends Command {
-        private final Argument<String> shortOrLongIdArg = ArgumentType.String("map");
-
-        public PlayCommand() {
-            super("play");
-
-//            addSyntax(this::playMapWithId, shortOrLongIdArg);
-            setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /map play [mapId]"));
-        }
-
-//        public @Blocking void playMapWithId(@NotNull CommandSender sender, @NotNull CommandContext context) {
-//            if (!(sender instanceof Player player)) {
-//                sender.sendMessage(GenericMessages.COMMAND_PLAYER_ONLY);
-//                return;
-//            }
-//
-//            var shortOrLongId = context.get(shortOrLongIdArg);
-//            String mapId;
-//            if (shortOrLongId.length() < 36) {
-//                // Assume short ID
-//                mapId = server.mapStorage().lookupShortId(shortOrLongId);
-//            } else {
-//                // Long ID
-//                mapId = shortOrLongId;
-//            }
-//
-//            try {
-//                handler.playMap(player, mapId);
-//            } catch (MapStorage.NotFoundError e) {
-//                sender.sendMessage(Component.translatable("command.map.generic.not_found", Component.text(shortOrLongId)));
-//            } catch (Exception e) {
-//                logger.error("failed to play map {}", shortOrLongId, e);
-//                sender.sendMessage(Component.translatable("command.generic.unknown_error", Component.text(e.getMessage())));
-//            }
-//        }
     }
 
     public class CreateCommand extends Command {
