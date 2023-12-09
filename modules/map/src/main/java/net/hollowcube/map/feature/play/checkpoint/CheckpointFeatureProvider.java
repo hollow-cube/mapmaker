@@ -151,6 +151,10 @@ public class CheckpointFeatureProvider implements FeatureProvider {
     }
 
     private int getCheckpointResetHeight(@NotNull MapData map, @Nullable String checkpointId) {
+        if (checkpointId == null)
+            //todo should be map height - 50 when map height is implemented
+            return MINIMUM_RESET_HEIGHT - 50;
+
         var checkpoint = map.getObject(checkpointId);
         if (checkpoint == null)
             System.out.println("Could not find checkpoint with id " + checkpointId +

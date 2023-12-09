@@ -44,7 +44,6 @@ public class ReturnToHubItem extends ItemHandler {
 
         Thread.startVirtualThread(() -> {
             try {
-                //player.sendMessage("Returning to hub");
                 player.removeTag(SPECTATOR_CHECKPOINT);
                 if (world instanceof InternalMapWorld internalWorld) {
                     internalWorld.removePlayer(player);

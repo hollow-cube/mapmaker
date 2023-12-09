@@ -1,5 +1,6 @@
 package net.hollowcube.map.feature.play.checkpoint;
 
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.item.BlockItemHandler;
@@ -32,6 +33,7 @@ public class FinishPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
+        if (!MapHooks.isPlayerPlaying(player)) return;
         EventDispatcher.call(new MapWorldCompleteEvent(MapWorld.forPlayer(player), player));
     }
 
