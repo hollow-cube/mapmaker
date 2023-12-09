@@ -71,6 +71,7 @@ public class TimerFeatureProvider implements FeatureProvider {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
         long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
+        milliseconds -= milliseconds % 50; // Round to ticks
         return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
     }
 
