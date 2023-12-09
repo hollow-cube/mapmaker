@@ -23,7 +23,7 @@ public class PlayMapsView extends View {
     private @ContextObject Player player;
     private @ContextObject String query;
 
-    private @Outlet("pageText") Text pageText;
+    private @Outlet("page_text") Text pageText;
     private @Outlet("paging") Pagination pagination;
 
     private @Outlet("parkour") AbstractToggle parkourToggle;
@@ -125,6 +125,9 @@ public class PlayMapsView extends View {
 
     // Pagination view
 
+    private int currentPage = 0;
+    private int maxPages = 0;
+
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
@@ -136,9 +139,9 @@ public class PlayMapsView extends View {
             }
             request.respond(maps, queryResult.nextPage());
 
-            var pageNum = "Page " + (request.page() + 1);
-            pageText.setText(pageNum);
-            pageText.setArgs(Component.translatable("gui.play_maps.page.name", Component.text(pageNum)));
+            maxPages = request.page() + 1;
+            currentPage = request.page() + 1;
+            updatePageText();
         } catch (Exception e) {
             player.closeInventory();
             player.sendMessage(Component.translatable("generic.unknown_error"));
@@ -148,12 +151,30 @@ public class PlayMapsView extends View {
 
     @Action("next_page")
     public void nextPage() {
+        if (currentPage < maxPages) { // Check if it's not the last page
+            currentPage++;
+            updatePageText();
+        }
         pagination.nextPage();
     }
 
     @Action("prev_page")
     public void prevPage() {
+        if (currentPage > 1) { // Check if it's not the first page
+            currentPage--;
+            updatePageText();
+        }
         pagination.prevPage();
     }
 
+    @Action("page_text")
+    public void resetToFirstPage() {
+        pagination.reset();
+    }
+
+    private void updatePageText() {
+        var pageNum = "Page " + (currentPage);
+        pageText.setText(pageNum);
+        pageText.setArgs(Component.translatable("gui.play_maps.page.name", Component.text(pageNum)));
+    }
 }
