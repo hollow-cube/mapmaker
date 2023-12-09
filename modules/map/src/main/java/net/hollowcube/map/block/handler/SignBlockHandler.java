@@ -34,8 +34,7 @@ public class SignBlockHandler implements BlockHandler {
             Component[] lines // Always 4 long
     ) {
         private static final TagSerializer<SignData> SERIALIZER = new TagSerializer<>() {
-            private static final List<Component> DEFAULT_MESSAGES = List.of(Component.text(""), Component.text(""), Component.text(""), Component.text(""));
-
+            private static final List<Component> DEFAULT_MESSAGES = List.of(Component.empty(), Component.empty(), Component.empty(), Component.empty());
             private static final Tag<Boolean> HAS_GLOWING_TEXT = Tag.Boolean("has_glowing_text").defaultValue(false);
             private static final Tag<String> COLOR = Tag.String("color").defaultValue("black");
             private static final Tag<List<Component>> LINES = Tag.Component("messages").list().defaultValue(DEFAULT_MESSAGES);
@@ -121,7 +120,6 @@ public class SignBlockHandler implements BlockHandler {
         var block = interaction.getBlock();
         var instance = interaction.getInstance();
         var isFront = isFacingFront(block, blockPosition, player);
-        System.out.println("IS_FRONT: " + isFront);
 
         if (itemStack.material().equals(Material.GLOW_INK_SAC)) {
             var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
@@ -180,7 +178,7 @@ public class SignBlockHandler implements BlockHandler {
     private Point getBlockCenter(@NotNull Block block) {
         if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
             return new Vec(0.5);
-        } else if (BlockTags.WALL_SIGNS.contains(block.namespace())) {
+        } else if (BlockTags.WALL_SIGNS.contains(block.namespace()) || BlockTags.ALL_HANGING_SIGNS.contains(block.namespace())) {
             var shape = block.registry().collisionShape();
             return shape.relativeStart().add(shape.relativeEnd()).div(2); // TODO THIS IS NOT PERFECT
         } else {
@@ -189,9 +187,9 @@ public class SignBlockHandler implements BlockHandler {
     }
 
     private double getBlockAngle(@NotNull Block block) {
-        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
+        if (BlockTags.STANDING_SIGNS.contains(block.namespace()) || BlockTags.CEILING_HANGING_SIGNS.contains(block.namespace())) {
             return Integer.parseInt(block.getProperty("rotation")) * 22.5;
-        } else if (BlockTags.WALL_SIGNS.contains(block.namespace())) {
+        } else if (BlockTags.WALL_SIGNS.contains(block.namespace()) || BlockTags.WALL_HANGING_SIGNS.contains(block.namespace())) {
             // TODO: move this block face to direction to some common util
             return switch (block.getProperty("facing")) {
                 case "south" -> 0;
