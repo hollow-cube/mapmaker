@@ -42,18 +42,20 @@ public class ReturnToHubItem extends ItemHandler {
         var player = click.player();
         var world = MapWorld.forPlayer(player);
 
-        try {
-            //player.sendMessage("Returning to hub");
-            player.removeTag(SPECTATOR_CHECKPOINT);
-            if (world instanceof InternalMapWorld internalWorld) {
-                internalWorld.removePlayer(player);
+        Thread.startVirtualThread(() -> {
+            try {
+                //player.sendMessage("Returning to hub");
+                player.removeTag(SPECTATOR_CHECKPOINT);
+                if (world instanceof InternalMapWorld internalWorld) {
+                    internalWorld.removePlayer(player);
+                }
+                world.server().bridge().sendPlayerToHub(player);
+            } catch (Exception e) {
+                logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
+                LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())
+                        .forEach(player::sendMessage);
             }
-            world.server().bridge().sendPlayerToHub(player);
-        } catch (Exception e) {
-            logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
-            LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())
-                    .forEach(player::sendMessage);
-        }
+        });
     }
 
 }

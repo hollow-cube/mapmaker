@@ -28,13 +28,15 @@ public class CommandRewriter {
     }
 
     public void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
-        final String command = packet.message();
-        if (Messenger.canReceiveCommand(player)) {
-            var commandManager = getCommandManagerForPlayer(player);
-            commandManager.execute(player, command);
-        } else {
-            Messenger.sendRejectionMessage(player);
-        }
+        Thread.startVirtualThread(() -> {
+            final String command = packet.message();
+            if (Messenger.canReceiveCommand(player)) {
+                var commandManager = getCommandManagerForPlayer(player);
+                commandManager.execute(player, command);
+            } else {
+                Messenger.sendRejectionMessage(player);
+            }
+        });
     }
 
     public void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
