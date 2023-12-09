@@ -16,6 +16,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MoveCommand extends Command {
 
     private final Argument<Integer> countArg = Argument.Int("count")
@@ -60,9 +63,15 @@ public class MoveCommand extends Command {
                         // Don't move air
                         if (block.isAir()) continue;
 
-                        Point newPosition = pos.add(offset);
-                        buffer.set(newPosition, block);
-                        buffer.set(pos, Block.AIR); // Overwrite previous block
+                        buffer.set(pos, Block.AIR); // Fill block buffer with air at old locations to delete our current selection
+                        // We do this first in order to not overwrite our valid blocks with air
+                    }
+                    for (var pos : region) {
+                        Block block = world.getBlock(pos);
+                        // Don't move air
+                        if (block.isAir()) continue;
+
+                        buffer.set(pos.add(offset), block); // Fill block buffer with our valid blocks at the new location
                     }
                     return buffer.build();
                 })
