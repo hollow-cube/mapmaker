@@ -4,7 +4,6 @@ import net.hollowcube.map.block.BlockTags;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +22,7 @@ public class HangingSignPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placementState) {
         if (placementState.blockFace() == null) return null;
+        System.out.println(block.handler());
 
         return switch (placementState.blockFace()) {
             case BOTTOM -> {
@@ -123,27 +123,27 @@ public class HangingSignPlacementRule extends BaseBlockPlacementRule {
         // TODO Is there a better way?
         // Something like indexof('_'), then do substring(0, indexof('_')) + "wall_" + substring(indexof('_')) ?
         if (block.compare(Block.OAK_HANGING_SIGN)) {
-            return Block.OAK_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.OAK_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.DARK_OAK_HANGING_SIGN)) {
-            return Block.DARK_OAK_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.DARK_OAK_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.BIRCH_HANGING_SIGN)) {
-            return Block.BIRCH_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.BIRCH_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.JUNGLE_HANGING_SIGN)) {
-            return Block.JUNGLE_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.JUNGLE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.ACACIA_HANGING_SIGN)) {
-            return Block.ACACIA_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.ACACIA_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.SPRUCE_HANGING_SIGN)) {
-            return Block.SPRUCE_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.SPRUCE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.MANGROVE_HANGING_SIGN)) {
-            return Block.MANGROVE_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.MANGROVE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.CHERRY_HANGING_SIGN)) {
-            return Block.CHERRY_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.CHERRY_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.BAMBOO_HANGING_SIGN)) {
-            return Block.BAMBOO_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.BAMBOO_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.CRIMSON_HANGING_SIGN)) {
-            return Block.CRIMSON_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.CRIMSON_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else if (block.compare(Block.WARPED_HANGING_SIGN)) {
-            return Block.WARPED_WALL_HANGING_SIGN.withNbt(block.nbt());
+            return Block.WARPED_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
         } else {
             return null;
         }
