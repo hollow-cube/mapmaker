@@ -136,9 +136,9 @@ public class PlayMapsView extends View {
             }
             request.respond(maps, queryResult.nextPage());
 
-            var pageNum = Component.text(request.page());
-            pageText.setText("Page " + pageNum);
-            pageText.setArgs(Component.translatable("gui.play_maps.page", pageNum));
+            var pageNum = "Page " + (request.page() + 1);
+            pageText.setText(pageNum);
+            pageText.setArgs(Component.translatable("gui.play_maps.page.name", Component.text(pageNum)));
         } catch (Exception e) {
             player.closeInventory();
             player.sendMessage(Component.translatable("generic.unknown_error"));
