@@ -32,7 +32,7 @@ public interface MapService {
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
 
-    void deleteMap(@NotNull MapPlayerData player, @NotNull String id);
+    void deleteMap(@NotNull String authorizer, @NotNull String id);
 
     void beginVerification(@NotNull String authorizer, @NotNull String mapId);
 

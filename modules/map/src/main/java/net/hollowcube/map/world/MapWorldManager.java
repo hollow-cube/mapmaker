@@ -18,7 +18,7 @@ public class MapWorldManager {
     private static final System.Logger logger = System.getLogger(MapWorldManager.class.getName());
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private record InstanceId(String id, boolean isEditing) {
+    public record InstanceId(String id, boolean isEditing) {
     }
 
     private final Map<InstanceId, Future<InternalMapWorld>> activeMaps = new ConcurrentHashMap<>();
@@ -47,6 +47,10 @@ public class MapWorldManager {
 
             closeMap(world);
         });
+    }
+
+    public Map<InstanceId, Future<InternalMapWorld>> getActiveMaps() {
+        return activeMaps;
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {

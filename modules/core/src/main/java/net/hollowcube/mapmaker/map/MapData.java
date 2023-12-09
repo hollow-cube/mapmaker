@@ -1,6 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.object.ObjectData;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -193,6 +197,32 @@ public class MapData {
         if (!Holder.ID_PATTERN.matcher(publishedId).matches())
             throw new IllegalArgumentException("Invalid published ID format");
         return Long.parseLong(publishedId.replace("-", ""));
+    }
+
+    /**
+     * Returns a component with the map name and a hover text that shows the map details GUI basically.
+     * <p>
+     * If the map is published it will also have a join link
+     *
+     * @return
+     */
+    public static @NotNull Component createMapHoverText(@NotNull MapData map) {
+        var comp = Component.text(map.name(), TextColor.color(0x15ADD3));
+        if (map.isPublished()) {
+            var hoverText = Component.text("Click to join!")
+                    .appendNewline()
+                    .append(Component.text("LINE 2"));
+            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
+                    .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())));
+        } else {
+            var hoverText = Component.text("Click to view details!")
+                    .appendNewline()
+                    .append(Component.text("LINE 2"));
+            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
+                    .clickEvent(ClickEvent.runCommand("/map details " + map.id()));
+        }
+
+        return comp;
     }
 
     public static class WithSlot extends MapData {

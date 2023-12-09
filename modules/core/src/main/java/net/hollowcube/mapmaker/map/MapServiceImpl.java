@@ -142,12 +142,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteMap(@NotNull MapPlayerData player, @NotNull String id) {
+    public void deleteMap(@NotNull String authorizer, @NotNull String id) {
         logger.log(System.Logger.Level.INFO, "deleting map " + id);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + id))
-                .header(AUTHORIZER_HEADER, player.id())
+                .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {

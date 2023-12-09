@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.EmojisCommand;
+import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
@@ -321,6 +322,11 @@ public class DevServer {
             hubCommandManager.register(emojisCommand);
             mapCommandManager.register(emojisCommand);
 
+            var hubMapCommand = hubCommandManager.getCommands().get("map");
+            hubMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
+            var mapMapCommand = mapCommandManager.getCommands().get("map");
+            mapMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
+
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
             eventHandler.addListener(PlayerLoginEvent.class, this::handleLogin);
@@ -440,11 +446,8 @@ public class DevServer {
             var map = world.map();
             baseMessage = baseMessage.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("[map]")
-                    //todo include more info + click to join
                     //todo should also be a hypercube perk
-                    .replacement((match, unused) -> Component.text(map.name(), TextColor.color(0x15ADD3))
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to join!")))
-                            .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId()))))
+                    .replacement((match, unused) -> MapData.createMapHoverText(map))
                     .build());
 
         }

@@ -561,7 +561,7 @@ public class EditMap extends View {
     private void deleteMap(@NotNull Player player) {
         try {
             var mapPlayerData = MapPlayerData.fromPlayer(player);
-            mapService.deleteMap(mapPlayerData, map.id());
+            mapService.deleteMap(mapPlayerData.id(), map.id());
 
             // Remove the map from the player as a "prediction", we will get
             // the actual update from the service later.

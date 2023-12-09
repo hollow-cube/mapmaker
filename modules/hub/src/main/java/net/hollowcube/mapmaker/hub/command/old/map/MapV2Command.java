@@ -21,7 +21,6 @@ public class MapV2Command extends BaseHubCommand {
         addSubcommand(new MapInfoCommand());
         addSubcommand(new MapCreateCommand(mapService));
         addSubcommand(new MapAlterCommand(mapService));
-        addSubcommand(new MapDeleteCommand(mapService));
         addSubcommand(new MapSpectateCommand(bridge));
         addSubcommand(new MapEditCommand(bridge));
     }
