@@ -28,6 +28,8 @@ public final class PlacementRules {
         //
 
         register(BlockTags.LOGS, AxisPlacementRule::new);
+        register(Block.BAMBOO_BLOCK, AxisPlacementRule::new);
+        register(Block.STRIPPED_BAMBOO_BLOCK, AxisPlacementRule::new);
         register(BlockTags.STAIRS, StairPlacementRule::new);
         register(BlockTags.SLABS, SlabPlacementRule::new);
         register(BlockTags.GLAZED_TERRACOTTA, b -> new FacingHorizontalPlacementRule(b, true));
