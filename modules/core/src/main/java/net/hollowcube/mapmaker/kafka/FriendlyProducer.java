@@ -35,7 +35,8 @@ public class FriendlyProducer implements AutoCloseable {
         //todo we should only have a single friendly producer per server probably.
         producer = new KafkaProducer<>(Map.of(
                 "client.id", ServerRuntime.getRuntime().hostname() + "-" + ThreadLocalRandom.current().nextInt(1000),
-                "bootstrap.servers", bootstrapServers
+                "bootstrap.servers", bootstrapServers,
+                "batch.size", 1
         ), new StringSerializer(), new StringSerializer());
     }
 

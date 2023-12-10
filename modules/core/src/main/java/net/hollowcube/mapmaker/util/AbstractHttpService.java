@@ -6,6 +6,8 @@ import com.google.gson.GsonBuilder;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.temp.ChatMessageData;
+import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -27,6 +29,8 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
+            .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
+            .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())

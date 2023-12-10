@@ -1,0 +1,35 @@
+package net.hollowcube.mapmaker.temp;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
+
+import java.util.List;
+
+public record ChatMessageData(
+        @NotNull ClientChatMessageData.Type type,
+
+        @NotNull String sender,
+        @NotNull String channel,
+        @NotNull List<Part> parts
+) {
+
+    public record Part(
+            @NotNull Type type,
+
+            // RAW
+            @UnknownNullability String text,
+
+            // EMOJI
+            @UnknownNullability String name,
+
+            // MAP
+            @UnknownNullability String mapId
+    ) {
+
+        public enum Type {
+            RAW, EMOJI, MAP
+        }
+
+    }
+
+}

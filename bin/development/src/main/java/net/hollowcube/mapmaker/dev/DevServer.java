@@ -19,6 +19,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.EmojisCommand;
@@ -63,6 +64,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.resourcepack.ResourcePack;
@@ -161,10 +163,10 @@ public class DevServer {
 
     private MetricWriter metricWriter;
 
-    private Pattern onlinePlayersPattern = Pattern.compile("");
+    public static Pattern onlinePlayersPattern = Pattern.compile("");
     public static final Map<String, Component> EMOJIS;
     public static final Map<String, List<String>> EMOJIS_BY_CATEGORY;
-    private static final Sound TAG_DING = Sound.sound()
+    public static final Sound TAG_DING = Sound.sound()
             .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
             .source(Sound.Source.PLAYER)
             .volume(5)
@@ -338,6 +340,10 @@ public class DevServer {
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
+            var packetListenerManager = MinecraftServer.getPacketListenerManager();
+            var chatMessageListener = new ChatMessageListener(playerService, mapService, "localhost:9092");
+            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+
             int i = 0;
             for (var facet : ServiceLoader.load(Facet.class)) {
                 scope.fork(Executors.callable(() -> facet.hook(MinecraftServer.process(), configProvider)));
@@ -347,6 +353,7 @@ public class DevServer {
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 logger.info("Graceful shutdown starting...");
+                chatMessageListener.close();
                 hub.shutdown();
                 maps.shutdown();
             });
