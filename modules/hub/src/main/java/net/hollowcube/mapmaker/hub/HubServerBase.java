@@ -130,7 +130,9 @@ public abstract class HubServerBase implements HubServer {
     }
 
     public void shutdown() {
-
+        for (var player : world.instance().getPlayers()) {
+            player.kick(Component.translatable("mapmaker.shutdown"));
+        }
     }
 
     private final Pos HUB_SPAWN_POINT = new Pos(0.5, 40, 0.5, 90, 0);

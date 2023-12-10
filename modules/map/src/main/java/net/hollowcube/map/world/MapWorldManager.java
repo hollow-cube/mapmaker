@@ -119,7 +119,7 @@ public class MapWorldManager {
         world.instance().scheduleNextTick(unused -> Thread.startVirtualThread(() -> {
             // ok to use resultNow because we cannot close a world that is not loaded
             // and a loaded world will always have a completed future.
-            removed.resultNow().close();
+            removed.resultNow().close(false);
         }));
     }
 
@@ -127,7 +127,7 @@ public class MapWorldManager {
         for (var mapFuture : activeMaps.values()) {
             try {
                 var world = mapFuture.get();
-                world.close();
+                world.close(true);
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to close world", e);
             }

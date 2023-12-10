@@ -29,7 +29,7 @@ public interface InternalMapWorld extends MapWorld {
      * All players are guaranteed to be removed before calling this method.
      */
     @Blocking
-    void close();
+    void close(boolean shutdown);
 
     @NonBlocking
     @Nullable MapWorld getMapForPlayer(@NotNull Player player);

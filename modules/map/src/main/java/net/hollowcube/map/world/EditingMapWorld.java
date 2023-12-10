@@ -162,14 +162,16 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @Blocking void close() {
+    public @Blocking void close(boolean shutdown) {
         logger.log(System.Logger.Level.INFO, "Closing editing world {0}", map.id());
         if (testWorld != null) {
-            testWorld.close();
+            testWorld.close(shutdown);
         }
 
-        for (var player : activePlayers) {
+        var kickMessage = Component.translatable("mapmaker.shutdown");
+        for (var player : Set.copyOf(activePlayers)) {
             removePlayer(player);
+            if (shutdown) player.kick(kickMessage);
         }
 
         if (autoSaveTask != null) autoSaveTask.cancel();
@@ -356,7 +358,7 @@ public class EditingMapWorld implements InternalMapWorld {
         ItemStack itemStack = event.getItemStack();
 
         if (itemStack.material() == Material.SUSPICIOUS_STEW) {
-                event.setCancelled(true);
+            event.setCancelled(true);
         }
     }
 

@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -103,10 +104,14 @@ public class TestingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public void close() {
+    public void close(boolean shutdown) {
         // Do not unregister instance, it is owned by the parent.
 
         // todo do we need to boot players here?
+        for (var player : Set.copyOf(activePlayers)) {
+            removePlayer(player);
+            if (shutdown) player.kick(Component.translatable("mapmaker.shutdown"));
+        }
     }
 
     @Override

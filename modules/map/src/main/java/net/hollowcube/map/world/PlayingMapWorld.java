@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -145,7 +146,17 @@ public class PlayingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @Blocking void close() {
+    public @Blocking void close(boolean shutdown) {
+        logger.log(System.Logger.Level.INFO, "Closing playing world {0}", map.id());
+        var kickMessage = Component.translatable("mapmaker.shutdown");
+        for (var player : Set.copyOf(activePlayers)) {
+            removePlayer(player, true);
+            if (shutdown) player.kick(kickMessage);
+        }
+        for (var player : Set.copyOf(spectatingPlayers)) {
+            removePlayer(player);
+            if (shutdown) player.kick(kickMessage);
+        }
         instance.unload();
     }
 
