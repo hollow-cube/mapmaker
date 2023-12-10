@@ -35,9 +35,10 @@ public class VoidGenerator implements Generator {
 
     @Override
     public void generate(@NotNull GenerationUnit unit) {
-        // Minestom worlds are void by default, so don't do anything except place nine blocks
-        if (blocksToSet.containsKey(new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ()))) {
-            for (Point point : blocksToSet.get(new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ()))) {
+        // Place all points we precalculated earlier
+        var pair = new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ());
+        if (blocksToSet.containsKey(pair)) {
+            for (Point point : blocksToSet.get(pair)) {
                 unit.modifier().setBlock(point, Block.STONE);
             }
         }
