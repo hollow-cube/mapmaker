@@ -48,6 +48,8 @@ public interface MapService {
 
     void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId);
 
+    void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId);
+
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
 

@@ -271,6 +271,22 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
+        var uri = url + "/" + mapId + "/leaderboard/playtime/restore";
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.discarding());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to restore playtime leaderboard: " + res.body());
+        }
+    }
+
+    @Override
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
