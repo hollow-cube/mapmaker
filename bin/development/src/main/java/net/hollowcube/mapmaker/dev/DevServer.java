@@ -341,7 +341,7 @@ public class DevServer {
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
-            var chatMessageListener = new ChatMessageListener(playerService, mapService, "localhost:9092");
+            var chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
             packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
 
             int i = 0;
