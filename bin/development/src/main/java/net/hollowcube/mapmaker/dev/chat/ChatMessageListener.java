@@ -23,6 +23,8 @@ import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,6 +32,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketListenerConsumer<ClientChatMessagePacket> {
+    private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
+
     private static final String CHAT_TOPIC = "chat";
     private static final String CHAT_OUT_TOPIC = "chat-messages";
     private static final Gson GSON = AbstractHttpService.GSON;
@@ -72,12 +76,14 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         var playerData = PlayerDataV2.fromPlayer(player);
         var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerData.id(), message, "global", currentMap == null ? null : currentMap.map().id());
+        logger.info("{}: {}", playerData.username(), messageData);
         this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(messageData));
     }
 
     @Override
     protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull ChatMessageData message) {
         Thread.startVirtualThread(() -> {
+            logger.info("Received chat message: {}", message);
             try {
                 // This is braindead inefficient
                 // Awful garbage code
