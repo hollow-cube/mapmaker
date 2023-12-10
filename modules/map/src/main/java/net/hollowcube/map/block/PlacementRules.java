@@ -43,7 +43,7 @@ public final class PlacementRules {
         register(BlockTags.BUTTONS, ButtonPlacementRule::new);
         register(BlockTags.BANNERS, BannerPlacementRule::new);
         register(BlockTags.STANDING_SIGNS, StandingSignPlacementRule::new);
-        register(BlockTags.CEILING_HANGING_SIGNS, NoopPlacementRule::new); //TODO: Hanging sign placements
+        register(BlockTags.CEILING_HANGING_SIGNS, HangingSignPlacementRule::new); // For some reason it never calls wall hanging signs, we just have to convert to them in the placement rule
         register(BlockTags.BEDS, BedPlacementRule::new);
         register(BlockTags.ANVILS, AnvilPlacementRule::new);
 
