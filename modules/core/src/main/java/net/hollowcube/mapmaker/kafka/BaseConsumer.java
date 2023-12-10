@@ -48,7 +48,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
         ), new StringDeserializer(), new StringDeserializer());
         consumer.subscribe(List.of(topic));
 
-        handle = executor.scheduleAtFixedRate(this::poll, 0, 500, TimeUnit.MILLISECONDS);
+        handle = executor.scheduleAtFixedRate(this::poll, 0, 50, TimeUnit.MILLISECONDS);
     }
 
     protected void setAutocommit(boolean autocommit) {
@@ -59,7 +59,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
 
     void poll() {
         try {
-            var records = consumer.poll(Duration.ofMillis(100));
+            var records = consumer.poll(Duration.ofMillis(50));
             for (var kafkaRecord : records) {
                 var value = valueDeserializer.apply(kafkaRecord.value());
                 if (value != null) {
