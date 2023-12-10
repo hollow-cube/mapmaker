@@ -1,20 +1,47 @@
 package net.hollowcube.mapmaker.instance.generation;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.Generator;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class VoidGenerator implements Generator {
+
+    private static final int PLATFORM_SIZE = 3;
+    private final Map<ChunkCoordinatePair, List<Point>> blocksToSet = new HashMap<>();
+
+    public VoidGenerator() {
+        int bounds = PLATFORM_SIZE / 2;
+        for (int x = -bounds; x <= bounds; x++) {
+            for (int z = -bounds; z <= bounds; z++) {
+                ChunkCoordinatePair pair = new ChunkCoordinatePair(
+                        (int) Math.floor((double) x / Chunk.CHUNK_SIZE_X),
+                        (int) Math.floor((double) z / Chunk.CHUNK_SIZE_Z)
+                );
+                blocksToSet.putIfAbsent(pair, new ArrayList<>());
+                blocksToSet.get(pair).add(new Pos(x, 39, z));
+            }
+        }
+    }
+
     @Override
     public void generate(@NotNull GenerationUnit unit) {
-        // Minestom worlds are void by default, so don't do anything except place one block
-        if (unit.absoluteStart().chunkX() == 0 && unit.absoluteStart().chunkZ() == 0)
-            // Fill in 3x3 grid
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
-                    unit.modifier().setBlock(x, 39, z, Block.STONE);
-                }
+        // Minestom worlds are void by default, so don't do anything except place nine blocks
+        if (blocksToSet.containsKey(new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ()))) {
+            for (Point point : blocksToSet.get(new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ()))) {
+                unit.modifier().setBlock(point, Block.STONE);
             }
+        }
     }
+
+    private record ChunkCoordinatePair(int x, int z) {}
 }
