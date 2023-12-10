@@ -22,7 +22,6 @@ public class HangingSignPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placementState) {
         if (placementState.blockFace() == null) return null;
-        System.out.println(block.handler());
 
         return switch (placementState.blockFace()) {
             case BOTTOM -> {
