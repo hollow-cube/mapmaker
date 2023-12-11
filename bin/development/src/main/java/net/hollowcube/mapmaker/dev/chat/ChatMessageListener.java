@@ -47,6 +47,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         this.playerService = playerService;
         this.mapService = mapService;
         this.producer = new FriendlyProducer(kafkaBrokers);
+
+        setAutocommit(false);
     }
 
     private static @NotNull ChatMessageData fromJson(@NotNull String json) {

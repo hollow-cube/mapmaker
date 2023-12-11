@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -81,7 +82,14 @@ public class LanguageProviderV2 {
         var args = translatable.args().stream()
                 .map(LanguageProviderV2::translate)
                 .toList();
-        var result = BASE_EMPTY.append(treeToComponent(partial, args));
+        Component result;
+        try {
+            result = BASE_EMPTY.append(treeToComponent(partial, args));
+        } catch (IllegalStateException e) {
+            logger.warn("Forced to fully reparse {} due to {}", translatable.key(), e.getMessage());
+            partial = Objects.requireNonNull(parseComponent(translatable.key()));
+            result = BASE_EMPTY.append(treeToComponent(partial, args));
+        }
         expandedComponentCache.put(translatable, result);
         return result;
     }
@@ -202,9 +210,7 @@ public class LanguageProviderV2 {
             tag = tagNode.tag();
 
             // special case for gradient and stuff
-            if (tag instanceof Modifying) {
-                final Modifying modTransformation = (Modifying) tag;
-
+            if (tag instanceof Modifying modTransformation) {
                 // first walk the tree
                 visitModifying(modTransformation, tagNode, 0);
                 modTransformation.postVisit();
