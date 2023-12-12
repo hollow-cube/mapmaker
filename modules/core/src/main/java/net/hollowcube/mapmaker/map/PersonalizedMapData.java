@@ -9,7 +9,7 @@ import java.time.Instant;
 
 public class PersonalizedMapData extends MapData {
 
-    public static final int MIN_PLAYS_FOR_DIFFICULTY = 1; //todo
+    public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
 
     public enum Progress {
         @SerializedName("none") NONE,

@@ -30,8 +30,6 @@ import java.util.Objects;
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
-    private static final int MIN_UNIQUE_PLAYS_FOR_DIFFICULTY = 10;
-
     private @ContextObject ServerBridge bridge;
     private @ContextObject PlayerService playerService;
 
@@ -136,7 +134,7 @@ public class MapDetailsView extends View {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             rowOneSwitch.setOption(1);
             qualityUnratedHalfText.setText("Unrated", TextColor.color(0xF04B3D));
-            if (map.getUniquePlays() > MIN_UNIQUE_PLAYS_FOR_DIFFICULTY) {
+            if (map.getUniquePlays() > PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY) {
                 if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy", TextColor.color(0x46FA32));
                     difficultySwitch.setOption(1);

@@ -89,9 +89,49 @@ public class MapEntry extends View {
                 lore.add(Component.translatable("gui.play_maps.map_display.tags_single", Component.text(tag.displayName())));
             }
         }
-        //todo settings
-//        lore.add(Component.empty());
-//        lore.add(Component.translatable("gui.play_maps.map_display.settings_header_none"));
+
+        if (map.settings().isOnlySprint() || map.settings().isNoSprint() || map.settings().isNoJump()
+                || map.settings().isNoSneak() || map.settings().isBoat()) {
+            lore.add(Component.empty());
+            lore.add(Component.translatable("gui.play_maps.map_display.settings_header"));
+
+            int settingsCount = 0;
+            int extraSettingsCount = 0;
+
+            if (map.settings().isOnlySprint()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Only Sprint")));
+                settingsCount++;
+            }
+            if (map.settings().isNoSprint()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sprint")));
+                settingsCount++;
+            }
+            if (map.settings().isNoJump()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Jump")));
+                settingsCount++;
+            }
+            if (map.settings().isNoSneak()) {
+                if (settingsCount < 3) {
+                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sneak")));
+                } else {
+                    extraSettingsCount++;
+                }
+                settingsCount++;
+            }
+            if (map.settings().isBoat()) {
+                if (settingsCount < 3) {
+                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Boats")));
+                } else {
+                    extraSettingsCount++;
+                }
+                settingsCount++;
+            }
+
+            if (settingsCount > 3) {
+                lore.add(Component.translatable("gui.play_maps.map_display.setting_more", Component.text(extraSettingsCount)));
+            }
+        }
+
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
 
