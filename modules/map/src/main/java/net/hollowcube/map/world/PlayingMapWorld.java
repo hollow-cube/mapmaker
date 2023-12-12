@@ -29,6 +29,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -151,7 +152,10 @@ public class PlayingMapWorld implements InternalMapWorld {
         var kickMessage = Component.translatable("mapmaker.shutdown");
         for (var player : Set.copyOf(activePlayers)) {
             removePlayer(player, true);
-            if (shutdown) player.kick(kickMessage);
+            if (shutdown) {
+                EventDispatcher.call(new PlayerDisconnectEvent(player)); // todo why isnt this done by Minestom
+                player.kick(kickMessage);
+            }
         }
         for (var player : Set.copyOf(spectatingPlayers)) {
             removePlayer(player);

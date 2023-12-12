@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       labels:
+        mapmaker.hollowcube.net/role: map
         {{- include "mapmaker-dev.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}

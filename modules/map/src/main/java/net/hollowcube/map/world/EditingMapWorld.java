@@ -19,10 +19,12 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -171,7 +173,10 @@ public class EditingMapWorld implements InternalMapWorld {
         var kickMessage = Component.translatable("mapmaker.shutdown");
         for (var player : Set.copyOf(activePlayers)) {
             removePlayer(player);
-            if (shutdown) player.kick(kickMessage);
+            if (shutdown) {
+                EventDispatcher.call(new PlayerDisconnectEvent(player)); // todo why isnt this done by Minestom
+                player.kick(kickMessage);
+            }
         }
 
         if (autoSaveTask != null) autoSaveTask.cancel();

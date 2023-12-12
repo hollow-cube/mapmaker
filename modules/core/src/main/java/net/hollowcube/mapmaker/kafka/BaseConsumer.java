@@ -10,10 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 public abstract class BaseConsumer<T> implements AutoCloseable {
@@ -25,6 +22,10 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     private final ScheduledFuture<?> handle;
 
     private boolean autocommit = true;
+
+    // KafkaConsumer is not thread safe, so if this is set (from another thread), then the consumer thread
+    // will see it, close, and then complete it allowing shutdown to finalize.
+    private volatile CompletableFuture<Void> closeFuture = null;
 
     protected BaseConsumer(@NotNull String topic, @NotNull String groupId,
                            @NotNull Function<String, T> deserializer,
@@ -58,6 +59,12 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     protected abstract void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull T message);
 
     void poll() {
+        if (closeFuture != null) {
+            consumer.close();
+            closeFuture.complete(null);
+            return;
+        }
+        
         try {
             var records = consumer.poll(Duration.ofMillis(50));
             for (var kafkaRecord : records) {
@@ -77,7 +84,10 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
 
     @Override
     public void close() {
+        if (consumer != null) {
+            closeFuture = new CompletableFuture<>();
+            closeFuture.join();
+        }
         if (handle != null) handle.cancel(false);
-        if (consumer != null) consumer.close(); //todo this invalid, cannot be closed from another thread.
     }
 }

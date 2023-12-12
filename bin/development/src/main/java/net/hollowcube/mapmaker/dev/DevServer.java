@@ -158,6 +158,8 @@ public class DevServer {
     private MapService mapService;
     private PermManager permManager;
 
+    private boolean shuttingDown = false; // Used to run some things synchronously during shutdown.
+
     private DevHubServer hub;
     private DevMapServer maps;
 
@@ -353,6 +355,7 @@ public class DevServer {
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 logger.info("Graceful shutdown starting...");
+                shuttingDown = true;
                 chatMessageListener.close();
                 hub.shutdown();
                 maps.shutdown();
@@ -396,26 +399,37 @@ public class DevServer {
     }
 
     private void handleLogin(PlayerLoginEvent event) {
+        logger.info("login - {}", event.getPlayer().getUsername());
+
         event.setSpawningInstance(hub.world().instance());
         event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5, 90, 0));
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
-        Thread.startVirtualThread(() -> {
+        logger.info("disconnect - {}", event.getPlayer().getUsername());
+        Runnable task = () -> {
             var player = event.getPlayer();
             var playerData = PlayerDataV2.fromPlayer(player);
 
-            Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
-            rebuildOnlinePlayersRegex();
-            broadcastTabHeaderAndFooter();
+            // There is just no need to do any of this if we arent shutting down.
+            if (!shuttingDown) {
+                Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
+                rebuildOnlinePlayersRegex();
+                broadcastTabHeaderAndFooter();
+            }
 
             try {
-                //todo we may want a dead letter or something, but im not sure where to put it. This requires a lot more thought
                 sessionService.deleteSession(playerData.id());
             } catch (Exception e) {
                 logger.error("Failed to close session for " + playerData.id(), e);
             }
-        });
+        };
+
+        if (shuttingDown) {
+            task.run();
+        } else {
+            Thread.startVirtualThread(task);
+        }
     }
 
     private void handleSkinInit(PlayerSkinInitEvent event) {

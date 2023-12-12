@@ -18,6 +18,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
@@ -110,7 +111,10 @@ public class TestingMapWorld implements InternalMapWorld {
         // todo do we need to boot players here?
         for (var player : Set.copyOf(activePlayers)) {
             removePlayer(player);
-            if (shutdown) player.kick(Component.translatable("mapmaker.shutdown"));
+            if (shutdown) {
+                EventDispatcher.call(new PlayerDisconnectEvent(player)); // todo why isnt this done by Minestom
+                player.kick(Component.translatable("mapmaker.shutdown"));
+            }
         }
     }
 
