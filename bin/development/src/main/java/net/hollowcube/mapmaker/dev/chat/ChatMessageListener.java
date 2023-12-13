@@ -18,8 +18,9 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.listener.manager.PacketListenerConsumer;
+import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
 import net.minestom.server.message.Messenger;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketListenerConsumer<ClientChatMessagePacket> {
+public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
 
     private static final String CHAT_TOPIC = "chat";
@@ -96,7 +97,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
                 var maps = new HashMap<String, MapData>();
 
-                for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                for (var recipient : MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY)) {
                     var builder = Component.text();
 
                     boolean hasDing = false;
