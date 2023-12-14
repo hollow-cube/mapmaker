@@ -38,6 +38,8 @@ public class MapDetailsView extends View {
     private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
     private @Outlet("tab_times_switch") Switch tabTimesSwitch;
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
+    private @Outlet("tab_container_switch") Switch tabContainerSwitch;
+    private @Outlet("no_map_settings_switch") Switch noMapSettingsSwitch;
     private Switch[] tabSwitches;
 
     // MAP QUALITIES (leave what is commented out, refer to line 92)
@@ -86,6 +88,7 @@ public class MapDetailsView extends View {
     // MAP SETTINGS
     private @Outlet("map_settings_switch") Switch mapSettingsSwitch;
     private @Outlet("no_map_settings_text") Text noMapSettingsText;
+    private @Outlet("no_map_settings_text_building") Text noMapSettingsTextBuilding;
     private @Outlet("map_settings_text") Text mapSettingsText;
 
     // GENERAL
@@ -99,7 +102,14 @@ public class MapDetailsView extends View {
         super(context);
         this.map = map;
 
-        this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};
+        if (map.settings().getVariant() == MapVariant.BUILDING) {
+            tabContainerSwitch.setOption(0);
+            this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabReviewswitch};
+        } else {
+            tabContainerSwitch.setOption(1);
+            this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};
+        }
+
         selectTab(0);
 
         variantIconSwitch.setOption(map.settings().getVariant().ordinal());
@@ -219,8 +229,14 @@ public class MapDetailsView extends View {
 
         var settings = map.settings().getSettingsString();
         if (settings == null) {
+            if (map.settings().getVariant() == MapVariant.BUILDING) {
+                noMapSettingsSwitch.setOption(1);
+                noMapSettingsTextBuilding.setText("No Settings");
+            } else {
+                noMapSettingsSwitch.setOption(0);
+                noMapSettingsText.setText("No Settings");
+            }
             mapSettingsSwitch.setOption(0);
-            noMapSettingsText.setText("No Settings");
         } else {
             mapSettingsSwitch.setOption(1);
             mapSettingsText.setText(settings);

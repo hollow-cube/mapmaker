@@ -16,7 +16,7 @@
         <button id="personal_world" translationKey="gui.create_maps.personal_world"
                 sprite="create_maps/personal_world" />
         <button id="folder" translationKey="gui.create_maps.map_folder" />
-        <button id="build_with_friends" translationKey="gui.create_maps.build_with_friends" />
+        <button id="build_with_friends" translationKey="gui.create_maps.build_with_friends" width="2"/>
     </box>
 
 </component>

@@ -6,6 +6,8 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +25,8 @@ public class TestCommand extends Command {
         var map = MapWorld.forPlayerOptional(player);
         if (map instanceof TestingMapWorld testingWorld) {
             testingWorld.exitTestMode(player);
+        } else if (map.map().settings().getVariant() == MapVariant.BUILDING) {
+            player.sendMessage(Component.translatable("command.test.gameplay_only"));
         } else if (map instanceof EditingMapWorld editingWorld) {
             editingWorld.enterTestMode(player);
         } else throw new IllegalStateException("unreachable");
