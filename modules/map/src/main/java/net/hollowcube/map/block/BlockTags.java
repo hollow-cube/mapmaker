@@ -112,11 +112,15 @@ public final class BlockTags {
     );
     public static Collection<NamespaceID> CORAL = create(
             Block.TUBE_CORAL, Block.BRAIN_CORAL, Block.BUBBLE_CORAL,
-            Block.FIRE_CORAL, Block.HORN_CORAL
+            Block.FIRE_CORAL, Block.HORN_CORAL, Block.DEAD_TUBE_CORAL,
+            Block.DEAD_BRAIN_CORAL, Block.DEAD_BUBBLE_CORAL,
+            Block.DEAD_FIRE_CORAL, Block.DEAD_HORN_CORAL
     );
     public static Collection<NamespaceID> CORAL_FAN = create(
             Block.TUBE_CORAL_FAN, Block.BRAIN_CORAL_FAN, Block.BUBBLE_CORAL_FAN,
-            Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN
+            Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN, Block.DEAD_TUBE_CORAL_FAN,
+            Block.DEAD_BRAIN_CORAL_FAN, Block.DEAD_BUBBLE_CORAL_FAN,
+            Block.DEAD_FIRE_CORAL_FAN, Block.DEAD_HORN_CORAL_FAN
     );
     public static final Collection<NamespaceID> GROWABLE = create( //todo for bonemeal
             Block.TORCHFLOWER_CROP, Block.MELON_STEM, Block.PUMPKIN_STEM,
