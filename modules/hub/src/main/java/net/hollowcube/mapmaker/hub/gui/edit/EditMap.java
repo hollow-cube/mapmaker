@@ -9,7 +9,9 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -575,8 +577,24 @@ public class EditMap extends View {
 
     // ACTIONS TAB
 
+    // little idea how to construct this GUI properly and pass in the right information, so I did some tomfoolery asking
+    // AI what I could do, which resulted in this hogwash that I don't even know how to use or debug, but I left it here
+    // anyway just in case it could be useful (probably not lol)
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
+        System.out.println("0");
+        HubServer.StaticAbuse.instance.newOpenGUI(player, context -> new ConfirmAction(context,
+                confirmed -> {
+                    System.out.println("1 " + confirmed); // it never reaches this
+                    if (confirmed) {
+                        deleteMapLogic(player);
+                        System.out.println("2");
+                    }
+                }
+        ));
+    }
+
+    private void deleteMapLogic(@NotNull Player player) {
         try {
             var mapPlayerData = MapPlayerData.fromPlayer(player);
             mapService.deleteMap(mapPlayerData.id(), map.id());
