@@ -42,8 +42,8 @@ public class EnterSpectatorModeItem extends ItemHandler {
         if (player.isOnGround()) {
             if (world instanceof PlayingMapWorld playingWorld) {
                 world.removePlayer(player);
-                player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
                 playingWorld.startSpectating(player, false);
+                player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
             }
         } else {
             player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
