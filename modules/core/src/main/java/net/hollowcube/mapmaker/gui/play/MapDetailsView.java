@@ -38,6 +38,9 @@ public class MapDetailsView extends View {
     private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
     private @Outlet("tab_times_switch") Switch tabTimesSwitch;
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
+    private @Outlet("tab_info_switch_building") Switch tabInfoSwitchBuilding;
+    private @Outlet("tab_stats_switch_building") Switch tabStatsSwitchBuilding;
+    private @Outlet("tab_reviews_switch_building") Switch tabReviewswitchBuilding;
     private @Outlet("tab_container_switch") Switch tabContainerSwitch;
     private @Outlet("no_map_settings_switch") Switch noMapSettingsSwitch;
     private Switch[] tabSwitches;
@@ -104,7 +107,7 @@ public class MapDetailsView extends View {
 
         if (map.settings().getVariant() == MapVariant.BUILDING) {
             tabContainerSwitch.setOption(0);
-            this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabReviewswitch};
+            this.tabSwitches = new Switch[]{tabInfoSwitchBuilding, tabStatsSwitchBuilding, tabReviewswitchBuilding};
         } else {
             tabContainerSwitch.setOption(1);
             this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};

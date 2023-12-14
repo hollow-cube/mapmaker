@@ -294,24 +294,24 @@
     <switch id="tab_container_switch" width="9" height="1">
         <box width="9" align="ltr" sprite="create_maps/tab_container_building">
             <spacer width="2"/>
-            <switch id="tab_info_switch">
-                <button id="tab_info" translationKey="gui.map_details.map_info_tab"
+            <switch id="tab_info_switch_building">
+                <button id="tab_info_building" translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon"
                         backgroundSprite="play_maps/details/tab_info/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon_selected"/>
             </switch>
             <spacer/>
-            <switch id="tab_stats_switch">
-                <button id="tab_stats" translationKey="gui.map_details.map_stats_tab"
+            <switch id="tab_stats_switch_building">
+                <button id="tab_stats_building" translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon"
                         backgroundSprite="play_maps/details/tab_stats/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon_selected"/>
             </switch>
             <spacer/>
-            <switch id="tab_reviews_switch">
-                <button id="tab_reviews" translationKey="gui.map_details.map_reviews_tab"
+            <switch id="tab_reviews_switch_building">
+                <button id="tab_reviews_building" translationKey="gui.map_details.map_reviews_tab"
                         sprite="play_maps/details/tab_reviews/icon"
                         backgroundSprite="play_maps/details/tab_reviews/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_reviews_tab"
