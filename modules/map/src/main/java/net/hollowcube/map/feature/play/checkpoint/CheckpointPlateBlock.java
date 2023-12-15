@@ -39,8 +39,8 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        var world = MapWorld.forPlayer(interaction.getPlayer());
-        if ((world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
+        var world = MapWorld.forPlayerOptional(interaction.getPlayer());
+        if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
 
         var player = interaction.getPlayer();
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return false;
