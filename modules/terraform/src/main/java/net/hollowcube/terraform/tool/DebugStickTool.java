@@ -3,7 +3,10 @@ package net.hollowcube.terraform.tool;
 import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.kyori.adventure.text.Component;
+import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
@@ -67,12 +70,12 @@ public class DebugStickTool implements BuiltinTool {
         var oldProperty = itemStack.getTag(TAG_PROPERTY);
         var newProperty = selectProperty(block, oldProperty, true);
         if (newProperty == null) {
-            player.sendActionBar(Component.text(block.name() + " has no properties"));
+            sendActionBar(player, block.name() + " has no properties");
             return;
         }
 
         click.updateItemStack(b -> b.setTag(TAG_PROPERTY, newProperty));
-        player.sendActionBar(Component.text("Selected \"" + newProperty + "\" (" + block.getProperty(newProperty) + ")"));
+        sendActionBar(player, String.format("Selected \"%s\" (%s)", newProperty, block.getProperty(newProperty)));
     }
 
     @Override
@@ -89,7 +92,7 @@ public class DebugStickTool implements BuiltinTool {
         var oldProperty = itemStack.getTag(TAG_PROPERTY);
         var newProperty = selectProperty(block, oldProperty, false);
         if (newProperty == null) {
-            player.sendActionBar(Component.text(block.name() + " has no properties"));
+            sendActionBar(player, block.name() + " has no properties");
             return;
         }
 
@@ -105,7 +108,7 @@ public class DebugStickTool implements BuiltinTool {
         if (name == null) name = props[0];
         instance.setBlock(blockPosition, block.withProperty(newProperty, name), false);
         if (!newProperty.equals(oldProperty)) click.updateItemStack(b -> b.setTag(TAG_PROPERTY, newProperty));
-        player.sendActionBar(Component.text("\"" + newProperty + "\" to " + name)); // "snowy" to false
+        sendActionBar(player, String.format("\"%s\" to %s", newProperty, name)); // "snowy" to false
     }
 
     /**
@@ -128,4 +131,47 @@ public class DebugStickTool implements BuiltinTool {
 
         return keys[0]; // if old is null or not present, return the first key
     }
+
+    private void sendActionBar(@NotNull Player player, @NotNull String message) {
+
+        var ab = ActionBar.forPlayer(player);
+        ab.addProvider(new ActionBarProvider(message));
+
+//        player.sendMessage(message);
+    }
+
+    private static final class ActionBarProvider implements ActionBar.Provider {
+        private final long expiration = System.currentTimeMillis() + 1000;
+        private final String message;
+        private final int width;
+
+        private ActionBarProvider(@NotNull String message) {
+            this.message = message;
+            this.width = FontUtil.measureText(message);
+        }
+
+        @Override
+        public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+            builder.pos((-width / 2) - 1);
+            builder.append(message);
+        }
+
+        @Override
+        public long expiration() {
+            return expiration;
+        }
+
+        // Always hash and equal any instance of this class, so if we set another it will replace the old one always.
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ActionBarProvider;
+        }
+
+        @Override
+        public int hashCode() {
+            return ActionBarProvider.class.hashCode();
+        }
+    }
+
 }

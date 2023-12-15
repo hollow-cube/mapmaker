@@ -10,6 +10,7 @@ java_library(
     deps = [
         "//modules/command",
         "//modules/common",
+        "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
         "//third_party:minestom",
         "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
