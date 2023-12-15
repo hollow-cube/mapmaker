@@ -577,12 +577,10 @@ public class EditMap extends View {
 
     // ACTIONS TAB
 
-    // little idea how to construct this GUI properly and pass in the right information, so I did some tomfoolery asking
-    // AI what I could do, which resulted in this hogwash that I don't even know how to use or debug, but I left it here
-    // anyway just in case it could be useful (probably not lol)
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
-        pushView(context -> new ConfirmAction(context, () -> deleteMapLogic(player)));
+        pushView(context -> new ConfirmAction(context, () -> deleteMapLogic(player),
+                Component.translatable("Delete your map " + map.name())));
     }
 
     private void deleteMapLogic(@NotNull Player player) {
@@ -602,9 +600,9 @@ public class EditMap extends View {
                     mapPlayerData.lastEditedMap()
             ));
 
-            showInfoTab();
             performSignal(CreateMaps.SIG_RESET);
             player.sendMessage(Component.translatable("command.map.delete.success"));
+            pushView(CreateMaps::new);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("command.map.delete.failure"));
             logger.log(System.Logger.Level.ERROR, "failed to delete map", e);
