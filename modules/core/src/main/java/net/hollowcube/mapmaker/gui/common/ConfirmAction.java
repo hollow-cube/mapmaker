@@ -10,19 +10,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 public class ConfirmAction extends View {
-    private Consumer<Boolean> confirmationCallback;
+    private @NotNull Runnable confirmationCallback;
 
     private @Outlet("yes") Label yesButton;
     private @Outlet("no") Label noButton;
 
-    public ConfirmAction(@NotNull Context context, Consumer<Boolean> confirmationCallback) {
+    public ConfirmAction(@NotNull Context context, @NotNull Runnable confirmationCallback) {
         super(context);
         this.confirmationCallback = confirmationCallback;
     }
 
     @Action("yes")
     private void handleYesClick() {
-        confirmationCallback.accept(true);
+        confirmationCallback.run();
         System.out.println("skibidi bop bop bop skibidi yes yes yes");
     }
 

@@ -582,16 +582,7 @@ public class EditMap extends View {
     // anyway just in case it could be useful (probably not lol)
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
-        System.out.println("0");
-        HubServer.StaticAbuse.instance.newOpenGUI(player, context -> new ConfirmAction(context,
-                confirmed -> {
-                    System.out.println("1 " + confirmed); // it never reaches this
-                    if (confirmed) {
-                        deleteMapLogic(player);
-                        System.out.println("2");
-                    }
-                }
-        ));
+        pushView(context -> new ConfirmAction(context, () -> deleteMapLogic(player)));
     }
 
     private void deleteMapLogic(@NotNull Player player) {

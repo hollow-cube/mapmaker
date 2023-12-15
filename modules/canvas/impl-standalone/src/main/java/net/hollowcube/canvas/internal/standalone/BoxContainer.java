@@ -66,7 +66,7 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         if (align == Align.LTR) {
             for (var child : children()) {
                 if (x < child.width()) {
-                    if (y >= child.height()) return CLICK_DENY;
+                    if (y >= child.height()) return CLICK_DENY; // TODO: Weirdness, if you have a spacer element at the top of the view, it always fails to proceed?
                     return child.handleClick(player, y * child.width() + x, clickType);
                 }
 
