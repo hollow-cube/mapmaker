@@ -1,6 +1,7 @@
 package net.hollowcube.canvas;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -35,6 +36,8 @@ public interface Label extends Element {
      */
     @Deprecated
     void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore);
+
+    void setSpriteColorModifier(@NotNull TextColor color);
 
     interface ActionHandler {
         static @NotNull ActionHandler lmb(@NotNull Consumer<Player> handler) {

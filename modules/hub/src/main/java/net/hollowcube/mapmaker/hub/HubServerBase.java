@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.feature.misc.CyberpunkStatDisplay;
 import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
+import net.hollowcube.mapmaker.hub.gui.biome.BiomeEditorView;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
@@ -27,6 +28,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
@@ -61,7 +63,10 @@ public abstract class HubServerBase implements HubServer {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
             .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn)
             .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump)
-            .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMovement)
+            .addListener(PlayerChatEvent.class, ev -> {
+                newOpenGUI(ev.getPlayer(), BiomeEditorView::new);
+            });
 
     public HubServerBase(@NotNull HubToMapBridge bridge) {
         this.bridge = bridge;
@@ -153,6 +158,8 @@ public abstract class HubServerBase implements HubServer {
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
+
+        newOpenGUI(player, BiomeEditorView::new);
     }
 
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {

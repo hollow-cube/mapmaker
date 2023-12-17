@@ -13,9 +13,13 @@ public interface Element extends ElementLike {
     boolean CLICK_DENY = false;
 
     String SIG_MOUNT = "player_gui_mount";
-    /** Called whenever the view is removed from the inventory (including on close). */
+    /**
+     * Called whenever the view is removed from the inventory (including on close).
+     */
     String SIG_UNMOUNT = "player_gui_unmount";
-    /** Called when the holding inventory is closed. */
+    /**
+     * Called when the holding inventory is closed.
+     */
     String SIG_CLOSE = "player_gui_close";
 
     // Sent when receiving anvil input from a player.

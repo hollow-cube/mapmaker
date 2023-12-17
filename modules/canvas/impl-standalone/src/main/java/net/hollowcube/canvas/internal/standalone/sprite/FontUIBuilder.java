@@ -6,6 +6,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FontUIBuilder {
     //todo probably i need to optimize this, since its called fairly often.
@@ -27,8 +28,20 @@ public class FontUIBuilder {
      * @return This object, mutated by the parameters
      */
     public @NotNull FontUIBuilder draw(@NotNull Sprite sprite, int slot) {
+        return draw(sprite, slot, null);
+    }
+
+    /**
+     * Draws the given sprite with an offset from the given slot
+     *
+     * @param sprite The sprite to draw
+     * @param slot   The slot to draw it at
+     * @return This object, mutated by the parameters
+     */
+    public @NotNull FontUIBuilder draw(@NotNull Sprite sprite, int slot, @Nullable TextColor color) {
         int offset = sprite.offsetX() + (slot * 18); // absolute offset of this char
         appendRaw(FontUtil.computeOffset(offset - pos));
+        if (color != null) this.color(color);
         appendRaw(String.valueOf(sprite.fontChar()));
         pos = offset + sprite.width() + 1 - sprite.rightOffset();
         return this;

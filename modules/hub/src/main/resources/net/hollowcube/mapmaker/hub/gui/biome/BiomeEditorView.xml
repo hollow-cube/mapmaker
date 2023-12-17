@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="9" align="ttb">
+    <box width="9" height="1" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.create_maps.new_map.information"/>
+        <text id="gui_title" width="5" translationKey="gui.biome_editor.title" font="slot_title"
+              centered="true"/>
+        <button sprite="minecraft:barrier" translationKey="gui.biome_editor.idk1"/>
+        <button sprite="minecraft:barrier" translationKey="gui.biome_editor.idk2"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text id="biome_name" width="8" translationKey="gui.create_maps.map_info_tab.change_name"
+              font="map_title" shift="19"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <button sprite="minecraft:barrier" translationKey="gui.biome_editor.idk2"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text width="3" height="1" id="sky_color"
+              sprite="biome/color_bg_line_3"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_3" centered="true"/>
+        <text width="3" height="1" id="fog_color"
+              sprite="biome/color_bg_line_3"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_3" centered="true"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text width="3" height="1" id="water_color"
+              sprite="biome/color_bg_line_4"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_4" centered="true"/>
+        <text width="3" height="1" id="water_fog_color"
+              sprite="biome/color_bg_line_4"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_4" centered="true"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text width="3" height="1" id="grass_color"
+              sprite="biome/color_bg_line_5"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_5" centered="true"/>
+        <text width="3" height="1" id="foliage_color"
+              sprite="biome/color_bg_line_5"
+              translationKey="gui.map_details.map_info_tab.quality.unrated"
+              font="line_5" centered="true"/>
+    </box>
+
+
+</component>

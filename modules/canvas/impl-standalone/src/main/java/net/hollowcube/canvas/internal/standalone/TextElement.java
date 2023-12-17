@@ -43,6 +43,8 @@ public class TextElement extends ButtonElement implements Text {
     @Override
     public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
         if (shouldDelegateDraw()) return;
+        super.buildTitle(sb, x, y);
+
         //todo we should only rewrite and measure the text once, not every time we draw it
         var textWidth = FontUtil.measureText(text);
 
@@ -53,7 +55,7 @@ public class TextElement extends ButtonElement implements Text {
             sb.pos(shift + (x * 16));
         }
 
-//        sb.color(color); // COLOR LOOKS AWFUL DO NOT REENABLE
+        sb.color(color);
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         sb.append(FontUtil.rewrite(font, text), textWidth);
     }
