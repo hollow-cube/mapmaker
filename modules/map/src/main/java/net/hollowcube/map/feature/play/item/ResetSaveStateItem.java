@@ -46,26 +46,16 @@ public class ResetSaveStateItem extends ItemHandler {
             if (world instanceof PlayingMapWorld playingWorld) playingWorld.removePlayer(player, false);
             else world.removePlayer(player);
 
-            // Delete the saveState
-            try {
-                world.server().mapService().deleteSaveState(world.map().id(), saveState.playerId(), saveState.id());
-            } catch (Exception ignored) {
-                // doesn't really matter.
-            }
+            Thread.startVirtualThread(() -> {
+                try {
+                    // Delete the saveState
+                    world.server().mapService().deleteSaveState(world.map().id(), saveState.playerId(), saveState.id());
+                } catch (Exception ignored) {
+                    // doesn't really matter.
+                }
 
-            world.acceptPlayer(player, true);
-
-//            world.removePlayer(player);
-//            player.removeTag(MapHooks.PLAYING);
-//            saveState.setPlaytime(0);
-//            saveState.setPlayStartTime(System.currentTimeMillis());
-//            saveState.setCompleted(false);
-//            saveState.setCheckpoint(null, world.map().settings().getSpawnPoint());
-//            player.teleport(world.map().settings().getSpawnPoint()).thenRun(() -> {
-//                player.setTag(MapHooks.PLAYING, true);
-//                EventDispatcher.call(new MapPlayerInitEvent(world, player, true));
-//            });
-            //todo this will not clear effects or anything, i guess the plate fp will have to do that
+                world.acceptPlayer(player, true);
+            });
         } else {
             // The player has no save state because they are spectating, so just re-add them to the server
             if (world instanceof PlayingMapWorld playingWorld) playingWorld.removePlayer(player, false);

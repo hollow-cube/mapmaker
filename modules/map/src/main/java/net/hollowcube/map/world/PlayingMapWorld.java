@@ -176,14 +176,14 @@ public class PlayingMapWorld implements InternalMapWorld {
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
         player.setTag(SaveState.TAG, saveState);
 
+        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
+        player.teleport(pos).join(); //todo should probably be done from elsewhere because it depends on checkpoints
+
         activePlayers.add(player);
         player.setTag(TAG_PLAYING, true);
         player.setTag(MapHooks.PLAYING, true); // Legacy
 
         MapWorldHelpers.resetPlayer(player);
-
-        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
-        player.teleport(pos).join(); //todo should probably be done from elsewhere because it depends on checkpoints
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn));
         if (saveState.getPlaytime() > 0) {
@@ -191,8 +191,6 @@ public class PlayingMapWorld implements InternalMapWorld {
             // Otherwise, we will start timing when they move the first time.
             saveState.setPlayStartTime(System.currentTimeMillis());
         }
-
-//        if (firstSpawn) player.sendMessage("Now playing " + map.settings().getName());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {

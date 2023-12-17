@@ -81,7 +81,6 @@ class MapWorldHelpers {
         player.setVelocity(Vec.ZERO);
         player.getInventory().clear();
         player.removeTag(SPECTATOR_CHECKPOINT);
-        player.refreshCommands();
     }
 
 }
