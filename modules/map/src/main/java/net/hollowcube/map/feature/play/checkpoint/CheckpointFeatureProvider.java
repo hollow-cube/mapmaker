@@ -132,7 +132,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             // No checkpoint set, return to spawn
             future = player.teleport(map.settings().getSpawnPoint());
             saveState.setPlaytime(0);
-            saveState.setPlayStartTime(System.currentTimeMillis());
+            saveState.setPlayStartTime(0); // Zero indicates that timing hasnt started yet
             saveState.setCompleted(false);
         } else {
             // Return to savestate at checkpoint

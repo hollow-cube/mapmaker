@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.util;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.TimeUnit;
+
 public final class NumberUtil {
 
     /**
@@ -25,6 +27,14 @@ public final class NumberUtil {
         if (str.endsWith(".00")) return str.substring(0, str.length() - 3);
         if (str.endsWith("0")) return str.substring(0, str.length() - 1);
         return str;
+    }
+
+    public static @NotNull String formatPlaytime(long time, boolean roundToTicks) {
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
+        long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
+        if (roundToTicks) milliseconds -= milliseconds % 50;
+        return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
     }
 
     private NumberUtil() {

@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
+
 public record LeaderboardData(
         @NotNull List<Entry> top,
         @Nullable Entry player
@@ -70,7 +72,7 @@ public record LeaderboardData(
 
             var playerName = playerService.getPlayerDisplayName2(entry.player()).build();
             comp.append(playerName).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])));
-            comp.append(Component.text(" " + timeToFriendly(entry.score()), TextColor.color(0xf2f2f2)));
+            comp.append(Component.text(" " + formatPlaytime(entry.score(), true), TextColor.color(0xf2f2f2)));
 
             result.add(comp.build());
 
@@ -82,7 +84,7 @@ public record LeaderboardData(
         }
 
         if (shouldShowSelf && player() != null) {
-            result.add(Component.text("Your time: " + player().score() + "ms (#" + player().rank() + ")"));
+            result.add(Component.text("Your time: " + formatPlaytime(player().score(), true) + " (#" + player().rank() + ")"));
         }
 
         return result;

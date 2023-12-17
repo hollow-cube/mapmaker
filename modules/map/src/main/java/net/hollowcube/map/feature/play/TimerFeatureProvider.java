@@ -12,15 +12,15 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.TimeUnit;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
 
 @AutoService(FeatureProvider.class)
 public class TimerFeatureProvider implements FeatureProvider {
@@ -28,7 +28,8 @@ public class TimerFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("hud/timer", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::handleStartPlaying)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying)
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
 
     private final ActionBar.Provider actionBar = this::buildWidget;
 
@@ -54,40 +55,35 @@ public class TimerFeatureProvider implements FeatureProvider {
         ActionBar.forPlayer(event.player()).removeProvider(actionBar);
     }
 
+    private void handlePlayerMove(@NotNull PlayerMoveEvent event) {
+        var player = event.getPlayer();
+        if (!MapHooks.isPlayerPlaying(player)) return;
+
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null || saveState.getPlayStartTime() != 0) return;
+
+        var oldPosition = player.getPosition();
+        var newPosition = event.getNewPosition();
+        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPosition)))
+            return; // Player did not actually move, just turn their head
+
+        saveState.setPlayStartTime(System.currentTimeMillis());
+    }
+
     private void buildWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
         if (!MapHooks.isPlayerPlaying(player)) return;
 
         var saveState = SaveState.fromPlayer(player);
-        var time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
 
-        var text = formatPlaytime(time);
+        long time = 0;
+        if (saveState.getPlayStartTime() != 0) {
+            time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
+        }
+
+        var text = formatPlaytime(time, false);
 
         builder.pushColor(FontUtil.NO_SHADOW);
         builder.pos(-TIMER_CONTAINER.width() / 2).drawInPlace(TIMER_CONTAINER);
         builder.pos(-TIMER_CONTAINER.width() / 2 + 19).append(text);
-    }
-
-    public static String formatPlaytime(long time) {
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-        long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
-        milliseconds -= milliseconds % 50; // Round to ticks
-        return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
-    }
-
-    private void sendTimerActionBar(@NotNull MapWorld world) {
-        for (var player : world.players()) {
-            var text = new StringBuilder();
-            text.append(TIMER_CONTAINER.fontChar());
-            text.append(FontUtil.computeOffset(-52));
-
-            var saveState = SaveState.fromPlayer(player);
-            var time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
-
-            var a = formatPlaytime(time);
-            text.append(a);
-
-            player.sendActionBar(Component.text(text.toString(), TextColor.color(78, 92, 36)));
-        }
     }
 }

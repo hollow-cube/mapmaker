@@ -186,13 +186,16 @@ public class PlayingMapWorld implements InternalMapWorld {
         player.teleport(pos).join(); //todo should probably be done from elsewhere because it depends on checkpoints
 
         EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn));
-        saveState.setPlayStartTime(System.currentTimeMillis());
+        if (saveState.getPlaytime() > 0) {
+            // If the playtime is non-zero (ie they have played before) start timing immediately.
+            // Otherwise, we will start timing when they move the first time.
+            saveState.setPlayStartTime(System.currentTimeMillis());
+        }
 
 //        if (firstSpawn) player.sendMessage("Now playing " + map.settings().getName());
     }
 
     public @Blocking void startSpectating(@NotNull Player player, boolean teleport) {
-
         player.setTag(TAG_PLAYING, false); // Sanity
         player.setTag(MapHooks.PLAYING, false); // Sanity
 
