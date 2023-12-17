@@ -154,6 +154,7 @@ public class InventoryViewHost {
     }
 
     private void drawCurrentElement() {
+        if (history.isEmpty()) return;
         logger.log(System.Logger.Level.INFO, "redraw (view = {0})", history.getLast());
 //        List.of(Thread.currentThread().getStackTrace())
 //                .stream()

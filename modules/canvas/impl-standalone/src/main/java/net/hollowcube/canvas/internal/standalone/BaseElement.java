@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -111,7 +112,7 @@ public abstract class BaseElement implements Element, Loadable {
 
     protected void drawBackgroundSprite(@NotNull FontUIBuilder sb, int x, int y) {
         if (state == State.ACTIVE && sprite != null) {
-            sb.draw(sprite, x);
+            sb.draw(sprite, x, spriteColorModifier);
         }
 
         if (state == State.LOADING && loadingSprite != null) {
@@ -184,10 +185,16 @@ public abstract class BaseElement implements Element, Loadable {
     // TRAIT: SpriteHolder
 
     private Sprite sprite = null;
+    private TextColor spriteColorModifier = null;
 
     public void setSprite(@Nullable Sprite sprite) {
         this.sprite = sprite;
         context.markDirty();
+    }
+
+    // This actually does override a method in Label
+    public void setSpriteColorModifier(@NotNull TextColor color) {
+        this.spriteColorModifier = color;
     }
 
     // TRAIT: LoadingSpriteHolder
