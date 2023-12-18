@@ -73,6 +73,7 @@ import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
+import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
@@ -427,6 +428,8 @@ public class DevServer {
         registry.put("minecraft:worldgen/biome", imw.biomes().toNBT());
         registry.put("minecraft:damage_type", DamageType.getNBT());
         player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
+
+        player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
 
         event.setSpawningInstance(imw.instance());
 
