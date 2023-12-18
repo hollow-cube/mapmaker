@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<component align="ltr">
+    <switch id="type">
+        <!-- Add icon -->
+        <button id="add_btn" translationKey="gui.biome_list.entry.add" sprite="green_concrete"/>
+        <!-- Editor link -->
+        <button id="edit_btn" translationKey="gui.biome_list.entry" sprite="paper"/>
+    </switch>
+</component>

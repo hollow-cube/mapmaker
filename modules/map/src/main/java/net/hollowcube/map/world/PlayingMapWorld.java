@@ -3,13 +3,14 @@ package net.hollowcube.map.world;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.biome.LocalBiomeManager;
+import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.world.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
@@ -62,7 +63,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
-    private final LocalBiomeManager biomeManager;
+    private final BiomeContainer biomeContainer;
     private final EventNode<InstanceEvent> scopedNode = EventNode.event("mapworld/playing", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
             return event.getPlayer().hasTag(TAG_PLAYING);
@@ -90,7 +91,7 @@ public class PlayingMapWorld implements InternalMapWorld {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
 
-        this.biomeManager = new LocalBiomeManager();
+        this.biomeContainer = new BiomeContainer();
 
         eventNode.addChild(scopedNode);
 
@@ -127,8 +128,8 @@ public class PlayingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull LocalBiomeManager biomeManager() {
-        return biomeManager;
+    public @NotNull BiomeContainer biomes() {
+        return biomeContainer;
     }
 
     @Override
@@ -151,9 +152,10 @@ public class PlayingMapWorld implements InternalMapWorld {
         // Load the map itself (eg blocks, if present)
         var mapData = server().mapService().getMapWorld(map.id(), true);
         if (mapData != null) {
-            instance.load(mapData);
+            instance.load(mapData, new ReadWorldAccess(this));
         }
 
+        this.biomeContainer.init();
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
     }
 

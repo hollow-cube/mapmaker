@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.biome;
+package net.hollowcube.map.gui.biome;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;

@@ -16,7 +16,6 @@ import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.feature.misc.CyberpunkStatDisplay;
 import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
-import net.hollowcube.mapmaker.hub.gui.biome.BiomeEditorView;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
@@ -154,8 +153,6 @@ public abstract class HubServerBase implements HubServer {
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
-
-        newOpenGUI(player, BiomeEditorView::new);
     }
 
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {

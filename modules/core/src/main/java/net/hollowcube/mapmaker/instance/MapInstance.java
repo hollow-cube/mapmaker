@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarWorld;
+import net.hollowcube.polar.PolarWorldAccess;
 import net.hollowcube.polar.PolarWriter;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -17,6 +18,7 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -80,10 +82,14 @@ public class MapInstance extends InstanceContainer {
         INSTANCE_MANAGER.registerInstance(this);
     }
 
-    public void load(byte @NotNull [] worldData) {
+    public void load(byte @NotNull [] worldData, @Nullable PolarWorldAccess worldAccess) {
         try {
             var loader = new PolarLoader(new ByteArrayInputStream(worldData));
+            if (worldAccess != null) loader.setWorldAccess(worldAccess);
             setChunkLoader(loader);
+
+            // Load the world data
+            loader.loadInstance(this);
 
             // Load all the chunks immediately
             var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
@@ -100,12 +106,13 @@ public class MapInstance extends InstanceContainer {
     }
 
     @Blocking
-    public byte @NotNull [] save() {
+    public byte @NotNull [] save(@Nullable PolarWorldAccess worldAccess) {
         // Since we deleted the loader we need a new one
         var loader = new PolarLoader(new PolarWorld());
+        if (worldAccess != null) loader.setWorldAccess(worldAccess);
         setChunkLoader(loader);
 
-        saveChunksToStorage().join();
+        saveInstance().join();
 
         var polarWorld = loader.world();
         var worldData = PolarWriter.write(polarWorld);

@@ -4,12 +4,9 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.TeamsPacket;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,12 +19,6 @@ import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SP
 class MapWorldHelpers {
     private MapWorldHelpers() {
     }
-
-    public static final Team MAP_TEAM = MinecraftServer.getTeamManager()
-            .createBuilder("map-team")
-            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-            .seeInvisiblePlayers()
-            .build();
 
     public static @NotNull List<FeatureProvider> loadFeatures(@NotNull InternalMapWorld world) {
         var enabledFeatures = new ArrayList<FeatureProvider>();
@@ -72,7 +63,6 @@ class MapWorldHelpers {
 
     public static void resetPlayer(@NotNull Player player) {
         player.refreshCommands();
-        player.setTeam(MAP_TEAM);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(false);
         player.setFlying(false);
