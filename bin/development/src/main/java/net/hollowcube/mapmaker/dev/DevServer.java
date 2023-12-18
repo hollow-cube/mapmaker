@@ -77,9 +77,6 @@ import net.minestom.server.network.packet.server.configuration.RegistryDataPacke
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.biomes.Biome;
-import net.minestom.server.world.biomes.BiomeEffects;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -405,44 +402,6 @@ public class DevServer {
             logger.error("failed to create session", e);
             player.kick(Component.text("Failed to login. Please try again later."));
         }
-
-        var bm = MinecraftServer.getBiomeManager();
-        var plains = bm.getByName(NamespaceID.from("minecraft:plains"));
-        bm.removeBiome(plains);
-
-        var pls = Biome.builder()
-                .category(Biome.Category.NONE)
-                .name(NamespaceID.from("minecraft:plains"))
-                .temperature(0.8F)
-                .downfall(0.4F)
-                .depth(0.125F)
-                .scale(0.05F)
-                .effects(BiomeEffects.builder()
-//                        .fogColor(0xFF5733)
-//                        .skyColor(0xFF5733)
-                        .fogColor(0x000000)
-                        .skyColor(0x000000)
-                        .waterColor(0xf0e335)
-                        .waterFogColor(0xf0e335)
-                        .grassColor(0x7CFC00)
-                        .foliageColor(0x7CFC00)
-
-//                        .fogColor(0xC0D8FF)
-//                        .skyColor(0x78A7FF)
-//                        .waterColor(0x3F76E4)
-//                        .waterFogColor(0x50533)
-
-                        .build())
-                .build();
-        try {
-            var id = Biome.class.getDeclaredField("id");
-            id.setAccessible(true);
-            id.set(pls, plains.id());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        bm.addBiome(pls);
 
     }
 
