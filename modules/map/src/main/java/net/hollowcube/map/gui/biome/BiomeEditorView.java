@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.gui.biome;
+package net.hollowcube.map.gui.biome;
 
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.hub.biome.BiomeInfo;
+import net.hollowcube.map.biome.BiomeInfo;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +28,11 @@ public class BiomeEditorView extends View {
     private @Outlet("grass_color") Text grassColorText;
     private @Outlet("foliage_color") Text foliageColorText;
 
-    private final BiomeInfo biomeInfo = new BiomeInfo();
+    private final BiomeInfo biomeInfo;
 
-    public BiomeEditorView(@NotNull Context context) {
+    public BiomeEditorView(@NotNull Context context, @NotNull BiomeInfo info) {
         super(context);
+        this.biomeInfo = info;
 
         guiTitleText.setText("Biome Editor");
 

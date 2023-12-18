@@ -40,6 +40,7 @@ import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.bossbar.BossBar;
@@ -464,7 +465,7 @@ public class DevServer {
         var registry = new HashMap<String, NBT>();
         registry.put("minecraft:chat_type", Messenger.chatRegistry());
         registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
-        registry.put("minecraft:worldgen/biome", imw.biomeManager().toNBT());
+        registry.put("minecraft:worldgen/biome", imw.biomes().toNBT());
         registry.put("minecraft:damage_type", DamageType.getNBT());
         player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
 
@@ -604,6 +605,9 @@ public class DevServer {
         var player = event.getPlayer();
         var playerData = PlayerDataV2.fromPlayer(player);
         var runtime = ServerRuntime.getRuntime();
+
+        // Add the player to the default team, todo do this based on rank
+        player.setTeam(CoreTeams.DEFAULT);
 
         // Alpha watermark
         String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());

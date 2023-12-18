@@ -2,7 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.biome.LocalBiomeManager;
+import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
@@ -86,8 +86,8 @@ public class TestingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull LocalBiomeManager biomeManager() {
-        return parent.biomeManager(); // Always share with the parent.
+    public @NotNull BiomeContainer biomes() {
+        return parent.biomes(); // Always share with the parent.
     }
 
     @Override

@@ -1,0 +1,53 @@
+package net.hollowcube.map.gui.biome;
+
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.map.biome.BiomeContainer;
+import net.hollowcube.map.biome.BiomeInfo;
+import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class BiomeEntry extends View {
+
+    private @Outlet("type") Switch typeSwitch;
+    private @Outlet("edit_btn") Label editButton;
+
+    private final BiomeInfo biomeInfo;
+    private final BiomeContainer container;
+
+    public BiomeEntry(@NotNull Context context, @Nullable BiomeInfo biomeInfo, @Nullable BiomeContainer container) {
+        super(context);
+        this.biomeInfo = biomeInfo;
+        this.container = container;
+
+        // If no biome was given, this is the "add" button
+        typeSwitch.setOption(biomeInfo == null ? 0 : 1);
+        if (biomeInfo != null) {
+            editButton.setItemSprite(ItemStack.of(biomeInfo.getDisplayItem()));
+        }
+    }
+
+    @Action("add_btn")
+    public void handleAddBiome(@NotNull Player player) {
+        if (container == null) return; // Sanity check
+
+        var biomeInfo = container.createBiome();
+        if (biomeInfo == null) return; // No more slots available
+
+        pushView(c -> new BiomeEditorView(c, biomeInfo));
+    }
+
+    @Action("edit_btn")
+    public void handleEditBiome() {
+        if (biomeInfo == null) return; // Sanity check
+
+        pushView(c -> new BiomeEditorView(c, biomeInfo));
+    }
+
+}

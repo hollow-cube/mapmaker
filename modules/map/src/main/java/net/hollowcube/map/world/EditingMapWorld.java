@@ -1,11 +1,13 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.biome.LocalBiomeManager;
+import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.BlockItemPlaceEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.object.ObjectBlockHandler;
+import net.hollowcube.map.world.polar.ReadWorldAccess;
+import net.hollowcube.map.world.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
@@ -64,7 +66,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
-    private final LocalBiomeManager biomeManager;
+    private final BiomeContainer biomeContainer;
     private final EventNode<InstanceEvent> scopedNode = EventNode.event("world-local", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
             return event.getPlayer().hasTag(TAG_EDITING);
@@ -90,7 +92,7 @@ public class EditingMapWorld implements InternalMapWorld {
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
 
-        this.biomeManager = new LocalBiomeManager();
+        this.biomeContainer = new BiomeContainer();
 
         eventNode.addChild(scopedNode);
         eventNode.addListener(PlayerBlockBreakEvent.class, this::preventSwordBreaking);
@@ -137,8 +139,8 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull LocalBiomeManager biomeManager() {
-        return biomeManager;
+    public @NotNull BiomeContainer biomes() {
+        return biomeContainer;
     }
 
     @Override
@@ -160,9 +162,10 @@ public class EditingMapWorld implements InternalMapWorld {
     public @Blocking void load() {
         var mapData = server().mapService().getMapWorld(map.id(), true);
         if (mapData != null) {
-            instance.load(mapData);
+            instance.load(mapData, new ReadWorldAccess(this));
         }
 
+        this.biomeContainer.init();
         this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
 
         // Kick off autosave
@@ -218,7 +221,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
             // Save the world data (if it is unverified only)
             if (map.verification() == MapVerification.UNVERIFIED) {
-                var worldData = instance.save();
+                var worldData = instance.save(new ReadWriteWorldAccess(this));
                 server().mapService().updateMapWorld(map.id(), worldData);
             }
 
