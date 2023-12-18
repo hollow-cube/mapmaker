@@ -1,6 +1,7 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.biome.LocalBiomeManager;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.entity.Player;
@@ -54,6 +55,8 @@ public interface MapWorld {
     int flags();
 
     @NotNull ItemRegistry itemRegistry();
+
+    @NotNull LocalBiomeManager biomeManager();
 
     void addScopedEventNode(@NotNull EventNode<InstanceEvent> eventNode);
 

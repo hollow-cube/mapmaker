@@ -200,11 +200,11 @@ public class EditMap extends View {
                 mapService.deleteVerification(playerData.id(), map.id());
             }
 
+            player.closeInventory();
             bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("edit.map.failure"));
             MinecraftServer.getExceptionManager().handleException(e);
-        } finally {
             player.closeInventory();
         }
     }

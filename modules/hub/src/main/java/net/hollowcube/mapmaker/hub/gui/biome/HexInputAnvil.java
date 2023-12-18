@@ -9,7 +9,6 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +27,6 @@ public class HexInputAnvil extends View {
             startingInput = "";
         }
 
-        MinecraftServer.getBiomeManager()
         input = startingInput;
         inputField.setArgs(Component.text(startingInput));
     }

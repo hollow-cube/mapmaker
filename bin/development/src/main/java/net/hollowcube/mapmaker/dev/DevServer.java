@@ -17,7 +17,9 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
@@ -57,6 +59,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.player.*;
@@ -64,17 +67,23 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionState;
+import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
+import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biomes.BiomeEffects;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -395,13 +404,72 @@ public class DevServer {
             logger.error("failed to create session", e);
             player.kick(Component.text("Failed to login. Please try again later."));
         }
+
+        var bm = MinecraftServer.getBiomeManager();
+        var plains = bm.getByName(NamespaceID.from("minecraft:plains"));
+        bm.removeBiome(plains);
+
+        var pls = Biome.builder()
+                .category(Biome.Category.NONE)
+                .name(NamespaceID.from("minecraft:plains"))
+                .temperature(0.8F)
+                .downfall(0.4F)
+                .depth(0.125F)
+                .scale(0.05F)
+                .effects(BiomeEffects.builder()
+//                        .fogColor(0xFF5733)
+//                        .skyColor(0xFF5733)
+                        .fogColor(0x000000)
+                        .skyColor(0x000000)
+                        .waterColor(0xf0e335)
+                        .waterFogColor(0xf0e335)
+                        .grassColor(0x7CFC00)
+                        .foliageColor(0x7CFC00)
+
+//                        .fogColor(0xC0D8FF)
+//                        .skyColor(0x78A7FF)
+//                        .waterColor(0x3F76E4)
+//                        .waterFogColor(0x50533)
+
+                        .build())
+                .build();
+        try {
+            var id = Biome.class.getDeclaredField("id");
+            id.setAccessible(true);
+            id.set(pls, plains.id());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        bm.addBiome(pls);
+
     }
 
     private void handleConfig(@NotNull AsyncPlayerConfigurationEvent event) {
-        logger.info("login - {}", event.getPlayer().getUsername());
+        var player = event.getPlayer();
+        logger.info("config - {}", player.getUsername());
 
-        event.setSpawningInstance(hub.world().instance());
-        event.getPlayer().setRespawnPoint(new Pos(0.5, 40, 0.5, 90, 0));
+        var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
+        if (targetWorld == null) {
+            // Spawn into hub
+            event.setSpawningInstance(hub.world().instance());
+            player.setRespawnPoint(new Pos(0.5, 40, 0.5, 90, 0));
+            return;
+        }
+
+        // Spawn the player into the map
+        var imw = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+
+        // Resend registry containing the local biomes for this map
+        var registry = new HashMap<String, NBT>();
+        registry.put("minecraft:chat_type", Messenger.chatRegistry());
+        registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
+        registry.put("minecraft:worldgen/biome", imw.biomeManager().toNBT());
+        registry.put("minecraft:damage_type", DamageType.getNBT());
+        player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
+
+        event.setSpawningInstance(imw.instance());
+
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -533,13 +601,35 @@ public class DevServer {
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
+        var player = event.getPlayer();
+        var playerData = PlayerDataV2.fromPlayer(player);
+        var runtime = ServerRuntime.getRuntime();
+
+        // Alpha watermark
+        String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
+        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+        player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
+                .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+
+        var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
+        if (targetWorld != null) {
+            player.setDisplayName(playerData.displayName()); //todo this is a Minestom bug, the display name needs to be re-sent automatically.
+            broadcastTabHeaderAndFooter();
+
+            var imw = FutureUtil.getUnchecked(targetWorld);
+            if (false && imw instanceof PlayingMapWorld playingMapWorld) { // joinMapState == HubToMapBridge.JoinMapState.SPECTATING
+                playingMapWorld.startSpectating(player, false);
+            } else {
+                imw.acceptPlayer(player, true);
+            }
+            return;
+        }
+
         rebuildOnlinePlayersRegex();
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
-        var player = event.getPlayer();
 
         // Send resource pack if present
-        var runtime = ServerRuntime.getRuntime();
         var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
         if (!resourcePackHash.equals("dev")) {
             var url = String.format(RESOURCE_PACK_URL, runtime.commit());
@@ -547,14 +637,7 @@ public class DevServer {
             player.setResourcePack(ResourcePack.forced(url, resourcePackHash));
         }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
-
-        // Alpha watermark
-        String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
-        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-        player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
-                .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
         var currencyDisplay = BadSprite.SPRITE_MAP.get("hud/currency_display");
         var currencyDisplayCreative = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");

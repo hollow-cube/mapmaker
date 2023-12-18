@@ -1,5 +1,6 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
@@ -69,24 +70,27 @@ public class MapWorldManager {
 
         // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)
         try {
-            var world = activeWorld.get(); // wait for the world to load
-
             // If the player is already in a map, remove them from it.
             var currentWorld = MapWorld.forPlayerOptional(player);
             if (currentWorld instanceof InternalMapWorld imw) {
                 imw.removePlayer(player);
             }
 
-            // spawn in minestom instance & then notify world
-            player.setInstance(world.instance(), world.spawnPoint()).join();
-            // Have the spectate functionality extracted to InternalMapWorld (probably)
-            if (joinMapState == HubToMapBridge.JoinMapState.SPECTATING && world instanceof PlayingMapWorld playingMapWorld) {
-                playingMapWorld.startSpectating(player, false);
-            } else {
-                world.acceptPlayer(player, true);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            player.setTag(MapHooks.TARGET_WORLD, activeWorld);
+            player.startConfigurationPhase();
+
+
+//            var world = activeWorld.get(); // wait for the world to load
+//
+//
+//            // spawn in minestom instance & then notify world
+//            player.setInstance(world.instance(), world.spawnPoint()).join();
+//            // Have the spectate functionality extracted to InternalMapWorld (probably)
+//            if (joinMapState == HubToMapBridge.JoinMapState.SPECTATING && world instanceof PlayingMapWorld playingMapWorld) {
+//                playingMapWorld.startSpectating(player, false);
+//            } else {
+//                world.acceptPlayer(player, true);
+//            }
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "Failed to load world", e);
             throw new RuntimeException(e);
