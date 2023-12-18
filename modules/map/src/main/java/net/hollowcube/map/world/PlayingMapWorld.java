@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.biome.LocalBiomeManager;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
@@ -61,6 +62,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
+    private final LocalBiomeManager biomeManager;
     private final EventNode<InstanceEvent> scopedNode = EventNode.event("mapworld/playing", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
             return event.getPlayer().hasTag(TAG_PLAYING);
@@ -84,8 +86,12 @@ public class PlayingMapWorld implements InternalMapWorld {
         instance.setTag(SELF_TAG, this);
 
         var eventNode = instance.eventNode();
+
         this.itemRegistry = new ItemRegistry();
         eventNode.addChild(itemRegistry.eventNode());
+
+        this.biomeManager = new LocalBiomeManager();
+
         eventNode.addChild(scopedNode);
 
         //todo move the following to some utility
@@ -118,6 +124,11 @@ public class PlayingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull ItemRegistry itemRegistry() {
         return itemRegistry;
+    }
+
+    @Override
+    public @NotNull LocalBiomeManager biomeManager() {
+        return biomeManager;
     }
 
     @Override

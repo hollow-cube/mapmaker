@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.config.ConfigProvider;
+import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
 import net.hollowcube.map.command.HubCommand;
@@ -141,6 +142,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new SpawnCommand());
         commandManager.register(new TeleportCommand());
         commandManager.register(new GiveCommand());
+
+        commandManager.register(new SetBiomeCommand());
 
         // Register features
         var features = new ArrayList<FeatureProvider>();

@@ -271,8 +271,8 @@ public class MapDetailsView extends View {
         }
 
         try {
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
             player.closeInventory();
+            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
             logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());

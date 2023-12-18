@@ -28,7 +28,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
@@ -63,10 +62,7 @@ public abstract class HubServerBase implements HubServer {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
             .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn)
             .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump)
-            .addListener(PlayerMoveEvent.class, this::handlePlayerMovement)
-            .addListener(PlayerChatEvent.class, ev -> {
-                newOpenGUI(ev.getPlayer(), BiomeEditorView::new);
-            });
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     public HubServerBase(@NotNull HubToMapBridge bridge) {
         this.bridge = bridge;
