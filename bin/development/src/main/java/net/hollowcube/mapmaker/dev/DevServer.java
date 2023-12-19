@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.dev;
 
+import io.getunleash.DefaultUnleash;
+import io.getunleash.Unleash;
+import io.getunleash.util.UnleashConfig;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -30,6 +33,7 @@ import net.hollowcube.mapmaker.dev.config.Config;
 import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
 import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
+import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.metrics.Metric;
@@ -102,6 +106,8 @@ public class DevServer {
     private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
     private static final UUID RESOURCE_PACK_ID = UUID.fromString("aceb326f-da15-45bc-bf2f-11940c21780c");
     private static final Tag<CompletableFuture<Void>> WAITING_FOR_RP_TAG = Tag.Transient("waiting_for_rp");
+
+    public static Unleash UNLEASH_INSTANCE = null;
 
     private HubToMapBridge hubToMapBridge;
 
@@ -262,6 +268,22 @@ public class DevServer {
         var kafkaConfig = configProvider.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
         metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
+
+        var unleashAddress = System.getenv("MAPMAKER_UNLEASH_ADDRESS");
+        var unleashToken = System.getenv("MAPMAKER_UNLEASH_TOKEN");
+        if (unleashAddress != null && unleashToken != null) {
+            var runtime = ServerRuntime.getRuntime();
+            var unleashConfig = UnleashConfig.builder()
+                    .appName("mapmaker")
+                    .instanceId(runtime.hostname())
+                    .unleashAPI(unleashAddress)
+                    .apiKey(unleashToken)
+                    .synchronousFetchOnInitialisation(true)
+                    .build();
+
+            var mapIds = new MapIdStrategy();
+            UNLEASH_INSTANCE = new DefaultUnleash(unleashConfig, mapIds);
+        }
 
         // Start phase 2
         // Start hub and map server and bridge them.

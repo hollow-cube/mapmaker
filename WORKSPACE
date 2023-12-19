@@ -121,6 +121,7 @@ maven_install(
         "io.grpc:grpc-stub:1.55.1",
         "com.google.protobuf:protobuf-java:3.24.4",
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
+        "io.getunleash:unleash-client-java:9.2.0",
 
         # Adventure
         "net.kyori:adventure-api:4.12.0",

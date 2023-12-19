@@ -3,6 +3,7 @@ package net.hollowcube.map.biome;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.map.util.MapCondition.mapFeature;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class SetBiomeCommand extends Command {
@@ -56,7 +59,10 @@ public class SetBiomeCommand extends Command {
     public SetBiomeCommand() {
         super("setbiome");
 
-        setCondition(mapFilter(false, true, false));
+        setCondition(and(
+                mapFilter(false, true, false),
+                mapFeature(MapFeatureFlags.BIOME_EDITOR)
+        ));
 
         addSyntax(playerOnly(this::handleSetRegionToBiome), biomeArg);
     }

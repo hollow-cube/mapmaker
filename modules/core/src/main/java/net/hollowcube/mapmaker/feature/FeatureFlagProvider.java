@@ -18,6 +18,6 @@ public interface FeatureFlagProvider {
         return Globals.provider;
     }
 
-    boolean test(@NotNull String name, @NotNull String... context);
+    boolean test(@NotNull String name, @NotNull FlagContext... context);
 
 }

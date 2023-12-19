@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
 
 @AutoService(FeatureProvider.class)
@@ -91,7 +92,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
 
         // Show the review GUI for the player if they have not submitted a rating yet
-        if (MapFeatureFlags.RATE_MAP.test(player.getUuid().toString())) {
+        if (MapFeatureFlags.RATE_MAP.test(player(player))) {
             if (MapRatingFeatureProvider.isMapRatable(world)) {
                 var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
                 if (lastRating == null || lastRating == -1) {

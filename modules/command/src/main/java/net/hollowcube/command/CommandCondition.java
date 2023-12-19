@@ -25,6 +25,18 @@ public interface CommandCondition {
         return (sender, context) -> context.pass() == CommandContext.Pass.SUGGEST ? HIDE : ALLOW;
     }
 
+    static @NotNull CommandCondition and(@NotNull CommandCondition... conditions) {
+        return (sender, context) -> {
+            for (var condition : conditions) {
+                var result = condition.test(sender, context);
+                if (result != ALLOW) {
+                    return result;
+                }
+            }
+            return ALLOW;
+        };
+    }
+
     @MagicConstant(valuesFromClass = CommandCondition.class)
     int test(@NotNull CommandSender sender, @NotNull CommandContext context);
 }

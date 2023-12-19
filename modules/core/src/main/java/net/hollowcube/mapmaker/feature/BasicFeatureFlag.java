@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 record BasicFeatureFlag(@NotNull String name) implements FeatureFlag {
 
     @Override
-    public boolean test(@NotNull String... context) {
+    public boolean test(@NotNull FlagContext... context) {
         try {
             return FeatureFlagProvider.current().test(name, context);
         } catch (Exception e) {

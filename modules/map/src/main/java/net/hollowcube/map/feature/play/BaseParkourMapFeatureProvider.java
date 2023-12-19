@@ -11,13 +11,14 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -78,7 +79,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            if (MapFeatureFlags.RATE_MAP.test(PlayerDataV2.fromPlayer(player).id())) {
+            if (MapFeatureFlags.RATE_MAP.test(player(player))) {
                 inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
             }
 
@@ -126,7 +127,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        if (MapFeatureFlags.RATE_MAP.test(PlayerDataV2.fromPlayer(player).id())) {
+        if (MapFeatureFlags.RATE_MAP.test(player(player))) {
             inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
         }
 
