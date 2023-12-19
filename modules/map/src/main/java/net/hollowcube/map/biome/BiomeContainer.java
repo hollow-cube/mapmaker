@@ -83,6 +83,12 @@ public class BiomeContainer {
         return unmodifiableBiomes;
     }
 
+    public @NotNull List<Biome> loadedBiomes() {
+        var allBiomes = new ArrayList<>(parent.unmodifiableCollection());
+        allBiomes.addAll(loadedBiomes);
+        return allBiomes;
+    }
+
     public NBTCompound toNBT() {
         var allBiomesNbt = new ArrayList<NBTCompound>();
 
@@ -103,7 +109,7 @@ public class BiomeContainer {
     // Serialization
 
     public void init() {
-        Check.stateCondition(loadedBiomes != null, "Biomes should only be initialized once");
+        if (loadedBiomes != null) return;
         loadedBiomes = new ArrayList<>();
 
         for (var biome : biomes) {
@@ -131,6 +137,8 @@ public class BiomeContainer {
         for (var biome : proto.getBiomeList()) {
             biomes.add(new BiomeInfo(biome));
         }
+
+        init();
     }
 
     public void write(@NotNull NetworkBuffer buffer) {

@@ -40,17 +40,17 @@ public class ReadWorldAccess implements PolarWorldAccess {
             // Legacy support
             return;
         }
-        
+
         mapWorld.biomes().read(buffer);
     }
 
     @Override
     public @NotNull Biome getBiome(@NotNull String name) {
-        return Biome.PLAINS;
+        return mapWorld.biomes().getBiome(name);
     }
 
     @Override
     public @NotNull String getBiomeName(int id) {
-        return "plains";
+        return mapWorld.biomes().getBiomeName(id);
     }
 }

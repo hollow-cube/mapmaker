@@ -71,6 +71,7 @@ public class MapInstance extends InstanceContainer {
         super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
 
         setTimeRate(0); //todo eventually this should be a map setting
+        setTime(6000);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
