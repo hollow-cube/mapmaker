@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package net.hollowcube.map.biome;
+
+//option java_multiple_files = true;
+option java_package = "net.hollowcube.map.biome";
+option java_outer_classname = "BiomeProtos";
+
+message BiomeInfo {
+  string name = 1;
+  string displayItem = 2;
+
+  int32 precipitation = 3; // Biome.Precipitation enum
+  //todo: particle
+
+  string skyColor = 4;
+  string fogColor = 5;
+  string waterColor = 6;
+  string waterFogColor = 7;
+  optional string grassColor = 8;
+  optional string foliageColor = 9;
+
+  //todo: music
+  //todo: ambient sound
+  //todo: additions sound
+  //todo: mood sound
+}
+
+message BiomeContainer {
+  repeated BiomeInfo biome = 1;
+}

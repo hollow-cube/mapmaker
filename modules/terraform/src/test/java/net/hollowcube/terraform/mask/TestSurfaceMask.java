@@ -23,7 +23,7 @@ public class TestSurfaceMask {
                 Arguments.of("alt solid", Block.BIRCH_TRAPDOOR, true),
                 Arguments.of("liquid", Block.WATER, false),
                 Arguments.of("air", Block.AIR, false),
-                Arguments.of("non-solid", Block.GRASS, false)
+                Arguments.of("non-solid", Block.SHORT_GRASS, false)
         );
     }
 

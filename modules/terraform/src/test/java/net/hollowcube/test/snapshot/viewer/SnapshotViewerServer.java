@@ -16,11 +16,12 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -73,7 +74,7 @@ public class SnapshotViewerServer {
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
 
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(PlayerLoginEvent.class, this::handlePlayerLogin);
+        globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, this::handlePlayerLogin);
         globalEventHandler.addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         var routing = Routing.builder()
@@ -93,7 +94,7 @@ public class SnapshotViewerServer {
         MinecraftServer.getSchedulerManager().buildShutdownTask(webServer::shutdown);
     }
 
-    private void handlePlayerLogin(@NotNull PlayerLoginEvent event) {
+    private void handlePlayerLogin(@NotNull AsyncPlayerConfigurationEvent event) {
         event.setSpawningInstance(instance);
         event.getPlayer().setRespawnPoint(new Pos(-30, 0, 18, -90, 0));
     }
@@ -186,7 +187,7 @@ public class SnapshotViewerServer {
 
     private void updateDebugPacket(@NotNull DebugMessage message) {
         this.debugPacket = message;
-        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+        for (var player : MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY)) {
             if (!player.getTag(SHOW_DEBUG)) continue;
 
             message.sendTo(player);

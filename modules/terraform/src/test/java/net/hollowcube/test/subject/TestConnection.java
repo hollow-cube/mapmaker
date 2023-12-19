@@ -3,7 +3,7 @@ package net.hollowcube.test.subject;
 import net.hollowcube.test.TestEnvImpl;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.player.PlayerConnection;
@@ -25,20 +25,21 @@ public class TestConnection {
 
     public @NotNull CompletableFuture<TestPlayer> connect(@NotNull Instance instance, @NotNull Pos pos) {
         TestPlayer player = new TestPlayer(process, playerConnection);
-        player.eventNode().addListener(PlayerLoginEvent.class, event -> {
+        player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(instance);
             event.getPlayer().setRespawnPoint(pos);
         });
 
-        return process.connection().startPlayState(player, true)
-                .thenApply(unused -> {
-                    process.connection().updateWaitingPlayers();
-                    return player;
-                })
-                .thenApply(unused -> {
-                    player.setInstance(instance).join();
-                    return player;
-                });
+        throw new UnsupportedOperationException("TODO");
+//        return process.connection().startPlayState(player, true)
+//                .thenApply(unused -> {
+//                    process.connection().updateWaitingPlayers();
+//                    return player;
+//                })
+//                .thenApply(unused -> {
+//                    player.setInstance(instance).join();
+//                    return player;
+//                });
     }
 
     final class PlayerConnectionImpl extends PlayerConnection {

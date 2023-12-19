@@ -18,7 +18,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
     @Override
     public void saveWorldData(@NotNull Instance instance, @NotNull NetworkBuffer buffer) {
         logger.debug("writing polar world data");
-        buffer.write(NetworkBuffer.BYTE, (byte) VERSION);
+        buffer.write(NetworkBuffer.BYTE, (byte) VERSION_LATEST);
 
         mapWorld.biomes().write(buffer);
     }

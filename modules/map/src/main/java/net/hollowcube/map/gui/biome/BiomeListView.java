@@ -38,7 +38,7 @@ public class BiomeListView extends View {
         var entries = new ArrayList<BiomeEntry>();
 
         for (var biome : container.values()) {
-            entries.add(new BiomeEntry(request.context(), biome, null));
+            entries.add(new BiomeEntry(request.context(), biome, container));
         }
 
         // If there is still remaining space, add the + button

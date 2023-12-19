@@ -1,10 +1,13 @@
 package net.hollowcube.map.biome;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biomes.BiomeEffects;
 import net.minestom.server.world.biomes.BiomeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,8 +39,6 @@ public class BiomeContainer {
     private final BiomeManager parent = MinecraftServer.getBiomeManager();
     private final List<BiomeInfo> biomes = new ArrayList<>();
     private final Collection<BiomeInfo> unmodifiableBiomes = Collections.unmodifiableCollection(biomes);
-    // The Minecraft biomes which were sent to players as they joined.
-    // Note: indices correspond to BiomeInfo indices, and null means the biome is not loaded
     private List<Biome> loadedBiomes = null;
 
     public @Nullable BiomeInfo createBiome() {
@@ -52,7 +53,6 @@ public class BiomeContainer {
         var namespace = NamespaceID.from(name);
 
         for (var biome : loadedBiomes) {
-            if (biome == null) continue;
             if (biome.name().equals(namespace)) return biome;
         }
 
@@ -61,11 +61,14 @@ public class BiomeContainer {
 
     public @NotNull String getBiomeName(int id) {
         for (var biome : loadedBiomes) {
-            if (biome == null) continue;
             if (biome.id() == id) return biome.name().asString();
         }
 
         return Objects.requireNonNullElse(parent.getById(id), Biome.PLAINS).name().asString();
+    }
+
+    public boolean hasCustomBiome(@NotNull String name) {
+        return biomes.stream().anyMatch(b -> b.getName().equals(name));
     }
 
     public int size() {
@@ -89,7 +92,6 @@ public class BiomeContainer {
         }
         // Add overwrite biomes
         for (var biome : loadedBiomes) {
-            if (biome == null) continue;
             allBiomesNbt.add(biome.toNbt());
         }
 
@@ -105,21 +107,66 @@ public class BiomeContainer {
         loadedBiomes = new ArrayList<>();
 
         for (var biome : biomes) {
-            var minestomBiome = biome.toMinestomBiome();
+            var minestomBiome = createMinestomBiome(biome);
+            if (minestomBiome == null) continue;
+
+            biome.setMinestomBiome(minestomBiome);
             loadedBiomes.add(minestomBiome);
-            if (minestomBiome != null) {
-                logger.info("Loaded custom biome {} (global id #{})", minestomBiome.name(), minestomBiome.id());
-            }
+            logger.info("Loaded custom biome {} (global id #{})", minestomBiome.name(), minestomBiome.id());
         }
     }
 
     public void read(@NotNull NetworkBuffer buffer) {
         Check.stateCondition(!biomes.isEmpty(), "Biomes should only be read once");
 
-        this.biomes.addAll(buffer.readCollection(BiomeInfo::new));
+        BiomeProtos.BiomeContainer proto;
+        try {
+            var bytes = buffer.read(NetworkBuffer.BYTE_ARRAY);
+            proto = BiomeProtos.BiomeContainer.parseFrom(bytes);
+        } catch (InvalidProtocolBufferException e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+            return;
+        }
+
+        for (var biome : proto.getBiomeList()) {
+            biomes.add(new BiomeInfo(biome));
+        }
     }
 
     public void write(@NotNull NetworkBuffer buffer) {
-        buffer.writeCollection(biomes, (buf, biome) -> biome.write(buf));
+        var builder = BiomeProtos.BiomeContainer.newBuilder();
+        for (var biome : biomes) {
+            builder = builder.addBiome(biome.toProto());
+        }
+
+        buffer.write(NetworkBuffer.BYTE_ARRAY, builder.build().toByteArray());
+    }
+
+    private @Nullable Biome createMinestomBiome(@NotNull BiomeInfo bi) {
+        if (bi.getName().isEmpty()) return null;
+
+        var effectBuilder = BiomeEffects.builder()
+                .skyColor(TextColor.fromCSSHexString(bi.getSkyColor()).value())
+                .fogColor(TextColor.fromCSSHexString(bi.getFogColor()).value())
+                .waterColor(TextColor.fromCSSHexString(bi.getWaterColor()).value())
+                .waterFogColor(TextColor.fromCSSHexString(bi.getWaterFogColor()).value());
+        if (bi.getGrassColor() != null) {
+            var color = TextColor.fromCSSHexString(bi.getGrassColor());
+            if (color != null) effectBuilder.grassColor(color.value());
+        }
+        if (bi.getFoliageColor() != null) {
+            var color = TextColor.fromCSSHexString(bi.getFoliageColor());
+            if (color != null) effectBuilder.foliageColor(color.value());
+        }
+
+        return Biome.builder()
+                .name(NamespaceID.from("custom", bi.getName()))
+                .category(Biome.Category.NONE)
+                .temperature(0.8F) // IDK what this affects
+                .downfall(0.4F) // IDK what this affects
+                .depth(0.125F) // IDK what this affects
+                .scale(0.05F) // IDK what this affects
+                .effects(effectBuilder.build())
+                .build();
     }
 }

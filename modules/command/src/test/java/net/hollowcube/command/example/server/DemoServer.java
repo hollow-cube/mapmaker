@@ -6,7 +6,7 @@ import net.hollowcube.command.example.FlipCommand;
 import net.hollowcube.command.example.ParentCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
@@ -47,7 +47,7 @@ public class DemoServer {
         });
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
-        eventHandler.addListener(PlayerLoginEvent.class, event -> {
+        eventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(instance);
             event.getPlayer().setRespawnPoint(new Pos(0, 40, 0));
         });

@@ -5,7 +5,7 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ComponentHoldingServerPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
@@ -36,16 +36,17 @@ final class TestConnectionImpl implements TestConnection {
     @Override
     public @NotNull CompletableFuture<Player> connect(@NotNull Instance instance, @NotNull Pos pos) {
         Player player = new Player(UUID.randomUUID(), "RandName", playerConnection);
-        player.eventNode().addListener(PlayerLoginEvent.class, event -> {
+        player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(instance);
             event.getPlayer().setRespawnPoint(pos);
         });
 
-        return process.connection().startPlayState(player, true)
-                .thenApply(unused -> {
-                    process.connection().updateWaitingPlayers();
-                    return player;
-                });
+        throw new UnsupportedOperationException("TODO");
+//        return process.connection().transitionConfigToPlay(player, true)
+//                .thenApply(unused -> {
+//                    process.connection().updateWaitingPlayers();
+//                    return player;
+//                });
     }
 
     @Override
@@ -65,7 +66,8 @@ final class TestConnectionImpl implements TestConnection {
         }
 
         private ServerPacket extractPacket(final SendablePacket packet) {
-            if (!(packet instanceof ServerPacket serverPacket)) return SendablePacket.extractServerPacket(packet);
+            if (!(packet instanceof ServerPacket serverPacket))
+                return SendablePacket.extractServerPacket(getServerState(), packet);
 
             final Player player = getPlayer();
             if (player == null) return serverPacket;

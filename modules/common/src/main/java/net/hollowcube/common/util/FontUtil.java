@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class FontUtil {
@@ -277,6 +278,12 @@ public final class FontUtil {
         return input.codePoints().filter(i -> i >= 0x20 && i <= 0x7E)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    public static @NotNull String stripNonAlphanumeric(@NotNull String input) {
+        return input.codePoints().filter(i -> (i >= 0x30 && i <= 0x39) || (i >= 0x41 && i <= 0x5A) || (i >= 0x61 && i <= 0x7A))
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString().toLowerCase(Locale.ROOT);
     }
 
 }

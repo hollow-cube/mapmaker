@@ -14,7 +14,8 @@ import org.slf4j.LoggerFactory;
 public class ReadWorldAccess implements PolarWorldAccess {
     private final Logger logger = LoggerFactory.getLogger(ReadWorldAccess.class);
 
-    public static final int VERSION = 1; // Versioning changes to world data
+    public static final int VERSION_LATEST = 2; // Versioning changes to world data
+    public static final int VERSION_PRE_PROTO = 1;
 
     protected final MapWorld mapWorld;
 
@@ -35,6 +36,11 @@ public class ReadWorldAccess implements PolarWorldAccess {
         }
         logger.debug("reading polar world data (version {})", version);
 
+        if (version <= VERSION_PRE_PROTO) {
+            // Legacy support
+            return;
+        }
+        
         mapWorld.biomes().read(buffer);
     }
 

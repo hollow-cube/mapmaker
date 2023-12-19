@@ -10,9 +10,9 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
@@ -64,7 +64,7 @@ public class DemoServer {
                     // Use username as session ID here because we are in offline mode
                     terraform.initPlayerSession(event.getPlayer(), event.getUsername());
                 })
-                .addListener(PlayerLoginEvent.class, event -> {
+                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
                     event.setSpawningInstance(instance);
                     event.getPlayer().setRespawnPoint(new Pos(0, 41, 0));
                 })

@@ -17,37 +17,45 @@ public class BiomeEntry extends View {
 
     private @Outlet("type") Switch typeSwitch;
     private @Outlet("edit_btn") Label editButton;
+    private @Outlet("edit_btn_unloaded") Label editButtonUnloaded;
 
     private final BiomeInfo biomeInfo;
     private final BiomeContainer container;
 
-    public BiomeEntry(@NotNull Context context, @Nullable BiomeInfo biomeInfo, @Nullable BiomeContainer container) {
+    public BiomeEntry(@NotNull Context context, @Nullable BiomeInfo biomeInfo, @NotNull BiomeContainer container) {
         super(context);
         this.biomeInfo = biomeInfo;
         this.container = container;
 
         // If no biome was given, this is the "add" button
-        typeSwitch.setOption(biomeInfo == null ? 0 : 1);
+        typeSwitch.setOption(biomeInfo == null ? 0 : (biomeInfo.isLoaded() ? 1 : 2));
         if (biomeInfo != null) {
             editButton.setItemSprite(ItemStack.of(biomeInfo.getDisplayItem()));
+            editButtonUnloaded.setItemSprite(ItemStack.of(biomeInfo.getDisplayItem()));
         }
     }
 
     @Action("add_btn")
     public void handleAddBiome(@NotNull Player player) {
-        if (container == null) return; // Sanity check
-
         var biomeInfo = container.createBiome();
         if (biomeInfo == null) return; // No more slots available
 
-        pushView(c -> new BiomeEditorView(c, biomeInfo));
+        pushView(c -> new BiomeEditorView(c, container, biomeInfo));
     }
 
     @Action("edit_btn")
     public void handleEditBiome() {
         if (biomeInfo == null) return; // Sanity check
 
-        pushView(c -> new BiomeEditorView(c, biomeInfo));
+        pushView(c -> new BiomeEditorView(c, container, biomeInfo));
+    }
+
+
+    @Action("edit_btn_unloaded")
+    public void handleEditUnloadedBiome() {
+        if (biomeInfo == null) return; // Sanity check
+
+        pushView(c -> new BiomeEditorView(c, container, biomeInfo));
     }
 
 }

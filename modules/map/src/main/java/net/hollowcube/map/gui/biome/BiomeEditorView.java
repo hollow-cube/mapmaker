@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.biome.BiomeInfo;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -28,10 +29,12 @@ public class BiomeEditorView extends View {
     private @Outlet("grass_color") Text grassColorText;
     private @Outlet("foliage_color") Text foliageColorText;
 
+    private final BiomeContainer container;
     private final BiomeInfo biomeInfo;
 
-    public BiomeEditorView(@NotNull Context context, @NotNull BiomeInfo info) {
+    public BiomeEditorView(@NotNull Context context, @NotNull BiomeContainer container, @NotNull BiomeInfo info) {
         super(context);
+        this.container = container;
         this.biomeInfo = info;
 
         guiTitleText.setText("Biome Editor");
@@ -52,6 +55,19 @@ public class BiomeEditorView extends View {
         updateColorText(waterFogColorText, biomeInfo.getWaterFogColor());
         updateColorText(grassColorText, biomeInfo.getGrassColor());
         updateColorText(foliageColorText, biomeInfo.getFoliageColor());
+    }
+
+    @Action("biome_name")
+    public void handleNameButton() {
+        pushView(c -> new BiomeNameInputAnvil(c, biomeInfo.getName()));
+    }
+
+    @Signal(BiomeNameInputAnvil.SIG_UPDATE_NAME)
+    public void handleNameChange(@NotNull String newName) {
+        if (newName.isEmpty() || container.hasCustomBiome(newName)) return;
+
+        biomeInfo.setName(newName);
+        updateContents();
     }
 
     @Action("sky_color")
