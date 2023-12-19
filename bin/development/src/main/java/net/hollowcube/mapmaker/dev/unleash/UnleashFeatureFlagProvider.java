@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureFlagProvider.class)
 public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
-    private static final boolean DEFAULT_ACTION = false;
+    private static final boolean DEFAULT_ACTION = Boolean.getBoolean("unleash.default");
 
     private final Unleash client = DevServer.UNLEASH_INSTANCE;
 
