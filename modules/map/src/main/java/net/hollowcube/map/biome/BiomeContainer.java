@@ -39,7 +39,8 @@ public class BiomeContainer {
     private final BiomeManager parent = MinecraftServer.getBiomeManager();
     private final List<BiomeInfo> biomes = new ArrayList<>();
     private final Collection<BiomeInfo> unmodifiableBiomes = Collections.unmodifiableCollection(biomes);
-    private List<Biome> loadedBiomes = null;
+    private final List<Biome> loadedBiomes = new ArrayList<>();
+    private boolean initialized = false;
 
     public @Nullable BiomeInfo createBiome() {
         if (biomes.size() >= maxSize()) return null;
@@ -109,8 +110,8 @@ public class BiomeContainer {
     // Serialization
 
     public void init() {
-        if (loadedBiomes != null) return;
-        loadedBiomes = new ArrayList<>();
+        if (initialized) return;
+        initialized = true;
 
         for (var biome : biomes) {
             var minestomBiome = createMinestomBiome(biome);
