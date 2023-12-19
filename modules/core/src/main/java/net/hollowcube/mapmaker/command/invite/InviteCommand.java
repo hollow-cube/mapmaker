@@ -24,12 +24,17 @@ public class InviteCommand extends Command {
 
     private void handleInvite(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(targetArg).findFirstPlayer(player);
+        String playerName = context.getRaw(targetArg);
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(context.getRaw(targetArg))));
+            player.sendMessage(Component.translatable("generic.player_offline", Component.text(playerName)));
             return;
         }
         if (player.equals(target)) {
             player.sendMessage(Component.translatable("generic.other_players_only"));
+            return;
+        }
+        if (playerName.length() > 16 || playerName.length() < 3) {
+            player.sendMessage(Component.text("generic.player_name_length"));
             return;
         }
 
