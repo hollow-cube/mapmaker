@@ -31,7 +31,7 @@ public class ComposterInteractionRule implements BlockInteractionRule {
         COMPOSTABLE_BLOCKS.addAll(ItemTags.SAPLINGS);
         COMPOSTABLE_BLOCKS.add(Material.BEETROOT_SEEDS.namespace());
         COMPOSTABLE_BLOCKS.add(Material.DRIED_KELP.namespace());
-        COMPOSTABLE_BLOCKS.add(Material.GRASS.namespace());
+        COMPOSTABLE_BLOCKS.add(Material.SHORT_GRASS.namespace());
         COMPOSTABLE_BLOCKS.add(Material.KELP.namespace());
         COMPOSTABLE_BLOCKS.add(Material.MELON_SEEDS.namespace());
         COMPOSTABLE_BLOCKS.add(Material.PUMPKIN_SEEDS.namespace());

@@ -56,10 +56,7 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
@@ -70,6 +67,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionState;
+import net.minestom.server.network.packet.client.common.ClientResourcePackStatusPacket;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
@@ -77,6 +75,7 @@ import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -89,6 +88,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +100,8 @@ public class DevServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
 
     private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
+    private static final UUID RESOURCE_PACK_ID = UUID.fromString("aceb326f-da15-45bc-bf2f-11940c21780c");
+    private static final Tag<CompletableFuture<Void>> WAITING_FOR_RP_TAG = Tag.Transient("waiting_for_rp");
 
     private HubToMapBridge hubToMapBridge;
 
@@ -278,6 +280,8 @@ public class DevServer {
             packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
             MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
 
+            packetListenerManager.setConfigurationListener(ClientResourcePackStatusPacket.class, this::handleResourcePackStatus);
+
             hubCommandManager.register(new HelpCommand(hubCommandManager));
             mapCommandManager.register(new HelpCommand(mapCommandManager));
 //            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
@@ -406,9 +410,43 @@ public class DevServer {
 
     }
 
+    private void handleResourcePackStatus(@NotNull ClientResourcePackStatusPacket packet, @NotNull Player player) {
+        switch (packet.status()) {
+            case INVALID_URL, FAILED_DOWNLOAD, FAILED_RELOAD -> player.kick("Resource pack failed to load.");
+            case DECLINED -> player.kick("Resource pack declined.");
+            case ACCEPTED, DISCARDED, DOWNLOADED -> {
+                // Status messages
+            }
+            case SUCCESSFULLY_LOADED -> {
+                var future = player.getTag(WAITING_FOR_RP_TAG);
+                if (future != null) {
+                    future.complete(null);
+                    player.removeTag(WAITING_FOR_RP_TAG);
+                }
+            }
+        }
+    }
+
     private void handleConfig(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
         logger.info("config - {}", player.getUsername());
+
+        if (event.isFirstConfig()) {
+
+            // Send resource pack if present
+            var runtime = ServerRuntime.getRuntime();
+            var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
+            if (!resourcePackHash.equals("dev")) {
+                var url = String.format(RESOURCE_PACK_URL, runtime.commit());
+                logger.info("Sending resource pack {} ({}) to {}", url, resourcePackHash, player.getUsername());
+                player.setResourcePack(ResourcePack.forced(RESOURCE_PACK_ID, url, resourcePackHash)); //todo
+                //todo in minestom it would be nice to have callback argument here to receive updates from resource pack status rather than having to do it on your own
+
+                var future = new CompletableFuture<Void>();
+                player.setTag(WAITING_FOR_RP_TAG, future);
+                future.join();
+            }
+        }
 
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld == null) {
@@ -432,7 +470,6 @@ public class DevServer {
         player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
 
         event.setSpawningInstance(imw.instance());
-
     }
 
     private void handleDisconnect(PlayerDisconnectEvent event) {
@@ -594,14 +631,6 @@ public class DevServer {
         rebuildOnlinePlayersRegex();
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
-
-        // Send resource pack if present
-        var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
-        if (!resourcePackHash.equals("dev")) {
-            var url = String.format(RESOURCE_PACK_URL, runtime.commit());
-            logger.info("Sending resource pack {} ({}) to {}", url, resourcePackHash, player.getUsername());
-            player.setResourcePack(ResourcePack.forced(url, resourcePackHash));
-        }
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
