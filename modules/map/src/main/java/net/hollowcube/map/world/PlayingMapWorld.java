@@ -51,7 +51,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     private static final BadSprite FINISHED_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/finished"));
 
     // If set, indicates that the player is an editor.
-    private static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
+    public static final Tag<Boolean> TAG_PLAYING = Tag.Boolean("mapworld/playing").defaultValue(false);
 
     private final MapServer server;
     private final MapData map;

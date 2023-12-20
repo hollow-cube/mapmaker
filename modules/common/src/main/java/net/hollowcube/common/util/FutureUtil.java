@@ -35,6 +35,16 @@ public final class FutureUtil {
         };
     }
 
+    public static void submitVirtual(@NotNull Runnable runnable) {
+        Thread.startVirtualThread(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
+        });
+    }
+
     public static void sleep(long millis) {
         try {
             Thread.sleep(millis);
