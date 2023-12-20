@@ -144,6 +144,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new TeleportCommand());
         commandManager.register(new GiveCommand());
 
+        commandManager.register(new PHeadCommand());
+
         commandManager.register(new BiomesCommand());
         commandManager.register(new SetBiomeCommand());
 

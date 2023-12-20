@@ -4,14 +4,15 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 
 import java.util.Collection;
 import java.util.List;
 
-public class PlayerHeadBlockHandler implements BlockHandler {
-    private static final Tag<@Nullable String> NOTE_BLOCK_SOUND = Tag.String("note_block_sound");
+import static net.hollowcube.map.block.handler.BlockHandlerHelpers.applyItemData;
 
+public class PlayerHeadBlockHandler implements BlockHandler {
+    private static final Tag<NBT> SKULL_OWNER = Tag.NBT("SkullOwner");
 
     public static final NamespaceID ID = NamespaceID.from("minecraft:player_head");
 
@@ -24,9 +25,15 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     }
 
     @Override
+    public void onPlace(@NotNull BlockHandler.Placement placement) {
+        if (!(placement instanceof PlayerPlacement p)) return;
+
+        applyItemData(p); // Add the item NBT to the block
+    }
+
+    @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        //todo head data
-        return List.of(NOTE_BLOCK_SOUND);
+        return List.of(SKULL_OWNER);
     }
 
 }

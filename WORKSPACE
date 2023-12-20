@@ -105,7 +105,7 @@ maven_install(
 
         # Minestom
         "dev.hollowcube:minestom-ce-snapshots:1_20_4-e2836b7cee",
-        "dev.hollowcube:polar:1.6.0",
+        "dev.hollowcube:polar:1.6.1",
         "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
