@@ -645,6 +645,9 @@ public class DevServer {
         // Add the player to the default team, todo do this based on rank
         player.setTeam(CoreTeams.DEFAULT);
 
+        // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
+        player.sendPacket(player.getMetadataPacket());
+
         // Alpha watermark
         String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
@@ -666,7 +669,7 @@ public class DevServer {
         }
 
         player.sendPacket(EMOJIS_PACKET);
-        
+
         rebuildOnlinePlayersRegex();
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
