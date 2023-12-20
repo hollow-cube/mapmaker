@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class FlySpeedCommand extends Command {
+    private static final float DEFAULT_SPEED = 0.05f;
+
     private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f)
             .defaultValue(1.0f)
             .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
@@ -23,12 +25,18 @@ public class FlySpeedCommand extends Command {
 
     private void handleSetFlySpeed(@NotNull Player player, @NotNull CommandContext context) {
         float flySpeedArg = context.get(speedArg);
-        if (flySpeedArg <= .5f) {
-            player.setFlyingSpeed(0.0f);
-            player.sendMessage(MapMessages.COMMAND_FLY_SPEED_CHANGED.with(0));
+
+        player.setFlyingSpeed(DEFAULT_SPEED * flySpeedArg);
+        player.sendMessage(MapMessages.COMMAND_FLY_SPEED_CHANGED.with(formatSpeed(flySpeedArg)));
+    }
+
+    private @NotNull String formatSpeed(float speed) {
+        if (speed == (int) speed) {
+            // If the float is an integer, format without decimal places
+            return String.valueOf((int) speed);
         } else {
-            player.setFlyingSpeed((flySpeedArg / 10.0f) - .05f);
-            player.sendMessage(MapMessages.COMMAND_FLY_SPEED_CHANGED.with(flySpeedArg));
+            // If the float has a fractional part, format with one decimal place
+            return String.format("%.1f", speed);
         }
     }
 }
