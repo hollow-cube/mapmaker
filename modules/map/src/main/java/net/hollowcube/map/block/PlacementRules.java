@@ -135,7 +135,7 @@ public final class PlacementRules {
 
         register(Block.CONDUIT, WaterloggedPlacementRule::new);
         register(BlockTags.CORAL, WaterloggedPlacementRule::new);
-        register(BlockTags.CORAL_FAN, WaterloggedPlacementRule::new); //todo needs wall placement
+        register(BlockTags.CORAL_FAN, CoralFanPlacementRule::new);
 
         // Annoying single use wall of shame >:(
 

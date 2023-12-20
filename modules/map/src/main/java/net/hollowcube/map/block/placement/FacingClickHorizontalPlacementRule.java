@@ -29,23 +29,28 @@ public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
         return switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> block.withProperty(PROP_FACING, blockFace.name().toLowerCase());
             case TOP, BOTTOM -> {
-                var instance = placementState.instance();
-
-                var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
-                var facingFace = BlockFace.fromYaw(playerPosition.yaw());
-                for (var neighborFace : getFaceOrder(facingFace)) {
-                    var neighbor = instance.getBlock(placementState.placePosition().relative(neighborFace));
-                    if (neighbor.isSolid()) {
-                        yield block.withProperty(PROP_FACING, neighborFace.getOppositeFace().name().toLowerCase());
-                    }
-                }
-
-                yield null;
+                var implicitFace = getImplicitFace(placementState);
+                yield implicitFace == null ? null : block.withProperty(PROP_FACING, implicitFace.name().toLowerCase());
             }
         };
     }
 
-    private @NotNull BlockFace[] getFaceOrder(@NotNull BlockFace facingFace) {
+    // Computes the horizontal face "closest" to the player in case they clicked the top or bottom face.
+    // Returns null if there are no solid blocks to place against
+    static @Nullable BlockFace getImplicitFace(@NotNull PlacementState placement) {
+        var instance = placement.instance();
+        var playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
+        var facingFace = BlockFace.fromYaw(playerPosition.yaw());
+        for (var neighborFace : getFaceOrder(facingFace)) {
+            var neighbor = instance.getBlock(placement.placePosition().relative(neighborFace));
+            if (neighbor.isSolid()) {
+                return neighborFace.getOppositeFace();
+            }
+        }
+        return null;
+    }
+
+    private static @NotNull BlockFace[] getFaceOrder(@NotNull BlockFace facingFace) {
         return new BlockFace[]{
                 facingFace, // Front
                 HORIZONTAL_FACES.get((HORIZONTAL_FACES.indexOf(facingFace) + 1) % HORIZONTAL_FACES.size()), // CW
