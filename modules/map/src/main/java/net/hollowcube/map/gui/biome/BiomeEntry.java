@@ -27,8 +27,12 @@ public class BiomeEntry extends View {
         this.biomeInfo = biomeInfo;
         this.container = container;
 
-        // If no biome was given, this is the "add" button
-        typeSwitch.setOption(biomeInfo == null ? 0 : (biomeInfo.isLoaded() ? 1 : 2));
+        int type = 1; // add (disabled)
+        if (biomeInfo != null)
+            type = biomeInfo.isLoaded() ? 2 : 3;
+        else if (container.size() < container.maxSize())
+            type = 0;
+        typeSwitch.setOption(type);
         if (biomeInfo != null) {
             editButton.setItemSprite(ItemStack.of(biomeInfo.getDisplayItem()));
             editButtonUnloaded.setItemSprite(ItemStack.of(biomeInfo.getDisplayItem()));

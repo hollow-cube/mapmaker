@@ -51,9 +51,9 @@ public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
 //        var memoryUsageBarPos = new Pos(-3 + 0.001, 41.35, 1.76);
 
         // Real positions
-        var staticTextPos = new Pos(-112.53, 72.15, -52.999).add(-22, -9, -20);
-        var tickTimeBarPos = new Pos(-113.76, 73.1, -52.998).add(-22, -9, -20);
-        var memoryUsageBarPos = new Pos(-113.76, 72.35, -52.998).add(-22, -9, -20);
+        var staticTextPos = new Pos(-112.53 - 22, 72.15 - 9, -52.999 - 20);
+        var tickTimeBarPos = new Pos(-113.76 - 22, 73.1 - 9, -52.998 - 20);
+        var memoryUsageBarPos = new Pos(-113.76 - 22, 72.35 - 9, -52.998 - 20);
 
         leftText = createTextEntity(server.world().instance(), staticTextPos);
         rightText = createTextEntity(server.world().instance(), staticTextPos);

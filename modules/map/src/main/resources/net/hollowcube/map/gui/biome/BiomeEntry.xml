@@ -3,6 +3,8 @@
     <switch id="type">
         <!-- Add icon -->
         <button id="add_btn" translationKey="gui.biome_list.entry.add" sprite="green_concrete"/>
+        <!-- Add icon (disabled) -->
+        <button id="add_btn" translationKey="gui.biome_list.entry.add.disabled" sprite="green_concrete"/>
         <!-- Editor link -->
         <button id="edit_btn" translationKey="gui.biome_list.entry" sprite="paper"/>
         <!-- Editor link (unloaded) -->
