@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -7,14 +8,19 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class SaveState {
+    private static final Logger logger = LoggerFactory.getLogger(SaveState.class);
+
     public static final Tag<SaveState> TAG = Tag.Transient("mapmaker:map/save_state");
 
     public static @NotNull SaveState fromPlayer(@NotNull Player player) {
@@ -169,8 +175,21 @@ public class SaveState {
     public @Nullable List<@NotNull ItemStack> getInventoryItems() {
         var inventory = inventory();
         if (inventory == null) return null;
-        return new NetworkBuffer(ByteBuffer.wrap(inventory))
-                .readCollection(NetworkBuffer.ITEM);
+        try {
+            var compound = (NBTCompound) new NetworkBuffer(ByteBuffer.wrap(inventory)).read(NetworkBuffer.NBT);
+            var items = compound.<NBTCompound>getList("Items");
+            if (items == null) return null;
+            return items.asListView().stream().map(ItemStack::fromItemNBT).toList();
+        } catch (Exception e) {
+            try {
+                logger.warn("Failed to read modern inventory, trying legacy: {}", e.getMessage());
+                return new NetworkBuffer(ByteBuffer.wrap(inventory))
+                        .readCollection(NetworkBuffer.ITEM);
+            } catch (Exception e2) {
+                MinecraftServer.getExceptionManager().handleException(e2);
+                return null;
+            }
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -178,7 +197,13 @@ public class SaveState {
         if (items == null) {
             this.inventory = null;
         } else {
-            this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.writeCollection(NetworkBuffer.ITEM, items)));
+            var entries = new ArrayList<NBTCompound>();
+            for (var item : items) entries.add(item.toItemNBT());
+            var inventoryTag = new NBTCompound(Map.of(
+                    "Items", new NBTList<>(NBTType.TAG_Compound, entries)
+                    // Space left for other tags
+            ));
+            this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.write(NetworkBuffer.NBT, inventoryTag)));
         }
         updates.setInventory(this.inventory);
     }
