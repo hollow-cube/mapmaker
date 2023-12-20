@@ -13,16 +13,31 @@ public class ArgumentInt extends Argument<Integer> {
         super(id);
     }
 
+    /**
+     * inclusive
+     *
+     * @param min
+     * @return
+     */
     public @NotNull ArgumentInt min(int min) {
         this.min = min;
         return this;
     }
 
+    /**
+     * inclusive
+     *
+     * @param max
+     * @return
+     */
     public @NotNull ArgumentInt max(int max) {
         this.max = max;
         return this;
     }
 
+    /**
+     * both inclusive
+     */
     public @NotNull ArgumentInt clamp(int min, int max) {
         this.min = min;
         this.max = max;
