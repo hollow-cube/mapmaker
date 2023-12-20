@@ -11,7 +11,7 @@ public class HubSpawnCommand extends Command {
     private final HubServerBase hubServerBase;
 
     public HubSpawnCommand(HubServerBase hubServerBase) {
-        super("spawn");
+        super("spawn", "hub");
 
         this.hubServerBase = hubServerBase;
         addSyntax(playerOnly(this::handleSpawn));
