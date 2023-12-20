@@ -77,6 +77,7 @@ import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
@@ -185,6 +186,7 @@ public class DevServer {
     public static Pattern onlinePlayersPattern = Pattern.compile("");
     public static final Map<String, Component> EMOJIS;
     public static final Map<String, List<String>> EMOJIS_BY_CATEGORY;
+    private static final PlayerInfoUpdatePacket EMOJIS_PACKET;
     public static final Sound TAG_DING = Sound.sound()
             .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
             .source(Sound.Source.PLAYER)
@@ -220,7 +222,8 @@ public class DevServer {
         for (var entry : raw.entrySet()) {
             var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(entry.getValue()), entry.getValue());
             var hoverText = Component.text(":" + entry.getKey() + ":", NamedTextColor.WHITE);
-            result.put(entry.getKey(), Component.text(sprite.fontChar(), FontUtil.NO_SHADOW).hoverEvent(HoverEvent.showText(hoverText)));
+            result.put(entry.getKey(), Component.text(sprite.fontChar(), FontUtil.NO_SHADOW)
+                    .hoverEvent(HoverEvent.showText(hoverText)));
         }
         EMOJIS = Map.copyOf(result);
 
@@ -229,6 +232,18 @@ public class DevServer {
         byCategory.put("ꜰᴀᴄᴇѕ", List.copyOf(faceEmojis.stream().map(Map.Entry::getKey).toList()));
         byCategory.put("ᴍɪѕᴄ", List.copyOf(miscEmojis.stream().map(Map.Entry::getKey).toList()));
         EMOJIS_BY_CATEGORY = byCategory;
+
+        var playerInfos = new ArrayList<PlayerInfoUpdatePacket.Entry>();
+        for (var emoji : allEmojis) {
+            playerInfos.add(new PlayerInfoUpdatePacket.Entry(
+                    UUID.randomUUID(), ":" + emoji.getKey() + ":",
+                    List.of(), false, 0, null, null, null
+            ));
+        }
+        EMOJIS_PACKET = new PlayerInfoUpdatePacket(
+                EnumSet.of(PlayerInfoUpdatePacket.Action.ADD_PLAYER, PlayerInfoUpdatePacket.Action.UPDATE_LISTED),
+                playerInfos
+        );
     }
 
     @Blocking
@@ -650,6 +665,8 @@ public class DevServer {
             return;
         }
 
+        player.sendPacket(EMOJIS_PACKET);
+        
         rebuildOnlinePlayersRegex();
 
         //todo this gamemode/fly/permission level stuff should be handled by the hub server
