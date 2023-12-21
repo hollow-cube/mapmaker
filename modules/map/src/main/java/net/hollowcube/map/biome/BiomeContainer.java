@@ -77,7 +77,7 @@ public class BiomeContainer {
     }
 
     public int maxSize() {
-        return 5;
+        return 15;
     }
 
     public @NotNull Collection<BiomeInfo> values() {
