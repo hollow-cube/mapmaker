@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
+import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
@@ -17,6 +19,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
+import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
@@ -24,10 +27,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
+@AutoService(HubFeature.class)
 @SuppressWarnings("UnstableApiUsage")
-public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
+public class CyberpunkStatDisplayFeature implements HubFeature {
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
     private static final BenchmarkManager BENCHMARK_MANAGER = MinecraftServer.getBenchmarkManager();
 
@@ -36,12 +39,13 @@ public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
     private static final double MAX_WIDTH = 2.48;
 
     private final AtomicReference<TickMonitor> LAST_TICK = new AtomicReference<>();
-    private final TextDisplayMeta leftText;
-    private final TextDisplayMeta rightText;
-    private final BlockDisplayMeta tickTimeBar;
-    private final BlockDisplayMeta memoryUsageBar;
+    private TextDisplayMeta leftText;
+    private TextDisplayMeta rightText;
+    private BlockDisplayMeta tickTimeBar;
+    private BlockDisplayMeta memoryUsageBar;
 
-    public CyberpunkStatDisplay(@NotNull HubServer server) {
+    @Override
+    public void init(@NotNull HubServer hub) {
         EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
         BENCHMARK_MANAGER.enable(Duration.of(2, TimeUnit.SECOND));
 
@@ -51,17 +55,17 @@ public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
 //        var memoryUsageBarPos = new Pos(-3 + 0.001, 41.35, 1.76);
 
         // Real positions
-        var staticTextPos = new Pos(-112.53 - 22, 72.15 - 9, -52.999 - 20);
-        var tickTimeBarPos = new Pos(-113.76 - 22, 73.1 - 9, -52.998 - 20);
-        var memoryUsageBarPos = new Pos(-113.76 - 22, 72.35 - 9, -52.998 - 20);
+        var staticTextPos = new Pos(-112.53 - 32, 72.15 - 9, -52.999 - 20);
+        var tickTimeBarPos = new Pos(-113.76 - 32, 73.1 - 9, -52.998 - 20);
+        var memoryUsageBarPos = new Pos(-113.76 - 32, 72.35 - 9, -52.998 - 20);
 
-        leftText = createTextEntity(server.world().instance(), staticTextPos);
-        rightText = createTextEntity(server.world().instance(), staticTextPos);
-        tickTimeBar = createBarEntity(server.world().instance(), tickTimeBarPos);
-        memoryUsageBar = createBarEntity(server.world().instance(), memoryUsageBarPos);
+        leftText = createTextEntity(hub.instance(), staticTextPos);
+        rightText = createTextEntity(hub.instance(), staticTextPos);
+        tickTimeBar = createBarEntity(hub.instance(), tickTimeBarPos);
+        memoryUsageBar = createBarEntity(hub.instance(), memoryUsageBarPos);
         // Add backgrounds for the bars
-        createBarEntity(server.world().instance(), tickTimeBarPos.sub(0, 0, 0.001));
-        createBarEntity(server.world().instance(), memoryUsageBarPos.sub(0, 0, 0.001));
+        createBarEntity(hub.instance(), tickTimeBarPos.sub(0, 0, 0.001));
+        createBarEntity(hub.instance(), memoryUsageBarPos.sub(0, 0, 0.001));
 
         // Static title text, no need to update all the time
         leftText.setText(Component.text()
@@ -76,10 +80,12 @@ public class CyberpunkStatDisplay implements Supplier<TaskSchedule> {
         // Align right
         rightText.setAlignLeft(false);
         rightText.setAlignRight(true);
+
+        // Start the task
+        hub.scheduler().submitTask(this::handleDisplayUpdate, ExecutionType.SYNC);
     }
 
-    @Override
-    public TaskSchedule get() {
+    public TaskSchedule handleDisplayUpdate() {
         var tickMonitor = LAST_TICK.get();
         if (tickMonitor == null) return TaskSchedule.tick(40); // sanity
 

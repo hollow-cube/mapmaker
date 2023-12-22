@@ -20,7 +20,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 @AutoService(FeatureProvider.class)
 public class TimerFeatureProvider implements FeatureProvider {
@@ -80,7 +80,7 @@ public class TimerFeatureProvider implements FeatureProvider {
             time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
         }
 
-        var text = formatPlaytime(time, false);
+        var text = formatMapPlaytime(time, false);
 
         builder.pushColor(FontUtil.NO_SHADOW);
         builder.pos(-TIMER_CONTAINER.width() / 2).drawInPlace(TIMER_CONTAINER);

@@ -29,12 +29,40 @@ public final class NumberUtil {
         return str;
     }
 
-    public static @NotNull String formatPlaytime(long time, boolean roundToTicks) {
+    public static @NotNull String formatMapPlaytime(long time, boolean roundToTicks) {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
         long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
         if (roundToTicks) milliseconds -= milliseconds % 50;
         return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+    }
+
+    public static @NotNull String formatPlayerPlaytime(long time) {
+        var result = new StringBuilder();
+        var days = time / 86400000;
+        if (days > 0) {
+            result.append(days).append("d ");
+            time %= 86400000;
+        }
+
+        var hours = time / 3600000;
+        if (hours > 0) {
+            result.append(hours).append("h ");
+            time %= 3600000;
+        }
+
+        var minutes = time / 60000;
+        if (minutes > 0) {
+            result.append(minutes).append("m");
+            time %= 60000;
+        }
+
+        if (result.isEmpty()) {
+            // Less than 1m
+            return "0m";
+        }
+
+        return result.toString();
     }
 
     private NumberUtil() {

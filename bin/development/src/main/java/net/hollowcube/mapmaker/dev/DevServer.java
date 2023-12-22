@@ -81,7 +81,6 @@ import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.TaskSchedule;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -97,7 +96,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -628,13 +626,6 @@ public class DevServer {
         setNoGravity(true);
     }};
 
-    Entity smallHouseEntity = new Entity(EntityType.ITEM_DISPLAY) {{
-        hasPhysics = false;
-        setNoGravity(true);
-    }};
-
-    private boolean isStuffGoing = false;
-
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
@@ -691,7 +682,6 @@ public class DevServer {
             builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
             var cubitText = NumberUtil.formatCurrency(playerData.cubits());
             builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
-//            builder.pos(56).append(font, "9.99b");
         });
 
         Thread.startVirtualThread(() -> {
@@ -744,109 +734,6 @@ public class DevServer {
         lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 41, -19.8, 90, 0)).join();
         lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
         lbTextMeta2.setScale(new Vec(1.75));
-
-        var smallHouseMeta = (ItemDisplayMeta) smallHouseEntity.getEntityMeta();
-        smallHouseMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(5)));
-        smallHouseMeta.setScale(new Vec(4));
-        smallHouseEntity.setInstance(player.getInstance(), new Pos(-38 + 0.5, 43, 54 + 0.5, 0, -90)).join();
-//        smallHouseEntity.setInstance(player.getInstance(), player.getPosition().add(0, 5, 0)).join();
-        smallHouseMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
-//        smallHouseMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into());
-
-
-        if (!isStuffGoing) {
-            isStuffGoing = true;
-
-            final var target = new AtomicInteger();
-            final int duration = 5;
-            MinecraftServer.getSchedulerManager().submitTask(() -> {
-                smallHouseMeta.setNotifyAboutChanges(false);
-
-                smallHouseMeta.setTransformationInterpolationStartDelta(0);
-                smallHouseMeta.setTransformationInterpolationDuration(duration * 20);
-//            smallHouseMeta.setTranslation(new Vec(0, ThreadLocalRandom.current().nextInt(5), 0));
-                smallHouseMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(target.getAndAdd(90))).into());
-
-                smallHouseMeta.setNotifyAboutChanges(true);
-                return TaskSchedule.seconds(duration);
-            });
-        }
-
-//        Scoreboards.showPlayerLobbyScoreboard(player);
-//        Scoreboards.setScoreboardVisibility(player, Boolean.TRUE);
-//        TabLists.showPlayerGlobalTabList(player);
-
-//        var textEntity = new Entity(EntityType.TEXT_DISPLAY){{
-//            hasPhysics = false;
-//            setNoGravity(true);
-//        }};
-//        var textMeta = (TextDisplayMeta) textEntity.getEntityMeta();
-//
-//        var lbData = mapService.getPlaytimeLeaderboard("dec02f24-8f84-4e25-b0ea-2babcb62fc5c", "aceb326f-da15-45bc-bf2f-11940c21780c")
-//                .toComponents(playerService, true);
-//        if (lbData == null) {
-//            textMeta.setText(Component.text("No leaderboard data"));
-//        } else {
-//            textMeta.setText(lbData.stream().reduce((a, b) -> a.append(Component.newline()).append(b)).orElse(Component.text("No leaderboard data")));
-//        }
-//        textMeta.setTextOpacity((byte) 0xFF);
-//        textMeta.setScale(new Vec(1, 1, 1));
-//
-//        textEntity.setInstance(player.getInstance(), new Vec(0, 42, 0)).join();
-
-//        var tube = new Entity(EntityType.ITEM_DISPLAY) {{
-//            hasPhysics = false;
-//            setNoGravity(true);
-//        }};
-//        var tubeMeta = (ItemDisplayMeta) tube.getEntityMeta();
-//        tubeMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1004)).build());
-//        tubeMeta.setScale(new Vec(4, 4, 4));
-//        tubeMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
-//        //todo set width and height of model
-//        tube.setInstance(hub.world().instance(), new Vec(0, 42, 0)).join();
-//
-//        var arm = new Entity(EntityType.ITEM_DISPLAY) {{
-//            hasPhysics = false;
-//        }};
-//        arm.setNoGravity(true);
-//        var armMeta = (ItemDisplayMeta) arm.getEntityMeta();
-//        armMeta.setItemStack(ItemStack.builder(Material.STICK).meta(b -> b.customModelData(1005)).build());
-//        armMeta.setScale(new Vec(4, 4, 4));
-//        armMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
-//        //todo set width and height of model
-//        arm.setInstance(player.getInstance(), player.getPosition().sub(0, 31, 0)).join();
-//        player.getInstance().setBlock(player.getPosition().sub(0, 31, 0), Block.TNT);
-//
-//        var pos = new AtomicDouble(0);
-//        MinecraftServer.getSchedulerManager()
-//                .buildTask(() -> {
-//                    tubeMeta.setNotifyAboutChanges(false);
-//                    armMeta.setNotifyAboutChanges(false);
-//
-//                    tubeMeta.setInterpolationDuration(80);
-//                    armMeta.setInterpolationDuration(80);
-//
-//                    tubeMeta.setInterpolationStartDelta(1);
-//                    armMeta.setInterpolationStartDelta(1);
-//
-//                    var newRot = pos.addAndGet(180) % 360;
-//                    var rot = new Quaternion(new Vec(0, 1, 0), Math.toRadians(newRot));
-//                    tubeMeta.setLeftRotation(rot.into());
-//                    armMeta.setRightRotation(rot.into());
-//
-//                    if (newRot == 180) {
-//                        armMeta.setTranslation(new Vec(0, 2, 0));
-//                    } else {
-//                        armMeta.setTranslation(new Vec(0, 0, 0));
-//                    }
-//
-//                    tubeMeta.setNotifyAboutChanges(true);
-//                    armMeta.setNotifyAboutChanges(true);
-//                })
-//                .delay(5, net.minestom.server.utils.time.TimeUnit.SECOND)
-//                .repeat(5, net.minestom.server.utils.time.TimeUnit.SECOND)
-//                .schedule();
-
     }
 
     private void broadcastTabHeaderAndFooter() {

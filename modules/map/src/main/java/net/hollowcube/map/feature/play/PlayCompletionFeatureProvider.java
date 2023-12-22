@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
-import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 @AutoService(FeatureProvider.class)
 public class PlayCompletionFeatureProvider implements FeatureProvider {
@@ -89,12 +89,12 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
             var bestSaveState = FutureUtil.getUnchecked(finishFuture);
             if (bestSaveState == null) {
-                player.sendMessage(Component.translatable("map.completed.first", Component.text(formatPlaytime(saveState.getPlaytime(), true))));
+                player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(saveState.getPlaytime(), true))));
             } else {
                 var diffPlaytime = bestSaveState.getPlaytime() - saveState.getPlaytime();
                 player.sendMessage(Component.translatable("map.completed.with_prior",
-                        Component.text(formatPlaytime(saveState.getPlaytime(), true)),
-                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatPlaytime(Math.abs(diffPlaytime), true), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+                        Component.text(formatMapPlaytime(saveState.getPlaytime(), true)),
+                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), true), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
             }
 
             FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));

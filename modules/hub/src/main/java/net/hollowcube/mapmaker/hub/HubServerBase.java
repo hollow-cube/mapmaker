@@ -13,13 +13,11 @@ import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
-import net.hollowcube.mapmaker.hub.feature.misc.CyberpunkStatDisplay;
-import net.hollowcube.mapmaker.hub.feature.motw.CountdownTimer;
+import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -32,18 +30,20 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.SchedulerManager;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 
 public abstract class HubServerBase implements HubServer {
     //todo one readiness check should be ensuring the world is loaded
 
-    private static final SchedulerManager SCHEDULER_MANAGER = MinecraftServer.getSchedulerManager();
+    private static final Logger logger = LoggerFactory.getLogger(HubServerBase.class);
 
     static {
         // Idk why the static initializer is not triggering from other usages
@@ -108,13 +108,11 @@ public abstract class HubServerBase implements HubServer {
         commandManager.register(new HubFlyCommand(permManager()));
         commandManager.register(new HubSpawnCommand(this));
 
-        // Map of the week
-        var motwTimer = new CountdownTimer(world.instance());
-        SCHEDULER_MANAGER.submitTask(motwTimer, ExecutionType.SYNC);
-
-        // Misc hub stuff
-        var hubStatDisplay = new CyberpunkStatDisplay(this);
-        SCHEDULER_MANAGER.submitTask(hubStatDisplay, ExecutionType.SYNC);
+        // Other features
+        for (var feature : ServiceLoader.load(HubFeature.class)) {
+            logger.info("Loading feature {}", feature.getClass().getName());
+            feature.init(this);
+        }
     }
 
     @Override
@@ -124,6 +122,10 @@ public abstract class HubServerBase implements HubServer {
 
     public HubHandler handler() {
         return mapHandler;
+    }
+
+    public @NotNull Scheduler scheduler() {
+        return world().instance().scheduler();
     }
 
     @Override

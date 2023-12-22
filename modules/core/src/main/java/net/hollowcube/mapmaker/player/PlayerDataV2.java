@@ -25,6 +25,9 @@ public class PlayerDataV2 {
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private PlayerSettings settings = new PlayerSettings();
 
+    private transient long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
+    private long playtime; // in milliseconds since last save (when session was created)
+
     private int coins = 0;
     private int cubits = 0;
 
@@ -60,6 +63,18 @@ public class PlayerDataV2 {
 
     public @NotNull PlayerSettings settings() {
         return settings;
+    }
+
+    public long storedPlaytime() {
+        return playtime;
+    }
+
+    public long sessionPlaytime() {
+        return System.currentTimeMillis() - sessionStart;
+    }
+
+    public long totalPlaytime() {
+        return storedPlaytime() + sessionPlaytime();
     }
 
     public int coins() {

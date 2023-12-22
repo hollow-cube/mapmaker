@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.hollowcube.mapmaker.util.NumberUtil.formatPlaytime;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public record LeaderboardData(
         @NotNull List<Entry> top,
@@ -72,7 +72,7 @@ public record LeaderboardData(
 
             var playerName = playerService.getPlayerDisplayName2(entry.player()).build();
             comp.append(playerName).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])));
-            comp.append(Component.text(" " + formatPlaytime(entry.score(), true), TextColor.color(0xf2f2f2)));
+            comp.append(Component.text(" " + formatMapPlaytime(entry.score(), true), TextColor.color(0xf2f2f2)));
 
             result.add(comp.build());
 
@@ -84,36 +84,9 @@ public record LeaderboardData(
         }
 
         if (shouldShowSelf && player() != null) {
-            result.add(Component.text("Your time: " + formatPlaytime(player().score(), true) + " (#" + player().rank() + ")"));
+            result.add(Component.text("Your time: " + formatMapPlaytime(player().score(), true) + " (#" + player().rank() + ")"));
         }
 
         return result;
-    }
-
-    private static @NotNull String timeToFriendly(long timeInMs) {
-        var result = new StringBuilder();
-        var hours = timeInMs / 3600000;
-        if (hours > 0) {
-            result.append(hours).append("h ");
-            timeInMs %= 3600000;
-        }
-
-        var minutes = timeInMs / 60000;
-        if (minutes > 0) {
-            result.append(minutes).append("m ");
-            timeInMs %= 60000;
-        }
-
-        var seconds = timeInMs / 1000;
-        if (seconds > 0) {
-            result.append(seconds).append("s ");
-            timeInMs %= 1000;
-        }
-
-        if (timeInMs > 0) {
-            result.append(timeInMs).append("ms");
-        }
-
-        return result.toString();
     }
 }
