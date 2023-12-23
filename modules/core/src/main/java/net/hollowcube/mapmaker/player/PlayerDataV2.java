@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.player;
 
 import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -31,12 +32,19 @@ public class PlayerDataV2 {
     private int coins = 0;
     private int cubits = 0;
 
-    public PlayerDataV2() {
-    }
-
-    public PlayerDataV2(@NotNull String id, @NotNull String username, @NotNull Component displayName) {
+    public PlayerDataV2(String id, String username, @NotNull TextComponent displayName) {
         this.id = id;
         this.username = username;
+    }
+
+    public PlayerDataV2(String id, String username, DisplayName displayName, PlayerSettings settings, long playtime, int coins, int cubits) {
+        this.id = id;
+        this.username = username;
+        this.displayNameV2 = displayName;
+        this.settings = settings;
+        this.playtime = playtime;
+        this.coins = coins;
+        this.cubits = cubits;
     }
 
     public @NotNull PlayerDataUpdateRequest getUpdateRequest() {

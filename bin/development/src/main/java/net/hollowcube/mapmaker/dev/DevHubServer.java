@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class DevHubServer extends HubServerBase {
+    private final HubToMapBridge bridge;
+
     private final PlayerService playerService;
     private final SessionService sessionService;
     private final MapService mapService;
@@ -23,11 +25,16 @@ public class DevHubServer extends HubServerBase {
             @NotNull MapService mapService,
             @NotNull PermManager permManager
     ) {
-        super(bridge);
+        this.bridge = Objects.requireNonNull(bridge);
         this.playerService = Objects.requireNonNull(playerService);
         this.sessionService = Objects.requireNonNull(sessionService);
         this.mapService = Objects.requireNonNull(mapService);
         this.permManager = Objects.requireNonNull(permManager);
+    }
+
+    @Override
+    public @NotNull HubToMapBridge bridge() {
+        return this.bridge;
     }
 
     @Override

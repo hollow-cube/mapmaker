@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
@@ -178,7 +179,7 @@ public class EditMap extends View {
     }
 
     public void showMap(@NotNull MapData map, int slot) {
-        this.map = map;
+        this.map = Objects.requireNonNull(map);
         this.slot = slot;
 
         for (var slotId : slotIds) {

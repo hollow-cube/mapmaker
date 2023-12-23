@@ -122,6 +122,8 @@ maven_install(
         "com.google.protobuf:protobuf-java:3.24.4",
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "io.getunleash:unleash-client-java:9.2.0",
+        "com.velocitypowered:velocity-api:3.1.1",
+        "com.google.inject:guice:5.0.1",
 
         # Adventure
         "net.kyori:adventure-api:4.12.0",
@@ -159,6 +161,7 @@ maven_install(
     repositories = [
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
+        "https://repo.papermc.io/repository/maven-public/",
     ],
 )
 

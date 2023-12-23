@@ -4,7 +4,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.command.HelpCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
@@ -50,7 +50,6 @@ public abstract class HubServerBase implements HubServer {
         new PlayerSpawnInInstanceEvent(null);
     }
 
-    private final HubToMapBridge bridge;
     private HubHandler mapHandler;
     private HubWorld world;
 
@@ -63,15 +62,6 @@ public abstract class HubServerBase implements HubServer {
             .addListener(PlayerStartFlyingEvent.class, this::handleDoubleJump)
             .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
-    public HubServerBase(@NotNull HubToMapBridge bridge) {
-        this.bridge = bridge;
-    }
-
-    @Override
-    public @NotNull HubToMapBridge bridge() {
-        return bridge;
-    }
-
     @Blocking
     public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService) {
         StaticAbuse.instance = this;
@@ -83,14 +73,16 @@ public abstract class HubServerBase implements HubServer {
                 "sessionService", sessionService(),
                 "mapService", mapService(),
                 "handler", mapHandler,
-                "bridge", bridge
+                "bridge", bridge()
         ));
 
         this.world = new HubWorld(this);
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
 
-        // Common commands
+        // Command init
+        commandManager.register(new HelpCommand(commandManager));
+
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand());
 
@@ -140,7 +132,7 @@ public abstract class HubServerBase implements HubServer {
         }
     }
 
-    private final Pos HUB_SPAWN_POINT = new Pos(0.5, 40, 0.5, 90, 0);
+    public final Pos HUB_SPAWN_POINT = new Pos(0.5, 40, 0.5, 90, 0);
 
     private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();

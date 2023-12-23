@@ -17,3 +17,8 @@ exports_files([
     "build_server.py",
     "build_client.py",
 ])
+
+exports_files([
+    "build_server.py",
+    "build_client.py",
+])

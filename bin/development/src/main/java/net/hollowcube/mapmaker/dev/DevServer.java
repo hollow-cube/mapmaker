@@ -24,14 +24,15 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.config.Config;
+import net.hollowcube.mapmaker.config.NewConfigProvider;
+import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.config.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
 import net.hollowcube.mapmaker.dev.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
-import net.hollowcube.mapmaker.dev.config.Config;
-import net.hollowcube.mapmaker.dev.config.NewConfigProvider;
-import net.hollowcube.mapmaker.dev.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -39,6 +40,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.metrics.Metric;
 import net.hollowcube.mapmaker.metrics.MetricType;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
@@ -47,7 +49,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -246,10 +247,10 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-        var velocitySecret = System.getenv("MAPMAKER_VELOCITY_SECRET");
-        if (velocitySecret != null) {
-            logger.info("Enabling velocity proxy...");
-            VelocityProxy.enable(velocitySecret);
+        var velocityConfig = configProvider.get(VelocityConfig.class);
+        if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
+            logger.info("Enabling modern forwarding...");
+            VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
             MojangAuth.init();
@@ -317,30 +318,9 @@ public class DevServer {
 
             packetListenerManager.setConfigurationListener(ClientResourcePackStatusPacket.class, this::handleResourcePackStatus);
 
-            hubCommandManager.register(new HelpCommand(hubCommandManager));
             mapCommandManager.register(new HelpCommand(mapCommandManager));
 //            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
 //            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
-//
-//            var arg = Argument.RelativeVec3("pos");
-//            var command = new Command("fuck") {
-//            };
-//            command.addSyntax((sender, context) -> {
-//                var newPos = context.get(arg);
-//                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
-//            }, arg);
-//            hubCommandManager.register(command);
-//
-//            var arg2 = Argument.GreedyString("pos");
-//            var command2 = new Command("fuck2") {
-//            };
-//            command2.addSyntax((sender, context) -> {
-//                var newPos = context.get(arg2);
-//                var m = (TextDisplayMeta) lbTextEntity.getEntityMeta();
-//                m.setScale(new Vec(Double.parseDouble(newPos)));
-////                lbTextEntity.teleport(Pos.fromPoint(newPos).withView(lbTextEntity.getPosition()));
-//            }, arg2);
-//            hubCommandManager.register(command2);
 
             var bridge = new DevServerBridge();
 
@@ -517,7 +497,7 @@ public class DevServer {
             if (!shuttingDown) {
                 Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
                 rebuildOnlinePlayersRegex();
-                broadcastTabHeaderAndFooter();
+                MiscFunctionality.broadcastTabList();
             }
 
             try {
@@ -627,28 +607,26 @@ public class DevServer {
     }};
 
     private void handleFirstSpawn(PlayerSpawnEvent event) {
+        // WARNING --------
+        // IF YOU ADD SOMETHING HERE, IT PROBABLY ALSO NEEDS TO BE ADDED TO THE
+        // SIMILAR FUNCTION IN HubServerImpl IN THE HUB BINARY MODULE.
+        // WARNING --------
         if (!event.isFirstSpawn()) return;
 
         var player = event.getPlayer();
         var playerData = PlayerDataV2.fromPlayer(player);
-        var runtime = ServerRuntime.getRuntime();
 
-        // Add the player to the default team, todo do this based on rank
-        player.setTeam(CoreTeams.DEFAULT);
+        player.setTeam(CoreTeams.DEFAULT); // todo do this based on rank
+        MiscFunctionality.sendBetaHeader(player);
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
         player.sendPacket(player.getMetadataPacket());
 
-        // Alpha watermark
-        String watermarkString = String.format("play.hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
-        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-        player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
-                .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld != null) {
             player.setDisplayName(playerData.displayName()); //todo this is a Minestom bug, the display name needs to be re-sent automatically.
-            broadcastTabHeaderAndFooter();
+            MiscFunctionality.broadcastTabList();
 
             var imw = FutureUtil.getUnchecked(targetWorld);
             if (false && imw instanceof PlayingMapWorld playingMapWorld) { // joinMapState == HubToMapBridge.JoinMapState.SPECTATING
@@ -689,7 +667,10 @@ public class DevServer {
         });
 
         player.setDisplayName(playerData.displayName());
-        broadcastTabHeaderAndFooter();
+        MiscFunctionality.broadcastTabList();
+
+
+        // GARBAGE THAT NEEDS TO BE MOVED!!!
 
         var screenMeta = (ItemDisplayMeta) screenEntity.getEntityMeta();
         screenMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(4)));
@@ -734,34 +715,6 @@ public class DevServer {
         lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 41, -19.8, 90, 0)).join();
         lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
         lbTextMeta2.setScale(new Vec(1.75));
-    }
-
-    private void broadcastTabHeaderAndFooter() {
-        var onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayerCount();
-        var playersText = onlinePlayers == 1 ? "ᴘʟᴀʏᴇʀ" : "ᴘʟᴀʏᴇʀѕ";
-        var playerCountText = FontUtil.rewrite("smallnums", "" + onlinePlayers);
-
-        var blueColor = TextColor.color(56, 140, 249);
-        var goldColor = TextColor.color(235, 188, 53);
-        var darkGrayColor = TextColor.color(0x696969);
-        var lightGrayColor = TextColor.color(0xB0B0B0); // or cccccc
-
-        var tabLogoSprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/tab/logo_outline"));
-        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 50); //todo where is the missing 2 coming from
-        var tabHeader = Component.text()
-                .appendNewline()
-                .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
-                .append(Component.text(cubeOffset + "ᴄʟᴏѕᴇᴅ ʙᴇᴛᴀ", darkGrayColor))
-                .appendNewline()
-                .build();
-        var tabFooter = Component.text()
-                .appendNewline()
-                .append(Component.text("ᴘʟᴀʏ.", lightGrayColor).append(Component.text("ʜᴏʟʟᴏᴡᴄᴜʙᴇ", goldColor)).append(Component.text(".ɴᴇᴛ", lightGrayColor))).appendNewline()
-                .append(Component.text(playerCountText, blueColor).append(Component.text(" " + playersText + " ᴏɴʟɪɴᴇ", darkGrayColor))).appendNewline()
-                .append(Component.text(FontUtil.computeOffset(125))) // Min width
-                .build();
-
-        Audiences.all().sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
     }
 
 }
