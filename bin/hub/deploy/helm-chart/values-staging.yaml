@@ -1,0 +1,19 @@
+replicaCount: 1
+
+env:
+  MAPMAKER_COMMIT_SHA: "$COMMIT_SHA"
+  MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
+
+  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka-kafka-bootstrap:9092"
+  #  MAPMAKER_PYROSCOPE_ENDPOINT: "http://pyroscope.mgmt.svc.cluster.local:4040"
+  MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
+  MAPMAKER_MAP_SERVICE_URL: "http://map-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_PLAYER_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_SPICEDB_URL: "spicedb:50051"
+  MAPMAKER_SPICEDB_TOKEN: "${SPICEDB_SECRET_KEY}"
+
+  MAPMAKER_UNLEASH_ADDRESS: "http://unleash.mgmt.svc.cluster.local:4242/api"
+  MAPMAKER_UNLEASH_TOKEN: "${UNLEASH_TOKEN}"
+
+  MAPMAKER_SPAWN_MAP_ID: "b210fa07-d64c-4100-a2db-1426c35b7533"

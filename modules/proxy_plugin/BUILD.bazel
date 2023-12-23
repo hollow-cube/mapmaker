@@ -1,0 +1,31 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_plugin(
+    name = "velocity_ap",
+    processor_class = "com.velocitypowered.api.plugin.ap.PluginAnnotationProcessor",
+    deps = ["@maven//:com_velocitypowered_velocity_api"],
+)
+
+java_library(
+    name = "velocity",
+    exported_plugins = [
+        "velocity_ap",
+    ],
+    exports = [
+        "@maven//:com_google_inject_guice",
+        "@maven//:com_velocitypowered_velocity_api",
+        "@maven//:org_slf4j_slf4j_api",
+    ],
+)
+
+java_library(
+    name = "proxy_plugin",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "velocity",
+        "//modules/core",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.dev.config;
+package net.hollowcube.mapmaker.config;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

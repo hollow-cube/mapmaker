@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.dev.config;
+package net.hollowcube.mapmaker.config;
 
 import net.hollowcube.common.config.ConfigPath;
 import net.hollowcube.common.config.ConfigProvider;
