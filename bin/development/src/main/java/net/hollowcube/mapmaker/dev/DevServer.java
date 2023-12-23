@@ -247,7 +247,8 @@ public class DevServer {
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-        var velocityConfig = configProvider.get(VelocityConfig.class);
+//        var velocityConfig = configProvider.get(VelocityConfig.class);
+        var velocityConfig = new VelocityConfig(System.getenv("MAPMAKER_VELOCITY_SECRET"));
         if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
             logger.info("Enabling modern forwarding...");
             VelocityProxy.enable(velocityConfig.secret());
