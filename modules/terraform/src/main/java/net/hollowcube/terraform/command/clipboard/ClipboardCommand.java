@@ -5,7 +5,7 @@ import net.hollowcube.command.Command;
 public class ClipboardCommand extends Command {
 
     public ClipboardCommand() {
-        super("c"); //todo aliases
+        super("c", "clipboard"); //todo aliases
 
         addSubcommand(new ClipClearCommand());
         addSubcommand(new ClipListCommand());

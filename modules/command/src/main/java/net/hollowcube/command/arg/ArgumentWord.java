@@ -11,7 +11,7 @@ import java.util.List;
 public class ArgumentWord extends Argument<String> {
     private List<String> values = null;
 
-    public ArgumentWord(@NotNull String id) {
+    ArgumentWord(@NotNull String id) {
         super(id);
     }
 
