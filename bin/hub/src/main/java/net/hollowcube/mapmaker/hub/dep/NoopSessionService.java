@@ -23,4 +23,19 @@ public class NoopSessionService implements SessionService {
     public void deleteSession(@NotNull String id) {
 
     }
+
+    @Override
+    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip) {
+        return null;
+    }
+
+    @Override
+    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id) {
+        return null;
+    }
+
+    @Override
+    public void deleteSessionV2(@NotNull String id) {
+
+    }
 }

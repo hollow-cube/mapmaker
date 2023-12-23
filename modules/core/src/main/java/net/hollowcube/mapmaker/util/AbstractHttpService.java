@@ -41,7 +41,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
             .create();
 
-    public static final String hostname;
+    public static final String hostname; //todo replace me with ServerRuntime call
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 

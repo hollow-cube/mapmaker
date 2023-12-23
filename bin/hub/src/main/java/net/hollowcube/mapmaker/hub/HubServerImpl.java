@@ -12,7 +12,10 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.PlayerServiceImpl;
+import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.player.SessionServiceImpl;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -157,14 +160,16 @@ class HubServerImpl extends HubServerBase {
         var player = event.getPlayer();
 
         try {
-            var playerData = sessionService.createSession(
-                    event.getPlayerUuid().toString(),
-                    event.getUsername(),
-                    "todo"
-            );
-            player.setTag(PlayerDataV2.TAG, playerData);
+            //todo
+//            var playerData = sessionService.createSession(
+//                    event.getPlayerUuid().toString(),
+//                    event.getUsername(),
+//                    "todo"
+//            );
+//            player.setTag(PlayerDataV2.TAG, playerData);
 
-            var mapPlayerData = mapService.getMapPlayerData(playerData.id());
+            var mapPlayerData = mapService.getMapPlayerData(event.getPlayerUuid().toString());
+//            var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
             logger.info("loaded map player data: {}", mapPlayerData);
         } catch (SessionService.UnauthorizedError ignored) {

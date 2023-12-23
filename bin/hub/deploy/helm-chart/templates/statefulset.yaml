@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "mapmaker-dev.fullname" . }}
   labels:
     {{- include "mapmaker-dev.labels" . | nindent 4 }}
 spec:
+  replicas: 2
   selector:
     matchLabels:
       {{- include "mapmaker-dev.selectorLabels" . | nindent 6 }}

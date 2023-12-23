@@ -14,6 +14,7 @@ java_library(
     exports = [
         "@maven//:com_google_inject_guice",
         "@maven//:com_velocitypowered_velocity_api",
+        "@maven//:net_kyori_adventure_api",
         "@maven//:org_slf4j_slf4j_api",
     ],
 )
@@ -28,4 +29,10 @@ java_library(
         "//modules/core",
         "@maven//:org_jetbrains_annotations",
     ],
+)
+
+java_binary(
+    name = "bin",
+    main_class = "com.velocitypowered.proxy.Velocity",
+    runtime_deps = ["proxy_plugin"],
 )
