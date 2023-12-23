@@ -12,3 +12,8 @@ java_binary(
         "@maven//:org_jetbrains_annotations",
     ],
 )
+
+exports_files([
+    "build_server.py",
+    "build_client.py",
+])

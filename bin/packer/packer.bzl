@@ -8,14 +8,7 @@ def packer_bundle(name, srcs, visibility = None):
             "en_US.json",
             "sprites.json",
         ],
-        cmd = """
-        $(location //bin/packer:packer) out_here_hack
-        echo "$(OUTS)" > output_files
-        for path in $$(cat output_files); do
-            file=$$(basename $$path)
-            cp server/$$file $$path
-        done
-        """,
+        cmd = "python3 bin/packer/build_server.py '$(location //bin/packer:packer)' $(OUTS)",
         tools = ["//bin/packer"],
         visibility = visibility,
     )
@@ -24,10 +17,7 @@ def packer_bundle(name, srcs, visibility = None):
         name = "packer_%s_client" % name,
         srcs = srcs,
         outs = ["client.zip"],
-        cmd = """
-            $(location //bin/packer:packer)
-            cd build/packer/client && zip -rq ../../../$(OUTS) .
-        """,
+        cmd = "python3 bin/packer/build_client.py '$(location //bin/packer:packer)' $(OUTS)",
         tools = ["//bin/packer"],
         visibility = visibility,
     )
