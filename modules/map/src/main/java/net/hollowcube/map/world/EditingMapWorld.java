@@ -18,7 +18,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -149,7 +148,7 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull Point spawnPoint() {
+    public @NotNull Pos spawnPoint() {
         return map.settings().getSpawnPoint();
     }
 

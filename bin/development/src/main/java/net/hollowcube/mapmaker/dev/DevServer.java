@@ -24,6 +24,7 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.config.Config;
 import net.hollowcube.mapmaker.config.NewConfigProvider;
 import net.hollowcube.mapmaker.config.VelocityConfig;
@@ -31,7 +32,6 @@ import net.hollowcube.mapmaker.config.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
@@ -57,7 +57,10 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
@@ -391,6 +394,13 @@ public class DevServer {
             var runtime = ServerRuntime.getRuntime();
             var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
             if (!resourcePackHash.equals("dev")) {
+
+                // TODO: NOTE ABOUT RESOURCE PACKS ON SPLIT SERVERS
+                // We should update the resource pack when joining any backend server which has a different pack loaded.
+                // We can generate a uuid seeded on the resource pack hash which would allow us to do this KIND OF.
+                // We might need to keep track of which resource pack the client has loaded, but its possible that you
+                // can pop then push the same ID and it wont do a RP reload which would be ideal. We'll see.
+
                 var url = String.format(RESOURCE_PACK_URL, runtime.commit());
                 logger.info("Sending resource pack {} ({}) to {}", url, resourcePackHash, player.getUsername());
                 player.setResourcePack(ResourcePack.forced(RESOURCE_PACK_ID, url, resourcePackHash)); //todo

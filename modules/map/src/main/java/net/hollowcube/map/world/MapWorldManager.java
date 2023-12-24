@@ -3,6 +3,7 @@ package net.hollowcube.map.world;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
@@ -52,6 +53,24 @@ public class MapWorldManager {
 
     public Map<InstanceId, Future<InternalMapWorld>> getActiveMaps() {
         return activeMaps;
+    }
+
+    @Blocking
+    public @NotNull Future<InternalMapWorld> getOrCreateMapWorld(@NotNull MapData map, ServerBridge.JoinMapState state) {
+        boolean isEditing = state == HubToMapBridge.JoinMapState.EDITING;
+        var activeWorld = activeMaps.get(new InstanceId(map.id(), isEditing));
+
+        // Create a new world if there is not one present
+        if (activeWorld == null) {
+            var world = isEditing ? new EditingMapWorld(server, map) : new PlayingMapWorld(server, map);
+            activeWorld = VIRTUAL_EXECUTOR.submit(() -> {
+                world.load();
+                return world;
+            });
+            activeMaps.put(new InstanceId(map.id(), isEditing), activeWorld);
+        }
+
+        return activeWorld;
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {

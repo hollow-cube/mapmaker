@@ -14,6 +14,8 @@ public class DevMapServer extends MapServerBase {
     private final MapService mapService;
     private final PermManager permManager;
 
+    private final MapToHubBridge bridge;
+
     public DevMapServer(
             @NotNull MapToHubBridge bridge,
             @NotNull PlayerService playerService,
@@ -21,11 +23,12 @@ public class DevMapServer extends MapServerBase {
             @NotNull MapService mapService,
             @NotNull PermManager permManager
     ) {
-        super(bridge);
         this.playerService = playerService;
         this.sessionService = sessionService;
         this.mapService = mapService;
         this.permManager = permManager;
+
+        this.bridge = bridge;
     }
 
     @Override
@@ -46,5 +49,10 @@ public class DevMapServer extends MapServerBase {
     @Override
     public @NotNull PermManager permManager() {
         return permManager;
+    }
+
+    @Override
+    public @NotNull MapToHubBridge bridge() {
+        return bridge;
     }
 }

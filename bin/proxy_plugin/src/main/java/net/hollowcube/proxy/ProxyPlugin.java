@@ -4,10 +4,13 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.player.SessionServiceImpl;
@@ -19,6 +22,8 @@ import java.net.InetSocketAddress;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
+    private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
+
     private final Logger logger;
     private final ProxyServer proxy;
 
@@ -30,6 +35,8 @@ public class ProxyPlugin {
         this.proxy = proxy;
 
         this.sessionService = new SessionServiceImpl("http://session-service:9124");
+
+        proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
 
         logger.info("hello, world!!!!");
     }
@@ -48,6 +55,22 @@ public class ProxyPlugin {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
         }
+    }
+
+    @Subscribe
+    public void handlePluginMessage(@NotNull PluginMessageEvent event) {
+        logger.info("plugin message: {}", event.getIdentifier());
+        if (!TRANSFER_MESSAGE_ID.equals(event.getIdentifier())) return;
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+
+        if (!(event.getSource() instanceof ServerConnection serverConn)) return;
+        var player = serverConn.getPlayer();
+
+        var serverName = new String(event.getData());
+        logger.info("transfering {} to {}", player.getUsername(), serverName);
+
+        var si = new ServerInfo("map-server", new InetSocketAddress(serverName, 25565));
+        player.createConnectionRequest(proxy.createRawRegisteredServer(si)).fireAndForget();
     }
 
     @Subscribe

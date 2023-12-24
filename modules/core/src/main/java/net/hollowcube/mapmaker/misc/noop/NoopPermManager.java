@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.dep;
+package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.perm.MapPerm;
 import net.hollowcube.mapmaker.perm.PermManager;

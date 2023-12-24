@@ -24,7 +24,6 @@ import net.hollowcube.map.terraform.MapServerModule;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
@@ -34,6 +33,7 @@ import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -64,7 +64,6 @@ public abstract class MapServerBase implements MapServer {
             .addListener(PlayerSpawnEvent.class, this::handleSpawn);
 
     private final MapWorldManager mwm = new MapWorldManager(this);
-    private final MapToHubBridge bridge;
     private final PlayerInviteService inviteService = new PlayerInviteServiceImpl(mwm);
 
     private MapMgmtConsumerImpl mapMgmtConsumer;
@@ -78,10 +77,6 @@ public abstract class MapServerBase implements MapServer {
     static {
         // Idk why the static initializer is not triggering from other usages
         new PlayerSpawnInInstanceEvent(null);
-    }
-
-    public MapServerBase(@NotNull MapToHubBridge bridge) {
-        this.bridge = bridge;
     }
 
     public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
@@ -100,7 +95,7 @@ public abstract class MapServerBase implements MapServer {
                 .globalCommandCondition(mapFilter(false, true, false))
                 .module(Terraform.BASE_MODULE)
                 .module(new MapServerModule())
-                .storage("http")
+                .storage(mapService() instanceof NoopMapService ? "memory" : "http")
                 .build();
 
         // Map management update listener
@@ -124,14 +119,14 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new InviteCommand(inviteService));
         commandManager.register(new AcceptCommand(inviteService));
         commandManager.register(new JoinCommand(inviteService, permManager()));
-        commandManager.register(new RemoveCommand(bridge));
+        commandManager.register(new RemoveCommand(bridge()));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
         commandManager.register(mapCommand);
 
         // Map specific commands
-        commandManager.register(new HubCommand(bridge, inviteService));
+        commandManager.register(new HubCommand(bridge(), inviteService));
 
         commandManager.register(new TestCommand());
         commandManager.register(new BuildCommand());
@@ -192,11 +187,6 @@ public abstract class MapServerBase implements MapServer {
 
     public @NotNull MapWorldManager worldManager() {
         return mwm;
-    }
-
-    @Override
-    public @NotNull MapToHubBridge bridge() {
-        return bridge;
     }
 
     public @NotNull PlayerInviteService inviteService() {

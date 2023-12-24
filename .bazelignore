@@ -9,4 +9,8 @@ WORKSPACE
 .bazelrc
 .run
 
+bin/development/deploy
+bin/hub/deploy
+bin/map/deploy
+
 README.md

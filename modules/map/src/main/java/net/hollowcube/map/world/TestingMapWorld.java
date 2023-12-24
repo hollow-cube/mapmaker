@@ -13,7 +13,7 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -101,7 +101,7 @@ public class TestingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull Point spawnPoint() {
+    public @NotNull Pos spawnPoint() {
         return parent.spawnPoint();
     }
 

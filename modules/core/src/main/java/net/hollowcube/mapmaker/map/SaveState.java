@@ -57,10 +57,11 @@ public class SaveState {
     public SaveState() {
     }
 
-    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId) {
+    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type) {
         this.id = id;
         this.playerId = playerId;
         this.mapId = mapId;
+        this.type = type;
     }
 
     public @NotNull SaveStateUpdateRequest getUpdateRequest() {

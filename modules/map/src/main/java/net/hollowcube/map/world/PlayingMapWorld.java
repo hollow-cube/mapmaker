@@ -21,7 +21,7 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -138,7 +138,7 @@ public class PlayingMapWorld implements InternalMapWorld {
     }
 
     @Override
-    public @NotNull Point spawnPoint() {
+    public @NotNull Pos spawnPoint() {
         return map.settings().getSpawnPoint();
     }
 

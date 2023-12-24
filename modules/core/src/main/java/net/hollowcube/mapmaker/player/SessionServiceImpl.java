@@ -12,10 +12,12 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
 
     private final String url;
     private final String urlV2;
+    private final String urlShortV2;
 
     public SessionServiceImpl(@NotNull String url) {
         this.url = String.format("%s/v1/internal/session", url);
         this.urlV2 = String.format("%s/v2/internal/session", url);
+        this.urlShortV2 = String.format("%s/v2/internal", url);
     }
 
     @Override
@@ -88,5 +90,21 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new InternalError("Failed to delete session(" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest body) {
+        logger.log(System.Logger.Level.INFO, "sending join request {0}", body);
+        var reqBody = GSON.toJson(body);
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(urlShortV2 + "/join_map"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
+            case 401 -> throw new UnauthorizedError();
+            default -> throw new InternalError("Failed to join map (" + res.statusCode() + "): " + res.body());
+        };
     }
 }

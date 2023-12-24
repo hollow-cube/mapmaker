@@ -16,6 +16,8 @@ public interface SessionService {
 
     void deleteSessionV2(@NotNull String id);
 
+    @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req);
+
     class InternalError extends RuntimeException {
         public InternalError(@NotNull String message) {
             super(message);

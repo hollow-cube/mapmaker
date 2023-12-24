@@ -8,7 +8,6 @@ import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.to_be_refactored.model.kafka.SchematicMgmt;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicReadException;
@@ -38,9 +37,9 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
     public void init(@NotNull ConfigProvider config) {
         logger.log(System.Logger.Level.INFO, "(not) Initializing schematic upload provider...");
 
-        var kafkaConfig = config.get(KafkaConfig.class);
-        consumer = new SchematicUploadConsumer(kafkaConfig.bootstrapServersStr());
-        producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
+//        var kafkaConfig = config.get(KafkaConfig.class);
+//        consumer = new SchematicUploadConsumer(kafkaConfig.bootstrapServersStr());
+//        producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
     }
 
     @Override

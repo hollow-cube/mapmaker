@@ -1,6 +1,6 @@
 package net.hollowcube.map.world;
 
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
@@ -15,7 +15,7 @@ public interface InternalMapWorld extends MapWorld {
 
     @NotNull Instance instance();
 
-    @NotNull Point spawnPoint();
+    @NotNull Pos spawnPoint();
 
     /**
      * Loads the world. The world will not be marked active/ready for players until this future completes.

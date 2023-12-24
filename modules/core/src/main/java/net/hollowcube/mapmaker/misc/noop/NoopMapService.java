@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.dep;
+package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.util.Response;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class NoopMapService implements MapService {
     private final Map<String, MapData> staticMaps = Map.of(
             "62da0aaf-8cad-4c13-869c-02b07688988d", new MapData("62da0aaf-8cad-4c13-869c-02b07688988d", UUID.randomUUID().toString(), new MapSettings(
-                    "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
+                    "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
             ), 0, null),
             "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new PersonalizedMapData(new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
                     "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
@@ -93,7 +93,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
-        throw new ConcurrentModificationException("not implemented");
+        return null;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
-        throw new ConcurrentModificationException("not implemented");
+        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, type);
     }
 
     @Override
