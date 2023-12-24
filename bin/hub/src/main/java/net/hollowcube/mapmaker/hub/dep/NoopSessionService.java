@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.hub.dep;
 
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.PlayerSettings;
-import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.player.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,7 +27,7 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id) {
+    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req) {
         return null;
     }
 

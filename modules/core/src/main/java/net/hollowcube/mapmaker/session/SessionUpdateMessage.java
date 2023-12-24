@@ -12,7 +12,8 @@ public record SessionUpdateMessage(
 
     public enum Action {
         CREATE,
-        DELETE
+        DELETE,
+        UPDATE
     }
 
 }

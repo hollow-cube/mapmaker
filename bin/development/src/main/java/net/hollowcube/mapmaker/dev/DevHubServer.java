@@ -6,7 +6,9 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
@@ -55,5 +57,10 @@ public class DevHubServer extends HubServerBase {
     @Override
     public @NotNull PermManager permManager() {
         return permManager;
+    }
+
+    @Override
+    public @UnknownNullability SessionManager sessionManager() {
+        return null;
     }
 }

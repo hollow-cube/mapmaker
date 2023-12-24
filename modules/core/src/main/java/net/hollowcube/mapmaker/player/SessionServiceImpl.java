@@ -63,9 +63,9 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id) {
+    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest body) {
         logger.log(System.Logger.Level.INFO, "transferring session for {0}", id);
-        var reqBody = GSON.toJson(new SessionTransferRequest(hostname));
+        var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
                 .method("PUT", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(urlV2 + "/" + id))

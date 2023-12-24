@@ -12,7 +12,7 @@ public interface SessionService {
 
     @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip);
 
-    @NotNull PlayerDataV2 transferSessionV2(@NotNull String id);
+    @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req);
 
     void deleteSessionV2(@NotNull String id);
 

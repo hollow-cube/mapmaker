@@ -49,6 +49,11 @@ public class SessionManager {
         return sessions.get(playerId);
     }
 
+    public @Nullable Presence getPresence(@NotNull String playerId) {
+        var session = getSession(playerId);
+        return session == null ? null : session.presence();
+    }
+
     public @NotNull Collection<PlayerSession> sessions() {
         return sessions.values();
     }
@@ -87,6 +92,13 @@ public class SessionManager {
         MiscFunctionality.broadcastTabList(allPlayers, networkPlayerCount());
     }
 
+    private void handleSessionUpdate(@NotNull SessionUpdateMessage message) {
+        logger.info("remote session updated for {}", message.playerId());
+
+        logger.info("UPDATE CONTENT: {}", message.session());
+        sessions.put(message.playerId(), message.session());
+    }
+
     private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
 
         protected ConsumerImpl(@NotNull String bootstrapServers) {
@@ -98,6 +110,7 @@ public class SessionManager {
             switch (message.action()) {
                 case CREATE -> FutureUtil.submitVirtual(() -> handleSessionCreate(message));
                 case DELETE -> FutureUtil.submitVirtual(() -> handleSessionDelete(message));
+                case UPDATE -> FutureUtil.submitVirtual(() -> handleSessionUpdate(message));
             }
         }
     }

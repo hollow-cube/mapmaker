@@ -8,11 +8,13 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Function;
 
@@ -39,6 +41,8 @@ public interface HubServer {
     @NotNull MapService mapService();
 
     @NotNull PermManager permManager();
+
+    @UnknownNullability SessionManager sessionManager(); // Null currently in DevServer
 
     @NotNull Scheduler scheduler();
 

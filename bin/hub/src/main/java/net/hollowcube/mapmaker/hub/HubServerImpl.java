@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -37,6 +38,7 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +168,11 @@ class HubServerImpl extends HubServerBase {
         return permManager;
     }
 
+    @Override
+    public @UnknownNullability SessionManager sessionManager() {
+        return sessionManager;
+    }
+
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
@@ -177,7 +184,11 @@ class HubServerImpl extends HubServerBase {
         var player = event.getPlayer();
 
         try {
-            var playerData = sessionService.transferSessionV2(player.getUuid().toString());
+            var transferReq = new SessionTransferRequest(
+                    AbstractHttpService.hostname,
+                    "mapmaker:hub", "", "hub"
+            );
+            var playerData = sessionService.transferSessionV2(player.getUuid().toString(), transferReq);
             player.setTag(PlayerDataV2.TAG, playerData);
 
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());

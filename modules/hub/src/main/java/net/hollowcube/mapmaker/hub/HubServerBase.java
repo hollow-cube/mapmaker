@@ -86,7 +86,7 @@ public abstract class HubServerBase implements HubServer {
         commandManager.register(new EmojisCommand());
 
         commandManager.register(new PlayCommand(mapService(), bridge()));
-        commandManager.register(new WhereCommand());
+        commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
 
         commandManager.register(new RequestCommand(inviteService));
         commandManager.register(new RejectCommand(inviteService));

@@ -116,7 +116,7 @@ public abstract class MapServerBase implements MapServer {
 
         // Common commands
         commandManager.register(new PlayCommand(mapService(), bridge()));
-        commandManager.register(new WhereCommand());
+        commandManager.register(new WhereCommand(null, null, null));
         commandManager.register(new TopTimesCommand(mapService(), playerService()));
 
         commandManager.register(new RequestCommand(inviteService));
