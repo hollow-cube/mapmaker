@@ -67,13 +67,13 @@ public class ProxyPlugin {
         event.setInitialServer(rs);
     }
 
-    @Subscribe
-    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
-        if (event.kickedDuringServerConnect()) return;
-
-        logger.info("kicked from server: {}", event.getServer().getServerInfo().getName());
-        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
-    }
+//    @Subscribe
+//    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
+//        if (event.kickedDuringServerConnect()) return;
+//
+//        logger.info("kicked from server: {}", event.getServer().getServerInfo().getName());
+//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
+//        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
+//    }
 
 }

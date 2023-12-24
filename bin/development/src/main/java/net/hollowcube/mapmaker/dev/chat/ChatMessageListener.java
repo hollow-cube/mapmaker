@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -120,9 +121,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                                 builder.append(component);
                             }
                             case EMOJI -> {
-                                var emoji = DevServer.EMOJIS.get(part.name().toLowerCase(Locale.ROOT));
-                                builder.append(Objects.requireNonNullElseGet(emoji,
-                                        () -> Component.text(":" + part.name() + ":")));
+                                var emoji = Emoji.findByName(part.name());
+                                if (emoji == null) {
+                                    builder.append(Component.text(":" + part.name() + ":"));
+                                } else builder.append(emoji.component());
                             }
                             case MAP -> {
                                 var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));

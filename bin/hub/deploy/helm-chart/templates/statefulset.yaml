@@ -5,11 +5,10 @@ metadata:
   labels:
     {{- include "mapmaker-dev.labels" . | nindent 4 }}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       {{- include "mapmaker-dev.selectorLabels" . | nindent 6 }}
-  minReadySeconds: 10 # by default is 0
   template:
     metadata:
       labels:
@@ -40,6 +39,7 @@ spec:
             httpGet:
               path: /ready
               port: 9124
+            periodSeconds: 5 # todo
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

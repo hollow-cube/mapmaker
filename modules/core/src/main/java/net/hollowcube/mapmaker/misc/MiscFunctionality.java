@@ -2,12 +2,17 @@ package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +27,11 @@ public final class MiscFunctionality {
                 .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
     }
 
-    public static void broadcastTabList() {
-        var onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayerCount();
+    public static void broadcastTabList(@NotNull Audience audience) {
+        broadcastTabList(audience, MinecraftServer.getConnectionManager().getOnlinePlayerCount());
+    }
+
+    public static void broadcastTabList(@NotNull Audience audience, int onlinePlayers) {
         var playersText = onlinePlayers == 1 ? "ᴘʟᴀʏᴇʀ" : "ᴘʟᴀʏᴇʀѕ";
         var playerCountText = FontUtil.rewrite("smallnums", "" + onlinePlayers);
 
@@ -47,6 +55,25 @@ public final class MiscFunctionality {
                 .append(Component.text(FontUtil.computeOffset(125))) // Min width
                 .build();
 
-        Audiences.all().sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
+        audience.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
+    }
+
+    private static final BadSprite CURRENCY_DISPLAY_SURVIVAL = BadSprite.SPRITE_MAP.get("hud/currency_display");
+    private static final BadSprite CURRENCY_DISPLAY_CREATIVE = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");
+
+    public static void buildCurrencyDisplay(@NotNull Player p, @NotNull FontUIBuilder builder) {
+        var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
+        var playerData = PlayerDataV2.fromPlayer(p);
+
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(11).drawInPlace(hasExperienceBar ? CURRENCY_DISPLAY_SURVIVAL : CURRENCY_DISPLAY_CREATIVE);
+
+        int MAX_TEXT_WIDTH = 22;
+        var font = hasExperienceBar ? "currency" : "currency_creative";
+
+        var coinText = NumberUtil.formatCurrency(playerData.coins());
+        builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
+        var cubitText = NumberUtil.formatCurrency(playerData.cubits());
+        builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
     }
 }

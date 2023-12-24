@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
+import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
@@ -82,6 +83,7 @@ public abstract class HubServerBase implements HubServer {
 
         // Command init
         commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new EmojisCommand());
 
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand());

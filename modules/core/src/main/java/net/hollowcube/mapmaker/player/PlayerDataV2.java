@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -26,11 +27,14 @@ public class PlayerDataV2 {
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private PlayerSettings settings = new PlayerSettings();
 
-    private transient long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
+    @Expose(serialize = false, deserialize = false)
+    public final long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
     private long playtime; // in milliseconds since last save (when session was created)
 
     private int coins = 0;
     private int cubits = 0;
+
+    public PlayerDataV2() {}
 
     public PlayerDataV2(String id, String username, @NotNull TextComponent displayName) {
         this.id = id;

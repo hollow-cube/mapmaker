@@ -31,29 +31,25 @@ import net.hollowcube.mapmaker.config.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
-import net.hollowcube.mapmaker.dev.command.EmojisCommand;
+import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.metrics.Metric;
-import net.hollowcube.mapmaker.metrics.MetricType;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
+import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.CoreTeams;
-import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
@@ -78,7 +74,6 @@ import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
-import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.resourcepack.ResourcePack;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
@@ -183,67 +178,11 @@ public class DevServer {
     private MetricWriter metricWriter;
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
-    public static final Map<String, Component> EMOJIS;
-    public static final Map<String, List<String>> EMOJIS_BY_CATEGORY;
-    private static final PlayerInfoUpdatePacket EMOJIS_PACKET;
     public static final Sound TAG_DING = Sound.sound()
             .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
             .source(Sound.Source.PLAYER)
             .volume(5)
             .build();
-
-    static {
-        var symbolEmojis = List.of(
-                Map.entry("plus", "icon/plus"),
-                Map.entry("minus", "icon/minus"),
-                Map.entry("x", "icon/x_mark")
-        );
-        var faceEmojis = List.of(
-                Map.entry("cool", "icon/emoji/cool"),
-                Map.entry("grin", "icon/emoji/grin"),
-                Map.entry("smile", "icon/emoji/smile"),
-                Map.entry("smirk", "icon/emoji/smirk"),
-                Map.entry("poop", "icon/emoji/poop")
-        );
-        var miscEmojis = List.of(
-                Map.entry("crown", "icon/emoji/crown"),
-                Map.entry("grass", "icon/emoji/grass"),
-                Map.entry("sus", "icon/emoji/sus")
-        );
-
-        var allEmojis = new ArrayList<Map.Entry<String, String>>();
-        allEmojis.addAll(symbolEmojis);
-        allEmojis.addAll(faceEmojis);
-        allEmojis.addAll(miscEmojis);
-        Map<String, String> raw = Map.ofEntries(allEmojis.toArray(Map.Entry[]::new));
-
-        var result = new HashMap<String, Component>();
-        for (var entry : raw.entrySet()) {
-            var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(entry.getValue()), entry.getValue());
-            var hoverText = Component.text(":" + entry.getKey() + ":", NamedTextColor.WHITE);
-            result.put(entry.getKey(), Component.text(sprite.fontChar(), FontUtil.NO_SHADOW)
-                    .hoverEvent(HoverEvent.showText(hoverText)));
-        }
-        EMOJIS = Map.copyOf(result);
-
-        var byCategory = new LinkedHashMap<String, List<String>>();
-        byCategory.put("ѕʏᴍʙᴏʟѕ", List.copyOf(symbolEmojis.stream().map(Map.Entry::getKey).toList()));
-        byCategory.put("ꜰᴀᴄᴇѕ", List.copyOf(faceEmojis.stream().map(Map.Entry::getKey).toList()));
-        byCategory.put("ᴍɪѕᴄ", List.copyOf(miscEmojis.stream().map(Map.Entry::getKey).toList()));
-        EMOJIS_BY_CATEGORY = byCategory;
-
-        var playerInfos = new ArrayList<PlayerInfoUpdatePacket.Entry>();
-        for (var emoji : allEmojis) {
-            playerInfos.add(new PlayerInfoUpdatePacket.Entry(
-                    UUID.randomUUID(), ":" + emoji.getKey() + ":",
-                    List.of(), false, 0, null, null, null
-            ));
-        }
-        EMOJIS_PACKET = new PlayerInfoUpdatePacket(
-                EnumSet.of(PlayerInfoUpdatePacket.Action.ADD_PLAYER, PlayerInfoUpdatePacket.Action.UPDATE_LISTED),
-                playerInfos
-        );
-    }
 
     @Blocking
     public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
@@ -350,7 +289,6 @@ public class DevServer {
             mapCommandManager.register(debugCommand);
 
             var emojisCommand = new EmojisCommand();
-            hubCommandManager.register(emojisCommand);
             mapCommandManager.register(emojisCommand);
 
             var hubMapCommand = hubCommandManager.getCommands().get("map");
@@ -498,7 +436,7 @@ public class DevServer {
             if (!shuttingDown) {
                 Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
                 rebuildOnlinePlayersRegex();
-                MiscFunctionality.broadcastTabList();
+                MiscFunctionality.broadcastTabList(Audiences.all());
             }
 
             try {
@@ -532,9 +470,9 @@ public class DevServer {
         var baseMessage = Component.text(strippedMessage).replaceText(TextReplacementConfig.builder()
                 .match(EMOJI_REGEX)
                 .replacement((match, builder) -> {
-                    var emoji = EMOJIS.get(match.group(1).toLowerCase(Locale.ROOT));
+                    var emoji = Emoji.findByName(match.group(1));
                     if (emoji == null) return builder;
-                    return emoji;
+                    return emoji.component();
                 })
                 .build());
 
@@ -627,7 +565,7 @@ public class DevServer {
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld != null) {
             player.setDisplayName(playerData.displayName()); //todo this is a Minestom bug, the display name needs to be re-sent automatically.
-            MiscFunctionality.broadcastTabList();
+            MiscFunctionality.broadcastTabList(Audiences.all());
 
             var imw = FutureUtil.getUnchecked(targetWorld);
             if (false && imw instanceof PlayingMapWorld playingMapWorld) { // joinMapState == HubToMapBridge.JoinMapState.SPECTATING
@@ -638,37 +576,20 @@ public class DevServer {
             return;
         }
 
-        player.sendPacket(EMOJIS_PACKET);
-
         rebuildOnlinePlayersRegex();
 
-        //todo this gamemode/fly/permission level stuff should be handled by the hub server
+
+        ActionBar.forPlayer(player).addProvider(MiscFunctionality::buildCurrencyDisplay);
+
+        player.setDisplayName(playerData.displayName());
+        Emoji.sendTabCompletions(player);
+        MiscFunctionality.broadcastTabList(Audiences.all());
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
-        var currencyDisplay = BadSprite.SPRITE_MAP.get("hud/currency_display");
-        var currencyDisplayCreative = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");
-        ActionBar.forPlayer(player).addProvider((p, builder) -> {
-            var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
-
-            builder.pushColor(FontUtil.NO_SHADOW);
-            builder.pos(11).drawInPlace(hasExperienceBar ? currencyDisplay : currencyDisplayCreative);
-
-            int MAX_TEXT_WIDTH = 22;
-            var font = hasExperienceBar ? "currency" : "currency_creative";
-
-            var coinText = NumberUtil.formatCurrency(playerData.coins());
-            builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
-            var cubitText = NumberUtil.formatCurrency(playerData.cubits());
-            builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
-        });
-
-        Thread.startVirtualThread(() -> {
-            metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
-        });
-
-        player.setDisplayName(playerData.displayName());
-        MiscFunctionality.broadcastTabList();
+//        Thread.startVirtualThread(() -> {
+//            metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
+//        });
 
 
         // GARBAGE THAT NEEDS TO BE MOVED!!!
