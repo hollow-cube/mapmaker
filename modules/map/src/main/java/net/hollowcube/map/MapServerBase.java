@@ -7,7 +7,6 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.HelpCommand;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
@@ -32,6 +31,7 @@ import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.util.MinestomCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -82,7 +82,7 @@ public abstract class MapServerBase implements MapServer {
         new PlayerSpawnInInstanceEvent(null);
     }
 
-    public @Blocking void init(@NotNull ConfigProvider config, @NotNull CommandManager commandManager) {
+    public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
 
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();

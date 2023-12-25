@@ -1,10 +1,8 @@
 package net.hollowcube.mapmaker.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public record HttpConf(
-        String host,
-        int port
-) {
+public record HttpConfig(@NotNull String host, int port) {
 }

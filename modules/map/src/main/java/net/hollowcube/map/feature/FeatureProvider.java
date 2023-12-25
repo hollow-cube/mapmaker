@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature;
 
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ public interface FeatureProvider {
     /**
      * Global feature init when a server starts.
      */
-    default void init(@NotNull ConfigProvider config) {
+    default void init(@NotNull ConfigLoaderV3 config) {
     }
 
     /**

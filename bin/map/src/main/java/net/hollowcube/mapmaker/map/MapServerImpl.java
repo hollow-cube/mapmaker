@@ -5,7 +5,6 @@ import io.helidon.webserver.ServerResponse;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServerBase;
@@ -13,6 +12,7 @@ import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -97,11 +97,9 @@ class MapServerImpl extends MapServerBase {
     // Note that we will separately hold them in the configuration phase until the map world is ready.
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
 
-    public @Blocking void start(@NotNull ConfigProvider config) {
-
-//        var velocityConfig = config.get(VelocityConfig.class);
-        var velocityConfig = new VelocityConfig(System.getenv("MAPMAKER_VELOCITY_SECRET"));
-        if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
+    public @Blocking void start(@NotNull ConfigLoaderV3 config) {
+        var velocityConfig = config.get(VelocityConfig.class);
+        if (!velocityConfig.secret().isEmpty()) {
             logger.info("Enabling modern forwarding...");
             VelocityProxy.enable(velocityConfig.secret());
         } else {

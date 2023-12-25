@@ -51,7 +51,7 @@ java_binary(
         ":packer_development_server",
     ],
     deps = [
-        "//bin/common",
+        "//bin/config",
         "//modules/canvas:api",
         "//modules/canvas:impl-standalone",
         "//modules/common",

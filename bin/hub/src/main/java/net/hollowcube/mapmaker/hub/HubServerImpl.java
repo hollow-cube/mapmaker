@@ -5,9 +5,9 @@ import io.helidon.webserver.ServerResponse;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
-import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.hub.dep.HubBridge;
 import net.hollowcube.mapmaker.hub.dep.NoopHubBridge;
@@ -74,10 +74,9 @@ class HubServerImpl extends HubServerBase {
 
     private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
 
-    public @Blocking void start(@NotNull ConfigProvider config) {
-//        var velocityConfig = config.get(VelocityConfig.class);
-        var velocityConfig = new VelocityConfig(System.getenv("MAPMAKER_VELOCITY_SECRET"));
-        if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
+    public @Blocking void start(@NotNull ConfigLoaderV3 config) {
+        var velocityConfig = config.get(VelocityConfig.class);
+        if (!velocityConfig.secret().isEmpty()) {
             logger.info("Enabling modern forwarding...");
             VelocityProxy.enable(velocityConfig.secret());
         } else {

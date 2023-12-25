@@ -14,7 +14,6 @@ import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
-import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
@@ -23,10 +22,10 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.config.Config;
-import net.hollowcube.mapmaker.config.NewConfigProvider;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.config.HttpConfig;
+import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
-import net.hollowcube.mapmaker.config.http.HttpConfig;
 import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.DebugCommand;
@@ -86,10 +85,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -135,9 +132,7 @@ public class DevServer {
         DefaultExports.initialize();
 
         // Load config
-        Path configPath = Path.of("config.yaml");
-        var config = Config.loadFromFile(configPath);
-        var configProvider = NewConfigProvider.loadFromFile(configPath);
+        var config = ConfigLoaderV3.loadDefault();
 
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
@@ -145,13 +140,14 @@ public class DevServer {
         var server = new DevServer();
 
         // Add health check & metrics web server.
-        var httpConfig = configProvider.get(HttpConfig.class);
+        var httpConfig = config.get(HttpConfig.class);
         WebServer webServer = WebServer.builder().host(httpConfig.host()).port(httpConfig.port()).addRouting(Routing.builder().register(HealthSupport.builder().webContext("alive").addLiveness(() -> HealthCheckResponse.up("mapmaker")).build()).register(HealthSupport.builder().webContext("ready").addReadiness(server.readinessChecks()).build()).register(PrometheusSupport.create()).build()).build();
-        webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", config.http().host(), ws.port()));
+        webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
 
         // Finish server initialization
-        server.start(config, configProvider);
-        minecraftServer.start(config.minestom().host(), config.minestom().port());
+        server.start(config);
+        var minestomConfig = config.get(MinestomConfig.class);
+        minecraftServer.start(minestomConfig.host(), minestomConfig.port());
 
         // Add shutdown hook for graceful shutdown
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
@@ -185,10 +181,9 @@ public class DevServer {
             .build();
 
     @Blocking
-    public void start(@NotNull Config config, @NotNull NewConfigProvider configProvider) {
-//        var velocityConfig = configProvider.get(VelocityConfig.class);
-        var velocityConfig = new VelocityConfig(System.getenv("MAPMAKER_VELOCITY_SECRET"));
-        if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
+    public void start(@NotNull ConfigLoaderV3 config) {
+        var velocityConfig = config.get(VelocityConfig.class);
+        if (!velocityConfig.secret().isEmpty()) {
             logger.info("Enabling modern forwarding...");
             VelocityProxy.enable(velocityConfig.secret());
         } else {
@@ -219,7 +214,7 @@ public class DevServer {
         if (spicedbToken == null) spicedbToken = "supersecretkey";
         permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
 
-        var kafkaConfig = configProvider.get(KafkaConfig.class);
+        var kafkaConfig = config.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
         metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
 
@@ -267,7 +262,7 @@ public class DevServer {
             this.hubToMapBridge = bridge;
 
             scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService())));
-            scope.fork(FutureUtil.call(() -> this.maps.init(configProvider, mapCommandManager)));
+            scope.fork(FutureUtil.call(() -> this.maps.init(config, mapCommandManager)));
 
             scope.join();
         } catch (Exception e) {
@@ -303,13 +298,6 @@ public class DevServer {
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             var chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
             packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
-
-            int i = 0;
-            for (var facet : ServiceLoader.load(Facet.class)) {
-                scope.fork(Executors.callable(() -> facet.hook(MinecraftServer.process(), configProvider)));
-                i++;
-            }
-            logger.info("Loaded {} facets.", i);
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 logger.info("Graceful shutdown starting...");

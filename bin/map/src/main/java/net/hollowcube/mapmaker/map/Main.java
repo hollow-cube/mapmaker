@@ -5,16 +5,15 @@ import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import io.prometheus.client.hotspot.DefaultExports;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
-import net.hollowcube.mapmaker.config.NewConfigProvider;
-import net.hollowcube.mapmaker.config.http.HttpConfig;
 import net.minestom.server.MinecraftServer;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.nio.file.Path;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +41,7 @@ public class Main {
         DefaultExports.initialize();
 
         // Load config
-        Path configPath = Path.of("config.yaml");
-        var configProvider = NewConfigProvider.loadFromFile(configPath);
+        var config = ConfigLoaderV3.loadDefault();
 
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
@@ -51,7 +49,7 @@ public class Main {
         var server = new MapServerImpl();
 
         // Add health check & metrics web server.
-        var httpConfig = configProvider.get(HttpConfig.class);
+        var httpConfig = config.get(HttpConfig.class);
         WebServer webServer = WebServer.builder().host(httpConfig.host()).port(httpConfig.port()).addRouting(Routing.builder()
                 .register(HealthSupport.builder().webContext("alive")
                         .addLiveness(() -> HealthCheckResponse.up("mapmaker")).build())
@@ -62,8 +60,8 @@ public class Main {
         webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
 
         // Finish server initialization
-        server.start(configProvider);
-        var minestomConfig = configProvider.get(MinestomConfig.class);
+        server.start(config);
+        var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());
 
         // Add shutdown hook for graceful shutdown

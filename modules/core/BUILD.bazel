@@ -17,6 +17,7 @@ java_library(
         "//third_party:spicedb",
         "@maven//:com_github_ben_manes_caffeine_caffeine",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_inject_guice",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:io_prometheus_simpleclient",
