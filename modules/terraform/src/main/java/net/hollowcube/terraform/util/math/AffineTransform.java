@@ -2,6 +2,8 @@ package net.hollowcube.terraform.util.math;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An affine transform.
@@ -341,21 +343,57 @@ public class AffineTransform {
             if (dInt < 0) {
                 dInt += 360;
             }
-            switch (dInt) {
-                case 0:
-                    return 0.0;
-                case 90:
-                    return 1.0;
-                case 180:
-                    return 0.0;
-                case 270:
-                    return -1.0;
-                default:
-                    break;
-            }
+            return switch (dInt) {
+                case 0, 180 -> 0;
+                case 90 -> 1.0;
+                case 270 -> -1.0;
+                default -> Math.sin(Math.toRadians(degrees));
+            };
         }
         return Math.sin(Math.toRadians(degrees));
     }
 
 
+    public @NotNull Block applyToBlock(@NotNull Block block) {
+        var properties = block.properties();
+        Block output = block;
+        if (properties.containsKey("axis")) {
+            switch (block.getProperty("axis")) {
+                case "x" -> {
+                    Point newPoint = apply2(new Vec(1, 0, 0));
+                    double x = Math.abs(newPoint.x());
+                    double y = Math.abs(newPoint.y());
+                    double z = Math.abs(newPoint.z());
+                    if (z > x && z > y) {
+                        output = block.withProperty("axis", "z");
+                    } else if (y > z && y > x) {
+                        output = block.withProperty("axis", "y");
+                    }
+                }
+                case "y" -> {
+                    Point newPoint = apply2(new Vec(0, 1, 0));
+                    double x = Math.abs(newPoint.x());
+                    double y = Math.abs(newPoint.y());
+                    double z = Math.abs(newPoint.z());
+                    if (z > x && z > y) {
+                        output = block.withProperty("axis", "z");
+                    } else if (x > z && x > y) {
+                        output = block.withProperty("axis", "x");
+                    }
+                }
+                case "z" -> {
+                    Point newPoint = apply2(new Vec(0, 0, 1));
+                    double x = Math.abs(newPoint.x());
+                    double y = Math.abs(newPoint.y());
+                    double z = Math.abs(newPoint.z());
+                    if (x > z && x > y) {
+                        output = block.withProperty("axis", "x");
+                    } else if (y > z && y > x) {
+                        output = block.withProperty("axis", "y");
+                    }
+                }
+            }
+        }
+        return output;
+    }
 }
