@@ -1,0 +1,24 @@
+{{ if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "mapmaker.fullname" . }}
+  labels:
+    {{- include "mapmaker.labels" . | nindent 4 }}
+spec:
+  jobLabel: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "mapmaker.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      relabelings:
+        - sourceLabels: [ __meta_kubernetes_endpoints_label_app_kubernetes_io_version ]
+          targetLabel: version
+{{ end }}

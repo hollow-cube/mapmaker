@@ -1,11 +1,18 @@
-replicaCount: 1
+mapmaker:
+  role: hub
+
+  terminationSeconds: 30
 
 image:
-  repository: map
+  prefix: ""
 
 env:
   MAPMAKER_VELOCITY_SECRET: "abcdef"
-  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "" # todo
+
   MAPMAKER_MAP_SERVICE_URL: "http://map-service:9124"
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service:9124"
   MAPMAKER_SESSION_SERVICE_URL: "http://session-service:9124"
+
+  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
+replicaCount: 1

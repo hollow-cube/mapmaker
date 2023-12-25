@@ -1,0 +1,65 @@
+nameOverride: ""
+fullnameOverride: ""
+
+mapmaker:
+  role: hub
+
+  # Max time given for people to leave before shutting down the server by force.
+  terminationSeconds: 60
+
+image:
+  prefix: "mworzala/mapmaker-"
+  pullPolicy: IfNotPresent
+  pullSecrets: [ ]
+  tag: ""
+
+env:
+  PROMETHEUS_DISABLE_CREATED_SERIES: "true"
+
+serviceAccount:
+  create: true
+  annotations: { }
+  name: ""
+
+service:
+  type: ClusterIP
+  httpPort: 9124
+  minecraftPort: 25565
+
+serviceMonitor:
+  enabled: false
+
+resources: { }
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
+
+replicaCount: 1
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+podAnnotations: { }
+
+nodeSelector: { }
+
+tolerations: [ ]
+
+affinity: { }
+
+podSecurityContext: { }
+# fsGroup: 2000
+
+securityContext: { }
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000

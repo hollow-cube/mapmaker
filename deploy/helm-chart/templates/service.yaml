@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mapmaker.fullname" . }}
+  labels:
+    {{- include "mapmaker.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.service.minecraftPort }}
+      targetPort: minecraft
+      protocol: TCP
+      name: minecraft
+  selector:
+    {{- include "mapmaker.selectorLabels" . | nindent 4 }}
