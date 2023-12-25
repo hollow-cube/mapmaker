@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import com.google.inject.Inject;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -9,10 +8,8 @@ import io.prometheus.client.hotspot.DefaultExports;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
-import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.minestom.server.MinecraftServer;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -24,16 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-
-    static class MyClass {
-        @Inject
-        public MyClass(@NotNull VelocityConfig config) {
-            System.out.println("VELOCITY CONFIG IS " + config);
-        }
-    }
-
     public static void main(String[] args) {
-
         long start = System.nanoTime();
 
         System.setProperty("minestom.chunk-view-distance", "16");
