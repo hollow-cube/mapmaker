@@ -67,7 +67,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
                 return;
             logger.log(System.Logger.Level.INFO, "Received schematic upload message: {0}", msg);
 
-            var player = MinecraftServer.getConnectionManager().getPlayer(UUID.fromString(msg.owner()));
+            var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(msg.owner()));
             if (player == null) return;
 
             // Get the current world of the player, if it is not an editing world then do nothing.

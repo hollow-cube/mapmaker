@@ -20,11 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerInviteServiceImpl implements PlayerInviteService {
 
-    private record Invite(UUID inviterUUID, UUID inviteeUUID) {}
+    private record Invite(UUID inviterUUID, UUID inviteeUUID) {
+    }
 
-    private record Request(UUID requesterUUID, UUID requesteeUUID) {}
+    private record Request(UUID requesterUUID, UUID requesteeUUID) {
+    }
 
-    private record Context(Instant time, String mapId) {}
+    private record Context(Instant time, String mapId) {
+    }
 
     private final MapWorldManager mwm;
     private final ConcurrentHashMap<Invite, Context> invites = new ConcurrentHashMap<>();
@@ -83,7 +86,7 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
                 sender.sendMessage("You have an distinct request and invite, please specify which player to accept from."); // TODO Translate
                 return;
             }
-            Player target = MinecraftServer.getConnectionManager().getPlayer(inviteList.get(0).inviterUUID);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(inviteList.get(0).inviterUUID);
             if (target == null) {
                 sender.sendMessage("Invalid invite, inviter is offline."); // TODO Translate
                 return;
@@ -93,14 +96,14 @@ public class PlayerInviteServiceImpl implements PlayerInviteService {
                 requests.remove(request);
             }
         } else if (!inviteList.isEmpty()) {
-            Player target = MinecraftServer.getConnectionManager().getPlayer(inviteList.get(0).inviterUUID);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(inviteList.get(0).inviterUUID);
             if (target == null) {
                 sender.sendMessage("Invalid invite, inviter is offline."); // TODO Translate
                 return;
             }
             acceptInvite(sender, target);
         } else if (!requestList.isEmpty()) {
-            Player target = MinecraftServer.getConnectionManager().getPlayer(requestList.get(0).requesteeUUID);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(requestList.get(0).requesteeUUID);
             if (target == null) {
                 sender.sendMessage("Invalid request, inviter is offline."); // TODO Translate
                 return;

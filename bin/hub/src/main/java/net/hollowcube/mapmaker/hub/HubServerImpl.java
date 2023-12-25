@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.hub;
 
+import io.helidon.webserver.ServerRequest;
+import io.helidon.webserver.ServerResponse;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
@@ -26,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -44,6 +47,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
 class HubServerImpl extends HubServerBase {
@@ -51,6 +56,8 @@ class HubServerImpl extends HubServerBase {
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
+
+    private static final long SHUTDOWN_MAX_WAIT_MILLIS = 10 * 1000; // 10 seconds
 
     private PlayerService playerService;
     private SessionService sessionService;
@@ -64,6 +71,8 @@ class HubServerImpl extends HubServerBase {
 
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
+
+    private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
 
     public @Blocking void start(@NotNull ConfigProvider config) {
 //        var velocityConfig = config.get(VelocityConfig.class);
@@ -135,6 +144,33 @@ class HubServerImpl extends HubServerBase {
         isReady = true;
     }
 
+    public void handleHttpShutdown(@NotNull ServerRequest serverRequest, @NotNull ServerResponse serverResponse) {
+        if (gracefulShutdownFuture != null) {
+            gracefulShutdownFuture.thenRun(() -> serverResponse.status(200).send());
+            return;
+        }
+
+        gracefulShutdownFuture = new CompletableFuture<>();
+        CompletableFuture.delayedExecutor(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+                // Automatically complete the future after the timeout.
+                .execute(() -> gracefulShutdownFuture.complete(null));
+        logger.info("received shutdown request");
+
+        // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
+        // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter
+        // the shutdown hook for the jvm (receive sigterm).
+        Audiences.players().sendMessage(Component.text("ENTERED SHUTDOWN PHASE"));
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        serverResponse.status(200).send();
+        gracefulShutdownFuture.complete(null);
+    }
+
     @Override
     public void shutdown() {
         if (isShuttingDown) return;
@@ -178,7 +214,8 @@ class HubServerImpl extends HubServerBase {
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
-                () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub")
+                () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub"),
+                () -> gracefulShutdownFuture == null ? HealthCheckResponse.up("graceful_shutdown") : HealthCheckResponse.down("graceful_shutdown")
         );
     }
 
@@ -207,6 +244,14 @@ class HubServerImpl extends HubServerBase {
     }
 
     private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+
+//        try {
+//
+//            Thread.sleep(5000);
+//        } catch (Exception e) {
+//            logger.error("failed to sleep", e);
+//        }
+//
         event.setSpawningInstance(instance());
         event.getPlayer().setRespawnPoint(HUB_SPAWN_POINT);
     }

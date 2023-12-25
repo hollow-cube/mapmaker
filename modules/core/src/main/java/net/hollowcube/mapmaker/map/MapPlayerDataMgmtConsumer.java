@@ -40,7 +40,7 @@ public class MapPlayerDataMgmtConsumer extends BaseConsumer<MapPlayerDataMgmtCon
         if (msg.action != MapPlayerDataUpdateMessage.ACTION_UPDATE) return;
 
         var data = msg.data;
-        var player = MinecraftServer.getConnectionManager().getPlayer(UUID.fromString(data.id()));
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(data.id()));
         if (player == null) return;
 
         MapPlayerData.fromPlayer(player).update(data);

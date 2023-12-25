@@ -7,7 +7,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +48,7 @@ public class ArgumentEntity extends Argument<EntityFinder> {
     public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
         // for now, just suggest matching players
         var input = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
-        for (var player : CONNECTION_MANAGER.getPlayers(ConnectionState.PLAY)) {
+        for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
             if (player.getUsername().toLowerCase(Locale.ROOT).startsWith(input)) {
                 suggestion.add(player.getUsername());
             }

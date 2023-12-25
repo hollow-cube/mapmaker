@@ -21,7 +21,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
 import net.minestom.server.message.Messenger;
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
@@ -98,7 +95,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
                 var maps = new HashMap<String, MapData>();
 
-                for (var recipient : MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY)) {
+                for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     var builder = Component.text();
 
                     boolean hasDing = false;

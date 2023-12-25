@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class PlayerServiceImpl extends AbstractHttpService implements PlayerService {
     private static final Summary remoteFetchDisplayNameTime = Summary.build()
@@ -55,7 +56,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     @Override
     public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
         // If the player is online we have an up-to-date display name anyway
-        var player = MinecraftServer.getConnectionManager().getPlayer(id);
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
             return PlayerDataV2.fromPlayer(player).displayName2();
         }

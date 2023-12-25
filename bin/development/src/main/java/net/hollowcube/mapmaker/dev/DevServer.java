@@ -13,7 +13,6 @@ import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.facet.Facet;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -24,7 +23,6 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.config.Config;
 import net.hollowcube.mapmaker.config.NewConfigProvider;
 import net.hollowcube.mapmaker.config.VelocityConfig;
@@ -70,7 +68,6 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.common.ClientResourcePackStatusPacket;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
@@ -261,10 +258,6 @@ public class DevServer {
 
             packetListenerManager.setConfigurationListener(ClientResourcePackStatusPacket.class, this::handleResourcePackStatus);
 
-            mapCommandManager.register(new HelpCommand(mapCommandManager));
-//            hubCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
-//            mapCommandManager.setUnknownCommandCallback((sender, command) -> sender.sendMessage("no such command"));
-
             var bridge = new DevServerBridge();
 
             this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager);
@@ -290,9 +283,6 @@ public class DevServer {
             var debugCommand = new DebugCommand(playerService, permManager, mapService);
             hubCommandManager.register(debugCommand);
             mapCommandManager.register(debugCommand);
-
-            var emojisCommand = new EmojisCommand();
-            mapCommandManager.register(emojisCommand);
 
             var hubMapCommand = hubCommandManager.getCommands().get("map");
             hubMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
@@ -531,7 +521,7 @@ public class DevServer {
         var builder = new StringBuilder();
         builder.append("(?:^|\\s)(");
         var first = true;
-        for (var player : MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY)) {
+        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             if (!first) builder.append("|");
             builder.append(player.getUsername());
             first = false;

@@ -2,15 +2,15 @@ package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.player.*;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.network.ConnectionState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public class NoopPlayerService implements PlayerService {
     @Override
     public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
-        var player = MinecraftServer.getConnectionManager().getPlayer(id);
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
             return PlayerDataV2.fromPlayer(player).displayName2();
         }
@@ -37,7 +37,7 @@ public class NoopPlayerService implements PlayerService {
 
     @Override
     public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
-        return new TabCompleteResponse(MinecraftServer.getConnectionManager().getPlayers(ConnectionState.PLAY).stream()
+        return new TabCompleteResponse(MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
                 .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(), p.getUsername()))
                 .toList());
     }

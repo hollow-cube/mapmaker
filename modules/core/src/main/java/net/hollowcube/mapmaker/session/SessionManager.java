@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.network.ConnectionState;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,7 +67,7 @@ public class SessionManager {
         var displayName = playerService.getPlayerDisplayName2(message.playerId());
         var joinMessage = Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT));
 
-        for (var player : CONNECTION_MANAGER.getPlayers(ConnectionState.PLAY)) {
+        for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
             // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
             if (player.getUuid().toString().equals(message.playerId())) continue;
 

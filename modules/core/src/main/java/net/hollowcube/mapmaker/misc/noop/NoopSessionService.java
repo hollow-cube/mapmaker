@@ -50,4 +50,9 @@ public class NoopSessionService implements SessionService {
     public @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req) {
+        throw new UnsupportedOperationException();
+    }
 }

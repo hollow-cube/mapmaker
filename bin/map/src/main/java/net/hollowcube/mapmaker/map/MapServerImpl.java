@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import io.helidon.webserver.ServerRequest;
+import io.helidon.webserver.ServerResponse;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
@@ -14,7 +16,7 @@ import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.map.dep.NoopMapBridge;
+import net.hollowcube.mapmaker.map.dep.MapBridge;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
@@ -31,12 +33,10 @@ import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
 class MapServerImpl extends MapServerBase {
@@ -64,6 +65,8 @@ class MapServerImpl extends MapServerBase {
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
+
+    private static final long SHUTDOWN_MAX_WAIT_MILLIS = 10 * 1000; // 10 seconds
 
     private static final Tag<MapJoinInfo> JOIN_INFO_TAG = Tag.Transient("mapmaker:join_info");
     private static final Tag<MapWorld> TARGET_WORLD_TAG = Tag.Transient("mapmaker:target_world");
@@ -83,6 +86,8 @@ class MapServerImpl extends MapServerBase {
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
 
+    private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
+
     // A pending join is a map of player id to a future that will be completed when the server has the join info.
     // The future returned will never complete with an exception, but may complete with null indicating that we
     // timed out while waiting for the player info to be received.
@@ -93,6 +98,7 @@ class MapServerImpl extends MapServerBase {
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
 
     public @Blocking void start(@NotNull ConfigProvider config) {
+
 //        var velocityConfig = config.get(VelocityConfig.class);
         var velocityConfig = new VelocityConfig(System.getenv("MAPMAKER_VELOCITY_SECRET"));
         if (velocityConfig.secret() != null && !velocityConfig.secret().isEmpty()) {
@@ -110,9 +116,6 @@ class MapServerImpl extends MapServerBase {
 
         // Service init
         boolean noopServices = Boolean.getBoolean("mapmaker.noop");
-
-        playerService = new NoopPlayerService();
-        sessionService = new NoopSessionService();
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
@@ -135,7 +138,7 @@ class MapServerImpl extends MapServerBase {
 
         mapJoinConsumer = new MapJoinConsumer("kafka:9092");
 
-        bridge = new NoopMapBridge();
+        bridge = new MapBridge(sessionService);
 
         // Command init
         commandManager = new CommandManager();
@@ -156,11 +159,39 @@ class MapServerImpl extends MapServerBase {
                 .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect);
+                .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect)
+                .addListener(PlayerPluginMessageEvent.class, this::handlePlayerPluginMessage);
 
         // The rest of the server init
         init(config, commandManager);
         isReady = true;
+    }
+
+    public void handleHttpShutdown(@NotNull ServerRequest serverRequest, @NotNull ServerResponse serverResponse) {
+        if (gracefulShutdownFuture != null) {
+            gracefulShutdownFuture.thenRun(() -> serverResponse.status(200).send());
+            return;
+        }
+
+        gracefulShutdownFuture = new CompletableFuture<>();
+        CompletableFuture.delayedExecutor(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+                // Automatically complete the future after the timeout.
+                .execute(() -> gracefulShutdownFuture.complete(null));
+        logger.info("received shutdown request");
+
+        // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
+        // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter
+        // the shutdown hook for the jvm (receive sigterm).
+        Audiences.players().sendMessage(Component.text("ENTERED SHUTDOWN PHASE"));
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        serverResponse.status(200).send();
+        gracefulShutdownFuture.complete(null);
     }
 
     @Override
@@ -202,7 +233,8 @@ class MapServerImpl extends MapServerBase {
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
-                () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub")
+                () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub"),
+                () -> gracefulShutdownFuture == null ? HealthCheckResponse.up("graceful_shutdown") : HealthCheckResponse.down("graceful_shutdown")
         );
     }
 
@@ -263,6 +295,8 @@ class MapServerImpl extends MapServerBase {
     }
 
     private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+        event.setSendRegistryData(false);
+
         var player = event.getPlayer();
 
         var joinInfo = player.getTag(JOIN_INFO_TAG);
@@ -323,6 +357,14 @@ class MapServerImpl extends MapServerBase {
 
     private void handlePlayerDisconnect(@NotNull PlayerDisconnectEvent event) {
         logger.info("disconnect - {}", event.getPlayer().getUsername());
+    }
+
+    private void handlePlayerPluginMessage(@NotNull PlayerPluginMessageEvent event) {
+        if (!event.getIdentifier().equals("mapmaker:transfer")) return;
+        var player = event.getPlayer();
+
+        // This is only sent when it is a failure.
+        player.sendMessage(Component.text("failed to join map!"));
     }
 
     // {"server_id":"map-c89db8f95-g92xs","player_id":"aceb326f-da15-45bc-bf2f-11940c21780c","map_id":"ddd0419e-499c-4292-87af-411bbfb362d2","state":"editing"}

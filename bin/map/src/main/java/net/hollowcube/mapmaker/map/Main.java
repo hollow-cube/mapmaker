@@ -57,7 +57,8 @@ public class Main {
                         .addLiveness(() -> HealthCheckResponse.up("mapmaker")).build())
                 .register(HealthSupport.builder().webContext("ready")
                         .addReadiness(server.readinessChecks()).build())
-                .register(PrometheusSupport.create()).build()).build();
+                .register(PrometheusSupport.create())
+                .register(rules -> rules.get(server::handleHttpShutdown)).build()).build();
         webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
 
         // Finish server initialization

@@ -55,7 +55,7 @@ public class MapListCommand extends BaseHubCommand {
                 return;
             }
 
-            var onlinePlayer = CONNECTION_MANAGER.getPlayer(playerName);
+            var onlinePlayer = CONNECTION_MANAGER.getOnlinePlayerByUsername(playerName);
             if (onlinePlayer != null)
                 playerData = MapPlayerData.fromPlayer(onlinePlayer);
             else playerData = mapService.getMapPlayerData(playerName);

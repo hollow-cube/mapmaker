@@ -47,6 +47,10 @@ public abstract class CommandHandlingPlayer extends Player {
 
     public abstract @NotNull CommandManager getCommandManager();
 
+    public void addToTab() {
+        sendPacket(getAddPlayerToList());
+    }
+
     private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
         final String command = packet.message();
         if (Messenger.canReceiveCommand(player)) {

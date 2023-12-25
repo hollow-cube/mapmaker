@@ -5,12 +5,15 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
+import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.player.SessionServiceImpl;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -29,6 +33,8 @@ public class ProxyPlugin {
 
     private SessionService sessionService;
 
+    private final RegisteredServer anyhubServer;
+
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
         this.logger = logger;
@@ -38,7 +44,15 @@ public class ProxyPlugin {
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
 
+        anyhubServer = proxy.getServer("anyhub").orElseThrow();
+
         logger.info("hello, world!!!!");
+    }
+
+    @Subscribe
+    public void handlePermissionSetup(@NotNull PermissionsSetupEvent event) {
+        // Always deny all permissions
+        event.setProvider(s -> p -> Tristate.FALSE);
     }
 
     @Subscribe
@@ -70,7 +84,16 @@ public class ProxyPlugin {
         logger.info("transfering {} to {}", player.getUsername(), serverName);
 
         var si = new ServerInfo("map-server", new InetSocketAddress(serverName, 25565));
-        player.createConnectionRequest(proxy.createRawRegisteredServer(si)).fireAndForget();
+        player.createConnectionRequest(proxy.createRawRegisteredServer(si)).connect().thenAccept(result -> {
+            switch (result.getStatus()) {
+                case SUCCESS, ALREADY_CONNECTED ->
+                        logger.info("transfer success: {} -> {}", player.getUsername(), serverName);
+                case SERVER_DISCONNECTED, CONNECTION_CANCELLED -> {
+                    logger.info("transfer failed: {} -> {}", player.getUsername(), serverName);
+                    serverConn.sendPluginMessage(TRANSFER_MESSAGE_ID, "fail".getBytes(StandardCharsets.UTF_8));
+                }
+            }
+        });
     }
 
     @Subscribe
@@ -84,19 +107,38 @@ public class ProxyPlugin {
         }
     }
 
-    @Subscribe
-    public void handleInitialServer(PlayerChooseInitialServerEvent event) {
-        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-        event.setInitialServer(rs);
-    }
-
 //    @Subscribe
-//    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
-//        if (event.kickedDuringServerConnect()) return;
+//    public void handleInitialServer(PlayerChooseInitialServerEvent event) {
+//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
+//        event.setInitialServer(rs);
+//    }
+
+    @Subscribe
+    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
+        if (event.kickedDuringServerConnect()) return;
+
+        // 'anyhub' points to the clusterip service for all the hub instances, so if you are kicked from it
+        // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
+        // ready instance, so it is totally safe to do so.
+        var serverName = event.getServer().getServerInfo().getName();
+        if ("anyhub".equals(serverName)) {
+            logger.info("reconnecting {} to hub", event.getPlayer().getUsername());
+            event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
+            return;
+        }
+
+//        if (event.getServer().getServerInfo().getName().equals("hub-minecraft")) return;
 //
-//        logger.info("kicked from server: {}", event.getServer().getServerInfo().getName());
+//        var playerId = event.getPlayer().getUniqueId().toString();
+//        logger.info("kicked from server, joining a new hub: {}", playerId);
+
+//        var res = sessionService.joinHubV2(new JoinHubRequest(playerId));
+//        logger.info("join hub result: {}", res);
+//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub", new InetSocketAddress(res.serverClusterIp(), 25565)));
+        //todo in the future we will need to let ss choose a hub to match you with friends, but for now it seems fine to just direct to any hub server?
+
 //        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
 //        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
-//    }
+    }
 
 }

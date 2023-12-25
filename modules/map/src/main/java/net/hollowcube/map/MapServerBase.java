@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.HelpCommand;
 import net.hollowcube.common.config.ConfigProvider;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
@@ -24,10 +25,12 @@ import net.hollowcube.map.terraform.MapServerModule;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.util.MinestomCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -110,6 +113,10 @@ public abstract class MapServerBase implements MapServer {
         InteractionRules.register(interactionEvents);
 
         // Common commands
+        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new EmojisCommand());
+        commandManager.register(new MinestomCommand());
+
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand(null, null, null));
         commandManager.register(new TopTimesCommand(mapService(), playerService()));

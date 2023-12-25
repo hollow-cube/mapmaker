@@ -18,6 +18,8 @@ public interface SessionService {
 
     @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req);
 
+    @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req);
+
     class InternalError extends RuntimeException {
         public InternalError(@NotNull String message) {
             super(message);

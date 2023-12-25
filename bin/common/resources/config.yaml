@@ -8,5 +8,8 @@ minestom:
   # Translation mode: server,proxy
   translation: server
 
+velocity:
+  secret: ""
+
 kafka:
   bootstrap_servers: localhost:9092

@@ -20,6 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
+      terminationGracePeriodSeconds: 500
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
@@ -40,6 +42,11 @@ spec:
               path: /ready
               port: 9124
             periodSeconds: 5 # todo
+          lifecycle:
+            preStop:
+              httpGet:
+                port: 9124
+                path: /shutdown
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
