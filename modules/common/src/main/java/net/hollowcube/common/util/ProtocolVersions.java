@@ -12,7 +12,7 @@ public final class ProtocolVersions {
     public static int getProtocolVersion(@NotNull String name) {
         return ID_TO_NAME.getOrDefault(name, -1);
     }
-    
+
     public static @NotNull String getProtocolName(int version) {
         return NAME_TO_ID.getOrDefault(version, "unknown");
     }
@@ -29,7 +29,8 @@ public final class ProtocolVersions {
             Map.entry("1.18.1", 757),
             Map.entry("1.17.1", 756),
             Map.entry("1.17", 755),
-            Map.entry("1.16.5", 754)
+            Map.entry("1.16.5", 754),
+            Map.entry("1.16.3", 753)
     );
     private static final Map<Integer, String> NAME_TO_ID = ID_TO_NAME.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
