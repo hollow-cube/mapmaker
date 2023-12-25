@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.misc.StandaloneServer;
 import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.*;
@@ -51,7 +52,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
-class HubServerImpl extends HubServerBase {
+class HubServerImpl extends HubServerBase implements StandaloneServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServerImpl.class);
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
@@ -74,6 +75,7 @@ class HubServerImpl extends HubServerBase {
 
     private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
 
+    @Override
     public @Blocking void start(@NotNull ConfigLoaderV3 config) {
         var velocityConfig = config.get(VelocityConfig.class);
         if (!velocityConfig.secret().isEmpty()) {
@@ -143,6 +145,7 @@ class HubServerImpl extends HubServerBase {
         isReady = true;
     }
 
+    @Override
     public void handleHttpShutdown(@NotNull ServerRequest serverRequest, @NotNull ServerResponse serverResponse) {
         if (gracefulShutdownFuture != null) {
             gracefulShutdownFuture.thenRun(() -> serverResponse.status(200).send());
@@ -210,6 +213,7 @@ class HubServerImpl extends HubServerBase {
         return sessionManager;
     }
 
+    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),

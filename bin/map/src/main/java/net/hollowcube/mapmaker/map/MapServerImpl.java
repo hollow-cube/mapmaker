@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.dep.MapBridge;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.misc.StandaloneServer;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
@@ -60,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
-class MapServerImpl extends MapServerBase {
+class MapServerImpl extends MapServerBase implements StandaloneServer {
     private static final Logger logger = LoggerFactory.getLogger(MapServerImpl.class);
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
@@ -97,6 +98,7 @@ class MapServerImpl extends MapServerBase {
     // Note that we will separately hold them in the configuration phase until the map world is ready.
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
 
+    @Override
     public @Blocking void start(@NotNull ConfigLoaderV3 config) {
         var velocityConfig = config.get(VelocityConfig.class);
         if (!velocityConfig.secret().isEmpty()) {
@@ -165,6 +167,7 @@ class MapServerImpl extends MapServerBase {
         isReady = true;
     }
 
+    @Override
     public void handleHttpShutdown(@NotNull ServerRequest serverRequest, @NotNull ServerResponse serverResponse) {
         if (gracefulShutdownFuture != null) {
             gracefulShutdownFuture.thenRun(() -> serverResponse.status(200).send());
@@ -228,6 +231,7 @@ class MapServerImpl extends MapServerBase {
         return permManager;
     }
 
+    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
