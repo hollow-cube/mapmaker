@@ -23,9 +23,9 @@ jobs:
         with:
           path: |
             ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: ${{ runner.os }}-bazel-rp-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-bazel-
+            ${{ runner.os }}-bazel-rp-
 
       - name: Build resource pack
         id: build
@@ -59,9 +59,9 @@ jobs:
         with:
           path: |
             ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: ${{ runner.os }}-bazel-bds-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-bazel-
+            ${{ runner.os }}-bazel-bds-
 
       # Build server
       - name: Build standalone binary
