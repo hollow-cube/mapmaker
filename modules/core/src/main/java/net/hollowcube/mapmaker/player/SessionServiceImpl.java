@@ -51,7 +51,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     @Override
     public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip) {
         logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
-        var reqBody = GSON.toJson(new SessionCreateRequest(hostname, username, ip));
+        var reqBody = GSON.toJson(new SessionCreateRequestV2(hostname, username, ip));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(urlV2 + "/" + id))
