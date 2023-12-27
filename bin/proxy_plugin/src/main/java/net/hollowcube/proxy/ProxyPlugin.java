@@ -53,6 +53,7 @@ public class ProxyPlugin {
         else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
+        proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
 
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
