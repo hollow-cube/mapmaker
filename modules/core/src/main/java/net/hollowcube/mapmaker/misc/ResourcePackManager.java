@@ -45,7 +45,7 @@ public final class ResourcePackManager {
                 .filter(event -> event.getIdentifier().equals("mapmaker:resource_pack"))
                 .handler(event -> future.complete(Boolean.parseBoolean(event.getMessageString())))
                 .expireCount(1).build());
-
+        player.sendPluginMessage("mapmaker:resource_pack", hash);
 
         // Send the proxy query
         return future.thenCompose(doSend -> {
