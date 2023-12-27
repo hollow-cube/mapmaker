@@ -6,6 +6,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerResourcePackStatusEvent;
 import net.minestom.server.resourcepack.ResourcePack;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,11 @@ public final class ResourcePackManager {
 
         // Listen for the proxy response and send the proxy query
         final var future = new CompletableFuture<Boolean>();
-//        EVENT_HANDLER.addListener(EventListener.builder(PlayerPluginMessageEvent.class)
-//                .filter(event -> event.getIdentifier().equals("mapmaker:resource_pack"))
-//                .handler(event -> future.complete(Boolean.parseBoolean(event.getMessageString())))
-//                .expireCount(1).build());
-//        player.sendPluginMessage("mapmaker:resource_pack", hash);
-        future.complete(true);
+        EVENT_HANDLER.addListener(EventListener.builder(PlayerPluginMessageEvent.class)
+                .filter(event -> event.getIdentifier().equals("mapmaker:resource_pack"))
+                .handler(event -> future.complete(Boolean.parseBoolean(event.getMessageString())))
+                .expireCount(1).build());
+        player.sendPluginMessage("mapmaker:resource_pack", hash);
 
         // Send the proxy query
         return future.thenCompose(doSend -> {
