@@ -95,9 +95,6 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         // Service init
         boolean noopServices = Boolean.getBoolean("mapmaker.noop");
 
-        playerService = new NoopPlayerService();
-        sessionService = new NoopSessionService();
-
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
         else if (noopServices) playerService = new NoopPlayerService();
@@ -115,7 +112,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         permManager = new NoopPermManager();
 
-        sessionManager = new SessionManager(sessionService, playerService, new KafkaConfig("kafka:9092"));
+        var kafkaConfig = config.get(KafkaConfig.class);
+        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig);
 
         if (noopServices) bridge = new NoopHubBridge();
         else bridge = new HubBridge(sessionService, sessionManager);
