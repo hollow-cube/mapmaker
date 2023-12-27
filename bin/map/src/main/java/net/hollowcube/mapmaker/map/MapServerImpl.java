@@ -242,7 +242,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         );
     }
 
-    private @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId) {
+    private @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
         var noop = mapService instanceof NoopMapService;
         if (noop) {
             //todo
@@ -253,13 +253,19 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
             ));
         }
 
-        return pendingPlayerJoins.computeIfAbsent(playerId, id -> {
+        var pendingJoin = pendingPlayerJoins.computeIfAbsent(playerId, id -> {
             var future = new CompletableFuture<MapJoinInfo>();
             //todo the futures are never actually removed from the map.
             // invalid to do below because it will remove the future before we can handle it in login event.
 //            future.whenComplete((v, e) -> pendingPlayerJoins.remove(id));
             return future;
         });
+        if (deleteCompleted && pendingJoin.isDone()) {
+            pendingPlayerJoins.remove(playerId);
+            pendingJoin = pendingPlayerJoins.computeIfAbsent(playerId, id -> new CompletableFuture<>());
+        }
+
+        return pendingJoin;
     }
 
     private void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
@@ -267,7 +273,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         var playerId = player.getUuid().toString();
 
         try {
-            var joinInfo = FutureUtil.getUnchecked(getPendingJoin(playerId));
+            var joinInfo = FutureUtil.getUnchecked(getPendingJoin(playerId, false));
             if (joinInfo == null) {
                 logger.error("timed out waiting for join info for {}", playerId);
                 player.kick(Component.text("Failed to join. Please try again later."));
