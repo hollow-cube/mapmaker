@@ -178,7 +178,7 @@ jobs:
           helm pull oci://registry-1.docker.io/mworzala/mapmaker-node --version "1.0.0-${{ github.sha }}"
           
           # <ALERT BEEP BOOP DIFFERENT FROM COMMON ACTION>
-          cat bin/map/deploy/values-staging.yaml | envsubst > ./values-override-hub.yaml
+          cat bin/hub/deploy/values-staging.yaml | envsubst > ./values-override-hub.yaml
           # </ALERT>
           
           helm upgrade mapmaker-hub mapmaker-node-1.0.0-${{ github.sha }}.tgz \
