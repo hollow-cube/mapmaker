@@ -48,6 +48,11 @@ public interface ServerRuntime {
         return Holder.hostname;
     }
 
+
+    default @NotNull String resourcePackSha1() {
+        return "dev";
+    }
+
     // Dependency info
 
     default @NotNull String minestom() {

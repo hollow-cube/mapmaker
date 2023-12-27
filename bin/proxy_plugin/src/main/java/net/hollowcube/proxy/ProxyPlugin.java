@@ -23,10 +23,14 @@ import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
+    private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -34,6 +38,9 @@ public class ProxyPlugin {
     private SessionService sessionService;
 
     private final RegisteredServer anyhubServer;
+
+    // Map of player uuid to the resource pack hash they currently have applied
+    private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -74,9 +81,30 @@ public class ProxyPlugin {
     @Subscribe
     public void handlePluginMessage(@NotNull PluginMessageEvent event) {
         logger.info("plugin message: {}", event.getIdentifier());
-        if (!TRANSFER_MESSAGE_ID.equals(event.getIdentifier())) return;
-        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (TRANSFER_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleTransfer(event);
+        } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleResourcePack(event);
+        }
+    }
 
+    private void handleResourcePack(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (!(event.getSource() instanceof ServerConnection serverConn)) return;
+        var player = serverConn.getPlayer();
+
+        var newResourcePack = new String(event.getData());
+        var existingResourcePack = resourcePacks.get(player.getUniqueId());
+
+        var shouldSend = existingResourcePack == null || !existingResourcePack.equals(newResourcePack);
+        serverConn.sendPluginMessage(RESOURCE_PACK_MESSAGE_ID, String.valueOf(shouldSend).getBytes(StandardCharsets.UTF_8));
+        if (shouldSend) {
+            resourcePacks.put(player.getUniqueId(), newResourcePack);
+        }
+    }
+
+    private void handleTransfer(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
 
@@ -104,6 +132,8 @@ public class ProxyPlugin {
             logger.info("deleted session (v2) for {}", playerId);
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
+        } finally {
+            resourcePacks.remove(event.getPlayer().getUniqueId());
         }
     }
 

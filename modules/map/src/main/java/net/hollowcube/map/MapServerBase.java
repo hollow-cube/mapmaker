@@ -29,6 +29,7 @@ import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.command.util.MinestomCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -38,6 +39,7 @@ import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.terraform.Terraform;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -116,6 +118,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new HelpCommand(commandManager));
         commandManager.register(new EmojisCommand());
         commandManager.register(new MinestomCommand());
+        commandManager.register(createDebugCommand());
 
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand(null, null, null));
@@ -229,6 +232,23 @@ public abstract class MapServerBase implements MapServer {
     public void shutdown() {
         mapMgmtConsumer.close();
         mwm.shutdown();
+    }
+
+    private @NotNull DebugCommand createDebugCommand() {
+        var cmd = new DebugCommand(playerService(), permManager(), mapService());
+
+        cmd.createPermissionlessSubcommand("world", (player, context) -> {
+            var world = MapWorld.forPlayerOptional(player);
+            if (world == null) {
+                player.sendMessage("You are not in a map world!");
+                return;
+            }
+
+            player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
+            player.sendMessage("Type: " + world.getClass().getSimpleName());
+        });
+
+        return cmd;
     }
 
 }

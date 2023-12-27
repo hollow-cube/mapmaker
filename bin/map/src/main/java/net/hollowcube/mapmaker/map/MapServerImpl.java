@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.dep.MapBridge;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.StandaloneServer;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
@@ -297,9 +298,11 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     }
 
     private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
-        event.setSendRegistryData(false);
-
         var player = event.getPlayer();
+
+        // Apply the resource pack, making sure not to continue if apply fails.
+        ResourcePackManager.sendResourcePack(player).join();
+        if (!player.isOnline()) return;
 
         var joinInfo = player.getTag(JOIN_INFO_TAG);
         if (joinInfo == null) {
@@ -324,6 +327,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         registry.put("minecraft:damage_type", DamageType.getNBT());
         player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
         player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
+        event.setSendRegistryData(false);
 
         // Spawn them into the world.
         player.setTag(TARGET_WORLD_TAG, mapWorld);

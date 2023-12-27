@@ -3,7 +3,7 @@ concurrency: Staging
 
 on:
   push:
-    branches: [ main-disabled ]
+    branches: [ main ]
 
 jobs:
   resource-pack-build:
@@ -44,7 +44,7 @@ jobs:
           AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
           SOURCE_DIR: out
 
-  docker-build:
+  docker-build-map:
     runs-on: ubuntu-latest
     steps:
       - name: Import Secrets
@@ -61,14 +61,13 @@ jobs:
             ~/.cache/bazel
           key: ${{ runner.os }}-bazel-bds-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-bazel-bds-
+            ${{ runner.os }}-bazel-map-
 
       # Build server
       - name: Build standalone binary
-        run: bazel build //:development_deploy.jar
+        run: bazel build //bin/map:map_deploy.jar
 
       # Build and push docker image
-      - run: cp bazel-bin/development_deploy.jar development-all.jar
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -79,11 +78,12 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
-          file: "bin/development/deploy/Dockerfile"
+          context: bazel-bin/bin/map
+          file: "bin/map/deploy/Dockerfile"
           platforms: linux/amd64
           push: true
-          tags: mworzala/mapmaker-dev:${{ github.sha }}
+          tags: mworzala/mapmaker-map:${{ github.sha }}
+
   helm-build:
     runs-on: ubuntu-latest
     steps:
@@ -92,11 +92,12 @@ jobs:
         with:
           vault-token: ${{ secrets.VAULT_TOKEN }}
           name: mapmaker-dev
-          path: bin/development/deploy/mapmaker-dev
-  helm-deploy:
+
+  helm-deploy-map:
+    name: Deploy Map Server
     runs-on: 'ubuntu-latest'
     needs:
-      - docker-build
+      - docker-build-map
       - helm-build
       - resource-pack-build
     steps:
@@ -135,13 +136,13 @@ jobs:
 
           # Deploy the chart
           helm registry login registry-1.docker.io --username mworzala --password ${{ env.DOCKER_PASS }}
-          helm pull oci://registry-1.docker.io/mworzala/mapmaker-dev --version "1.0.0-${{ github.sha }}"
+          helm pull oci://registry-1.docker.io/mworzala/mapmaker-map --version "1.0.0-${{ github.sha }}"
           
           # <ALERT BEEP BOOP DIFFERENT FROM COMMON ACTION>
-          cat bin/development/deploy/mapmaker-dev/values-staging.yaml | envsubst > ./values-override.yaml
+          cat bin/map/deploy/values-staging.yaml | envsubst > ./values-override-map.yaml
           # </ALERT>
           
-          helm upgrade mapmaker-dev mapmaker-dev-1.0.0-${{ github.sha }}.tgz \
+          helm upgrade mapmaker-map mapmaker-map-1.0.0-${{ github.sha }}.tgz \
                --install --create-namespace --namespace mapmaker \
-               --reset-values -f ./values-override.yaml \
-               --set base.image.tag="${{ github.sha }}" 
+               --reset-values -f ./values-override-map.yaml \
+               --set image.tag="${{ github.sha }}" 
