@@ -135,9 +135,10 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         permManager = new NoopPermManager();
 
-        sessionManager = new SessionManager(sessionService, playerService, new KafkaConfig("kafka:9092"));
+        var kafkaConfig = config.get(KafkaConfig.class);
+        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig);
 
-        mapJoinConsumer = new MapJoinConsumer("kafka:9092");
+        mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
 
         bridge = new MapBridge(sessionService);
 
@@ -184,7 +185,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
         // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter
         // the shutdown hook for the jvm (receive sigterm).
-        Audiences.players().sendMessage(Component.text("ENTERED SHUTDOWN PHASE"));
+        Audiences.players().sendMessage(Component.text("Shutdown started (this message is temp)"));
 
         try {
             Thread.sleep(5000);
