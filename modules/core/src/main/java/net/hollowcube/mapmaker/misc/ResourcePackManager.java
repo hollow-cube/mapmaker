@@ -49,6 +49,7 @@ public final class ResourcePackManager {
 
         // Send the proxy query
         return future.thenCompose(doSend -> {
+            if (!doSend) return CompletableFuture.completedFuture(null);
             logger.info("Sending resource pack {} ({}) to {}", url, hash, player.getUsername());
 
             // Send the pack and listen for the status
