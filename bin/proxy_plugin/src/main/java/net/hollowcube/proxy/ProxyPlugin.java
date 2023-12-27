@@ -47,7 +47,10 @@ public class ProxyPlugin {
         this.logger = logger;
         this.proxy = proxy;
 
-        this.sessionService = new SessionServiceImpl("http://session-service:9124");
+
+        var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
+        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
+        else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
 

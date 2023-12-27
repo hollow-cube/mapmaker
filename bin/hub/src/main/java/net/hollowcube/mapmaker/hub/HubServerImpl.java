@@ -17,7 +17,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.StandaloneServer;
 import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -249,15 +248,17 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         var player = event.getPlayer();
 
         // Apply the resource pack, making sure not to continue if apply fails.
-        ResourcePackManager.sendResourcePack(player).join();
-        if (!player.isOnline()) return;
+//        ResourcePackManager.sendResourcePack(player).join();
+//        if (!player.isOnline()) return;
 
         event.setSpawningInstance(instance());
         player.setRespawnPoint(HUB_SPAWN_POINT);
+        logger.info("done config for {}", player.getUsername());
     }
 
     private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
+        logger.info("doing spawn for {}", event.getPlayer().getUsername());
 
         var player = event.getPlayer();
         var playerData = PlayerDataV2.fromPlayer(player);
