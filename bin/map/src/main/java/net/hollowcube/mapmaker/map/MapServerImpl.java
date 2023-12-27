@@ -400,7 +400,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
             if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
 
             logger.info("received join info for {}: {}", message.playerId(), message);
-            var pendingJoin = getPendingJoin(message.playerId());
+            var pendingJoin = getPendingJoin(message.playerId(), true);
             pendingJoin.complete(new MapJoinInfo(message.playerId(), message.mapId(), message.state()));
         }
     }
