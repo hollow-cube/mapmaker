@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,8 @@ public interface MapServer {
     @NotNull MapService mapService();
 
     @NotNull PermManager permManager();
+
+    @NotNull SessionManager sessionManager();
 
     @NotNull List<FeatureProvider> features();
 

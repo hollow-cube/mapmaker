@@ -249,6 +249,11 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     }
 
     @Override
+    public @NotNull SessionManager sessionManager() {
+        return sessionManager;
+    }
+
+    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),

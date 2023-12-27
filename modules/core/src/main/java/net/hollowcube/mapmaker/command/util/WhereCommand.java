@@ -75,15 +75,16 @@ public class WhereCommand extends Command {
 
         var targetName = playerService.getPlayerDisplayName2(target).build();
         switch (presence.type()) {
-            case Presence.TYPE_MAPMAKER_HUB -> player.sendMessage(Component.translatable("command.where.hub", targetName));
+            case Presence.TYPE_MAPMAKER_HUB ->
+                    player.sendMessage(Component.translatable("command.where.hub", targetName));
             case Presence.TYPE_MAPMAKER_MAP -> {
                 var senderPresence = Objects.requireNonNull(sessionManager.getPresence(senderId));
                 if (senderPresence.mapId().equals(presence.mapId())) {
                     player.sendMessage(Component.translatable("command.where.same_map", targetName));
                 } else if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
-                    player.sendMessage(Component.translatable("command.where.self.building", targetName));
+                    player.sendMessage(Component.translatable("command.where.building", targetName));
                 } else {
-                    player.sendMessage(Component.translatable("command.where.self.playing", targetName));
+                    player.sendMessage(Component.translatable("command.where.playing", targetName));
                 }
             }
             default -> player.sendMessage(Component.translatable("command.where.unknown", targetName));
