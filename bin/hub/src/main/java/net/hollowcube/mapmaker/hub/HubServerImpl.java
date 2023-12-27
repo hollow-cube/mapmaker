@@ -262,7 +262,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         //  Fucking velocity is so braindead they dont have their plugin message api work
         //  during the config state its actually insane how is their shit so bad i am a
         //  single person maintaining minestom and they have all of paper.
-        ResourcePackManager.sendResourcePack(player); // .join();
+        ResourcePackManager.sendResourcePack(player).join();
         if (!player.isOnline()) return;
 
         event.setSpawningInstance(instance());

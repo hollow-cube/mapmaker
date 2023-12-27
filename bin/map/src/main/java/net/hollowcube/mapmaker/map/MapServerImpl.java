@@ -320,7 +320,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         //  Fucking velocity is so braindead they dont have their plugin message api work
         //  during the config state its actually insane how is their shit so bad i am a
         //  single person maintaining minestom and they have all of paper.
-        ResourcePackManager.sendResourcePack(player); //.join();
+        ResourcePackManager.sendResourcePack(player).join();
         if (!player.isOnline()) return;
 
         var joinInfo = player.getTag(JOIN_INFO_TAG);
