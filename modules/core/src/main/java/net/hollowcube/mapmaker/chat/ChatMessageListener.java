@@ -1,8 +1,6 @@
-package net.hollowcube.mapmaker.dev.chat;
+package net.hollowcube.mapmaker.chat;
 
 import com.google.gson.Gson;
-import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.mapmaker.dev.DevServer;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
@@ -14,6 +12,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextColor;
@@ -22,6 +21,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.sound.SoundEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -36,6 +36,12 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private static final String CHAT_TOPIC = "chat";
     private static final String CHAT_OUT_TOPIC = "chat-messages";
     private static final Gson GSON = AbstractHttpService.GSON;
+
+    private static final Sound TAG_DING = Sound.sound()
+            .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
+            .source(Sound.Source.PLAYER)
+            .volume(5)
+            .build();
 
     private final PlayerService playerService;
     private final MapService mapService;
@@ -68,15 +74,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-        var currentMap = MapWorld.forPlayerOptional(player);
-        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
-            player.sendMessage(Component.text("You are not in a published map.")); //todo message
-            return;
-        }
+//        var currentMap = MapWorld.forPlayerOptional(player);
+//        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
+//            player.sendMessage(Component.text("You are not in a published map.")); //todo message
+//            return;
+//        }
 
         var playerData = PlayerDataV2.fromPlayer(player);
         var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                playerData.id(), message, "global", currentMap == null ? null : currentMap.map().id());
+                playerData.id(), message, "global", null); //currentMap == null ? null : currentMap.map().id());
         logger.info("{}: {}", playerData.username(), messageData);
         this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(messageData));
     }
@@ -107,7 +113,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                                 var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
                                 if (namePattern.matcher(part.text()).find()) {
                                     if (!hasDing && !recipient.getUuid().toString().equals(message.sender()))
-                                        recipient.playSound(DevServer.TAG_DING);
+                                        recipient.playSound(TAG_DING);
                                     hasDing = true;
                                     component = component.replaceText(TextReplacementConfig.builder()
                                             .match(namePattern)
@@ -124,8 +130,9 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                                 } else builder.append(emoji.component());
                             }
                             case MAP -> {
-                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
-                                builder.append(MapData.createMapHoverText(map));
+                                builder.append(Component.text("[map - todo]"));
+//                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
+//                                builder.append(MapData.createMapHoverText(map));
                             }
                         }
                     }

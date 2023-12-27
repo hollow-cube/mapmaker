@@ -7,6 +7,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.hub.dep.HubBridge;
@@ -39,6 +40,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -68,6 +70,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
     private HubToMapBridge bridge;
 
     private SessionManager sessionManager;
+
+    private ChatMessageListener chatMessageListener;
 
     private CommandManager commandManager;
 
@@ -117,6 +121,10 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         if (noopServices) bridge = new NoopHubBridge();
         else bridge = new HubBridge(sessionService, sessionManager);
+
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+        packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
 
         // Command init
         commandManager = new CommandManager();
@@ -179,6 +187,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         MinecraftServer.stopCleanly();
         sessionManager.close();
+        chatMessageListener.close();
         super.shutdown();
     }
 

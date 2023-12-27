@@ -12,6 +12,7 @@ import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
+import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
@@ -43,6 +44,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.tag.Tag;
@@ -81,6 +83,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
     private SessionManager sessionManager;
 
+    private ChatMessageListener chatMessageListener;
     private MapJoinConsumer mapJoinConsumer;
 
     private CommandManager commandManager;
@@ -141,6 +144,10 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
 
         bridge = new MapBridge(sessionService);
+
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+        packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
 
         // Command init
         commandManager = new CommandManager();
@@ -205,6 +212,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         MinecraftServer.stopCleanly();
         sessionManager.close();
         mapJoinConsumer.close();
+        chatMessageListener.close();
         super.shutdown();
     }
 

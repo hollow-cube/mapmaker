@@ -16,24 +16,26 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
-import net.hollowcube.mapmaker.dev.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -43,12 +45,9 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
@@ -74,7 +73,6 @@ import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.resourcepack.ResourcePack;
-import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -85,7 +83,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -174,11 +175,6 @@ public class DevServer {
     private MetricWriter metricWriter;
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
-    public static final Sound TAG_DING = Sound.sound()
-            .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
-            .source(Sound.Source.PLAYER)
-            .volume(5)
-            .build();
 
     @Blocking
     public void start(@NotNull ConfigLoaderV3 config) {
@@ -290,7 +286,6 @@ public class DevServer {
             eventHandler.addListener(PlayerSpawnEvent.class, this::handleFirstSpawn);
             eventHandler.addListener(PlayerDisconnectEvent.class, this::handleDisconnect);
             eventHandler.addListener(PlayerSkinInitEvent.class, this::handleSkinInit);
-            eventHandler.addListener(PlayerChatEvent.class, this::handleChatMessage);
 
             MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
             MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
@@ -443,66 +438,6 @@ public class DevServer {
 
     private void handleSkinInit(PlayerSkinInitEvent event) {
         event.setSkin(PlayerSkin.fromUuid(event.getPlayer().getUuid().toString()));
-    }
-
-    private static final Pattern EMOJI_REGEX = Pattern.compile(":([a-zA-Z\\-]+):");
-
-    private void handleChatMessage(PlayerChatEvent event) {
-        // Cancel the event, so we can send player specific versions ourselves
-        event.setCancelled(true);
-
-        var strippedMessage = FontUtil.stripInvalidChars(event.getMessage()).trim();
-        if (strippedMessage.isBlank()) return;
-
-        // Replace emojis with their sprites
-        var baseMessage = Component.text(strippedMessage).replaceText(TextReplacementConfig.builder()
-                .match(EMOJI_REGEX)
-                .replacement((match, builder) -> {
-                    var emoji = Emoji.findByName(match.group(1));
-                    if (emoji == null) return builder;
-                    return emoji.component();
-                })
-                .build());
-
-        // If the message contains a map placeholder, and they are in a playing map, build the string to replace with
-        var sender = event.getPlayer();
-        if (event.getMessage().toLowerCase(Locale.ROOT).contains("[map]")) {
-            var world = MapWorld.forPlayerOptional(sender);
-            if (world == null || !world.map().isPublished()) {
-                sender.sendMessage(Component.text("You are not in a published map.")); //todo message
-                return;
-            }
-
-            var map = world.map();
-            baseMessage = baseMessage.replaceText(TextReplacementConfig.builder()
-                    .matchLiteral("[map]")
-                    //todo should also be a hypercube perk
-                    .replacement((match, unused) -> MapData.createMapHoverText(map))
-                    .build());
-
-        }
-
-        var lowerMessage = event.getMessage().toLowerCase(Locale.ROOT);
-        for (var recipient : event.getRecipients()) {
-            var message = baseMessage;
-
-            // If they were tagged, send a ding effect and edit the message for them
-            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
-            if (namePattern.matcher(lowerMessage).find()) {
-                if (!recipient.equals(sender)) recipient.playSound(TAG_DING);
-                message = message.replaceText(TextReplacementConfig.builder()
-                        .match(namePattern)
-                        .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
-                        .build());
-            }
-
-            recipient.sendMessage(Component.translatable(
-                    "chat.channel.global.default",
-                    PlayerDataV2.fromPlayer(event.getPlayer()).displayName(),
-                    message
-            ));
-        }
-
     }
 
     private void rebuildOnlinePlayersRegex() {
