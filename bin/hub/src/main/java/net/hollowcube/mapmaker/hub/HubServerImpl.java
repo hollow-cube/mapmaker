@@ -258,10 +258,6 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         var player = event.getPlayer();
 
         // Apply the resource pack, making sure not to continue if apply fails.
-        // todo: Do this during the configuration state
-        //  Fucking velocity is so braindead they dont have their plugin message api work
-        //  during the config state its actually insane how is their shit so bad i am a
-        //  single person maintaining minestom and they have all of paper.
         ResourcePackManager.sendResourcePack(player).join();
         if (!player.isOnline()) return;
 

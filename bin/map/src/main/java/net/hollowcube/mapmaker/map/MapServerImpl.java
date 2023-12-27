@@ -33,6 +33,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.CoreTeams;
+import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -170,6 +171,12 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect)
                 .addListener(PlayerPluginMessageEvent.class, this::handlePlayerPluginMessage);
+
+        //todo: fix
+        KindaBadThingToFix.badbadbad = player -> {
+            var world = MapWorld.forPlayerOptional(player);
+            return world == null ? null : world.map();
+        };
 
         // The rest of the server init
         init(config, commandManager);
@@ -316,10 +323,6 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         var player = event.getPlayer();
 
         // Apply the resource pack, making sure not to continue if apply fails.
-        // todo: Do this during the configuration state
-        //  Fucking velocity is so braindead they dont have their plugin message api work
-        //  during the config state its actually insane how is their shit so bad i am a
-        //  single person maintaining minestom and they have all of paper.
         ResourcePackManager.sendResourcePack(player).join();
         if (!player.isOnline()) return;
 
