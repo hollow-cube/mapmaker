@@ -91,7 +91,7 @@ jobs:
         uses: hollow-cube/actions/helm-build@main
         with:
           vault-token: ${{ secrets.VAULT_TOKEN }}
-          name: mapmaker-dev
+          name: mapmaker-node
 
   helm-deploy-map:
     name: Deploy Map Server
@@ -136,13 +136,13 @@ jobs:
 
           # Deploy the chart
           helm registry login registry-1.docker.io --username mworzala --password ${{ env.DOCKER_PASS }}
-          helm pull oci://registry-1.docker.io/mworzala/mapmaker-map --version "1.0.0-${{ github.sha }}"
+          helm pull oci://registry-1.docker.io/mworzala/mapmaker-node --version "1.0.0-${{ github.sha }}"
           
           # <ALERT BEEP BOOP DIFFERENT FROM COMMON ACTION>
           cat bin/map/deploy/values-staging.yaml | envsubst > ./values-override-map.yaml
           # </ALERT>
           
-          helm upgrade mapmaker-map mapmaker-map-1.0.0-${{ github.sha }}.tgz \
+          helm upgrade mapmaker-map mapmaker-node-1.0.0-${{ github.sha }}.tgz \
                --install --create-namespace --namespace mapmaker \
                --reset-values -f ./values-override-map.yaml \
                --set image.tag="${{ github.sha }}" 

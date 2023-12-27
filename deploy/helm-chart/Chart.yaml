@@ -1,5 +1,5 @@
 apiVersion: v2
-name: mapmaker
+name: mapmaker-node
 description: A Helm chart for standalone hub and map services.
 type: application
 
