@@ -6,6 +6,8 @@ import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.map.feature.play.checkpoint.CheckpointPlateBlock;
+import net.hollowcube.map.feature.play.checkpoint.FinishPlateBlock;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -148,6 +150,10 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect);
+
+        // TODO: giga cursed need to rework this BADLY
+        logger.info("bad1: {}", FinishPlateBlock.OBJECT_TYPE);
+        logger.info("bad2: {}", CheckpointPlateBlock.OBJECT_TYPE);
 
         // The rest of the server init
         init(commandManager, new NoopPlayerInviteService());

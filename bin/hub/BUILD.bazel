@@ -18,6 +18,7 @@ java_binary(
         "//modules/common",
         "//modules/core",
         "//modules/hub",
+        "//modules/map",
         "//modules/terraform",
         "//third_party:adventure_all",
         "//third_party:auto_service",

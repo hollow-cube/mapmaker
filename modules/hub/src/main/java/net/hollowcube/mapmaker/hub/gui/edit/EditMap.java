@@ -270,7 +270,7 @@ public class EditMap extends View {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             boolean found = false;
             for (var object : map.objects()) {
-                if (object.type().id().equals("mapmaker:finish_plate")) {
+                if ("mapmaker:finish_plate".equals(object.type().id())) {
                     found = true;
                     break;
                 }
