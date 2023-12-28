@@ -5,16 +5,20 @@ import net.hollowcube.command.arg.ArgumentInt;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class HelpCommand extends Command {
+    //TODO this needs to become translation keys
+    private static final TextColor LIGHT_GRAY = TextColor.color(0xB0B0B0);
+    private static final TextColor WHITE_GRAY = TextColor.color(0xF2F2F2);
+
     private final CommandManager commandManager;
     private final CommandDoc.DocRenderer renderer;
 
@@ -33,6 +37,7 @@ public class HelpCommand extends Command {
         this.commandManager = commandManager;
         this.renderer = renderer;
 
+        category = null;
         description = "Lists commands or shows help for a command.";
         examples = List.of("/help", "/help tp");
 
@@ -45,19 +50,56 @@ public class HelpCommand extends Command {
     }
 
     private void showCommandList(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage("available commands:");
+        var builder = Component.text();
+
+        int maxWidth = 0;
+        var commandList = new TreeMap<String, List<Command>>();
         for (var command : commandManager.getUniqueCommands()) {
             if (!testCondition(command, sender)) continue;
 
-            sender.sendMessage(command.name());
+            maxWidth = Math.max(maxWidth, FontUtil.measureText(command.name()));
+            commandList.computeIfAbsent(
+                    Objects.requireNonNullElse(command.category(), "_______________ᴏᴛʜᴇʀ"),
+                    unused -> new ArrayList<>()).add(command);
         }
+
+        maxWidth += 15;
+
+        var dm = commandList.descendingMap();
+        while (!dm.isEmpty()) {
+            var entry = dm.pollFirstEntry();
+            builder.append(Component.text(entry.getKey().replaceAll("_", ""), LIGHT_GRAY)).appendNewline();
+
+            var commands = entry.getValue();
+            while (!commands.isEmpty()) {
+                var command = commands.remove(0);
+                builder.append(buildSingleCommand(sender, command));
+                builder.append(Component.text(FontUtil.computeOffset(maxWidth - FontUtil.measureText(command.name()))));
+                if (commands.isEmpty()) break;
+
+                command = commands.remove(0);
+                builder.append(buildSingleCommand(sender, command));
+
+                if (!commands.isEmpty()) builder.appendNewline();
+            }
+
+            if (!dm.isEmpty()) builder.appendNewline();
+
+        }
+
+        sender.sendMessage(builder);
+    }
+
+    private @NotNull Component buildSingleCommand(@NotNull CommandSender sender, @NotNull Command command) {
+        var hover = renderer.render(sender, List.of(command.name()), command.doc(sender));
+        return Component.text(command.name(), WHITE_GRAY).hoverEvent(hover);
     }
 
     private void showCommandHelp(@NotNull CommandSender sender, @NotNull CommandContext context) {
         var resolved = context.get(commandArg);
         var fullPath = new ArrayList<>(resolved.path);
         fullPath.add(resolved.command.name());
-        renderer.render(sender, fullPath, resolved.command.doc(sender));
+        sender.sendMessage(renderer.render(sender, fullPath, resolved.command.doc(sender)));
     }
 
     record ResolvedCommand(@NotNull List<String> path, @NotNull Command command) {

@@ -24,6 +24,8 @@ public class MapCommand extends Command {
     ) {
         super("map");
 
+        category = CommandCategory.GLOBAL;
+
         // Default commands
         addSubcommand(this.list = new MapListCommand(guiController, playerService, mapService));
         addSubcommand(this.info = new MapInfoCommand(mapService, permManager));

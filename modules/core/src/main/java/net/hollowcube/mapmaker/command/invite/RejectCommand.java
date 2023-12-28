@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -18,6 +19,8 @@ public class RejectCommand extends Command {
     public RejectCommand(@NotNull PlayerInviteService inviteService) {
         super("reject");
         this.inviteService = inviteService;
+
+        category = CommandCategory.SOCIAL;
 
         addSyntax(playerOnly(this::handleReject), targetArg);
     }

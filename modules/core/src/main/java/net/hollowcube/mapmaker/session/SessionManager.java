@@ -33,10 +33,11 @@ public class SessionManager {
 
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
 
-    public SessionManager(@NotNull SessionService sessionService, @NotNull PlayerService playerService, @NotNull KafkaConfig kafkaConfig) {
+    public SessionManager(@NotNull SessionService sessionService, @NotNull PlayerService playerService, @NotNull KafkaConfig kafkaConfig, boolean noop) {
         this.sessionService = sessionService;
         this.playerService = playerService;
-        this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServers()));
+        if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServers()));
+        else this.consumer = null;
     }
 
     public void close() {

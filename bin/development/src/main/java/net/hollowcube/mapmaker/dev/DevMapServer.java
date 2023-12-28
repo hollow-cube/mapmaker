@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
 
 public class DevMapServer extends MapServerBase {
@@ -49,6 +50,11 @@ public class DevMapServer extends MapServerBase {
     @Override
     public @NotNull PermManager permManager() {
         return permManager;
+    }
+
+    @Override
+    public @NotNull SessionManager sessionManager() {
+        return null;
     }
 
     @Override

@@ -7,6 +7,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//modules/common",
         "//third_party:minestom",
         "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:it_unimi_dsi_fastutil",

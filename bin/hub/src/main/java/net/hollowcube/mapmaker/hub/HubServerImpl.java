@@ -117,14 +117,16 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         permManager = new NoopPermManager();
 
         var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig);
+        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
 
         if (noopServices) bridge = new NoopHubBridge();
         else bridge = new HubBridge(sessionService, sessionManager);
 
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
-        packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+        if (!noopServices) {
+            chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+        }
 
         // Command init
         commandManager = new CommandManager();

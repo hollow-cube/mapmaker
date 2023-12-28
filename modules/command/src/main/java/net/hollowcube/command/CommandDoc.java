@@ -35,13 +35,13 @@ public record CommandDoc(
     @FunctionalInterface
     public interface DocRenderer {
 
-        void render(@NotNull CommandSender sender, @NotNull List<String> path, @NotNull CommandDoc doc);
+        @NotNull Component render(@NotNull CommandSender sender, @NotNull List<String> path, @NotNull CommandDoc doc);
     }
 
     private static class DefaultRenderer implements DocRenderer {
 
         @Override
-        public void render(@NotNull CommandSender sender, @NotNull List<String> path, @NotNull CommandDoc doc) {
+        public @NotNull Component render(@NotNull CommandSender sender, @NotNull List<String> path, @NotNull CommandDoc doc) {
             var builder = Component.text();
             var description = doc.description == null ? "NO DESCRIPTION PROVIDED" : doc.description;
             builder.append(Component.text(description));
@@ -66,7 +66,7 @@ public record CommandDoc(
                 }
             }
 
-            sender.sendMessage(builder.build());
+            return builder.build();
         }
     }
 

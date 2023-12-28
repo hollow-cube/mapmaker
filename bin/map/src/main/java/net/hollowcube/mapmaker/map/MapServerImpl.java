@@ -140,7 +140,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         permManager = new NoopPermManager();
 
         var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig);
+        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
 
         mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
 

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.command.util;
 
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -18,6 +19,8 @@ public class ListCommand extends Command {
         super("list");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
+
+        category = CommandCategory.SOCIAL;
 
         addSyntax(playerOnly(this::handleListPlayers));
     }
@@ -37,7 +40,7 @@ public class ListCommand extends Command {
                 builder.append(Component.text(", "));
             }
         }
-        
+
         player.sendMessage(builder);
     }
 }

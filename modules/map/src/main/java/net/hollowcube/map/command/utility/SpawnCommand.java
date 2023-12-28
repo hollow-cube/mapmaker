@@ -3,6 +3,7 @@ package net.hollowcube.map.command.utility;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ public class SpawnCommand extends Command {
     public SpawnCommand() {
         super("spawn", "tpstart");
         setCondition(mapFilter(true, true, true));
+        
+        category = CommandCategory.GLOBAL;
 
         addSyntax(playerOnly(this::handleTeleportToSpawn));
     }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -23,6 +24,8 @@ public class JoinCommand extends Command {
         super("join");
         this.inviteService = inviteService;
         this.permManager = permManager;
+
+        category = CommandCategory.SOCIAL;
 
         addSyntax(playerOnly(this::handleJoin), targetArg);
     }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -18,6 +19,8 @@ public class InviteCommand extends Command {
     public InviteCommand(@NotNull PlayerInviteService inviteService) {
         super("invite");
         this.inviteService = inviteService;
+
+        category = CommandCategory.SOCIAL;
 
         addSyntax(playerOnly(this::handleInvite), targetArg);
     }

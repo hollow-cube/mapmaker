@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -19,12 +20,14 @@ public class AcceptCommand extends Command {
         super("accept");
         this.inviteService = inviteService;
 
+        category = CommandCategory.SOCIAL;
+
         addSyntax(playerOnly(this::handleDefaultAccept));
         addSyntax(playerOnly(this::handleAccept), targetArg);
     }
 
     private void handleDefaultAccept(@NotNull Player player, @NotNull CommandContext context) {
-            inviteService.accept(player);
+        inviteService.accept(player);
     }
 
     private void handleAccept(@NotNull Player player, @NotNull CommandContext context) {

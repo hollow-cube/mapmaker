@@ -22,6 +22,7 @@ public abstract class Command {
     private CommandCondition condition = null;
 
     // Documentation bits
+    protected String category = null;
     protected String description = null;
     protected List<String> examples = null;
 
@@ -44,6 +45,10 @@ public abstract class Command {
 
     public @NotNull Collection<Command> getUniqueSubcommands() {
         return uniqueSubcommands;
+    }
+
+    public @Nullable String category() {
+        return category;
     }
 
     public void addSubcommand(@NotNull Command command) {

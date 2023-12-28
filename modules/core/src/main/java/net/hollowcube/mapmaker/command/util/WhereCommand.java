@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.util;
 import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
@@ -30,6 +31,8 @@ public class WhereCommand extends Command {
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
+
+        category = CommandCategory.SOCIAL;
 
         //todo this should be any online player, not just any player.
         targetArg = playerService != null ? CoreArgument.AnyPlayerId("player", playerService) : null;

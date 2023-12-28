@@ -18,6 +18,8 @@ public class EmojisCommand extends Command {
     public EmojisCommand() {
         super("emojis");
 
+        category = CommandCategory.SOCIAL;
+
         addSyntax(playerOnly(this::showEmojiList));
     }
 

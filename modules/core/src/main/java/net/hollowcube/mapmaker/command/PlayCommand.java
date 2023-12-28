@@ -22,6 +22,7 @@ public class PlayCommand extends Command {
         super("play");
         this.bridge = bridge;
 
+        category = CommandCategory.SOCIAL;
         description = "Play a map by ID or search for a map";
         mapArg = CoreArgument.PlayableMap("map", mapService)
                 .errorHandler(this::mapArgErrorHandler)
