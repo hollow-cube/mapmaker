@@ -31,6 +31,7 @@ import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.command.util.MinestomCommand;
+import net.hollowcube.mapmaker.command.util.PingCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
@@ -119,6 +120,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(new EmojisCommand());
         commandManager.register(new MinestomCommand());
         commandManager.register(createDebugCommand());
+        commandManager.register(new PingCommand());
 
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
