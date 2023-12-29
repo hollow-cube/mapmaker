@@ -63,6 +63,10 @@ public class StairPlacementRule extends BaseBlockPlacementRule {
             var blockFace = orderedFaces[i];
             var relativeBlock = instance.getBlock(blockPos.relative(blockFace), Block.Getter.Condition.TYPE);
             if (!BlockTags.STAIRS.contains(relativeBlock.namespace())) continue; // Non-stairs never connect
+            if (!block.getProperty(PROP_HALF).equals(relativeBlock.getProperty(PROP_HALF))) {
+                // Top and bottom stairs never connect
+                continue;
+            }
 
             var relativeFacing = BlockFace.valueOf(relativeBlock.getProperty(PROP_FACING).toUpperCase());
             if (facing.isSimilar(blockFace)) {
