@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
@@ -115,6 +116,12 @@ public class SessionManager {
 
         logger.info("UPDATE CONTENT: {}", message.session());
         sessions.put(message.playerId(), message.session());
+    }
+
+    private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+        if (!event.isFirstConfig()) return;
+
+        syntheticTab.preAddLocalPlayer(event.getPlayer());
     }
 
     private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {

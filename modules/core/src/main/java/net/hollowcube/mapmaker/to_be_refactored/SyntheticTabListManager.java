@@ -73,10 +73,15 @@ public class SyntheticTabListManager {
         MiscFunctionality.broadcastTabList(Audiences.all(), sessionManager.networkPlayerCount());
     }
 
-    public void addLocalPlayer(@NotNull Player player) {
+    public void preAddLocalPlayer(@NotNull Player player) {
         localPlayers.add(player.getUuid().toString());
 
-        // It seems like its fine to do ADD_PLAYER on a player who already exists, so we will just do that for now.
+        // Remove the player for all others on the server
+        var packet = new PlayerInfoRemovePacket(List.of(player.getUuid()));
+        PacketUtils.broadcastPlayPacket(packet);
+    }
+
+    public void addLocalPlayer(@NotNull Player player) {
 
         // Add all remote entries to the player.
         // The local ones will be managed by Minestom anyway.
