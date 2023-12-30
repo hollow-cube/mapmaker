@@ -13,6 +13,7 @@ public record PlayerSession(
         @NotNull String proxyId,
         @NotNull String serverId,
 
+        @NotNull String username,
         @NotNull PlayerSkin skin,
 
         @UnknownNullability Presence presence

@@ -46,7 +46,7 @@ public class SyntheticTabListManager {
                 : List.of(new PlayerInfoUpdatePacket.Property("textures", session.skin().texture(), session.skin().signature()));
         var displayName = playerService.getPlayerDisplayName2(session.playerId()).build();
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
-                UUID.fromString(session.playerId()), session.playerId().substring(0, 5), properties,
+                UUID.fromString(session.playerId()), session.username(), properties,
                 true, 0, null, displayName, null
         );
 
