@@ -1,8 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
-import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
-import io.getunleash.util.UnleashConfig;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -30,7 +28,6 @@ import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
-import net.hollowcube.mapmaker.dev.unleash.MapIdStrategy;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
@@ -214,22 +211,6 @@ public class DevServer {
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
         metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
 
-        var unleashAddress = System.getenv("MAPMAKER_UNLEASH_ADDRESS");
-        var unleashToken = System.getenv("MAPMAKER_UNLEASH_TOKEN");
-        if (unleashAddress != null && unleashToken != null) {
-            var runtime = ServerRuntime.getRuntime();
-            var unleashConfig = UnleashConfig.builder()
-                    .appName("mapmaker")
-                    .instanceId(runtime.hostname())
-                    .unleashAPI(unleashAddress)
-                    .apiKey(unleashToken)
-                    .synchronousFetchOnInitialisation(true)
-                    .build();
-
-            var mapIds = new MapIdStrategy();
-            UNLEASH_INSTANCE = new DefaultUnleash(unleashConfig, mapIds);
-        }
-
         // Start phase 2
         // Start hub and map server and bridge them.
 
@@ -257,7 +238,7 @@ public class DevServer {
             bridge.setMapServer(maps);
             this.hubToMapBridge = bridge;
 
-            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService())));
+            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService(), config)));
             scope.fork(FutureUtil.call(() -> this.maps.init(config, mapCommandManager)));
 
             scope.join();

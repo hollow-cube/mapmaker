@@ -35,6 +35,9 @@ import net.hollowcube.mapmaker.command.util.PingCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
+import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
@@ -50,6 +53,8 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.BlockManager;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +69,7 @@ import static net.hollowcube.map.util.MapCondition.mapFilter;
 public abstract class MapServerBase implements MapServer {
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
 
-    private static final System.Logger logger = System.getLogger(MapServerBase.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MapServerBase.class);
 
     private final EventNode<Event> eventNode = EventNode.all("mapmaker:map")
             .addListener(PlayerSpawnEvent.class, this::handleSpawn);
@@ -87,6 +92,13 @@ public abstract class MapServerBase implements MapServer {
 
     public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
+
+        var unleashConfig = config.get(UnleashConfig.class);
+        if (unleashConfig.enabled()) {
+            logger.info("Unleash is enabled, loading feature flag provider");
+            var provider = new UnleashFeatureFlagProvider(unleashConfig);
+            FeatureFlagProvider.replaceGlobals(provider);
+        }
 
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
         globalEventHandler.addChild(eventNode);
@@ -172,7 +184,7 @@ public abstract class MapServerBase implements MapServer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to initialize features", e);
+            logger.error("Failed to initialize features", e);
             throw new RuntimeException(e);
         }
 

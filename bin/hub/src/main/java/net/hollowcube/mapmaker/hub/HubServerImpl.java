@@ -156,7 +156,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         logger.info("bad2: {}", CheckpointPlateBlock.OBJECT_TYPE);
 
         // The rest of the server init
-        init(commandManager, new NoopPlayerInviteService());
+        init(commandManager, new NoopPlayerInviteService(), config);
         isReady = true;
     }
 

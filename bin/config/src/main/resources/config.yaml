@@ -13,3 +13,8 @@ velocity:
 
 kafka:
   bootstrap_servers: localhost:9092
+
+unleash:
+  enabled: false
+  address: ""
+  token: ""

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.dev.unleash;
+package net.hollowcube.mapmaker.feature.unleash;
 
 import io.getunleash.UnleashContext;
 import io.getunleash.strategy.Strategy;

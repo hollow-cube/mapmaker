@@ -10,7 +10,11 @@ import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.util.*;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
+import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
+import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
@@ -64,7 +68,14 @@ public abstract class HubServerBase implements HubServer {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     @Blocking
-    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService) {
+    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
+        var unleashConfig = config.get(UnleashConfig.class);
+        if (unleashConfig.enabled()) {
+            logger.info("Unleash is enabled, loading feature flag provider");
+            var provider = new UnleashFeatureFlagProvider(unleashConfig);
+            FeatureFlagProvider.replaceGlobals(provider);
+        }
+
         StaticAbuse.instance = this;
         this.mapHandler = new HubHandler(this, mapService());
 
