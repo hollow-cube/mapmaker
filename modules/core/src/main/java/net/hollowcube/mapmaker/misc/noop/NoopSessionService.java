@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.session.PlayerSession;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -22,10 +23,15 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip) {
+    public @NotNull List<PlayerSession> sync() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body) {
         return new PlayerDataV2(
-                id, username,
-                new DisplayName(List.of(new DisplayName.Part("username", username, null))),
+                id, body.username(),
+                new DisplayName(List.of(new DisplayName.Part("username", body.username(), null))),
                 new PlayerSettings(),
                 0, 0, 0
         );

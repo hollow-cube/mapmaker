@@ -111,6 +111,9 @@ public abstract class HubServerBase implements HubServer {
             logger.info("Loading feature {}", feature.getClass().getName());
             feature.init(this);
         }
+
+        // Sync sessions with remote
+        if (sessionManager() != null) sessionManager().sync();
     }
 
     @Override

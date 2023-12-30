@@ -15,10 +15,15 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import com.velocitypowered.api.util.GameProfile;
+import net.hollowcube.mapmaker.player.PlayerSkin;
+import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.player.SessionServiceImpl;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
@@ -70,10 +75,21 @@ public class ProxyPlugin {
     public void handleLogin(@NotNull LoginEvent event) {
         var player = event.getPlayer();
         try {
+            String skinTexture = null, skinSignature = null;
+            var texProp = getGPProperty(player.getGameProfile(), "textures");
+            if (texProp != null) {
+                skinTexture = texProp.getValue();
+                skinSignature = texProp.getSignature();
+            }
+
             var pd = sessionService.createSessionV2(
                     player.getUniqueId().toString(),
-                    player.getUsername(),
-                    player.getRemoteAddress().getAddress().getHostAddress()
+                    new SessionCreateRequestV2(
+                            AbstractHttpService.hostname,
+                            player.getUsername(),
+                            player.getRemoteAddress().getAddress().getHostAddress(),
+                            new PlayerSkin(skinTexture, skinSignature)
+                    )
             );
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
         } catch (Exception e) {
@@ -173,6 +189,10 @@ public class ProxyPlugin {
 
 //        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
 //        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
+    }
+
+    private @Nullable GameProfile.Property getGPProperty(@NotNull GameProfile gp, @NotNull String name) {
+        return gp.getProperties().stream().filter(p -> p.getName().equals(name)).findFirst().orElse(null);
     }
 
 }

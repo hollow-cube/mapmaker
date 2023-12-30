@@ -374,7 +374,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
         ActionBar.forPlayer(player).addProvider(MiscFunctionality::buildCurrencyDisplay);
-        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount());
+//        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount());
 
         // Garbage below
 

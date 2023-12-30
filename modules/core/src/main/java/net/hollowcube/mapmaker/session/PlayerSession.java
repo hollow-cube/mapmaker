@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.session;
 
+import net.hollowcube.mapmaker.player.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -11,6 +12,8 @@ public record PlayerSession(
 
         @NotNull String proxyId,
         @NotNull String serverId,
+
+        @NotNull PlayerSkin skin,
 
         @UnknownNullability Presence presence
 ) {

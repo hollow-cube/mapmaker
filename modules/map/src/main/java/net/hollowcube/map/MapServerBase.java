@@ -182,6 +182,9 @@ public abstract class MapServerBase implements MapServer {
                 "playerService", playerService(),
                 "bridge", bridge()
         ));
+
+        // Sync sessions with remote
+        if (sessionManager() != null) sessionManager().sync();
     }
 
     @Override

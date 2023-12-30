@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.player;
 
+import net.hollowcube.mapmaker.session.PlayerSession;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @Blocking
 public interface SessionService {
@@ -10,11 +13,13 @@ public interface SessionService {
 
     void deleteSession(@NotNull String id);
 
-    @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip);
+    @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body);
 
     @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req);
 
     void deleteSessionV2(@NotNull String id);
+
+    @NotNull List<PlayerSession> sync();
 
     @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req);
 

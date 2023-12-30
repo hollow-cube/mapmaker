@@ -1,11 +1,14 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.reflect.TypeToken;
+import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 public class SessionServiceImpl extends AbstractHttpService implements SessionService {
     private static final System.Logger logger = System.getLogger(SessionServiceImpl.class.getName());
@@ -49,9 +52,9 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull String username, @NotNull String ip) {
-        logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
-        var reqBody = GSON.toJson(new SessionCreateRequestV2(hostname, username, ip));
+    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body) {
+        logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, body.username(), body.ip());
+        var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(urlV2 + "/" + id))
@@ -90,6 +93,22 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new InternalError("Failed to delete session(" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public @NotNull List<PlayerSession> sync() {
+        logger.log(System.Logger.Level.INFO, "sync sessions");
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(urlShortV2 + "/server/sync"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<PlayerSession>>() {
+            }.getType());
+            case 204 -> List.of();
+            default -> throw new InternalError("Failed to sync sessions (" + res.statusCode() + "): " + res.body());
+        };
     }
 
     @Override

@@ -176,7 +176,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
         // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter
         // the shutdown hook for the jvm (receive sigterm).
-        Audiences.players().sendMessage(Component.text("ENTERED SHUTDOWN PHASE"));
+        Audiences.players().sendMessage(Component.text("Shutdown started (this message is temp)"));
 
         try {
             Thread.sleep(5000);
@@ -290,7 +290,38 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         // Send the join message for themselves only. For everyone else it will be sent whenever the session create message is received.
         player.sendMessage(Component.translatable("chat.player.join", playerData.displayName2().build()));
-        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount()); // Also send initial tablist
+//        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount()); // Also send initial tablist
+
+//        var book = Component.text();
+//        var spr = BadSprite.SPRITE_MAP.get("create_maps/container");
+//        book.append(Component.text(FontUtil.computeOffset(-50))).append(Component.text(spr.fontChar(), NamedTextColor.WHITE).append(Component.text(FontUtil.computeOffset(-spr.width()))))
+//                .append(Component.text("AM LINE 1???"))
+//                .appendNewline();
+//
+//        for (int i = 0; i < 10; i++) {
+//            book = book.append(Component.text("line " + i)).appendNewline();
+//        }
+//
+//        for (int i = 0; i < 4; i++) {
+//            book = book.append(Component.text(FontUtil.computeOffset(114))
+//                    .hoverEvent(HoverEvent.showText(Component.text("line " + i)))
+//                    .clickEvent(ClickEvent.openUrl("https://hollowcube.net/")));
+//        }
+//
+//        player.openBook(Book.builder()
+//                .addPage(book.build())
+//                .build());
+//
+//        Thread.startVirtualThread(() -> {
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//            player.closeInventory();
+////            player.openInventory(new Inventory(InventoryType.ANVIL, Component.text("test123")));
+//        });
 
         // Garbage below
 

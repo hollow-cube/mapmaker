@@ -3,14 +3,16 @@ package net.hollowcube.mapmaker.session;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
@@ -32,12 +34,28 @@ public class SessionManager {
     private final ConsumerImpl consumer;
 
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
+    private final SyntheticTabListManager syntheticTab;
 
     public SessionManager(@NotNull SessionService sessionService, @NotNull PlayerService playerService, @NotNull KafkaConfig kafkaConfig, boolean noop) {
         this.sessionService = sessionService;
         this.playerService = playerService;
+
         if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServers()));
         else this.consumer = null;
+
+        this.syntheticTab = new SyntheticTabListManager(this, playerService);
+        MinecraftServer.getGlobalEventHandler()
+                .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
+                .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect);
+    }
+
+    public void sync() {
+        for (var newSession : sessionService.sync()) {
+            sessions.put(newSession.playerId(), newSession);
+            syntheticTab.addSession(newSession);
+        }
+
+        logger.info("synced session manager with {} sessions", sessions.size());
     }
 
     public void close() {
@@ -75,7 +93,7 @@ public class SessionManager {
             player.sendMessage(joinMessage);
         }
 
-        MiscFunctionality.broadcastTabList(Audiences.all(), networkPlayerCount());
+        syntheticTab.addSession(message.session());
     }
 
     private void handleSessionDelete(@NotNull SessionUpdateMessage message) {
@@ -88,7 +106,8 @@ public class SessionManager {
 
         var allPlayers = Audiences.players();
         allPlayers.sendMessage(leaveMessage);
-        MiscFunctionality.broadcastTabList(allPlayers, networkPlayerCount());
+
+        syntheticTab.removeSession(message.playerId());
     }
 
     private void handleSessionUpdate(@NotNull SessionUpdateMessage message) {
@@ -96,6 +115,16 @@ public class SessionManager {
 
         logger.info("UPDATE CONTENT: {}", message.session());
         sessions.put(message.playerId(), message.session());
+    }
+
+    private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
+        if (!event.isFirstSpawn()) return;
+
+        syntheticTab.addLocalPlayer(event.getPlayer());
+    }
+
+    private void handlePlayerDisconnect(@NotNull PlayerDisconnectEvent event) {
+        syntheticTab.removeLocalPlayer(event.getPlayer());
     }
 
     private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
