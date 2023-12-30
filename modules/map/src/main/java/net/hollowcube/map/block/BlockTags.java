@@ -33,6 +33,7 @@ public final class BlockTags {
     public static final Collection<NamespaceID> ANVILS = builtin("minecraft:anvil");
     public static final Collection<NamespaceID> TRAPDOORS = builtin("minecraft:trapdoors");
     public static final Collection<NamespaceID> CANDLES = builtin("minecraft:candles");
+    public static final Collection<NamespaceID> CANDLE_CAKES = builtin("minecraft:candle_cakes");
     public static final Collection<NamespaceID> BANNERS = builtin("minecraft:banners");
     public static final Collection<NamespaceID> DOORS = builtin("minecraft:doors");
     public static final Collection<NamespaceID> TERRACOTTA = builtin("minecraft:terracotta");
