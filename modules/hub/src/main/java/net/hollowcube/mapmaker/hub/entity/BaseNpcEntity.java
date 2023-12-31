@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.hub.entity;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BaseNpcEntity extends Entity {
     private Entity interactionEntity = null;
@@ -18,10 +20,15 @@ public class BaseNpcEntity extends Entity {
         this.setTag(NpcHandler.TAG, handler);
     }
 
-    public void setInteractionBox(int width, int height) { //todo move along with the npc
+    public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height) {
+        return setInteractionBox(width, height, Pos.ZERO);
+    }
+
+    public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height, @NotNull Pos offset) { //todo move along with the npc
         if (this.interactionEntity != null) this.interactionEntity.remove();
 
         this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID());
+        this.interactionEntity.setNoGravity(true);
         var interactionMeta = (InteractionMeta) interactionEntity.getEntityMeta();
         interactionMeta.setWidth(width);
         interactionMeta.setHeight(height);
@@ -30,6 +37,6 @@ public class BaseNpcEntity extends Entity {
             if (!BaseNpcEntity.this.hasTag(NpcHandler.TAG)) return;
             BaseNpcEntity.this.getTag(NpcHandler.TAG).handlePlayerInteract(player, BaseNpcEntity.this, hand);
         });
-        this.interactionEntity.setInstance(this.getInstance(), this.getPosition());
+        return this.interactionEntity.setInstance(this.getInstance(), this.getPosition().add(offset));
     }
 }
