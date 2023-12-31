@@ -44,6 +44,8 @@ public class InteractionRules {
         item(ItemTags.AXES, new AxeInteractionRule());
         item(ItemTags.SHOVELS, new ShovelInteractionRule());
         item(ItemTags.HOES, new HoeInteractionRule());
+        item(Material.ITEM_FRAME, new ItemFrameInteractionRule(false));
+        item(Material.GLOW_ITEM_FRAME, new ItemFrameInteractionRule(true));
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {

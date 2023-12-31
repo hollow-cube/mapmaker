@@ -45,49 +45,9 @@ public interface BlockInteractionRule {
         return SneakState.NOT_SNEAKING;
     }
 
-    final class Interaction implements Block.Getter, Block.Setter {
-        private final Player player;
-        private final Instance instance;
-        private final Point blockPosition;
-        private final BlockFace blockFace;
-        private final ItemStack item;
-        private final Player.Hand hand;
-
-        public Interaction(
-                @NotNull Player player,
-                @NotNull Instance instance,
-                @NotNull Point blockPosition,
-                @NotNull BlockFace blockFace,
-                @NotNull ItemStack item,
-                @NotNull Player.Hand hand
-        ) {
-            this.player = player;
-            this.instance = instance;
-            this.blockPosition = blockPosition;
-            this.blockFace = blockFace;
-            this.item = item;
-            this.hand = hand;
-        }
-
-        public @NotNull Player player() {
-            return player;
-        }
-
-        public @NotNull Point blockPosition() {
-            return blockPosition;
-        }
-
-        public @NotNull BlockFace blockFace() {
-            return blockFace;
-        }
-
-        public @NotNull ItemStack item() {
-            return item;
-        }
-
-        public Player.@NotNull Hand hand() {
-            return hand;
-        }
+    record Interaction(@NotNull Player player, @NotNull Instance instance, @NotNull Point blockPosition,
+                       @NotNull BlockFace blockFace, @NotNull ItemStack item,
+                       @NotNull Player.Hand hand) implements Block.Getter, Block.Setter {
 
         public @NotNull WorldBorder worldBorder() {
             return instance.getWorldBorder();

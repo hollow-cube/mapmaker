@@ -7,11 +7,6 @@ public class CandleCakeInteractionRule implements BlockInteractionRule {
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
-        if (interaction.player().isSneaking()) {
-            // We don't replace with a normal cake if the player is sneaking
-            return false;
-        }
-
         // If we interact with a candle cake, it converts the candle cake back into a normal cake
         // with one slice eaten
         var replacement = Block.CAKE.withProperty("bites", "1");
