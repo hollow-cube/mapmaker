@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.util.math;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -320,18 +321,12 @@ public class AffineTransform {
             if (dInt < 0) {
                 dInt += 360;
             }
-            switch (dInt) {
-                case 0:
-                    return 1.0;
-                case 90:
-                    return 0.0;
-                case 180:
-                    return -1.0;
-                case 270:
-                    return 0.0;
-                default:
-                    break;
-            }
+            return switch (dInt) {
+                case 0 -> 1.0;
+                case 90, 270 -> 0.0;
+                case 180 -> -1.0;
+                default -> Math.cos(Math.toRadians(degrees));
+            };
         }
         return Math.cos(Math.toRadians(degrees));
     }
@@ -394,6 +389,48 @@ public class AffineTransform {
                 }
             }
         }
+        if (properties.containsKey("rotation")) {
+            Vec vec = convertRotationToVector(Integer.parseInt(properties.get("rotation")));
+            output = output.withProperty("rotation", String.valueOf(
+                    convertPointToRotation(apply2(vec))));
+        }
+        if (properties.containsKey("facing")) {
+            Vec vec = switch (properties.get("facing")) {
+                case "north" -> new Vec(0, 0, -1);
+                case "south" -> new Vec(0, 0, 1);
+                case "east" -> new Vec(1, 0, 0);
+                case "west" -> new Vec(-1, 0, 0);
+                default -> new Vec(0);
+            };
+            Point result = apply2(vec);
+            // Determine largest absolute value
+            if (Math.abs(result.z()) > Math.abs(result.x())) {
+                // Determine sign
+                if (result.z() < 0) {
+                    output = output.withProperty("facing", "north");
+                } else {
+                    output = output.withProperty("facing", "south");
+                }
+            } else {
+                if (result.x() < 0) {
+                    output = output.withProperty("facing", "west");
+                } else {
+                    output = output.withProperty("facing", "east");
+                }
+            }
+
+        }
         return output;
+    }
+
+    private Vec convertRotationToVector(int rotation) {
+        float yaw = rotation * 22.5f;
+        // Convert yaw (radians) to vector direction
+        return new Pos(0, 0, 0, yaw, 0).direction();
+    }
+
+    private int convertPointToRotation(@NotNull Point point) {
+        float yaw = (float) Math.abs(Math.toDegrees(Math.atan2(point.x(), point.z())));
+        return (int) (Math.round(yaw / 22.5d) % 16);
     }
 }
