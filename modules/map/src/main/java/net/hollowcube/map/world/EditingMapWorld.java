@@ -281,6 +281,7 @@ public class EditingMapWorld implements InternalMapWorld {
             player.setTag(SaveState.TAG, saveState);
 
             MapWorldHelpers.resetPlayer(player);
+            player.setPermissionLevel(4);
 
             // Load Terraform State
             terraform.initPlayerSession(player, playerData.id());

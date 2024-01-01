@@ -3,16 +3,14 @@ package net.hollowcube.map.item;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.map.item.impl.DebugStickItem;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.tool.BuiltinTool;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
-import net.minestom.server.event.player.PlayerBlockInteractEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -77,12 +75,14 @@ public class ItemRegistry {
             .addListener(PlayerBlockInteractEvent.class, this::handleUseItemOnBlock)
             .addListener(PlayerUseItemEvent.class, this::handleUseItem)
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock)
+            .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick);
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> customModelDataToItemHandler = new Int2ObjectArrayMap<>();
+    private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
     private final Set<NamespaceID> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
@@ -91,6 +91,8 @@ public class ItemRegistry {
         for (var item : Material.values()) {
             allItemNames.add(item.namespace());
         }
+
+        register(DebugStickItem.INSTANCE);
     }
 
     public @NotNull EventNode<InstanceEvent> eventNode() {
@@ -101,7 +103,12 @@ public class ItemRegistry {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler); // NOSONAR - It thinks put is deprecated
+            if (itemHandler.customModelData() >= 0) {
+                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            } else {
+                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+            }
+
             allItemNames.add(itemHandler.id());
         } finally {
             lock.unlock();
@@ -116,7 +123,11 @@ public class ItemRegistry {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler); // NOSONAR - It thinks put is deprecated
+            if (itemHandler.customModelData() >= 0) {
+                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            } else {
+                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+            }
         } finally {
             lock.unlock();
         }
@@ -161,11 +172,8 @@ public class ItemRegistry {
     private void handleUseItem(@NotNull PlayerUseItemEvent event) {
         if (event.getHand() != Player.Hand.MAIN) return;
 
-        var cmd = event.getItemStack().meta().getCustomModelData();
-        var itemHandler = customModelDataToItemHandler.get(cmd);
-        if (itemHandler == null) return;
-
-        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_AIR)) return;
+        var itemHandler = getHandlerFromItemStack(event.getItemStack());
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_AIR)) return;
 
         // For some dumb reason this is triggered when right clicking on a block,
         // so is playerUseItemOnBlockEvent so we filter this one out.
@@ -188,12 +196,11 @@ public class ItemRegistry {
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var player = event.getPlayer();
-        var itemStack = player.getItemInHand(event.getHand());
-        var cmd = itemStack.meta().getCustomModelData();
-        var itemHandler = customModelDataToItemHandler.get(cmd);
-        if (itemHandler == null) return;
+        if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK) || player.getTag(TRIGGER_TAG) != null) return;
+        var itemStack = player.getItemInHand(event.getHand());
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
         event.setBlockingItemUse(true);
         player.setTag(TRIGGER_TAG, true);
@@ -212,12 +219,11 @@ public class ItemRegistry {
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var player = event.getPlayer();
-        var itemStack = player.getItemInHand(event.getHand());
-        var cmd = itemStack.meta().getCustomModelData();
-        var itemHandler = customModelDataToItemHandler.get(cmd);
-        if (itemHandler == null) return;
+        if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY) || player.getTag(TRIGGER_TAG) != null) return;
+        var itemStack = player.getItemInHand(event.getHand());
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
 
         player.setTag(TRIGGER_TAG, true);
         itemHandler.rightClicked(new ItemHandler.Click(
@@ -234,12 +240,8 @@ public class ItemRegistry {
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var itemStack = event.getPlayer().getItemInHand(event.getHand());
-        var cmd = itemStack.meta().getCustomModelData();
-        var itemHandler = customModelDataToItemHandler.get(cmd);
-        if (itemHandler == null) return;
-
-        event.setCancelled(true);
-        if (!itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
         event.setCancelled(true);
         var placeOffset = event.getBlockFace().toDirection();
@@ -253,6 +255,30 @@ public class ItemRegistry {
                 event.getBlockFace(),
                 null
         ));
+    }
+
+    private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {
+        var itemStack = event.getPlayer().getItemInHand(Player.Hand.MAIN);
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_BLOCK)) return;
+
+        event.setCancelled(true);
+        itemHandler.leftClicked(new ItemHandler.Click(
+                itemHandler,
+                event.getPlayer(),
+                itemStack,
+                Player.Hand.MAIN,
+                event.getBlockPosition(),
+                null,
+                event.getBlockFace(),
+                null
+        ));
+    }
+
+    private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
+        var itemHandler = materialToItemHandler.get(itemStack.material().id());
+        if (itemHandler != null) return itemHandler;
+        return customModelDataToItemHandler.get(itemStack.meta().getCustomModelData());
     }
 
 }

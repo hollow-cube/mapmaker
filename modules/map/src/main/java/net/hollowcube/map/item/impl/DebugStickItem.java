@@ -1,16 +1,15 @@
-package net.hollowcube.terraform.tool;
+package net.hollowcube.map.item.impl;
 
-import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,9 +17,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-@AutoService(BuiltinTool.class)
-public class DebugStickTool implements BuiltinTool {
-    private static final NamespaceID TYPE = NamespaceID.from("terraform:debug_stick");
+public class DebugStickItem extends ItemHandler {
+    public static final DebugStickItem INSTANCE = new DebugStickItem();
 
     private static final Tag<String> TAG_PROPERTY = Tag.String("property");
 
@@ -42,14 +40,8 @@ public class DebugStickTool implements BuiltinTool {
         VALID_PROPERTIES = blockmap;
     }
 
-    @Override
-    public @NotNull NamespaceID namespace() {
-        return TYPE;
-    }
-
-    @Override
-    public int flags() {
-        return RIGHT_CLICK_BLOCK | LEFT_CLICK_BLOCK;
+    private DebugStickItem() {
+        super("minecraft:debug_stick", RIGHT_CLICK_BLOCK | LEFT_CLICK_BLOCK);
     }
 
     @Override
@@ -58,7 +50,12 @@ public class DebugStickTool implements BuiltinTool {
     }
 
     @Override
-    public void leftClicked(@NotNull Click click) {
+    public int customModelData() {
+        return -1; // Match based on material not custom model data.
+    }
+
+    @Override
+    protected void leftClicked(@NotNull Click click) {
         // Determine the target selection
         var player = click.player();
         var itemStack = click.itemStack();
@@ -79,7 +76,7 @@ public class DebugStickTool implements BuiltinTool {
     }
 
     @Override
-    public void rightClicked(@NotNull Click click) {
+    protected void rightClicked(@NotNull Click click) {
         // Determine the target selection
         var player = click.player();
         var itemStack = click.itemStack();
@@ -133,11 +130,8 @@ public class DebugStickTool implements BuiltinTool {
     }
 
     private void sendActionBar(@NotNull Player player, @NotNull String message) {
-
         var ab = ActionBar.forPlayer(player);
         ab.addProvider(new ActionBarProvider(message));
-
-//        player.sendMessage(message);
     }
 
     private static final class ActionBarProvider implements ActionBar.Provider {
@@ -170,7 +164,7 @@ public class DebugStickTool implements BuiltinTool {
 
         @Override
         public int hashCode() {
-            return ActionBarProvider.class.hashCode();
+            return DebugStickItem.class.hashCode();
         }
     }
 
