@@ -142,13 +142,15 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
 
-        mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
+        if (!noopServices) mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
 
         bridge = new MapBridge(sessionService);
 
-        var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
-        packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+        if (!noopServices) {
+            var packetListenerManager = MinecraftServer.getPacketListenerManager();
+            chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+        }
 
         // Command init
         commandManager = new CommandManager();

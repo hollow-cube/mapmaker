@@ -20,7 +20,6 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
@@ -252,10 +251,6 @@ public class DevServer {
         // Load all facets & other misc startup tasks like setting up some events & minestom properties
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var debugCommand = new DebugCommand(playerService, permManager, mapService);
-            hubCommandManager.register(debugCommand);
-            mapCommandManager.register(debugCommand);
-
             var hubMapCommand = hubCommandManager.getCommands().get("map");
             hubMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
             var mapMapCommand = mapCommandManager.getCommands().get("map");

@@ -18,6 +18,7 @@ import net.hollowcube.map.command.build.SetSpawnCommand;
 import net.hollowcube.map.command.build.TestCommand;
 import net.hollowcube.map.command.invite.RemoveCommand;
 import net.hollowcube.map.command.utility.*;
+import net.hollowcube.map.entity.MapEntities;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteServiceImpl;
 import net.hollowcube.map.terraform.MapServerModule;
@@ -93,6 +94,8 @@ public abstract class MapServerBase implements MapServer {
     public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
 
+        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
+
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
@@ -118,7 +121,7 @@ public abstract class MapServerBase implements MapServer {
 
         // Map management update listener
         var kafkaConfig = config.get(KafkaConfig.class);
-        mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
+        if (!noopServices) mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServersStr(), this);
 
         // Block/item rules
         PlacementRules.init(terraform);
@@ -126,6 +129,11 @@ public abstract class MapServerBase implements MapServer {
                 eventFilter(false, true, false));
         globalEventHandler.addChild(interactionEvents);
         InteractionRules.register(interactionEvents);
+
+        // Entities
+        var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
+        globalEventHandler.addChild(entityEvents);
+        MapEntities.init(entityEvents);
 
         // Common commands
         commandManager.register(new HelpCommand(commandManager));

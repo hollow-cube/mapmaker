@@ -1,12 +1,14 @@
 package net.hollowcube.map.block.interaction;
 
+import net.hollowcube.map.entity.impl.ItemFrameEntity;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.metadata.other.ItemFrameMeta;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class ItemFrameInteractionRule implements BlockInteractionRule {
 
@@ -18,10 +20,21 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
-        Entity itemFrame = new Entity(this.glowing ? EntityType.GLOW_ITEM_FRAME : EntityType.ITEM_FRAME);
+        var entity = this.glowing ? new ItemFrameEntity.Glowing(UUID.randomUUID()) : new ItemFrameEntity(UUID.randomUUID());
 
-        Pos pos = this.calculatePlacementPos(interaction.blockPosition(), interaction.blockFace());
-        itemFrame.setInstance(interaction.instance(), pos);
+        var meta = (ItemFrameMeta) entity.getEntityMeta();
+        meta.setOrientation(switch (interaction.blockFace()) {
+            case BOTTOM -> ItemFrameMeta.Orientation.DOWN;
+            case TOP -> ItemFrameMeta.Orientation.UP;
+            case NORTH -> ItemFrameMeta.Orientation.NORTH;
+            case SOUTH -> ItemFrameMeta.Orientation.SOUTH;
+            case WEST -> ItemFrameMeta.Orientation.WEST;
+            case EAST -> ItemFrameMeta.Orientation.EAST;
+        });
+
+        var pos = this.calculatePlacementPos(interaction.blockPosition(), interaction.blockFace());
+        entity.setInstance(interaction.instance(), pos);
+        entity.playSpawnSound();
 
         return true;
     }

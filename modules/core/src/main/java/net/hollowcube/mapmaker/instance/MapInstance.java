@@ -94,9 +94,7 @@ public class MapInstance extends InstanceContainer {
 
             // Load all the chunks immediately
             var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
-            loader.world().chunks().forEach(chunk -> {
-                loadingChunks.add(loadChunk(chunk.x(), chunk.z()));
-            });
+            loader.world().chunks().forEach(chunk -> loadingChunks.add(loadChunk(chunk.x(), chunk.z())));
             CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
 
             // Delete the polar world to avoid the second copy of the world data
