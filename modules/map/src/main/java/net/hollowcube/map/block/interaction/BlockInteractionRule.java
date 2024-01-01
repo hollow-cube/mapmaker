@@ -9,6 +9,7 @@ import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -25,10 +26,11 @@ public interface BlockInteractionRule {
     enum SneakState {
         NOT_SNEAKING,
         SNEAKING,
-        BOTH;
+        BOTH,
+        NOT_SNEAKING_OR_EMPTY_HAND;
 
-        public boolean test(boolean isSneaking) {
-            return this == BOTH || (this == SNEAKING && isSneaking) || (this == NOT_SNEAKING && !isSneaking);
+        public boolean test(boolean isSneaking, boolean hasItemInHand) {
+            return this == BOTH || (this == SNEAKING && isSneaking) || (this == NOT_SNEAKING && !isSneaking) || (this == NOT_SNEAKING_OR_EMPTY_HAND && (!isSneaking || !hasItemInHand));
         }
     }
 
@@ -68,6 +70,10 @@ public interface BlockInteractionRule {
 
         public void playSound(@NotNull Sound sound, @NotNull Point blockPosition) {
             instance.playSound(sound, blockPosition);
+        }
+
+        public void playBlockSound(@NotNull SoundEvent sound, float volume, float pitch) {
+            instance.playSound(Sound.sound(sound, Sound.Source.BLOCK, volume, pitch), blockPosition);
         }
     }
 }

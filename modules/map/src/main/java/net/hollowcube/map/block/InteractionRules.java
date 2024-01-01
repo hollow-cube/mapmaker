@@ -35,6 +35,7 @@ public class InteractionRules {
         block(Block.STICKY_PISTON, PistonInteractionRule.INSTANCE);
         block(Block.RESPAWN_ANCHOR, new RespawnAnchorInteractionRule());
         block(BlockTags.CANDLE_CAKES, new CandleCakeInteractionRule());
+        block(Block.LEVER, new LeverInteractionRule());
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
@@ -46,6 +47,8 @@ public class InteractionRules {
         item(ItemTags.HOES, new HoeInteractionRule());
         item(Material.ITEM_FRAME, new ItemFrameInteractionRule(false));
         item(Material.GLOW_ITEM_FRAME, new ItemFrameInteractionRule(true));
+        item(Material.ENDER_EYE, new EnderEyeInteractionRule());
+        item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {
@@ -66,7 +69,7 @@ public class InteractionRules {
         // Try to apply a block rule first, if present
         var block = event.getBlock();
         var rule = blockRules.get(block.id());
-        if (rule != null && rule.sneakState().test(player.isSneaking())) {
+        if (rule != null && rule.sneakState().test(player.isSneaking(), !itemStack.isAir())) {
             var interaction = new BlockInteractionRule.Interaction(
                     player, event.getInstance(), event.getBlockPosition(),
                     event.getBlockFace(), itemStack, event.getHand()
@@ -81,7 +84,7 @@ public class InteractionRules {
         }
 
         rule = itemRules.get(itemStack.material().id());
-        if (rule == null || !rule.sneakState().test(player.isSneaking())) return;
+        if (rule == null || !rule.sneakState().test(player.isSneaking(), !itemStack.isAir())) return;
 
         var interaction = new BlockInteractionRule.Interaction(
                 player, event.getInstance(), event.getBlockPosition(),
