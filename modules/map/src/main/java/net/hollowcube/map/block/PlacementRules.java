@@ -104,6 +104,7 @@ public final class PlacementRules {
         register(Block.COMMAND_BLOCK, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.CHAIN_COMMAND_BLOCK, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.REPEATING_COMMAND_BLOCK, b -> new FacingAllAxisPlacementRule(b, false));
+        register(Block.CALIBRATED_SCULK_SENSOR, b -> new FacingHorizontalPlacementRule(b, false));
 
         register(Block.LIGHTNING_ROD, b -> new ClickFacePlacementRule(b, true));
         register(Block.END_ROD, b -> new ClickFacePlacementRule(b, true));
