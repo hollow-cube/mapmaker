@@ -285,7 +285,10 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         player.setTeam(CoreTeams.DEFAULT); // todo do this based on rank
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
-        ActionBar.forPlayer(player).addProvider(MiscFunctionality::buildCurrencyDisplay);
+
+        var actionBar = ActionBar.forPlayer(player);
+        actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
+        actionBar.addProvider(MiscFunctionality::buildExperienceBar);
 
         // Send the join message for themselves only. For everyone else it will be sent whenever the session create message is received.
         player.sendMessage(Component.translatable("chat.player.join", playerData.displayName2().build()));

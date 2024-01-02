@@ -11,7 +11,6 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -58,22 +57,29 @@ public final class MiscFunctionality {
         audience.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
     }
 
-    private static final BadSprite CURRENCY_DISPLAY_SURVIVAL = BadSprite.SPRITE_MAP.get("hud/currency_display");
-    private static final BadSprite CURRENCY_DISPLAY_CREATIVE = BadSprite.SPRITE_MAP.get("hud/currency_display_creative");
+    private static final BadSprite CURRENCY_DISPLAY = BadSprite.SPRITE_MAP.get("hud/currency_display");
 
     public static void buildCurrencyDisplay(@NotNull Player p, @NotNull FontUIBuilder builder) {
-        var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
         var playerData = PlayerDataV2.fromPlayer(p);
 
         builder.pushColor(FontUtil.NO_SHADOW);
-        builder.pos(11).drawInPlace(hasExperienceBar ? CURRENCY_DISPLAY_SURVIVAL : CURRENCY_DISPLAY_CREATIVE);
+        builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
 
         int MAX_TEXT_WIDTH = 22;
-        var font = hasExperienceBar ? "currency" : "currency_creative";
 
         var coinText = NumberUtil.formatCurrency(playerData.coins());
-        builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, coinText))).append(font, coinText);
+        builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
         var cubitText = NumberUtil.formatCurrency(playerData.cubits());
-        builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText(font, cubitText))).append(font, cubitText);
+        builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", cubitText))).append("currency", cubitText);
+    }
+
+    private static final BadSprite XP_BAR_BACKGROUND = BadSprite.SPRITE_MAP.get("hud/level/xp_bar_background");
+
+    public static void buildExperienceBar(@NotNull Player p, @NotNull FontUIBuilder builder) {
+        var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
+        if (hasExperienceBar) return; // Use the builtin one for these.
+
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(-(XP_BAR_BACKGROUND.width() / 2)).drawInPlace(XP_BAR_BACKGROUND);
     }
 }

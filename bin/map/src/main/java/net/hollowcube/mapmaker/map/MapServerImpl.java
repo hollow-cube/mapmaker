@@ -375,8 +375,10 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         player.setTeam(CoreTeams.DEFAULT); // todo do this based on rank
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
-        ActionBar.forPlayer(player).addProvider(MiscFunctionality::buildCurrencyDisplay);
-//        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount());
+
+        var actionBar = ActionBar.forPlayer(player);
+        actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
+        actionBar.addProvider(MiscFunctionality::buildExperienceBar);
 
         // Garbage below
 

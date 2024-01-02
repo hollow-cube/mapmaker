@@ -478,7 +478,9 @@ public class DevServer {
         rebuildOnlinePlayersRegex();
 
 
-        ActionBar.forPlayer(player).addProvider(MiscFunctionality::buildCurrencyDisplay);
+        var actionBar = ActionBar.forPlayer(player);
+        actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
+        actionBar.addProvider(MiscFunctionality::buildExperienceBar);
 
         player.setDisplayName(playerData.displayName());
         Emoji.sendTabCompletions(player);
