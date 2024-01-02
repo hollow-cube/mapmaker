@@ -3,6 +3,7 @@ package net.hollowcube.terraform.session;
 import net.hollowcube.terraform.schem.*;
 import net.hollowcube.terraform.util.math.AffineTransform;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.RegExp;
@@ -65,6 +66,21 @@ public class Clipboard {
         return schematic;
     }
 
+    @Deprecated
+    public Schematic getSchematicWithRotations() {
+        var newSchem = new SchematicBuilder();
+        schematic.apply(Rotation.NONE, (p, block) -> {
+            for (var transform : transforms) {
+                p = transform.apply2(p);
+                if (hasRotationProperty(block)) {
+                    block = transform.applyToBlock(block);
+                }
+            }
+            newSchem.addBlock(p, block);
+        });
+        return newSchem.build();
+    }
+
     public @NotNull CompletableFuture<Void> apply(@NotNull LocalSession session, @NotNull Point pos) {
         Check.stateCondition(isEmpty(), "Clipboard is empty");
         //todo rewrite to use actions and add to history stack
@@ -73,6 +89,9 @@ public class Clipboard {
         schematic.apply(Rotation.NONE, (p, block) -> {
             for (var transform : transforms) {
                 p = transform.apply2(p);
+                if (hasRotationProperty(block)) {
+                    block = transform.applyToBlock(block);
+                }
             }
             newSchem.addBlock(p, block);
         });
@@ -81,6 +100,11 @@ public class Clipboard {
         newSchem.build().build(Rotation.NONE, null)
                 .apply(session.instance(), pos, () -> future.complete(null));
         return future;
+    }
+
+    private boolean hasRotationProperty(@NotNull Block block) {
+        var properties = block.properties();
+        return properties.containsKey("facing") || properties.containsKey("rotation") || properties.containsKey("axis");
     }
 
     public void rotate(double x, double y, double z) {

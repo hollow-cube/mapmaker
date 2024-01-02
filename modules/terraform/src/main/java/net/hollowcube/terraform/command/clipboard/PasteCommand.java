@@ -41,7 +41,7 @@ public class PasteCommand extends Command {
                 .metadata()
                 .compute((task, world) -> {
                     var buffer = BlockBuffer.builder(world);
-                    clipboard.getSchematic().apply(Rotation.NONE, (p, block) -> {
+                    clipboard.getSchematicWithRotations().apply(Rotation.NONE, (p, block) -> {
                         buffer.set(p.add(playerPosition), block.stateId());
                     });
                     return buffer.build();

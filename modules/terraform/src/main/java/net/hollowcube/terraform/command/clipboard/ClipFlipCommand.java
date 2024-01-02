@@ -1,94 +1,50 @@
 package net.hollowcube.terraform.command.clipboard;
 
 import net.hollowcube.command.Command;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ArgumentWord;
+import net.hollowcube.terraform.session.Clipboard;
+import net.hollowcube.terraform.session.PlayerSession;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public class ClipFlipCommand extends Command {
 
+    private final ArgumentWord axisArg = Argument.Word("axis").with("x", "y", "z");
+
     public ClipFlipCommand() {
         super("flip");
+
+        axisArg.defaultValue("x");
+
+        addSyntax(playerOnly(this::handleFlip), axisArg);
     }
 
-    // private final Argument<Byte> axesArg = new ArgumentSwizzle("axes");
-    //            private final Argument<FlipDirection> directionArg = ArgumentType.Enum("direction", FlipDirection.class)
-    //                    .setFormat(ArgumentEnum.Format.LOWER_CASED)
-    //                    .setDefaultValue(FlipDirection.FORWARD);
-    //
-    //            public Flip() {
-    //                super("flip");
-    //
-    //                setDefaultExecutor(this::handleFlipDirection);
-    //
-    //                addSyntax(this::handleFlipAxes, axesArg);
-    //                addSyntax(this::handleFlipDirection, directionArg);
-    //            }
-    //
-    //            private void handleFlipAxes(@NotNull CommandSender sender, @NotNull CommandContext context) {
-    //                if (!(sender instanceof Player player)) {
-    //                    sender.sendMessage(Component.translatable("generic.players_only"));
-    //                    return;
-    //                }
-    //
-    //                handleFlip(player, context.get(axesArg));
-    //            }
-    //
-    //            private void handleFlipDirection(@NotNull CommandSender sender, @NotNull CommandContext context) {
-    //                if (!(sender instanceof Player player)) {
-    //                    sender.sendMessage(Component.translatable("generic.players_only"));
-    //                    return;
-    //                }
-    //
-    //                var flipDirection = context.get(directionArg);
-    //                handleFlip(player, flipDirection.axisFromView(player.getPosition().yaw()));
-    //            }
-    //
-    //            private void handleFlip(@NotNull Player player, byte magicAxes) {
-    //                var playerSession = PlayerSession.forPlayer(player);
-    //                var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-    //                if (clipboard.isEmpty()) {
-    //                    player.sendMessage("empty clipboard blah blah");
-    //                    return;
-    //                }
-    //
-    //                clipboard.flip(
-    //                        (magicAxes & ArgumentSwizzle.X) != 0,
-    //                        (magicAxes & ArgumentSwizzle.Y) != 0,
-    //                        (magicAxes & ArgumentSwizzle.Z) != 0
-    //                );
-    //                player.sendMessage("flipped");
-    //            }
-    //
-    //            private enum FlipDirection {
-    //                // Absolute
-    //                NORTH,
-    //                SOUTH,
-    //                EAST,
-    //                WEST,
-    //                UP,
-    //                DOWN,
-    //                TOP,
-    //                BOTTOM,
-    //
-    //                // Relative
-    //                BACK,
-    //                FORWARD,
-    //                LEFT,
-    //                RIGHT;
-    //
-    //                public @MagicConstant(valuesFromClass = ArgumentSwizzle.class) byte axisFromView(float yaw) {
-    //                    var normalYaw = yaw % 360;
-    //                    if (normalYaw < 0) normalYaw += 360;
-    //                    var facingX = MathUtils.isBetween(normalYaw, 45, 135) ||
-    //                            MathUtils.isBetween(normalYaw, 225, 315);
-    //
-    //                    return switch (this) {
-    //                        case NORTH, SOUTH -> ArgumentSwizzle.Z;
-    //                        case EAST, WEST -> ArgumentSwizzle.X;
-    //                        case UP, DOWN, TOP, BOTTOM -> ArgumentSwizzle.Y;
-    //                        // 45, 135, 225, 315
-    //                        case BACK, FORWARD -> facingX ? ArgumentSwizzle.X : ArgumentSwizzle.Z;
-    //                        case LEFT, RIGHT -> facingX ? ArgumentSwizzle.Z : ArgumentSwizzle.X;
-    //                    };
-    //                }
-    //            }
-    //        }
+    private void handleFlip(@NotNull Player player, @NotNull CommandContext context) {
+        var playerSession = PlayerSession.forPlayer(player);
+        var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
+
+        if (clipboard.isEmpty()) {
+            player.sendMessage(Component.translatable("terraform.generic.empty_clipbord"));
+            return;
+        }
+
+        if (context.has(axisArg)) {
+            String axis = context.get(axisArg).toLowerCase(Locale.ROOT);
+            switch (axis) {
+                case "x" -> clipboard.flip(true, false, false);
+                case "y" -> clipboard.flip(false, true, false);
+                case "z" -> clipboard.flip(false, false, true);
+                default -> {
+                    player.sendMessage("Unknown argument " + axis); // TODO TRANSLATE
+                    return;
+                }
+            }
+            player.sendMessage("Successfully flipped your clipboard across the " + axis + " axis."); // TODO TRANSLATE
+        }
+    }
 }
