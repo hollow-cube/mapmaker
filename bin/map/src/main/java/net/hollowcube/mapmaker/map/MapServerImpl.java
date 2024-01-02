@@ -32,7 +32,6 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -372,7 +371,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         // Player init
         player.setDisplayName(playerData.displayName());
-        player.setTeam(CoreTeams.DEFAULT); // todo do this based on rank
+        MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
 

@@ -41,4 +41,17 @@ public class NoopPlayerService implements PlayerService {
                 .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(), p.getUsername()))
                 .toList());
     }
+
+    @Override
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, @NotNull String productId) {
+        return new CreateCheckoutLinkResponse(new CreateCheckoutLinkResponse.Link(productId, "https://hollowcube.net/store/checkout/fkelnk"), null);
+    }
+
+    @Override
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, int cubits) {
+        return new CreateCheckoutLinkResponse(
+                new CreateCheckoutLinkResponse.Link("cubits_50", "https://hollowcube.net/store/checkout/fkelnk"),
+                new CreateCheckoutLinkResponse.Link("cubits_105", "https://hollowcube.net/store/checkout/fkelnk")
+        );
+    }
 }

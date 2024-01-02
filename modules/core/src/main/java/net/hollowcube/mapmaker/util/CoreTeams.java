@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
@@ -14,6 +15,7 @@ public final class CoreTeams {
             .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
             .seeInvisiblePlayers()
+            .prefix(Component.text("\uF833")) // Tab ordering
             .build();
 
     // Green coloring rank
@@ -21,6 +23,7 @@ public final class CoreTeams {
             .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
             .seeInvisiblePlayers()
+            .prefix(Component.text("\uF832")) // Tab ordering
             .build();
 
     // Blue coloring rank
@@ -28,6 +31,7 @@ public final class CoreTeams {
             .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
             .seeInvisiblePlayers()
+            .prefix(Component.text("\uF831")) // Tab ordering
             .build();
 
     // Admin/red coloring in tab
@@ -35,6 +39,7 @@ public final class CoreTeams {
             .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
             .seeInvisiblePlayers()
+            .prefix(Component.text("\uF830")) // Tab ordering
             .build();
 
 }

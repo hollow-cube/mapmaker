@@ -91,4 +91,40 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
             throw new InternalError("Failed to get tab completions (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), TabCompleteResponse.class);
     }
+
+    @Override
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, @NotNull String productId) {
+        var reqBody = GSON.toJson(Map.of(
+                "type", "product",
+                "source", source,
+                "player", playerId,
+                "product", productId
+        ));
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/payments/checkout"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 201)
+            throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
+        return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
+    }
+
+    @Override
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, int cubits) {
+        var reqBody = GSON.toJson(Map.of(
+                "type", "cubits",
+                "source", source,
+                "player", playerId,
+                "cubits", cubits
+        ));
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/payments/checkout"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 201)
+            throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
+        return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
+    }
 }

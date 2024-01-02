@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
@@ -28,6 +29,16 @@ public final class MiscFunctionality {
 
     public static void broadcastTabList(@NotNull Audience audience) {
         broadcastTabList(audience, MinecraftServer.getConnectionManager().getOnlinePlayerCount());
+    }
+
+    public static void assignTeam(@NotNull Player player) {
+        var playerData = PlayerDataV2.fromPlayer(player);
+        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
+            case "dev_3", "mod_3", "ct_3" -> CoreTeams.RED;
+            case "dev_2", "mod_2", "ct_2" -> CoreTeams.CYAN;
+            case "dev_1", "mod_1", "ct_1" -> CoreTeams.GREEN;
+            case null, default -> CoreTeams.DEFAULT;
+        });
     }
 
     public static void broadcastTabList(@NotNull Audience audience, int onlinePlayers) {

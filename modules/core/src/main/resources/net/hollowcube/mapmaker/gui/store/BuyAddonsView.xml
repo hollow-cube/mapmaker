@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<component width="9" height="5" align="ttb">
+    <label width="9" height="5" translationKey="gui.store.addons"/>
+</component>

@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<component width="9" height="5" align="ttb">
+
+    <button width="9" height="4" translationKey="gui.store.cubits.4"
+            sprite="minecraft:painting"/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <button id="buy_30d" width="3" height="1"
+                translationKey="gui.store.hypercube.30d"
+                sprite="minecraft:oak_chest_boat"/>
+        <spacer/>
+        <button id="buy_365d" width="3" height="1"
+                translationKey="gui.store.hypercube.365d"
+                sprite="minecraft:chest_minecart"/>
+        <spacer/>
+    </box>
+
+</component>

@@ -60,4 +60,11 @@ public record DisplayName(
         return builder.build();
     }
 
+    public @Nullable String getBadgeName() {
+        for (var part : parts) {
+            if (part.type.equals("badge")) return part.text;
+        }
+        return null;
+    }
+
 }

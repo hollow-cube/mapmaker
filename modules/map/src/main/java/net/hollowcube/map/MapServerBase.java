@@ -30,6 +30,7 @@ import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.command.util.MinestomCommand;
 import net.hollowcube.mapmaker.command.util.PingCommand;
@@ -156,6 +157,8 @@ public abstract class MapServerBase implements MapServer {
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
         commandManager.register(mapCommand);
+
+        commandManager.register(new StoreCommand(guiController));
 
         // Map specific commands
         commandManager.register(new HubCommand(bridge(), inviteService));

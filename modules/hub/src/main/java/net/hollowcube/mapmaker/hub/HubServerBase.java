@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
+import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
@@ -112,6 +113,8 @@ public abstract class HubServerBase implements HubServer {
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.addSubcommand(new MapLegacyCommand(mapService(), permManager()));
         commandManager.register(mapCommand);
+
+        commandManager.register(new StoreCommand(guiController));
 
         // Hub specific commands
         commandManager.register(new HubFlyCommand(permManager()));

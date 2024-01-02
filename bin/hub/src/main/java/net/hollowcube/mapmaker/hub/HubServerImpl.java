@@ -28,7 +28,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -282,7 +281,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         // Player init
         player.setDisplayName(playerData.displayName());
-        player.setTeam(CoreTeams.DEFAULT); // todo do this based on rank
+        MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
 
@@ -295,19 +294,21 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 //        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount()); // Also send initial tablist
 
 //        var book = Component.text();
-//        var spr = BadSprite.SPRITE_MAP.get("create_maps/container");
-//        book.append(Component.text(FontUtil.computeOffset(-50))).append(Component.text(spr.fontChar(), NamedTextColor.WHITE).append(Component.text(FontUtil.computeOffset(-spr.width()))))
-//                .append(Component.text("AM LINE 1???"))
+//        var spr = BadSprite.SPRITE_MAP.get("booktest/guide");
+//        book.append(Component.text("" + spr.fontChar(), NamedTextColor.WHITE))
 //                .appendNewline();
-//
-//        for (int i = 0; i < 10; i++) {
-//            book = book.append(Component.text("line " + i)).appendNewline();
+////        book.append(Component.text(FontUtil.computeOffset(-50))).append(Component.text(spr.fontChar(), NamedTextColor.WHITE).append(Component.text(FontUtil.computeOffset(-spr.width()))))
+////                .append(Component.text("AM LINE 1???"))
+////                .appendNewline();
+////
+//        for (int i = 0; i < 9; i++) {
+//            book = book.append(Component.text("line " + i, NamedTextColor.WHITE)).appendNewline();
 //        }
-//
+////
 //        for (int i = 0; i < 4; i++) {
-//            book = book.append(Component.text(FontUtil.computeOffset(114))
+//            book = book.append(Component.text("line " + i + FontUtil.computeOffset(114 - FontUtil.measureText("line " + i)), NamedTextColor.WHITE)
 //                    .hoverEvent(HoverEvent.showText(Component.text("line " + i)))
-//                    .clickEvent(ClickEvent.openUrl("https://hollowcube.net/")));
+//                    .clickEvent(ClickEvent.openUrl("https://hollowcube.net/store/checkout/fkelnk"))).appendNewline();
 //        }
 //
 //        player.openBook(Book.builder()
@@ -324,6 +325,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 //            player.closeInventory();
 ////            player.openInventory(new Inventory(InventoryType.ANVIL, Component.text("test123")));
 //        });
+
+//        newOpenGUI(player, StoreView::new);
 
         // Garbage below
 
