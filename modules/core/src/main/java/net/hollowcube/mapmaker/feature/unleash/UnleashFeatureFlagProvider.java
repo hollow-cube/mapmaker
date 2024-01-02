@@ -30,7 +30,13 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
     public boolean test(@NotNull String name, @NotNull FlagContext... context) {
         if (client == null) return DEFAULT_ACTION;
         var unleashContext = UnleashContext.builder();
-        for (var ctx : context) unleashContext.addProperty(ctx.name(), ctx.value());
+        for (var ctx : context) {
+            if (ctx.name().equals("userId")) {
+                unleashContext.userId(ctx.value());
+            } else {
+                unleashContext.addProperty(ctx.name(), ctx.value());
+            }
+        }
         return client.isEnabled(name, unleashContext.build());
     }
 }
