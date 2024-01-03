@@ -12,6 +12,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MapData {
@@ -36,6 +37,8 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
+
+    private MapQuality quality;
 
     private int objectLimit = 100;
     private List<ObjectData> objects = new ArrayList<>();
@@ -107,6 +110,10 @@ public class MapData {
 
     public @UnknownNullability Instant publishedAt() {
         return publishedAt;
+    }
+
+    public @NotNull MapQuality quality() {
+        return Objects.requireNonNullElse(quality, MapQuality.UNRATED);
     }
 
     public int objectUsage() {

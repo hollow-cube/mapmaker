@@ -44,14 +44,8 @@ public class MapDetailsView extends View {
     private Switch[] tabSwitches;
 
     // MAP QUALITIES (leave what is commented out, refer to line 92)
-//    private @Outlet("quality_switch") Switch qualitySwitch;
     private @Outlet("quality_unrated_half_text") Text qualityUnratedHalfText;
     private @Outlet("quality_unrated_full_text") Text qualityUnratedFullText;
-//    private @Outlet("quality_good_text") Text qualityGoodText;
-//    private @Outlet("quality_great_text") Text qualityGreatText;
-//    private @Outlet("quality_excellent_text") Text qualityExcellentText;
-//    private @Outlet("quality_outstanding_text") Text qualityOutstandingText;
-//    private @Outlet("quality_masterpiece_text") Text qualityMasterpieceText;
 
     // MAP DIFFICULTIES
     private @Outlet("difficulty_switch") Switch difficultySwitch;
@@ -117,34 +111,13 @@ public class MapDetailsView extends View {
 
         // MAP QUALITY
 
-//        INTENTIONALLY DISABLED, DO NOT UNCOMMENT UNTIL METHODS ARE IMPLEMENTED. THIS ALSO NEEDS A SMALL REWORK.
-//        Switch[] qualitySwitches = new Switch[]{qualitySwitch};
-//        if(map.getQuality().equals("good")) {
-//            qualityGoodText.setText("Good", TextColor.color(0xF5DC3B));
-//            qualitySwitch.setOption(1);
-//        } else if(map.getQualityName().equals("great")) {
-//            qualityGreatText.setText("Great", TextColor.color(0x8CDB46));
-//            qualitySwitch.setOption(2);
-//        } else if(map.getQualityName().equals("excellent")) {
-//            qualityExcellentText.setText("Excellent", TextColor.color(0x81AFFF));
-//            qualitySwitch.setOption(3);
-//        } else if(map.getQualityName().equals("outstanding")) {
-//            qualityOutstandingText.setText("Outstanding", TextColor.color(0x78FFDF));
-//            qualitySwitch.setOption(4);
-//        } else if(map.getQualityName().equals("masterpiece")) {
-//            qualityMasterpieceText.setText("Masterpiece", TextColor.color(0xEE6EFF));
-//            qualitySwitch.setOption(5);
-//        } else {
-//        Default value for map quality (unrated)
-//        qualityUnratedText.setText("Unrated", TextColor.color(0xF04B3D));
-//        qualitySwitch.setOption(0);
-//        }
+        qualityUnratedHalfText.setText(map.quality().name());
+        qualityUnratedFullText.setText(map.quality().name());
 
         // MAP DIFFICULTY
 
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             rowOneSwitch.setOption(1);
-            qualityUnratedHalfText.setText("Unrated");
             if (map.getUniquePlays() > PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY) {
                 if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy");
@@ -200,7 +173,6 @@ public class MapDetailsView extends View {
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             rowOneSwitch.setOption(0);
             difficultySwitch.setOption(0);
-            qualityUnratedFullText.setText("Unrated");
             if (map.settings().getBuildingSubVariant() == BuildingSubVariant.SHOWCASE) {
                 mapTypeShowcaseText.setText("Building Showcase");
                 mapTypeSwitch.setOption(8);

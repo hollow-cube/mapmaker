@@ -36,6 +36,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
             .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
             .registerTypeAdapter(MapRating.State.class, new EnumOrdinalTypeAdapter<>(MapRating.State.class))
+            .registerTypeAdapter(MapQuality.class, new EnumOrdinalTypeAdapter<>(MapQuality.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
