@@ -157,12 +157,12 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public int getMapRating(@NotNull String mapId, @NotNull String playerId) {
+    public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
         throw new ConcurrentModificationException("not implemented");
     }
 
     @Override
-    public void setMapRating(@NotNull String mapId, @NotNull String playerId, int rating) {
+    public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
         throw new ConcurrentModificationException("not implemented");
     }
 

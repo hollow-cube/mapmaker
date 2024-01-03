@@ -79,7 +79,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            if (MapFeatureFlags.RATE_MAP.test(player(player))) {
+            if (MapFeatureFlags.RATE_MAP.test(player(player)) && MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
                 inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
             }
 
@@ -127,7 +127,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        if (MapFeatureFlags.RATE_MAP.test(player(player))) {
+        if (MapFeatureFlags.RATE_MAP.test(player(player)) && MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
             inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
         }
 

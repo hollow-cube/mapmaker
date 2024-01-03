@@ -13,6 +13,7 @@ import net.hollowcube.map.util.FireworkUtil;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.text.Component;
@@ -103,7 +104,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             if (MapFeatureFlags.RATE_MAP.test(player(player))) {
                 if (MapRatingFeatureProvider.isMapRatable(world)) {
                     var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
-                    if (lastRating == null || lastRating == -1) {
+                    if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
                         world.server().newOpenGUI(player, c -> new RateMapView(c, world.map().id()));
                     }
                 }
