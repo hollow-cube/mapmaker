@@ -29,6 +29,7 @@ import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
 import net.hollowcube.mapmaker.mod.packet.server.HCSetCreativeItemsPacket;
 import net.hollowcube.mapmaker.mod.util.CreativeTab;
 import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -136,8 +137,16 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
         else if (noopServices) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
-
-        permManager = new NoopPermManager();
+        
+        if (noopServices) {
+            permManager = new NoopPermManager();
+        } else {
+            var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
+            if (spicedbUrl == null) spicedbUrl = "localhost:50051";
+            var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
+            if (spicedbToken == null) spicedbToken = "supersecretkey";
+            permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
+        }
 
         var kafkaConfig = config.get(KafkaConfig.class);
         sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
