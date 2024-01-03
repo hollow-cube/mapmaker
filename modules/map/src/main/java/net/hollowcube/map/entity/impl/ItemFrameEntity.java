@@ -2,9 +2,11 @@ package net.hollowcube.map.entity.impl;
 
 import net.hollowcube.map.entity.MapEntity;
 import net.hollowcube.map.world.MapWorld;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.ItemFrameMeta;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +36,54 @@ public class ItemFrameEntity extends MapEntity {
 
     @Override
     public void onBuildLeftClick(@NotNull MapWorld world, @NotNull Player player) {
+        var item = getEntityMeta().getItem();
+        if (item.isAir()) {
+            breakFrame();
+        } else {
+            removeItem();
+        }
+    }
+
+    private void breakFrame() {
         playSound(breakSound, 1, 1);
         remove();
+    }
+
+    private void removeItem() {
+        playSound(removeItemSound, 1, 1);
+        getEntityMeta().setItem(ItemStack.AIR);
+    }
+
+    @Override
+    public void onBuildRightClick(@NotNull MapWorld world, @NotNull Player player, @NotNull Player.Hand hand,
+                                  @NotNull Point interactPosition) {
+        ItemStack heldItem = player.getItemInMainHand();
+        if (heldItem.isAir()) {
+            rotate();
+        } else {
+            addItem(heldItem);
+        }
+    }
+
+    private void rotate() {
+        var meta = getEntityMeta();
+
+        var existingItem = meta.getItem();
+        if (existingItem.isAir()) {
+            // Don't rotate if there's no item
+            return;
+        }
+
+        var currentRotation = meta.getRotation();
+        var newRotation = currentRotation.rotateClockwise();
+        meta.setRotation(newRotation);
+
+        playSound(rotateItemSound, 1, 1);
+    }
+
+    private void addItem(@NotNull ItemStack item) {
+        playSound(addItemSound, 1, 1);
+        getEntityMeta().setItem(item);
     }
 
     @Override
