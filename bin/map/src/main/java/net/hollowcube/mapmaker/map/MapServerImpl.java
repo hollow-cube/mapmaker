@@ -26,13 +26,14 @@ import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
 import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
+import net.hollowcube.mapmaker.mod.packet.server.HCSetCreativeItemsPacket;
+import net.hollowcube.mapmaker.mod.util.CreativeTab;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -40,8 +41,8 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.*;
-import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -110,7 +111,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-            MojangAuth.init();
+//            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -172,12 +173,6 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect)
                 .addListener(PlayerPluginMessageEvent.class, this::handlePlayerPluginMessage);
-
-        //todo: fix
-        KindaBadThingToFix.badbadbad = player -> {
-            var world = MapWorld.forPlayerOptional(player);
-            return world == null ? null : world.map();
-        };
 
         // The rest of the server init
         init(config, commandManager);
@@ -315,6 +310,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
             logger.info("loaded map player data: {}", mapPlayerData);
+
+
 //        } catch (SessionService.UnauthorizedError ignored) {
 //            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
 //                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
@@ -356,6 +353,13 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
         player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
         event.setSendRegistryData(false);
+
+        // Mod init stuff
+        player.sendPacket(new HCSetCreativeItemsPacket(Map.of(
+                CreativeTab.REDSTONE, List.of(new HCSetCreativeItemsPacket.Entry(
+                        Material.BAMBOO_CHEST_RAFT, 0, HCSetCreativeItemsPacket.Position.AFTER, Material.REDSTONE_BLOCK
+                ))
+        )).toPacket(player));
 
         // Spawn them into the world.
         player.setTag(TARGET_WORLD_TAG, mapWorld);

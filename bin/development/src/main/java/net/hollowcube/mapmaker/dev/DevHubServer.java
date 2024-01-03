@@ -19,19 +19,22 @@ public class DevHubServer extends HubServerBase {
     private final SessionService sessionService;
     private final MapService mapService;
     private final PermManager permManager;
+    private final SessionManager sessionManager;
 
     public DevHubServer(
             @NotNull HubToMapBridge bridge,
             @NotNull PlayerService playerService,
             @NotNull SessionService sessionService,
             @NotNull MapService mapService,
-            @NotNull PermManager permManager
+            @NotNull PermManager permManager,
+            @NotNull SessionManager sessionManager
     ) {
         this.bridge = Objects.requireNonNull(bridge);
         this.playerService = Objects.requireNonNull(playerService);
         this.sessionService = Objects.requireNonNull(sessionService);
         this.mapService = Objects.requireNonNull(mapService);
         this.permManager = Objects.requireNonNull(permManager);
+        this.sessionManager = Objects.requireNonNull(sessionManager);
     }
 
     @Override
@@ -61,6 +64,6 @@ public class DevHubServer extends HubServerBase {
 
     @Override
     public @UnknownNullability SessionManager sessionManager() {
-        return null;
+        return sessionManager;
     }
 }

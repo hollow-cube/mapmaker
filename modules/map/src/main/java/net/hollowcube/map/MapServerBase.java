@@ -1,5 +1,8 @@
 package net.hollowcube.map;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
@@ -43,7 +46,11 @@ import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -87,6 +94,8 @@ public abstract class MapServerBase implements MapServer {
     // Terraform
     private Terraform terraform;
 
+    private Injector injector;
+
     static {
         // Idk why the static initializer is not triggering from other usages
         new PlayerSpawnInInstanceEvent(null);
@@ -119,6 +128,29 @@ public abstract class MapServerBase implements MapServer {
                 .module(new MapServerModule())
                 .storage(mapService() instanceof NoopMapService ? "memory" : "http")
                 .build();
+        
+        this.guiController = Controller.make(Map.of(
+                "mapServer", this,
+                "mapService", mapService(),
+                "playerService", playerService(),
+                "bridge", bridge()
+        ));
+
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MapServer.class).toInstance(MapServerBase.this);
+                bind(MapWorldManager.class).toInstance(worldManager());
+                bind(Controller.class).toInstance(guiController);
+                bind(PlayerInviteService.class).toInstance(inviteService);
+                bind(ConfigLoaderV3.class).toInstance(config);
+                bind(PermManager.class).toInstance(permManager());
+                bind(PlayerService.class).toInstance(playerService());
+                bind(SessionManager.class).toInstance(sessionManager());
+                bind(CommandManager.class).toInstance(commandManager);
+                bind(MapService.class).toInstance(mapService());
+            }
+        });
 
         // Map management update listener
         var kafkaConfig = config.get(KafkaConfig.class);
@@ -145,13 +177,13 @@ public abstract class MapServerBase implements MapServer {
 
         commandManager.register(new PlayCommand(mapService(), bridge()));
         commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
-        commandManager.register(new TopTimesCommand(mapService(), playerService()));
+        commandManager.register(new TopTimesCommand(mapService(), playerService(), sessionManager()));
 
         commandManager.register(new RequestCommand(inviteService));
         commandManager.register(new RejectCommand(inviteService));
         commandManager.register(new InviteCommand(inviteService));
         commandManager.register(new AcceptCommand(inviteService));
-        commandManager.register(new JoinCommand(inviteService, permManager()));
+        commandManager.register(injector.getInstance(JoinCommand.class));
         commandManager.register(new RemoveCommand(bridge()));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
@@ -198,13 +230,6 @@ public abstract class MapServerBase implements MapServer {
             logger.error("Failed to initialize features", e);
             throw new RuntimeException(e);
         }
-
-        this.guiController = Controller.make(Map.of(
-                "mapServer", this,
-                "mapService", mapService(),
-                "playerService", playerService(),
-                "bridge", bridge()
-        ));
 
         // Sync sessions with remote
         if (sessionManager() != null) sessionManager().sync();

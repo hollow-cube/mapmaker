@@ -8,25 +8,20 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class WhereCommand extends Command {
-    private final Argument<EntityFinder> targetArgLegacy = Argument.Opt(Argument.Entity("player")
-            .singleEntity(true).onlyPlayers(true));
     private final Argument<String> targetArg;
 
     private final SessionManager sessionManager; // Optional for backwards compatibility
     private final PlayerService playerService;
     private final MapService mapService;
 
-    public WhereCommand(@Nullable SessionManager sessionManager, @Nullable PlayerService playerService, @Nullable MapService mapService) {
+    public WhereCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("where", "find");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
@@ -34,14 +29,9 @@ public class WhereCommand extends Command {
 
         category = CommandCategory.SOCIAL;
 
-        //todo this should be any online player, not just any player.
-        targetArg = playerService != null ? CoreArgument.AnyPlayerId("player", playerService) : null;
+        targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
 
-        if (sessionManager != null && playerService != null) {
-            addSyntax(playerOnly(this::handleFindPlayer), targetArg);
-        } else {
-            addSyntax(playerOnly(this::handleLegacyFindPlayer), targetArgLegacy);
-        }
+        addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 
     private void handleFindPlayer(@NotNull Player player, @NotNull CommandContext context) {
@@ -92,40 +82,5 @@ public class WhereCommand extends Command {
             }
             default -> player.sendMessage(Component.translatable("command.where.unknown", targetName));
         }
-    }
-
-    private void handleLegacyFindPlayer(@NotNull Player player, @NotNull CommandContext context) {
-        // If the target was not specified, use the player themselves.
-        var targetFinder = context.get(targetArgLegacy);
-        var target = targetFinder == null ? player : targetFinder.findFirstPlayer(player);
-        if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(context.getRaw(targetArgLegacy))));
-            return;
-        }
-
-        // If checking self, just say where you are.
-        var senderMap = KindaBadThingToFix.getMapFromCurrentWorld(player);
-        if (player.equals(target)) {
-            if (senderMap == null) {
-                player.sendMessage(Component.translatable("command.where.self.hub"));
-            } else if (senderMap.isPublished()) {
-                player.sendMessage(Component.translatable("command.where.self.playing", Component.text(senderMap.name())));
-            } else if (!senderMap.isPublished()) {
-                player.sendMessage(Component.translatable("command.where.self.building", Component.text(senderMap.name())));
-            }
-            return;
-        }
-
-        // Otherwise find the other players info
-        var targetMap = KindaBadThingToFix.getMapFromCurrentWorld(target);
-        if (targetMap == null) {
-            player.sendMessage(Component.translatable("command.where.hub", Component.text(target.getUsername())));
-        } else if (targetMap.equals(senderMap)) {
-            player.sendMessage(Component.translatable("command.where.same_map", Component.text(target.getUsername())));
-        } else if (targetMap.isPublished()) {
-            player.sendMessage(Component.translatable("command.where.playing", Component.text(target.getUsername()), Component.text(targetMap.name())));
-        } else if (!targetMap.isPublished()) {
-            player.sendMessage(Component.translatable("command.where.building", Component.text(target.getUsername())));
-        } else throw new IllegalStateException("unreachable");
     }
 }

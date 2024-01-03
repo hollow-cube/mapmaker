@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.hub;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
@@ -23,6 +26,10 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -61,6 +68,8 @@ public abstract class HubServerBase implements HubServer {
 
     private Controller guiController;
 
+    private Injector injector;
+
     private final Tag<Boolean> DOUBLE_JUMP_COOLDOWN_TAG = Tag.Boolean("mapmaker:hub-double-jump-cooldown");
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:hub", EventFilter.INSTANCE)
@@ -89,6 +98,23 @@ public abstract class HubServerBase implements HubServer {
                 "bridge", bridge()
         ));
 
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(HubServer.class).toInstance(HubServerBase.this);
+                bind(HubHandler.class).toInstance(mapHandler);
+                bind(HubWorld.class).toInstance(world);
+                bind(Controller.class).toInstance(guiController);
+                bind(PlayerInviteService.class).toInstance(inviteService);
+                bind(ConfigLoaderV3.class).toInstance(config);
+                bind(PermManager.class).toInstance(permManager());
+                bind(PlayerService.class).toInstance(playerService());
+                bind(SessionManager.class).toInstance(sessionManager());
+                bind(CommandManager.class).toInstance(commandManager);
+                bind(MapService.class).toInstance(mapService());
+            }
+        });
+
         this.world = new HubWorld(this);
         this.world.loadWorld();
         this.world.instance().eventNode().addChild(eventNode);
@@ -108,7 +134,7 @@ public abstract class HubServerBase implements HubServer {
         commandManager.register(new RejectCommand(inviteService));
         commandManager.register(new InviteCommand(inviteService));
         commandManager.register(new AcceptCommand(inviteService));
-        commandManager.register(new JoinCommand(inviteService, permManager()));
+        commandManager.register(injector.getInstance(JoinCommand.class));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.addSubcommand(new MapLegacyCommand(mapService(), permManager()));

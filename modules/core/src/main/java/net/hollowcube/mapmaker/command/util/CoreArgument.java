@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -13,6 +14,7 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public final class CoreArgument {
@@ -48,6 +50,28 @@ public final class CoreArgument {
                 /* Suggester */ (sender, reader, suggestion, raw) -> {
                     for (var result : playerService.getUsernameTabCompletions(raw).resultSafe()) {
                         suggestion.add(result.username());
+                    }
+                }
+        );
+    }
+
+    public static @NotNull Argument<@Nullable String> AnyOnlinePlayer(@NotNull String id, @NotNull SessionManager sessionManager) {
+        var word = Argument.Word(id);
+        return word.map(
+                /* Mapper */ (sender, raw) -> new Argument.ParseDeferredSuccess<>(() -> {
+                    for (var session : sessionManager.sessions()) {
+                        if (session.username().equalsIgnoreCase(raw)) {
+                            return session.playerId();
+                        }
+                    }
+                    return null;
+                }),
+                /* Suggester */ (sender, reader, suggestion, raw) -> {
+                    raw = raw.toLowerCase(Locale.ROOT);
+                    for (var session : sessionManager.sessions()) {
+                        if (session.username().toLowerCase(Locale.ROOT).startsWith(raw)) {
+                            suggestion.add(session.username());
+                        }
                     }
                 }
         );
@@ -94,7 +118,6 @@ public final class CoreArgument {
      *
      * @param id
      * @param mapService
-     * @param permManager
      * @return
      */
     public static @NotNull Argument<MapData> PlayableMap(

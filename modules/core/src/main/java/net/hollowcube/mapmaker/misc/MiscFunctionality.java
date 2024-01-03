@@ -2,7 +2,11 @@ package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.session.MapPresence;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.mapmaker.util.CoreTeams;
@@ -14,7 +18,9 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -92,5 +98,18 @@ public final class MiscFunctionality {
 
         builder.pushColor(FontUtil.NO_SHADOW);
         builder.pos(-(XP_BAR_BACKGROUND.width() / 2)).drawInPlace(XP_BAR_BACKGROUND);
+    }
+
+    @Blocking
+    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull Player player) {
+        var playerId = PlayerDataV2.fromPlayer(player).id();
+        return getCurrentMap(sessionManager, mapService, playerId);
+    }
+
+    @Blocking
+    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull String playerId) {
+        var presence = sessionManager.getPresence(playerId);
+        if (presence == null || !presence.type().equals(MapPresence.TYPE)) return null;
+        return mapService.getMap(playerId, presence.mapId());
     }
 }

@@ -16,7 +16,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -38,9 +37,9 @@ import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.CoreTeams;
-import net.hollowcube.mapmaker.world.KindaBadThingToFix;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -210,15 +209,12 @@ public class DevServer {
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
         metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
 
+        var sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, false);
+
         // Start phase 2
         // Start hub and map server and bridge them.
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-
-            KindaBadThingToFix.badbadbad = player -> {
-                var world = MapWorld.forPlayerOptional(player);
-                return world == null ? null : world.map();
-            };
 
             // Configure command rewriter
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
@@ -231,8 +227,8 @@ public class DevServer {
 
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager);
-            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager);
+            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
+            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
             this.hubToMapBridge = bridge;

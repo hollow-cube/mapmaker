@@ -7,6 +7,7 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         "//modules/command",
+        "@maven//:com_google_inject_guice",
         "@maven//:org_apache_kafka_kafka_clients",
     ],
     deps = [

@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -29,8 +30,10 @@ import org.slf4j.Logger;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -42,10 +45,13 @@ public class ProxyPlugin {
 
     private SessionService sessionService;
 
+    private final RegisteredServer limboServer;
     private final RegisteredServer anyhubServer;
 
     // Map of player uuid to the resource pack hash they currently have applied
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
+
+    private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -60,6 +66,7 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
 
+        limboServer = proxy.getServer("limbo").orElseThrow();
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
         logger.info("hello, world!!!!");
@@ -69,6 +76,14 @@ public class ProxyPlugin {
     public void handlePermissionSetup(@NotNull PermissionsSetupEvent event) {
         // Always deny all permissions
         event.setProvider(s -> p -> Tristate.FALSE);
+    }
+
+    @Subscribe
+    public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
+        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
+            logger.info("sending {} to limbo", event.getPlayer().getUsername());
+            event.setInitialServer(limboServer);
+        }
     }
 
     @Subscribe
@@ -91,7 +106,11 @@ public class ProxyPlugin {
                             new PlayerSkin(skinTexture, skinSignature)
                     )
             );
+            playersWithSession.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
+        } catch (SessionService.UnauthorizedError ignored) {
+            // this is ok, they will be sent to the limbo
+            logger.info("player {} is not in the beta", player.getUsername());
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
@@ -146,6 +165,8 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
+        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) return;
+
         var playerId = event.getPlayer().getUniqueId().toString();
         try {
             sessionService.deleteSessionV2(playerId);
@@ -154,6 +175,7 @@ public class ProxyPlugin {
             logger.error("failed to delete session (v2) for {}", playerId, e);
         } finally {
             resourcePacks.remove(event.getPlayer().getUniqueId());
+            playersWithSession.remove(event.getPlayer().getUniqueId());
         }
     }
 
@@ -167,10 +189,16 @@ public class ProxyPlugin {
     public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
         if (event.kickedDuringServerConnect()) return;
 
+        // If they were leaving the limbo, they should be disconnected completely no redirect.
+        var serverName = event.getServer().getServerInfo().getName();
+        if ("limbo".equals(serverName)) {
+            event.setResult(KickedFromServerEvent.DisconnectPlayer.create(event.getServerKickReason().orElse(Component.empty())));
+            return;
+        }
+
         // 'anyhub' points to the clusterip service for all the hub instances, so if you are kicked from it
         // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
         // ready instance, so it is totally safe to do so.
-        var serverName = event.getServer().getServerInfo().getName();
         if ("anyhub".equals(serverName)) {
             logger.info("reconnecting {} to hub", event.getPlayer().getUsername());
             event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));

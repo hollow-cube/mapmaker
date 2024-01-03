@@ -8,9 +8,10 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.world.KindaBadThingToFix;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,11 +20,13 @@ public class TopTimesCommand extends Command {
 
     private final MapService mapService;
     private final PlayerService playerService;
+    private final SessionManager sessionManager;
 
-    public TopTimesCommand(@NotNull MapService mapService, @NotNull PlayerService playerService) {
+    public TopTimesCommand(@NotNull MapService mapService, @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
         super("toptimes", "tt");
         this.mapService = mapService;
         this.playerService = playerService;
+        this.sessionManager = sessionManager;
 
         mapArg = Argument.Opt(CoreArgument.PlayableMap("map", mapService));
 
@@ -31,8 +34,8 @@ public class TopTimesCommand extends Command {
     }
 
     private void showTopTimes(@NotNull Player player, @NotNull CommandContext context) {
-        var currentMap = KindaBadThingToFix.getMapFromCurrentWorld(player);
-        ;
+        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+
         var targetMap = context.get(mapArg);
         // If no map was specified, try to get the map from the player's current world.
         if (targetMap == null) targetMap = currentMap;
@@ -44,7 +47,7 @@ public class TopTimesCommand extends Command {
                 return;
             }
 
-            targetMap = mapService.getMap(player.getUuid().toString(), lastPlayedMap);
+            targetMap = mapService.getMap(PlayerDataV2.fromPlayer(player).id(), lastPlayedMap);
         }
 
         // At this point target map always contains a value.
