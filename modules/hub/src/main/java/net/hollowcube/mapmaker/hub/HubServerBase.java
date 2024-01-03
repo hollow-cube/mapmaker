@@ -98,6 +98,10 @@ public abstract class HubServerBase implements HubServer {
                 "bridge", bridge()
         ));
 
+        this.world = new HubWorld(this);
+        this.world.loadWorld();
+        this.world.instance().eventNode().addChild(eventNode);
+
         this.injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -114,10 +118,6 @@ public abstract class HubServerBase implements HubServer {
                 bind(MapService.class).toInstance(mapService());
             }
         });
-
-        this.world = new HubWorld(this);
-        this.world.loadWorld();
-        this.world.instance().eventNode().addChild(eventNode);
 
         // Command init
         commandManager.register(new HelpCommand(commandManager));
