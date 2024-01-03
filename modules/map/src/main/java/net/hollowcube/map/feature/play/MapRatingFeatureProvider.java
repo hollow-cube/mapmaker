@@ -2,7 +2,6 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapRating;
@@ -21,8 +20,7 @@ public class MapRatingFeatureProvider implements FeatureProvider {
     public static final Tag<Future<MapRating>> LAST_RATING_TAG = Tag.Transient("map:last_rating");
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/rating", EventFilter.INSTANCE)
-            .addListener(MapPlayerInitEvent.class, this::handlePlayerInit)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::handlePlayerRemove);
+            .addListener(MapPlayerInitEvent.class, this::handlePlayerInit);
 
     public static boolean isMapRatable(@NotNull MapWorld world) {
         return world.map().isPublished() && world.flags() == MapWorld.FLAG_PLAYING;
@@ -56,10 +54,6 @@ public class MapRatingFeatureProvider implements FeatureProvider {
             }
         });
         player.setTag(LAST_RATING_TAG, future);
-    }
-
-    private void handlePlayerRemove(@NotNull MapWorldPlayerStopPlayingEvent event) {
-        event.getPlayer().removeTag(LAST_RATING_TAG);
     }
 
 }
