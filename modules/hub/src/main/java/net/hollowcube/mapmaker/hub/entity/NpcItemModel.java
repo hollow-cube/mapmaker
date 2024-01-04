@@ -17,6 +17,7 @@ public class NpcItemModel extends BaseNpcEntity {
     public NpcItemModel(@NotNull UUID uuid) {
         super(EntityType.ITEM_DISPLAY, uuid);
 
+        hasPhysics = false;
         setNoGravity(true);
     }
 

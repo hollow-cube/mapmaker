@@ -13,7 +13,6 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -42,24 +41,18 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
-import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.common.ClientResourcePackStatusPacket;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -430,16 +423,6 @@ public class DevServer {
         setNoGravity(true);
     }};
 
-    Entity lbTextEntity = new Entity(EntityType.TEXT_DISPLAY) {{
-        hasPhysics = false;
-        setNoGravity(true);
-    }};
-
-    Entity lbTextEntity2 = new Entity(EntityType.TEXT_DISPLAY) {{
-        hasPhysics = false;
-        setNoGravity(true);
-    }};
-
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         // WARNING --------
         // IF YOU ADD SOMETHING HERE, IT PROBABLY ALSO NEEDS TO BE ADDED TO THE
@@ -483,57 +466,6 @@ public class DevServer {
         MiscFunctionality.broadcastTabList(Audiences.all());
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
-
-//        Thread.startVirtualThread(() -> {
-//            metricWriter.writeMetric(new Metric(MetricType.PLAYER_JOIN_SERVER, List.of(System.currentTimeMillis(), player.getUuid())));
-//        });
-
-
-        // GARBAGE THAT NEEDS TO BE MOVED!!!
-
-        var screenMeta = (ItemDisplayMeta) screenEntity.getEntityMeta();
-        screenMeta.setItemStack(ItemStack.of(Material.STICK).withMeta(b -> b.customModelData(4)));
-        screenEntity.setInstance(player.getInstance(), new Pos(-1, 46, -24)).join(); // should be -1
-        screenMeta.setScale(new Vec(16, 16, 16));
-        screenMeta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(10)).into());
-
-        var lbTextMeta = (TextDisplayMeta) lbTextEntity.getEntityMeta();
-        lbTextMeta.setText(Component.text()
-                .append(Component.text("Leaderboard", NamedTextColor.GOLD)).appendNewline()
-                .append(Component.text("#1 notmattw 100000")).appendNewline()
-                .append(Component.text("#2 notmattw 100000")).appendNewline()
-                .append(Component.text("#3 notmattw 100000")).appendNewline()
-                .append(Component.text("#4 notmattw 100000")).appendNewline()
-                .append(Component.text("#5 notmattw 100000")).appendNewline()
-                .append(Component.text("#6 notmattw 100000")).appendNewline()
-                .append(Component.text("#7 notmattw 100000")).appendNewline()
-                .append(Component.text("#8 notmattw 100000")).appendNewline()
-                .append(Component.text("#9 notmattw 100000")).appendNewline()
-                .append(Component.text("#0 notmattw 100000"))
-                .build());
-        lbTextMeta.setBackgroundColor(0);
-        lbTextEntity.setInstance(player.getInstance(), new Pos(5.97, 41, -25.4, 90, 0)).join();
-        lbTextMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
-        lbTextMeta.setScale(new Vec(1.75));
-
-        var lbTextMeta2 = (TextDisplayMeta) lbTextEntity2.getEntityMeta();
-        lbTextMeta2.setText(Component.text()
-                .append(Component.text("Leaderboard", NamedTextColor.GOLD)).appendNewline()
-                .append(Component.text("#1 notmattw 100000")).appendNewline()
-                .append(Component.text("#2 notmattw 100000")).appendNewline()
-                .append(Component.text("#3 notmattw 100000")).appendNewline()
-                .append(Component.text("#4 notmattw 100000")).appendNewline()
-                .append(Component.text("#5 notmattw 100000")).appendNewline()
-                .append(Component.text("#6 notmattw 100000")).appendNewline()
-                .append(Component.text("#7 notmattw 100000")).appendNewline()
-                .append(Component.text("#8 notmattw 100000")).appendNewline()
-                .append(Component.text("#9 notmattw 100000")).appendNewline()
-                .append(Component.text("#0 notmattw 100000"))
-                .build());
-        lbTextMeta2.setBackgroundColor(0);
-        lbTextEntity2.setInstance(player.getInstance(), new Pos(5.97, 41, -19.8, 90, 0)).join();
-        lbTextMeta2.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(10)).into());
-        lbTextMeta2.setScale(new Vec(1.75));
     }
 
 }
