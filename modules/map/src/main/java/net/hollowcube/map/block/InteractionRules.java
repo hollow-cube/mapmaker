@@ -83,7 +83,6 @@ public class InteractionRules {
             // Rule was not applied, so continue to item rules
         }
 
-        if (event.isBlockingItemUse()) return; // Skip item rules if the event blocks item use
         rule = itemRules.get(itemStack.material().id());
         if (rule == null || !rule.sneakState().test(player.isSneaking(), !itemStack.isAir())) return;
 

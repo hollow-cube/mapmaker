@@ -3,7 +3,10 @@ package net.hollowcube.terraform.tool;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.*;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -27,7 +30,6 @@ public class ToolHandler {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("terraform:tool/handler", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
             .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItemOnBlock)
-            .addListener(PlayerBlockInteractEvent.class, this::handleBlockInteract)
             .addListener(PlayerUseItemEvent.class, this::handleUseItem)
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock);
 
@@ -129,14 +131,6 @@ public class ToolHandler {
                 event.getBlockFace(),
                 null
         ));
-    }
-
-    private void handleBlockInteract(@NotNull PlayerBlockInteractEvent event) {
-        var itemStack = event.getPlayer().getItemInHand(event.getHand());
-        var tool = getTool(itemStack);
-        if (tool == null || (tool.flags() & BuiltinTool.RIGHT_CLICK_BLOCK) == 0) return;
-
-        event.setBlockingItemUse(true);
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
