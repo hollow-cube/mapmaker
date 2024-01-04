@@ -19,7 +19,8 @@ public record Emoji(@NotNull String name, char raw, @NotNull Component component
     private static final List<Category> EMOJIS_BY_CATEGORY;
     private static final PlayerInfoUpdatePacket EMOJI_PLAYERS_PACKET;
 
-    public record Category(@NotNull String displayName, @NotNull List<Emoji> emojis) {}
+    public record Category(@NotNull String displayName, @NotNull List<Emoji> emojis) {
+    }
 
     /**
      * Look up an emoji by its name (case-insensitive).
@@ -58,6 +59,7 @@ public record Emoji(@NotNull String name, char raw, @NotNull Component component
                         "grin", "icon/emoji/grin",
                         "smile", "icon/emoji/smile",
                         "smirk", "icon/emoji/smirk",
+                        "clown", "icon/emoji/clown",
                         "poop", "icon/emoji/poop"
                 ),
                 "misc", Map.of(
