@@ -194,6 +194,8 @@ public abstract class HubServerBase implements HubServer {
         player.sendActionBar(Component.empty());
         player.setFlyingSpeed(player.getTag(HubServer.DOUBLE_JUMP_TAG) ? 0 : 0.05f);
 
+//        player.teleport(new Pos(-119.5, 78, -76.5, -85, 9));
+
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
     }

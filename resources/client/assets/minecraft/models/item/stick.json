@@ -33,6 +33,18 @@
         "custom_model_data": 5
       },
       "model": "minecraft:item/sm_house"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "minecraft:item/train_middle"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "minecraft:item/train_front"
     }
   ]
 }

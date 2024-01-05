@@ -56,4 +56,11 @@ public final class CoordinateUtil {
         }
     }
 
+    public static @NotNull Point lerp(Point zero, Point one, float t) {
+        return new Vec(lerp(zero.x(), one.x(), t), lerp(zero.y(), one.y(), t), lerp(zero.z(), one.z(), t));
+    }
+
+    private static double lerp(double zero, double one, float t) {
+        return zero + (one - zero) * t;
+    }
 }
