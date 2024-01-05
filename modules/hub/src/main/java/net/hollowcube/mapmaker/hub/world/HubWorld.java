@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.world;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
-import net.hollowcube.mapmaker.hub.world.generator.HubGenerators;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
@@ -47,9 +46,10 @@ public class HubWorld {
         this.server = server;
 
         instance = new MapInstance("mapmaker:hub");
+//        instance = new MapInstance("mapmaker:hub", DimensionType.OVERWORLD);
         instance.setTag(MARKER, true);
         instance.setTag(THIS_TAG, this);
-        instance.setGenerator(HubGenerators.stoneWorld());
+//        instance.setChunkSupplier(LightingChunk::new);
 
         var eventNode = instance.eventNode();
         eventNode.addChild(HubHotbar.eventNode());
