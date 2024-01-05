@@ -5,11 +5,7 @@
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.rate_map.information"/>
-
-        <spacer width="5"/>
-
-        <label width="2" translationKey="gui.rate_map.comment"
-               sprite="minecraft:paper"/>
+        <spacer width="7"/>
     </box>
 
     <spacer width="9" height="1"/>
