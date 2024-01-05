@@ -1,0 +1,10334 @@
+{
+  "textures": {
+    "1awughfaiuwg": "block/bedrock",
+    "d": "block/acacia_trapdoor",
+    "9": "block/tinted_glass",
+    "4": "block/repeating_command_block_front",
+    "c": "block/red_sandstone_top",
+    "1": "block/deepslate_tiles",
+    "8": "block/polished_deepslate",
+    "2": "block/deepslate_bricks",
+    "a": "block/gray_wool",
+    "3": "block/repeating_command_block_side",
+    "7": "block/pearlescent_froglight_side",
+    "b": "block/mangrove_planks",
+    "6": "block/pearlescent_froglight_top",
+    "5": "block/repeating_command_block_back"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        0.5
+      ],
+      "to": [
+        3.5,
+        0.5,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            8.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        6.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        7.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        6.5,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        8.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        8.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        9.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        9.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        0.5,
+        0.0
+      ],
+      "to": [
+        10.0,
+        1.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        10.0,
+        0.5,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#3",
+          "rotation": 180,
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#3",
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ]
+        },
+        "east": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#3",
+          "rotation": 270,
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#3",
+          "rotation": 90,
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:repeating_command_block{properties\u003d{conditional\u003d\u003efalse, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#6",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#6",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:pearlescent_froglight{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        6.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#6",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#6",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#7",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:pearlescent_froglight{properties\u003d{axis\u003d\u003ey}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        7.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#3",
+          "rotation": 180,
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ]
+        },
+        "up": {
+          "texture": "#3",
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#5",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#3",
+          "rotation": 270,
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#3",
+          "rotation": 90,
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:repeating_command_block{properties\u003d{conditional\u003d\u003efalse, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        8.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        9.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        0.5,
+        1.0
+      ],
+      "to": [
+        10.0,
+        1.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#2"
+        }
+      },
+      "_block": "minecraft:deepslate_brick_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        1.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        1.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        2.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        2.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        3.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        4.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.5,
+        0.0,
+        2.5
+      ],
+      "to": [
+        4.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        5.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        6.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        7.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_left, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.5,
+        0.0,
+        2.0
+      ],
+      "to": [
+        7.0,
+        0.5,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003eouter_left, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        8.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        8.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        9.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        9.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        0.5,
+        2.0
+      ],
+      "to": [
+        10.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        0.0,
+        2.5
+      ],
+      "to": [
+        10.0,
+        0.5,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:deepslate_tile_stairs{properties\u003d{half\u003d\u003etop, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        5.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        6.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        7.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        8.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        9.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        1.0,
+        0.0
+      ],
+      "to": [
+        10.0,
+        2.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        1.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        2.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        1.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.5,
+        1.0
+      ],
+      "to": [
+        2.5,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        4.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        5.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        6.0,
+        1.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        1.5,
+        1.0
+      ],
+      "to": [
+        5.5,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        7.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        8.0,
+        1.5,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        1.5,
+        1.0
+      ],
+      "to": [
+        7.5,
+        2.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#b"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#b"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#b"
+        }
+      },
+      "_block": "minecraft:mangrove_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        9.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        1.0,
+        1.0
+      ],
+      "to": [
+        10.0,
+        1.0625,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "north": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        },
+        "east": {
+          "uv": [
+            0,
+            15,
+            16,
+            16
+          ],
+          "texture": "#a"
+        }
+      },
+      "_block": "minecraft:gray_carpet{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        5.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        6.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        7.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        8.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        9.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        1.0,
+        2.0
+      ],
+      "to": [
+        10.0,
+        2.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        5.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        6.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        7.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        8.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        9.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        2.0,
+        0.0
+      ],
+      "to": [
+        10.0,
+        3.0,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        1.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        5.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        6.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        7.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        8.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        9.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#9",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#9",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:tinted_glass{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        2.0,
+        2.0
+      ],
+      "to": [
+        10.0,
+        3.0,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#8",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#8",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:polished_deepslate{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        1.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        1.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.5,
+        0.0
+      ],
+      "to": [
+        0.5,
+        4.0,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            0.0,
+            0.0,
+            8.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        2.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        3.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        4.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        4.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        5.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        5.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        6.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        6.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        7.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        7.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        8.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        8.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        9.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        9.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        10.0,
+        3.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.5,
+        3.5,
+        0.0
+      ],
+      "to": [
+        10.0,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        3.5,
+        0.5
+      ],
+      "to": [
+        9.5,
+        4.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            8,
+            8,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        1.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        2.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        3.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        4.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        5.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        6.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        7.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        8.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        9.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        3.5,
+        1.0
+      ],
+      "to": [
+        10.0,
+        4.0,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_slab{properties\u003d{waterlogged\u003d\u003efalse, type\u003d\u003etop}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        1.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        0.5,
+        4.0,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.5,
+        3.5,
+        2.0
+      ],
+      "to": [
+        1.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            8.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        2.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        3.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        3.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        4.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        3.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        4.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        5.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        4.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        5.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        6.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        5.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        6.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        7.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        6.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        7.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        8.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        7.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        8.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        9.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        8.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        9.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        3.0,
+        2.0
+      ],
+      "to": [
+        10.0,
+        3.5,
+        3.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        3.5,
+        2.0
+      ],
+      "to": [
+        10.0,
+        4.0,
+        2.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.5,
+        3.5,
+        2.5
+      ],
+      "to": [
+        10.0,
+        4.0,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            16.0,
+            8.0
+          ],
+          "texture": "#c"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#c"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#c"
+        }
+      },
+      "_block": "minecraft:smooth_red_sandstone_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0.0,
+        4.0,
+        1.0
+      ],
+      "to": [
+        1.0,
+        4.1875,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#d"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#d"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        }
+      },
+      "_block": "minecraft:acacia_trapdoor{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003eeast, open\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        9.0,
+        4.0,
+        1.0
+      ],
+      "to": [
+        10.0,
+        4.1875,
+        2.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#d"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#d"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#d"
+        }
+      },
+      "_block": "minecraft:acacia_trapdoor{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, powered\u003d\u003efalse, facing\u003d\u003ewest, open\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    }
+  ],
+  "display": {
+    "fixed": {
+      "scale": [
+        4,
+        4,
+        4
+      ],
+      "rotation": [
+        -90,
+        0,
+        0
+      ],
+      "translation": [
+        22,
+        22,
+        -32
+      ]
+    },
+    "firstperson_righthand": {
+      "scale": [
+        4,
+        4,
+        4
+      ],
+      "rotation": [
+        -90,
+        0,
+        0
+      ],
+      "translation": [
+        22,
+        22,
+        -32
+      ]
+    }
+  }
+}
