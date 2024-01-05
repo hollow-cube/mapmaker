@@ -100,7 +100,7 @@ public final class CommandManager {
     public void execute(@NotNull CommandSender sender, @NotNull String input) {
         var context = expand(CommandContext.Pass.EXECUTE, sender, input);
         if (!context.hasCommand()) {
-            sender.sendMessage(Component.translatable("command.not_found"));
+            sender.sendMessage(Component.translatable("generic.command.not_found"));
             return;
         }
         if (context.isFailed()) return; //todo, allow handling? log? something?

@@ -29,7 +29,7 @@ public class ClipFlipCommand extends Command {
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
 
         if (clipboard.isEmpty()) {
-            player.sendMessage(Component.translatable("terraform.generic.empty_clipbord"));
+            player.sendMessage(Component.translatable("terraform.generic.empty_clipboard"));
             return;
         }
 
@@ -40,11 +40,11 @@ public class ClipFlipCommand extends Command {
                 case "y" -> clipboard.flip(false, true, false);
                 case "z" -> clipboard.flip(false, false, true);
                 default -> {
-                    player.sendMessage("Unknown argument " + axis); // TODO TRANSLATE
+                    player.sendMessage(Component.translatable("terraform.clipboard.flip.unknown_axis", Component.text(axis)));
                     return;
                 }
             }
-            player.sendMessage("Successfully flipped your clipboard across the " + axis + " axis."); // TODO TRANSLATE
+            player.sendMessage(Component.translatable("terraform.clipboard.flip", Component.text(axis)));
         }
     }
 }

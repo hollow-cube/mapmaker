@@ -222,7 +222,7 @@ public class EditMap extends View {
         try {
             bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
+            player.sendMessage(Component.translatable("generic.map.verify.fail"));
             MinecraftServer.getExceptionManager().handleException(e);
         } finally {
             player.closeInventory();

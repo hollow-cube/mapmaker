@@ -69,8 +69,8 @@ public final class TestingMapHotbar {
     private static void handleItem(@NotNull Player player, int customModelData) {
         var server = MapWorld.forPlayer(player).server();
         switch (customModelData) {
-            case RETURN_CHECKPOINT_CMD -> player.sendMessage("todo");
-            case SPECTATOR_CMD -> player.sendMessage("todo");
+            case RETURN_CHECKPOINT_CMD -> player.sendMessage("todo"); // TODO translate
+            case SPECTATOR_CMD -> player.sendMessage("todo"); // TODO translate
 //            case BUILD_MODE_CMD -> BuildModeCommand.enterBuildMode(player, server);
         }
     }

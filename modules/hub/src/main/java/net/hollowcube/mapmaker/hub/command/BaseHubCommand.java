@@ -17,7 +17,7 @@ public class BaseHubCommand extends Command {
     public BaseHubCommand(@NotNull String name, @Nullable String... aliases) {
         super(name, aliases);
 
-        setDefaultExecutor((sender, context) -> sender.sendMessage("todo: help"));
+        setDefaultExecutor((sender, context) -> sender.sendMessage("todo: help")); // TODO translate
     }
 
     protected @NotNull CommandExecutor wrap(@NotNull BiConsumer<@NotNull Player, @NotNull CommandContext> executor) {

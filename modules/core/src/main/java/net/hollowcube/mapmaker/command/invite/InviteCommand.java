@@ -29,7 +29,7 @@ public class InviteCommand extends Command {
         var target = context.get(targetArg).findFirstPlayer(player);
         String playerName = context.getRaw(targetArg);
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(playerName)));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(playerName)));
             return;
         }
         if (player.equals(target)) {
@@ -37,7 +37,7 @@ public class InviteCommand extends Command {
             return;
         }
         if (playerName.length() > 16 || playerName.length() < 3) {
-            player.sendMessage(Component.text("generic.player_name_length"));
+            player.sendMessage(Component.text("generic.player.name_length"));
             return;
         }
 

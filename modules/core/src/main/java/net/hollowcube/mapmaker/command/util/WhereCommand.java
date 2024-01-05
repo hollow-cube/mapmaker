@@ -40,12 +40,12 @@ public class WhereCommand extends Command {
         // If the target was not specified, use the player themselves.
         var target = context.has(targetArg) ? context.get(targetArg) : senderId;
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(context.getRaw(targetArg))));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(context.getRaw(targetArg))));
             return;
         }
         var presence = sessionManager.getPresence(target);
         if (presence == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(context.getRaw(targetArg))));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(context.getRaw(targetArg))));
             return;
         }
 

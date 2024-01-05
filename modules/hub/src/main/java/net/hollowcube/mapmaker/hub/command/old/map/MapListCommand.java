@@ -51,7 +51,7 @@ public class MapListCommand extends BaseHubCommand {
         try {
             var playerName = context.get(targetArg).trim();
             if (playerName.isEmpty()) {
-                player.sendMessage("Player not found."); //todo
+                player.sendMessage(Component.translatable("generic.player.not_found"));
                 return;
             }
 
@@ -60,7 +60,7 @@ public class MapListCommand extends BaseHubCommand {
                 playerData = MapPlayerData.fromPlayer(onlinePlayer);
             else playerData = mapService.getMapPlayerData(playerName);
         } catch (MapService.NotFoundError e) {
-            player.sendMessage("Player not found."); //todo
+            player.sendMessage(Component.translatable("generic.player.not_found"));
             return;
         }
 

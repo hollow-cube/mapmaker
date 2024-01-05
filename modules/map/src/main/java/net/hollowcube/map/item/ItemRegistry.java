@@ -65,7 +65,9 @@ public class ItemRegistry {
                     }
                 }
         ).errorHandler((sender, context) -> {
-            sender.sendMessage("unknown item: " + context.getRaw(word)); // todo translate
+            //sender.sendMessage(Component.translatable("command.give.unknown_item", Component.text(context.getRaw(word))));
+            // TODO for some reason this doesn't work locally for me, idk why
+            sender.sendMessage("Unknown Item: " + context.getRaw(word));
         });
     }
 

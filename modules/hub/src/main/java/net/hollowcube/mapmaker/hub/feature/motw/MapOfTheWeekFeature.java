@@ -51,7 +51,7 @@ public class MapOfTheWeekFeature implements HubFeature {
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {
         try {
-            player.sendMessage(Component.translatable("motw.joining")); //todo(seth): translation key)
+            player.sendMessage(Component.translatable("motw.joining"));
             bridge.joinMap(player, "14b8a361-7cba-49ec-933c-14faad11f385", ServerBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)

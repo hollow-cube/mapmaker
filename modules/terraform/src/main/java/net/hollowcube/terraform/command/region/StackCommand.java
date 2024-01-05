@@ -36,7 +36,7 @@ public class StackCommand extends Command {
 
         var count = context.get(countArg);
         if (count < 1 || count > 100) {
-            player.sendMessage(Component.translatable("terraform.stack.invalid_count"));
+            player.sendMessage(Component.translatable("generic.number.not_in_range", Component.text(1), Component.text(100)));
             return;
         }
 

@@ -31,19 +31,15 @@ public class ClipRotateCommand extends Command {
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
 
         if (clipboard.isEmpty()) {
-            player.sendMessage(Component.translatable("terraform.generic.empty_clipbord"));
+            player.sendMessage(Component.translatable("terraform.generic.empty_clipboard"));
             return;
         }
 
         if (context.has(axisArg) && context.has(amountArg)) {
             int amount = context.get(amountArg);
-            if (amount == 0) {
-                player.sendMessage("No rotation?");
-                // Insert megamind meme
-                return;
-            }
-            if (amount == 360) {
-                player.sendMessage("That's a whole rotation you dummy");
+            if (amount == 0 || amount == 360) {
+                player.sendMessage(Component.translatable("terraform.clipboard.rotate.invalid"));
+                // no rotation? Insert megamind meme
                 return;
             }
             String axis = context.get(axisArg).toLowerCase(Locale.ROOT);
@@ -52,11 +48,11 @@ public class ClipRotateCommand extends Command {
                 case "y" -> clipboard.rotate(0, amount, 0);
                 case "z" -> clipboard.rotate(0, 0, amount);
                 default -> {
-                    player.sendMessage("Unknown argument " + axis); // TODO TRANSLATE
+                    player.sendMessage(Component.translatable("terraform.clipboard.rotate.unknown_axis", Component.text(axis)));
                     return;
                 }
             }
-            player.sendMessage("Successfully rotated your clipboard on the " + axis + " axis by " + amount + " degrees."); // TODO TRANSLATE
+            player.sendMessage(Component.translatable("terraform.clipboard.rotate", Component.text(axis), Component.text(amount)));
         }
     }
 }

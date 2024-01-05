@@ -111,7 +111,7 @@ public class CreateMaps extends View {
         try {
             bridge.joinMap(player, spawnMapId, HubToMapBridge.JoinMapState.EDITING);
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to edit map")); //todo use translation key
+            player.sendMessage(Component.translatable("generic.map.edit.fail"));
             MinecraftServer.getExceptionManager().handleException(e);
         } finally {
             player.closeInventory();

@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MoveCommand extends Command {
-
     private final Argument<Integer> countArg = Argument.Int("count")
             .min(1).defaultValue(1);
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
@@ -41,7 +40,7 @@ public class MoveCommand extends Command {
 
         var count = context.get(countArg);
         if (count < 1 || count > 100) {
-            player.sendMessage(Component.translatable("terraform.move.invalid_count")); // TODO Translate
+            player.sendMessage(Component.translatable("generic.number.not_in_range", Component.text(1), Component.text(100)));
             return;
         }
 
@@ -79,10 +78,11 @@ public class MoveCommand extends Command {
                     player.sendMessage(Component.translatable("terraform.selection.move",
                             Component.translatable(String.valueOf(result.blocksChanged()))));
                     // Move selection to match the move command
-                    Point newPrimary = selection.region().min().add(offset);
-                    Point newSecondary = selection.region().max().add(offset);
-                    selection.selectPrimary(newPrimary, false);
-                    selection.selectSecondary(newSecondary, false);
+                    // builders don't like it this behavior. Should be an optional flag
+//                    Point newPrimary = selection.region().min().add(offset);
+//                    Point newSecondary = selection.region().max().add(offset);
+//                    selection.selectPrimary(newPrimary, false);
+//                    selection.selectSecondary(newSecondary, false);
                 })
                 .submit();
     }
