@@ -37,7 +37,6 @@ import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
-import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,12 +82,12 @@ public class EditingMapWorld implements InternalMapWorld {
         this.map = map;
         this.flags |= FLAG_EDITING;
 
-        if (map.id().equals(MapData.SPAWN_MAP_ID)) {
-            instance = new MapInstance(getDimensionName(), DimensionType.OVERWORLD);
+//        if (map.id().equals(MapData.SPAWN_MAP_ID)) {
+//            instance = new MapInstance(getDimensionName(), DimensionType.OVERWORLD);
 //            instance.setChunkSupplier(LightingChunk::new);
-        } else {
-            instance = new MapInstance(getDimensionName());
-        }
+//        } else {
+        instance = new MapInstance(getDimensionName());
+//        }
         instance.setGenerator(MapGenerators.voidWorld());
         instance.setTag(SELF_TAG, this);
 

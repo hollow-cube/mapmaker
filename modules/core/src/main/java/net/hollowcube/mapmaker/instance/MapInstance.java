@@ -87,7 +87,7 @@ public class MapInstance extends InstanceContainer {
         try {
             var loader = new PolarLoader(new ByteArrayInputStream(worldData));
             if (worldAccess != null) loader.setWorldAccess(worldAccess);
-            setChunkLoader(loader);
+            setChunkLoader(loader.setLoadLighting(false));
 
             // Load the world data
             loader.loadInstance(this);
