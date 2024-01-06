@@ -1,18 +1,19 @@
 package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.ServerRuntime;
+import net.kyori.adventure.resource.ResourcePackInfo;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
-import net.minestom.server.event.player.PlayerResourcePackStatusEvent;
-import net.minestom.server.resourcepack.ResourcePack;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -54,10 +55,15 @@ public final class ResourcePackManager {
 
             // Send the pack and listen for the status
             var future2 = new CompletableFuture<Void>();
-            EVENT_HANDLER.addListener(EventListener.builder(PlayerResourcePackStatusEvent.class)
-                    .filter(event -> event.getPlayer() == player) //todo filter on the ID when its added to the event
-                    .handler(event -> {
-                        switch (event.getStatus()) {
+            player.sendResourcePacks(ResourcePackRequest.resourcePackRequest()
+                    .packs(ResourcePackInfo.resourcePackInfo()
+                            .id(RESOURCE_PACK_ID)
+                            .uri(URI.create(url))
+                            .hash(hash)
+                            .build())
+                    .required(true)
+                    .callback((uuid, status, audience) -> {
+                        switch (status) {
                             case SUCCESSFULLY_LOADED -> future2.complete(null);
                             case ACCEPTED, DOWNLOADED -> {/* Indeterminate so do nothing */}
                             default -> {
@@ -68,8 +74,7 @@ public final class ResourcePackManager {
                             }
                         }
                     })
-                    .expireWhen(unused -> future2.isDone()).build());
-            player.setResourcePack(ResourcePack.forced(RESOURCE_PACK_ID, url, hash));
+                    .build());
 
             return future2;
         });

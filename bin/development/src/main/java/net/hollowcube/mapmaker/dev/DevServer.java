@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.dev;
 
-import io.getunleash.Unleash;
 import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.Routing;
@@ -11,7 +10,6 @@ import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
@@ -24,7 +22,6 @@ import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.dev.command.CommandRewriter;
 import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
-import net.hollowcube.mapmaker.dev.runtime.DevRuntime;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
@@ -47,21 +44,17 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
-import net.minestom.server.network.packet.client.common.ClientResourcePackStatusPacket;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
-import net.minestom.server.resourcepack.ResourcePack;
-import net.minestom.server.tag.Tag;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -74,8 +67,6 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -83,12 +74,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("UnstableApiUsage")
 public class DevServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
-
-    private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
-    private static final UUID RESOURCE_PACK_ID = UUID.fromString("aceb326f-da15-45bc-bf2f-11940c21780c");
-    private static final Tag<CompletableFuture<Void>> WAITING_FOR_RP_TAG = Tag.Transient("waiting_for_rp");
-
-    public static Unleash UNLEASH_INSTANCE = null;
 
     private HubToMapBridge hubToMapBridge;
 
@@ -212,8 +197,6 @@ public class DevServer {
             packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
             MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
 
-            packetListenerManager.setConfigurationListener(ClientResourcePackStatusPacket.class, this::handleResourcePackStatus);
-
             var bridge = new DevServerBridge();
 
             this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
@@ -301,50 +284,9 @@ public class DevServer {
 
     }
 
-    private void handleResourcePackStatus(@NotNull ClientResourcePackStatusPacket packet, @NotNull Player player) {
-        switch (packet.status()) {
-            case INVALID_URL, FAILED_DOWNLOAD, FAILED_RELOAD -> player.kick("Resource pack failed to load.");
-            case DECLINED -> player.kick("Resource pack declined.");
-            case ACCEPTED, DISCARDED, DOWNLOADED -> {
-                // Status messages
-            }
-            case SUCCESSFULLY_LOADED -> {
-                var future = player.getTag(WAITING_FOR_RP_TAG);
-                if (future != null) {
-                    future.complete(null);
-                    player.removeTag(WAITING_FOR_RP_TAG);
-                }
-            }
-        }
-    }
-
     private void handleConfig(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
         logger.info("config - {}", player.getUsername());
-
-        if (event.isFirstConfig()) {
-
-            // Send resource pack if present
-            var runtime = ServerRuntime.getRuntime();
-            var resourcePackHash = ((DevRuntime) runtime).resourcePackSha1();
-            if (!resourcePackHash.equals("dev")) {
-
-                // TODO: NOTE ABOUT RESOURCE PACKS ON SPLIT SERVERS
-                // We should update the resource pack when joining any backend server which has a different pack loaded.
-                // We can generate a uuid seeded on the resource pack hash which would allow us to do this KIND OF.
-                // We might need to keep track of which resource pack the client has loaded, but its possible that you
-                // can pop then push the same ID and it wont do a RP reload which would be ideal. We'll see.
-
-                var url = String.format(RESOURCE_PACK_URL, runtime.commit());
-                logger.info("Sending resource pack {} ({}) to {}", url, resourcePackHash, player.getUsername());
-                player.setResourcePack(ResourcePack.forced(RESOURCE_PACK_ID, url, resourcePackHash)); //todo
-                //todo in minestom it would be nice to have callback argument here to receive updates from resource pack status rather than having to do it on your own
-
-                var future = new CompletableFuture<Void>();
-                player.setTag(WAITING_FOR_RP_TAG, future);
-                future.join();
-            }
-        }
 
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld == null) {
