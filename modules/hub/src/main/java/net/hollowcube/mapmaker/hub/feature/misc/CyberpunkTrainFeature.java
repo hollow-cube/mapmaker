@@ -21,8 +21,9 @@ public class CyberpunkTrainFeature implements HubFeature {
     private final NpcItemModel trainFront = new NpcItemModel();
     private final NpcItemModel trainMiddle = new NpcItemModel();
     private final NpcItemModel trainBack = new NpcItemModel();
-
     //todo it would be nice to have a "group" entity which controls these ones.
+
+    private boolean moving = false;
 
     @Override
     public void init(@NotNull HubServer hub) {
@@ -32,7 +33,7 @@ public class CyberpunkTrainFeature implements HubFeature {
         metaFront.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         metaFront.setTranslation(new Vec(-10, 0, 1));
-        metaFront.setPosRotInterpolationDuration(1);
+        metaFront.setBrightnessOverride(240);
         trainFront.setInstance(hub.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
 
         trainMiddle.setInstance(hub.instance(), new Vec(0, 40, 0)).join();
@@ -41,7 +42,7 @@ public class CyberpunkTrainFeature implements HubFeature {
         var metaMiddle = trainMiddle.getEntityMeta();
         metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
-        metaFront.setPosRotInterpolationDuration(1);
+        metaMiddle.setBrightnessOverride(240);
         trainMiddle.setInstance(hub.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
 
         trainBack.setInstance(hub.instance(), new Vec(0, 40, 0)).join();
@@ -51,14 +52,11 @@ public class CyberpunkTrainFeature implements HubFeature {
         metaBack.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         metaBack.setTranslation(new Vec(-5, 0, -1));
+        metaBack.setBrightnessOverride(240);
         trainBack.setInstance(hub.instance(), new Pos(TRAIN_START, -180 + 26f, 0)).join();
 
         hub.scheduler().submitTask(this::trainUpdate);
     }
-
-    private float progress = 0f;
-
-    private boolean moving = false;
 
     private @NotNull TaskSchedule trainUpdate() {
         if (moving) {
@@ -76,16 +74,6 @@ public class CyberpunkTrainFeature implements HubFeature {
             moving = true;
             return TaskSchedule.tick(30);
         }
-
-//        progress += 0.01f;
-//        if (progress > 1f) progress = 0f;
-
-//        var position = CoordinateUtil.lerp(TRAIN_START, TRAIN_END, progress);
-//        trainFront.teleport(new Pos(position).withView(trainFront.getPosition()));
-//        trainMiddle.teleport(new Pos(position).withView(trainMiddle.getPosition()));
-//        trainBack.teleport(new Pos(position).withView(trainBack.getPosition()));
-//
-//        return TaskSchedule.tick(1);
     }
 
     private void setPosInterpolation(int duration) {
