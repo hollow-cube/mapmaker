@@ -41,11 +41,7 @@ public class CoreInit {
         System.setProperty("minestom.chunk-view-distance", "16");
         System.setProperty("minestom.command.async-virtual", "true");
         System.setProperty("minestom.event.multiple-parents", "true");
-        System.setProperty("minestom.use-new-chunk-sending", "true");
         System.setProperty("minestom.experiment.pose-updates", "true");
-
-        System.setProperty("minestom.new-chunk-sending-count-per-interval", "50");
-        System.setProperty("minestom.new-chunk-sending-send-interval", "1");
 
         var minecraftServer = MinecraftServer.init();
         MinecraftServer.getExceptionManager().setExceptionHandler(t -> logger.error("An uncaught exception has been handled", t));

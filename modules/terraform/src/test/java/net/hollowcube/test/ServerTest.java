@@ -25,7 +25,6 @@ public @interface ServerTest {
         public void beforeEach(ExtensionContext context) {
             System.setProperty("minestom.viewable-packet", "false");
             System.setProperty("minestom.event.multiple-parents", "true");
-            System.setProperty("minestom.use-new-chunk-sending", "true");
         }
     }
 
