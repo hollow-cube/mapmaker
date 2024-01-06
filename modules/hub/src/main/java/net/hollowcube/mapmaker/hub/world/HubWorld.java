@@ -75,11 +75,11 @@ public class HubWorld {
         if (spawnMapId != null) {
             var mapData = server().mapService().getMapWorld(spawnMapId, false);
             assert mapData != null;
-            instance.setChunkLoader(new PolarLoader(PolarReader.read(mapData)));
+            instance.setChunkLoader(new PolarLoader(PolarReader.read(mapData)).setLoadLighting(false));
         } else {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
-                instance.setChunkLoader(new PolarLoader(is));
+                instance.setChunkLoader(new PolarLoader(is).setLoadLighting(false));
             } catch (IOException e) {
                 MinecraftServer.getExceptionManager().handleException(e);
             }
