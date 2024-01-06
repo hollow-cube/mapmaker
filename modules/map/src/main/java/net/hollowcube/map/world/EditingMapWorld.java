@@ -31,7 +31,6 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.EffectPacket;
@@ -86,7 +85,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
         if (map.id().equals(MapData.SPAWN_MAP_ID)) {
             instance = new MapInstance(getDimensionName(), DimensionType.OVERWORLD);
-            instance.setChunkSupplier(LightingChunk::new);
+//            instance.setChunkSupplier(LightingChunk::new);
         } else {
             instance = new MapInstance(getDimensionName());
         }

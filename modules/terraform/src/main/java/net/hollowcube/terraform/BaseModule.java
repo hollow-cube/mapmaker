@@ -14,6 +14,7 @@ import net.hollowcube.terraform.command.schem.SchemCommand;
 import net.hollowcube.terraform.command.selection.HPosCommand;
 import net.hollowcube.terraform.command.selection.PosCommand;
 import net.hollowcube.terraform.command.selection.SelCommand;
+import net.hollowcube.terraform.command.selection.SetLightCommand;
 import net.hollowcube.terraform.command.tool.ToolCommand;
 import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.selection.region.RegionSelector;
@@ -66,6 +67,7 @@ final class BaseModule implements TerraformModule {
                 new SetCommand(terraform), new ReplaceCommand(terraform),
                 new StackCommand(), new SmearCommand(),
                 new MoveCommand(),
+                new SetLightCommand(),
 
                 // History
                 new UndoCommand(), new RedoCommand(),
