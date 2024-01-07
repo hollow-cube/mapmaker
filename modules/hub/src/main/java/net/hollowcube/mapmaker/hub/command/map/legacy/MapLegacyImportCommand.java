@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -11,14 +11,14 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapLegacyImportCommand extends Command {
-    private final Argument<String> playerArg = Argument.Word("player");
-    private final Argument<String> mapIdArg = Argument.Word("id")
-            .map((sender, raw) -> {
-                if (raw.length() > 5)
-                    return new Argument.ParseFailure<>();
-                return new Argument.ParseSuccess<>(raw);
-            });
+public class MapLegacyImportCommand extends CommandDsl {
+    private final Argument2<String> playerArg = Argument2.Word("player");
+    private final Argument2<String> mapIdArg = Argument2.Word("id");
+//            .map((sender, raw) -> {
+//                if (raw.length() > 5)
+//                    return new Argument.ParseFailure<>();
+//                return new Argument.ParseSuccess<>(raw);
+//            });
 
     private final MapService mapService;
 
@@ -29,7 +29,7 @@ public class MapLegacyImportCommand extends Command {
         var importAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
 
         addSyntax(playerOnly(this::importLegacyMap), mapIdArg);
-        addSyntax(importAnyPerm, playerOnly(this::importLegacyMap), playerArg, mapIdArg);
+//        addSyntax(importAnyPerm, playerOnly(this::importLegacyMap), playerArg, mapIdArg);
     }
 
     private void importLegacyMap(@NotNull Player player, @NotNull CommandContext context) {

@@ -2,7 +2,8 @@ package net.hollowcube.map.item;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.arg.Argument2;
 import net.hollowcube.map.item.impl.DebugStickItem;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.tool.BuiltinTool;
@@ -31,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ItemRegistry {
 
-    public static @NotNull Argument<@Nullable ItemStack> Argument(@NotNull String id) {
+    public static @NotNull Argument2<@Nullable ItemStack> Argument(@NotNull String id) {
         var word = Argument.Word(id);
         return word.map(
                 /* mapper */ (sender, raw) -> {

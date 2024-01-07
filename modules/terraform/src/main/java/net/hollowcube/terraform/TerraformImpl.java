@@ -2,7 +2,7 @@ package net.hollowcube.terraform;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManager2;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -52,7 +52,7 @@ public final class TerraformImpl implements Terraform {
     TerraformImpl(
             @NotNull Collection<Supplier<TerraformModule>> modules, @NotNull String storage,
             @Nullable EventNode<InstanceEvent> eventNode,
-            @NotNull CommandManager commandManager, @Nullable CommandCondition commandCondition
+            @NotNull CommandManager2 commandManager, @Nullable CommandCondition commandCondition
     ) {
         // Set the eventNode or register a new one.
         if (eventNode != null) this.eventNode = eventNode;

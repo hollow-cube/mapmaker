@@ -1,8 +1,10 @@
 package net.hollowcube.map.biome;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.selection.Selection;
@@ -19,8 +21,8 @@ import static net.hollowcube.command.CommandCondition.and;
 import static net.hollowcube.map.util.MapCondition.mapFeature;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class SetBiomeCommand extends Command {
-    private final Argument<Biome> biomeArg = Argument.Word("biome")
+public class SetBiomeCommand extends CommandDsl {
+    private final Argument2<Biome> biomeArg = Argument2.Word("biome")
             .map(
                     (sender, value) -> {
                         value = value.toLowerCase(Locale.ROOT);
@@ -56,6 +58,7 @@ public class SetBiomeCommand extends Command {
                     }
             );
 
+    @Inject
     public SetBiomeCommand() {
         super("setbiome");
 

@@ -1,7 +1,8 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager2Impl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.storage.TerraformStorage;
@@ -70,7 +71,7 @@ public sealed interface Terraform permits TerraformImpl {
         private String storage = "memory";
 
         private EventNode<InstanceEvent> eventNode;
-        private CommandManager commandManager = new CommandManager();
+        private CommandManager2 commandManager = new CommandManager2Impl();
         private CommandCondition commandCondition = null;
 
         public @NotNull Builder module(@NotNull TerraformModule module) {
@@ -102,7 +103,7 @@ public sealed interface Terraform permits TerraformImpl {
             return this;
         }
 
-        public @NotNull Builder rootCommandManager(@NotNull CommandManager commandManager) {
+        public @NotNull Builder rootCommandManager(@NotNull CommandManager2 commandManager) {
             this.commandManager = commandManager;
             return this;
         }

@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;
@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PasteCommand extends Command {
+public class PasteCommand extends CommandDsl {
 
     public PasteCommand() {
         super("paste");

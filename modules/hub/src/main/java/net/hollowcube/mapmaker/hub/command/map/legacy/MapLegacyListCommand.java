@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -12,8 +12,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapLegacyListCommand extends Command {
-    private final Argument<String> playerArg = Argument.Word("player");
+public class MapLegacyListCommand extends CommandDsl {
+    private final Argument2<String> playerArg = Argument2.Word("player");
 
     private final MapService mapService;
 
@@ -24,7 +24,7 @@ public class MapLegacyListCommand extends Command {
         var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
 
         addSyntax(playerOnly(this::listLegacyMaps));
-        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
+//        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
     }
 
     private void listLegacyMaps(@NotNull Player player, @NotNull CommandContext context) {

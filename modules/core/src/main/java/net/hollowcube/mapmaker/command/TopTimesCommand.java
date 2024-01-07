@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -15,21 +16,23 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class TopTimesCommand extends Command {
-    private final Argument<MapData> mapArg;
+public class TopTimesCommand extends CommandDsl {
+    private final Argument2<MapData> mapArg;
 
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
+    @Inject
     public TopTimesCommand(@NotNull MapService mapService, @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
         super("toptimes", "tt");
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
 
-        mapArg = Argument.Opt(CoreArgument.PlayableMap("map", mapService));
+        mapArg = CoreArgument.PlayableMap("map", mapService);
 
+        addSyntax(playerOnly(this::showTopTimes));
         addSyntax(playerOnly(this::showTopTimes), mapArg);
     }
 

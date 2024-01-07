@@ -1,11 +1,12 @@
 package net.hollowcube.mapmaker.command.util;
 
+import com.google.inject.Inject;
 import com.sun.management.HotSpotDiagnosticMXBean;
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.CommandExecutor;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -32,10 +33,11 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DebugCommand extends Command {
+public class DebugCommand extends CommandDsl {
 
     private final CommandCondition adminCondition;
 
+    @Inject
     public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService) {
         super("debug");
 
@@ -54,11 +56,11 @@ public class DebugCommand extends Command {
 //        addSyntax((sender, context) -> sender.sendMessage("Debug command :O"));
     }
 
-    public @NotNull Command createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.Player handler) {
+    public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler) {
         return createSubcommand(name, handler, null);
     }
 
-    public @NotNull Command createPermissionedSubcommand(@NotNull String name, @NotNull CommandExecutor.Player handler) {
+    public @NotNull CommandDsl createPermissionedSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler) {
         return createSubcommand(name, handler, adminCondition);
     }
 
@@ -81,9 +83,8 @@ public class DebugCommand extends Command {
 
     }
 
-    private @NotNull Command createSubcommand(@NotNull String name, @NotNull CommandExecutor.Player handler, @Nullable CommandCondition condition) {
-        var cmd = new Command(name) {
-        };
+    private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition) {
+        var cmd = new CommandDsl(name);
         cmd.setCondition(condition);
         cmd.addSyntax(playerOnly(handler));
         addSubcommand(cmd);
@@ -106,7 +107,7 @@ public class DebugCommand extends Command {
         player.sendMessage("Block: " + block);
     }
 
-    public static class SysCommand extends Command {
+    public static class SysCommand extends CommandDsl {
         private static final Logger logger = LoggerFactory.getLogger(SysCommand.class);
 
         private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyMMdd-HHmmss");
@@ -142,7 +143,7 @@ public class DebugCommand extends Command {
             logger.info("async profiler: {} (pid={})", ASYNC_PROFILER_BIN, ProcessHandle.current().pid());
         }
 
-        private final Argument<Integer> profileTimeArg = Argument.Int("profile-time").min(1).max(60);
+        private final Argument2<Integer> profileTimeArg = Argument2.Int("profile-time").min(1).max(60);
 
         private final MapService mapService;
 
@@ -229,9 +230,8 @@ public class DebugCommand extends Command {
             });
         }
 
-        private @NotNull Command subcommand(@NotNull String name, @NotNull CommandExecutor handler, @Nullable CommandCondition condition) {
-            var cmd = new Command(name) {
-            };
+        private @NotNull CommandDsl subcommand(@NotNull String name, @NotNull CommandExecutor handler, @Nullable CommandCondition condition) {
+            var cmd = new CommandDsl(name);
             cmd.setCondition(condition);
             cmd.addSyntax(handler);
             addSubcommand(cmd);

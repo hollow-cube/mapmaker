@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.util;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
@@ -12,12 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public final class DebugCommand extends Command {
+public final class DebugCommand extends CommandDsl {
     public DebugCommand() {
         super("debug");
 
-        setDefaultExecutor(this::showHelp);
-        addSyntax(playerOnly(this::showSessionDebug), Argument.Literal("session"));
+        addSyntax(this::showHelp);
+        addSyntax(playerOnly(this::showSessionDebug), Argument2.Literal("session"));
     }
 
     private void showHelp(@NotNull CommandSender sender, @NotNull CommandContext context) {

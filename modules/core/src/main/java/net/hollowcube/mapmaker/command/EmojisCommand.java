@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.misc.Emoji;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EmojisCommand extends Command {
+public class EmojisCommand extends CommandDsl {
     private static final String SPACE_1PX = FontUtil.computeOffset(1);
 
     public EmojisCommand() {

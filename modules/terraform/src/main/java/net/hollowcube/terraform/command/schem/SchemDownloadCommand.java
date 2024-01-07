@@ -1,16 +1,16 @@
 package net.hollowcube.terraform.command.schem;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class SchemDownloadCommand extends Command {
+public class SchemDownloadCommand extends CommandDsl {
 
     public SchemDownloadCommand() {
         super("download");
 
-        setDefaultExecutor(this::handleDownloadSchematic);
+        addSyntax(this::handleDownloadSchematic);
     }
 
     private void handleDownloadSchematic(@NotNull CommandSender sender, @NotNull CommandContext context) {

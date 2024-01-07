@@ -1,21 +1,22 @@
 package net.hollowcube.map.command.utility;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.lang.MapMessages;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class FlySpeedCommand extends Command {
+public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
 
-    private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f)
-            .defaultValue(1.0f)
+    private final Argument2<Float> speedArg = Argument2.Float("speed").clamp(0f, 10f)
             .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
 
+    @Inject
     public FlySpeedCommand() {
         super("flyspeed");
         setCondition(mapFilter(false, true, false));

@@ -1,10 +1,8 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.ArgumentInt;
-import net.hollowcube.command.arg.ArgumentWord;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
@@ -13,16 +11,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public class ClipRotateCommand extends Command {
+public class ClipRotateCommand extends CommandDsl {
 
-    private final ArgumentWord axisArg = Argument.Word("axis").with("x", "y", "z");
-    private final ArgumentInt amountArg = Argument.Int("rotation").clamp(0, 360);
+    private final Argument2<String> axisArg = Argument2.Word("axis").with("x", "y", "z"); // .defaultValue("x")
+    private final Argument2<Integer> amountArg = Argument2.Int("rotation").clamp(0, 360); // .defaultValue(90);
 
     public ClipRotateCommand() {
         super("rotate");
 
-        axisArg.defaultValue("x");
-        amountArg.defaultValue(90);
+        addSyntax(playerOnly(this::handleRotate));
+        addSyntax(playerOnly(this::handleRotate), axisArg);
         addSyntax(playerOnly(this::handleRotate), axisArg, amountArg);
     }
 

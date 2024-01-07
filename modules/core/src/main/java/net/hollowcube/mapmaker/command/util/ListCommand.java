@@ -1,7 +1,8 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -11,10 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ListCommand extends Command {
+public class ListCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
+    @Inject
     public ListCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
         super("list");
         this.sessionManager = sessionManager;

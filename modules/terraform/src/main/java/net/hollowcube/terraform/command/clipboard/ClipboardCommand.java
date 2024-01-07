@@ -1,11 +1,11 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
+import net.hollowcube.command.dsl.CommandDsl;
 
-public class ClipboardCommand extends Command {
+public class ClipboardCommand extends CommandDsl {
 
     public ClipboardCommand() {
-        super("c", "clipboard"); //todo aliases
+        super("c", "clipboard");
 
         addSubcommand(new ClipClearCommand());
         addSubcommand(new ClipListCommand());

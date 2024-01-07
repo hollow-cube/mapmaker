@@ -1,7 +1,8 @@
 package net.hollowcube.mapmaker.hub.command.util;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -9,8 +10,9 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class HubFlyCommand extends Command {
+public class HubFlyCommand extends CommandDsl {
 
+    @Inject
     public HubFlyCommand(@NotNull PermManager permManager) {
         super("fly");
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));

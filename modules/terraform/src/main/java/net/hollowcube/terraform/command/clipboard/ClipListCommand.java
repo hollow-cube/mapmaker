@@ -1,13 +1,13 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ClipListCommand extends Command {
+public class ClipListCommand extends CommandDsl {
 
     public ClipListCommand() {
         super("list");

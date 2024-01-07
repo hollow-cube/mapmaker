@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.selection;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
 import net.kyori.adventure.text.Component;
@@ -10,12 +10,13 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public sealed abstract class HPosCommand extends Command permits HPosCommand.Primary, HPosCommand.Secondary {
-    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
+public sealed abstract class HPosCommand extends CommandDsl permits HPosCommand.Primary, HPosCommand.Secondary {
+    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
 
     protected HPosCommand(@NotNull String name) {
         super(name);
 
+        addSyntax(playerOnly(this::handleSelectionUpdate));
         addSyntax(playerOnly(this::handleSelectionUpdate), selectionArg);
     }
 

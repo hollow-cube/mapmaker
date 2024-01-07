@@ -1,6 +1,6 @@
 package net.hollowcube.terraform;
 
-import net.hollowcube.command.Command;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.TerraformCommand;
 import net.hollowcube.terraform.command.clipboard.ClipboardCommand;
 import net.hollowcube.terraform.command.clipboard.CopyCommand;
@@ -49,7 +49,7 @@ final class BaseModule implements TerraformModule {
     }
 
     @Override
-    public @NotNull Set<Command> commands(@NotNull Terraform terraform) {
+    public @NotNull Set<CommandDsl> commands(@NotNull Terraform terraform) {
         return Set.of(
                 // Root/Debug
                 new TerraformCommand(),

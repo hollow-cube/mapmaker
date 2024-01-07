@@ -1,14 +1,14 @@
 package net.hollowcube.terraform.command.schem;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.util.Format;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class SchemListCommand extends Command {
+public class SchemListCommand extends CommandDsl {
 
     public SchemListCommand() {
         super("list");

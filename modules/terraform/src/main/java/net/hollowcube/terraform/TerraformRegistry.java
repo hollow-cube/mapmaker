@@ -1,7 +1,7 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManager2;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import net.minestom.server.instance.block.Block;
@@ -29,14 +29,14 @@ public final class TerraformRegistry {
     private final Map<String, RegionSelector.Factory> regionTypes;
     private final Map<String, TerraformStorage.Factory> storageTypes;
 
-    private final CommandManager commandManager;
+    private final CommandManager2 commandManager;
 
     // Vanilla block registry, kept to allow overriding of vanilla blocks to add a block handler to them
     private final ObjectArray<Block> BLOCK_STATES = ObjectArray.singleThread(16384);
 
     TerraformRegistry(
             @NotNull TerraformImpl tf, @NotNull Collection<Supplier<TerraformModule>> modules,
-            @NotNull CommandManager commandManager, @Nullable CommandCondition condition
+            @NotNull CommandManager2 commandManager, @Nullable CommandCondition condition
     ) {
         var regionTypes = new HashMap<String, RegionSelector.Factory>();
         var storageTypes = new HashMap<String, TerraformStorage.Factory>();

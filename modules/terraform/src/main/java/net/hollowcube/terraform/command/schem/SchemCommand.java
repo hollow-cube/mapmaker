@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.schem;
 
-import net.hollowcube.command.Command;
+import net.hollowcube.command.dsl.CommandDsl;
 
-public class SchemCommand extends Command {
+public class SchemCommand extends CommandDsl {
 
     public final SchemListCommand list;
     public final SchemSaveCommand save;

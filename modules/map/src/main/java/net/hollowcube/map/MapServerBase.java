@@ -8,8 +8,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.Command;
-import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.HelpCommand;
+import net.hollowcube.command.CommandManager2;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
@@ -101,7 +100,7 @@ public abstract class MapServerBase implements MapServer {
         new PlayerSpawnInInstanceEvent(null);
     }
 
-    public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager commandManager) {
+    public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager2 commandManager) {
         MapServer.StaticAbuse.instance = this;
 
         boolean noopServices = Boolean.getBoolean("mapmaker.noop");
@@ -122,13 +121,13 @@ public abstract class MapServerBase implements MapServer {
         globalEventHandler.addChild(terraformEvents);
         terraform = Terraform.builder()
                 .rootEventNode(terraformEvents)
-                .rootCommandManager(commandManager)
+//                .rootCommandManager(commandManager)
                 .globalCommandCondition(mapFilter(false, true, false))
                 .module(Terraform.BASE_MODULE)
                 .module(new MapServerModule())
                 .storage(mapService() instanceof NoopMapService ? "memory" : "http")
                 .build();
-        
+
         this.guiController = Controller.make(Map.of(
                 "mapServer", this,
                 "mapService", mapService(),
@@ -147,7 +146,7 @@ public abstract class MapServerBase implements MapServer {
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());
                 bind(SessionManager.class).toInstance(sessionManager());
-                bind(CommandManager.class).toInstance(commandManager);
+                bind(CommandManager2.class).toInstance(commandManager);
                 bind(MapService.class).toInstance(mapService());
             }
         });
@@ -169,47 +168,47 @@ public abstract class MapServerBase implements MapServer {
         MapEntities.init(entityEvents);
 
         // Common commands
-        commandManager.register(new HelpCommand(commandManager));
-        commandManager.register(new EmojisCommand());
-        commandManager.register(new MinestomCommand());
+//        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(injector.getInstance(EmojisCommand.class));
+        commandManager.register(injector.getInstance(MinestomCommand.class));
         commandManager.register(createDebugCommand());
-        commandManager.register(new PingCommand());
+        commandManager.register(injector.getInstance(PingCommand.class));
 
-        commandManager.register(new PlayCommand(mapService(), bridge()));
-        commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
-        commandManager.register(new TopTimesCommand(mapService(), playerService(), sessionManager()));
+        commandManager.register(injector.getInstance(PlayCommand.class));
+        commandManager.register(injector.getInstance(WhereCommand.class));
+        commandManager.register(injector.getInstance(TopTimesCommand.class));
 
-        commandManager.register(new RequestCommand(inviteService));
-        commandManager.register(new RejectCommand(inviteService));
-        commandManager.register(new InviteCommand(inviteService));
-        commandManager.register(new AcceptCommand(inviteService));
+        commandManager.register(injector.getInstance(RequestCommand.class));
+        commandManager.register(injector.getInstance(RejectCommand.class));
+        commandManager.register(injector.getInstance(InviteCommand.class));
+        commandManager.register(injector.getInstance(AcceptCommand.class));
         commandManager.register(injector.getInstance(JoinCommand.class));
-        commandManager.register(new RemoveCommand(bridge()));
+        commandManager.register(injector.getInstance(RemoveCommand.class));
 
-        var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
-        mapCommand.info.setDefaultExecutor(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
+        var mapCommand = injector.getInstance(MapCommand.class);
+        mapCommand.info.addSyntax(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
         commandManager.register(mapCommand);
 
-        commandManager.register(new StoreCommand(guiController));
+        commandManager.register(injector.getInstance(StoreCommand.class));
 
         // Map specific commands
-        commandManager.register(new HubCommand(bridge(), inviteService));
+        commandManager.register(injector.getInstance(HubCommand.class));
 
-        commandManager.register(new TestCommand());
-        commandManager.register(new BuildCommand());
-        commandManager.register(new SetSpawnCommand());
+        commandManager.register(injector.getInstance(TestCommand.class));
+        commandManager.register(injector.getInstance(BuildCommand.class));
+        commandManager.register(injector.getInstance(SetSpawnCommand.class));
 
-        commandManager.register(new FlyCommand());
-        commandManager.register(new FlySpeedCommand());
-        commandManager.register(new ClearInventoryCommand());
-        commandManager.register(new SpawnCommand());
-        commandManager.register(new TeleportCommand());
-        commandManager.register(new GiveCommand());
+        commandManager.register(injector.getInstance(FlyCommand.class));
+        commandManager.register(injector.getInstance(FlySpeedCommand.class));
+        commandManager.register(injector.getInstance(ClearInventoryCommand.class));
+        commandManager.register(injector.getInstance(SpawnCommand.class));
+        commandManager.register(injector.getInstance(TeleportCommand.class));
+        commandManager.register(injector.getInstance(GiveCommand.class));
 
-        commandManager.register(new PHeadCommand());
+        commandManager.register(injector.getInstance(PHeadCommand.class));
 
-        commandManager.register(new BiomesCommand());
-        commandManager.register(new SetBiomeCommand());
+        commandManager.register(injector.getInstance(BiomesCommand.class));
+        commandManager.register(injector.getInstance(SetBiomeCommand.class));
 
         // Register features
         var features = new ArrayList<FeatureProvider>();
@@ -232,7 +231,7 @@ public abstract class MapServerBase implements MapServer {
         }
 
         // Sync sessions with remote
-        if (sessionManager() != null) sessionManager().sync();
+        sessionManager().sync();
     }
 
     @Override

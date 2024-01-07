@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
@@ -14,7 +14,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-public class CutCommand extends Command {
+public class CutCommand extends CommandDsl {
 
     public CutCommand() {
         super("cut");

@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.command.map;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -13,8 +13,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapDeleteCommand extends Command {
-    private final Argument<@NotNull MapData> mapArg;
+public class MapDeleteCommand extends CommandDsl {
+    private final Argument2<@NotNull MapData> mapArg;
 
     private final MapService mapService;
 

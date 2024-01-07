@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.command.invite;
 
 import com.google.inject.Inject;
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class JoinCommand extends Command {
-    private final Argument<String> targetArg;
+public class JoinCommand extends CommandDsl {
+    private final Argument2<String> targetArg;
 
     private final MapService mapService;
     private final SessionManager sessionManager;

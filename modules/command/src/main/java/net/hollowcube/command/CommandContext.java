@@ -1,6 +1,6 @@
 package net.hollowcube.command;
 
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
@@ -21,38 +21,10 @@ public interface CommandContext {
 
     @NotNull CommandSender sender();
 
-    @UnknownNullability String getRaw(@NotNull Argument<?> arg);
+    @UnknownNullability String getRaw(@NotNull Argument2<?> arg);
 
-    <T> @UnknownNullability T get(@NotNull Argument<T> arg);
+    <T> @UnknownNullability T get(@NotNull Argument2<T> arg);
 
-    boolean has(@NotNull Argument<?> arg);
+    boolean has(@NotNull Argument2<?> arg);
 
-    static @NotNull CommandContext fake(@NotNull CommandSender sender) {
-        return new CommandContext() {
-            @Override
-            public @NotNull Pass pass() {
-                return Pass.SUGGEST;
-            }
-
-            @Override
-            public @NotNull CommandSender sender() {
-                return sender;
-            }
-
-            @Override
-            public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
-                return null;
-            }
-
-            @Override
-            public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
-                return null;
-            }
-
-            @Override
-            public boolean has(@NotNull Argument<?> arg) {
-                return false;
-            }
-        };
-    }
 }
