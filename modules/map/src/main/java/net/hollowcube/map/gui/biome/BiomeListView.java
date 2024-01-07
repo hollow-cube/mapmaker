@@ -30,7 +30,10 @@ public class BiomeListView extends View {
 
     @Signal(Element.SIG_MOUNT)
     public void redraw() {
-        capacityText.setText(String.format("%d/%d", container.size(), container.maxSize()));
+        String capacity = String.format("%d/%d Biome Slots Used", container.size(), container.maxSize());
+        capacityText.setText(capacity);
+        // capacityText.setArgs(Component.translatable("gui.biome_list.capacity.name", Component.text(capacity)));
+        // TODO make this work
     }
 
     @Action(value = "biome_list")
