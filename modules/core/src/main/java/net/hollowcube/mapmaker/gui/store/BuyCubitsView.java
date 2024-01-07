@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.gui.store;
 
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.ContextObject;
+import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;

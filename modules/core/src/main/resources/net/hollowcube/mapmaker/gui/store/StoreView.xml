@@ -6,9 +6,16 @@
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.store.information"/>
-        <spacer width="5"/>
-        <button id="coins_to_cubits" width="2" heigh="1"
-                translationKey="gui.store.coins_to_cubits" sprite="minecraft:gold_nugget"/>
+        <switch id="name_switch" width="5" height="1">
+            <text id="cubits_text" width="5" translationKey="gui.store.buy_cubits" font="slot_title"
+                  centered="true"/>
+            <text id="hypercube_text" width="5" translationKey="gui.store.buy_hypercube" font="slot_title"
+                  centered="true"/>
+            <text id="addons_text" width="5" translationKey="gui.store.buy_addons" font="slot_title"
+                  centered="true"/>
+        </switch>
+        <button id="cubits_to_coins" width="2" height="1"
+                translationKey="gui.store.cubits_to_coins" sprite="minecraft:gold_nugget"/>
     </box>
 
     <switch id="tab_switch" width="9" height="5">
