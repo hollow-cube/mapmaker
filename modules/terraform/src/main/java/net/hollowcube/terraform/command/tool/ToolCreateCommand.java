@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.tool;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.tool.ToolHandler;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -10,8 +10,8 @@ import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class ToolCreateCommand extends Command {
-    private final Argument<String> builtinToolArg;
+public class ToolCreateCommand extends CommandDsl {
+    private final Argument2<String> builtinToolArg;
 
     private final ToolHandler toolHandler;
 
@@ -19,7 +19,7 @@ public class ToolCreateCommand extends Command {
         super("create");
         this.toolHandler = toolHandler;
 
-        builtinToolArg = Argument.Word("type").with(toolHandler.getToolNames());
+        builtinToolArg = Argument2.Word("type").with(toolHandler.getToolNames());
 
         addSyntax(playerOnly(this::createBuiltinTool), builtinToolArg);
     }

@@ -1,7 +1,8 @@
 package net.hollowcube.map.command;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -14,18 +15,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class HubCommand extends Command {
+public class HubCommand extends CommandDsl {
     private static final Logger logger = LoggerFactory.getLogger(HubCommand.class);
 
     private final MapToHubBridge bridge;
     private final PlayerInviteService inviteService;
 
+    @Inject
     public HubCommand(@NotNull MapToHubBridge bridge, PlayerInviteService inviteService) {
         super("hub", "leave", "l", "lobby");
         this.bridge = bridge;
         this.inviteService = inviteService;
 
-        setDefaultExecutor(playerOnly(this::returnToHub));
+        addSyntax(playerOnly(this::returnToHub));
     }
 
     private void returnToHub(@NotNull Player player, @NotNull CommandContext context) {

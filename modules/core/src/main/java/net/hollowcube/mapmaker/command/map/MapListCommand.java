@@ -1,23 +1,20 @@
 package net.hollowcube.mapmaker.command.map;
 
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.util.CoreArgument;
 import net.hollowcube.mapmaker.gui.play.ListMapsView;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
-public class MapListCommand extends Command {
-    private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
+public class MapListCommand extends CommandDsl {
 
-    private final Argument<String> targetArg;
+    private final Argument2<String> targetArg;
 
     private final Controller guiController;
     private final MapService mapService;
@@ -32,10 +29,10 @@ public class MapListCommand extends Command {
         this.guiController = guiController;
         this.mapService = mapService;
 
-        this.targetArg = CoreArgument.AnyPlayerId("target", playerService)
-                .doc("The player to list maps for", "you");
+        this.targetArg = CoreArgument.AnyPlayerId("target", playerService);
+//                .doc("The player to list maps for", "you");
 
-        setDefaultExecutor(playerOnly(this::execute));
+        addSyntax(playerOnly(this::execute));
         addSyntax(playerOnly(this::execute), targetArg);
     }
 

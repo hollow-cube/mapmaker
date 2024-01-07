@@ -1,14 +1,14 @@
 package net.hollowcube.map.command.utility;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.lang.MapMessages;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class ClearInventoryCommand extends Command {
+public class ClearInventoryCommand extends CommandDsl {
     public ClearInventoryCommand() {
         super("clear", "clearinventory", "clearinv");
         setCondition(mapFilter(false, true, false));

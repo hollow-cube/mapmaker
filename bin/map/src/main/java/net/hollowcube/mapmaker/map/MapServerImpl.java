@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.map;
 
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import net.hollowcube.command.Command;
-import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager2Impl;
+import net.hollowcube.command.util.CommandHandlingPlayer2;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServerBase;
@@ -88,7 +88,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     private ChatMessageListener chatMessageListener;
     private MapJoinConsumer mapJoinConsumer;
 
-    private CommandManager commandManager;
+    private CommandManager2 commandManager;
 
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
@@ -137,7 +137,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
         else if (noopServices) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
-        
+
         if (noopServices) {
             permManager = new NoopPermManager();
         } else {
@@ -162,18 +162,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         }
 
         // Command init
-        commandManager = new CommandManager();
-        CommandHandlingPlayer.init();
-        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
-
-        var cmd = new Command("sessions") {
-        };
-        cmd.setDefaultExecutor((sender, context) -> {
-            sessionManager.sessions().forEach(session -> {
-                sender.sendMessage(Component.text(session.playerId()));
-            });
-        });
-        commandManager.register(cmd);
+        commandManager = new CommandManager2Impl();
+        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer2.createDefaultProvider(commandManager));
 
         // Standalone hub specific events
         EVENT_HANDLER

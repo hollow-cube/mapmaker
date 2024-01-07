@@ -1,8 +1,9 @@
 package net.hollowcube.map.command.build;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
@@ -12,8 +13,9 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class TestCommand extends Command {
+public class TestCommand extends CommandDsl {
 
+    @Inject
     public TestCommand() {
         super("test");
 

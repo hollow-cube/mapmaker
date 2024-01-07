@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.region;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -15,14 +15,17 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
-public class SmearCommand extends Command {
-    private final Argument<Integer> countArg = Argument.Int("count")
-            .min(1).defaultValue(1);
-    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
+public class SmearCommand extends CommandDsl {
+    private final Argument2<Integer> countArg = Argument2.Int("count")
+            .min(1); //.defaultValue(1);
+    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
 
     public SmearCommand() {
         super("smear");
 
+        addSyntax(playerOnly(this::handleStackSelection));
+        addSyntax(playerOnly(this::handleStackSelection), selectionArg);
+        addSyntax(playerOnly(this::handleStackSelection), countArg);
         addSyntax(playerOnly(this::handleStackSelection), countArg, selectionArg);
     }
 

@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.command.util.CoreArgument;
@@ -13,11 +14,12 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayCommand extends Command {
+public class PlayCommand extends CommandDsl {
     private final Argument<MapData> mapArg;
 
     private final ServerBridge bridge;
 
+    @Inject
     public PlayCommand(@NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super("play");
         this.bridge = bridge;

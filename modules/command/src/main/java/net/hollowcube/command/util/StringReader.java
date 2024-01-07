@@ -18,6 +18,10 @@ public final class StringReader {
         this.pos = mark;
     }
 
+    public int pos(int mark) {
+        return mark;
+    }
+
     public int pos() {
         var pos = this.pos;
         while (pos < string.length() && string.charAt(pos) == ' ') {

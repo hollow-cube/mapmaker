@@ -1,9 +1,8 @@
 package net.hollowcube.terraform.command.clipboard;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.arg.ArgumentWord;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
@@ -12,15 +11,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public class ClipFlipCommand extends Command {
+public class ClipFlipCommand extends CommandDsl {
 
-    private final ArgumentWord axisArg = Argument.Word("axis").with("x", "y", "z");
+    private final Argument2<String> axisArg = Argument2.Word("axis").with("x", "y", "z"); // .defaultValue("x")
 
     public ClipFlipCommand() {
         super("flip");
 
-        axisArg.defaultValue("x");
-
+        addSyntax(playerOnly(this::handleFlip));
         addSyntax(playerOnly(this::handleFlip), axisArg);
     }
 

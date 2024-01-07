@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.command.invite;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.kyori.adventure.text.Component;
@@ -10,12 +11,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-public class AcceptCommand extends Command {
+public class AcceptCommand extends CommandDsl {
     private final Argument<EntityFinder> targetArg = Argument.Opt(Argument.Entity("player")
             .singleEntity(true).onlyPlayers(true));
 
     private final PlayerInviteService inviteService;
 
+    @Inject
     public AcceptCommand(@NotNull PlayerInviteService inviteService) {
         super("accept");
         this.inviteService = inviteService;

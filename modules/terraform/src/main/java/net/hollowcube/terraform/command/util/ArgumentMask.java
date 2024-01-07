@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.command.util;
 
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.terraform.mask.Mask;

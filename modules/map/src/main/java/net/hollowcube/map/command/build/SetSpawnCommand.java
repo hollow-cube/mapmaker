@@ -1,8 +1,9 @@
 package net.hollowcube.map.command.build;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.kyori.adventure.text.Component;
@@ -14,22 +15,18 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class SetSpawnCommand extends Command {
-    private final Argument<Point> coordArgument = Argument.RelativeVec3("position");
-    private final Argument<Float> yawArgument = Argument.Float("yaw");
-    private final Argument<Float> pitchArgument = Argument.Float("pitch");
+public class SetSpawnCommand extends CommandDsl {
+    private final Argument2<Point> coordArgument = Argument2.RelativeVec3("position");
+    private final Argument2<Float> yawArgument = Argument2.Float("yaw");
+    private final Argument2<Float> pitchArgument = Argument2.Float("pitch");
 
-
+    @Inject
     public SetSpawnCommand() {
         super("setspawn");
         setCondition(mapFilter(false, true, false));
 
         addSyntax(playerOnly(this::handleSetSpawnToPlayer));
         addSyntax(playerOnly(this::handleSetSpawnToCoords), coordArgument, yawArgument, pitchArgument);
-
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("other syntax todo");
-        });
     }
 
     private void handleSetSpawnToPlayer(@NotNull Player player, @NotNull CommandContext context) {

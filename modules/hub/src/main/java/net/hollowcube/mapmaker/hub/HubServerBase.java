@@ -6,8 +6,7 @@ import com.google.inject.Injector;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.HelpCommand;
+import net.hollowcube.command.CommandManager2;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
@@ -78,7 +77,7 @@ public abstract class HubServerBase implements HubServer {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     @Blocking
-    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
+    public void init(@NotNull CommandManager2 commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
@@ -114,37 +113,37 @@ public abstract class HubServerBase implements HubServer {
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());
                 bind(SessionManager.class).toInstance(sessionManager());
-                bind(CommandManager.class).toInstance(commandManager);
+                bind(CommandManager2.class).toInstance(commandManager);
                 bind(MapService.class).toInstance(mapService());
             }
         });
 
         // Command init
-        commandManager.register(new HelpCommand(commandManager));
+//        commandManager.register(new HelpCommand(commandManager));
         commandManager.register(new EmojisCommand());
         commandManager.register(new MinestomCommand());
         commandManager.register(createDebugCommand());
         commandManager.register(new PingCommand());
 
-        commandManager.register(new PlayCommand(mapService(), bridge()));
-        commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
-        if (sessionManager() != null) commandManager.register(new ListCommand(sessionManager(), playerService()));
+        commandManager.register(injector.getInstance(PlayCommand.class));
+        commandManager.register(injector.getInstance(WhereCommand.class));
+        commandManager.register(injector.getInstance(ListCommand.class));
 
-        commandManager.register(new RequestCommand(inviteService));
-        commandManager.register(new RejectCommand(inviteService));
-        commandManager.register(new InviteCommand(inviteService));
-        commandManager.register(new AcceptCommand(inviteService));
+        commandManager.register(injector.getInstance(RequestCommand.class));
+        commandManager.register(injector.getInstance(RejectCommand.class));
+        commandManager.register(injector.getInstance(InviteCommand.class));
+        commandManager.register(injector.getInstance(AcceptCommand.class));
         commandManager.register(injector.getInstance(JoinCommand.class));
 
         var mapCommand = new MapCommand(guiController, playerService(), mapService(), permManager());
         mapCommand.addSubcommand(new MapLegacyCommand(mapService(), permManager()));
         commandManager.register(mapCommand);
 
-        commandManager.register(new StoreCommand(guiController));
+        commandManager.register(injector.getInstance(StoreCommand.class));
 
         // Hub specific commands
-        commandManager.register(new HubFlyCommand(permManager()));
-        commandManager.register(new HubSpawnCommand(this));
+        commandManager.register(injector.getInstance(HubFlyCommand.class));
+        commandManager.register(injector.getInstance(HubSpawnCommand.class));
 
         // Other features
         for (var feature : ServiceLoader.load(HubFeature.class)) {

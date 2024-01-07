@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class MinestomCommand extends Command {
+public class MinestomCommand extends CommandDsl {
     public MinestomCommand() {
         super("minestom", "pl");
 
-        setDefaultExecutor(this::sendMinestomInfo);
+        addSyntax(this::sendMinestomInfo);
     }
 
     private void sendMinestomInfo(@NotNull CommandSender sender, @NotNull CommandContext context) {

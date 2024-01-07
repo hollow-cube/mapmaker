@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PingCommand extends Command {
+public class PingCommand extends CommandDsl {
     public PingCommand() {
         super("ping");
 

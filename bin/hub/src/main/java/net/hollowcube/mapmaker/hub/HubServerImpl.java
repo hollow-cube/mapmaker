@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.hub;
 
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import net.hollowcube.command.Command;
-import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager2Impl;
+import net.hollowcube.command.util.CommandHandlingPlayer2;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.feature.play.checkpoint.CheckpointPlateBlock;
 import net.hollowcube.map.feature.play.checkpoint.FinishPlateBlock;
@@ -75,7 +75,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
     private ChatMessageListener chatMessageListener;
 
-    private CommandManager commandManager;
+    private CommandManager2 commandManager;
 
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
@@ -139,18 +139,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         }
 
         // Command init
-        commandManager = new CommandManager();
-        CommandHandlingPlayer.init();
-        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
-
-        var cmd = new Command("sessions") {
-        };
-        cmd.setDefaultExecutor((sender, context) -> {
-            sessionManager.sessions().forEach(session -> {
-                sender.sendMessage(Component.text(session.playerId()));
-            });
-        });
-        commandManager.register(cmd);
+        commandManager = new CommandManager2Impl();
+        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer2.createDefaultProvider(commandManager));
 
         // Standalone hub specific events
         EVENT_HANDLER

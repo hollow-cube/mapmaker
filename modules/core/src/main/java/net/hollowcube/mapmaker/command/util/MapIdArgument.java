@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.mapmaker.map.MapService;

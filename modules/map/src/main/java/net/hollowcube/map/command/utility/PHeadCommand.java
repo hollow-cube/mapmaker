@@ -1,8 +1,9 @@
 package net.hollowcube.map.command.utility;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.item.ExtraItemTags;
 import net.minestom.server.entity.Player;
@@ -13,9 +14,10 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class PHeadCommand extends Command {
-    private final Argument<String> nameArg = Argument.Word("name");
+public class PHeadCommand extends CommandDsl {
+    private final Argument2<String> nameArg = Argument2.Word("name");
 
+    @Inject
     public PHeadCommand() {
         super("phead");
         setCondition(mapFilter(false, true, false));

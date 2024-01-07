@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.selection;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.selection.region.Region;
@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public final class SelCommand extends Command {
-    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
+public final class SelCommand extends CommandDsl {
+    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
 
     public SelCommand() {
         super("sel");
@@ -21,7 +21,8 @@ public final class SelCommand extends Command {
         for (var regionType : Region.Type.values()) {
             addSubcommand(new SetTypeCommand(regionType));
         }
-        addSyntax(playerOnly(this::handleClearSelection), Argument.Literal("clear"), selectionArg);
+        addSyntax(playerOnly(this::handleClearSelection), Argument2.Literal("clear"));
+        addSyntax(playerOnly(this::handleClearSelection), Argument2.Literal("clear"), selectionArg);
     }
 
     private void handleClearSelection(@NotNull Player player, @NotNull CommandContext context) {
@@ -29,13 +30,14 @@ public final class SelCommand extends Command {
         player.sendMessage(Component.translatable("terraform.sel.clear"));
     }
 
-    private final class SetTypeCommand extends Command {
+    private final class SetTypeCommand extends CommandDsl {
         private final Region.Type regionType;
 
         public SetTypeCommand(@NotNull Region.Type type) {
             super(type.name().toLowerCase(Locale.ROOT));
             this.regionType = type;
 
+            addSyntax(playerOnly(this::handleSetType));
             addSyntax(playerOnly(this::handleSetType), selectionArg);
         }
 

@@ -1,6 +1,6 @@
 package net.hollowcube.terraform;
 
-import net.hollowcube.command.Command;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import net.minestom.server.event.EventNode;
@@ -39,7 +39,7 @@ public interface TerraformModule {
      * @param terraform The terraform instance being loaded. <b>Note that the instance has
      *                  not been fully initialized at this point, it should only be stored.</b>
      */
-    default @NotNull Set<Command> commands(@NotNull Terraform terraform) {
+    default @NotNull Set<CommandDsl> commands(@NotNull Terraform terraform) {
         return Set.of();
     }
 

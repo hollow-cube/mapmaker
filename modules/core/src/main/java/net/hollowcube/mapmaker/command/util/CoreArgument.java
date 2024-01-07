@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.arg.Argument2;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -14,7 +15,6 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
 import java.util.UUID;
 
 public final class CoreArgument {
@@ -37,7 +37,7 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<@Nullable String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
+    public static @NotNull Argument2<@Nullable String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
         var word = Argument.Word(id);
         return word.map(
                 /* Mapper */ (sender, raw) -> new Argument.ParseDeferredSuccess<>(() -> {
@@ -55,26 +55,27 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<@Nullable String> AnyOnlinePlayer(@NotNull String id, @NotNull SessionManager sessionManager) {
-        var word = Argument.Word(id);
-        return word.map(
-                /* Mapper */ (sender, raw) -> new Argument.ParseDeferredSuccess<>(() -> {
-                    for (var session : sessionManager.sessions()) {
-                        if (session.username().equalsIgnoreCase(raw)) {
-                            return session.playerId();
-                        }
-                    }
-                    return null;
-                }),
-                /* Suggester */ (sender, reader, suggestion, raw) -> {
-                    raw = raw.toLowerCase(Locale.ROOT);
-                    for (var session : sessionManager.sessions()) {
-                        if (session.username().toLowerCase(Locale.ROOT).startsWith(raw)) {
-                            suggestion.add(session.username());
-                        }
-                    }
-                }
-        );
+    public static @NotNull Argument2<@Nullable String> AnyOnlinePlayer(@NotNull String id, @NotNull SessionManager sessionManager) {
+        var word = Argument2.Word(id);
+        return word;
+//        return word.map(
+//                /* Mapper */ (sender, raw) -> new Argument.ParseDeferredSuccess<>(() -> {
+//                    for (var session : sessionManager.sessions()) {
+//                        if (session.username().equalsIgnoreCase(raw)) {
+//                            return session.playerId();
+//                        }
+//                    }
+//                    return null;
+//                }),
+//                /* Suggester */ (sender, reader, suggestion, raw) -> {
+//                    raw = raw.toLowerCase(Locale.ROOT);
+//                    for (var session : sessionManager.sessions()) {
+//                        if (session.username().toLowerCase(Locale.ROOT).startsWith(raw)) {
+//                            suggestion.add(session.username());
+//                        }
+//                    }
+//                }
+//        );
     }
 
     // Map Stuff
@@ -109,7 +110,7 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<String> NewMapArg(@NotNull String id, @NotNull MapService mapService) {
+    public static @NotNull Argument2<String> NewMapArg(@NotNull String id, @NotNull MapService mapService) {
         return new MapIdArgument(id, mapService);
     }
 
@@ -120,7 +121,7 @@ public final class CoreArgument {
      * @param mapService
      * @return
      */
-    public static @NotNull Argument<MapData> PlayableMap(
+    public static @NotNull Argument2<MapData> PlayableMap(
             @NotNull String id,
             @NotNull MapService mapService
     ) {
@@ -155,7 +156,7 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<MapData> AnyMap(
+    public static @NotNull Argument2<MapData> AnyMap(
             @NotNull String id,
             @NotNull MapService mapService,
             @NotNull PermManager permManager

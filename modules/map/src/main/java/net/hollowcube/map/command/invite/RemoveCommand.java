@@ -1,8 +1,8 @@
 package net.hollowcube.map.command.invite;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class RemoveCommand extends Command {
+public class RemoveCommand extends CommandDsl {
 
-    private final Argument<EntityFinder> targetArg = Argument.Entity("player").onlyPlayers(true);
+    private final Argument2<EntityFinder> targetArg = Argument2.Entity("player").onlyPlayers(true);
 
     private final MapToHubBridge bridge;
 

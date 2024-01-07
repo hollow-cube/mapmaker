@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.command.region;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -10,24 +10,23 @@ import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Set;
+public class MoveCommand extends CommandDsl {
 
-public class MoveCommand extends Command {
-
-    private final Argument<Integer> countArg = Argument.Int("count")
-            .min(1).defaultValue(1);
-    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument2<Integer> countArg = Argument2.Int("count")
+            .min(1); //.defaultValue(1);
+    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
 
     public MoveCommand() {
         super("move");
 
+        addSyntax(playerOnly(this::handleMoveSelection));
+        addSyntax(playerOnly(this::handleMoveSelection), selectionArg);
+        addSyntax(playerOnly(this::handleMoveSelection), countArg);
         addSyntax(playerOnly(this::handleMoveSelection), countArg, selectionArg);
     }
 

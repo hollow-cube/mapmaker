@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.command.util;
 
-import net.hollowcube.command.Command;
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -14,13 +15,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class WhereCommand extends Command {
-    private final Argument<String> targetArg;
+public class WhereCommand extends CommandDsl {
+    private final Argument2<String> targetArg;
 
-    private final SessionManager sessionManager; // Optional for backwards compatibility
+    private final SessionManager sessionManager;
     private final PlayerService playerService;
     private final MapService mapService;
 
+    @Inject
     public WhereCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("where", "find");
         this.sessionManager = sessionManager;

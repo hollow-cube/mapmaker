@@ -1,14 +1,15 @@
 package net.hollowcube.mapmaker.command;
 
+import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.command.Command;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.map.*;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import org.jetbrains.annotations.NotNull;
 
-public class MapCommand extends Command {
+public class MapCommand extends CommandDsl {
 
     public final MapListCommand list;
     public final MapInfoCommand info;
@@ -16,6 +17,7 @@ public class MapCommand extends Command {
     public final MapDeleteCommand delete;
     public final MapLeaderboardCommand leaderboard;
 
+    @Inject
     public MapCommand(
             @NotNull Controller guiController,
             @NotNull PlayerService playerService,

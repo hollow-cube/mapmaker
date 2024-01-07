@@ -1,7 +1,7 @@
 package net.hollowcube.map.command.utility;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.kyori.adventure.text.Component;
@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
-public class SpawnCommand extends Command {
+public class SpawnCommand extends CommandDsl {
 
     public SpawnCommand() {
         super("spawn", "tpstart");
         setCondition(mapFilter(true, true, true));
-        
+
         category = CommandCategory.GLOBAL;
 
         addSyntax(playerOnly(this::handleTeleportToSpawn));
