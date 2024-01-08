@@ -6,7 +6,8 @@ import com.google.inject.Injector;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
@@ -77,7 +78,7 @@ public abstract class HubServerBase implements HubServer {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     @Blocking
-    public void init(@NotNull CommandManager2 commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
+    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
@@ -105,6 +106,7 @@ public abstract class HubServerBase implements HubServer {
             @Override
             protected void configure() {
                 bind(HubServer.class).toInstance(HubServerBase.this);
+                bind(HubServerBase.class).toInstance(HubServerBase.this);
                 bind(HubHandler.class).toInstance(mapHandler);
                 bind(HubWorld.class).toInstance(world);
                 bind(Controller.class).toInstance(guiController);
@@ -113,8 +115,9 @@ public abstract class HubServerBase implements HubServer {
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());
                 bind(SessionManager.class).toInstance(sessionManager());
-                bind(CommandManager2.class).toInstance(commandManager);
+                bind(CommandManager.class).toInstance(commandManager);
                 bind(MapService.class).toInstance(mapService());
+                bind(ServerBridge.class).toInstance(bridge());
             }
         });
 
@@ -152,7 +155,8 @@ public abstract class HubServerBase implements HubServer {
         }
 
         // Sync sessions with remote
-        if (sessionManager() != null) sessionManager().sync();
+        //todo this throws interrupted exception when not in vthread and i have no idea why
+        Thread.startVirtualThread(() -> sessionManager().sync());
     }
 
     @Override

@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.command.map;
 
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.util.CoreArgument;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.play.ListMapsView;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapListCommand extends CommandDsl {
 
-    private final Argument2<String> targetArg;
+    private final Argument<String> targetArg;
 
     private final Controller guiController;
     private final MapService mapService;

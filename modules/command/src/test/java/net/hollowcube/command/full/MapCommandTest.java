@@ -2,7 +2,7 @@ package net.hollowcube.command.full;
 
 import net.hollowcube.command.BaseCommandTest;
 import net.hollowcube.command.CommandBuilder;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +19,8 @@ public class MapCommandTest extends BaseCommandTest {
 
     @BeforeEach
     void createCommandGraph() {
-        var playerArg = Argument2.Word("player").with("sethprg", "notmattw");
-        var sizeArg = Argument2.Word("size").with("small", "medium", "large");
+        var playerArg = Argument.Word("player").with("sethprg", "notmattw");
+        var sizeArg = Argument.Word("size").with("small", "medium", "large");
 
         manager.register("map", new CommandBuilder()
                 .child("list", list -> list

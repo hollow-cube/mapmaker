@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.hub.util.HubMessages;
 import net.hollowcube.mapmaker.map.MapService;
@@ -12,8 +12,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapLegacyImportCommand extends CommandDsl {
-    private final Argument2<String> playerArg = Argument2.Word("player");
-    private final Argument2<String> mapIdArg = Argument2.Word("id");
+    private final Argument<String> playerArg = Argument.Word("player");
+    private final Argument<String> mapIdArg = Argument.Word("id");
 //            .map((sender, raw) -> {
 //                if (raw.length() > 5)
 //                    return new Argument.ParseFailure<>();

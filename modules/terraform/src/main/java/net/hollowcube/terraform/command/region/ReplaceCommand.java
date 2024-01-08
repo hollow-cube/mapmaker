@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.region;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.command.util.TFArgument;
@@ -15,9 +15,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class ReplaceCommand extends CommandDsl {
-    private final Argument2<Mask> maskArg = TFArgument.Mask("mask");
-    private final Argument2<Pattern> patternArg;
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Mask> maskArg = TFArgument.Mask("mask");
+    private final Argument<Pattern> patternArg;
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public ReplaceCommand(@NotNull Terraform tf) {
         super("replace");

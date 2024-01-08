@@ -1,8 +1,7 @@
 package net.hollowcube.terraform.command.util;
 
-import net.hollowcube.command.arg.Argument2;
-import net.hollowcube.command.argold.Argument;
-import net.hollowcube.command.util.WordType;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
@@ -17,27 +16,27 @@ import java.util.Locale;
 
 public final class TFArgument {
 
-    public static @NotNull Argument2<Selection> Selection(@NotNull String id) {
-        return Argument2.Word(id).map(
+    public static @NotNull Argument<Selection> Selection(@NotNull String id) {
+        return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> {
                     if (!(sender instanceof Player player))
-                        return new Argument.ParseFailure<>();
+                        return new ParseResult.Failure<>(-1);
                     raw = raw.toLowerCase(Locale.ROOT);
 
                     var session = LocalSession.forPlayer(player);
                     var partial = false;
                     for (var selectionName : session.selectionNames()) {
                         if (selectionName.equalsIgnoreCase(raw))
-                            return new Argument.ParseSuccess<>(session.selection(selectionName));
+                            return new ParseResult.Success<>(session.selection(selectionName));
                         if (selectionName.startsWith(raw)) partial = true;
                     }
-                    return partial ? new Argument.ParsePartial<>() : new Argument.ParseFailure<>();
+                    return partial ? new ParseResult.Partial<>() : new ParseResult.Failure<>(-1);
                 },
-                /* Suggestor */ (sender, reader, suggestion, raw) -> {
+                /* Suggestor */ (sender, raw, suggestion) -> {
                     //todo in every case suggestions should only be relevant for players.
                     if (!(sender instanceof Player player)) return;
 
-                    var word = reader.readWord(WordType.ALPHANUMERIC).toLowerCase(Locale.ROOT);
+                    var word = raw.toLowerCase(Locale.ROOT);
                     var session = LocalSession.forPlayer(player);
                     for (var selectionName : session.selectionNames()) {
                         if (selectionName.startsWith(word)) {
@@ -45,35 +44,34 @@ public final class TFArgument {
                         }
                     }
                 }
-        ).defaultValue(sender -> {
-            if (!(sender instanceof Player player)) return null;
-            return LocalSession.forPlayer(player).selection(Selection.DEFAULT);
-        }).errorHandler((sender, unused) -> {
-            sender.sendMessage("no such clipboard: todo add name here");
-        });
+        );
+//        .defaultValue(sender -> {
+//            if (!(sender instanceof Player player)) return null;
+//            return LocalSession.forPlayer(player).selection(Selection.DEFAULT);
+//        });
     }
 
-    public static @NotNull Argument2<Clipboard> Clipboard(@NotNull String id) {
-        return Argument2.Word(id).map(
+    public static @NotNull Argument<Clipboard> Clipboard(@NotNull String id) {
+        return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> {
                     if (!(sender instanceof Player player))
-                        return new Argument.ParseFailure<>();
+                        return new ParseResult.Failure<>(-1);
                     raw = raw.toLowerCase(Locale.ROOT);
 
                     var session = PlayerSession.forPlayer(player);
                     var partial = false;
                     for (var selectionName : session.clipboardNames()) {
                         if (selectionName.equalsIgnoreCase(raw))
-                            return new Argument.ParseSuccess<>(session.clipboard(selectionName));
+                            return new ParseResult.Success<>(session.clipboard(selectionName));
                         if (selectionName.startsWith(raw)) partial = true;
                     }
-                    return partial ? new Argument.ParsePartial<>() : new Argument.ParseFailure<>();
+                    return partial ? new ParseResult.Partial<>() : new ParseResult.Failure<>(-1);
                 },
-                /* Suggestor */ (sender, reader, suggestion, raw) -> {
+                /* Suggestor */ (sender, raw, suggestion) -> {
                     //todo in every case suggestions should only be relevant for players.
                     if (!(sender instanceof Player player)) return;
 
-                    var word = reader.readWord(WordType.ALPHANUMERIC).toLowerCase(Locale.ROOT);
+                    var word = raw.toLowerCase(Locale.ROOT);
                     var session = PlayerSession.forPlayer(player);
                     for (var selectionName : session.clipboardNames()) {
                         if (selectionName.startsWith(word)) {
@@ -81,17 +79,17 @@ public final class TFArgument {
                         }
                     }
                 }
-        ).defaultValue(sender -> {
-            if (!(sender instanceof Player player)) return null;
-            return PlayerSession.forPlayer(player).clipboard(Selection.DEFAULT);
-        });
+        ); //todo .defaultValue(sender -> {
+//        if (!(sender instanceof Player player)) return null;
+//        return PlayerSession.forPlayer(player).clipboard(Selection.DEFAULT);
+//    })
     }
 
-    public static @NotNull Argument2<Pattern> Pattern(@NotNull String id, @NotNull Terraform tf) {
+    public static @NotNull Argument<Pattern> Pattern(@NotNull String id, @NotNull Terraform tf) {
         return new ArgumentPattern(id, tf);
     }
 
-    public static @NotNull Argument2<Mask> Mask(@NotNull String id) {
+    public static @NotNull Argument<Mask> Mask(@NotNull String id) {
         return new ArgumentMask(id);
     }
 

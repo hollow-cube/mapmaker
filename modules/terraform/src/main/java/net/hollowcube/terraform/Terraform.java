@@ -1,8 +1,8 @@
 package net.hollowcube.terraform;
 
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandManager2;
-import net.hollowcube.command.CommandManager2Impl;
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.storage.TerraformStorage;
@@ -24,16 +24,19 @@ import java.util.function.Supplier;
  * It should be created once for an entire server
  */
 public sealed interface Terraform permits TerraformImpl {
-    @NotNull Supplier<TerraformModule> BASE_MODULE = BaseModule::new;
+    @NotNull
+    Supplier<TerraformModule> BASE_MODULE = BaseModule::new;
 
     static @NotNull Builder builder() {
         return new Builder();
     }
 
 
-    @NotNull TerraformRegistry registry();
+    @NotNull
+    TerraformRegistry registry();
 
-    @NotNull TerraformStorage storage();
+    @NotNull
+    TerraformStorage storage();
 
 
     // Sessions
@@ -71,7 +74,7 @@ public sealed interface Terraform permits TerraformImpl {
         private String storage = "memory";
 
         private EventNode<InstanceEvent> eventNode;
-        private CommandManager2 commandManager = new CommandManager2Impl();
+        private CommandManager commandManager = new CommandManagerImpl();
         private CommandCondition commandCondition = null;
 
         public @NotNull Builder module(@NotNull TerraformModule module) {
@@ -103,7 +106,7 @@ public sealed interface Terraform permits TerraformImpl {
             return this;
         }
 
-        public @NotNull Builder rootCommandManager(@NotNull CommandManager2 commandManager) {
+        public @NotNull Builder rootCommandManager(@NotNull CommandManager commandManager) {
             this.commandManager = commandManager;
             return this;
         }

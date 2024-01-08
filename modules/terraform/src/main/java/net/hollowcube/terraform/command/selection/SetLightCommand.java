@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.selection;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -14,8 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 
 public class SetLightCommand extends CommandDsl {
-    private final Argument2<Integer> levelArg = Argument2.Int("level").clamp(0, 15);
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Integer> levelArg = Argument.Int("level").clamp(0, 15);
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public SetLightCommand() {
         super("setlight");

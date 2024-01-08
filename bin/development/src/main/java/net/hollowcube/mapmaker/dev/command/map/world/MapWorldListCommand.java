@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.dev.command.map.world;
 
-import net.hollowcube.command.Command;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.map.MapData;
@@ -9,7 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MapWorldListCommand extends Command {
+public class MapWorldListCommand extends CommandDsl {
     private final MapWorldManager mwm;
 
     public MapWorldListCommand(@NotNull MapWorldManager mwm) {

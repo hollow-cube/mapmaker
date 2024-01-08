@@ -8,7 +8,8 @@ class TestConditions extends BaseCommandTest {
     void allowSuggest() {
         manager.register("test", test -> test
                 .condition(condAllow)
-                .child("a", a -> a));
+                .child("a", a -> {
+                }));
 
         assertSuggestions("test ", "a");
     }
@@ -26,7 +27,8 @@ class TestConditions extends BaseCommandTest {
     void denySuggest() {
         manager.register("test", test -> test
                 .condition(condDeny)
-                .child("a", a -> a));
+                .child("a", a -> {
+                }));
 
         assertSuggestions("test ", "a");
     }
@@ -44,7 +46,8 @@ class TestConditions extends BaseCommandTest {
     void hideSuggest() {
         manager.register("test", test -> test
                 .condition(condHide)
-                .child("a", a -> a));
+                .child("a", a -> {
+                }));
 
         assertSuggestions("test ");
     }

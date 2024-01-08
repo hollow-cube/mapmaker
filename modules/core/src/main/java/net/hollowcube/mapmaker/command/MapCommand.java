@@ -3,7 +3,10 @@ package net.hollowcube.mapmaker.command;
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.map.*;
+import net.hollowcube.mapmaker.command.map.MapDeleteCommand;
+import net.hollowcube.mapmaker.command.map.MapInfoCommand;
+import net.hollowcube.mapmaker.command.map.MapLeaderboardCommand;
+import net.hollowcube.mapmaker.command.map.MapListCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -37,7 +40,7 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
 
         // Testing
-        addSubcommand(new MapLookupCommand(mapService));
+//        addSubcommand(new MapLookupCommand(mapService));
     }
 
 }

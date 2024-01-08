@@ -2,7 +2,7 @@ package net.hollowcube.map.command.build;
 
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class SetSpawnCommand extends CommandDsl {
-    private final Argument2<Point> coordArgument = Argument2.RelativeVec3("position");
-    private final Argument2<Float> yawArgument = Argument2.Float("yaw");
-    private final Argument2<Float> pitchArgument = Argument2.Float("pitch");
+    private final Argument<Point> coordArgument = Argument.RelativeVec3("position");
+    private final Argument<Float> yawArgument = Argument.Float("yaw");
+    private final Argument<Float> pitchArgument = Argument.Float("pitch");
 
     @Inject
     public SetSpawnCommand() {

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public class CommandManager2Impl implements CommandManager2 {
+public class CommandManagerImpl implements CommandManager {
     private final RootCommandNode root = new RootCommandNode();
 
     @Override

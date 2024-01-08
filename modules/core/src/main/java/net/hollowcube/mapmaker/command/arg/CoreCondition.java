@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.command.util;
+package net.hollowcube.mapmaker.command.arg;
 
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.mapmaker.feature.FeatureFlag;

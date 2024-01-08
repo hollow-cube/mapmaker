@@ -3,7 +3,7 @@ package net.hollowcube.command.dsl;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.CommandBuilder;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ public class CommandDsl {
         subcommands.add(command);
     }
 
-    public void addSyntax(@NotNull CommandExecutor executor, @NotNull Argument2<?>... args) {
+    public void addSyntax(@NotNull CommandExecutor executor, @NotNull Argument<?>... args) {
         if (syntaxes == null) syntaxes = new ArrayList<>();
         syntaxes.add(new Syntax(null, executor, args));
     }
@@ -77,7 +77,7 @@ public class CommandDsl {
     }
 
     private record Syntax(@Nullable CommandCondition condition, @NotNull CommandExecutor executor,
-                          @NotNull Argument2<?>[] args) {
+                          @NotNull Argument<?>[] args) {
     }
 
 }

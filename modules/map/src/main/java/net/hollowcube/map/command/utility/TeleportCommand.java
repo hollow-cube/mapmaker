@@ -1,7 +1,7 @@
 package net.hollowcube.map.command.utility;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class TeleportCommand extends CommandDsl {
-    private final Argument2<EntityFinder> targetArg = Argument2.Entity("target").singleEntity(true).onlyPlayers(true);
+    private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true);
 
     public TeleportCommand() {
         super("tp");

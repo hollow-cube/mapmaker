@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.command.util;
 
-import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.terraform.mask.Mask;
@@ -20,10 +21,10 @@ public final class ArgumentMask extends Argument<Mask> {
         var raw = reader.readWord(WordType.GREEDY);
         try {
             var tree = new MaskParser(raw).parse();
-            if (tree == null) return new ParsePartial<>();
-            return new ParseSuccess<>(tree.toMask());
+            if (tree == null) return partial();
+            return success(tree.toMask());
         } catch (MaskParseException e) {
-            return new ParsePartial<>();
+            return partial();
         }
     }
 }

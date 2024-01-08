@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.selection;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed abstract class PosCommand extends CommandDsl permits PosCommand.Primary, PosCommand.Secondary {
-    private final Argument2<@Nullable Point> posArg = Argument2.RelativeVec3("pos");
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<@Nullable Point> posArg = Argument.RelativeVec3("pos");
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     private PosCommand(@NotNull String name) {
         super(name);

@@ -5,7 +5,7 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.CommandExecutor;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -143,7 +143,7 @@ public class DebugCommand extends CommandDsl {
             logger.info("async profiler: {} (pid={})", ASYNC_PROFILER_BIN, ProcessHandle.current().pid());
         }
 
-        private final Argument2<Integer> profileTimeArg = Argument2.Int("profile-time").min(1).max(60);
+        private final Argument<Integer> profileTimeArg = Argument.Int("profile-time").min(1).max(60);
 
         private final MapService mapService;
 

@@ -1,7 +1,7 @@
 package net.hollowcube.map.command.utility;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.item.ItemRegistry;
 import net.hollowcube.map.item.ItemUtils;
@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class GiveCommand extends CommandDsl {
-    private final Argument2<ItemStack> itemArg = ItemRegistry.Argument("item");
-    private final Argument2<Integer> amountArg = Argument2.Int("count")
-            .clamp(1, 64).defaultValue(1);
+    private final Argument<ItemStack> itemArg = ItemRegistry.Argument("item");
+    private final Argument<Integer> amountArg = Argument.Int("count")
+            .clamp(1, 64); //.defaultValue(1);
 
     public GiveCommand() {
         super("give");

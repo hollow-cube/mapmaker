@@ -1,15 +1,13 @@
 package net.hollowcube.command;
 
-import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.CommandExecutor;
-import net.hollowcube.command.arg.Argument2;
-import net.hollowcube.command.arg.ParseResult2;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +41,18 @@ public class CommandNode {
         }
 
         var mark = reader.mark();
-        var suggestion = new Suggestion(reader.pos(mark), reader.pos() - reader.pos(mark));
-        for (ArgumentPair(Argument2<?> argument, CommandNode node) : children) {
+        // the +1 here is to skip the space, but i think its kinda wrong
+        var suggestion = new Suggestion(reader.pos(mark) + 1, reader.remaining());
+        for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
             var result = argument.parse(sender, reader);
 
             // If we get an exact match we can suggest the child
-            if (result instanceof ParseResult2.Success<?>) {
+            if (result instanceof ParseResult.Success<?>) {
                 return node.suggest(sender, reader);
             }
 
             // If we consumed the entire remainder and have a partial match we can suggest the child.
-            if (!reader.canRead() && result instanceof ParseResult2.Partial<?>) {
+            if (!reader.canRead() && result instanceof ParseResult.Partial<?>) {
                 argument.suggest(sender, reader.rawSince(mark), suggestion);
                 // Do not return here, we will try to collect suggestions from the other args as well.
             }
@@ -87,20 +86,20 @@ public class CommandNode {
         // Try to apply one of the children
         if (children != null && !children.isEmpty()) {
             CommandResult pendingError = null;
-            for (ArgumentPair(Argument2<?> argument, CommandNode node) : children) {
+            for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
 
                 // Try to parse the childs argument
                 var mark = reader.mark();
                 var result = argument.parse(sender, reader);
-                if (result instanceof ParseResult2.Success<?> success) {
+                if (result instanceof ParseResult.Success<?> success) {
                     // If it succeeds we have matched and can execute the child
-                    context.setArgValue(argument.id(), reader.rawSince(mark).trim(), success.value());
+                    context.setArgValue(argument.id(), reader.rawSince(mark).trim(), success.valueFunc().get());
                     return node.execute(sender, reader, context);
                 }
 
                 // Otherwise store the error and try the next argument.
                 if (pendingError == null) {
-                    if (result instanceof ParseResult2.Failure<?> failure) {
+                    if (result instanceof ParseResult.Failure<?> failure) {
                         int errorStart = failure.start() == -1 ? reader.pos(mark) : failure.start();
                         pendingError = new CommandResult.SyntaxError(errorStart, argument);
                     } else {
@@ -147,9 +146,10 @@ public class CommandNode {
      *
      * <p>Arguments are matched by id, and must be equal if the argument already exists.</p>
      */
-    @NotNull CommandNode nodeFor(@NotNull Argument2<?> argument) {
+    @NotNull
+    CommandNode nodeFor(@NotNull Argument<?> argument) {
         if (children == null) children = new ArrayList<>();
-        for (ArgumentPair(Argument2<?> existing, CommandNode node) : children) {
+        for (ArgumentPair(Argument<?> existing, CommandNode node) : children) {
             if (!existing.id().equalsIgnoreCase(argument.id())) continue;
 
             // Test equality on the argument objects
@@ -164,10 +164,24 @@ public class CommandNode {
         return node;
     }
 
-    protected record ArgumentPair(Argument2<?> argument, CommandNode node) {
+    protected record ArgumentPair(Argument<?> argument, CommandNode node) {
     }
 
     protected record ConditionContext(@NotNull CommandSender sender, @NotNull Pass pass) implements CommandContext {
+        @Override
+        public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
+            return null;
+        }
+
+        @Override
+        public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
+            return null;
+        }
+
+        @Override
+        public boolean has(@NotNull Argument<?> arg) {
+            return false;
+        }
     }
 
 }

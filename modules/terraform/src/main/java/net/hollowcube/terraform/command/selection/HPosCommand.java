@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.selection;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -11,7 +11,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public sealed abstract class HPosCommand extends CommandDsl permits HPosCommand.Primary, HPosCommand.Secondary {
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     protected HPosCommand(@NotNull String name) {
         super(name);

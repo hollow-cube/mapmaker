@@ -2,7 +2,7 @@ package net.hollowcube.command.full;
 
 import net.hollowcube.command.BaseCommandTest;
 import net.hollowcube.command.CommandBuilder;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +19,8 @@ public class GameRuleCommandTest extends BaseCommandTest {
 
     @BeforeEach
     void createCommandGraph() {
-        var boolArg = Argument2.Word("value").with("true", "false");
-        var intArg = Argument2.Word("value");
+        var boolArg = Argument.Word("value").with("true", "false");
+        var intArg = Argument.Word("value");
 
         manager.register("gamerule", new CommandBuilder()
                 .child("doDaylightCycle", doDaylightCycle -> doDaylightCycle

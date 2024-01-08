@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.region;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
@@ -17,9 +17,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class MoveCommand extends CommandDsl {
 
-    private final Argument2<Integer> countArg = Argument2.Int("count")
+    private final Argument<Integer> countArg = Argument.Int("count")
             .min(1); //.defaultValue(1);
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public MoveCommand() {
         super("move");

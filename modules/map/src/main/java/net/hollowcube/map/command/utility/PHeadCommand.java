@@ -2,7 +2,7 @@ package net.hollowcube.map.command.utility;
 
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.item.ExtraItemTags;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class PHeadCommand extends CommandDsl {
-    private final Argument2<String> nameArg = Argument2.Word("name");
+    private final Argument<String> nameArg = Argument.Word("name");
 
     @Inject
     public PHeadCommand() {
