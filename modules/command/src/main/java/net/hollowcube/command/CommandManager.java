@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public interface CommandManager2 {
+public interface CommandManager {
 
 
     void register(@NotNull String name, @NotNull CommandNode node);
@@ -27,7 +27,8 @@ public interface CommandManager2 {
      * @param input  The input text to provide suggestions for
      * @return The command suggestions
      */
-    @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input);
+    @NotNull
+    Suggestion suggest(@NotNull CommandSender sender, @NotNull String input);
 
     /**
      * Executes the given command input for the given sender. This function does not indicate success and will not
@@ -40,8 +41,10 @@ public interface CommandManager2 {
      * @param input  The input text to execute
      */
     @Blocking
-    @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
+    @NotNull
+    CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
 
-    @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player);
+    @NotNull
+    DeclareCommandsPacket createCommandPacket(@NotNull Player player);
 
 }

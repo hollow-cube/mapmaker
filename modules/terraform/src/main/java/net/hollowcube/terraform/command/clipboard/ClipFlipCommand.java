@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.clipboard;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class ClipFlipCommand extends CommandDsl {
 
-    private final Argument2<String> axisArg = Argument2.Word("axis").with("x", "y", "z"); // .defaultValue("x")
+    private final Argument<String> axisArg = Argument.Word("axis").with("x", "y", "z"); // .defaultValue("x")
 
     public ClipFlipCommand() {
         super("flip");

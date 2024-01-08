@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.selection;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 public final class SelCommand extends CommandDsl {
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public SelCommand() {
         super("sel");
@@ -21,8 +21,8 @@ public final class SelCommand extends CommandDsl {
         for (var regionType : Region.Type.values()) {
             addSubcommand(new SetTypeCommand(regionType));
         }
-        addSyntax(playerOnly(this::handleClearSelection), Argument2.Literal("clear"));
-        addSyntax(playerOnly(this::handleClearSelection), Argument2.Literal("clear"), selectionArg);
+        addSyntax(playerOnly(this::handleClearSelection), Argument.Literal("clear"));
+        addSyntax(playerOnly(this::handleClearSelection), Argument.Literal("clear"), selectionArg);
     }
 
     private void handleClearSelection(@NotNull Player player, @NotNull CommandContext context) {

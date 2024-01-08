@@ -9,7 +9,8 @@ class TestBadExecution extends BaseCommandTest {
     @Test
     void singleChildUnexpectedEndOfInput() {
         manager.register("test", new CommandBuilder()
-                .child("a", a -> a)
+                .child("a", a -> {
+                })
                 .node());
 
         var err = assertSyntaxError("test a");
@@ -19,7 +20,8 @@ class TestBadExecution extends BaseCommandTest {
     @Test
     void singleChildExtraInput() {
         manager.register("test", new CommandBuilder()
-                .child("a", a -> a)
+                .child("a", a -> {
+                })
                 .node());
 
         var err = assertSyntaxError("test a b");
@@ -29,7 +31,8 @@ class TestBadExecution extends BaseCommandTest {
     @Test
     void singleChildPartialMatch() {
         manager.register("test", new CommandBuilder()
-                .child("abc", abc -> abc)
+                .child("abc", abc -> {
+                })
                 .node());
 
         var err = assertSyntaxError("test ab");
@@ -39,7 +42,8 @@ class TestBadExecution extends BaseCommandTest {
     @Test
     void singleChildInvalidArg() {
         manager.register("test", new CommandBuilder()
-                .child("a", a -> a)
+                .child("a", a -> {
+                })
                 .node());
 
         var err = assertSyntaxError("test b");
@@ -49,8 +53,10 @@ class TestBadExecution extends BaseCommandTest {
     @Test
     void multiChildInvalidArg() {
         manager.register("test", new CommandBuilder()
-                .child("a", a -> a)
-                .child("b", b -> b)
+                .child("a", a -> {
+                })
+                .child("b", b -> {
+                })
                 .node());
 
         var err = assertSyntaxError("test c");

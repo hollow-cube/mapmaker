@@ -6,15 +6,15 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class Argument2Bool extends Argument2<Boolean> {
+public class ArgumentBool extends Argument<Boolean> {
     // This is case sensitive right now, which matches Brigadier, maybe should have an option to match case insensitively for server side only?
 
-    public Argument2Bool(@NotNull String id) {
+    public ArgumentBool(@NotNull String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult2<Boolean> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<Boolean> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.ALPHANUMERIC);
         if ("true".equals(word)) return success(true);
         if ("false".equals(word)) return success(false);

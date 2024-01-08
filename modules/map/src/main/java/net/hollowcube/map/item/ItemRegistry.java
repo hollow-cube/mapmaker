@@ -2,8 +2,8 @@ package net.hollowcube.map.item;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.command.argold.Argument;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.map.item.impl.DebugStickItem;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.terraform.tool.BuiltinTool;
@@ -32,9 +32,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ItemRegistry {
 
-    public static @NotNull Argument2<@Nullable ItemStack> Argument(@NotNull String id) {
-        var word = Argument.Word(id);
-        return word.map(
+    public static @NotNull Argument<@Nullable ItemStack> Argument(@NotNull String id) {
+        return Argument.Word(id).map(
                 /* mapper */ (sender, raw) -> {
                     if (!(sender instanceof Player player)) return null;
                     var world = MapWorld.forPlayerOptional(player);
@@ -42,19 +41,19 @@ public class ItemRegistry {
                     var itemRegistry = world.itemRegistry();
 
                     var suggestions = itemRegistry.suggestItems(raw);
-                    if (suggestions.isEmpty()) return new Argument.ParseFailure<>();
+                    if (suggestions.isEmpty()) return new ParseResult.Failure<>(-1);
                     if (suggestions.size() > 1) {
                         // Look for exact match and succeed, otherwise fail if we have more than one suggestion and we aren't sure
                         ItemStack stack = itemRegistry.getItemStack(raw, null);
                         if (stack != null) {
-                            return new Argument.ParseSuccess<>(stack);
+                            return new ParseResult.Success<>(stack);
                         } else {
-                            return new Argument.ParsePartial<>();
+                            return new ParseResult.Partial<>();
                         }
                     }
-                    return new Argument.ParseSuccess<>(itemRegistry.getItemStack(suggestions.get(0), null));
+                    return new ParseResult.Success<>(itemRegistry.getItemStack(suggestions.get(0), null));
                 },
-                /* suggester */ (sender, reader, suggestion, raw) -> {
+                /* suggester */ (sender, raw, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
                     var world = MapWorld.forPlayerOptional(player);
                     if (world == null) return;
@@ -65,9 +64,10 @@ public class ItemRegistry {
                         suggestion.add(item);
                     }
                 }
-        ).errorHandler((sender, context) -> {
-            sender.sendMessage("unknown item: " + context.getRaw(word)); // todo translate
-        });
+        );
+//        .errorHandler((sender, context) -> {
+//            sender.sendMessage("unknown item: " + context.getRaw(word)); // todo translate
+//        });
     }
 
     private static final Tag<Boolean> TRIGGER_TAG = Tag.Transient("mapmaker:triggered");

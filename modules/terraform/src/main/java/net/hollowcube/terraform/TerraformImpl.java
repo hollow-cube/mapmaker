@@ -2,7 +2,7 @@ package net.hollowcube.terraform;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+@SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public final class TerraformImpl implements Terraform {
     private static final Logger logger = LoggerFactory.getLogger(Terraform.class);
@@ -52,7 +53,7 @@ public final class TerraformImpl implements Terraform {
     TerraformImpl(
             @NotNull Collection<Supplier<TerraformModule>> modules, @NotNull String storage,
             @Nullable EventNode<InstanceEvent> eventNode,
-            @NotNull CommandManager2 commandManager, @Nullable CommandCondition commandCondition
+            @NotNull CommandManager commandManager, @Nullable CommandCondition commandCondition
     ) {
         // Set the eventNode or register a new one.
         if (eventNode != null) this.eventNode = eventNode;
@@ -157,7 +158,7 @@ public final class TerraformImpl implements Terraform {
                 long start = System.nanoTime();
 
                 var world = WorldView.instance(task, task.session().instance());
-                var buffer = task.computeFunc().exec(task, world);
+                var buffer = Objects.requireNonNull(task.computeFunc()).exec(task, world);
                 task.setBuffer(buffer);
 
                 logger.debug("{}: compute complete in {}ms ({})", task, (System.nanoTime() - start) / 1_000_000d, Format.formatBytes(buffer.sizeBytes()));

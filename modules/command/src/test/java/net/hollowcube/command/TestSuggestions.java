@@ -21,7 +21,8 @@ class TestSuggestions extends BaseCommandTest {
     @Test
     void exactMatchNoSpace() {
         manager.register("test", new CommandBuilder()
-                .child("a", builder -> builder)
+                .child("a", builder -> {
+                })
                 .node());
 
         assertSuggestions("test", "");
@@ -30,7 +31,8 @@ class TestSuggestions extends BaseCommandTest {
     @Test
     void singleChildExactMatchTrailingSpace() {
         manager.register("test", new CommandBuilder()
-                .child("a", builder -> builder)
+                .child("a", builder -> {
+                })
                 .node());
 
         assertSuggestions("test ", "a");
@@ -39,8 +41,10 @@ class TestSuggestions extends BaseCommandTest {
     @Test
     void multiChildExactMatchTrailingSpace() {
         manager.register("test", new CommandBuilder()
-                .child("a", builder -> builder)
-                .child("b", builder -> builder)
+                .child("a", builder -> {
+                })
+                .child("b", builder -> {
+                })
                 .node());
 
         assertSuggestions("test ", "a", "b");

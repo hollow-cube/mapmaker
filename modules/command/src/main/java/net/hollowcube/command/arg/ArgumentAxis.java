@@ -8,17 +8,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public class Argument2Axis extends Argument2<Argument2Axis.Result> {
+public class ArgumentAxis extends Argument<ArgumentAxis.Result> {
     public record Result(boolean x, boolean y, boolean z) {
     }
 
 
-    public Argument2Axis(@NotNull String id) {
+    public ArgumentAxis(@NotNull String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult2<Result> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<Result> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.ALPHANUMERIC);
         boolean x = false, y = false, z = false;
         for (char c : word.toCharArray()) {

@@ -1,8 +1,10 @@
 package net.hollowcube.common.util;
 
 import net.minestom.server.MinecraftServer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
@@ -62,7 +64,8 @@ public final class FutureUtil {
         throw new IllegalStateException("Unsafe blocking call on '" + thread.getName() + "'");
     }
 
-    public static <T> @Nullable T getUnchecked(@Nullable Future<T> future) {
+    @Contract("null -> null")
+    public static <T> @UnknownNullability T getUnchecked(@Nullable Future<T> future) {
         if (future == null) return null;
         try {
             return future.get();

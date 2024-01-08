@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.command.util;
 
-import net.hollowcube.command.argold.Argument;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
@@ -34,15 +35,15 @@ public class ArgumentPattern extends Argument<Pattern> {
             var rawBlockState = ArgumentBlockState.staticParse(word);
             // Remap the block state using the registry, todo just rework this whole thing to use tf registry to start.
             var blockState = tf.registry().blockState(rawBlockState.stateId());
-            return new ParseSuccess<>((world, blockPosition) -> blockState);
+            return success((world, blockPosition) -> blockState);
         } catch (ArgumentSyntaxException e) {
-            return new ParsePartial<>();
+            return partial();
         }
     }
 
     @Override
-    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
-        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
+    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+        var word = raw.toLowerCase(Locale.ROOT);
         for (var block : BLOCKS) {
             if (block.asString().startsWith(word) || block.path().startsWith(word)) {
                 suggestion.add(block.asString());

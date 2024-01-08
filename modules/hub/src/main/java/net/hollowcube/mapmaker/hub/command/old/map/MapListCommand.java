@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.hub.command.ExtraArguments;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -35,10 +34,8 @@ public class MapListCommand extends BaseHubCommand {
         this.mapService = mapService;
 
         this.targetArg = ExtraArguments.PlayerNameWithCompletion(playerService, "target");
-        var condition = permManager.createPlatformCondition(PlatformPerm.MAP_ADMIN);
 
         setDefaultExecutor(wrap(this::listMapsSelf));
-        addConditionalSyntax(condition, wrap(this::listMapsOther), targetArg);
     }
 
     private void listMapsSelf(@NotNull Player player, @NotNull CommandContext context) {

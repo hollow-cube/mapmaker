@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.command.util;
 
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class WhereCommand extends CommandDsl {
-    private final Argument2<String> targetArg;
+    private final Argument<String> targetArg;
 
     private final SessionManager sessionManager;
     private final PlayerService playerService;

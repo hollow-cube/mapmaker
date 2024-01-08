@@ -1,4 +1,4 @@
-package net.hollowcube.command.argold;
+package net.hollowcube.command.arg;
 
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
@@ -37,19 +37,20 @@ public class ArgumentEntity extends Argument<EntityFinder> {
     public @NotNull ParseResult<EntityFinder> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         try {
             var input = reader.readWord(WordType.GREEDY);
-            return new ParseSuccess<>(net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity
+            return success(net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity
                     .staticParse(sender, input, onlySingleEntity, onlyPlayers));
         } catch (ArgumentSyntaxException ignored) {
-            return new ParsePartial<>();
+            return partial();
         }
     }
 
     @Override
-    public void suggestions(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull Suggestion suggestion) {
+    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+        raw = raw.toLowerCase(Locale.ROOT);
+
         // for now, just suggest matching players
-        var input = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
         for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
-            if (player.getUsername().toLowerCase(Locale.ROOT).startsWith(input)) {
+            if (player.getUsername().toLowerCase(Locale.ROOT).startsWith(raw)) {
                 suggestion.add(player.getUsername());
             }
         }

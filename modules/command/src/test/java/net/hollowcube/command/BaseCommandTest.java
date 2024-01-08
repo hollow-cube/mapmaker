@@ -1,8 +1,5 @@
 package net.hollowcube.command;
 
-import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.suggestion.SuggestionEntry;
 import net.minestom.server.command.CommandSender;
@@ -14,7 +11,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BaseCommandTest {
-    protected final CommandManager2Impl manager = new CommandManager2Impl();
+    protected final CommandManagerImpl manager = new CommandManagerImpl();
     protected final CommandSender sender = new ConsoleSender();
 
     protected final CommandCondition condAllow = (sender, context) -> CommandCondition.ALLOW;

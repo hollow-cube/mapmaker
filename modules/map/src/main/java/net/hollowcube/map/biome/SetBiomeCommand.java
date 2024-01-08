@@ -2,8 +2,8 @@ package net.hollowcube.map.biome;
 
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.argold.Argument;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.world.MapWorld;
@@ -22,27 +22,27 @@ import static net.hollowcube.map.util.MapCondition.mapFeature;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class SetBiomeCommand extends CommandDsl {
-    private final Argument2<Biome> biomeArg = Argument2.Word("biome")
+    private final Argument<Biome> biomeArg = Argument.Word("biome")
             .map(
                     (sender, value) -> {
                         value = value.toLowerCase(Locale.ROOT);
                         if (!(sender instanceof Player player)) {
-                            return new Argument.ParseFailure<>();
+                            return new ParseResult.Failure<>(-1);
                         }
 
                         var biomeContainer = MapWorld.forPlayer(player).biomes();
                         for (var biome : biomeContainer.loadedBiomes()) {
                             var nsid = biome.name();
                             if (value.equals(nsid.asString()))
-                                return new Argument.ParseSuccess<>(biome);
+                                return new ParseResult.Success<>(biome);
                             if (nsid.asString().startsWith(value) || nsid.path().startsWith(value))
-                                return new Argument.ParsePartial<>();
+                                return new ParseResult.Partial<>();
                         }
 
-                        return new Argument.ParseFailure<>();
+                        return new ParseResult.Failure<>(-1);
                     },
-                    (sender, reader, suggestion, value) -> {
-                        value = value.toLowerCase(Locale.ROOT);
+                    (sender, raw, suggestion) -> {
+                        raw = raw.toLowerCase(Locale.ROOT);
                         if (!(sender instanceof Player player)) {
                             return;
                         }
@@ -51,7 +51,7 @@ public class SetBiomeCommand extends CommandDsl {
                         var biomeContainer = MapWorld.forPlayer(player).biomes();
                         for (var biome : biomeContainer.loadedBiomes()) {
                             var nsid = biome.name();
-                            if (nsid.asString().startsWith(value) || nsid.path().startsWith(value)) {
+                            if (nsid.asString().startsWith(raw) || nsid.path().startsWith(raw)) {
                                 suggestion.add(nsid.asString());
                             }
                         }

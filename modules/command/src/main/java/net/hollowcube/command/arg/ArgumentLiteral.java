@@ -7,17 +7,18 @@ import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 
-public class Argument2Literal extends Argument2<String> {
+public class ArgumentLiteral extends Argument<String> {
     private final String literal;
 
-    public Argument2Literal(@NotNull String literal) {
+    public ArgumentLiteral(@NotNull String literal) {
         super(literal);
         this.literal = literal;
     }
 
     @Override
-    public @NotNull ParseResult2<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var compareValue = literal.toLowerCase(Locale.ROOT);
 
         int pos = reader.pos();
@@ -30,5 +31,23 @@ public class Argument2Literal extends Argument2<String> {
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
         if (literal.toLowerCase(Locale.ROOT).startsWith(raw.toLowerCase(Locale.ROOT))) suggestion.add(literal);
+    }
+
+    @Override
+    public String toString() {
+        return "literal@" + id();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArgumentLiteral that = (ArgumentLiteral) o;
+        return Objects.equals(literal, that.literal);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(literal);
     }
 }

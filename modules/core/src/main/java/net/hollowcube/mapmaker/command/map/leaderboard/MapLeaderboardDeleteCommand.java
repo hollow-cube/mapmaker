@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.command.map.leaderboard;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.util.CoreArgument;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -14,8 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MapLeaderboardDeleteCommand extends CommandDsl {
-    private final Argument2<@NotNull MapData> mapArg;
-    private final Argument2<@Nullable String> playerArg;
+    private final Argument<@NotNull MapData> mapArg;
+    private final Argument<@Nullable String> playerArg;
 
     private final MapService mapService;
 

@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.map;
 
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import net.hollowcube.command.CommandManager2;
-import net.hollowcube.command.CommandManager2Impl;
-import net.hollowcube.command.util.CommandHandlingPlayer2;
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServerBase;
@@ -65,7 +65,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "FieldCanBeLocal"})
 class MapServerImpl extends MapServerBase implements StandaloneServer {
     private static final Logger logger = LoggerFactory.getLogger(MapServerImpl.class);
 
@@ -88,7 +88,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     private ChatMessageListener chatMessageListener;
     private MapJoinConsumer mapJoinConsumer;
 
-    private CommandManager2 commandManager;
+    private CommandManager commandManager;
 
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
@@ -158,12 +158,12 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         if (!noopServices) {
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
-            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+            packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
         }
 
         // Command init
-        commandManager = new CommandManager2Impl();
-        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer2.createDefaultProvider(commandManager));
+        commandManager = new CommandManagerImpl();
+        CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
 
         // Standalone hub specific events
         EVENT_HANDLER

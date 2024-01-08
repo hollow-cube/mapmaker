@@ -10,24 +10,23 @@ import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
-import net.hollowcube.mapmaker.dev.command.CommandRewriter;
-import net.hollowcube.mapmaker.dev.command.map.MapWorldCommand;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
-import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -42,8 +41,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.*;
@@ -51,8 +48,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
-import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
-import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import org.eclipse.microprofile.health.HealthCheck;
@@ -71,11 +66,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "FieldCanBeLocal"})
 public class DevServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServer.class);
-
-    private HubToMapBridge hubToMapBridge;
 
     public static void main(String[] args) {
         long start = System.nanoTime();
@@ -106,7 +99,18 @@ public class DevServer {
 
         // Begin server initialization
         var minecraftServer = MinecraftServer.init();
-        MinecraftServer.getExceptionManager().setExceptionHandler(t -> logger.error("An uncaught exception has been handled", t));
+        MinecraftServer.getExceptionManager().setExceptionHandler(t -> {
+            try {
+                logger.error("An uncaught exception has been handled", t);
+            } catch (Exception e) {
+                System.err.println("An error occurred trying to log an unhandled exception:");
+                //noinspection CallToPrintStackTrace
+                e.printStackTrace();
+                System.err.println("The original stacktrace is printed below:");
+                //noinspection CallToPrintStackTrace
+                t.printStackTrace();
+            }
+        });
         var server = new DevServer();
 
         // Add health check & metrics web server.
@@ -122,14 +126,15 @@ public class DevServer {
         // Add shutdown hook for graceful shutdown
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
             webServer.shutdown();
+            //noinspection ResultOfMethodCallIgnored
             ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
         });
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
-    private final CommandManager hubCommandManager = new CommandManager();
-    private final CommandManager mapCommandManager = new CommandManager();
+    private final CommandManager hubCommandManager = new CommandManagerImpl();
+    private final CommandManager mapCommandManager = new CommandManagerImpl();
 
     private PlayerService playerService;
     private SessionService sessionService;
@@ -141,7 +146,6 @@ public class DevServer {
     private DevHubServer hub;
     private DevMapServer maps;
 
-    private MetricWriter metricWriter;
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
 
@@ -181,7 +185,7 @@ public class DevServer {
 
         var kafkaConfig = config.get(KafkaConfig.class);
         new MapPlayerDataMgmtConsumer(kafkaConfig.bootstrapServersStr()); //todo close me
-        metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
+//        metricWriter = new MetricWriter(kafkaConfig.bootstrapServersStr());
 
         var sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, false);
 
@@ -191,11 +195,13 @@ public class DevServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 
             // Configure command rewriter
-            var packetListenerManager = MinecraftServer.getPacketListenerManager();
-            var rewriter = new CommandRewriter(hubCommandManager, mapCommandManager);
-            packetListenerManager.setListener(ClientCommandChatPacket.class, rewriter::execCommand);
-            packetListenerManager.setListener(ClientTabCompletePacket.class, rewriter::tabCommand);
-            MinecraftServer.getConnectionManager().setPlayerProvider(rewriter::createPlayer);
+            MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
+                @Override
+                public @NotNull CommandManager getCommandManager() {
+                    System.out.println("GET COMMAND MANAGER == " + (MapWorld.forPlayerOptional(this) != null));
+                    return MapWorld.forPlayerOptional(this) != null ? mapCommandManager : hubCommandManager;
+                }
+            });
 
             var bridge = new DevServerBridge();
 
@@ -203,7 +209,6 @@ public class DevServer {
             this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
-            this.hubToMapBridge = bridge;
 
             scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService(), config)));
             scope.fork(FutureUtil.call(() -> this.maps.init(config, mapCommandManager)));
@@ -219,11 +224,6 @@ public class DevServer {
         // Load all facets & other misc startup tasks like setting up some events & minestom properties
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var hubMapCommand = hubCommandManager.getCommands().get("map");
-            hubMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
-            var mapMapCommand = mapCommandManager.getCommands().get("map");
-            mapMapCommand.addSubcommand(new MapWorldCommand(maps.worldManager(), permManager));
-
             var eventHandler = MinecraftServer.getGlobalEventHandler();
             eventHandler.addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin);
             eventHandler.addListener(AsyncPlayerConfigurationEvent.class, this::handleConfig);
@@ -236,7 +236,7 @@ public class DevServer {
 
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             var chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
-            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+            packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
             MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
                 logger.info("Graceful shutdown starting...");
@@ -356,11 +356,6 @@ public class DevServer {
         onlinePlayersPattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
     }
 
-    Entity screenEntity = new Entity(EntityType.ITEM_DISPLAY) {{
-        hasPhysics = false;
-        setNoGravity(true);
-    }};
-
     private void handleFirstSpawn(PlayerSpawnEvent event) {
         // WARNING --------
         // IF YOU ADD SOMETHING HERE, IT PROBABLY ALSO NEEDS TO BE ADDED TO THE
@@ -376,7 +371,6 @@ public class DevServer {
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
         player.sendPacket(player.getMetadataPacket());
-
 
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld != null) {

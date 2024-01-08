@@ -1,8 +1,8 @@
 package net.hollowcube.command.demo;
 
 import net.hollowcube.command.CommandBuilder;
-import net.hollowcube.command.CommandManager2Impl;
-import net.hollowcube.command.util.CommandHandlingPlayer2;
+import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -18,12 +18,14 @@ public class DemoServer {
         instance.setChunkSupplier(LightingChunk::new);
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 39, Block.STONE));
 
-        var commandManager = new CommandManager2Impl();
+        var commandManager = new CommandManagerImpl();
         commandManager.register("test", new CommandBuilder()
                 .executes((sender, context) -> sender.sendMessage("test no arg syntax"))
+                .child("abc", abc -> {
+                })
                 .node());
 
-        MinecraftServer.getConnectionManager().setPlayerProvider(CommandHandlingPlayer2.createDefaultProvider(commandManager));
+        MinecraftServer.getConnectionManager().setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {

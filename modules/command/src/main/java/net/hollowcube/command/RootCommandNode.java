@@ -1,9 +1,7 @@
 package net.hollowcube.command;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
@@ -17,20 +15,21 @@ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 final class RootCommandNode extends CommandNode {
 
     @Override
-    @NotNull CommandNode nodeFor(@NotNull Argument2<?> argument) {
+    @NotNull
+    CommandNode nodeFor(@NotNull Argument<?> argument) {
         throw new UnsupportedOperationException("use register() to manage root node children");
     }
 
     void register(@NotNull String name, @NotNull CommandNode node) {
         if (this.children == null) this.children = new ArrayList<>();
 
-        for (ArgumentPair(Argument2<?> argument, CommandNode unused) : this.children) {
+        for (ArgumentPair(Argument<?> argument, CommandNode unused) : this.children) {
             if (argument.id().equalsIgnoreCase(name)) {
                 throw new IllegalArgumentException("duplicate child name: " + name);
             }
         }
 
-        this.children.add(new ArgumentPair(Argument2.Literal(name), node));
+        this.children.add(new ArgumentPair(Argument.Literal(name), node));
     }
 
     public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
@@ -39,7 +38,7 @@ final class RootCommandNode extends CommandNode {
         nodes.add(root);
 
         var rootNodes = new IntArrayList();
-        for (ArgumentPair(Argument2<?> argument, CommandNode childNode) : children) {
+        for (ArgumentPair(Argument<?> argument, CommandNode childNode) : children) {
             if (childNode.condition != null) {
                 var result = childNode.condition.test(player, new ConditionContext(player, CommandContext.Pass.BUILD));
                 if (result == CommandCondition.HIDE) continue;

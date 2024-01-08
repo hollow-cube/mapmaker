@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.history;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
@@ -9,7 +9,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class RedoCommand extends CommandDsl {
-    private final Argument2<Integer> countArg = Argument2.Int("count").min(1);//.defaultValue(1);
+    private final Argument<Integer> countArg = Argument.Int("count").min(1);//.defaultValue(1);
 
     public RedoCommand() {
         super("redo");

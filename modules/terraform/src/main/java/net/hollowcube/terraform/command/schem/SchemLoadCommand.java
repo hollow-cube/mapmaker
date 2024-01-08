@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.schem;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.session.Clipboard;
@@ -10,8 +10,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class SchemLoadCommand extends CommandDsl {
-    private final Argument2<String> nameArg = Argument2.Word("name");
-    private final Argument2<Clipboard> clipboardArg = TFArgument.Clipboard("clipboard");
+    private final Argument<String> nameArg = Argument.Word("name");
+    private final Argument<Clipboard> clipboardArg = TFArgument.Clipboard("clipboard");
 
     public SchemLoadCommand() {
         super("load");

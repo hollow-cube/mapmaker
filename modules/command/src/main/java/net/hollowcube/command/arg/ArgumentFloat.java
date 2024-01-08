@@ -5,32 +5,32 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class Argument2Float extends Argument2<Float> {
+public class ArgumentFloat extends Argument<Float> {
     private float min = -Float.MAX_VALUE;
     private float max = Float.MAX_VALUE;
 
-    Argument2Float(@NotNull String id) {
+    ArgumentFloat(@NotNull String id) {
         super(id);
     }
 
-    public @NotNull Argument2Float min(float min) {
+    public @NotNull ArgumentFloat min(float min) {
         this.min = min;
         return this;
     }
 
-    public @NotNull Argument2Float max(float max) {
+    public @NotNull ArgumentFloat max(float max) {
         this.max = max;
         return this;
     }
 
-    public @NotNull Argument2Float clamp(float min, float max) {
+    public @NotNull ArgumentFloat clamp(float min, float max) {
         this.min = min;
         this.max = max;
         return this;
     }
 
     @Override
-    public @NotNull ParseResult2<Float> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<Float> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.BRIGADIER);
         try {
             var value = Float.parseFloat(word);

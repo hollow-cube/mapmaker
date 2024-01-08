@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.tool;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.tool.ToolHandler;
 import net.kyori.adventure.text.Component;
@@ -11,7 +11,7 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ToolCreateCommand extends CommandDsl {
-    private final Argument2<String> builtinToolArg;
+    private final Argument<String> builtinToolArg;
 
     private final ToolHandler toolHandler;
 
@@ -19,7 +19,7 @@ public class ToolCreateCommand extends CommandDsl {
         super("create");
         this.toolHandler = toolHandler;
 
-        builtinToolArg = Argument2.Word("type").with(toolHandler.getToolNames());
+        builtinToolArg = Argument.Word("type").with(toolHandler.getToolNames());
 
         addSyntax(playerOnly(this::createBuiltinTool), builtinToolArg);
     }

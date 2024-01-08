@@ -5,11 +5,11 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class Argument2Int extends Argument2<Integer> {
+public class ArgumentInt extends Argument<Integer> {
     private int min = Integer.MIN_VALUE;
     private int max = Integer.MAX_VALUE;
 
-    Argument2Int(@NotNull String id) {
+    ArgumentInt(@NotNull String id) {
         super(id);
     }
 
@@ -19,7 +19,7 @@ public class Argument2Int extends Argument2<Integer> {
      * @param min
      * @return
      */
-    public @NotNull Argument2Int min(int min) {
+    public @NotNull ArgumentInt min(int min) {
         this.min = min;
         return this;
     }
@@ -30,7 +30,7 @@ public class Argument2Int extends Argument2<Integer> {
      * @param max
      * @return
      */
-    public @NotNull Argument2Int max(int max) {
+    public @NotNull ArgumentInt max(int max) {
         this.max = max;
         return this;
     }
@@ -38,14 +38,14 @@ public class Argument2Int extends Argument2<Integer> {
     /**
      * both inclusive
      */
-    public @NotNull Argument2Int clamp(int min, int max) {
+    public @NotNull ArgumentInt clamp(int min, int max) {
         this.min = min;
         this.max = max;
         return this;
     }
 
     @Override
-    public @NotNull ParseResult2<Integer> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<Integer> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var word = reader.readWord(WordType.ALPHANUMERIC);
         try {
             var value = Integer.parseInt(word);

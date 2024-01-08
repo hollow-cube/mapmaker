@@ -1,12 +1,9 @@
 package net.hollowcube.command;
 
-import net.hollowcube.command.CommandCondition;
-import net.hollowcube.command.CommandExecutor;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class CommandBuilder {
 
@@ -23,21 +20,15 @@ public class CommandBuilder {
 
     // Children
 
-    public CommandBuilder child(@NotNull String name, @NotNull Function<CommandBuilder, Object> consumer) {
-        var childNode = node.nodeFor(Argument2.Literal(name));
-        consumer.apply(new CommandBuilder(childNode));
-        return this;
-    }
-
     public CommandBuilder child(@NotNull String name, @NotNull Consumer<CommandBuilder> consumer) {
-        var childNode = node.nodeFor(Argument2.Literal(name));
+        var childNode = node.nodeFor(Argument.Literal(name));
         consumer.accept(new CommandBuilder(childNode));
         return this;
     }
 
     // Execution
 
-    public @NotNull CommandBuilder executes(CommandExecutor executor, Argument2<?>... args) {
+    public @NotNull CommandBuilder executes(CommandExecutor executor, Argument<?>... args) {
         var executableNode = this.node;
         for (var arg : args) {
             executableNode = executableNode.nodeFor(arg);

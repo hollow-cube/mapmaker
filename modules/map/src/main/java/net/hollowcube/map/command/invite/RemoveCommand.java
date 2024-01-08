@@ -1,7 +1,8 @@
 package net.hollowcube.map.command.invite;
 
+import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
@@ -17,10 +18,11 @@ import static net.hollowcube.map.util.MapCondition.mapFilter;
 
 public class RemoveCommand extends CommandDsl {
 
-    private final Argument2<EntityFinder> targetArg = Argument2.Entity("player").onlyPlayers(true);
+    private final Argument<EntityFinder> targetArg = Argument.Entity("player").onlyPlayers(true);
 
     private final MapToHubBridge bridge;
 
+    @Inject
     public RemoveCommand(@NotNull MapToHubBridge bridge) {
         super("remove");
         this.bridge = bridge;

@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.region;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.command.util.TFArgument;
@@ -14,8 +14,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class SetCommand extends CommandDsl {
-    private final Argument2<Pattern> patternArg;
-    private final Argument2<Selection> selectionArg = TFArgument.Selection("selection");
+    private final Argument<Pattern> patternArg;
+    private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public SetCommand(@NotNull Terraform tf) {
         super("set");

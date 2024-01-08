@@ -7,8 +7,8 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.command.Command;
-import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
@@ -27,6 +27,8 @@ import net.hollowcube.map.terraform.MapServerModule;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
+import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
@@ -74,6 +76,7 @@ import java.util.function.Function;
 import static net.hollowcube.map.util.MapCondition.eventFilter;
 import static net.hollowcube.map.util.MapCondition.mapFilter;
 
+@SuppressWarnings("FieldCanBeLocal")
 public abstract class MapServerBase implements MapServer {
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
 
@@ -97,10 +100,11 @@ public abstract class MapServerBase implements MapServer {
 
     static {
         // Idk why the static initializer is not triggering from other usages
+        //noinspection DataFlowIssue
         new PlayerSpawnInInstanceEvent(null);
     }
 
-    public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager2 commandManager) {
+    public @Blocking void init(@NotNull ConfigLoaderV3 config, @NotNull CommandManager commandManager) {
         MapServer.StaticAbuse.instance = this;
 
         boolean noopServices = Boolean.getBoolean("mapmaker.noop");
@@ -139,6 +143,8 @@ public abstract class MapServerBase implements MapServer {
             @Override
             protected void configure() {
                 bind(MapServer.class).toInstance(MapServerBase.this);
+                bind(MapServerBase.class).toInstance(MapServerBase.this);
+
                 bind(MapWorldManager.class).toInstance(worldManager());
                 bind(Controller.class).toInstance(guiController);
                 bind(PlayerInviteService.class).toInstance(inviteService);
@@ -146,8 +152,11 @@ public abstract class MapServerBase implements MapServer {
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());
                 bind(SessionManager.class).toInstance(sessionManager());
-                bind(CommandManager2.class).toInstance(commandManager);
+                bind(CommandManager.class).toInstance(commandManager);
                 bind(MapService.class).toInstance(mapService());
+
+                bind(MapToHubBridge.class).toInstance(bridge());
+                bind(ServerBridge.class).toInstance(bridge());
             }
         });
 
@@ -186,8 +195,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(injector.getInstance(RemoveCommand.class));
 
         var mapCommand = injector.getInstance(MapCommand.class);
-        mapCommand.info.addSyntax(Command.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
-        commandManager.register(mapCommand);
+        mapCommand.info.addSyntax(CommandDsl.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
+//        commandManager.register(mapCommand);
 
         commandManager.register(injector.getInstance(StoreCommand.class));
 

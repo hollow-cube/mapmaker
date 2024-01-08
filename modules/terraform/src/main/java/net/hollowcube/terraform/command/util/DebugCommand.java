@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.command.util;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -17,7 +17,7 @@ public final class DebugCommand extends CommandDsl {
         super("debug");
 
         addSyntax(this::showHelp);
-        addSyntax(playerOnly(this::showSessionDebug), Argument2.Literal("session"));
+        addSyntax(playerOnly(this::showSessionDebug), Argument.Literal("session"));
     }
 
     private void showHelp(@NotNull CommandSender sender, @NotNull CommandContext context) {

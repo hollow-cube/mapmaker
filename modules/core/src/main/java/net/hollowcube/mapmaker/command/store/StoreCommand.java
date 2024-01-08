@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.command.util.CoreCondition.feature;
+import static net.hollowcube.mapmaker.command.arg.CoreCondition.feature;
 
 public class StoreCommand extends CommandDsl {
     private final Controller guiController;

@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -13,7 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapLegacyListCommand extends CommandDsl {
-    private final Argument2<String> playerArg = Argument2.Word("player");
+    private final Argument<String> playerArg = Argument.Word("player");
 
     private final MapService mapService;
 

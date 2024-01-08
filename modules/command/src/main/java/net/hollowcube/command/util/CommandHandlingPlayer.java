@@ -1,8 +1,8 @@
 package net.hollowcube.command.util;
 
-import net.hollowcube.command.CommandManager2;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
-import net.hollowcube.command.arg.Argument2;
+import net.hollowcube.command.arg.Argument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -24,27 +24,27 @@ import java.util.UUID;
  * <p>It is valid to override BLAH BLAH BLAH</p>
  */
 @SuppressWarnings("UnstableApiUsage")
-public abstract class CommandHandlingPlayer2 extends Player {
+public abstract class CommandHandlingPlayer extends Player {
     private static boolean initialized = false;
 
-    public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager2 commandManager) {
-        return (uuid, username, connection) -> new CommandHandlingPlayer2(uuid, username, connection) {
+    public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager commandManager) {
+        return (uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
             @Override
-            public @NotNull CommandManager2 getCommandManager() {
+            public @NotNull CommandManager getCommandManager() {
                 return commandManager;
             }
         };
     }
 
-    public CommandHandlingPlayer2(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
+    public CommandHandlingPlayer(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
         super(uuid, username, playerConnection);
 
         if (!initialized) {
             initialized = true;
 
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
-            packetListenerManager.setPlayListener(ClientCommandChatPacket.class, CommandHandlingPlayer2::execCommand);
-            packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer2::tabCommand);
+            packetListenerManager.setPlayListener(ClientCommandChatPacket.class, CommandHandlingPlayer::execCommand);
+            packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer::tabCommand);
         }
     }
 
@@ -53,17 +53,17 @@ public abstract class CommandHandlingPlayer2 extends Player {
         sendPacket(getCommandManager().createCommandPacket(this));
     }
 
-    public abstract @NotNull CommandManager2 getCommandManager();
+    public abstract @NotNull CommandManager getCommandManager();
 
     private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
         final String command = packet.message();
         if (Messenger.canReceiveCommand(player)) {
             Thread.startVirtualThread(() -> {
                 try {
-                    if (player instanceof CommandHandlingPlayer2 pl) {
+                    if (player instanceof CommandHandlingPlayer pl) {
                         var result = pl.getCommandManager().execute(player, command);
 
-                        if (result instanceof CommandResult.SyntaxError(int start, Argument2<?> arg)) {
+                        if (result instanceof CommandResult.SyntaxError(int start, Argument<?> arg)) {
                             player.sendMessage(Component.text()
                                     .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
                                     .append(Component.text(command.substring(0, start), NamedTextColor.GRAY))
@@ -73,8 +73,6 @@ public abstract class CommandHandlingPlayer2 extends Player {
                         } else if (result instanceof CommandResult.Denied) {
                             player.sendMessage("permission error");
                         }
-
-                        System.out.println(result);
 
                     } else throw new RuntimeException("Player is not a CommandHandlingPlayer");
                 } catch (Exception e) {
@@ -89,8 +87,8 @@ public abstract class CommandHandlingPlayer2 extends Player {
     private static void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
         if (!Messenger.canReceiveCommand(player)) return;
 
-        CommandManager2 commandManager;
-        if (player instanceof CommandHandlingPlayer2 pl) {
+        CommandManager commandManager;
+        if (player instanceof CommandHandlingPlayer pl) {
             commandManager = pl.getCommandManager();
         } else throw new RuntimeException("Player is not a CommandHandlingPlayer");
 
