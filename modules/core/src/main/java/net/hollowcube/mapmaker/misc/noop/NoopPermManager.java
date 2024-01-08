@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class NoopPermManager implements PermManager {
     @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPerm perm) {
-        return true;
+        return false;
     }
 
     @Override

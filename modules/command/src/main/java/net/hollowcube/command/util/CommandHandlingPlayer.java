@@ -2,7 +2,6 @@ package net.hollowcube.command.util;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
-import net.hollowcube.command.arg.Argument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -61,25 +60,27 @@ public abstract class CommandHandlingPlayer extends Player {
             Thread.startVirtualThread(() -> {
                 try {
                     if (player instanceof CommandHandlingPlayer pl) {
-                        var result = pl.getCommandManager().execute(player, command);
-                        switch (result) {
-                            case CommandResult.Success() -> {
+                        switch (pl.getCommandManager().execute(player, command)) {
+                            case CommandResult.Success result -> {
                             }
-                            case CommandResult.SyntaxError(int start, Argument<?> arg) -> {
-                                player.sendMessage(Component.text()
-                                        .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
-                                        .append(Component.text(command.substring(0, start), NamedTextColor.GRAY))
-                                        .append(Component.text(command.substring(start), NamedTextColor.RED, TextDecoration.UNDERLINED))
-                                        .append(Component.text("<--[HERE]", NamedTextColor.RED))
-                                        .build());
+                            case CommandResult.Denied result ->
+                                    player.sendMessage(Component.translatable("command.not_found"));
+                            case CommandResult.SyntaxError result -> {
+                                if (result.isNotFound()) {
+                                    player.sendMessage(Component.translatable("command.not_found"));
+                                } else {
+                                    player.sendMessage(Component.text()
+                                            .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
+                                            .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
+                                            .append(Component.text(command.substring(result.start()), NamedTextColor.RED, TextDecoration.UNDERLINED))
+                                            .append(Component.text("<--[HERE]", NamedTextColor.RED))
+                                            .build());
+                                }
                             }
-                            case CommandResult.ExecutionError(Throwable e) -> {
+                            case CommandResult.ExecutionError result -> {
                                 player.sendMessage(Component.translatable("generic.unknown_error"));
                                 MinecraftServer.getExceptionManager().handleException(new RuntimeException(
-                                        "An unhandled exception occurred while executing the command '" + command + "'", e));
-                            }
-                            case CommandResult.Denied() -> {
-                                player.sendMessage("permission error");
+                                        "An unhandled exception occurred while executing the command '" + command + "'", result.cause()));
                             }
                         }
                     } else throw new RuntimeException("Player is not a CommandHandlingPlayer");

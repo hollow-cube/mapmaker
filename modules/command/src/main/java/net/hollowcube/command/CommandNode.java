@@ -108,8 +108,8 @@ public class CommandNode {
         // If there is a condition on this node we need to evaluate it
         if (condition != null) {
             var result = condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
-            if (result == CommandCondition.DENY) return new CommandResult.Denied();
-            if (result == CommandCondition.HIDE) return new CommandResult.SyntaxError(reader.pos(), null);
+            if (result == CommandCondition.DENY) return CommandResult.denied(this);
+            if (result == CommandCondition.HIDE) return CommandResult.syntaxError(reader.pos(), null, true);
         }
 
         if (reader.remaining() == 0) {
@@ -117,19 +117,19 @@ public class CommandNode {
             if (executor != null) {
                 try {
                     executor.execute(sender, context);
-                    return new CommandResult.Success();
+                    return CommandResult.success();
                 } catch (Exception e) {
-                    return new CommandResult.ExecutionError(e);
+                    return CommandResult.execError(e);
                 }
             }
 
             // Otherwise we reached end of input without an executable command (i think), so its an error.
-            return new CommandResult.SyntaxError(reader.pos(), null);
+            return CommandResult.syntaxError(reader.pos(), null);
         }
 
         // Try to apply one of the children
         if (children != null && !children.isEmpty()) {
-            CommandResult pendingError = null;
+            CommandResult.SyntaxError pendingError = null;
             for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
 
                 // Try to parse the childs argument
@@ -138,27 +138,28 @@ public class CommandNode {
                 if (result instanceof ParseResult.Success<?> success) {
                     // If it succeeds we have matched and can execute the child
                     context.setArgValue(argument.id(), reader.rawSince(mark).trim(), success.valueFunc().get());
-                    return node.execute(sender, reader, context);
+                    return unwrap(node.execute(sender, reader, context));
                 }
 
                 // Otherwise store the error and try the next argument.
                 if (pendingError == null) {
                     if (result instanceof ParseResult.Failure<?> failure) {
                         int errorStart = failure.start() == -1 ? reader.pos(mark) : failure.start();
-                        pendingError = new CommandResult.SyntaxError(errorStart, argument);
+                        pendingError = CommandResult.syntaxError(errorStart, argument);
                     } else {
-                        pendingError = new CommandResult.SyntaxError(reader.pos(), argument);
+                        pendingError = CommandResult.syntaxError(reader.pos(), argument);
                     }
                 }
                 reader.restore(mark);
             }
 
             // If we reach here, we have no matching child, so return the pending error
-            return Objects.requireNonNull(pendingError, "pendingError sanity check");
+            Objects.requireNonNull(pendingError, "pendingError sanity check");
+            return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), true);
         }
 
         // At this point we reached a leaf node but we still have input left so its an error
-        return new CommandResult.SyntaxError(reader.pos(), null);
+        return CommandResult.syntaxError(reader.pos(), null, true);
     }
 
 
@@ -216,6 +217,22 @@ public class CommandNode {
         var node = new CommandNode();
         children.add(new ArgumentPair(argument, node));
         return node;
+    }
+
+    protected @NotNull CommandResult unwrap(@NotNull CommandResult result) {
+        // This is a bad solution for handling not found errors. Basically any error that _could_ be a not found error
+        // is created as a syntax error with isNotFound set to true. Then, when a command returns one it is `unwrap`ed
+        // to remove that error EXCEPT for at the root command manager which will not do that unwrap step resulting
+        // in a syntax error with isNotFound being returned only for root errors.
+
+        if (result instanceof CommandResult.SyntaxError syntaxError) {
+            if (!syntaxError.isNotFound()) return result;
+
+            // Remove the isNotFound flag
+            return CommandResult.syntaxError(syntaxError.start(), syntaxError.arg());
+        }
+
+        return result;
     }
 
     protected record ArgumentPair(Argument<?> argument, CommandNode node) {
