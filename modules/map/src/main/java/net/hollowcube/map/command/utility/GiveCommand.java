@@ -23,6 +23,7 @@ public class GiveCommand extends CommandDsl {
         super("give");
         setCondition(mapFilter(false, true, false));
 
+        addSyntax(playerOnly(this::handleGiveItem), itemArg);
         addSyntax(playerOnly(this::handleGiveItem), itemArg, amountArg);
     }
 

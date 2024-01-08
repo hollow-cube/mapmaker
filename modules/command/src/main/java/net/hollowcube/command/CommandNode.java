@@ -46,13 +46,13 @@ public class CommandNode {
         for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
             var result = argument.parse(sender, reader);
 
-            // If we get an exact match we can suggest the child
-            if (result instanceof ParseResult.Success<?>) {
+            // If we have more space to read and get an exact match we can suggest the child
+            if (reader.canRead() && result instanceof ParseResult.Success<?>) {
                 return node.suggest(sender, reader);
             }
 
             // If we consumed the entire remainder and have a partial match we can suggest the child.
-            if (!reader.canRead() && result instanceof ParseResult.Partial<?>) {
+            if (!reader.canRead() && !(result instanceof ParseResult.Failure<?>)) {
                 argument.suggest(sender, reader.rawSince(mark), suggestion);
                 // Do not return here, we will try to collect suggestions from the other args as well.
             }
