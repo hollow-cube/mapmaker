@@ -28,6 +28,9 @@ public class ItemFrameEntity extends MapEntity {
 
     protected ItemFrameEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);
+
+        hasPhysics = false;
+        setNoGravity(true);
     }
 
     public void playSpawnSound() {

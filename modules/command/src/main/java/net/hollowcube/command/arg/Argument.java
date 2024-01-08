@@ -4,8 +4,10 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class Argument<T> {
@@ -51,7 +53,7 @@ public abstract class Argument<T> {
 
     private final String id;
 
-//    private Function<CommandSender, T> defaultProvider = null;
+    private Function<CommandSender, T> defaultProvider = null;
 
     protected Argument(@NotNull String id) {
         this.id = id;
@@ -64,22 +66,22 @@ public abstract class Argument<T> {
 
     // Properties
 
-//    public boolean isOptional() {
-//        return defaultProvider != null;
-//    }
-//
-//    public @NotNull Argument2<T> defaultValue(@Nullable T value) {
-//        return defaultValue(sender -> value);
-//    }
-//
-//    public @NotNull Argument2<T> defaultValue(@NotNull Function<CommandSender, T> provider) {
-//        this.defaultProvider = provider;
-//        return this;
-//    }
-//
-//    public @Nullable T getDefaultValue(@NotNull CommandSender sender) {
-//        return defaultProvider == null ? null : defaultProvider.apply(sender);
-//    }
+    public boolean isOptional() {
+        return defaultProvider != null;
+    }
+
+    public @NotNull Argument<T> defaultValue(@Nullable T value) {
+        return defaultValue(sender -> value);
+    }
+
+    public @NotNull Argument<T> defaultValue(@NotNull Function<CommandSender, T> provider) {
+        this.defaultProvider = provider;
+        return this;
+    }
+
+    public @Nullable T getDefaultValue(@NotNull CommandSender sender) {
+        return defaultProvider == null ? null : defaultProvider.apply(sender);
+    }
 
 
     // Transforms

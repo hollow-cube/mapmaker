@@ -7,11 +7,17 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Consumer;
 
 public class CommandManagerImpl implements CommandManager {
     private final RootCommandNode root = new RootCommandNode();
+
+    @Override
+    public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+        return root.xpath(path, followRedirects);
+    }
 
     @Override
     public void register(@NotNull String name, @NotNull CommandNode node) {
@@ -27,7 +33,14 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public void register(@NotNull CommandDsl command) {
-        register(command.name(), command::build);
+        var builder = new CommandBuilder();
+        command.build(builder);
+        var node = builder.node();
+
+        register(command.name(), node);
+        for (var alias : command.aliases()) {
+            register(alias, aliasBuilder -> aliasBuilder.redirect(node));
+        }
     }
 
     @Override

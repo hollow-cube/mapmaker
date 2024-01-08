@@ -44,11 +44,10 @@ public final class TFArgument {
                         }
                     }
                 }
-        );
-//        .defaultValue(sender -> {
-//            if (!(sender instanceof Player player)) return null;
-//            return LocalSession.forPlayer(player).selection(Selection.DEFAULT);
-//        });
+        ).defaultValue(sender -> {
+            if (!(sender instanceof Player player)) return null;
+            return LocalSession.forPlayer(player).selection(Selection.DEFAULT);
+        });
     }
 
     public static @NotNull Argument<Clipboard> Clipboard(@NotNull String id) {
@@ -79,10 +78,10 @@ public final class TFArgument {
                         }
                     }
                 }
-        ); //todo .defaultValue(sender -> {
-//        if (!(sender instanceof Player player)) return null;
-//        return PlayerSession.forPlayer(player).clipboard(Selection.DEFAULT);
-//    })
+        ).defaultValue(sender -> {
+            if (!(sender instanceof Player player)) return null;
+            return PlayerSession.forPlayer(player).clipboard(Selection.DEFAULT);
+        });
     }
 
     public static @NotNull Argument<Pattern> Pattern(@NotNull String id, @NotNull Terraform tf) {

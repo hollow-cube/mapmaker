@@ -1,8 +1,8 @@
 package net.hollowcube.command.dsl;
 
+import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandExecutor;
-import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.arg.Argument;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +33,10 @@ public class CommandDsl {
         return name;
     }
 
+    public @NotNull List<String> aliases() {
+        return aliases;
+    }
+
     public void build(@NotNull CommandBuilder builder) {
         if (condition != null) {
             builder.condition(condition);
@@ -40,7 +44,13 @@ public class CommandDsl {
 
         if (subcommands != null) {
             for (var subcommand : subcommands) {
-                builder.child(subcommand.name(), subcommand::build);
+                builder.child(subcommand.name(), child -> {
+                    subcommand.build(child);
+
+                    for (var alias : subcommand.aliases()) {
+                        builder.child(alias, aliasBuilder -> aliasBuilder.redirect(child.node()));
+                    }
+                });
             }
         }
 

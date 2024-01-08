@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class MoveCommand extends CommandDsl {
 
     private final Argument<Integer> countArg = Argument.Int("count")
-            .min(1); //.defaultValue(1);
+            .min(1).defaultValue(1);
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public MoveCommand() {

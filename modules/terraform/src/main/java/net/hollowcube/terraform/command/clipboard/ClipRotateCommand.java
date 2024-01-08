@@ -13,8 +13,8 @@ import java.util.Locale;
 
 public class ClipRotateCommand extends CommandDsl {
 
-    private final Argument<String> axisArg = Argument.Word("axis").with("x", "y", "z"); // .defaultValue("x")
-    private final Argument<Integer> amountArg = Argument.Int("rotation").clamp(0, 360); // .defaultValue(90);
+    private final Argument<String> axisArg = Argument.Word("axis").with("x", "y", "z").defaultValue("x");
+    private final Argument<Integer> amountArg = Argument.Int("rotation").clamp(0, 360).defaultValue(90);
 
     public ClipRotateCommand() {
         super("rotate");

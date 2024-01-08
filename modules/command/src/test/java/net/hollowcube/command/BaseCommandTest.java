@@ -67,7 +67,7 @@ public class BaseCommandTest {
         private boolean executed = false;
 
         @Override
-        public void execute(CommandSender sender, CommandContext context) {
+        public void execute(@NotNull CommandSender sender, @NotNull CommandContext context) {
             this.executed = true;
         }
     }

@@ -22,6 +22,7 @@ public final class SetCommand extends CommandDsl {
 
         this.patternArg = TFArgument.Pattern("pattern", tf);
 
+        addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg);
         addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg, selectionArg);
     }
 

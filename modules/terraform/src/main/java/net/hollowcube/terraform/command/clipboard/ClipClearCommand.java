@@ -15,6 +15,7 @@ public class ClipClearCommand extends CommandDsl {
     public ClipClearCommand() {
         super("clear");
 
+        addSyntax(playerOnly(this::handleClearClipboard));
         addSyntax(playerOnly(this::handleClearClipboard), clipboardArg);
     }
 

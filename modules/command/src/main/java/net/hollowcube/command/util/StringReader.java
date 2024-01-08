@@ -10,6 +10,10 @@ public final class StringReader {
         this.string = string;
     }
 
+    public @NotNull String raw() {
+        return string;
+    }
+
     public int mark() {
         return pos;
     }

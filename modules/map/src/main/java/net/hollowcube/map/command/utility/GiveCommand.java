@@ -17,7 +17,7 @@ import static net.hollowcube.map.util.MapCondition.mapFilter;
 public class GiveCommand extends CommandDsl {
     private final Argument<ItemStack> itemArg = ItemRegistry.Argument("item");
     private final Argument<Integer> amountArg = Argument.Int("count")
-            .clamp(1, 64); //.defaultValue(1);
+            .clamp(1, 64).defaultValue(1);
 
     public GiveCommand() {
         super("give");

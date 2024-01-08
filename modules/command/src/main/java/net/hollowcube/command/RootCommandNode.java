@@ -37,6 +37,10 @@ final class RootCommandNode extends CommandNode {
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);
 
+        // Note about redirects:
+        // Currently we just tell brigadier that they are a new root literal node which works fine since we never
+        // actually send real arguments to the client. However, once we do, they will need to be handled better.
+
         var rootNodes = new IntArrayList();
         for (ArgumentPair(Argument<?> argument, CommandNode childNode) : children) {
             if (childNode.condition != null) {

@@ -7,11 +7,25 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Consumer;
 
 public interface CommandManager {
 
+    default @UnknownNullability CommandNode xpath(@NotNull String path) {
+        return xpath(path, true);
+    }
+
+    /**
+     * XPath is used to search for a command in the graph using a path-like syntax of argument IDs.
+     *
+     * <p>For example: cmd.a.b.c</p>
+     *
+     * @param path The path to search for
+     * @return The command node, or null if not found
+     */
+    @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects);
 
     void register(@NotNull String name, @NotNull CommandNode node);
 

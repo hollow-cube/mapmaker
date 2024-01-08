@@ -21,16 +21,51 @@ import java.util.Objects;
  */
 public class CommandNode {
 
-    private CommandExecutor executor = null;
-    protected List<ArgumentPair> children = null;
+    protected CommandNode redirect = null; // May not be used with executor, children, condition.
 
-    protected CommandCondition condition = null;
+    protected CommandExecutor executor = null; // May not be used with redirect
+    protected List<ArgumentPair> children = null; // May not be used with redirect
+    protected CommandCondition condition = null; // May not be used with redirect
 
     public CommandNode() {
 
     }
 
+    public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+        // If its a redirect always defer to the directed node.
+        if (followRedirects && redirect != null) {
+            return redirect.xpath(path, true);
+        }
+
+        // Found this node
+        if (path.isEmpty()) return this;
+
+        String next, remaining;
+        if (path.indexOf('.') != -1) {
+            // If there is a dot, split on it and try to find a child with the first part
+            next = path.substring(0, path.indexOf('.'));
+            remaining = path.substring(path.indexOf('.') + 1);
+        } else {
+            // Otherwise the entire path is the first part
+            next = path;
+            remaining = "";
+        }
+
+        for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
+            if (!argument.id().equalsIgnoreCase(next)) continue;
+
+            return node.xpath(remaining, followRedirects);
+        }
+
+        return null;
+    }
+
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull StringReader reader) {
+        // If this is a redirect, completely defer handling
+        if (redirect != null) {
+            return redirect.suggest(sender, reader);
+        }
+
         // If there are no children, or we are at end of input then there cannot be any suggestions
         if (children == null || children.isEmpty() || !reader.canRead()) return Suggestion.EMPTY;
 
@@ -65,6 +100,11 @@ public class CommandNode {
     }
 
     public @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull CommandContextImpl context) {
+        // If this is a redirect, completely defer handling
+        if (redirect != null) {
+            return redirect.execute(sender, reader, context);
+        }
+
         // If there is a condition on this node we need to evaluate it
         if (condition != null) {
             var result = condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
@@ -75,8 +115,12 @@ public class CommandNode {
         if (reader.remaining() == 0) {
             // No more to read, and we have an executor, run it.
             if (executor != null) {
-                executor.execute(sender, context);
-                return new CommandResult.Success();
+                try {
+                    executor.execute(sender, context);
+                    return new CommandResult.Success();
+                } catch (Exception e) {
+                    return new CommandResult.ExecutionError(e);
+                }
             }
 
             // Otherwise we reached end of input without an executable command (i think), so its an error.
@@ -131,14 +175,23 @@ public class CommandNode {
 
     // Modification
 
+    void setRedirect(@NotNull CommandNode node) {
+        Check.stateCondition(this.executor != null, "Cannot add redirect to an executable node!");
+        Check.stateCondition(this.children != null, "Cannot add redirect to a node with children!");
+        Check.stateCondition(this.condition != null, "Cannot add redirect to a conditional node!");
+        this.redirect = Objects.requireNonNull(node);
+    }
+
     void setExecutor(@NotNull CommandExecutor executor) {
+        Check.stateCondition(this.redirect != null, "Cannot add an executor to a redirect node!");
         Check.stateCondition(this.executor != null, "Command node already has an executor!");
-        this.executor = executor;
+        this.executor = Objects.requireNonNull(executor);
     }
 
     void setCondition(@NotNull CommandCondition condition) {
+        Check.stateCondition(this.redirect != null, "Cannot add condition to a redirect node!");
         Check.stateCondition(this.condition != null, "Command node already has a condition!");
-        this.condition = condition;
+        this.condition = Objects.requireNonNull(condition);
     }
 
     /**
@@ -148,6 +201,7 @@ public class CommandNode {
      */
     @NotNull
     CommandNode nodeFor(@NotNull Argument<?> argument) {
+        Check.stateCondition(this.redirect != null, "Cannot add child to a redirect node!");
         if (children == null) children = new ArrayList<>();
         for (ArgumentPair(Argument<?> existing, CommandNode node) : children) {
             if (!existing.id().equalsIgnoreCase(argument.id())) continue;

@@ -62,18 +62,26 @@ public abstract class CommandHandlingPlayer extends Player {
                 try {
                     if (player instanceof CommandHandlingPlayer pl) {
                         var result = pl.getCommandManager().execute(player, command);
-
-                        if (result instanceof CommandResult.SyntaxError(int start, Argument<?> arg)) {
-                            player.sendMessage(Component.text()
-                                    .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
-                                    .append(Component.text(command.substring(0, start), NamedTextColor.GRAY))
-                                    .append(Component.text(command.substring(start), NamedTextColor.RED, TextDecoration.UNDERLINED))
-                                    .append(Component.text("<--[HERE]", NamedTextColor.RED))
-                                    .build());
-                        } else if (result instanceof CommandResult.Denied) {
-                            player.sendMessage("permission error");
+                        switch (result) {
+                            case CommandResult.Success() -> {
+                            }
+                            case CommandResult.SyntaxError(int start, Argument<?> arg) -> {
+                                player.sendMessage(Component.text()
+                                        .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
+                                        .append(Component.text(command.substring(0, start), NamedTextColor.GRAY))
+                                        .append(Component.text(command.substring(start), NamedTextColor.RED, TextDecoration.UNDERLINED))
+                                        .append(Component.text("<--[HERE]", NamedTextColor.RED))
+                                        .build());
+                            }
+                            case CommandResult.ExecutionError(Throwable e) -> {
+                                player.sendMessage(Component.translatable("generic.unknown_error"));
+                                MinecraftServer.getExceptionManager().handleException(new RuntimeException(
+                                        "An unhandled exception occurred while executing the command '" + command + "'", e));
+                            }
+                            case CommandResult.Denied() -> {
+                                player.sendMessage("permission error");
+                            }
                         }
-
                     } else throw new RuntimeException("Player is not a CommandHandlingPlayer");
                 } catch (Exception e) {
                     MinecraftServer.getExceptionManager().handleException(e);

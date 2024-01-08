@@ -125,7 +125,7 @@ public abstract class MapServerBase implements MapServer {
         globalEventHandler.addChild(terraformEvents);
         terraform = Terraform.builder()
                 .rootEventNode(terraformEvents)
-//                .rootCommandManager(commandManager)
+                .rootCommandManager(commandManager)
                 .globalCommandCondition(mapFilter(false, true, false))
                 .module(Terraform.BASE_MODULE)
                 .module(new MapServerModule())

@@ -35,13 +35,17 @@ public class CommandContextImpl implements CommandContext {
 
     @Override
     public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
-        //noinspection unchecked
-        return (T) argValues.get(arg.id());
+        if (argValues.containsKey(arg.id())) {
+            //noinspection unchecked
+            return (T) argValues.get(arg.id());
+        } else {
+            return arg.getDefaultValue(sender);
+        }
     }
 
     @Override
     public boolean has(@NotNull Argument<?> arg) {
-        return argValues.containsKey(arg.id());
+        return arg.isOptional() || argValues.containsKey(arg.id());
     }
 
     public void setArgValue(@NotNull String argId, @NotNull String rawValue, @NotNull Object value) {

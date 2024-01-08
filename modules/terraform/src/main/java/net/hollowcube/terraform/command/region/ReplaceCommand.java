@@ -24,6 +24,7 @@ public final class ReplaceCommand extends CommandDsl {
 
         patternArg = TFArgument.Pattern("pattern", tf);
 
+        addSyntax(playerOnly(this::handleReplaceMaskInRegion), maskArg, patternArg);
         addSyntax(playerOnly(this::handleReplaceMaskInRegion), maskArg, patternArg, selectionArg);
     }
 

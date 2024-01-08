@@ -26,6 +26,11 @@ public class CommandBuilder {
         return this;
     }
 
+    public CommandBuilder redirect(@NotNull CommandNode target) {
+        node.setRedirect(target);
+        return this;
+    }
+
     // Execution
 
     public @NotNull CommandBuilder executes(CommandExecutor executor, Argument<?>... args) {

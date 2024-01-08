@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class ClipFlipCommand extends CommandDsl {
 
-    private final Argument<String> axisArg = Argument.Word("axis").with("x", "y", "z"); // .defaultValue("x")
+    private final Argument<String> axisArg = Argument.Word("axis").with("x", "y", "z").defaultValue("x");
 
     public ClipFlipCommand() {
         super("flip");

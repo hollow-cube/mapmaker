@@ -9,7 +9,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class UndoCommand extends CommandDsl {
-    private final Argument<Integer> countArg = Argument.Int("count").min(1); //.defaultValue(1);
+    private final Argument<Integer> countArg = Argument.Int("count").min(1).defaultValue(1);
 
     public UndoCommand() {
         super("undo");
