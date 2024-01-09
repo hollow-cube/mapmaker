@@ -460,9 +460,15 @@ public class EditMap extends View {
     }
 
     private void settingClickHandler(MapSettings.Setting setting, boolean set) {
-        if (map.isVerified()) {
-            player().sendMessage(Component.translatable("settings.verify.error"));
-            return;
+        switch (map.verification()) {
+            case PENDING -> {
+                player().sendMessage(Component.translatable("settings.verify.error"));
+                return;
+            }
+            case VERIFIED -> {
+                player().sendMessage(Component.translatable("settings.verified.error"));
+                return;
+            }
         }
         // TODO this is disgusting but I'm lazy, we should do this like tags as enum
         if (set) {
