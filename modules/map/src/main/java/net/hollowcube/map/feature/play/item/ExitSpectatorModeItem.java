@@ -1,9 +1,12 @@
 package net.hollowcube.map.feature.play.item;
 
+import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
+import net.minestom.server.event.EventDispatcher;
+import net.kyori.adventure.text.Component;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +40,6 @@ public class ExitSpectatorModeItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        player.removeTag(SPECTATOR_CHECKPOINT);
         var world = (InternalMapWorld) MapWorld.forPlayer(player);
         //todo should not depend on implementation details of InternalMapWorld
 
@@ -46,8 +48,17 @@ public class ExitSpectatorModeItem extends ItemHandler {
             CompletableFuture.runAsync(() -> {
                 playingWorld.removePlayer(player, false);
                 playingWorld.acceptPlayer(player, true);
+                if (world.map().settings().isOnlySprint()) {
+                    var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+                    if (checkpoint != null) {
+                        player.teleport(checkpoint);
+                    } else {
+                        EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
+                    }
+                    player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
+                }
+                player.removeTag(SPECTATOR_CHECKPOINT);
             });
         }
     }
-
 }
