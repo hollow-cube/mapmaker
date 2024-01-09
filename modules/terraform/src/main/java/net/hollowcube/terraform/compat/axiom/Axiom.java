@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.compat.axiom;
 
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
+import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.instance.block.Block;
@@ -18,8 +19,8 @@ import java.util.Map;
 @SuppressWarnings("UnstableApiUsage")
 public class Axiom {
 
-    public static final int MIN_API_VERSION = 6;
-    public static final int MAX_API_VERSION = 6;
+    public static final int MIN_API_VERSION = 7;
+    public static final int MAX_API_VERSION = 7;
 
     // Config properties
 
@@ -48,14 +49,29 @@ public class Axiom {
 
     public static void enable(@NotNull Player player) {
         Check.stateCondition(!isPresent(player), "Axiom is not present on the client");
-        TerraformAxiom.sendEnableMessage(player);
+
+        var enablePacket = new AxiomEnablePacket(
+                true,
+                0x100000, // 1mb, todo: constant/configurable
+                false, false,
+                5, // todo: constant/configurable
+                16, // todo: constant/configurable
+                true // todo: constant/configurable
+        );
+        player.sendPacket(enablePacket.toPacket(player));
         player.setTag(ENABLED_TAG, true);
+
+        //todo init hotbars
+        //todo init views
+
     }
 
     public static void disable(@NotNull Player player) {
         if (!isEnabled(player)) return;
         player.removeTag(ENABLED_TAG);
-        TerraformAxiom.sendDisableMessage(player);
+
+        var packet = new AxiomEnablePacket(false);
+        player.sendPacket(packet.toPacket(player));
     }
 
     /**

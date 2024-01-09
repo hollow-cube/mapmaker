@@ -77,6 +77,10 @@ public final class MiscFunctionality {
     private static final BadSprite CURRENCY_DISPLAY = BadSprite.SPRITE_MAP.get("hud/currency_display");
 
     public static void buildCurrencyDisplay(@NotNull Player p, @NotNull FontUIBuilder builder) {
+        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
+        // which should not show this ui for sure (it looks awful).
+        if (p.getGameMode() == GameMode.SPECTATOR) return;
+
         var playerData = PlayerDataV2.fromPlayer(p);
 
         builder.pushColor(FontUtil.NO_SHADOW);
@@ -93,6 +97,10 @@ public final class MiscFunctionality {
     private static final BadSprite XP_BAR_BACKGROUND = BadSprite.SPRITE_MAP.get("hud/level/xp_bar_background");
 
     public static void buildExperienceBar(@NotNull Player p, @NotNull FontUIBuilder builder) {
+        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
+        // which should not show this ui for sure (it looks awful).
+        if (p.getGameMode() == GameMode.SPECTATOR) return;
+
         var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.
 

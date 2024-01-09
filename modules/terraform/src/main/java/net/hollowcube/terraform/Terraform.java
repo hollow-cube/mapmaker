@@ -3,6 +3,7 @@ package net.hollowcube.terraform;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.terraform.compat.axiom.AxiomModule;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.storage.TerraformStorage;
@@ -26,6 +27,8 @@ import java.util.function.Supplier;
 public sealed interface Terraform permits TerraformImpl {
     @NotNull
     Supplier<TerraformModule> BASE_MODULE = BaseModule::new;
+    @NotNull
+    Supplier<TerraformModule> AXIOM_MODULE = AxiomModule::new;
 
     static @NotNull Builder builder() {
         return new Builder();
