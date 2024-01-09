@@ -309,7 +309,7 @@ public class EditingMapWorld implements InternalMapWorld {
             player.teleport(pos).join();
 
             if (firstSpawn)
-                player.sendMessage(Component.translatable("build.world.load.first", Component.translatable(map.settings().getName())));
+                player.sendMessage(Component.translatable("build.world.load.first", Component.translatable(map().name())));
         }
 
         player.refreshCommands(); //todo this should just be done on every instance change
