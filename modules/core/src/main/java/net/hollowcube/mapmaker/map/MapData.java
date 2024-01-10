@@ -132,6 +132,7 @@ public class MapData {
             if (objectUsage() + object.type().cost() > objectLimit)
                 return false;
 
+            if (objects == null) objects = new ArrayList<>();
             objects.add(object);
             objectUsage += object.type().cost();
 
@@ -148,6 +149,8 @@ public class MapData {
     public boolean removeObject(@NotNull String id) {
         settings.updateLock.lock();
         try {
+            if (objects == null) return false;
+
             var removed = false;
             var iter = objects.iterator();
             while (iter.hasNext()) {
@@ -173,11 +176,12 @@ public class MapData {
     }
 
     public @NotNull List<ObjectData> objects() {
+        if (this.objects == null) return List.of();
         return List.copyOf(objects);
     }
 
     public @Nullable ObjectData getObject(String id) {
-        var object = objects.stream().filter(obj -> obj.id().equals(id)).findFirst();
+        var object = objects().stream().filter(obj -> obj.id().equals(id)).findFirst();
         return object.orElse(null);
     }
 
