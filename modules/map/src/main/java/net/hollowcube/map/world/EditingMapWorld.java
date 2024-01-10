@@ -1,5 +1,6 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.BlockItemPlaceEvent;
@@ -40,13 +41,15 @@ import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EditingMapWorld implements InternalMapWorld {
-    private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EditingMapWorld.class);
 
     // If set, indicates that the player is an editor.
     private static final Tag<Boolean> TAG_EDITING = Tag.Boolean("editing").defaultValue(false);
@@ -183,7 +186,7 @@ public class EditingMapWorld implements InternalMapWorld {
 
     @Override
     public @Blocking void close(boolean shutdown) {
-        logger.log(System.Logger.Level.INFO, "Closing editing world {0}", map.id());
+        logger.info("Closing editing world {}", map.id());
         if (testWorld != null) {
             testWorld.close(shutdown);
         }
@@ -217,7 +220,7 @@ public class EditingMapWorld implements InternalMapWorld {
                     server().mapService().updateMap(map.owner(), map.id(), updates);
                     return true;
                 } catch (Exception e) {
-                    logger.log(System.Logger.Level.ERROR, "Failed to save map settings for " + map.id(), e);
+                    logger.error("Failed to save map settings for {}", map.id(), e);
                     MinecraftServer.getExceptionManager().handleException(e);
                     return false;
                 }
@@ -248,7 +251,7 @@ public class EditingMapWorld implements InternalMapWorld {
                 instance.sendMessage(Component.translatable("build.world.save.success"));
             }
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to save world " + map.id(), e);
+            logger.error("Failed to save world {}", map.id(), e);
             instance.sendMessage(Component.translatable("build.world.save.failure"));
         } finally {
             saveLock.unlock();
@@ -256,8 +259,8 @@ public class EditingMapWorld implements InternalMapWorld {
     }
 
     private void autoSaveTaskWrapper() {
-        Thread.startVirtualThread(() -> {
-            logger.log(System.Logger.Level.INFO, "Autosaving world {0}", map.id());
+        FutureUtil.submitVirtual(() -> {
+            logger.info("Autosaving world {}", map.id());
             saveWorld(true);
         });
     }
@@ -336,9 +339,9 @@ public class EditingMapWorld implements InternalMapWorld {
                 //todo
 //                playerData.setLastEditedMap(map.id());
 
-                logger.log(System.Logger.Level.INFO, "Updated data for {0}", player.getUuid());
+                logger.info("Updated data for {}", player.getUuid());
             } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+                logger.error("Failed to save player state for {}", player.getUuid(), e);
             }
         }
 

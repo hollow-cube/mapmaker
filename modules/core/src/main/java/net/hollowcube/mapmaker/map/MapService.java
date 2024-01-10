@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.mapmaker.util.Response;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,7 @@ public interface MapService {
      *
      * @return The created map
      */
-    @NotNull Response<MapData> createMap(@NotNull MapPlayerData player, int slot);
+    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot);
 
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
@@ -52,8 +51,6 @@ public interface MapService {
 
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
-
-    @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 
     default @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId) {
         return getLatestSaveState(mapId, playerId, null);

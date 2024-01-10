@@ -41,11 +41,13 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class PlayingMapWorld implements InternalMapWorld {
-    private static final System.Logger logger = System.getLogger(EditingMapWorld.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EditingMapWorld.class);
 
     private static final BadSprite SPECTATOR_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/spectator"));
     private static final BadSprite FINISHED_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/finished"));
@@ -161,7 +163,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
     @Override
     public @Blocking void close(boolean shutdown) {
-        logger.log(System.Logger.Level.INFO, "Closing playing world {0}", map.id());
+        logger.info("Closing playing world {}", map.id());
         var kickMessage = Component.translatable("mapmaker.shutdown");
         for (var player : Set.copyOf(activePlayers)) {
             removePlayer(player, true);
@@ -277,9 +279,9 @@ public class PlayingMapWorld implements InternalMapWorld {
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
 
-                logger.log(System.Logger.Level.INFO, "Updated savestate for {0}", player.getUuid());
+                logger.info("Updated savestate for {}", player.getUuid());
             } catch (Exception e) {
-                logger.log(System.Logger.Level.ERROR, "Failed to save player state for {0}", player.getUuid(), e);
+                logger.error("Failed to save player state for {}", player.getUuid(), e);
             }
         }
         player.removeTag(SaveState.TAG);

@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.util.Response;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +31,7 @@ public class NoopMapService implements MapService {
     );
 
     @Override
-    public @NotNull Response<MapData> createMap(@NotNull MapPlayerData player, int slot) {
+    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot) {
         throw new ConcurrentModificationException("not implemented");
     }
 
@@ -118,11 +117,6 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
-        throw new ConcurrentModificationException("not implemented");
-    }
-
-    @Override
-    public @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
         throw new ConcurrentModificationException("not implemented");
     }
 

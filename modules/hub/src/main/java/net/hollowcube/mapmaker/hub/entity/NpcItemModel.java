@@ -21,6 +21,8 @@ public class NpcItemModel extends BaseNpcEntity {
         setNoGravity(true);
     }
 
+    // 13
+    // -6
     public void setModel(@NotNull Material material, int customModelData) {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);

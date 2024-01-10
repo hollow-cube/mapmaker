@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.util.Response;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +38,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull Response<MapData> createMap(@NotNull MapPlayerData player, int slot) {
+    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot) {
         logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
         var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot));
         var req = HttpRequest.newBuilder()
@@ -48,12 +47,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-//        if (res.statusCode() != 200)
-//            throw new InternalError("Failed to create map: " + res.body());
+        if (res.statusCode() != 201)
+            throw new InternalError("Failed to create map: " + res.body());
 
-        var resType = new TypeToken<Response<MapData>>() {
-        };
-        return GSON.fromJson(res.body(), resType);
+        return GSON.fromJson(res.body(), MapData.class);
     }
 
     @Override
@@ -61,7 +58,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/search?page=" + page + "&page_size=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
+                .uri(URI.create(url + "/search?page=" + page + "&pageSize=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -76,7 +73,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var endpoint = new StringBuilder(url + "/search?");
         if (params.page() != -1) {
             endpoint.append("page=").append(params.page()).append("&");
-            endpoint.append("page_size=").append(params.pageSize()).append("&");
+            endpoint.append("pageSize=").append(params.pageSize()).append("&");
         }
         if (params.owner() != null) {
             endpoint.append("owner=").append(params.owner()).append("&");
@@ -136,9 +133,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         switch (res.statusCode()) {
             case 204 -> {/* update ok */}
             case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to update map: " + res.body());
+            default -> throw new InternalError("Failed to update map" + res.statusCode() + ": " + res.body());
         }
-        ;
     }
 
     @Override
@@ -151,9 +147,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
-            case 204 -> {/* delete ok */}
+            case 200 -> {/* delete ok */}
             case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to delete map: " + res.body());
+            default -> throw new InternalError("Failed to delete map" + res.statusCode() + ": " + res.body());
         }
     }
 
@@ -301,23 +297,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState getSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
-                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), SaveState.class);
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to get savestate: " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?type=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
+                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -351,7 +333,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 204) return; // Ok
+        if (res.statusCode() == 200) return; // Ok
         throw new InternalError("Failed to update savestate: " + res.body());
     }
 

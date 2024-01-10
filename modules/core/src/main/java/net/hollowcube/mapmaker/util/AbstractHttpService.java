@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.util;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.hollowcube.mapmaker.map.*;
@@ -27,11 +26,12 @@ public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
-            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+//            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
+            .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumOrdinalTypeAdapter<>(PersonalizedMapData.Progress.class))
             .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
             .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
             .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))

@@ -44,9 +44,7 @@ public class MapRatingFeatureProvider implements FeatureProvider {
 
         var future = MapService.VIRTUAL_EXECUTOR.submit(() -> {
             try {
-                var rating = world.server().mapService().getMapRating(world.map().id(), player.getUuid().toString());
-                System.out.println("player rating: " + rating);
-                return rating;
+                return world.server().mapService().getMapRating(world.map().id(), player.getUuid().toString());
             } catch (Exception e) {
                 MinecraftServer.getExceptionManager().handleException(e);
                 // It's fine to default to a new rating since its valid to overwrite a rating anyway.

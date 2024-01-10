@@ -142,6 +142,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             } else {
                 var cps = CheckpointCache.forInstance(event.getInstance());
                 var checkpoint = cps.getCheckpoint(checkpointId);
+                if (checkpoint == null) return;
                 future = player.teleport(player.getPosition().withCoord(checkpoint.pos().add(0.5, 0, 0.5)));
             }
         }

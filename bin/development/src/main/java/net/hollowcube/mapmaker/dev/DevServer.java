@@ -198,7 +198,6 @@ public class DevServer {
             MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
                 @Override
                 public @NotNull CommandManager getCommandManager() {
-                    System.out.println("GET COMMAND MANAGER == " + (MapWorld.forPlayerOptional(this) != null));
                     return MapWorld.forPlayerOptional(this) != null ? mapCommandManager : hubCommandManager;
                 }
             });
