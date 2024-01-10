@@ -4,6 +4,7 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -28,7 +29,15 @@ class MapWorldHelpers {
             var enabledFutures = new Future[features.size()];
             for (int i = 0; i < features.size(); i++) {
                 var feature = features.get(i);
-                enabledFutures[i] = scope.fork(() -> feature.initMap(world));
+                enabledFutures[i] = scope.fork(() -> {
+                    try {
+                        return feature.initMap(world);
+                    } catch (Exception e) {
+                        MinecraftServer.getExceptionManager().handleException(new RuntimeException(
+                                "failed to load feature " + feature.getClass().getName(), e));
+                        return false;
+                    }
+                });
             }
 
             scope.join();
