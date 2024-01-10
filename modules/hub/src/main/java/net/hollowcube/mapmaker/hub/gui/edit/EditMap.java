@@ -67,6 +67,7 @@ public class EditMap extends View {
 
     // MAP SETTINGS
     private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
+    private @Outlet("map_settings_locked_container_switch") Switch mapSettingsLockedContainerSwitch;
 
     // VISUAL
 
@@ -613,6 +614,11 @@ public class EditMap extends View {
     @Action("tab_settings")
     public void showSettingsTab() {
         selectTab(2);
+        if (map.settings().getVariant() == MapVariant.BUILDING) {
+            mapSettingsLockedContainerSwitch.setOption(0);
+        } else {
+            mapSettingsLockedContainerSwitch.setOption(1);
+        }
     }
 
     @Action("tab_actions")
@@ -626,8 +632,12 @@ public class EditMap extends View {
             tabButtonSwitches[i].setOption(i == index ? 1 : 0);
         }
         //Default to visual tab if map is build type
-        if (index == 1 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING))
+        if (index == 1 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING)) {
             mapTagsTabSwitch.setOption(0);
+        }
+        if (index == 2 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING)) {
+            mapSettingsTabSwitch.setOption(0);
+        }
     }
 
 }
