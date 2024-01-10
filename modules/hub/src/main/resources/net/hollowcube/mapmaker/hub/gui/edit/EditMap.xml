@@ -153,14 +153,23 @@
                 <button translationKey="gui.create_maps.map_tags_tab.filter"/>
             </box>
 
-            <box width="9" align="ltr">
-                <!-- make the locked container in here -->
-                <button width="4" id="map_tags_tab_visual"
-                        translationKey="gui.create_maps.map_tags_tab.visual_tags"/>
-                <spacer width="1"/>
-                <button width="4" id="map_tags_tab_gameplay"
-                        translationKey="gui.create_maps.map_tags_tab.gameplay_tags"/>
-            </box>
+            <switch id="map_tags_locked_container_switch" width="9" height="1">
+                <box width="9" align="ltr">
+                    <button width="4" translationKey="gui.create_maps.map_tags_tab.visual_tags"/>
+                    <spacer width="1"/>
+                    <button width="3" translationKey="gui.create_maps.map_tags_tab.gameplay_tags_locked"/>
+                    <button sprite="create_maps/tab_tags/tab_visual/container_lock"
+                            translationKey="gui.create_maps.map_tags_tab.gameplay_tags_locked"/>
+                </box>
+                <box width="9" align="ltr">
+                    <button width="4" id="map_tags_tab_visual"
+                            translationKey="gui.create_maps.map_tags_tab.visual_tags"/>
+                    <spacer width="1"/>
+                    <button width="4" id="map_tags_tab_gameplay"
+                            translationKey="gui.create_maps.map_tags_tab.gameplay_tags"/>
+                </box>
+            </switch>
+
             <switch id="map_tags_tab_switch" width="9" height="3">
                 <!-- VISUAL TAB -->
                 <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container" align="ltr">

@@ -63,6 +63,7 @@ public class EditMap extends View {
     // WARNING! The order of the elements in this array MUST match the order of the enum constants in MapTags.Tag.
     // The order is determined by the order in which the elements exist in the GUI xml file.
     private @OutletGroup("map_tag_.+_switch") Switch[] mapTagsSwitches;
+    private @Outlet("map_tags_locked_container_switch") Switch mapTagsLockedContainerSwitch;
 
     // MAP SETTINGS
     private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
@@ -602,6 +603,11 @@ public class EditMap extends View {
     @Action("tab_tags")
     public void showTagsTab() {
         selectTab(1);
+        if (map.settings().getVariant() == MapVariant.BUILDING) {
+            mapTagsLockedContainerSwitch.setOption(0);
+        } else {
+            mapTagsLockedContainerSwitch.setOption(1);
+        }
     }
 
     @Action("tab_settings")
@@ -619,7 +625,7 @@ public class EditMap extends View {
         for (int i = 0; i < tabButtonSwitches.length; i++) {
             tabButtonSwitches[i].setOption(i == index ? 1 : 0);
         }
-        // Default to visual tab if map is build type
+        //Default to visual tab if map is build type
         if (index == 1 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING))
             mapTagsTabSwitch.setOption(0);
     }
