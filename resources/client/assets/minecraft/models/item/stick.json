@@ -51,6 +51,18 @@
         "custom_model_data": 8
       },
       "model": "minecraft:item/lb_screen_1x"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "minecraft:item/conveyor_claw_pillar"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "minecraft:item/conveyor_claw_claw"
     }
   ]
 }
