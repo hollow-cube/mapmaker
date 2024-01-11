@@ -4,14 +4,18 @@ import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcTextModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class LeaderboardText {
 
@@ -37,15 +41,24 @@ public class LeaderboardText {
         initTextEntity(updatedEntity, horizontalOffset, SUBTITLE_SCALE, TEXT_SHIFT + 0.5, screenAngle);
     }
 
-    public void setData(@NotNull LeaderboardData data) {
+    public void setTitle(@NotNull Component title) {
+        titleEntity.getEntityMeta().setText(title);
+    }
+
+    public void setSubtitle(@NotNull Component subtitle) {
+        subtitleEntity.getEntityMeta().setText(subtitle);
+    }
+
+    public void setUpdated(@NotNull Component updated) {
+        updatedEntity.getEntityMeta().setText(updated);
+    }
+
+    public void setData(@NotNull Function<String, DisplayName> nameFunc, @NotNull LeaderboardData data) {
         this.data = data;
 
-        entriesEntity.getEntityMeta().setText(buildTop10(data)
+        entriesEntity.getEntityMeta().setText(buildTop10(nameFunc, data)
                 .appendNewline()
-                .append(Component.text("Your Score: 1")));
-        titleEntity.getEntityMeta().setText(Component.text("ᴍᴀᴘѕ ʙᴇᴀᴛᴇɴ", NamedTextColor.GOLD));
-        subtitleEntity.getEntityMeta().setText(Component.text("ᴀʟʟ ᴛɪᴍᴇ", NamedTextColor.GRAY));
-        updatedEntity.getEntityMeta().setText(Component.text("ᴜᴘᴅᴀᴛᴇᴅ " + FontUtil.rewrite("smallnums", "5") + "ᴍ ᴀɢᴏ", NamedTextColor.DARK_GRAY));
+                .append(Component.text("Your Score: ---")));
     }
 
     public @NotNull CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos pos) {
@@ -75,38 +88,47 @@ public class LeaderboardText {
         ));
     }
 
-    private @NotNull Component buildTop10(@NotNull LeaderboardData data) {
+    private @NotNull Component buildTop10(@NotNull Function<String, DisplayName> nameFunc, @NotNull LeaderboardData data) {
+        List<Component> names = new ArrayList<>();
+
         // Compute the target width of each line
         int maxWidth = 0;
         for (var entry : data.top()) {
-            maxWidth = Math.max(maxWidth, measureLine(entry));
+            var name = nameFunc.apply(entry.player()).build();
+            names.add(name);
+            maxWidth = Math.max(maxWidth, measureLine(name, entry));
         }
 
         // Rebuild each line properly with the known length
         var result = Component.text();
-        for (var entry : data.top()) {
-            result.append(buildLine(entry, 125, true)).appendNewline();
+        for (int i = 0; i < data.top().size(); i++) {
+            result.append(buildLine(names.get(i), data.top().get(i), 125, true)).appendNewline();
+        }
+        for (int i = data.top().size(); i < 10; i++) {
+            result.append(buildLine(Component.text("............................"), new LeaderboardData.Entry("", 0, i + 1), 125, true)).appendNewline();
         }
         return result.build();
     }
 
-    private int measureLine(@NotNull LeaderboardData.Entry entry) {
-        return FontUtil.measureText(String.format("#%d%s%d", entry.rank(), entry.player(), entry.score()));
+    private int measureLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry) {
+        var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
+        return FontUtil.measureText(String.format("#%d%s%d", entry.rank(), plainName, entry.score()));
     }
 
-    private @NotNull Component buildLine(@NotNull LeaderboardData.Entry entry, int targetSize, boolean trueCenter) {
-        var padding = (targetSize - measureLine(entry));
+    private @NotNull Component buildLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry, int targetSize, boolean trueCenter) {
+        var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
+        var padding = (targetSize - measureLine(playerName, entry));
 
         int leftPadding;
         if (trueCenter) {
-            leftPadding = (int) Math.ceil((targetSize / 2.0) - (FontUtil.measureText(entry.player()) / 2.0) - FontUtil.measureText("#" + entry.rank()));
+            leftPadding = (int) Math.ceil((targetSize / 2.0) - (FontUtil.measureText(plainName) / 2.0) - FontUtil.measureText("#" + entry.rank()));
         } else {
             leftPadding = (int) Math.ceil(padding / 2.0);
         }
 
         return Component.text("#" + entry.rank())
                 .append(Component.text(FontUtil.computeOffset(leftPadding)))
-                .append(Component.text(entry.player()))
+                .append(playerName)
                 .append(Component.text(FontUtil.computeOffset(padding - leftPadding)))
                 .append(Component.text(entry.score()));
     }

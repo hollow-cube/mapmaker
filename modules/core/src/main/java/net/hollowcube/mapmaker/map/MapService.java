@@ -14,6 +14,9 @@ import java.util.concurrent.Executors;
 public interface MapService {
     @NotNull ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
+    @NotNull String LEADERBOARD_TOP_TIMES = "top_times";
+    @NotNull String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
+
     /**
      * Creates a new map in the map service with the given owner.
      *
@@ -42,6 +45,8 @@ public interface MapService {
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
 
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
+
+    @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
 
     @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
 

@@ -235,6 +235,21 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
+        var uri = url + "/leaderboard/" + name;
+        if (playerId != null) uri += "?playerId=" + playerId;
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), LeaderboardData.class);
+            default -> throw new InternalError("Failed to get playtime leaderboard: " + res.body());
+        };
+    }
+
+    @Override
     public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
         var uri = url + "/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;

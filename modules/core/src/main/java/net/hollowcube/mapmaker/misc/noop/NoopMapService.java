@@ -101,6 +101,11 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
+        return null;
+    }
+
+    @Override
     public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
         throw new ConcurrentModificationException("not implemented");
     }
