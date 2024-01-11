@@ -41,9 +41,13 @@ public class LocalSession {
     private static final int MAX_HISTORY_SIZE = 10;
 
     public static @NotNull LocalSession forPlayer(@NotNull Player player) {
+        return Objects.requireNonNull(forPlayerOptional(player), "Local session not initialized");
+    }
+
+    public static @Nullable LocalSession forPlayerOptional(@NotNull Player player) {
         var instance = player.getInstance();
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
-        return Objects.requireNonNull(instance.getTag(tag), "Local session not initialized");
+        return instance.getTag(tag);
     }
 
     private final PlayerSession playerSession;

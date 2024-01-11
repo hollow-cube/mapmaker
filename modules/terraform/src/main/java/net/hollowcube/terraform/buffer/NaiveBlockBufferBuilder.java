@@ -2,6 +2,7 @@ package net.hollowcube.terraform.buffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.PaletteUtil;
@@ -13,7 +14,7 @@ final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
 
     private final @Nullable WorldView world;
 
-    private final Long2ObjectMap<Palette> sectionData = new Long2ObjectArrayMap<>();
+    private final Long2ObjectMap<Palette.Mutable> sectionData = new Long2ObjectArrayMap<>();
     private boolean hasBorderTaint = false;
 
     public NaiveBlockBufferBuilder(@Nullable WorldView world) {
@@ -34,7 +35,7 @@ final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
         // Set the block
         long sectionKey = PaletteUtil.packPos(x >> 4, y >> 4, z >> 4);
         //todo how can this computeIfAbsent call be sped up? It is almost all of the time when building a big buffer
-        Palette section = sectionData.computeIfAbsent(sectionKey, k -> new NaivePalette());
+        var section = sectionData.computeIfAbsent(sectionKey, k -> Palette.blocks());
         section.set(x & 0xF, y & 0xF, z & 0xF, value);
     }
 
@@ -52,7 +53,7 @@ final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
         // Set the block
         long sectionKey = PaletteUtil.packPos(x >> 4, y >> 4, z >> 4);
         //todo how can this computeIfAbsent call be sped up? It is almost all of the time when building a big buffer
-        Palette section = sectionData.computeIfAbsent(sectionKey, k -> new NaivePalette());
+        var section = sectionData.computeIfAbsent(sectionKey, k -> Palette.blocks());
         section.set(x & 0xF, y & 0xF, z & 0xF, value);
     }
 

@@ -1,13 +1,14 @@
 package net.hollowcube.terraform.buffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.util.PaletteUtil;
 import org.jetbrains.annotations.NotNull;
 
 final class BlockBufferImpl implements BlockBuffer {
-    private final Long2ObjectMap<Palette> sectionData;
+    private final Long2ObjectMap<? extends Palette> sectionData;
 
-    BlockBufferImpl(@NotNull Long2ObjectMap<Palette> sectionData) {
+    BlockBufferImpl(@NotNull Long2ObjectMap<? extends Palette> sectionData) {
         this.sectionData = sectionData;
     }
 

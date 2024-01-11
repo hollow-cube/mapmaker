@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.buffer;
 
+import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.hollowcube.terraform.task.edit.WorldView;
@@ -15,7 +16,11 @@ import org.jetbrains.annotations.Nullable;
  * <p>BlockBuffer is the core type for block data being applied by a Terraform action.
  * It is used when computing the change set, storing the undo and redo data, etc.</p>
  */
-public sealed interface BlockBuffer permits BlockBufferImpl {
+public interface BlockBuffer {
+
+    static @NotNull BlockBuffer empty() {
+        return EmptyBlockBuffer.INSTANCE;
+    }
 
     static @NotNull Builder builder(@Nullable WorldView world) {
         return new NaiveBlockBufferBuilder(world);

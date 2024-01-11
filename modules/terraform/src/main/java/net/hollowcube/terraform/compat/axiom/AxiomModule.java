@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 
 public class AxiomModule implements TerraformModule {
-    private static final Logger logger = LoggerFactory.getLogger(AxiomModule.class);
+    static final Logger logger = LoggerFactory.getLogger(AxiomModule.class);
 
     private final EventNode<Event> axiomEvents = EventNode.all("tf/compat/axiom")
             .addListener(PlayerSpawnEvent.class, this::handlePlayerConfig)
@@ -53,14 +53,18 @@ public class AxiomModule implements TerraformModule {
             case AxiomClientHelloPacket packet -> handler.handleHelloMessage(player, packet);
             case AxiomClientSetGameModePacket packet -> handler.handleSetGamemode(player, packet);
             case AxiomClientSetFlySpeedPacket packet -> handler.handleSetFlySpeed(player, packet);
-            case AxiomClientSetBlockPacket packet -> handler.handleSetBlock(player, packet);
-////            case "axiom:set_hotbar_slot" -> {}
-////            case "axiom:switch_active_hotbar" -> {}
+            case AxiomClientSetHotbarSlotPacket packet -> handler.handleSetHotbarSlot(player, packet);
+            case AxiomClientSwitchActiveHotbarPacket packet -> handler.handleSwitchActiveHotbar(player, packet);
             case AxiomClientTeleportPacket packet -> handler.handleTeleport(player, packet);
-////            case "axiom:set_editor_views" -> {}
-            case AxiomClientRequestBlockEntityPacket packet -> handler.handleRequestBlockEntities(player, packet);
+            case AxiomClientSetEditorViewsPacket packet -> handler.handleSetEditorViews(player, packet);
+            case AxiomClientChunkDataRequestPacket packet -> handler.handleRequestChunkData(player, packet);
+            case AxiomClientSetBlockPacket packet -> handler.handleSetBlock(player, packet);
             case AxiomClientSetBufferPacket packet -> handler.handleSetBuffer(player, packet);
             case AxiomClientSetWorldPropertyPacket packet -> handler.handleSetWorldProperty(player, packet);
+            case AxiomClientSetTimePacket packet -> handler.handleSetTime(player, packet);
+            case AxiomClientSpawnEntitiesPacket packet -> handler.handleSpawnEntities(player, packet);
+            case AxiomClientModifyEntitiesPacket packet -> handler.handleModifyEntities(player, packet);
+            case AxiomClientDeleteEntitiesPacket packet -> handler.handleDeleteEntities(player, packet);
             case null -> logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
         }
     }

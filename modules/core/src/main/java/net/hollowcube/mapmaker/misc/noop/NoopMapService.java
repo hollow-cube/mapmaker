@@ -97,7 +97,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
-        throw new ConcurrentModificationException("not implemented");
+        // Do nothing we arent going to save the world
     }
 
     @Override

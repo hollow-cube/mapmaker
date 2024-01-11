@@ -1,11 +1,11 @@
-package net.hollowcube.terraform.buffer;
+package net.hollowcube.terraform.buffer.palette;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-final class NaivePalette implements Palette {
+public final class NaivePalette implements Palette.Mutable {
     private static final int SIZE = 16;
 
     private final int[] palette = new int[SIZE * SIZE * SIZE];
@@ -37,12 +37,16 @@ final class NaivePalette implements Palette {
         }
     }
 
+    public int[] array() {
+        return palette;
+    }
+
     @Override
     public long sizeBytes() {
         return (long) palette.length * Integer.BYTES;
     }
 
     private static int getIndex(int x, int y, int z) {
-        return x + SIZE * (y + SIZE * z);
+        return x + SIZE * (z + SIZE * y);
     }
 }

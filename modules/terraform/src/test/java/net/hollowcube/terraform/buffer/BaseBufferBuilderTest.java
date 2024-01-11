@@ -2,6 +2,7 @@ package net.hollowcube.terraform.buffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.util.PaletteUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

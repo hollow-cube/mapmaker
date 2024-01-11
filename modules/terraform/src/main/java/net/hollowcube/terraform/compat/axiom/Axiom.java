@@ -7,7 +7,6 @@ import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -22,12 +21,18 @@ public class Axiom {
     public static final int MIN_API_VERSION = 7;
     public static final int MAX_API_VERSION = 7;
 
+
     // Config properties
 
     /**
      * The maximum number of sections which can be updated in a single (correlated) change.
      */
     public static final int MAX_SECTIONS_PER_UPDATE = Integer.getInteger("terraform.axiom.max_sections_per_update", 1024);
+
+    /**
+     * The block state sent in block buffers to indicate no change to the world.
+     */
+    public static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
 
 
     public record ClientInfo(int apiVersion, @NotNull NBTCompound extraData) {
@@ -47,23 +52,36 @@ public class Axiom {
         return player.hasTag(ENABLED_TAG);
     }
 
+    /**
+     * Enables Axiom functionality for a given player.
+     *
+     * <p>This will work even if the Axiom enable packet has not been received yet, it will be enabled as soon as we
+     * recieve that message.</p>
+     *
+     * @param player
+     */
     public static void enable(@NotNull Player player) {
-        Check.stateCondition(!isPresent(player), "Axiom is not present on the client");
+        if (!isPresent(player)) {
+            // Not present yet, just set the enabled tag and wait for the hello packet
+            player.setTag(ENABLED_TAG, true);
+            return;
+        }
 
+        // Axiom is present, perform the enable sequence.
         var enablePacket = new AxiomEnablePacket(
                 true,
                 0x100000, // 1mb, todo: constant/configurable
                 false, false,
                 5, // todo: constant/configurable
                 16, // todo: constant/configurable
-                true // todo: constant/configurable
+                true, // todo: constant/configurable
+                List.of() //todo: constant/configurable
         );
         player.sendPacket(enablePacket.toPacket(player));
         player.setTag(ENABLED_TAG, true);
 
         //todo init hotbars
         //todo init views
-
     }
 
     public static void disable(@NotNull Player player) {
@@ -74,16 +92,28 @@ public class Axiom {
         player.sendPacket(packet.toPacket(player));
     }
 
+    private static final Map<String, ReadableAxiomPacket<?>> CLIENT_PACKETS = Map.ofEntries(
+            Map.entry("axiom:hello", AxiomClientHelloPacket::new),
+            Map.entry("axiom:set_gamemode", AxiomClientSetGameModePacket::new),
+            Map.entry("axiom:set_fly_speed", AxiomClientSetFlySpeedPacket::new),
+            Map.entry("axiom:set_hotbar_slot", AxiomClientSetHotbarSlotPacket::new),
+            Map.entry("axiom:switch_active_hotbar", AxiomClientSwitchActiveHotbarPacket::new),
+            Map.entry("axiom:teleport", AxiomClientTeleportPacket::new),
+            Map.entry("axiom:set_editor_views", AxiomClientSetEditorViewsPacket::new),
+            Map.entry("axiom:request_chunk_data", AxiomClientChunkDataRequestPacket::new),
+            Map.entry("axiom:set_block", AxiomClientSetBlockPacket::new),
+            Map.entry("axiom:set_buffer", AxiomClientSetBufferPacket::new),
+            Map.entry("axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new),
+            Map.entry("axiom:set_time", AxiomClientSetTimePacket::new),
+            Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
+            Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
+            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new)
+    );
+
     /**
      * All the axiom channels which the server will read from.
      */
-    static final List<String> INCOMING_CHANNELS = List.of(
-            "axiom:hello", "axiom:set_gamemode",
-            "axiom:set_fly_speed", "axiom:set_block",
-            "axiom:set_hotbar_slot", "axiom:switch_active_hotbar",
-            "axiom:teleport", "axiom:set_editor_views",
-            "axiom:request_block_entity"
-    );
+    static final List<String> INCOMING_CHANNELS = List.copyOf(CLIENT_PACKETS.keySet());
 
     /**
      * All the axiom channels which the server supports (will handle).
@@ -92,23 +122,15 @@ public class Axiom {
             "axiom:enable"
 //        "axiom:initialize_hotbars",
 //        "axiom:set_editor_views",
-//        "axiom:block_entities"
+//        "axiom:response_chunk_data",
+//        "axiom:register_world_properties",
+//        "axiom:set_world_property",
+//        "axiom:ack_world_properties",
     );
 
     private interface ReadableAxiomPacket<T extends AxiomClientPacket> {
         @NotNull T read(@NotNull NetworkBuffer buffer, int apiVersion);
     }
-
-    private static final Map<String, ReadableAxiomPacket<?>> CLIENT_PACKETS = Map.of(
-            "axiom:hello", AxiomClientHelloPacket::new,
-            "axiom:set_gamemode", AxiomClientSetGameModePacket::new,
-            "axiom:set_fly_speed", AxiomClientSetFlySpeedPacket::new,
-            "axiom:set_block", AxiomClientSetBlockPacket::new,
-            "axiom:teleport", AxiomClientTeleportPacket::new,
-            "axiom:request_block_entity", AxiomClientRequestBlockEntityPacket::new,
-            "axiom:set_buffer", AxiomClientSetBufferPacket::new,
-            "axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new
-    );
 
     public static @Nullable AxiomClientPacket readPacket(@NotNull PlayerPluginMessageEvent event) {
         var reader = CLIENT_PACKETS.get(event.getIdentifier());
@@ -121,11 +143,6 @@ public class Axiom {
         var apiVersion = clientInfo == null ? MAX_API_VERSION : clientInfo.apiVersion();
         return reader.read(buffer, apiVersion);
     }
-
-    /**
-     * The block state sent in block buffers to indicate no change to the world.
-     */
-    static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
 
     private Axiom() {
     }

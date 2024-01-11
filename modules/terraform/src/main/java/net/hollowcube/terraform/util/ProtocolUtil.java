@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.util;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,10 @@ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 public final class ProtocolUtil {
     private static final int DEBUG_MARKER = 0xbaadf00d;
     private static final boolean DEBUG_MARKERS_ENABLED = Boolean.getBoolean("terraform.debug.markers");
+
+    // Used by Axiom as an end of list marker
+    public static final long MIN_POSITION_LONG = 0b1000000000000000000000000010000000000000000000000000100000000000L;
+
 
     /**
      * Inserts a 4-byte marker into the buffer. This is used to assert that the buffer is in the correct
@@ -38,6 +43,10 @@ public final class ProtocolUtil {
         if (!DEBUG_MARKERS_ENABLED) return;
         int marker = buffer.read(INT);
         Check.stateCondition(marker != DEBUG_MARKER, "Buffer marker mismatch: {}", id);
+    }
+
+    public static @NotNull Pos readPos(@NotNull NetworkBuffer buffer) {
+        return new Pos(buffer.read(NetworkBuffer.VECTOR3D), buffer.read(NetworkBuffer.FLOAT), buffer.read(NetworkBuffer.FLOAT));
     }
 
     public static <K, V> @NotNull Map<K, V> readMap(

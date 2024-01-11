@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.buffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
+import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.PaletteUtil;
@@ -17,7 +18,7 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
     private @Nullable WorldView world;
     private final Point min, max; // Absolute min/max
     private final Point smin, smax; // Section min/max
-    private final Palette[] sectionData;
+    private final Palette.Mutable[] sectionData;
 
     private boolean hasBorderTaint = false;
 
@@ -32,7 +33,7 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
         var sectionCount = (smax.blockX() - smin.blockX() + 1)
                 * (smax.blockY() - smin.blockY() + 1)
                 * (smax.blockZ() - smin.blockZ() + 1);
-        this.sectionData = new Palette[sectionCount];
+        this.sectionData = new Palette.Mutable[sectionCount];
     }
 
     @Override
@@ -60,7 +61,7 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
 
         var palette = sectionData[sectionIndex];
         if (palette == null) {
-            palette = new NaivePalette();
+            palette = Palette.blocks();
             sectionData[sectionIndex] = palette;
         }
 
@@ -92,7 +93,7 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
 
         var palette = sectionData[sectionIndex];
         if (palette == null) {
-            palette = new NaivePalette();
+            palette = Palette.blocks();
             sectionData[sectionIndex] = palette;
         }
 

@@ -17,6 +17,7 @@ java_library(
         "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
     ],
 )
 

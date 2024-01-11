@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -294,6 +295,9 @@ public class EditingMapWorld implements InternalMapWorld {
             // Load Terraform State
             terraform.initPlayerSession(player, playerData.id());
             terraform.initLocalSession(player, playerData.id());
+            // We don't actually know if Axiom will become present later, so just send the enable message now
+            // and if they do have it installed they will get permission to use it.
+            Axiom.enable(player);
 
             player.setGameMode(GameMode.CREATIVE);
             saveState.setPlayStartTime(System.currentTimeMillis());
@@ -333,6 +337,7 @@ public class EditingMapWorld implements InternalMapWorld {
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
 
                 // Save terraform state
+                if (Axiom.isEnabled(player)) Axiom.disable(player);
                 terraform.saveLocalSession(player, true);
                 terraform.savePlayerSession(player, true);
 
