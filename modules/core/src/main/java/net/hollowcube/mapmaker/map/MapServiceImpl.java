@@ -228,7 +228,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
-            case 204 -> {/* update ok */}
+            case 200 -> {/* update ok */}
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update map world: " + res.body());
         }

@@ -6,6 +6,7 @@ import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -258,7 +259,7 @@ public class EditMap extends View {
         pushView(c -> new MapDetailsView(c, publishedMap2, authorName.build(DisplayName.Context.PLAIN)));
     }
 
-    private static final int MIN_PLAYTIME = Integer.getInteger("map.min.playtime", 5 * 60 * 1000); // 5 minutes
+    private static final int MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment() ? 1 : 5 * 60 * 1000; // 5 minutes
 
     private PublishStage getPublishState() {
         try {

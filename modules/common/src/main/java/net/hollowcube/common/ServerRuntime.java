@@ -9,6 +9,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public interface ServerRuntime {
 
+    default boolean isDevelopment() {
+        return commit().equals("dev");
+    }
+
     // Server info
 
     default @NotNull String version() {

@@ -118,7 +118,7 @@ public class MapData {
 
     public int objectUsage() {
         if (objectUsage == -1) {
-            objectUsage = objects.stream()
+            objectUsage = objects().stream()
                     .mapToInt(o -> o.type().cost())
                     .sum();
         }
