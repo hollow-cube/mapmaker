@@ -30,24 +30,112 @@
             <!-- MAP QUALITIES -->
             <switch id="row_one" width="9" height="1">
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_full">
-                    <button width="1" height="1"
-                            id="quality_unrated_full"
-                            translationKey="gui.map_details.map_info_tab.quality_description"
-                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
-                    <text width="8" height="1"
-                          id="quality_unrated_full_text"
-                          translationKey="gui.map_details.map_info_tab.quality.unrated"
-                          font="map_details_quality" centered="false" shift="3"/>
+                    <switch id="quality_icon_full" width="1" height="1">
+                        <button width="1" height="1"
+                                id="quality_unrated_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/unrated_icon"/>
+                        <button width="1" height="1"
+                                id="quality_good_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/good_icon"/>
+                        <button width="1" height="1"
+                                id="quality_great_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/great_icon"/>
+                        <button width="1" height="1"
+                                id="quality_excellent_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/excellent_icon"/>
+                        <button width="1" height="1"
+                                id="quality_outstanding_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/outstanding_icon"/>
+                        <button width="1" height="1"
+                                id="quality_masterpiece_full"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/masterpiece_icon"/>
+                    </switch>
+                    <switch id="quality_text_full" width="8" height="1">
+                        <text width="8" height="1"
+                              id="quality_unrated_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.unrated"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="8" height="1"
+                              id="quality_good_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.good"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="8" height="1"
+                              id="quality_great_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.great"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="8" height="1"
+                              id="quality_excellent_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.excellent"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="8" height="1"
+                              id="quality_outstanding_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.outstanding"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="8" height="1"
+                              id="quality_masterpiece_full_text"
+                              translationKey="gui.map_details.map_info_tab.quality.masterpiece"
+                              font="map_details_quality" centered="false" shift="3"/>
+                    </switch>
                 </box>
                 <box width="9" height="1" align="ltr" sprite="play_maps/details/tab_info/container_quality_half">
-                    <button width="1" height="1"
-                            id="quality_unrated_half"
-                            translationKey="gui.map_details.map_info_tab.quality_description"
-                            sprite="play_maps/details/tab_info/quality/unrated_icon"/>
-                    <text width="4" height="1"
-                          id="quality_unrated_half_text"
-                          translationKey="gui.map_details.map_info_tab.quality.unrated"
-                          font="map_details_quality" centered="false" shift="3"/>
+                    <switch id="quality_icon_half" width="1" height="1">
+                        <button width="1" height="1"
+                                id="quality_unrated_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/unrated_icon"/>
+                        <button width="1" height="1"
+                                id="quality_good_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/good_icon"/>
+                        <button width="1" height="1"
+                                id="quality_great_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/great_icon"/>
+                        <button width="1" height="1"
+                                id="quality_excellent_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/excellent_icon"/>
+                        <button width="1" height="1"
+                                id="quality_outstanding_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/outstanding_icon"/>
+                        <button width="1" height="1"
+                                id="quality_masterpiece_half"
+                                translationKey="gui.map_details.map_info_tab.quality_description"
+                                sprite="play_maps/details/tab_info/quality/masterpiece_icon"/>
+                    </switch>
+                    <switch id="quality_text_half" width="4" height="1">
+                        <text width="4" height="1"
+                              id="quality_unrated_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.unrated"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="4" height="1"
+                              id="quality_good_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.good"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="4" height="1"
+                              id="quality_great_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.great"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="4" height="1"
+                              id="quality_excellent_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.excellent"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="4" height="1"
+                              id="quality_outstanding_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.outstanding"
+                              font="map_details_quality" centered="false" shift="3"/>
+                        <text width="4" height="1"
+                              id="quality_masterpiece_half_text"
+                              translationKey="gui.map_details.map_info_tab.quality.masterpiece"
+                              font="map_details_quality" centered="false" shift="3"/>
+                    </switch>
                     <!-- MAP DIFFICULTIES -->
                     <switch id="difficulty_switch" width="4" height="1">
                         <box width="4" height="1" align="ltr" sprite="play_maps/details/tab_info/container_difficulty">

@@ -43,9 +43,23 @@ public class MapDetailsView extends View {
     private @Outlet("no_map_settings_switch") Switch noMapSettingsSwitch;
     private Switch[] tabSwitches;
 
-    // MAP QUALITIES (leave what is commented out, refer to line 92)
+    // MAP QUALITIES
     private @Outlet("quality_unrated_half_text") Text qualityUnratedHalfText;
     private @Outlet("quality_unrated_full_text") Text qualityUnratedFullText;
+    private @Outlet("quality_good_half_text") Text qualityGoodHalfText;
+    private @Outlet("quality_good_full_text") Text qualityGoodFullText;
+    private @Outlet("quality_great_half_text") Text qualityGreatHalfText;
+    private @Outlet("quality_great_full_text") Text qualityGreatFullText;
+    private @Outlet("quality_excellent_half_text") Text qualityExcellentHalfText;
+    private @Outlet("quality_excellent_full_text") Text qualityExcellentFullText;
+    private @Outlet("quality_outstanding_half_text") Text qualityOutstandingHalfText;
+    private @Outlet("quality_outstanding_full_text") Text qualityOutstandingFullText;
+    private @Outlet("quality_masterpiece_half_text") Text qualityMasterpieceHalfText;
+    private @Outlet("quality_masterpiece_full_text") Text qualityMasterpieceFullText;
+    private @Outlet("quality_icon_full") Switch qualityIconFull;
+    private @Outlet("quality_icon_half") Switch qualityIconHalf;
+    private @Outlet("quality_text_full") Switch qualityTextFull;
+    private @Outlet("quality_text_half") Switch qualityTextHalf;
 
     // MAP DIFFICULTIES
     private @Outlet("difficulty_switch") Switch difficultySwitch;
@@ -111,8 +125,59 @@ public class MapDetailsView extends View {
 
         // MAP QUALITY
 
-        qualityUnratedHalfText.setText(map.quality().name());
-        qualityUnratedFullText.setText(map.quality().name());
+        if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            if (map.quality() == MapQuality.GOOD) {
+                qualityGoodHalfText.setText("Good");
+                qualityIconHalf.setOption(1);
+                qualityTextHalf.setOption(1);
+            } else if (map.quality() == MapQuality.GREAT) {
+                qualityGreatHalfText.setText("Great");
+                qualityIconHalf.setOption(2);
+                qualityTextHalf.setOption(2);
+            } else if (map.quality() == MapQuality.EXCELLENT) {
+                qualityExcellentHalfText.setText("Excellent");
+                qualityIconHalf.setOption(3);
+                qualityTextHalf.setOption(3);
+            } else if (map.quality() == MapQuality.OUTSTANDING) {
+                qualityOutstandingHalfText.setText("Outstanding");
+                qualityIconHalf.setOption(4);
+                qualityTextHalf.setOption(4);
+            } else if (map.quality() == MapQuality.MASTERPIECE) {
+                qualityMasterpieceHalfText.setText("Masterpiece");
+                qualityIconHalf.setOption(5);
+                qualityTextHalf.setOption(5);
+            } else {
+                qualityUnratedHalfText.setText("Unrated");
+                qualityIconHalf.setOption(0);
+                qualityTextHalf.setOption(0);
+            }
+        } else {
+            if (map.quality() == MapQuality.GOOD) {
+                qualityGoodFullText.setText("Good");
+                qualityIconFull.setOption(1);
+                qualityTextFull.setOption(1);
+            } else if (map.quality() == MapQuality.GREAT) {
+                qualityGreatFullText.setText("Great");
+                qualityIconFull.setOption(2);
+                qualityTextFull.setOption(2);
+            } else if (map.quality() == MapQuality.EXCELLENT) {
+                qualityExcellentFullText.setText("Excellent");
+                qualityIconFull.setOption(3);
+                qualityTextFull.setOption(3);
+            } else if (map.quality() == MapQuality.OUTSTANDING) {
+                qualityOutstandingFullText.setText("Outstanding");
+                qualityIconFull.setOption(4);
+                qualityTextFull.setOption(4);
+            } else if (map.quality() == MapQuality.MASTERPIECE) {
+                qualityMasterpieceFullText.setText("Masterpiece");
+                qualityIconFull.setOption(5);
+                qualityTextFull.setOption(5);
+            } else {
+                qualityUnratedFullText.setText("Unrated");
+                qualityIconFull.setOption(0);
+                qualityTextFull.setOption(0);
+            }
+        }
 
         // MAP DIFFICULTY
 
