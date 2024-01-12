@@ -127,15 +127,19 @@ public class LeaderboardDisplay {
 
         var playerId = player.getUuid().toString();
         long playerScore = cachedData.getScore(playerId);
+        int playerRank = cachedData.getRank(playerId);
 
         if (playerScore == -1) {
             playerScore = playerScoreSupplier.apply(playerId);
         }
 
         var content = cachedTopTen.appendNewline().append(Component.text("You: " + playerScore));
-        if (playerScore != -1) content = content.append(Component.text(" (", NamedTextColor.GRAY)
-                .append(Component.text("#1"))
-                .append(Component.text(")", NamedTextColor.GRAY)));
+        if (playerRank != -1) {
+            content = content.append(Component.text(" (", NamedTextColor.GRAY)
+                    .append(Component.text("#" + cachedData.getRank(playerId)))
+                    .append(Component.text(")", NamedTextColor.GRAY)));
+        }
+
         Map<Integer, Metadata.Entry<?>> metaUpdates = Map.of(TEXT_METADATA_INDEX, Metadata.Chat(content));
         player.sendPacket(new EntityMetaDataPacket(entriesEntity.getEntityId(), metaUpdates));
     }

@@ -35,6 +35,10 @@ public record LeaderboardData(
         return top().stream().filter(e -> e.player().equals(playerId)).findFirst().map(Entry::score).orElse(-1L);
     }
 
+    public int getRank(@NotNull String playerId) {
+        return top().stream().filter(e -> e.player().equals(playerId)).findFirst().map(Entry::rank).orElse(-1);
+    }
+
     /**
      * Converts the leaderboard data to a sendable list of components for a leaderboard.
      *
