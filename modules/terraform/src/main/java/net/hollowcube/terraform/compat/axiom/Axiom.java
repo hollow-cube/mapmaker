@@ -119,13 +119,15 @@ public class Axiom {
      * All the axiom channels which the server supports (will handle).
      */
     static final List<String> OUTGOING_CHANNELS = List.of(
-            "axiom:enable"
-//        "axiom:initialize_hotbars",
-//        "axiom:set_editor_views",
-//        "axiom:response_chunk_data",
-//        "axiom:register_world_properties",
-//        "axiom:set_world_property",
-//        "axiom:ack_world_properties",
+            "axiom:enable",
+            "axiom:ack_world_properties",
+            "axiom:response_chunk_data",
+            "axiom:set_editor_views",
+            "axiom:set_world_property",
+            "axiom:initialize_hotbars",
+            "axiom:custom_blocks", // todo
+            "axiom:editor_warning", // todo
+            "axiom:register_world_properties"
     );
 
     private interface ReadableAxiomPacket<T extends AxiomClientPacket> {

@@ -7,6 +7,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,7 +35,10 @@ public class PlayerDataV2 {
     private int coins = 0;
     private int cubits = 0;
 
-    public PlayerDataV2() {}
+    private Cosmetics cosmetics = Cosmetics.EMPTY;
+
+    public PlayerDataV2() {
+    }
 
     public PlayerDataV2(String id, String username, @NotNull TextComponent displayName) {
         this.id = id;
@@ -95,6 +99,21 @@ public class PlayerDataV2 {
 
     public int cubits() {
         return cubits;
+    }
+
+    public @NotNull Cosmetics cosmetics() {
+        return cosmetics;
+    }
+
+    public record Cosmetics(
+            @Nullable String head,
+            @Nullable String back,
+            @Nullable String hand,
+            @Nullable String particle,
+            @Nullable String companion
+    ) {
+        public static final Cosmetics EMPTY = new Cosmetics(null, null, null, null, null);
+
     }
 
 }

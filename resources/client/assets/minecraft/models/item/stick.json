@@ -8,61 +8,71 @@
       "predicate": {
         "custom_model_data": 1
       },
-      "model": "minecraft:item/blank"
+      "model": "minecraft:item/blank",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 2
       },
-      "model": "minecraft:item/broken"
+      "model": "minecraft:item/broken",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 3
       },
-      "model": "minecraft:item/loader_1"
+      "model": "minecraft:item/loader_1",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 4
       },
-      "model": "minecraft:item/lb_screen"
+      "model": "minecraft:item/lb_screen",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 5
       },
-      "model": "minecraft:item/sm_house"
+      "model": "minecraft:item/sm_house",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 6
       },
-      "model": "minecraft:item/train_middle"
+      "model": "minecraft:item/train_middle",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 7
       },
-      "model": "minecraft:item/train_front"
+      "model": "minecraft:item/train_front",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 8
       },
-      "model": "minecraft:item/lb_screen_1x"
+      "model": "minecraft:item/lb_screen_1x",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 9
       },
-      "model": "minecraft:item/conveyor_claw_pillar"
+      "model": "minecraft:item/conveyor_claw_pillar",
+      "axiom:hide": true
     },
     {
       "predicate": {
         "custom_model_data": 10
       },
-      "model": "minecraft:item/conveyor_claw_claw"
+      "model": "minecraft:item/conveyor_claw_claw",
+      "axiom:hide": true
     }
   ]
 }

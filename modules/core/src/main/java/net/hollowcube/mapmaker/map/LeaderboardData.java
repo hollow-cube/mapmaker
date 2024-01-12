@@ -27,6 +27,14 @@ public record LeaderboardData(
     public record Entry(@NotNull String player, long score, int rank) {
     }
 
+    public boolean contains(@NotNull String playerId) {
+        return top().stream().anyMatch(e -> e.player().equals(playerId));
+    }
+
+    public long getScore(@NotNull String playerId) {
+        return top().stream().filter(e -> e.player().equals(playerId)).findFirst().map(Entry::score).orElse(-1L);
+    }
+
     /**
      * Converts the leaderboard data to a sendable list of components for a leaderboard.
      *

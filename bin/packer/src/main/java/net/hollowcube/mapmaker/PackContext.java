@@ -132,6 +132,7 @@ public class PackContext {
         predicate.addProperty("custom_model_data", cmd);
         override.add("predicate", predicate);
         override.addProperty("model", writeBasicModel(name, texture));
+        override.addProperty("axiom:hide", true);
         leatherArmorFile.getAsJsonArray("overrides").add(override);
         return cmd;
     }
