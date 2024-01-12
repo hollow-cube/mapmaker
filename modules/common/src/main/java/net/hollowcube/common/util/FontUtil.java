@@ -188,7 +188,7 @@ public final class FontUtil {
                 for (var entry : allSprites) {
                     var obj = entry.getAsJsonObject();
                     if (!obj.has("fontChar")) continue;
-                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0), obj.get("width").getAsInt());
+                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0), obj.get("width").getAsInt() + 1);
                 }
             }
         } catch (IOException e) {
