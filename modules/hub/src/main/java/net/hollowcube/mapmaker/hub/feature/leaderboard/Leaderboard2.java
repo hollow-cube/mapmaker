@@ -36,7 +36,7 @@ public class Leaderboard2 {
     public final LeaderboardDisplay left;
     public final LeaderboardDisplay right;
 
-    private long refreshInterval = 1 * 60 * 1000; // 3 minutes
+    private long refreshInterval = 15 * 60 * 1000; // 15 minutes
     private long lastRefresh = -1;
 
     public Leaderboard2(
