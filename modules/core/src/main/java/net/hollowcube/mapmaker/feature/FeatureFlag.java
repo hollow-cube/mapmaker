@@ -51,6 +51,6 @@ public interface FeatureFlag {
      * @return True if the feature is known to be enabled, false otherwise.
      */
     @NonBlocking
-    boolean test(@NotNull FlagContext... context);
+    boolean test(@NotNull Object... context);
 
 }

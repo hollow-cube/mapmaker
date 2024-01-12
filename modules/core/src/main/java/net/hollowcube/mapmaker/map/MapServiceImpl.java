@@ -235,6 +235,22 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
+        var reqBody = GSON.toJson(req);
+        var req2 = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url + "/" + mapId + "/report"))
+                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+                .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to report map: " + res.body());
+        }
+    }
+
+    @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         var uri = url + "/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;

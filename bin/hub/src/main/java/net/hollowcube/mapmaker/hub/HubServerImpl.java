@@ -325,8 +325,6 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 ////            player.openInventory(new Inventory(InventoryType.ANVIL, Component.text("test123")));
 //        });
 
-//        newOpenGUI(player, StoreView::new);
-
         // Garbage below
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.

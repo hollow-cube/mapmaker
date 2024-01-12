@@ -46,6 +46,8 @@ public interface MapService {
 
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 
+    void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
+
     @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
 
     @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);

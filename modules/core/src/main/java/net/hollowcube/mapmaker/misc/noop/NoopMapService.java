@@ -101,6 +101,11 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
+
+    }
+
+    @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         return null;
     }

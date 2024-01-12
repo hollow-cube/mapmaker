@@ -24,7 +24,7 @@
                       font="map_details_author" centered="true"/>
                 <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
                         sprite="play_maps/details/add_to_playlist"/>
-                <button translationKey="gui.map_details.map_info_tab.report_map"
+                <button id="report_button_info" translationKey="gui.map_details.map_info_tab.report_map"
                         sprite="play_maps/details/report"/>
             </box>
             <!-- MAP QUALITIES -->

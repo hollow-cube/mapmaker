@@ -1,13 +1,16 @@
 package net.hollowcube.mapmaker.gui.play;
 
+import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.map.*;
@@ -30,6 +33,8 @@ public class MapDetailsView extends View {
 
     private @ContextObject ServerBridge bridge;
     private @ContextObject PlayerService playerService;
+
+    private @OutletGroup("report_button_.+") Label[] reportButtons;
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
@@ -110,6 +115,11 @@ public class MapDetailsView extends View {
     public MapDetailsView(@NotNull Context context, @NotNull PersonalizedMapData map, @NotNull Component authorName) {
         super(context);
         this.map = map;
+
+        for (var reportButton : reportButtons) {
+            var buttonId = Objects.requireNonNull(reportButton.id());
+            addActionHandler(buttonId, Label.ActionHandler.lmb(this::handleReportMap));
+        }
 
         if (map.settings().getVariant() == MapVariant.BUILDING) {
             tabContainerSwitch.setOption(0);
@@ -296,6 +306,11 @@ public class MapDetailsView extends View {
         }
         authorText.setArgs(authorName);
 
+    }
+
+    public void handleReportMap(@NotNull Player player) {
+        if (!CoreFeatureFlags.MAP_REPORTS.test(player)) return;
+        pushView(c -> new ReportMapView(c, map.id()));
     }
 
     @Action(value = "play_map", async = true)
