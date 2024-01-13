@@ -43,9 +43,10 @@ public class PlayMapsView extends View {
 
         public @NotNull String getSortName() {
             return switch (this) {
-                case BEST -> "quality";
+                case APPROVED -> "quality";
+                case BEST -> "best";
                 case RECENT -> "new";
-                case APPROVED, BOOSTED, TRENDING -> "__IDK__";
+                case BOOSTED, TRENDING -> "__IDK__";
             };
         }
     }
@@ -94,10 +95,10 @@ public class PlayMapsView extends View {
     @Signal(SortApprovedToggle.SIG_TOGGLE)
     private void handleApprovedToggle(boolean selected) {
         // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
-//        if (!selected) return;
-//
-//        sortPreset = SortPreset.APPROVED;
-//        updateQuery();
+        if (!selected) return;
+
+        sortPreset = SortPreset.APPROVED;
+        updateQuery(true);
     }
 
     @Signal(SortBoostedToggle.SIG_TOGGLE)
