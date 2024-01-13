@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
+import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapService;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@AutoService(HubFeature.class)
+@AutoService(HubFeature.class)
 public class MainLeaderboardFeature implements HubFeature {
     private static final Logger logger = LoggerFactory.getLogger(MainLeaderboardFeature.class);
 
