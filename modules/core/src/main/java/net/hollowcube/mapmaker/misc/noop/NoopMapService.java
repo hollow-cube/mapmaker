@@ -35,7 +35,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
         return new MapSearchResponse(1, false, staticMaps.values().stream()
                 .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
                 .map(m -> (PersonalizedMapData) m)

@@ -39,10 +39,18 @@ public class PlayMapsView extends View {
     private boolean building = true;
 
     private enum SortPreset {
-        APPROVED, BEST, BOOSTED, RECENT, TRENDING
+        APPROVED, BEST, BOOSTED, RECENT, TRENDING;
+
+        public @NotNull String getSortName() {
+            return switch (this) {
+                case BEST -> "quality";
+                case RECENT -> "new";
+                case APPROVED, BOOSTED, TRENDING -> "__IDK__";
+            };
+        }
     }
 
-    private SortPreset sortPreset = SortPreset.RECENT;
+    private SortPreset sortPreset = SortPreset.BEST;
 
 
     public PlayMapsView(@NotNull Context context) {
@@ -68,11 +76,10 @@ public class PlayMapsView extends View {
 
     @Signal(SortBestToggle.SIG_TOGGLE)
     private void handleBestToggle(boolean selected) {
-        // INTENTIONALLY DISABLED UNTIL IMPLEMENTED PROPERLY
-//        if (!selected) return;
-//
-//        sortPreset = SortPreset.BEST;
-//        updateQuery();
+        if (!selected) return;
+
+        sortPreset = SortPreset.BEST;
+        updateQuery(true);
     }
 
     @Signal(SortTrendingToggle.SIG_TOGGLE)
@@ -131,7 +138,7 @@ public class PlayMapsView extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), request.page(), request.pageSize(), building, parkour, query);
+            var queryResult = mapService.searchMaps(player.getUuid().toString(), this.sortPreset.getSortName(), request.page(), request.pageSize(), building, parkour, query);
 
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
