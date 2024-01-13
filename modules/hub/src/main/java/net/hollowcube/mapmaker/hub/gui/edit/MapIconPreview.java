@@ -5,6 +5,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -16,31 +17,29 @@ public class MapIconPreview extends View {
     private @Outlet("label") Label label;
 
     private final Material material;
-    private final String labelText;
+    private final boolean isNoResultsButton;
 
     public MapIconPreview(@NotNull Context context, @NotNull Material material) {
         super(context);
         this.material = material;
-        this.labelText = material.name();
+        this.isNoResultsButton = false;
 
         label.setItemSprite(ItemStack.of(material));
-        label.setArgs(Component.text(labelText));
+        label.setArgs(LanguageProviderV2.getVanillaTranslation(material));
     }
 
     public MapIconPreview(@NotNull Context context) {
         super(context);
         this.material = Material.BARRIER;
-        this.labelText = "No Results Found!";
+        this.isNoResultsButton = true;
 
         label.setItemSprite(ItemStack.of(Material.BARRIER));
-        label.setArgs(Component.text(labelText));
+        label.setArgs(Component.text("No Results Found!"));
     }
 
     @Action("label")
     private void handleSelect() {
-        if (labelText.equals("No Results Found!")) {
-            return;
-        }
+        if (isNoResultsButton) return;
         performSignal(SIG_SELECTED, material);
     }
 }

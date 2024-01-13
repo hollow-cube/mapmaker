@@ -19,6 +19,16 @@ import java.util.Set;
 
 public final class Autocompletors {
 
+    public static final Set<Material> MATERIAL_BLACKLIST = Set.of(
+            Material.AIR, // Obvious
+            Material.BUNDLE, // Adds a slot lore element
+            // Stuff that glows
+            Material.DEBUG_STICK, Material.NETHER_STAR, Material.EXPERIENCE_BOTTLE, Material.LIGHT,
+            Material.ENCHANTED_GOLDEN_APPLE, Material.ENCHANTED_BOOK, Material.END_CRYSTAL,
+            // Stuff that moves
+            Material.SCULK_SENSOR, Material.CALIBRATED_SCULK_SENSOR, Material.RECOVERY_COMPASS
+    );
+
     private static final AutocompleteEngine<IndexableMaterial> materials = new AutocompleteEngine.Builder<IndexableMaterial>()
             .setIndex(new IndexAdapter<>() {
                 private final FuzzyIndex<IndexableMaterial> index = new PatriciaTrie<>();
@@ -52,18 +62,8 @@ public final class Autocompletors {
     }
 
     static {
-        var blacklist = Set.of(
-                Material.AIR, // Obvious
-                Material.BUNDLE, // Adds a slot lore element
-                // Stuff that glows
-                Material.DEBUG_STICK, Material.NETHER_STAR, Material.EXPERIENCE_BOTTLE, Material.LIGHT,
-                Material.ENCHANTED_GOLDEN_APPLE, Material.ENCHANTED_BOOK, Material.END_CRYSTAL,
-                // Stuff that moves
-                Material.SCULK_SENSOR, Material.CALIBRATED_SCULK_SENSOR, Material.RECOVERY_COMPASS
-        );
-
         for (var material : Material.values()) {
-            if (blacklist.contains(material)) continue;
+            if (MATERIAL_BLACKLIST.contains(material)) continue;
             materials.add(new IndexableMaterial(material));
         }
     }

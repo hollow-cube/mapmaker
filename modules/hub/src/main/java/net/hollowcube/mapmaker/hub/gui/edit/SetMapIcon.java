@@ -17,6 +17,8 @@ import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SetMapIcon extends View {
     public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
@@ -53,15 +55,26 @@ public class SetMapIcon extends View {
 
     @Action("page")
     private void createPage(@NotNull Pagination.PageRequest<MapIconPreview> request) {
-        var result = new ArrayList<MapIconPreview>();
-        for (var suggestion : Autocompletors.mapIconMaterial(input, request.pageSize())) {
-            result.add(new MapIconPreview(request.context(), suggestion));
-        }
+        List<MapIconPreview> result;
+        if (input.isEmpty()) {
+            // Add some random items
+            result = ThreadLocalRandom.current().ints(1, Material.values().size())
+                    .mapToObj(Material::fromId)
+                    .filter(m -> m != null && !Autocompletors.MATERIAL_BLACKLIST.contains(m))
+                    .limit(request.pageSize())
+                    .map(m -> new MapIconPreview(request.context(), m))
+                    .toList();
+        } else {
+            result = new ArrayList<>();
+            for (var suggestion : Autocompletors.mapIconMaterial(input, request.pageSize())) {
+                result.add(new MapIconPreview(request.context(), suggestion));
+            }
 
-        if (!input.isEmpty() && result.isEmpty()) {
-            result.add(new MapIconPreview(request.context()));
+            // Show a "no results" button if there are no results
+            if (result.isEmpty()) {
+                result.add(new MapIconPreview(request.context()));
+            }
         }
-
         request.respond(result, false);
     }
 
