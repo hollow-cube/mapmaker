@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -114,6 +115,18 @@ public class MapSettings {
             if (updates.hasChanges() && callback.apply(updates)) {
                 this.updates = new MapUpdateRequest();
             }
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    /**
+     * Run a callback with the update request, and if the callback returns true, reset the update request.
+     */
+    public void modifyUpdateRequest(@NotNull Consumer<@NotNull MapUpdateRequest> callback) {
+        updateLock.lock();
+        try {
+            callback.accept(updates);
         } finally {
             updateLock.unlock();
         }
@@ -310,6 +323,16 @@ public class MapSettings {
         return size;
     }
 
+    public void setSize(@NotNull MapSize size) {
+        updateLock.lock();
+        try {
+            updates.setSize(size);
+            this.size = size;
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
     public @NotNull MapVariant getVariant() {
         return variant;
     }
@@ -458,30 +481,37 @@ public class MapSettings {
         return this.tags;
     }
 
-    public void addTag(@NotNull MapTags.Tag tag) {
+    public boolean addTag(@NotNull MapTags.Tag tag) {
+        Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
+                "building maps may not have gameplay tags");
+
         updateLock.lock();
         try {
-            if (variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY) {
-                System.out.println("you shouldn't be here! make sure you're not allowing build maps to use gameplay tags.");
-            }
             if (this.tags == null) {
                 this.tags = new ArrayList<>();
+            } else if (this.tags.contains(tag)) {
+                return false; // Already present
             }
-            if (!this.tags.contains(tag))
-                this.tags.add(tag);
+
+            this.tags.add(tag);
             updates.setTags(this.tags);
+            return true;
         } finally {
             updateLock.unlock();
         }
     }
 
-    public void removeTag(@NotNull MapTags.Tag tag) {
+    public boolean removeTag(@NotNull MapTags.Tag tag) {
         updateLock.lock();
         try {
-            if (this.tags != null) {
-                this.tags.remove(tag);
-                updates.setTags(this.tags);
-            }
+            if (this.tags == null) return false;
+            var removed = this.tags.remove(tag);
+            if (removed) updates.setTags(this.tags);
+            return removed;
+        } catch (UnsupportedOperationException ignored) {
+            // todo: Awful awful awful why is this ending up immutable (@nix >:( )
+            this.tags = new ArrayList<>(this.tags);
+            return removeTag(tag);
         } finally {
             updateLock.unlock();
         }

@@ -7,6 +7,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -35,6 +37,8 @@ public class EditMap extends View {
     private @OutletGroup("slot_id_.+") Text[] slotIds;
     private @Outlet("tab_switch") Switch tabSwitch;
     private @OutletGroup("tab_.+_switch") Switch[] tabButtonSwitches;
+
+    private @OutletGroup("info_button_.+") Label[] infoButtons;
 
     private enum PublishStage {
         VERIFY_ERROR,
@@ -87,6 +91,11 @@ public class EditMap extends View {
         setupSubvariantClickHandlers();
         setupTagClickHandlers();
         setupSettingsClickHandlers();
+
+        for (var button : infoButtons) {
+            var buttonId = Objects.requireNonNull(button.id());
+            addActionHandler(buttonId, Label.ActionHandler.lmb(this::showInformation));
+        }
 
         selectTab(0);
         setState(State.LOADING);
@@ -639,6 +648,18 @@ public class EditMap extends View {
         if (index == 2 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING)) {
             mapSettingsTabSwitch.setOption(0);
         }
+    }
+
+    public void showInformation(@NotNull Player player) {
+        player.closeInventory();
+
+        var authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
+        player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
+                Component.text(map.id()),
+                Component.text("None/Not Published"),
+                Component.text(map.name()),
+                authorName
+        )));
     }
 
 }

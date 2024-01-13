@@ -6,7 +6,7 @@
         <box width="9" height="5" align="ttb">
             <box width="9" height="1" align="ltr" sprite="create_maps/tab_info/header">
                 <BackButton/>
-                <label translationKey="gui.create_maps.map_info_tab.information"/>
+                <button id="info_button_info" translationKey="gui.create_maps.map_info_tab.information"/>
                 <text id="slot_id_info" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <!--        todo those last 2 buttons-->
@@ -146,7 +146,7 @@
         <box width="9" height="5" sprite="create_maps/tab_tags/container" align="ttb">
             <box width="9" height="1" align="ltr">
                 <BackButton/>
-                <label translationKey="gui.create_maps.map_tags_tab.information"/>
+                <button id="info_button_tags" translationKey="gui.create_maps.map_tags_tab.information"/>
                 <text id="slot_id_tags" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <button translationKey="gui.create_maps.map_tags_tab.reset"/>
@@ -372,7 +372,7 @@
         <box width="9" height="5" sprite="create_maps/tab_settings/container" align="ttb">
             <box width="9" height="1" align="ltr">
                 <BackButton/>
-                <label translationKey="gui.create_maps.map_settings_tab.information"/>
+                <button id="info_button_settings" translationKey="gui.create_maps.map_settings_tab.information"/>
                 <text id="slot_id_settings" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <button translationKey="gui.create_maps.map_settings_tab.reset"/>
@@ -456,7 +456,7 @@
         <box width="9" height="5" sprite="create_maps/tab_actions/container" align="ttb">
             <box width="9" height="1" align="ltr">
                 <BackButton/>
-                <label translationKey="gui.create_maps.map_actions_tab.information"/>
+                <button id="info_button_actions" translationKey="gui.create_maps.map_actions_tab.information"/>
                 <text id="slot_id_actions" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <!--        todo those last 2 buttons-->

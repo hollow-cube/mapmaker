@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +31,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -62,32 +61,32 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void deleteMap(@NotNull String authorizer, @NotNull String id) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -112,22 +111,22 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -137,7 +136,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -147,27 +146,27 @@ public class NoopMapService implements MapService {
 
     @Override
     public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -181,16 +180,16 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void uploadPerfdump(@NotNull String name, @NotNull Path data) {
-        throw new ConcurrentModificationException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 }

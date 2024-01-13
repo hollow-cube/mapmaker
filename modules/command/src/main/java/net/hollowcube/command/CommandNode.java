@@ -66,19 +66,22 @@ public class CommandNode {
             return redirect.suggest(sender, reader);
         }
 
+        // It is worth noting that we do not execute the condition of this command right here. During suggestion,
+        // conditions are executed by the parent node entering them only.
+
         // If there are no children, or we are at end of input then there cannot be any suggestions
         if (children == null || children.isEmpty() || !reader.canRead()) return Suggestion.EMPTY;
-
-        // If there is a condition on this node we need to evaluate it
-        if (condition != null) {
-            var result = condition.test(sender, new ConditionContext(sender, CommandContext.Pass.SUGGEST));
-            if (result == CommandCondition.HIDE) return Suggestion.EMPTY;
-        }
 
         var mark = reader.mark();
         // the +1 here is to skip the space, but i think its kinda wrong
         var suggestion = new Suggestion(reader.pos(mark) + 1, reader.remaining());
         for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
+            // If there is a condition on the child node we need to evaluate it
+            if (node.condition != null) {
+                var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.SUGGEST));
+                if (result == CommandCondition.HIDE) continue;
+            }
+
             var result = argument.parse(sender, reader);
 
             // If we have more space to read and get an exact match we can suggest the child
@@ -105,13 +108,6 @@ public class CommandNode {
             return redirect.execute(sender, reader, context);
         }
 
-        // If there is a condition on this node we need to evaluate it
-        if (condition != null) {
-            var result = condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
-            if (result == CommandCondition.DENY) return CommandResult.denied(this);
-            if (result == CommandCondition.HIDE) return CommandResult.syntaxError(reader.pos(), null, true);
-        }
-
         if (reader.remaining() == 0) {
             // No more to read, and we have an executor, run it.
             if (executor != null) {
@@ -131,6 +127,12 @@ public class CommandNode {
         if (children != null && !children.isEmpty()) {
             CommandResult.SyntaxError pendingError = null;
             for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
+                // If there is a condition on the child we need to evaluate it
+                if (node.condition != null) {
+                    var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
+                    if (result == CommandCondition.DENY) return CommandResult.denied(this);
+                    if (result == CommandCondition.HIDE) continue;
+                }
 
                 // Try to parse the childs argument
                 var mark = reader.mark();
@@ -155,7 +157,7 @@ public class CommandNode {
 
             // If we reach here, we have no matching child, so return the pending error
             Objects.requireNonNull(pendingError, "pendingError sanity check");
-            return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), true);
+            return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), this instanceof RootCommandNode);
         }
 
         // At this point we reached a leaf node but we still have input left so its an error

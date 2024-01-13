@@ -19,6 +19,8 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.Material;
 import org.apache.kafka.common.cache.LRUCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -119,6 +121,14 @@ public class LanguageProviderV2 {
         return result.build();
     }
 
+    public static @NotNull Component getVanillaTranslation(@NotNull Material material) {
+        if (material.isBlock()) return getVanillaTranslation(material.registry().block());
+        return Component.translatable("item." + material.namespace().namespace() + "." + material.namespace().path());
+    }
+
+    public static @NotNull Component getVanillaTranslation(@NotNull Block block) {
+        return Component.translatable("block." + block.namespace().namespace() + "." + block.namespace().path());
+    }
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
 

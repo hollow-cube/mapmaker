@@ -26,6 +26,12 @@ public class CommandBuilder {
         return this;
     }
 
+    public CommandBuilder child(@NotNull Argument<?> argument, @NotNull Consumer<CommandBuilder> consumer) {
+        var childNode = node.nodeFor(argument);
+        consumer.accept(new CommandBuilder(childNode));
+        return this;
+    }
+
     public CommandBuilder redirect(@NotNull CommandNode target) {
         node.setRedirect(target);
         return this;

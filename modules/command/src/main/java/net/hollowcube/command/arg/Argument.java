@@ -36,6 +36,10 @@ public abstract class Argument<T> {
         return new ArgumentFloat(id);
     }
 
+    public static <E extends Enum<?>> ArgumentEnum<E> Enum(@NotNull String id, Class<E> enumType) {
+        return new ArgumentEnum<>(id, enumType);
+    }
+
     public static @NotNull ArgumentAxis Axis(@NotNull String id) {
         return new ArgumentAxis(id);
     }
@@ -46,6 +50,10 @@ public abstract class Argument<T> {
 
     public static @NotNull ArgumentRelativeVec3 RelativeVec3(@NotNull String id) {
         return new ArgumentRelativeVec3(id);
+    }
+
+    public static @NotNull ArgumentMaterial Material(@NotNull String id) {
+        return new ArgumentMaterial(id);
     }
 
 

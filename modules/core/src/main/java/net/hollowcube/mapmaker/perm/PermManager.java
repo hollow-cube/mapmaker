@@ -12,7 +12,7 @@ public interface PermManager {
     boolean hasMapPermission(@NotNull Player player, @NotNull String mapId, @NotNull MapPerm perm);
 
     default @NotNull net.hollowcube.command.CommandCondition createPlatformCondition2(@NotNull PlatformPerm perm) {
-        return (sender, context) -> sender instanceof Player && hasPlatformPermission((Player) sender, perm)
+        return (sender, context) -> sender instanceof Player p && hasPlatformPermission(p, perm)
                 ? net.hollowcube.command.CommandCondition.ALLOW
                 : net.hollowcube.command.CommandCondition.HIDE;
     }

@@ -60,4 +60,16 @@ class TestConditions extends BaseCommandTest {
 
         assertSyntaxError("test");
     }
+
+    @Test
+    void subTreeSuggestRegression() {
+        manager.register("map", map -> map
+                .child("list", list -> list.executes(mockExecutor()))
+                .child("alter", alter -> alter
+                        .condition(condHide)
+                        .child("name", name -> name.executes(mockExecutor()))
+                ));
+
+        assertSuggestions("map ", "list");
+    }
 }

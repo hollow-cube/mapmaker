@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.command;
 
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.map.MapDeleteCommand;
 import net.hollowcube.mapmaker.command.map.MapInfoCommand;
@@ -19,6 +20,7 @@ public class MapCommand extends CommandDsl {
 
     public final MapDeleteCommand delete;
     public final MapLeaderboardCommand leaderboard;
+    public final MapAlterCommand alter;
 
     @Inject
     public MapCommand(
@@ -38,9 +40,15 @@ public class MapCommand extends CommandDsl {
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
+        this.alter = new MapAlterCommand(mapService, permManager);
 
         // Testing
 //        addSubcommand(new MapLookupCommand(mapService));
     }
 
+    @Override
+    public void build(@NotNull CommandBuilder builder) {
+        super.build(builder);
+        alter.build(builder);
+    }
 }
