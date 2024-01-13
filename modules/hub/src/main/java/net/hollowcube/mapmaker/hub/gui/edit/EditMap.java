@@ -232,12 +232,11 @@ public class EditMap extends View {
 
         // Send the player to the map
         try {
+            player.closeInventory();
             bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);
-        } finally {
-            player.closeInventory();
         }
     }
 

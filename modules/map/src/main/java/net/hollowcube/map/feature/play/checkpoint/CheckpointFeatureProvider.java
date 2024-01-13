@@ -128,7 +128,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
         var saveState = SaveState.fromPlayer(player);
         var checkpointId = saveState.checkpoint();
-        if (checkpointId == null) {
+        if (checkpointId == null || checkpointId.isEmpty()) {
             // No checkpoint set, return to spawn
             future = player.teleport(map.settings().getSpawnPoint());
             saveState.setPlaytime(0);

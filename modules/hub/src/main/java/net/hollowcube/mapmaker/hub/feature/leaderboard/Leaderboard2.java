@@ -77,7 +77,6 @@ public class Leaderboard2 {
     }
 
     public void update() {
-        System.out.println("Updating LB");
         long now = System.currentTimeMillis();
         if (lastRefresh == -1 || now - lastRefresh >= refreshInterval) {
             if (left != null) left.update();
