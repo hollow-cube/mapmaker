@@ -9,10 +9,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
-import net.hollowcube.mapmaker.map.BuildingSubVariant;
-import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.map.ParkourSubVariant;
-import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -79,7 +76,20 @@ public class MapEntry extends View {
         lore.add(Component.translatable("gui.play_maps.map_display.type", getMapTypeComponent()));
         if (map.settings().getVariant() == MapVariant.PARKOUR)
             lore.add(Component.translatable("gui.play_maps.map_display.difficulty", map.getDifficultyComponent()));
-        lore.add(Component.translatable("gui.play_maps.map_display.rating"));
+        if (map.quality() == MapQuality.GOOD) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.good"));
+        } else if (map.quality() == MapQuality.GREAT) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.great"));
+        } else if (map.quality() == MapQuality.EXCELLENT) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.excellent"));
+        } else if (map.quality() == MapQuality.OUTSTANDING) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.outstanding"));
+        } else if (map.quality() == MapQuality.MASTERPIECE) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.masterpiece"));
+        } else {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.unrated"));
+        }
+
         lore.add(Component.translatable("gui.play_maps.map_display.id", Component.text(map.publishedIdString())));
         var tags = map.settings().getTags();
         if (!tags.isEmpty()) {
