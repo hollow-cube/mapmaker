@@ -6,6 +6,7 @@ public final class MapFeatureFlags {
 
     public static FeatureFlag RATE_MAP = FeatureFlag.of("map.rate_map");
     public static FeatureFlag BIOME_EDITOR = FeatureFlag.of("map.biome_editor");
+    public static FeatureFlag ANIMATION_BUILDER = FeatureFlag.of("map.animation_builder");
 
     public static FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 

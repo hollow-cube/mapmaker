@@ -60,11 +60,25 @@ public final class CoordinateUtil {
         }
     }
 
-    public static @NotNull Point lerp(Point zero, Point one, float t) {
+    public static @NotNull Vec lerp(Point zero, Point one, float t) {
         return new Vec(lerp(zero.x(), one.x(), t), lerp(zero.y(), one.y(), t), lerp(zero.z(), one.z(), t));
     }
 
+    public static @NotNull Pos lerp(Pos zero, Pos one, float t) {
+        return new Pos(
+                lerp(zero.x(), one.x(), t),
+                lerp(zero.y(), one.y(), t),
+                lerp(zero.z(), one.z(), t),
+                lerp(zero.yaw(), one.yaw(), t),
+                lerp(zero.pitch(), one.pitch(), t)
+        );
+    }
+
     public static double lerp(double zero, double one, float t) {
+        return zero + (one - zero) * t;
+    }
+
+    private static float lerp(float zero, float one, float t) {
         return zero + (one - zero) * t;
     }
 }
