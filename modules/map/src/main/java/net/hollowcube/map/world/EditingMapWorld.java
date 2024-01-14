@@ -2,6 +2,7 @@ package net.hollowcube.map.world;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServer;
+import net.hollowcube.map.animation.AnimationBuilder;
 import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.BlockItemPlaceEvent;
 import net.hollowcube.map.feature.FeatureProvider;
@@ -71,6 +72,8 @@ public class EditingMapWorld implements InternalMapWorld {
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
     private final ItemRegistry itemRegistry;
     private final BiomeContainer biomeContainer;
+    private AnimationBuilder animationBuilder = null;
+
     private final EventNode<InstanceEvent> scopedNode = EventNode.event("world-local", EventFilter.INSTANCE, ev -> {
         if (ev instanceof PlayerEvent event) {
             return event.getPlayer().hasTag(TAG_EDITING);
@@ -150,6 +153,13 @@ public class EditingMapWorld implements InternalMapWorld {
     @Override
     public @NotNull BiomeContainer biomes() {
         return biomeContainer;
+    }
+
+    public @NotNull AnimationBuilder animationBuilder() {
+        if (animationBuilder == null) {
+            animationBuilder = new AnimationBuilder(this);
+        }
+        return animationBuilder;
     }
 
     @Override

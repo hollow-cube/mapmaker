@@ -37,7 +37,7 @@
         "custom_model_data": 5
       },
       "model": "minecraft:item/sm_house",
-      "axiom:hide": true
+      "axiom:hide": false
     },
     {
       "predicate": {
@@ -73,6 +73,13 @@
       },
       "model": "minecraft:item/conveyor_claw_claw",
       "axiom:hide": true
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "minecraft:item/island_5x",
+      "axiom:hide": false
     }
   ]
 }

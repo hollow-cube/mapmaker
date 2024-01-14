@@ -12,6 +12,7 @@ import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
+import net.hollowcube.map.command.AnimCommand;
 import net.hollowcube.map.command.HubCommand;
 import net.hollowcube.map.command.build.BiomesCommand;
 import net.hollowcube.map.command.build.BuildCommand;
@@ -224,6 +225,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(injector.getInstance(BiomesCommand.class));
         commandManager.register(injector.getInstance(SetBiomeCommand.class));
 
+        commandManager.register(injector.getInstance(AnimCommand.class));
+
         // Register features
         var features = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
@@ -279,13 +282,14 @@ public abstract class MapServerBase implements MapServer {
         var player = event.getPlayer();
         player.refreshCommands();
 
-        // This is invalid because the player has not actually entered the map, so forPlayer fails.
-//        var map = MapWorld.forPlayer(event.getPlayer()).map();
-//        if (map.isPublished()) {
-//            Scoreboards.showPlayerPlayingScoreboard(player, map);
-//        } else {
-//            Scoreboards.showPlayerEditingScoreboard(player, map);
-//        }
+//        var animator = new EntityAnimator(event.getSpawnInstance(), EntityType.VILLAGER, List.of(
+//                new EntityAnimator.Keyframe(0, new Vec(5, 40, 5)),
+//                new EntityAnimator.Keyframe(40, new Vec(-5, 40, 5)),
+//                new EntityAnimator.Keyframe(80, new Vec(-5, 40, -5)),
+//                new EntityAnimator.Keyframe(120, new Vec(5, 40, -5))
+//        ));
+//        var controller = new AnimationController(event.getSpawnInstance(), List.of(animator));
+//        controller.play();
     }
 
     @Override
