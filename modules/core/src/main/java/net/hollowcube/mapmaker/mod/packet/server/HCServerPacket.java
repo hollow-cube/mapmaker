@@ -24,7 +24,7 @@ public sealed interface HCServerPacket permits HCServerConfigPacket, HCServerPla
         int apiVersion = 1;
 
         // Ensure we are in the correct state for the packet.
-        switch (player.getPlayerConnection().getServerState()) {
+        switch (player.getPlayerConnection().getConnectionState()) {
             case HANDSHAKE, STATUS, LOGIN -> Check.stateCondition(true,
                     "Cannot send packet before configuration state");
             case CONFIGURATION -> Check.stateCondition(
