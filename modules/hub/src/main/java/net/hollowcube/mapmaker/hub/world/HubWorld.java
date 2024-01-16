@@ -13,10 +13,8 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.chunk.ChunkUtils;
-import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,11 +45,11 @@ public class HubWorld {
     public HubWorld(@NotNull HubServer server) {
         this.server = server;
 
-//        instance = new MapInstance("mapmaker:hub");
-        instance = new MapInstance("mapmaker:hub", DimensionType.OVERWORLD);
+        instance = new MapInstance("mapmaker:hub");
+//        instance = new MapInstance("mapmaker:hub", DimensionType.OVERWORLD);
         instance.setTag(MARKER, true);
         instance.setTag(THIS_TAG, this);
-        instance.setChunkSupplier(LightingChunk::new);
+//        instance.setChunkSupplier(LightingChunk::new);
 
         var eventNode = instance.eventNode();
         eventNode.addChild(HubHotbar.eventNode());
@@ -77,7 +75,7 @@ public class HubWorld {
         if (spawnMapId != null) {
             var mapData = server().mapService().getMapWorld(spawnMapId, false);
             assert mapData != null;
-            instance.setChunkLoader(new PolarLoader(PolarReader.read(mapData)));
+            instance.setChunkLoader(new PolarLoader(PolarReader.read(mapData)).setLoadLighting(false));
         } else {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
