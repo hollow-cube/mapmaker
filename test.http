@@ -19,3 +19,12 @@ x-hc-user-id: b571aed9-19f4-4032-9c06-75a4b7cf6c00
   "owner": "b571aed9-19f4-4032-9c06-75a4b7cf6c00",
   "size": 3
 }
+
+###
+
+# curl localhost:9125/v1/internal/maps/search?page=0&pageSize=10&owner=b571aed9-19f4-4032-9c06-75a4b7cf6c00&isPublished=true
+GET localhost:9125/v1/internal/maps/search?page=0&pageSize=10&owner=b571aed9-19f4-4032-9c06-75a4b7cf6c00
+
+###
+
+

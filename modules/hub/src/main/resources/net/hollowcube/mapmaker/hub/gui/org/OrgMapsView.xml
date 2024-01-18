@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.hub.gui.org ?>
+<component width="9" height="10" align="ttb">
+    <!-- Top bar -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.play_maps.simple.information"/>
+        <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"
+              font="play_maps_page" centered="true"/>
+    </box>
+
+    <!-- Map list -->
+    <box width="9" height="5" align="ltr">
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="prev_page" height="3"
+                    translationKey="gui.generic.previous_page"
+                    sprite="generic/left_big" spritePos="1"/>
+            <spacer/>
+        </box>
+
+        <pagination id="paging" width="7" height="5"
+                    loader="centered" child="OrgMapEntry"/>
+
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="next_page" height="3"
+                    translationKey="gui.generic.next_page"
+                    sprite="generic/right_big" spritePos="1"/>
+            <spacer/>
+        </box>
+    </box>
+
+</component>

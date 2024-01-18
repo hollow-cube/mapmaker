@@ -7,7 +7,8 @@ public record MapSearchRequest(
         @NotNull String authorizer,
         int page,
         int pageSize,
-        @Nullable String owner
+        @Nullable String owner,
+        boolean isPublished
 ) {
 
     public static @NotNull Builder builder(@NotNull String authorizer) {
@@ -21,6 +22,8 @@ public record MapSearchRequest(
         private int pageSize = -1;
 
         private String owner = null;
+
+        private boolean isPublished = true;
 
 
         Builder(@NotNull String authorizer) {
@@ -38,9 +41,14 @@ public record MapSearchRequest(
             return this;
         }
 
+        public @NotNull Builder isPublished(boolean isPublished) {
+            this.isPublished = isPublished;
+            return this;
+        }
+
         public @NotNull MapSearchRequest build() {
             return new MapSearchRequest(
-                    authorizer, page, pageSize, owner
+                    authorizer, page, pageSize, owner, isPublished
             );
         }
     }

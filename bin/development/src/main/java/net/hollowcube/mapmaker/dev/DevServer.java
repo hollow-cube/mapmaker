@@ -387,7 +387,6 @@ public class DevServer {
 
         rebuildOnlinePlayersRegex();
 
-
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(MiscFunctionality::buildExperienceBar);
@@ -397,6 +396,8 @@ public class DevServer {
         MiscFunctionality.broadcastTabList(Audiences.all());
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
+
+//        hub.newOpenGUI(player, c -> new OrgMapsView(c, "b571aed9-19f4-4032-9c06-75a4b7cf6c00"));
     }
 
 }

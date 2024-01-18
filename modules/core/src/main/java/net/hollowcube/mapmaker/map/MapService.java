@@ -24,6 +24,8 @@ public interface MapService {
      */
     @NotNull MapData createMap(@NotNull MapPlayerData player, int slot);
 
+    @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId);
+
     @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest request);
