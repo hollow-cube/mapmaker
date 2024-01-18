@@ -13,6 +13,8 @@ env:
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service:9124"
   MAPMAKER_SESSION_SERVICE_URL: "http://session-service:9124"
 
+  MAPMAKER_SPICEDB_URL: "local:50051"
+
   MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
 
 replicaCount: 1
