@@ -4,6 +4,8 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -80,6 +82,10 @@ class MapWorldHelpers {
         player.setVelocity(Vec.ZERO);
         player.getInventory().clear();
         player.removeTag(SPECTATOR_CHECKPOINT);
+
+        // Reapply the cosmetics they have on
+        var playerData = PlayerDataV2.fromPlayer(player);
+        MiscFunctionality.applyCosmetics(player, playerData.cosmetics());
     }
 
 }

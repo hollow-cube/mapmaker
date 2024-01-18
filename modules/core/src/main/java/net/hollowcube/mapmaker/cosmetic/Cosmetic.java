@@ -6,10 +6,26 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Cosmetic {
+    private static final Map<String, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
+
+    static {
+        // Class init required
+        var ignored = HeadCosmetics.CROWN;
+    }
+
+    public static @Nullable Cosmetic byId(@NotNull String type, @Nullable String id) {
+        if (id == null) return null;
+        var byType = COSMETICS.get(type);
+        if (byType == null) return null;
+        return byType.get(id);
+    }
 
     public enum Rarity {
         COMMON,
@@ -29,10 +45,10 @@ public class Cosmetic {
         this.id = id;
         this.rarity = rarity;
 
-        this.icon = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
-                .displayName(LanguageProviderV2.translate(Component.translatable("cosmetic." + id + ".name")))
-                .lore(LanguageProviderV2.translate(Component.translatable("cosmetic." + id + ".lore")))
-                .meta(meta -> meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get("cosmetic/" + id)).cmd()))
+        this.icon = ItemStack.builder(Material.DIAMOND)
+                .displayName(LanguageProviderV2.translate(Component.translatable("cosmetic." + type + "." + id + ".name")))
+                .lore(LanguageProviderV2.translate(Component.translatable("cosmetic." + type + "." + id + ".lore")))
+                .meta(meta -> meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get("models/cosmetics/" + type + "/" + id)).cmd()))
                 .build();
     }
 
@@ -64,7 +80,9 @@ public class Cosmetic {
         }
 
         public @NotNull Cosmetic build() {
-            return new Cosmetic(type, id, rarity);
+            var cosmetic = new Cosmetic(type, id, rarity);
+            COSMETICS.computeIfAbsent(type, k -> new HashMap<>()).put(id, cosmetic);
+            return cosmetic;
         }
     }
 }

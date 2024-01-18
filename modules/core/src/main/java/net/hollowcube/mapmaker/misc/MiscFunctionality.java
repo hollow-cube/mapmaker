@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -119,5 +120,10 @@ public final class MiscFunctionality {
         var presence = sessionManager.getPresence(playerId);
         if (presence == null || !presence.type().equals(MapPresence.TYPE)) return null;
         return mapService.getMap(playerId, presence.mapId());
+    }
+
+    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2.Cosmetics cosmetics) {
+        var head = Cosmetic.byId("head", cosmetics.head());
+        if (head != null) player.getInventory().setHelmet(head.icon());
     }
 }

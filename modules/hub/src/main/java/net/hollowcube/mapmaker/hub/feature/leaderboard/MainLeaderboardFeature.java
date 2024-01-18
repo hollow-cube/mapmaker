@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapService;
@@ -26,6 +27,8 @@ public class MainLeaderboardFeature implements HubFeature {
 
     @Override
     public void init(@NotNull HubServer hub) {
+        if (ServerRuntime.getRuntime().isDevelopment()) return;
+        
         parkourLeaderboard = new Leaderboard2(
                 () -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
                 playerId -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),

@@ -27,7 +27,9 @@ import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -197,10 +199,11 @@ public abstract class HubServerBase implements HubServer {
         player.sendActionBar(Component.empty());
         player.setFlyingSpeed(player.getTag(HubServer.DOUBLE_JUMP_TAG) ? 0 : 0.05f);
 
-//        player.teleport(new Pos(-119.5, 78, -76.5, -85, 9));
-
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
+
+        var playerData = PlayerDataV2.fromPlayer(player);
+        MiscFunctionality.applyCosmetics(player, playerData.cosmetics());
     }
 
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
