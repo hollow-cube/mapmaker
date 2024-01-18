@@ -1,24 +1,29 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.ContextObject;
-import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.annotation.Signal;
+import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMaps extends View {
+    private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("create_maps.selected_slot", 0);
+
     public static final String SIG_RESET = "create_maps.reset";
 
+    private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
     private @ContextObject HubToMapBridge bridge;
     private @ContextObject("handler") HubHandler mapHandler;
@@ -27,18 +32,13 @@ public class CreateMaps extends View {
     private @Outlet("editor") EditMap editor;
     private @Outlet("creator") CreateMap creator;
 
-    private @Outlet("slot0") EditMapIconBase slot0;
-    private @Outlet("slot1") EditMapIconBase slot1;
-    private @Outlet("slot2") EditMapIconBase slot2;
-    private @Outlet("slot3") EditMapIconBase slot3;
-    private @Outlet("slot4") EditMapIconBase slot4;
+    private @OutletGroup("slot\\d") EditMapIconBase[] slots;
 
-    private final EditMapIconBase[] slots;
+    private final PlayerDataV2 playerData;
 
     public CreateMaps(@NotNull Context context) {
         super(context);
-
-        slots = new EditMapIconBase[]{slot0, slot1, slot2, slot3, slot4};
+        playerData = PlayerDataV2.fromPlayer(player);
 
         reset();
     }
@@ -48,6 +48,7 @@ public class CreateMaps extends View {
         slots[slot].setToSelected(map);
         editor.showMap(map, slot);
         switcher.setOption(0);
+        playerData.setSetting(SELECTED_SLOT, slot);
     }
 
     @Signal(EditMapIconBase.SIG_CREATE_MAP_IN_SLOT)
@@ -60,6 +61,7 @@ public class CreateMaps extends View {
     public void selectMapInSlot(@NotNull MapData map, int slot) {
         editor.showMap(map, slot);
         switcher.setOption(0);
+        playerData.setSetting(SELECTED_SLOT, slot);
     }
 
     @Signal(SIG_RESET)
@@ -91,7 +93,9 @@ public class CreateMaps extends View {
         if (firstSlot == -1) {
             createMapInSlot(0);
         } else {
-            var slot = firstSlot;
+            // Otherwise, select the slot we have saved for them, otherwise the first slot with a map
+            var savedSlot = this.playerData.getSetting(SELECTED_SLOT);
+            var slot = slots[savedSlot].getSlotState() == EditMapIconBase.State.FULL ? savedSlot : firstSlot;
             async(() -> {
                 var map = slots[slot].mapDataFuture.get();
                 selectMapInSlot(map, slot);
@@ -105,7 +109,7 @@ public class CreateMaps extends View {
         var spawnMapId = MapData.SPAWN_MAP_ID;
         if (spawnMapId == null) return;
 
-        if (!MapData.SPAWN_MAP_PLAYERS.contains(player.getUuid().toString()))
+        if (!CoreFeatureFlags.SPAWN_MAP_ACCESS.test(player))
             return;
 
         try {
@@ -116,6 +120,11 @@ public class CreateMaps extends View {
         } finally {
             player.closeInventory();
         }
+    }
+
+    @Signal(Element.SIG_CLOSE)
+    private void onClose() {
+        playerData.writeUpdatesUpstream(playerService);
     }
 
 }

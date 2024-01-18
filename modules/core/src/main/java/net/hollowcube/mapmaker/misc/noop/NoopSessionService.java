@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.misc.noop;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ public class NoopSessionService implements SessionService {
         return new PlayerDataV2(
                 id, username,
                 new DisplayName(List.of(new DisplayName.Part("username", username, null))),
-                new PlayerSettings(),
+                new JsonObject(),
                 0, 0, 0
         );
     }
@@ -32,7 +33,7 @@ public class NoopSessionService implements SessionService {
         return new PlayerDataV2(
                 id, body.username(),
                 new DisplayName(List.of(new DisplayName.Part("username", body.username(), null))),
-                new PlayerSettings(),
+                new JsonObject(),
                 0, 0, 0
         );
     }
@@ -42,7 +43,7 @@ public class NoopSessionService implements SessionService {
         return new PlayerDataV2(
                 id, id,
                 new DisplayName(List.of(new DisplayName.Part("username", id, null))),
-                new PlayerSettings(),
+                new JsonObject(),
                 0, 0, 0
         );
     }

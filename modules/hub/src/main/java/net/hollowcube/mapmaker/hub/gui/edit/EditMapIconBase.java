@@ -80,6 +80,10 @@ public class EditMapIconBase extends View {
         }
     }
 
+    public @NotNull State getSlotState() {
+        return State.values()[stateSwitch.getOption()];
+    }
+
     public void setToSelected(@NotNull MapData map) {
         mapDataFuture = CompletableFuture.completedFuture(map);
         var args = new Component[]{Component.text(slot + 1),

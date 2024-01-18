@@ -19,16 +19,6 @@ public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 
     public static final String SPAWN_MAP_ID = System.getenv("MAPMAKER_SPAWN_MAP_ID");
-    public static final List<String> SPAWN_MAP_PLAYERS = List.of(
-            "e6c3e11c-1166-4dcd-ad59-c12e386b00bd", // Nixotica
-            "aceb326f-da15-45bc-bf2f-11940c21780c", // notmattw
-            "a3634428-40a0-45b3-8583-a3b5813d64c5", // SethPRG
-            "b6496267-8dfe-485c-982f-85871ae4cbe4", // Tamto
-            "3e66e238-ec72-49bb-b9dc-6a8a83d0aae6", // ArcaneWarrior
-            "47cc8695-2681-4dcd-b772-7eeb8d69c09b", // Ossipago1
-            "194845a1-cd34-43a7-9c35-a70c26bc0d90", // TheSmartFox
-            "ed017f08-fd89-46e2-bba0-495686319801"  // Ontal
-    );
 
     private String id;
     private String owner;

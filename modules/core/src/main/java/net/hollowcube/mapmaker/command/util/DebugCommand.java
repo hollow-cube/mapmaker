@@ -72,10 +72,13 @@ public class DebugCommand extends CommandDsl {
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
         var playerData = PlayerDataV2.fromPlayer(player);
-        player.sendMessage(Component.text(playerData.id() + " (" + playerData.username() + ")"));
-        player.sendMessage(Component.text("Display: ").append(Component.text(playerData.username())));
-        player.sendMessage(Component.text("Settings: "));
-        player.sendMessage(Component.text("  scoreboards: " + playerData.settings().isScoreboardEnabled()));
+        player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().substring(0, 8) + "...)"));
+        player.sendMessage(Component.text("Display: ").append(playerData.displayName2().build()));
+        var rawSettings = playerData.settingsRawValues();
+        player.sendMessage(Component.text("Settings: " + (rawSettings.isEmpty() ? "empty" : "")));
+        for (var entry : rawSettings) {
+            player.sendMessage(Component.text("  " + entry.getKey() + ": " + entry.getValue()));
+        }
 
         var mapPlayerData = MapPlayerData.fromPlayer(player);
         player.sendMessage(Component.text("Last played: " + mapPlayerData.lastPlayedMap()));

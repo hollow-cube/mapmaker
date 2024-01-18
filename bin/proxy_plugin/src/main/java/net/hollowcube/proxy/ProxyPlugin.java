@@ -8,6 +8,7 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -39,6 +40,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
+    private static final ChannelIdentifier JOIN_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "first_join");
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -52,6 +54,7 @@ public class ProxyPlugin {
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
 
     private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
+    private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -66,7 +69,7 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
 
-        limboServer = proxy.getServer("limbo").orElseThrow();
+        limboServer = proxy.getServer("limbo").orElse(null);
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
         logger.info("hello, world!!!!");
@@ -80,7 +83,7 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
+        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
             logger.info("sending {} to limbo", event.getPlayer().getUsername());
             event.setInitialServer(limboServer);
         }
@@ -107,6 +110,7 @@ public class ProxyPlugin {
                     )
             );
             playersWithSession.add(player.getUniqueId());
+            playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
         } catch (SessionService.UnauthorizedError ignored) {
             // this is ok, they will be sent to the limbo
@@ -164,6 +168,16 @@ public class ProxyPlugin {
     }
 
     @Subscribe
+    public void handlePostConnect(@NotNull ServerPostConnectEvent event) {
+        var playerId = event.getPlayer().getUniqueId();
+        if (!playersJustJoined.contains(playerId)) return;
+
+        playersJustJoined.remove(playerId);
+        event.getPlayer().getCurrentServer().ifPresent(ignored ->
+                event.getPlayer().sendPluginMessage(JOIN_MESSAGE_ID, new byte[0]));
+    }
+
+    @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
         if (!playersWithSession.contains(event.getPlayer().getUniqueId())) return;
 
@@ -176,6 +190,7 @@ public class ProxyPlugin {
         } finally {
             resourcePacks.remove(event.getPlayer().getUniqueId());
             playersWithSession.remove(event.getPlayer().getUniqueId());
+            playersJustJoined.remove(event.getPlayer().getUniqueId());
         }
     }
 

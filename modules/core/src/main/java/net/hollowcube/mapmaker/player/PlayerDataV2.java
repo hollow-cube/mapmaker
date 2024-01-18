@@ -1,17 +1,26 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class PlayerDataV2 {
+    private static final Logger logger = LoggerFactory.getLogger(PlayerDataV2.class);
+
     public static final Tag<PlayerDataV2> TAG = Tag.Transient("mapmaker:player_data");
 
     public static @NotNull PlayerDataV2 fromPlayer(@NotNull Player player) {
@@ -26,7 +35,7 @@ public class PlayerDataV2 {
     private String username;
     @SerializedName("display_name_v2")
     private DisplayName displayNameV2 = new DisplayName(List.of());
-    private PlayerSettings settings = new PlayerSettings();
+    private JsonObject settings = new JsonObject();
 
     @Expose(serialize = false, deserialize = false)
     public final long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
@@ -45,7 +54,7 @@ public class PlayerDataV2 {
         this.username = username;
     }
 
-    public PlayerDataV2(String id, String username, DisplayName displayName, PlayerSettings settings, long playtime, int coins, int cubits) {
+    public PlayerDataV2(String id, String username, DisplayName displayName, JsonObject settings, long playtime, int coins, int cubits) {
         this.id = id;
         this.username = username;
         this.displayNameV2 = displayName;
@@ -55,10 +64,23 @@ public class PlayerDataV2 {
         this.cubits = cubits;
     }
 
-    public @NotNull PlayerDataUpdateRequest getUpdateRequest() {
-        var updates = this.updates;
-        this.updates = new PlayerDataUpdateRequest();
-        return updates;
+    /**
+     * Writes all updates to the database.
+     *
+     * @param playerService
+     * @return true if the update was successful, false if it failed (an error was already logged)
+     */
+    public boolean writeUpdatesUpstream(@NotNull PlayerService playerService) {
+        //todo need to add a lock here
+        if (!updates.hasChanges()) return true;
+        try {
+            playerService.updatePlayerData(id, updates);
+            updates = new PlayerDataUpdateRequest();
+            return true;
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+            return false;
+        }
     }
 
     public @NotNull String id() {
@@ -77,7 +99,22 @@ public class PlayerDataV2 {
         return displayNameV2;
     }
 
-    public @NotNull PlayerSettings settings() {
+    public <T> @NotNull T getSetting(@NotNull PlayerSetting<T> setting) {
+        return setting.read(settings());
+    }
+
+    public <T> void setSetting(@NotNull PlayerSetting<T> setting, @NotNull T value) {
+        var raw = setting.write(value);
+        settings().add(setting.key(), raw);
+        updates.updateSetting(setting.key(), raw);
+    }
+
+    public @NotNull Collection<Map.Entry<String, JsonElement>> settingsRawValues() {
+        return settings().entrySet();
+    }
+
+    private @NotNull JsonObject settings() {
+        if (settings == null) settings = new JsonObject();
         return settings;
     }
 

@@ -102,9 +102,18 @@ public class ViewProviderImpl implements ViewProvider {
                     Check.argCondition(!field.getType().isArray(), "OutletGroup must be an array type: " + field.getType());
                     field.setAccessible(true); // NOSONAR
 
-                    var array = (Object[]) java.lang.reflect.Array.newInstance(field.getType().getComponentType(), elements.size());
+                    var arrayType = field.getType().getComponentType();
+                    var array = (Object[]) java.lang.reflect.Array.newInstance(arrayType, elements.size());
                     for (int i = 0; i < array.length; i++) {
-                        array[i] = elements.get(i);
+                        var element = elements.get(i);
+                        if (arrayType.isAssignableFrom(element.getClass())) {
+                            array[i] = element;
+                        } else if (element instanceof ViewContainer viewContainer &&
+                                arrayType.isAssignableFrom(viewContainer.getAssociatedView().getClass())) {
+                            array[i] = viewContainer.getAssociatedView(); // NOSONAR
+                        } else {
+                            throw new RuntimeException("Outlet type mismatch: " + element);
+                        }
                     }
                     field.set(view, array);
                 }

@@ -35,10 +35,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -145,6 +142,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         EVENT_HANDLER
                 .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                .addListener(PlayerPluginMessageEvent.class, this::handlePluginMessage)
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect);
 
@@ -287,8 +285,6 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(MiscFunctionality::buildExperienceBar);
 
-        // Send the join message for themselves only. For everyone else it will be sent whenever the session create message is received.
-        player.sendMessage(Component.translatable("chat.player.join", playerData.displayName2().build()));
 //        MiscFunctionality.broadcastTabList(player, sessionManager.networkPlayerCount()); // Also send initial tablist
 
 //        var book = Component.text();
@@ -328,6 +324,15 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
         player.sendPacket(player.getMetadataPacket());
+    }
+
+    private void handlePluginMessage(@NotNull PlayerPluginMessageEvent event) {
+        if (event.getIdentifier().equals("mapmaker:first_join")) {
+            // Send the join message for themselves only. For everyone else it will be sent whenever the session create message is received.
+            var player = event.getPlayer();
+            player.sendMessage(Component.translatable("chat.player.join", PlayerDataV2.fromPlayer(player).displayName2().build()));
+        }
+        logger.info("New plugin message " + event.getIdentifier());
     }
 
     private void handlePlayerDisconnect(@NotNull PlayerDisconnectEvent event) {

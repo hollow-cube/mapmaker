@@ -337,7 +337,7 @@ public class EditingMapWorld implements InternalMapWorld {
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), saveStateUpdate);
 
                 // Save terraform state
-                if (Axiom.isEnabled(player)) Axiom.disable(player);
+                if (Axiom.isPresent(player)) Axiom.disable(player);
                 terraform.saveLocalSession(player, true);
                 terraform.savePlayerSession(player, true);
 
