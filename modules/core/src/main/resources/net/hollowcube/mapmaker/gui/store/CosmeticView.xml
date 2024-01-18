@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.gui.store ?>
+<component width="9" height="10" align="ttb">
+    <!-- Top bar -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.store.information"/>
+        <spacer width="5"/>
+        <button id="coins_to_cubits" width="2" heigh="1"
+                translationKey="gui.store.coins_to_cubits" sprite="minecraft:gold_nugget"/>
+    </box>
+
+    <box width="9" height="5" align="ltr">
+        <spacer/>
+        <pagination id="cosmetic_list" width="7" height="5"
+                    loader="centered" child="CosmeticEntry" />
+        <spacer/>
+    </box>
+
+    <spacer/>
+
+    <!-- Bottom switcher -->
+    <box width="9" height="3" align="ltr">
+        <spacer/>
+        <button id="tab_id_headwear" width="1" height="1"
+                translationKey="gui.cosmetics.tab_headwear" sprite="minecraft:leather_helmet"/>
+        <button id="tab_id_backwear" width="1" height="1"
+                translationKey="gui.cosmetics.tab_backwear" sprite="minecraft:netherite_chestplate"/>
+        <button id="tab_id_accessory" width="1" height="1"
+                translationKey="gui.cosmetics.tab_accessory" sprite="minecraft:flower_banner_pattern"/>
+        <button id="tab_id_companions" width="1" height="1"
+                translationKey="gui.cosmetics.tab_companions" sprite="minecraft:sheep_spawn_egg"/>
+        <button id="tab_id_emotes" width="1" height="1"
+                translationKey="gui.cosmetics.tab_emotes" sprite="minecraft:skeleton_skull"/>
+        <button id="tab_id_particles" width="1" height="1"
+                translationKey="gui.cosmetics.tab_particles" sprite="minecraft:cyan_dye"/>
+        <button id="tab_id_victory_effects" width="1" height="1"
+                translationKey="gui.cosmetics.tab_victory_effects" sprite="minecraft:gold_ingot"/>
+    </box>
+</component>
