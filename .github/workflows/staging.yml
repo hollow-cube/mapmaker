@@ -31,10 +31,12 @@ jobs:
         id: build
         run: |
           bazel build //:packer_development_client
-          echo "resource_pack_sha=$(sha1sum bazel-bin/client.zip | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+          export RESOURCE_PACK_SHA=$(sha1sum bazel-bin/client.zip | cut -d ' ' -f1)
+          echo "resource_pack_sha=$(RESOURCE_PACK_SHA)" >> "$GITHUB_OUTPUT"
+          echo "Resource Pack Hash: $(RESOURCE_PACK_SHA)" >> "$GITHUB_STEP_SUMMARY"
           
           mkdir -p out
-          cp bazel-bin/client.zip out/mapmaker-${{ github.sha }}.zip
+          cp bazel-bin/client.zip out/mapmaker-$(RESOURCE_PACK_SHA).zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
