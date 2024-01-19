@@ -82,7 +82,7 @@ public abstract class HubServerBase implements HubServer {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMovement);
 
     @Blocking
-    public void init(@NotNull CommandManager commandManager, @NotNull PlayerInviteService inviteService, @NotNull ConfigLoaderV3 config) {
+    public void init(@NotNull CommandManager commandManager, @NotNull ConfigLoaderV3 config) {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
@@ -114,7 +114,7 @@ public abstract class HubServerBase implements HubServer {
                 bind(HubHandler.class).toInstance(mapHandler);
                 bind(HubWorld.class).toInstance(world);
                 bind(Controller.class).toInstance(guiController);
-                bind(PlayerInviteService.class).toInstance(inviteService);
+                bind(PlayerInviteService.class).toInstance(inviteService());
                 bind(ConfigLoaderV3.class).toInstance(config);
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());

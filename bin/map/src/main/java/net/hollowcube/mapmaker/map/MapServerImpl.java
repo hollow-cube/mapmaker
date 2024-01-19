@@ -15,6 +15,10 @@ import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
+import net.hollowcube.mapmaker.invite.MapInviteListener;
+import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.dep.MapBridge;
@@ -22,10 +26,7 @@ import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.StandaloneServer;
-import net.hollowcube.mapmaker.misc.noop.NoopMapService;
-import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
-import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
-import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
+import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
@@ -77,6 +78,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     private PlayerService playerService;
     private SessionService sessionService;
     private MapService mapService;
+    private PlayerInviteService inviteService;
     private PermManager permManager;
     private MapToHubBridge bridge;
 
@@ -84,6 +86,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
     private ChatMessageListener chatMessageListener;
     private MapJoinConsumer mapJoinConsumer;
+    private MapInviteListener mapInviteListener;
+    private MapInviteAcceptedOrRejectedListener mapInviteAcceptedOrRejectedListener;
 
     private CommandManager commandManager;
 
@@ -152,6 +156,21 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         bridge = new MapBridge(sessionService);
 
+        // Has to go here to ensure the session manager and bridge are initialised.
+        var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
+        if (inviteServiceUrl != null) {
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionService, sessionManager, bridge);
+        } else if (noopServices) {
+            this.inviteService = new NoopPlayerInviteService();
+        } else {
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionService, sessionManager, bridge); // tilt
+        }
+
+        if (!noopServices) {
+            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+        }
+
         if (!noopServices) {
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
@@ -212,6 +231,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         sessionManager.close();
         mapJoinConsumer.close();
         chatMessageListener.close();
+        mapInviteListener.close();
+        mapInviteAcceptedOrRejectedListener.close();
         super.shutdown();
     }
 
@@ -233,6 +254,11 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     @Override
     public @NotNull MapService mapService() {
         return mapService;
+    }
+
+    @Override
+    public @NotNull PlayerInviteService inviteService() {
+        return this.inviteService;
     }
 
     @Override

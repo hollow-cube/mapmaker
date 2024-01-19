@@ -14,6 +14,10 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.hub.dep.HubBridge;
 import net.hollowcube.mapmaker.hub.dep.NoopHubBridge;
+import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
+import net.hollowcube.mapmaker.invite.MapInviteListener;
+import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -65,12 +69,15 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
     private PlayerService playerService;
     private SessionService sessionService;
     private MapService mapService;
+    private PlayerInviteService inviteService;
     private PermManager permManager;
     private HubToMapBridge bridge;
 
     private SessionManager sessionManager;
 
     private ChatMessageListener chatMessageListener;
+    private MapInviteListener mapInviteListener;
+    private MapInviteAcceptedOrRejectedListener mapInviteAcceptedOrRejectedListener;
 
     private CommandManager commandManager;
 
@@ -129,6 +136,21 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         if (noopServices) bridge = new NoopHubBridge();
         else bridge = new HubBridge(sessionService, sessionManager);
 
+        // Has to go here to ensure the session manager and bridge initialised.
+        var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
+        if (inviteServiceUrl != null) {
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionService, sessionManager, bridge);
+        } else if (noopServices) {
+            this.inviteService = new NoopPlayerInviteService();
+        } else {
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionService, sessionManager, bridge); // tilt
+        }
+
+        if (!noopServices) {
+            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+        }
+
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
         if (!noopServices) {
             chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
@@ -152,7 +174,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         logger.info("bad2: {}", CheckpointPlateBlock.OBJECT_TYPE);
 
         // The rest of the server init
-        init(commandManager, new NoopPlayerInviteService(), config);
+        init(commandManager, config);
         isReady = true;
     }
 
@@ -192,6 +214,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         MinecraftServer.stopCleanly();
         sessionManager.close();
         chatMessageListener.close();
+        mapInviteListener.close();
+        mapInviteAcceptedOrRejectedListener.close();
         super.shutdown();
     }
 
@@ -213,6 +237,11 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
     @Override
     public @NotNull MapService mapService() {
         return mapService;
+    }
+
+    @Override
+    public @NotNull PlayerInviteService inviteService() {
+        return this.inviteService;
     }
 
     @Override

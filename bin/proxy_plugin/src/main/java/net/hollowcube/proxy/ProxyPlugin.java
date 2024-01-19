@@ -39,6 +39,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
+    private static final ChannelIdentifier TRANSFER_OTHER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer_other");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final ChannelIdentifier JOIN_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "first_join");
 
@@ -67,6 +68,7 @@ public class ProxyPlugin {
         else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
+        proxy.getChannelRegistrar().register(TRANSFER_OTHER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
 
         limboServer = proxy.getServer("limbo").orElse(null);
@@ -126,6 +128,8 @@ public class ProxyPlugin {
         logger.info("plugin message: {}", event.getIdentifier());
         if (TRANSFER_MESSAGE_ID.equals(event.getIdentifier())) {
             handleTransfer(event);
+        } else if (TRANSFER_OTHER_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleTransferOther(event);
         } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
             handleResourcePack(event);
         }
@@ -165,6 +169,38 @@ public class ProxyPlugin {
                 }
             }
         });
+    }
+
+    private void handleTransferOther(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (!(event.getSource() instanceof ServerConnection serverConnection)) return;
+
+        var data = AbstractHttpService.GSON.fromJson(new String(event.getData()), TransferOtherRequest.class);
+
+        var targetPlayerId = data.targetPlayerId();
+        var targetPlayer = proxy.getPlayer(targetPlayerId).orElse(null);
+        if (targetPlayer == null) {
+            logger.error("transfer_other target player not found: {}", targetPlayerId);
+            return;
+        }
+
+        var serverName = data.serverName();
+        logger.info("transferring {} to {}", targetPlayerId, serverName);
+
+        var info = new ServerInfo("map-server", new InetSocketAddress(serverName, 25565));
+        targetPlayer.createConnectionRequest(proxy.createRawRegisteredServer(info)).connect().thenAccept(result -> {
+            switch (result.getStatus()) {
+                case SUCCESS, ALREADY_CONNECTED ->
+                        logger.info("transfer_other success: {} -> {}", targetPlayerId, serverName);
+                case SERVER_DISCONNECTED, CONNECTION_CANCELLED -> {
+                    logger.info("transfer_other failed: {} -> {}", targetPlayerId, serverName);
+                    serverConnection.sendPluginMessage(TRANSFER_OTHER_MESSAGE_ID, "fail".getBytes(StandardCharsets.UTF_8));
+                }
+            }
+        });
+    }
+
+    private record TransferOtherRequest(@NotNull UUID targetPlayerId, @NotNull String serverName) {
     }
 
     @Subscribe

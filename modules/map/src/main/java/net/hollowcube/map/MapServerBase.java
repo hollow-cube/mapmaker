@@ -20,7 +20,6 @@ import net.hollowcube.map.command.invite.RemoveCommand;
 import net.hollowcube.map.command.utility.*;
 import net.hollowcube.map.entity.MapEntities;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.invites.PlayerInviteServiceImpl;
 import net.hollowcube.map.terraform.MapServerModule;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.MapWorldManager;
@@ -86,7 +85,6 @@ public abstract class MapServerBase implements MapServer {
             .addListener(PlayerSpawnEvent.class, this::handleSpawn);
 
     private final MapWorldManager mwm = new MapWorldManager(this);
-    private final PlayerInviteService inviteService = new PlayerInviteServiceImpl(mwm);
 
     private MapMgmtConsumerImpl mapMgmtConsumer;
     private List<FeatureProvider> features;
@@ -148,7 +146,7 @@ public abstract class MapServerBase implements MapServer {
 
                 bind(MapWorldManager.class).toInstance(worldManager());
                 bind(Controller.class).toInstance(guiController);
-                bind(PlayerInviteService.class).toInstance(inviteService);
+                bind(PlayerInviteService.class).toInstance(inviteService());
                 bind(ConfigLoaderV3.class).toInstance(config);
                 bind(PermManager.class).toInstance(permManager());
                 bind(PlayerService.class).toInstance(playerService());
@@ -264,10 +262,6 @@ public abstract class MapServerBase implements MapServer {
 
     public @NotNull MapWorldManager worldManager() {
         return mwm;
-    }
-
-    public @NotNull PlayerInviteService inviteService() {
-        return inviteService;
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {
