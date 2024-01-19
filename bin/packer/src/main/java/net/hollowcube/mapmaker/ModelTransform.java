@@ -46,7 +46,7 @@ public class ModelTransform {
                 JsonObject modelObj = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_model.json")), JsonObject.class);
                 fixModelTextures(modelObj, texId);
                 String model = ctx.writeModel(name, modelObj);
-                int cmd = ctx.addBasicItem(name, model);
+                int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
                 JsonObject serverSpriteConf = new JsonObject();
                 String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "");

@@ -60,6 +60,11 @@ public class SwitchElement extends ContainerElement implements Switch, SpriteHol
     }
 
     @Override
+    public void performSignal(@NotNull String name, @NotNull Object... args) {
+        children().get(state).performSignal(name, args);
+    }
+
+    @Override
     public @NotNull SwitchElement clone(@NotNull ElementContext context) {
         return new SwitchElement(context, this);
     }

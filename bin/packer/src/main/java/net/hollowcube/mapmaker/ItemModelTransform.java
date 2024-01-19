@@ -52,7 +52,7 @@ public class ItemModelTransform {
                 JsonObject modelObj = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_3d.json")), JsonObject.class);
                 add2dModel(modelObj, tex2d, tex3d);
                 String model = ctx.writeModel(name, modelObj);
-                int cmd = ctx.addBasicItem(name, model);
+                int cmd = ctx.addBasicItem(ModelType.DEFAULT, name, model);
 
                 JsonObject serverSpriteConf = new JsonObject();
                 serverSpriteConf.addProperty("name", name);

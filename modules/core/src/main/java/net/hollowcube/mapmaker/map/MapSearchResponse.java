@@ -4,9 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record MapSearchResponse(
+public record MapSearchResponse<M extends MapData>(
         int page,
         boolean nextPage,
-        @NotNull List<PersonalizedMapData> results
+        @NotNull List<M> results
 ) {
 }

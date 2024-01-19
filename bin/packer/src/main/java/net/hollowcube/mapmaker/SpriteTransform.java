@@ -78,9 +78,9 @@ public class SpriteTransform {
 
                         int cmd;
                         if (debug) {
-                            cmd = context.addBasicItemTexture(name, baos.toByteArray());
+                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, baos.toByteArray());
                         } else {
-                            cmd = context.addBasicItemTexture(name, Files.readAllBytes(imageFile));
+                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, Files.readAllBytes(imageFile));
                         }
 
                         JsonObject serverSpriteConf = new JsonObject();

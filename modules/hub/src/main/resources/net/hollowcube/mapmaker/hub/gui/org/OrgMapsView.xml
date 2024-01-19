@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.hub.gui.org ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="org_maps/container">
+    <text id="title" width="9" height="0" translationKey=""
+          font="map_details_title" centered="true"/>
+
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
@@ -10,26 +13,25 @@
               font="play_maps_page" centered="true"/>
     </box>
 
-    <!-- Map list -->
-    <box width="9" height="5" align="ltr">
-        <box height="5" align="ttb">
-            <spacer/>
-            <button id="prev_page" height="3"
-                    translationKey="gui.generic.previous_page"
-                    sprite="generic/left_big" spritePos="1"/>
-            <spacer/>
-        </box>
+    <!-- Org info -->
+    <box width="9" height="2" align="ltr">
 
-        <pagination id="paging" width="7" height="5"
+    </box>
+
+    <!-- Map list -->
+    <box width="9" height="3" align="ltr">
+        <button id="prev_page" height="3"
+                translationKey="gui.generic.previous_page"
+                sprite="generic/left_big" spritePos="1"/>
+
+        <pagination id="paging" width="7" height="3" cached="true"
                     loader="centered" child="OrgMapEntry"/>
 
-        <box height="5" align="ttb">
-            <spacer/>
-            <button id="next_page" height="3"
-                    translationKey="gui.generic.next_page"
-                    sprite="generic/right_big" spritePos="1"/>
-            <spacer/>
-        </box>
+        <button id="next_page" height="3"
+                translationKey="gui.generic.next_page"
+                sprite="generic/right_big" spritePos="1"/>
     </box>
+
+    <OrgMapDetails id="details"/>
 
 </component>

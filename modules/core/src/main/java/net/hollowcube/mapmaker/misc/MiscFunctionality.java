@@ -125,5 +125,18 @@ public final class MiscFunctionality {
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2.Cosmetics cosmetics) {
         var head = Cosmetic.byId("head", cosmetics.head());
         if (head != null) player.getInventory().setHelmet(head.icon());
+
+//        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
+//        newDisplayedSkinParts &= ~0x40;
+//        player.getSettings().refresh(
+//                player.getSettings().getLocale(),
+//                player.getSettings().getViewDistance(),
+//                player.getSettings().getChatMessageType(),
+//                player.getSettings().hasChatColors(),
+//                newDisplayedSkinParts,
+//                player.getSettings().getMainHand(),
+//                player.getSettings().enableTextFiltering(),
+//                player.getSettings().allowServerListings()
+//        );
     }
 }

@@ -132,7 +132,8 @@ public class XmlElementReader {
         var itemClassName = getString(node, "child", null);
         Check.argCondition(itemClassName == null, "Pagination must have a child class");
         var itemClass = findImportedClass(itemClassName); // NOSONAR - sonarqube doesnt understand contracts
-        var elem = new PaginationElement<>(context, getId(node), getWidth(node), getHeight(node), itemClass);
+        var isCached = getBool(node, "cached", true);
+        var elem = new PaginationElement<>(context, getId(node), getWidth(node), getHeight(node), itemClass, isCached);
         return applyTraits(node, elem);
     }
 
@@ -330,6 +331,12 @@ public class XmlElementReader {
     private boolean getBool(@NotNull Node node, @NotNull String name) {
         var attr = node.getAttributes().getNamedItem(name);
         return attr != null && Boolean.parseBoolean(attr.getNodeValue());
+    }
+
+    private boolean getBool(@NotNull Node node, @NotNull String name, boolean defaultValue) {
+        var attr = node.getAttributes().getNamedItem(name);
+        if (attr == null) return defaultValue;
+        return Boolean.parseBoolean(attr.getNodeValue());
     }
 
     private @UnknownNullability String getString(@NotNull Node node, @NotNull String name, @UnknownNullability String def) {

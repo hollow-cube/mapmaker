@@ -26,9 +26,11 @@ public interface MapService {
 
     @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId);
 
-    @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
+    @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
-    @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest request);
+    @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request);
+
+    @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 

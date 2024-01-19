@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.hub.gui.org ?>
+<component width="9" height="3" align="ttb">
+    <switch id="root" width="9" height="3">
+        <!-- Not Selected State -->
+        <label translationKey="not_selected_todo" width="9" height="3"/>
+        <!-- Map Details -->
+        <box width="9" height="3" align="ttb">
+            <box width="9" height="1" align="ltr">
+                <!-- Shift by 19 to avoid the icon -->
+                <text id="map_name" width="8" translationKey="gui.create_maps.map_info_tab.change_name"
+                      font="line_6" shift="19"/>
+                <switch id="set_map_icon_switch">
+                    <button id="set_map_icon_unset" translationKey="gui.create_maps.map_info_tab.set_display_item.unset"
+                            sprite="org_maps/edit/set_map_icon_unset"
+                            backgroundSprite="org_maps/edit/set_map_icon_bg_unset"/>
+                    <button id="set_map_icon_set" translationKey="gui.create_maps.map_info_tab.set_display_item.set"
+                            sprite="org_maps/edit/set_map_icon_set"
+                            backgroundSprite="org_maps/edit/set_map_icon_bg_set"/>
+                </switch>
+            </box>
+
+            <box width="9" height="2" align="ltr">
+                <button id="edit_map" width="3" height="2" translationKey="gui.org_maps.edit_map"/>
+                <button id="publish_map" width="3" height="2" translationKey="gui.org_maps.publish_map"/>
+                <button id="delete_map" width="3" height="2" translationKey="gui.org_maps.delete_map"/>
+            </box>
+        </box>
+    </switch>
+</component>

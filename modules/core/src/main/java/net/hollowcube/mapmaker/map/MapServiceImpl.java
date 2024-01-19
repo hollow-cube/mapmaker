@@ -70,7 +70,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
         Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()
@@ -79,13 +79,14 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapSearchResponse.class);
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<PersonalizedMapData>>() {
+            });
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest params) {
+    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest params) {
         var endpoint = new StringBuilder(url + "/search?");
         if (params.page() != -1) {
             endpoint.append("page=").append(params.page()).append("&");
@@ -102,7 +103,27 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapSearchResponse.class);
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<PersonalizedMapData>>() {
+            });
+            default -> throw new InternalError("Failed to search maps: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
+        var endpoint = new StringBuilder(url + "/search_orgs?");
+        endpoint.append("page=").append(page).append("&");
+        endpoint.append("pageSize=").append(pageSize).append("&");
+        endpoint.append("orgId=").append(orgId).append("&");
+
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(endpoint.toString()))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
+            });
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }

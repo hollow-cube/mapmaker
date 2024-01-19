@@ -32,7 +32,9 @@ public class PackContext {
     private final JsonObject fontFile;
 
     private final JsonObject leatherArmorFile;
+    private final JsonObject diamondFile;
     private int leatherArmorCMD = 1;
+    private int diamondCMD = 1;
 
     private JsonArray serverSprites = new JsonArray();
 
@@ -60,9 +62,16 @@ public class PackContext {
         leatherArmorFile = new JsonObject();
         leatherArmorFile.addProperty("parent", "item/generated");
         JsonObject leatherTextures = new JsonObject();
-        leatherTextures.addProperty("layer0", "item/diamond");
+        leatherTextures.addProperty("layer0", "item/leather_horse_armor");
         leatherArmorFile.add("textures", leatherTextures);
         leatherArmorFile.add("overrides", new JsonArray());
+
+        diamondFile = new JsonObject();
+        diamondFile.addProperty("parent", "item/generated");
+        JsonObject diamondTextures = new JsonObject();
+        diamondTextures.addProperty("layer0", "item/diamond");
+        diamondFile.add("textures", diamondTextures);
+        diamondFile.add("overrides", new JsonArray());
     }
 
     public @NotNull Path resources() {
@@ -125,26 +134,26 @@ public class PackContext {
         fontFile.getAsJsonArray("providers").add(definition);
     }
 
-    public int addBasicItemTexture(@NotNull String name, byte[] texture) throws IOException {
-        int cmd = leatherArmorCMD++;
+    public int addBasicItemTexture(@NotNull ModelType modelType, @NotNull String name, byte[] texture) throws IOException {
+        int cmd = modelType == ModelType.COLORED ? leatherArmorCMD++ : diamondCMD++;
         JsonObject override = new JsonObject();
         JsonObject predicate = new JsonObject();
         predicate.addProperty("custom_model_data", cmd);
         override.add("predicate", predicate);
         override.addProperty("model", writeBasicModel(name, texture));
         override.addProperty("axiom:hide", true);
-        leatherArmorFile.getAsJsonArray("overrides").add(override);
+        (modelType == ModelType.COLORED ? leatherArmorFile : diamondFile).getAsJsonArray("overrides").add(override);
         return cmd;
     }
 
-    public int addBasicItem(@NotNull String name, String model) throws IOException {
-        int cmd = leatherArmorCMD++;
+    public int addBasicItem(@NotNull ModelType modelType, @NotNull String name, String model) throws IOException {
+        int cmd = modelType == ModelType.COLORED ? leatherArmorCMD++ : diamondCMD++;
         JsonObject override = new JsonObject();
         JsonObject predicate = new JsonObject();
         predicate.addProperty("custom_model_data", cmd);
         override.add("predicate", predicate);
         override.addProperty("model", model);
-        leatherArmorFile.getAsJsonArray("overrides").add(override);
+        (modelType == ModelType.COLORED ? leatherArmorFile : diamondFile).getAsJsonArray("overrides").add(override);
         return cmd;
     }
 
@@ -166,8 +175,11 @@ public class PackContext {
         }
         Files.writeString(fontFile, fontDefinition);
 
-        Path leatherArmorFile = rpMinecraftBase.resolve("models").resolve("item").resolve("diamond.json");
+        Path leatherArmorFile = rpMinecraftBase.resolve("models").resolve("item").resolve("leather_horse_armor.json");
         Files.writeString(leatherArmorFile, gson.toJson(this.leatherArmorFile));
+
+        Path diamondFile = rpMinecraftBase.resolve("models").resolve("item").resolve("diamond.json");
+        Files.writeString(diamondFile, gson.toJson(this.diamondFile));
 
         Path serverSpritesPath = out().resolve("server").resolve("sprites.json");
         Files.createDirectories(serverSpritesPath.getParent());

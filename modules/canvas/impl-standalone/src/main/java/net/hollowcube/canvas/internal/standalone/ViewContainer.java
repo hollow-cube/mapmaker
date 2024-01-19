@@ -81,6 +81,7 @@ public class ViewContainer extends BoxContainer implements ViewElement {
             constructor.setAccessible(true);
             var other = ((ViewContainer) constructor.newInstance(context).element());
             other.setId(id);
+
             return other;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
                  InstantiationException e) {

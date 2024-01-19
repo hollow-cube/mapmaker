@@ -20,20 +20,24 @@ import java.util.function.Predicate;
 
 public class PaginationElement<T extends View> extends BaseElement implements Pagination {
     private final Class<T> itemClass;
+    private final boolean cached;
 
     private final List<BaseElement> pageCache = new ArrayList<>();
     private Consumer<PageRequest<T>> pageHandler = null;
     private int maxPage = 0;
     private int page = 0;
 
-    public PaginationElement(@NotNull ElementContext context, @Nullable String id, int width, int height, Class<T> itemClass) {
+    public PaginationElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
+                             Class<T> itemClass, boolean cached) {
         super(context, id, width, height);
         this.itemClass = itemClass;
+        this.cached = cached;
     }
 
     protected PaginationElement(@NotNull ElementContext context, @NotNull PaginationElement<T> other) {
         super(context, other);
         this.itemClass = other.itemClass;
+        this.cached = other.cached;
     }
 
     @Override
@@ -112,7 +116,9 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     private void mount() {
-        reset();
+        if (!cached || pageCache.isEmpty()) {
+            reset();
+        }
     }
 
     @Override

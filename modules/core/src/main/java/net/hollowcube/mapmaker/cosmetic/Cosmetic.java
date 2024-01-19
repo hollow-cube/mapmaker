@@ -3,8 +3,10 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.color.Color;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.metadata.LeatherArmorMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,10 +47,13 @@ public class Cosmetic {
         this.id = id;
         this.rarity = rarity;
 
-        this.icon = ItemStack.builder(Material.DIAMOND)
+        this.icon = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
                 .displayName(LanguageProviderV2.translate(Component.translatable("cosmetic." + type + "." + id + ".name")))
                 .lore(LanguageProviderV2.translate(Component.translatable("cosmetic." + type + "." + id + ".lore")))
-                .meta(meta -> meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get("models/cosmetics/" + type + "/" + id)).cmd()))
+                .meta(LeatherArmorMeta.class, meta -> {
+                    meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get("models/cosmetics/" + type + "/" + id)).cmd());
+                    meta.color(new Color(255, 0, 0));
+                })
                 .build();
     }
 

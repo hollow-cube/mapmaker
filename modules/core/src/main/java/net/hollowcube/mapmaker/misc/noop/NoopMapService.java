@@ -40,19 +40,24 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
-        return new MapSearchResponse(1, false, staticMaps.values().stream()
+    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        return new MapSearchResponse<>(1, false, staticMaps.values().stream()
                 .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
                 .map(m -> (PersonalizedMapData) m)
                 .toList());
     }
 
     @Override
-    public @NotNull MapSearchResponse searchMaps(@NotNull MapSearchRequest request) {
-        return new MapSearchResponse(1, false, staticMaps.values().stream()
+    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request) {
+        return new MapSearchResponse<>(1, false, staticMaps.values().stream()
                 .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
                 .map(m -> (PersonalizedMapData) m)
                 .toList());
+    }
+
+    @Override
+    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

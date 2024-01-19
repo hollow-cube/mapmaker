@@ -23,7 +23,7 @@ x-hc-user-id: b571aed9-19f4-4032-9c06-75a4b7cf6c00
 ###
 
 # curl localhost:9125/v1/internal/maps/search?page=0&pageSize=10&owner=b571aed9-19f4-4032-9c06-75a4b7cf6c00&isPublished=true
-GET localhost:9125/v1/internal/maps/search?page=0&pageSize=10&owner=b571aed9-19f4-4032-9c06-75a4b7cf6c00
+GET localhost:9125/v1/internal/maps/search_orgs?page=0&pageSize=10&orgId=b571aed9-19f4-4032-9c06-75a4b7cf6c00
 
 ###
 
