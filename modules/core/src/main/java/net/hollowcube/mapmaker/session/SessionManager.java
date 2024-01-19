@@ -67,6 +67,15 @@ public class SessionManager {
         return sessions.get(playerId);
     }
 
+    public @Nullable PlayerSession getSessionByName(@NotNull String playerName) {
+        for (var session : sessions.values()) {
+            if (session.username().equalsIgnoreCase(playerName)) {
+                return session;
+            }
+        }
+        return null;
+    }
+
     public @Nullable Presence getPresence(@NotNull String playerId) {
         var session = getSession(playerId);
         return session == null ? null : session.presence();

@@ -12,6 +12,7 @@ env:
   MAPMAKER_MAP_SERVICE_URL: "http://map-service:9124"
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service:9124"
   MAPMAKER_SESSION_SERVICE_URL: "http://session-service:9124"
+  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://session-service:9124"
 
   MAPMAKER_SPICEDB_URL: "local:50051"
 
