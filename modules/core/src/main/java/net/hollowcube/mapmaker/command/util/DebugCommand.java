@@ -20,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -99,6 +100,10 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage("Commands refreshed!");
     }
 
+    public interface BlockDebug {
+        void sendDebugInfo(@NotNull Player player, @NotNull Block block);
+    }
+
     private void handleBlockDebug(@NotNull Player player, @NotNull CommandContext context) {
         var blockPosition = player.getTargetBlockPosition(5);
         if (blockPosition == null) {
@@ -107,7 +112,12 @@ public class DebugCommand extends CommandDsl {
         }
 
         var block = player.getInstance().getBlock(blockPosition);
-        player.sendMessage("Block: " + block);
+        if (block.handler() != null && block.handler() instanceof BlockDebug bd) {
+            player.sendMessage("Block: " + block.handler().getNamespaceId());
+            bd.sendDebugInfo(player, block);
+        } else {
+            player.sendMessage("Block: " + block);
+        }
     }
 
     public static class SysCommand extends CommandDsl {

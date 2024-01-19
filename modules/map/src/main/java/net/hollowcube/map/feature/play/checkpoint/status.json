@@ -1,0 +1,21 @@
+{
+  "name": "string",
+  "progressIndex": 1,
+  "repeatable": false,
+  "timeLimit": 0,
+  "extraTime": 0,
+  "resetHeight": 0,
+  "clearPotionEffects": false,
+  "potionEffects": {
+    "minecraft:regen": 5
+  },
+  "teleport": [
+    0,
+    0,
+    0
+  ],
+  "settings": {
+  },
+  "items": {
+  }
+}

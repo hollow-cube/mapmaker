@@ -3,6 +3,7 @@ package net.hollowcube.map.feature.play.checkpoint;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.block.custom.BouncePadBlock;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
 import net.hollowcube.map.event.MapWorldCheckpointReachedEvent;
@@ -47,7 +48,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     @Override
     public @NotNull List<BlockHandler> blockHandlers() {
-        return List.of(FinishPlateBlock.INSTANCE, CheckpointPlateBlock.INSTANCE);
+        return List.of(FinishPlateBlock.INSTANCE, CheckpointPlateBlock.INSTANCE, BouncePadBlock.INSTANCE);
     }
 
     @Override
@@ -55,6 +56,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
         if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
             world.itemRegistry().register(FinishPlateBlock.ITEM);
             world.itemRegistry().register(CheckpointPlateBlock.ITEM);
+            world.itemRegistry().register(BouncePadBlock.ITEM);
         }
 
         if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {
