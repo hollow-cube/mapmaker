@@ -85,7 +85,7 @@ class MapWorldHelpers {
 
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);
-        MiscFunctionality.applyCosmetics(player, playerData.cosmetics());
+        MiscFunctionality.applyCosmetics(player, playerData);
     }
 
 }

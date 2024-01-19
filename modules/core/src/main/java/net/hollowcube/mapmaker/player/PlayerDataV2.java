@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
@@ -14,9 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerDataV2 {
     private static final Logger logger = LoggerFactory.getLogger(PlayerDataV2.class);
@@ -44,7 +44,8 @@ public class PlayerDataV2 {
     private int coins = 0;
     private int cubits = 0;
 
-    private Cosmetics cosmetics = Cosmetics.EMPTY;
+    private JsonObject cosmetics = new JsonObject();
+    private Set<String> unlockedCosmetics = new HashSet<>();
 
     public PlayerDataV2() {
     }
@@ -138,19 +139,26 @@ public class PlayerDataV2 {
         return cubits;
     }
 
-    public @NotNull Cosmetics cosmetics() {
-        return cosmetics;
+    public @Nullable String getCosmetic(@NotNull CosmeticType type) {
+        var raw = cosmetics.get(type.id());
+        if (raw == null || raw.getAsString().isEmpty()) return null;
+        return raw.getAsString();
     }
 
-    public record Cosmetics(
-            @Nullable String head,
-            @Nullable String back,
-            @Nullable String hand,
-            @Nullable String particle,
-            @Nullable String companion
-    ) {
-        public static final Cosmetics EMPTY = new Cosmetics(null, null, null, null, null);
-
+    public void setCosmetic(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
+        if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
+        if (cosmetic == null) {
+            cosmetics.remove(type.id());
+            updates.updateCosmetic(type, null);
+        } else {
+            cosmetics.addProperty(type.id(), cosmetic.id());
+            updates.updateCosmetic(type, cosmetic.id());
+        }
     }
+
+    public @NotNull Set<String> unlockedCosmetics() {
+        return unlockedCosmetics;
+    }
+
 
 }

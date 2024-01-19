@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.misc;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -122,9 +124,9 @@ public final class MiscFunctionality {
         return mapService.getMap(playerId, presence.mapId());
     }
 
-    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2.Cosmetics cosmetics) {
-        var head = Cosmetic.byId("head", cosmetics.head());
-        if (head != null) player.getInventory().setHelmet(head.icon());
+    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
+        var head = Cosmetic.byId(CosmeticType.HEAD, playerData.getCosmetic(CosmeticType.HEAD));
+        player.getInventory().setHelmet(head == null ? ItemStack.AIR : head.icon());
 
 //        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
 //        newDisplayedSkinParts &= ~0x40;

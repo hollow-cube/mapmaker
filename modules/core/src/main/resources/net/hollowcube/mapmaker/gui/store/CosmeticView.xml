@@ -6,15 +6,19 @@
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.store.information"/>
-        <spacer width="5"/>
-        <button id="coins_to_cubits" width="2" heigh="1"
-                translationKey="gui.store.coins_to_cubits" sprite="minecraft:gold_nugget"/>
+        <spacer width="6"/>
+        <switch id="show_locked_switch">
+            <button id="show_locked_off" translationKey="gui.cosmetics.show_locked.off"
+                    sprite="minecraft:black_concrete"/>
+            <button id="show_locked_on" translationKey="gui.cosmetics.show_locked.on"
+                    sprite="minecraft:white_concrete"/>
+        </switch>
     </box>
 
     <box width="9" height="5" align="ltr">
         <spacer/>
-        <pagination id="cosmetic_list" width="7" height="5"
-                    loader="centered" child="CosmeticEntry" />
+        <pagination id="cosmetic_list" width="7" height="5" cached="true"
+                    loader="centered" child="CosmeticEntry"/>
         <spacer/>
     </box>
 

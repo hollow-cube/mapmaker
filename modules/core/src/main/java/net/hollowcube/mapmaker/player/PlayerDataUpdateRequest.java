@@ -1,9 +1,13 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,8 +20,10 @@ public class PlayerDataUpdateRequest {
     @SerializedName("settings_updates")
     private JsonObject settings = null;
 
+    private JsonObject cosmetics = null;
+
     public boolean hasChanges() {
-        return username != null || ipHistory != null || lastOnline != null || settings != null;
+        return username != null || ipHistory != null || lastOnline != null || settings != null || cosmetics != null;
     }
 
     public @NotNull PlayerDataUpdateRequest setUsername(String username) {
@@ -40,6 +46,14 @@ public class PlayerDataUpdateRequest {
             settings = new JsonObject();
         }
         settings.add(key, value);
+        return this;
+    }
+
+    public @NotNull PlayerDataUpdateRequest updateCosmetic(@NotNull CosmeticType type, @Nullable String id) {
+        if (cosmetics == null) {
+            cosmetics = new JsonObject();
+        }
+        cosmetics.add(type.id(), id == null ? JsonNull.INSTANCE : new JsonPrimitive(id));
         return this;
     }
 

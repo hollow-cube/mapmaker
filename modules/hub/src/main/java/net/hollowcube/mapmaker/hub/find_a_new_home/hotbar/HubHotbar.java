@@ -1,8 +1,11 @@
 package net.hollowcube.mapmaker.hub.find_a_new_home.hotbar;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.gui.play.PlayMapsView;
+import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
+import net.hollowcube.mapmaker.hub.gui.org.OrgMapsView;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -49,6 +52,9 @@ public final class HubHotbar {
     private static final int PLAY_ITEM_CMD = BadSprite.SPRITE_MAP.get("tablet").cmd();
     private static final int CREATE_ITEM_CMD = BadSprite.SPRITE_MAP.get("hammer").cmd();
 
+    private static final int COSMETICS_ITEM_CMD = 5555;
+    private static final int ORG_MAPS_ITEM_CMD = 5556;
+
     private static final ItemStack PLAY_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
             .displayName(Component.translatable("item.mapmaker.play_maps.name"))
             .lore(LanguageProviderV2.translateMulti("item.mapmaker.play_maps.lore", List.of()))
@@ -61,6 +67,18 @@ public final class HubHotbar {
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))
             .build();
 
+    private static final ItemStack COSMETICS_ITEM = ItemStack.builder(Material.ARMOR_STAND)
+            .displayName(Component.translatable("item.mapmaker.cosmetics.name"))
+            .lore(LanguageProviderV2.translateMulti("item.mapmaker.cosmetics.lore", List.of()))
+            .meta(meta -> meta.customModelData(COSMETICS_ITEM_CMD))
+            .build();
+
+    private static final ItemStack ORG_MAPS_ITEM = ItemStack.builder(Material.DIAMOND_PICKAXE)
+            .displayName(Component.translatable("item.mapmaker.org_maps.name"))
+            .lore(LanguageProviderV2.translateMulti("item.mapmaker.org_maps.lore", List.of()))
+            .meta(meta -> meta.customModelData(ORG_MAPS_ITEM_CMD))
+            .build();
+
     public static @NotNull EventNode<InstanceEvent> eventNode() {
         return eventNode;
     }
@@ -68,6 +86,13 @@ public final class HubHotbar {
     public static void applyToPlayer(@NotNull Player player) {
         player.getInventory().setItemStack(0, PLAY_MAPS_ITEM);
         player.getInventory().setItemStack(1, CREATE_MAPS_ITEM);
+        if (CoreFeatureFlags.ORGANIZATIONS.test(player)) {
+            player.getInventory().setItemStack(2, ORG_MAPS_ITEM);
+        }
+
+        if (CoreFeatureFlags.COSMETICS.test(player)) {
+            player.getInventory().setItemStack(8, COSMETICS_ITEM);
+        }
     }
 
     private static void handleUseItem(@NotNull PlayerUseItemEvent event) {
@@ -81,6 +106,10 @@ public final class HubHotbar {
             server.newOpenGUI(player, context -> new PlayMapsView(context.with(Map.of("query", ""))));
         } else if (customModelData == CREATE_ITEM_CMD) {
             server.newOpenGUI(player, CreateMaps::new);
+        } else if (customModelData == ORG_MAPS_ITEM_CMD) {
+            server.newOpenGUI(player, context -> new OrgMapsView(context, "b571aed9-19f4-4032-9c06-75a4b7cf6c00"));
+        } else if (customModelData == COSMETICS_ITEM_CMD) {
+            server.newOpenGUI(player, CosmeticView::new);
         }
     }
 

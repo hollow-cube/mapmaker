@@ -203,7 +203,7 @@ public abstract class HubServerBase implements HubServer {
         HubHotbar.applyToPlayer(player);
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        MiscFunctionality.applyCosmetics(player, playerData.cosmetics());
+        MiscFunctionality.applyCosmetics(player, playerData);
     }
 
     private void handleDoubleJump(@NotNull PlayerStartFlyingEvent event) {
