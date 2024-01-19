@@ -32,7 +32,7 @@ public class InviteCommand extends CommandDsl {
         var target = context.get(targetArg).findFirstPlayer(player);
         String playerName = context.getRaw(targetArg);
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(playerName)));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(playerName)));
             return;
         }
         if (player.equals(target)) {

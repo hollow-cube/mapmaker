@@ -50,7 +50,7 @@ public class JoinCommand extends CommandDsl {
     private void handleJoin(@NotNull Player player, @NotNull CommandContext context) {
         var targetId = context.get(targetArg);
         if (targetId == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(context.getRaw(targetArg))));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(context.getRaw(targetArg))));
             return;
         }
 

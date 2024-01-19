@@ -7,8 +7,6 @@
         <label translationKey="gui.biome_list.information"/>
         <text id="gui_title" width="5" translationKey="gui.biome_list.title" font="slot_title"
               centered="true"/>
-        <button sprite="minecraft:barrier" translationKey="gui.biome_list.idk1"/>
-        <button sprite="minecraft:barrier" translationKey="gui.biome_list.idk2"/>
     </box>
 
     <box width="9" height="3" align="ltr">
@@ -21,6 +19,5 @@
 
     <text id="capacity" width="9" translationKey="gui.biome_list.capacity"
           font="line_4" centered="true"/>
-
 
 </component>

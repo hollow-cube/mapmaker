@@ -23,7 +23,7 @@ public class TeleportCommand extends CommandDsl {
     private void handleTeleportToTarget(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(targetArg).findFirstPlayer(player);
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.translatable(context.getRaw(targetArg))));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.translatable(context.getRaw(targetArg))));
             return;
         }
         if (player.equals(target)) {

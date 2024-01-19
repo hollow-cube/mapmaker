@@ -40,7 +40,7 @@ public class MoveCommand extends CommandDsl {
 
         var count = context.get(countArg);
         if (count < 1 || count > 100) {
-            player.sendMessage(Component.translatable("terraform.move.invalid_count")); // TODO Translate
+            player.sendMessage(Component.translatable("generic.number.not_in_range", Component.text(1), Component.text(100)));
             return;
         }
 
@@ -78,10 +78,11 @@ public class MoveCommand extends CommandDsl {
                     player.sendMessage(Component.translatable("terraform.selection.move",
                             Component.translatable(String.valueOf(result.blocksChanged()))));
                     // Move selection to match the move command
-                    Point newPrimary = selection.region().min().add(offset);
-                    Point newSecondary = selection.region().max().add(offset);
-                    selection.selectPrimary(newPrimary, false);
-                    selection.selectSecondary(newSecondary, false);
+                    // builders don't like this behavior. Should be an optional flag
+//                    Point newPrimary = selection.region().min().add(offset);
+//                    Point newSecondary = selection.region().max().add(offset);
+//                    selection.selectPrimary(newPrimary, false);
+//                    selection.selectSecondary(newSecondary, false);
                 })
                 .submit();
     }
