@@ -45,36 +45,36 @@ public class BuyCubitsView extends View {
 
     @Blocking
     private void handleBuyCubitsGeneric(@NotNull Player player, int productIndex) {
-        var playerData = PlayerDataV2.fromPlayer(player);
-        var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.id(), productIdMap[productIndex]);
-
-        var background = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("booktest/buy_single"));
-        var book = Component.text();
-        book.append(Component.text("" + background.fontChar(), NamedTextColor.WHITE));
-        book.appendNewline();
-
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        book.appendNewline();
-        for (int i = 0; i < 2; i++) {
-            book.append(Component.text(FontUtil.computeOffset(16 + 5)));
-            book.append(Component.text(FontUtil.computeOffset(83))
-                    .hoverEvent(HoverEvent.showText(Component.text("Go to checkout")))
-                    .clickEvent(ClickEvent.openUrl("https://hollowcube.net/store/checkout/fkelnk")));
-            book.appendNewline();
-        }
-
-        player.openBook(Book.builder()
-                .addPage(book.build())
-                .build());
-
+//        var playerData = PlayerDataV2.fromPlayer(player);
+//        var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.id(), productIdMap[productIndex]);
+//
+//        var background = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("booktest/buy_single"));
+//        var book = Component.text();
+//        book.append(Component.text("" + background.fontChar(), NamedTextColor.WHITE));
+//        book.appendNewline();
+//
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        book.appendNewline();
+//        for (int i = 0; i < 2; i++) {
+//            book.append(Component.text(FontUtil.computeOffset(16 + 5)));
+//            book.append(Component.text(FontUtil.computeOffset(83))
+//                    .hoverEvent(HoverEvent.showText(Component.text("Go to checkout")))
+//                    .clickEvent(ClickEvent.openUrl("https://hollowcube.net/store/checkout/fkelnk")));
+//            book.appendNewline();
+//        }
+//
+//        player.openBook(Book.builder()
+//                .addPage(book.build())
+//                .build());
+//
 //        player.sendMessage("opening store link: " + resp.main().url());
     }
 }
