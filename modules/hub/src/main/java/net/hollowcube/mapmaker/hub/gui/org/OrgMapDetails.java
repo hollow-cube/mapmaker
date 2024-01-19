@@ -69,7 +69,7 @@ public class OrgMapDetails extends AbstractMapEditor {
     public void handleDeleteMap(@NotNull Player player) {
         try {
             var mapPlayerData = MapPlayerData.fromPlayer(player);
-            mapService.deleteMap(mapPlayerData.id(), map.id());
+            mapService.deleteMap(mapPlayerData.id(), map.id(), null);
             performSignal(SIG_RESET);
         } catch (Exception e) {
             player.closeInventory();

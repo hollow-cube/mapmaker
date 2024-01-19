@@ -11,7 +11,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
-import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -586,7 +585,7 @@ public class EditMap extends View {
     private void deleteMapLogic(@NotNull Player player) {
         try {
             var mapPlayerData = MapPlayerData.fromPlayer(player);
-            mapService.deleteMap(mapPlayerData.id(), map.id());
+            mapService.deleteMap(mapPlayerData.id(), map.id(), null);
 
             // Remove the map from the player as a "prediction", we will get
             // the actual update from the service later.

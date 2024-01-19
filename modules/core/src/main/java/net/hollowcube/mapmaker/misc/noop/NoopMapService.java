@@ -80,7 +80,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id) {
+    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
         throw new UnsupportedOperationException("not implemented");
     }
 

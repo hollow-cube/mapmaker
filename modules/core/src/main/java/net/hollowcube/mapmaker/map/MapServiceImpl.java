@@ -14,10 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
@@ -176,10 +173,13 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id) {
+    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
         logger.log(System.Logger.Level.INFO, "deleting map " + id);
+        var body = new HashMap<String, String>();
+        body.put("reason", reason);
+        var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
-                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .method("DELETE", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapDeleteCommand extends CommandDsl {
     private final Argument<@NotNull MapData> mapArg;
+    private final Argument<String> reasonArg = Argument.GreedyString("reason");
 
     private final MapService mapService;
 
@@ -25,14 +26,19 @@ public class MapDeleteCommand extends CommandDsl {
         mapArg = CoreArgument.PlayableMap("map", mapService);
 
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
-        addSyntax(playerOnly(this::handleDeleteMap), mapArg);
+        addSyntax(playerOnly(this::handleDeleteMap), mapArg, reasonArg);
     }
 
     private void handleDeleteMap(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var reason = context.get(reasonArg);
+        if (reason == null || reason.isEmpty()) {
+            player.sendMessage("reason required to delete a map");
+            return;
+        }
         try {
             var playerData = MapPlayerData.fromPlayer(player);
-            mapService.deleteMap(playerData.id(), map.id());
+            mapService.deleteMap(playerData.id(), map.id(), reason);
             player.sendMessage("deleted map " + map.id());
         } catch (Exception e) {
             player.sendMessage("failed to delete map");
