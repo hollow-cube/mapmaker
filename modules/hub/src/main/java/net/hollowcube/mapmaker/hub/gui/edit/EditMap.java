@@ -387,6 +387,7 @@ public class EditMap extends View {
         if (mapTypeTabSwitch.getOption() == 0) return;
 
         mapTypeTabSwitch.setOption(0);
+        map.settings().setBuildingSubVariant(null);
         map.settings().setVariant(MapVariant.PARKOUR);
         map.settings().removeVisualTags();
         updateElementsFromMap();
@@ -398,6 +399,7 @@ public class EditMap extends View {
         if (mapTypeTabSwitch.getOption() == 1) return;
 
         mapTypeTabSwitch.setOption(1);
+        map.settings().setParkourSubVariant(null);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
         map.settings().setOnlySprint(false);
