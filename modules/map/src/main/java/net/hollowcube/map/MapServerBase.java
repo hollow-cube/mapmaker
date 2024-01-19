@@ -8,12 +8,10 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
 import net.hollowcube.map.command.HubCommand;
-import net.hollowcube.map.command.MapListCommandMixin;
 import net.hollowcube.map.command.build.BiomesCommand;
 import net.hollowcube.map.command.build.BuildCommand;
 import net.hollowcube.map.command.build.SetSpawnCommand;
@@ -196,8 +194,8 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(injector.getInstance(RemoveCommand.class));
 
         var mapCommand = injector.getInstance(MapCommand.class);
-        mapCommand.info.addSyntax(CommandDsl.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
-//        commandManager.register(mapCommand);
+//        mapCommand.info.addSyntax(CommandDsl.playerOnly(MapListCommandMixin::showMapInfoAboutCurrent));
+        commandManager.register(mapCommand);
 
         commandManager.register(injector.getInstance(StoreCommand.class));
 
