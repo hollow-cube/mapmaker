@@ -15,7 +15,7 @@ jobs:
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: global/resourcepackr2
+          path: global/resourcepacks3
 
       - uses: actions/checkout@v3
       - name: Cache Bazel
@@ -38,10 +38,10 @@ jobs:
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
-          AWS_S3_BUCKET: resource-pack
+          AWS_S3_BUCKET: hollowcube-resource-pack
           AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
-          AWS_S3_ENDPOINT: "https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com"
+          AWS_S3_REGION: "us-east-1"
           SOURCE_DIR: out
 
   docker-build-map:
