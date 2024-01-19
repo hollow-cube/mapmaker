@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.hub.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.find_a_new_home.hotbar.HubHotbar;
 import net.hollowcube.mapmaker.hub.world.HubWorld;
@@ -149,6 +150,7 @@ public abstract class HubServerBase implements HubServer {
         // Hub specific commands
         commandManager.register(injector.getInstance(HubFlyCommand.class));
         commandManager.register(injector.getInstance(HubSpawnCommand.class));
+        commandManager.register(injector.getInstance(HubTrainCommand.class));
 
         // Other features
         for (var feature : ServiceLoader.load(HubFeature.class)) {
