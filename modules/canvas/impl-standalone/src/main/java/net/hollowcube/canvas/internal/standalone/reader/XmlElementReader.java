@@ -75,7 +75,8 @@ public class XmlElementReader {
     private @NotNull ViewContainer loadRoot(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("component"), "Root node must be 'component'");
         var elem = new ViewContainer(context, getId(node), getWidth(node), getHeight(node),
-                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Component must have an alignment"));
+                Objects.requireNonNull(getEnum(BoxContainer.Align.class, node, "align", null), "Component must have an alignment"),
+                getBool(node, "wipe_player_inv", false));
         return applyTraits(node, loadChildren(node, elem));
     }
 

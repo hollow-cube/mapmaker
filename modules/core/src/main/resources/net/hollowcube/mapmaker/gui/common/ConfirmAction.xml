@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<component width="9" height="7" align="ltr" sprite="generic/confirm_container">
+<component width="9" height="3" wipe_player_inv="true" align="ttb" sprite="generic/confirm_container">
+    <spacer width="9" height="1"/>
     <box width="9" height="1" align="ltr">
         <spacer width="1"/>
         <button id="no" width="3" height="1" translationKey="gui.confirm.no"/>
         <spacer width="1"/>
         <button id="yes" width="3" height="1" translationKey="gui.confirm.yes"/>
     </box>
-    <spacer width="9" height="5"/>
 </component>

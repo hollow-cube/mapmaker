@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Hub (noop)" type="BlazeCommandRunConfigurationType" factoryName="Bazel Command">
+    <blaze-settings handler-id="BlazeJavaRunConfigurationHandlerProvider" kind="java_binary" blaze-command="run">
+      <blaze-target>//bin/hub:hub</blaze-target>
+      <blaze-user-flag>--define</blaze-user-flag>
+      <blaze-user-flag>RESOURCE_PACK_SHA=dev</blaze-user-flag>
+      <blaze-user-flag>--define</blaze-user-flag>
+      <blaze-user-flag>MAPMAKER_UNLEASH_ENABLED=true</blaze-user-flag>
+      <blaze-user-flag>--jvmopt=&quot;-Dmapmaker.noop=true&quot;</blaze-user-flag>
+      <blaze-user-flag>--jvmopt=&quot;-Dunleash.default=true&quot;</blaze-user-flag>
+      <blaze-user-flag>--jvmopt=&quot;-XX:+UnlockDiagnosticVMOptions&quot;</blaze-user-flag>
+      <blaze-user-flag>--jvmopt=&quot;-XX:+DebugNonSafepoints&quot;</blaze-user-flag>
+    </blaze-settings>
+    <method v="2">
+      <option name="Blaze.BeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

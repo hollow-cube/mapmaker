@@ -3,6 +3,7 @@ package net.hollowcube.canvas.internal.standalone.provider;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
+import net.hollowcube.canvas.internal.standalone.ViewContainer;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,7 +55,7 @@ public class InventoryViewHost {
 
     public void pushView(@NotNull View view) {
         history.addLast(view);
-        replaceInventory((BaseElement) view.element());
+        replaceInventory((ViewContainer) view.element());
     }
 
     public void popView() {
@@ -64,7 +65,7 @@ public class InventoryViewHost {
         }
 
         history.removeLast();
-        replaceInventory((BaseElement) history.getLast().element());
+        replaceInventory((ViewContainer) history.getLast().element());
     }
 
     public @NotNull Inventory getHandle() {
@@ -75,7 +76,7 @@ public class InventoryViewHost {
         return element;
     }
 
-    private void replaceInventory(@NotNull BaseElement newElement) {
+    private void replaceInventory(@NotNull ViewContainer newElement) {
         // Unmount old component if relevant
         Inventory oldInv = this.inventory;
         if (this.element != null) {
@@ -101,7 +102,7 @@ public class InventoryViewHost {
         }
     }
 
-    private @NotNull InventoryType updateSize(@NotNull BaseElement element) {
+    private @NotNull InventoryType updateSize(@NotNull ViewContainer element) {
 //        Check.argCondition(section.width() > 9, "section width must be <= 9, was {}", section.width());
         var id = element.id() != null ? element.id() : "chest";
 
@@ -116,7 +117,7 @@ public class InventoryViewHost {
             return InventoryType.ANVIL;
         }
 
-        return switch (element.height()) {
+        var inventoryType = switch (element.height()) {
             case 1 -> InventoryType.CHEST_1_ROW;
             case 2 -> InventoryType.CHEST_2_ROW;
             case 3 -> InventoryType.CHEST_3_ROW;
@@ -129,6 +130,10 @@ public class InventoryViewHost {
             }
             default -> throw new IllegalStateException("Unreachabe");
         };
+        if (element.isConsumePlayerInventory()) {
+            playerInventoryRows = 4;
+        }
+        return inventoryType;
     }
 
     public void performSignal(@NotNull String signal, @NotNull Object... args) {
@@ -166,10 +171,7 @@ public class InventoryViewHost {
         var contents = element.getContents();
         ItemStack[] top, bottom = null;
 
-        if (inventory.getInventoryType() == InventoryType.ANVIL)
-            top = new ItemStack[3];
-        else
-            top = new ItemStack[9 * (height - playerInventoryRows)];
+        top = new ItemStack[inventory.getInventoryType().getSize()];
         Arrays.fill(top, ItemStack.AIR);
         for (int i = 0; i < top.length; i++) {
             if (contents[i] == null) continue;
@@ -180,8 +182,9 @@ public class InventoryViewHost {
             bottom = new ItemStack[9 * playerInventoryRows];
             Arrays.fill(bottom, ItemStack.AIR);
             for (int i = 0; i < bottom.length; i++) {
-                if (contents[9 * (height - playerInventoryRows) + i] == null) continue;
-                bottom[i] = contents[9 * (height - playerInventoryRows) + i];
+                var contentIndex = inventory.getInventoryType().getSize() + i;
+                if (contentIndex >= contents.length || contents[contentIndex] == null) continue;
+                bottom[i] = contents[contentIndex];
             }
         }
 

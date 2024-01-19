@@ -19,17 +19,23 @@ import java.util.function.Consumer;
 public class ViewContainer extends BoxContainer implements ViewElement {
 
     private View associatedView;
+    private boolean consumePlayerInventory;
 
     private final Map<String, List<Consumer<Object[]>>> signals = new HashMap<>();
 
-    public ViewContainer(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull Align align) {
+    public ViewContainer(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull Align align, boolean consumePlayerInventory) {
         super(context, id, width, height, align);
         this.associatedView = null;
+        this.consumePlayerInventory = consumePlayerInventory;
     }
 
     protected ViewContainer(@NotNull ElementContext context, @NotNull ViewContainer other) {
         super(context, other);
         this.associatedView = null;
+    }
+
+    public boolean isConsumePlayerInventory() {
+        return consumePlayerInventory;
     }
 
     public void setId(@Nullable String id) {
