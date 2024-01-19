@@ -16,6 +16,7 @@ java_library(
         "//modules/terraform",
         "//third_party:minestom",
         "@com_google_protobuf//java/core",
+        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",

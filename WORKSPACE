@@ -124,6 +124,7 @@ maven_install(
         "io.getunleash:unleash-client-java:9.2.0",
         "com.velocitypowered:velocity-api:3.1.1",
         "com.google.inject:guice:5.0.1",
+        "com.github.hollow-cube:datafixerupper:cf58e926a6",
 
         # Adventure
         "net.kyori:adventure-api:4.12.0",

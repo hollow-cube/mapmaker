@@ -18,6 +18,7 @@ java_library(
         "//third_party:minestom",
         "//third_party:spicedb",
         "@maven//:com_github_ben_manes_caffeine_caffeine",
+        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_inject_guice",
         "@maven//:dev_hollowcube_polar",
