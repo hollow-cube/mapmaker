@@ -21,7 +21,8 @@ public final class ResourcePackManager {
     private static final Logger logger = LoggerFactory.getLogger(ResourcePackManager.class);
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
 
-    private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
+    private static final String RESOURCE_PACK_URL = "https://hollowcube-resource-pack.s3.amazonaws.com/mapmaker-%s.zip";
+    //    private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
     private static final UUID RESOURCE_PACK_ID = UUID.fromString("aceb326f-da15-45bc-bf2f-11940c21780c");
 
     /**
@@ -38,7 +39,7 @@ public final class ResourcePackManager {
             logger.info("Skipping resource pack for {} (in dev mode)", player.getUsername());
             return CompletableFuture.completedFuture(null);
         }
-        String url = String.format(RESOURCE_PACK_URL, runtime.commit()), hash = runtime.resourcePackSha1();
+        String url = String.format(RESOURCE_PACK_URL, runtime.resourcePackSha1()), hash = runtime.resourcePackSha1();
 
         // Listen for the proxy response and send the proxy query
         final var future = new CompletableFuture<Boolean>();
