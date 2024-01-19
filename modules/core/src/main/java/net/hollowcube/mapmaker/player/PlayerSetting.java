@@ -10,6 +10,9 @@ import java.util.function.Function;
 
 public sealed interface PlayerSetting<T> permits PlayerSettingImpl {
 
+    static @NotNull PlayerSetting<String> String(@NotNull String key, @NotNull String defaultValue) {
+        return create(key, defaultValue, JsonPrimitive::new, JsonElement::getAsString);
+    }
 
     static @NotNull PlayerSetting<Boolean> Bool(@NotNull String key, boolean defaultValue) {
         return create(key, defaultValue, JsonPrimitive::new, JsonElement::getAsBoolean);

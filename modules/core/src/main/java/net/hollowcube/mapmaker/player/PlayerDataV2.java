@@ -44,7 +44,6 @@ public class PlayerDataV2 {
     private int coins = 0;
     private int cubits = 0;
 
-    private JsonObject cosmetics = new JsonObject();
     private Set<String> unlockedCosmetics = new HashSet<>();
 
     public PlayerDataV2() {
@@ -140,20 +139,13 @@ public class PlayerDataV2 {
     }
 
     public @Nullable String getCosmetic(@NotNull CosmeticType type) {
-        var raw = cosmetics.get(type.id());
-        if (raw == null || raw.getAsString().isEmpty()) return null;
-        return raw.getAsString();
+        var cosmetic = getSetting(type.setting());
+        return cosmetic.isEmpty() ? null : cosmetic;
     }
 
     public void setCosmetic(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
         if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
-        if (cosmetic == null) {
-            cosmetics.remove(type.id());
-            updates.updateCosmetic(type, null);
-        } else {
-            cosmetics.addProperty(type.id(), cosmetic.id());
-            updates.updateCosmetic(type, cosmetic.id());
-        }
+        setSetting(type.setting(), cosmetic == null ? "" : cosmetic.id());
     }
 
     public @NotNull Set<String> unlockedCosmetics() {
