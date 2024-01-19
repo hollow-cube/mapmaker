@@ -58,9 +58,9 @@ public class CosmeticEntry extends View {
 
     @Action("off")
     public void handleSelectCosmetic(@NotNull Player player) {
-        if (!playerData.unlockedCosmetics().contains(cosmetic.id())) {
-            return;
-        }
+//        if (!playerData.unlockedCosmetics().contains(cosmetic.id())) {
+//            return;
+//        }
 
         playerData.setCosmetic(CosmeticType.HEAD, cosmetic);
         performSignal(UPDATE_SELECTED);

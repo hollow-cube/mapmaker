@@ -65,8 +65,9 @@ public class Cosmetic {
                 .lore(LanguageProviderV2.translateMulti("cosmetic." + type.id() + ".lore",
                         List.of(rarity().asComponent(), Component.translatable("cosmetic." + type.id() + "." + id + ".lore"))))
                 .meta(LeatherArmorMeta.class, meta -> {
-                    meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get("models/cosmetics/" + type.id() + "/" + id)).cmd());
-                    meta.color(new Color(255, 0, 0));
+                    var spritePath = "models/cosmetics/" + type.id() + "/" + id;
+                    meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+                    meta.color(new Color(255, 255, 255));
                     meta.hideFlag(ItemHideFlag.HIDE_DYE);
                 })
                 .build();

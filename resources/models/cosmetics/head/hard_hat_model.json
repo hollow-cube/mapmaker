@@ -1,0 +1,84 @@
+{
+	"credit": "Made By Fritz_angelos",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "mapmaker:item/hard_hatv5",
+		"particle": "mapmaker:item/hard_hatv5"
+	},
+	"elements": [
+		{
+			"from": [1.5, 12, -1],
+			"to": [13.5, 12, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 7.5]},
+			"faces": {
+				"north": {"uv": [10, 16, 13, 16], "texture": "#0"},
+				"east": {"uv": [6, 16, 10, 16], "texture": "#0"},
+				"south": {"uv": [17, 16, 20, 16], "texture": "#0"},
+				"west": {"uv": [13, 16, 17, 16], "texture": "#0"},
+				"up": {"uv": [13.25, 16, 10.25, 12], "texture": "#0"},
+				"down": {"uv": [13.25, 12, 10.25, 16], "texture": "#0"}
+			}
+		},
+		{
+			"from": [4, 12, 4],
+			"to": [12, 16, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 7.5]},
+			"faces": {
+				"north": {"uv": [10, 3, 12, 4], "texture": "#0"},
+				"east": {"uv": [8, 3, 10, 4], "texture": "#0"},
+				"south": {"uv": [14, 3, 16, 4], "texture": "#0"},
+				"west": {"uv": [12, 3, 14, 4], "texture": "#0"},
+				"up": {"uv": [12, 3, 10, 1], "texture": "#0"},
+				"down": {"uv": [14, 1, 12, 3], "texture": "#0"}
+			}
+		},
+		{
+			"from": [3.75, 12.25, 3.75],
+			"to": [12.25, 16.75, 12.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 7.5]},
+			"faces": {
+				"north": {"uv": [2, 15, 4, 16], "texture": "#0"},
+				"east": {"uv": [0, 15, 2, 16], "texture": "#0"},
+				"south": {"uv": [6, 15, 8, 16], "texture": "#0"},
+				"west": {"uv": [4, 15, 6, 16], "texture": "#0"},
+				"up": {"uv": [4, 15, 2, 13], "texture": "#0"},
+				"down": {"uv": [6, 13, 4, 15], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"gui": {
+			"rotation": [-152.5, 32, 180],
+			"translation": [0.25, -3.5, 0],
+			"scale": [0.88, 0.88, 0.88]
+		},
+		"head": {
+			"translation": [0, -5.5, 0],
+			"scale": [1.82, 1.82, 1.82]
+		}
+	},
+	"groups": [
+		{
+			"name": "root",
+			"origin": [8, 4, 8],
+			"color": 0,
+			"nbt": "{}",
+			"children": [
+				{
+					"name": "non_tint",
+					"origin": [8, 4, 8],
+					"color": 0,
+					"nbt": "{}",
+					"children": []
+				},
+				{
+					"name": "tint",
+					"origin": [8, 4, 8],
+					"color": 0,
+					"nbt": "{}",
+					"children": [0, 1, 2]
+				}
+			]
+		}
+	]
+}
