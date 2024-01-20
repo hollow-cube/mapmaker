@@ -1,12 +1,16 @@
 package net.hollowcube.map.world;
 
 import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.util.debug.PlayingDebugOverlay;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -78,6 +82,8 @@ class MapWorldHelpers {
         player.setAllowFlying(false);
         player.setFlying(false);
         player.setFlyingSpeed(0.05f);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+        player.setHealth(20);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
         player.getInventory().clear();
@@ -86,6 +92,10 @@ class MapWorldHelpers {
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);
         MiscFunctionality.applyCosmetics(player, playerData);
+
+        if (MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
+            ActionBar.forPlayer(player).addProvider(PlayingDebugOverlay.INSTANCE);
+        }
     }
 
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.map.gui.effect ?>
+<component width="9" height="4" align="ttb">
+
+    <box width="9" align="ltr">
+        <text id="name_text" width="7" font="line_1"
+              translationKey="gui.effect.name"/>
+        <text id="progress_index_text" width="2" font="line_1"
+              translationKey="gui.effect.progress_index"/>
+    </box>
+
+    <box width="9" height="3" align="ltr">
+        <button id="repeatable" width="3" height="3"
+                translationKey="gui.status.repeatable"
+                sprite="minecraft:comparator"/>
+        <button id="time_limit" width="3" height="3"
+                translationKey="gui.effect.time_limit"
+                sprite="minecraft:clock"/>
+        <button id="reset_height" width="3" height="3"
+                translationKey="gui.effect.reset_height"
+                sprite="minecraft:iron_boots"/>
+    </box>
+
+</component>

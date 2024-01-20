@@ -33,6 +33,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -198,6 +199,8 @@ public abstract class HubServerBase implements HubServer {
         player.teleport(HUB_SPAWN_POINT);
         player.sendActionBar(Component.empty());
         player.setFlyingSpeed(player.getTag(HubServer.DOUBLE_JUMP_TAG) ? 0 : 0.05f);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+        player.setHealth(20);
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);

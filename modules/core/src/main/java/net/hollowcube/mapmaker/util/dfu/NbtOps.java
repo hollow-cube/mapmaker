@@ -147,7 +147,7 @@ public class NbtOps implements DynamicOps<NBT> {
             return DataResult.success(new NBTList<>(list.getSubtagType(), newList));
         }
 
-        if (nbt == null || nbt.getID().equals(NBTType.TAG_End)) {
+        if (nbt == null || NBTType.TAG_End.equals(nbt.getID())) {
             if (values.isEmpty())
                 return DataResult.success(NBTEnd.INSTANCE);
             return DataResult.success(new NBTList<>(values.get(0).getID(), values));
