@@ -1,10 +1,17 @@
 package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.particle.Particle;
+import net.minestom.server.particle.ParticleCreator;
+import net.minestom.server.thread.TickThread;
+import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +31,8 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         var instance = tick.getInstance();
         var pos = tick.getBlockPosition();
         var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
+
+        particleTick(instance, tick.getBlockPosition());
 
         Set<Player> newPlayers = new HashSet<>(), currentPlayers = getPlayersOnPlate();
 
@@ -57,6 +66,26 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         }
         currentPlayers.clear();
         currentPlayers.addAll(newPlayers);
+    }
+
+    default void particleTick(@NotNull Instance instance, @NotNull Point blockPosition) {
+
+        // Spawn particles in the world every once in a while if building
+        //noinspection UnstableApiUsage,DataFlowIssue
+        if (TickThread.current().getTick() % 20 != 0) return;
+        var world = MapWorld.unsafeFromInstance(instance);
+        if (world == null || ((world.flags()) & MapWorld.FLAG_EDITING) == 0) return;
+
+        PacketUtils.sendGroupedPacket(world.players(), ParticleCreator.createParticlePacket(
+                Particle.DUST, true,
+                blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
+                0.25f, 0.25f, 0.25f, 0f, 5, buffer -> {
+                    buffer.writeFloat(0f); // red
+                    buffer.writeFloat(1f); // green
+                    buffer.writeFloat(0f); // blue
+                    buffer.writeFloat(1f); // scale
+                }
+        ));
     }
 
     void onPlatePressed(@NotNull Tick tick, @NotNull Player player);

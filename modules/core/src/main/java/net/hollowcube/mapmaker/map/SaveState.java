@@ -1,10 +1,14 @@
 package net.hollowcube.mapmaker.map;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +46,8 @@ public class SaveState {
     private boolean completed;
     private long playtime;
     private transient long playStartTime;
+
+    private PlayState playState = new PlayState();
 
     // Common to play and edit
     private Pos pos = null;
@@ -132,6 +138,16 @@ public class SaveState {
         playStartTime = System.currentTimeMillis();
     }
 
+    public @NotNull PlayState playState() {
+        return playState;
+    }
+
+    public void setPlayState(@NotNull PlayState playState) {
+        this.playState = playState;
+    }
+
+    // OLD STUFF THAT NEEDS TO BE DELETED PROBABLY BELOW
+
     public @Nullable Pos pos() {
         return pos;
     }
@@ -207,6 +223,171 @@ public class SaveState {
             this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.write(NetworkBuffer.NBT, inventoryTag)));
         }
         updates.setInventory(this.inventory);
+    }
+
+    public static class PlayState {
+        public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
+
+        public static Codec<PlayState> CODEC;
+
+        static {
+            CODEC = RecordCodecBuilder.create(i -> i.group(
+                    ExtraCodecs.Lazy(() -> CODEC).optionalFieldOf("lastState").forGetter(PlayState::lastState),
+                    Codec.STRING.listOf().fieldOf("history").orElseGet(s -> {
+                    }, ArrayList::new).forGetter(PlayState::history),
+                    Codec.INT.optionalFieldOf("progressIndex").forGetter(PlayState::progressIndex),
+                    Codec.LONG.optionalFieldOf("timeLimit").forGetter(PlayState::timeLimit),
+                    Codec.INT.optionalFieldOf("resetHeight").forGetter(PlayState::resetHeight),
+                    Codec.unboundedMap(ExtraCodecs.POTION_EFFECT, Codec.INT).optionalFieldOf("potionEffects", Map.of()).forGetter(PlayState::potionEffects),
+                    ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
+                    Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
+                    Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives)
+            ).apply(i, PlayState::new));
+        }
+
+        private Optional<PlayState> lastState; // The previous state of the player (ie at the last checkpoint)
+
+        // Has two meanings:
+        // in main state -> The list of status reached since the last checkpoint.
+        // in last state -> The last entry is always the checkpoint that was reached at that state.
+        private final List<String> history;
+        private Optional<Integer> progressIndex;
+        private Optional<Long> timeLimit; // Remaining time limit in ms
+        private Optional<Integer> resetHeight;
+        private Map<PotionEffect, Integer> potionEffects;
+        private Optional<Pos> pos;
+        private Optional<Integer> maxLives; // Maximum number of lives for the current state
+        private Optional<Integer> lives; // Number of lives remaining for the current state
+
+        public PlayState() {
+            this(Optional.empty(), List.of(), Optional.empty(),
+                    Optional.empty(), Optional.empty(), Map.of(), Optional.empty(),
+                    Optional.empty(), Optional.empty());
+        }
+
+        public PlayState(
+                Optional<PlayState> lastState, List<String> statusEffects,
+                Optional<Integer> progressIndex, Optional<Long> timeLimit,
+                Optional<Integer> resetHeight,
+                Map<PotionEffect, Integer> potionEffects, Optional<Pos> pos,
+                Optional<Integer> maxLives, Optional<Integer> lives
+        ) {
+            this.lastState = lastState;
+            this.history = new ArrayList<>(statusEffects);
+            this.progressIndex = progressIndex;
+            this.timeLimit = timeLimit;
+            this.resetHeight = resetHeight;
+            this.potionEffects = new HashMap<>(potionEffects);
+            this.pos = pos;
+            this.maxLives = maxLives;
+            this.lives = lives;
+        }
+
+        public Optional<PlayState> lastState() {
+            return lastState;
+        }
+
+        public boolean hasStatus(@NotNull String id) {
+            return history.contains(id);
+        }
+
+        public List<String> history() {
+            return history;
+        }
+
+        public Optional<Integer> progressIndex() {
+            return progressIndex;
+        }
+
+        public Optional<Long> timeLimit() {
+            return timeLimit;
+        }
+
+        public Optional<Integer> resetHeight() {
+            return resetHeight;
+        }
+
+        public Map<PotionEffect, Integer> potionEffects() {
+            return potionEffects;
+        }
+
+        public Optional<Pos> pos() {
+            return pos;
+        }
+
+        public Optional<Integer> maxLives() {
+            return maxLives;
+        }
+
+        public Optional<Integer> lives() {
+            return lives;
+        }
+
+        public void setLastState(@Nullable PlayState lastState) {
+            this.lastState = Optional.ofNullable(lastState);
+        }
+
+        public void addStatus(@NotNull String id) {
+            if (!history.contains(id)) history.add(id);
+        }
+
+        public void clearStatus() {
+            history.clear();
+        }
+
+        public void setProgressIndex(int progressIndex) {
+            this.progressIndex = progressIndex == -1 ? Optional.empty() : Optional.of(progressIndex);
+        }
+
+        public void setTimeLimit(long timeLimit) {
+            this.timeLimit = timeLimit == -1 ? Optional.empty() : Optional.of(timeLimit);
+        }
+
+        public void setResetHeight(int resetHeight) {
+            this.resetHeight = resetHeight == NO_RESET_HEIGHT ? Optional.empty() : Optional.of(resetHeight);
+        }
+
+        public void setPotionEffects(Map<PotionEffect, Integer> potionEffects) {
+            this.potionEffects = potionEffects;
+        }
+
+        public void setPos(Optional<Pos> pos) {
+            this.pos = pos;
+        }
+
+        public void setMaxLives(int maxLives) {
+            this.maxLives = maxLives == -1 ? Optional.empty() : Optional.of(maxLives);
+        }
+
+        public void setLives(int lives) {
+            this.lives = lives == -1 ? Optional.empty() : Optional.of(lives);
+        }
+
+        public @NotNull PlayState copy() {
+            return new PlayState(
+                    lastState, history, progressIndex, timeLimit, resetHeight,
+                    potionEffects, pos, maxLives, lives
+            );
+        }
+
+        @Override
+        public String toString() {
+            return toString(true);
+        }
+
+        public String toString(boolean includeLast) {
+            return "PlayState{" +
+                    "lastState=" + lastState.isPresent() +
+                    ", statusEffects=" + history +
+                    ", progressIndex=" + progressIndex +
+                    ", timeLimit=" + timeLimit +
+                    ", resetHeight=" + resetHeight +
+                    ", potionEffects=" + potionEffects +
+                    ", pos=" + pos +
+                    ", maxLives=" + maxLives +
+                    ", lives=" + lives +
+                    '}';
+        }
     }
 
 }

@@ -62,4 +62,8 @@ public interface MapWorld {
 
     @NotNull Set<Player> players();
 
+    default void callEvent(@NotNull InstanceEvent event) {
+        instance().eventNode().call(event);
+    }
+
 }

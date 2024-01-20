@@ -87,7 +87,7 @@ public class CheckpointSettingsView extends View {
 
         // If the block was removed, play a block break effect
         if (block.isAir()) {
-            var packet = new EffectPacket(2001, blockPosition, CheckpointPlateBlock.VANILLA_BLOCK.stateId(), false);
+            var packet = new EffectPacket(2001, blockPosition, Block.HEAVY_WEIGHTED_PRESSURE_PLATE.stateId(), false);
             instance.sendGroupedPacket(packet);
         }
     }

@@ -48,7 +48,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
 
     @Override
     public @NotNull List<BlockHandler> blockHandlers() {
-        return List.of(FinishPlateBlock.INSTANCE, CheckpointPlateBlock.INSTANCE, BouncePadBlock.INSTANCE);
+        return List.of(FinishPlateBlock.INSTANCE, CheckpointPlateBlock.INSTANCE, BouncePadBlock.INSTANCE, StatusPlateBlock.INSTANCE);
     }
 
     @Override
@@ -57,6 +57,7 @@ public class CheckpointFeatureProvider implements FeatureProvider {
             world.itemRegistry().register(FinishPlateBlock.ITEM);
             world.itemRegistry().register(CheckpointPlateBlock.ITEM);
             world.itemRegistry().register(BouncePadBlock.ITEM);
+            world.itemRegistry().register(StatusPlateBlock.ITEM);
         }
 
         if ((world.flags() & MapWorld.FLAG_PLAYING) != 0) {

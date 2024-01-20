@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -26,7 +27,6 @@ public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
-//            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
@@ -44,6 +44,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
             .registerTypeAdapter(Point.class, new PointTypeAdapter())
             .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
+            .registerTypeAdapter(SaveState.PlayState.class, DFU.JsonSerializer(SaveState.PlayState.CODEC))
             .disableJdkUnsafe()
             .create();
 

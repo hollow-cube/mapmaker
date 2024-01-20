@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.map.gui.effect ?>
+<component width="9" height="3" align="ttb">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.effect.coordinate.information"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text id="x" width="3" height="1"
+              translationKey="gui.effect.coordinate.x"
+              font="line_1" centered="true"/>
+        <text id="y" width="3" height="1"
+              translationKey="gui.effect.coordinate.y"
+              font="line_1" centered="true"/>
+        <text id="z" width="3" height="1"
+              translationKey="gui.effect.coordinate.z"
+              font="line_1" centered="true"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <text id="yaw" width="3" height="1"
+              translationKey="gui.effect.coordinate.yaw"
+              font="line_2" centered="true"/>
+        <spacer/>
+        <text id="pitch" width="3" height="1"
+              translationKey="gui.effect.coordinate.pitch"
+              font="line_2" centered="true"/>
+    </box>
+
+
+</component>

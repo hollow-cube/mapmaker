@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.map.gui.effect ?>
+<component width="9" height="4" align="ttb">
+
+    <box width="9" height="2" align="ltr">
+        <button id="potion_effects" width="2" height="2"
+                translationKey="gui.effect.actions.potion_effects"
+                sprite="minecraft:brewing_stand"/>
+        <button id="clear_effects" width="2" height="2"
+                translationKey="gui.effect.actions.clear_effects"
+                sprite="minecraft:glass_bottle"/>
+
+        <spacer/>
+
+        <button id="teleport" width="2" height="2"
+                translationKey="gui.effect.actions.teleport"
+                sprite="minecraft:ender_pearl"/>
+        <button id="settings" width="2" height="2"
+                translationKey="gui.effect.actions.settings"
+                sprite="minecraft:comparator"/>
+    </box>
+
+    <box width="9" height="2" align="ltr">
+        <button id="add_item" width="2" height="2"
+                translationKey="gui.effect.actions.add_item"
+                sprite="minecraft:iron_ingot"/>
+        <button id="remove_item" width="2" height="2"
+                translationKey="gui.effect.actions.remove_item"
+                sprite="minecraft:barrier"/>
+    </box>
+
+</component>
