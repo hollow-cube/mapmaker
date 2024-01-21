@@ -12,6 +12,7 @@ import net.minestom.server.MinecraftServer;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTEnd;
 import org.slf4j.Logger;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -21,6 +22,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class CoreInit {
+
+    public static void fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin() {
+        // Rant  : https://discord.com/channels/706185253441634317/706186227493109860/1198617307870670938
+        // Reason: https://discord.com/channels/706185253441634317/706186227493109860/1198620211243401257
+        var end = NBTEnd.INSTANCE;
+        System.out.println("NBTEnd=" + end);
+    }
 
     public static void logging() {
         // Convert JUL messages to SLF4J
@@ -71,6 +79,8 @@ public class CoreInit {
 
     public static void genericStandaloneInit(@NotNull Logger logger, @NotNull Supplier<? extends StandaloneServer> serverConstructor) {
         long start = System.nanoTime();
+
+        CoreInit.fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin();
 
         CoreInit.logging();
         CoreInit.metrics();

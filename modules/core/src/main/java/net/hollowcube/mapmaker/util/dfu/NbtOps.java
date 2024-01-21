@@ -79,6 +79,7 @@ public class NbtOps implements DynamicOps<NBT> {
     @Override
     public DataResult<Boolean> getBooleanValue(NBT input) {
         return switch (input) {
+            case NBTEnd nbt -> DataResult.success(false);
             case NBTByte nbt -> DataResult.success(nbt.getValue() != 0);
             case NBTShort nbt -> DataResult.success(nbt.getValue() != 0);
             case NBTInt nbt -> DataResult.success(nbt.getValue() != 0);

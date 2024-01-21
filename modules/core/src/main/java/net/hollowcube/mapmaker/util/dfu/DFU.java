@@ -14,7 +14,16 @@ public final class DFU {
 
     public static <T> @NotNull Tag<T> View(@NotNull Codec<T> codec) {
         return Tag.View(TagSerializer.fromCompound(
-                compound -> codec.decode(NbtOps.INSTANCE, compound).result().orElseThrow().getFirst(),
+                compound -> {
+                    var result = codec.decode(NbtOps.INSTANCE, compound);
+                    if (result.result().isPresent()) {
+                        return result.result().get().getFirst();
+                    } else if (result.error().isPresent()) {
+                        throw new RuntimeException(result.error().get().message());
+                    } else {
+                        throw new RuntimeException("Unknown error");
+                    }
+                },
                 value -> {
                     var result = codec.encode(value, NbtOps.INSTANCE, null);
                     if (result.result().isPresent()) {
