@@ -86,6 +86,7 @@ class MapWorldHelpers {
         player.setHealth(20);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
+        player.clearEffects();
         player.getInventory().clear();
         player.removeTag(SPECTATOR_CHECKPOINT);
 

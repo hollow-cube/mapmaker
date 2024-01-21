@@ -19,6 +19,7 @@ import net.hollowcube.map.command.build.TestCommand;
 import net.hollowcube.map.command.invite.RemoveCommand;
 import net.hollowcube.map.command.utility.*;
 import net.hollowcube.map.entity.MapEntities;
+import net.hollowcube.map.entity.potion.PotionHandler;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.invites.PlayerInviteServiceImpl;
 import net.hollowcube.map.terraform.MapServerModule;
@@ -174,6 +175,7 @@ public abstract class MapServerBase implements MapServer {
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
         MapEntities.init(entityEvents);
+        eventNode.addChild(PotionHandler.EVENT_NODE);
 
         // Common commands
 //        commandManager.register(new HelpCommand(commandManager));
