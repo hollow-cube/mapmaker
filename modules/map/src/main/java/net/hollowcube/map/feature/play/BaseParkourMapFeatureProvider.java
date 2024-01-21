@@ -8,20 +8,25 @@ import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
+import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.feature.play.item.*;
+import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +38,9 @@ import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class BaseParkourMapFeatureProvider implements FeatureProvider {
+    // This tag is present when the player has an active countdown and holds the time at which
+    // the countdown will end, in ms since epoch.
+    public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
@@ -42,6 +50,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             .addListener(MapPlayerCheckpointChangeEvent.class, this::handleCheckpointChange)
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
+            .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
+            .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
             .addListener(InstanceTickEvent.class, this::handleTick);
 
     @Override
@@ -157,56 +167,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.updateViewableRule((p) -> true);
     }
 
-    /**
-     * Resets the player to the start of the map.
-     *
-     * @param player    the player to reset
-     * @param saveState the save state of the player
-     */
-    public void hardReset(@NotNull Player player, @NotNull SaveState saveState) {
-        // Remove the playing tag so they can't trigger a checkpoint/status/completion
-        player.removeTag(MapHooks.PLAYING);
-
-        var newPlayState = new SaveState.PlayState();
-        saveState.setPlayState(newPlayState);
-
-        var world = MapWorld.forPlayer(player);
-        player.teleport(world.map().settings().getSpawnPoint()).thenRun(() -> {
-            updatePlayerFromState(player, newPlayState);
-            player.setTag(MapHooks.PLAYING, true);
-        });
-    }
-
-    /**
-     * Resets the player to their last checkpoint, or to the start of the map if they don't have a checkpoint.
-     *
-     * @param player the player to reset
-     */
-    public void softReset(@NotNull Player player, @NotNull SaveState saveState) {
-        var playState = saveState.playState();
-        // If they don't have a checkpoint or are on their last life, do a hard reset.
-        if (playState.lastState().isEmpty() || playState.lives().orElse(0) == 1) {
-            hardReset(player, saveState);
-            return;
-        }
-
-        // Remove the playing tag so they can't trigger a checkpoint/status/completion
-        player.removeTag(MapHooks.PLAYING);
-
-        // "pop" the last state to the current
-        playState = playState.lastState().get();
-        if (playState.lives().isPresent())
-            // This is definitely valid, we checked above to see if this was the last life.
-            playState.setLives(playState.lives().get() - 1);
-        saveState.setPlayState(playState);
-        // Create a copy so that we can reset to the checkpoint again
-        playState.setLastState(playState.copy());
-
-        // Apply the current state to the player and teleport them
-        updatePlayerFromState(player, playState);
-        player.teleport(playState.pos().orElseThrow()).thenRun(() -> player.setTag(MapHooks.PLAYING, true));
-    }
-
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointChangeEvent event) {
         var player = event.getPlayer();
         var state = SaveState.fromPlayer(player).playState();
@@ -225,10 +185,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var checkpointPos = data.teleport().orElse(player.getPosition());
 
         // Apply the checkpoint/effect changes
-        data.setTimeLimit(-1); // Time always reset on checkpoint
+        state.setTimeLimit(-1); // Time always reset on checkpoint
+        player.removeTag(COUNTDOWN_END);
         updateBaseEffectState(player, data, state);
-        state.setMaxLives(data.lives());
-        state.setLives(data.lives());
+        if (data.lives() > 0) {
+            state.setMaxLives(data.lives());
+            state.setLives(data.lives());
+        }
 
         // Cache the last state so that we can reset back here.
         state.setLastState(new SaveState.PlayState(
@@ -247,6 +210,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Update the player based on the new state
         updatePlayerFromState(player, state);
+        player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 
     public void handleStatusChange(@NotNull MapPlayerStatusChangeEvent event) {
@@ -262,6 +226,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return; // Player has already passed this progress index.
 
         // Apply the status changes
+        updateStateFromCountdown(player, state);
         updateBaseEffectState(player, data, state);
         if (data.extraTime() > 0 && state.timeLimit().isPresent()) {
             state.setTimeLimit(state.timeLimit().get() + data.extraTime());
@@ -272,26 +237,135 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         updatePlayerFromState(player, state);
     }
 
+    public void handlePlayerReset(@NotNull MapPlayerResetEvent event) {
+        var player = event.getPlayer();
+        if (!MapHooks.isPlayerPlaying(player)) return;
+
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null) return;
+
+        if (event.toCheckpoint()) {
+            softReset(player, saveState);
+        } else {
+            hardReset(player, saveState);
+        }
+    }
+
+    private void handleInitTimerFromMove(@NotNull PlayerMoveEvent event) {
+        var player = event.getPlayer();
+        if (!MapHooks.isPlayerPlaying(player)) return;
+
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null || saveState.getPlayStartTime() != 0) return;
+
+        var oldPosition = player.getPosition();
+        var newPosition = event.getNewPosition();
+        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPosition)))
+            return; // Player did not actually move, just turn their head
+
+        // Start the timer.
+        saveState.setPlayStartTime(System.currentTimeMillis());
+    }
+
     public void handleTick(@NotNull InstanceTickEvent event) {
         var instance = event.getInstance();
 
+        long now = System.currentTimeMillis();
+
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
+            if (!MapHooks.isPlayerPlaying(player)) continue;
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) continue;
+
+            //todo need to handle spectator checkpoint here
+            // actually this probably doesnt need to be handled here, idk
+//            if (playingMapWorld.isSpectating(player) && player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
+//                var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+//                if (checkpoint != null)
+//                    player.teleport(checkpoint);
+//            }
 
             var resetHeight = saveState.playState().resetHeight().orElse(-64);
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
+                continue;
+            }
+
+            var countdownEnd = player.getTag(COUNTDOWN_END);
+            if (countdownEnd != -1 && countdownEnd < now) {
+                player.sendMessage("you ran out of time, todo add a sound effect or something");
+                softReset(player, saveState);
+                continue;
             }
         }
+    }
+
+    /**
+     * Resets the player to the start of the map.
+     *
+     * @param player    the player to reset
+     * @param saveState the save state of the player
+     */
+    public void hardReset(@NotNull Player player, @NotNull SaveState saveState) {
+        if (saveState.isCompleted()) return;
+
+        // Remove the playing tag so that they can't trigger a checkpoint/status/completion
+        player.removeTag(MapHooks.PLAYING);
+
+        saveState.setCompleted(false);
+        saveState.setPlaytime(0);
+        saveState.setPlayStartTime(0);
+        var newPlayState = new SaveState.PlayState();
+        saveState.setPlayState(newPlayState);
+
+        player.removeTag(COUNTDOWN_END);
+
+        var world = MapWorld.forPlayer(player);
+        player.teleport(world.map().settings().getSpawnPoint()).thenRun(() -> {
+            updatePlayerFromState(player, newPlayState);
+            player.setTag(MapHooks.PLAYING, true);
+        });
+    }
+
+    /**
+     * Resets the player to their last checkpoint, or to the start of the map if they don't have a checkpoint.
+     *
+     * @param player the player to reset
+     */
+    public void softReset(@NotNull Player player, @NotNull SaveState saveState) {
+        if (saveState.isCompleted()) return;
+
+        var playState = saveState.playState();
+        // If they don't have a checkpoint or are on their last life, do a hard reset.
+        if (playState.lastState().isEmpty() || playState.lives().orElse(0) == 1) {
+            hardReset(player, saveState);
+            return;
+        }
+
+        // Remove the playing tag so that they can't trigger a checkpoint/status/completion
+        player.removeTag(MapHooks.PLAYING);
+
+        // "pop" the last state to the current
+        playState = playState.lastState().get();
+        if (playState.lives().isPresent())
+            // This is definitely valid, we checked above to see if this was the last life.
+            playState.setLives(playState.lives().get() - 1);
+        saveState.setPlayState(playState);
+        // Create a copy so that we can reset to the checkpoint again
+        playState.setLastState(playState.copy());
+
+        player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
+        // Apply the current state to the player and teleport them
+        updatePlayerFromState(player, playState);
+        player.teleport(playState.pos().orElseThrow()).thenRun(() -> player.setTag(MapHooks.PLAYING, true));
     }
 
     private void updateBaseEffectState(@NotNull Player player, @NotNull BaseEffectData data, @NotNull SaveState.PlayState state) {
         if (data.progressIndex() != -1) {
             state.setProgressIndex(data.progressIndex());
         }
-        if (data.timeLimit() != -1) {
+        if (data.timeLimit() > 0) {
             // Only update the time limit if it is assigned in this effect.
             // In a checkpoint it will have been reset prior to calling this function.
             state.setTimeLimit(data.timeLimit());
@@ -310,9 +384,28 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
+    private void updateStateFromCountdown(@NotNull Player player, @NotNull SaveState.PlayState state) {
+        var countdownEnd = player.getTag(COUNTDOWN_END);
+        if (countdownEnd == -1) return;
+        state.setTimeLimit(countdownEnd - System.currentTimeMillis());
+    }
+
     private void updatePlayerFromState(@NotNull Player player, @NotNull SaveState.PlayState state) {
-        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().orElse(10));
-        player.setHealth(2 * state.lives().orElse(10));
+        // Set the player health to the number of lives they have (1 heart = 1 life)
+        if (state.maxLives().isPresent() && state.lives().isPresent()) {
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
+            player.setHealth(2 * state.lives().get());
+        } else {
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+            player.setHealth(20);
+        }
+
+        // Update the countdown timer (time may have been added
+        if (state.timeLimit().isPresent()) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit().get());
+        }
+
+        //todo potions
     }
 
     private void updateViewership(@NotNull MapWorld world) {

@@ -5,6 +5,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.feature.play.effect.StatusEffectData;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -19,20 +20,20 @@ public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData>
 
     @Action("add_time")
     public void handleChangeAddTime() {
-        pushView(context -> new BaseEffectTimeLimitAnvil(context, data.extraTime() > 0 ? String.valueOf(data.extraTime()) : ""));
+        pushView(context -> new BaseEffectTimeLimitAnvil(context, data.extraTime() > 0 ? String.valueOf(data.extraTime() / 1000.0) : ""));
     }
 
     @Signal(BaseEffectTimeLimitAnvil.SIG_UPDATE_NAME)
     public void handleUpdateTimeLimit(@NotNull String index) {
         if (index.isEmpty()) {
-            data.setExtraTime(0);
+            data.setExtraTime(BaseEffectData.NO_TIME_LIMIT);
             updateFromData();
             return;
         }
 
         try {
-            var extraTime = Integer.parseInt(index);
-            if (extraTime < 0 || extraTime >= 86_400) return;
+            var extraTime = (int) (Double.parseDouble(index) * 1000.0);
+            if (extraTime < BaseEffectData.NO_TIME_LIMIT || extraTime >= 86_400_000) return;
             data.setExtraTime(extraTime);
             updateFromData();
         } catch (NumberFormatException ignored) {

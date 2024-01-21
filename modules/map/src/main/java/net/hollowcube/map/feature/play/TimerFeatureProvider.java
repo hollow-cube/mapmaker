@@ -12,11 +12,9 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,14 +26,13 @@ public class TimerFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("hud/timer", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::handleStartPlaying)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying)
-            .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying);
 
     private final ActionBar.Provider actionBar = this::buildWidget;
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0 || (world.flags() & MapWorld.FLAG_TESTING) != 0)
+        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
             return false;
 
         var settings = world.map().settings();
@@ -55,29 +52,27 @@ public class TimerFeatureProvider implements FeatureProvider {
         ActionBar.forPlayer(event.player()).removeProvider(actionBar);
     }
 
-    private void handlePlayerMove(@NotNull PlayerMoveEvent event) {
-        var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
-
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState == null || saveState.getPlayStartTime() != 0) return;
-
-        var oldPosition = player.getPosition();
-        var newPosition = event.getNewPosition();
-        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPosition)))
-            return; // Player did not actually move, just turn their head
-
-        saveState.setPlayStartTime(System.currentTimeMillis());
-    }
-
     private void buildWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
         if (!MapHooks.isPlayerPlaying(player)) return;
+
+        var world = MapWorld.forPlayerOptional(player);
+        var isTestingMode = (world.flags() & MapWorld.FLAG_TESTING) != 0;
 
         var saveState = SaveState.fromPlayer(player);
 
         long time = 0;
         if (saveState.getPlayStartTime() != 0) {
             time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
+        }
+
+        // Append the countdown timer, but only if it's not a testing map.
+        // We should not show the normal timer in testing mode.
+        var countdownEnd = player.getTag(BaseParkourMapFeatureProvider.COUNTDOWN_END);
+        if (countdownEnd != -1) {
+            time = countdownEnd - System.currentTimeMillis();
+            if (time < 0) time = 0;
+        } else if (isTestingMode) {
+            return;
         }
 
         var text = formatMapPlaytime(time, false);

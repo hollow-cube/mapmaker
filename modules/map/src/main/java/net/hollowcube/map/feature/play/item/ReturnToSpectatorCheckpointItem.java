@@ -34,7 +34,8 @@ public class ReturnToSpectatorCheckpointItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
-        if (checkpoint != null) // TODO this shouldn't be possible but if it is what do?
-            player.teleport(checkpoint);
+        if (checkpoint == null) return; // Sanity check
+
+        player.teleport(checkpoint);
     }
 }

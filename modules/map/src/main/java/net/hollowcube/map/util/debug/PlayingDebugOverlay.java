@@ -21,7 +21,7 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
 
         var playState = SaveState.fromPlayer(player).playState();
         var sliced = slice(playState.toString(false));
-        builder.offset(-FontUtil.measureText(sliced) / 2).append(sliced);
+        builder.offset(-FontUtil.measureText(sliced) / 2).append("line_0", sliced);
     }
 
     private @NotNull String slice(@NotNull String str) {

@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.play.checkpoint;
+package net.hollowcube.map.block.custom;
 
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerStatusChangeEvent;
@@ -64,7 +64,8 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var statusId = createObjectId(tick.getBlockPosition());
         world.callEvent(new MapPlayerStatusChangeEvent(player, world, statusId, data));

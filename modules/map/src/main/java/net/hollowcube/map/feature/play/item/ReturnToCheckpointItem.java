@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
+import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -43,9 +43,9 @@ public class ReturnToCheckpointItem extends ItemHandler {
         if (checkpoint != null) {
             player.teleport(checkpoint);
         } else {
-            var world = MapWorld.forPlayer(player);
+            var world = MapWorld.forPlayerOptional(player);
             if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
-                EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
+                EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
             }
         }
     }

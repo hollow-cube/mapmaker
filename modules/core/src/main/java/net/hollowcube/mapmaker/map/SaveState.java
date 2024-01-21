@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.*;
 
 public class SaveState {
@@ -41,24 +40,16 @@ public class SaveState {
     private String playerId;
     private String mapId;
     private SaveStateType type;
-    private Instant created;
-    private Instant lastModified;
     private boolean completed;
     private long playtime;
     private transient long playStartTime;
 
-    private PlayState playState = new PlayState();
-
-    // Common to play and edit
-    private Pos pos = null;
+    private PlayState playState = null;
 
     // Editing
+    private Pos pos = null;
     private boolean isFlying = false;
     private String inventory = null; // base64 bytes
-
-    // Playing
-    private String checkpoint = null;
-    private Pos checkpointPos = null;
 
     public SaveState() {
     }
@@ -90,14 +81,6 @@ public class SaveState {
 
     public @NotNull SaveStateType type() {
         return type;
-    }
-
-    public @NotNull Instant created() {
-        return created;
-    }
-
-    public @NotNull Instant lastModified() {
-        return lastModified;
     }
 
     public boolean isCompleted() {
@@ -139,6 +122,7 @@ public class SaveState {
     }
 
     public @NotNull PlayState playState() {
+        if (playState == null) playState = new PlayState();
         return playState;
     }
 
@@ -169,21 +153,6 @@ public class SaveState {
     public byte @Nullable [] inventory() {
         if (inventory == null) return null;
         return Base64.getDecoder().decode(inventory);
-    }
-
-    public @Nullable String checkpoint() {
-        return checkpoint;
-    }
-
-    public void setCheckpoint(@Nullable String checkpoint, @NotNull Pos pos) {
-        this.checkpoint = checkpoint;
-        this.checkpointPos = pos;
-        updates.setCheckpoint(checkpoint == null ? "" : checkpoint);
-        updates.setCheckpointPos(pos);
-    }
-
-    public @Nullable Pos checkpointPos() {
-        return checkpointPos;
     }
 
     // Utilities
@@ -340,7 +309,7 @@ public class SaveState {
         }
 
         public void setTimeLimit(long timeLimit) {
-            this.timeLimit = timeLimit == -1 ? Optional.empty() : Optional.of(timeLimit);
+            this.timeLimit = timeLimit <= 0 ? Optional.empty() : Optional.of(timeLimit);
         }
 
         public void setResetHeight(int resetHeight) {
@@ -356,11 +325,11 @@ public class SaveState {
         }
 
         public void setMaxLives(int maxLives) {
-            this.maxLives = maxLives == -1 ? Optional.empty() : Optional.of(maxLives);
+            this.maxLives = maxLives <= 0 ? Optional.empty() : Optional.of(maxLives);
         }
 
         public void setLives(int lives) {
-            this.lives = lives == -1 ? Optional.empty() : Optional.of(lives);
+            this.lives = lives <= 0 ? Optional.empty() : Optional.of(lives);
         }
 
         public @NotNull PlayState copy() {
@@ -379,14 +348,18 @@ public class SaveState {
             return "PlayState{" +
                     "lastState=" + lastState.isPresent() +
                     ", statusEffects=" + history +
-                    ", progressIndex=" + progressIndex +
-                    ", timeLimit=" + timeLimit +
-                    ", resetHeight=" + resetHeight +
+                    ", progressIndex=" + pretty(progressIndex) +
+                    ", timeLimit=" + pretty(timeLimit) +
+                    ", resetHeight=" + pretty(resetHeight) +
                     ", potionEffects=" + potionEffects +
-                    ", pos=" + pos +
-                    ", maxLives=" + maxLives +
-                    ", lives=" + lives +
+                    ", pos=" + pretty(pos) +
+                    ", maxLives=" + pretty(maxLives) +
+                    ", lives=" + pretty(lives) +
                     '}';
+        }
+
+        private @NotNull String pretty(@NotNull Optional<?> optional) {
+            return optional.map(Object::toString).orElse("null");
         }
     }
 
