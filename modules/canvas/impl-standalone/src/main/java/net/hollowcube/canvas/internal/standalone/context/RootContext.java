@@ -33,7 +33,7 @@ public record RootContext(
     }
 
     @Override
-    public void pushView(@NotNull View view) {
+    public void pushView(@NotNull View view, boolean isTransient) {
         throw new UnsupportedOperationException("Cannot push view on root context");
     }
 

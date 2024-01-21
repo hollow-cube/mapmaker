@@ -6,6 +6,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.map.gui.effect.potion.PotionEffectListView;
+import net.hollowcube.map.gui.effect.potion.PotionEffectSelectorView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -31,6 +33,17 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         this.data = data;
 
         updateFromData();
+    }
+
+    @Action("potion_effects")
+    public void addPotionEffect() {
+        // If this is the first effect go straight to the selector view
+        // Otherwise open the list view
+        if (data.potionEffects().isEmpty()) {
+            pushTransientView(c -> new PotionEffectSelectorView(c, data.potionEffects()));
+        } else {
+            pushView(c -> new PotionEffectListView(c, data.potionEffects()));
+        }
     }
 
     @Action("clear_effects")

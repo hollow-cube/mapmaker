@@ -23,7 +23,7 @@ public interface Context {
 
     boolean canPopView();
 
-    void pushView(@NotNull View view);
+    void pushView(@NotNull View view, boolean isTransient);
 
     void popView();
 

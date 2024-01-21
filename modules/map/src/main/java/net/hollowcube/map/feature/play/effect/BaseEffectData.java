@@ -4,11 +4,9 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseEffectData {
@@ -20,7 +18,7 @@ public abstract class BaseEffectData {
     private int timeLimit;
     private int resetHeight;
     private boolean clearPotionEffects;
-    private Map<PotionEffect, Integer> potionEffects;
+    private PotionEffectList potionEffects;
     private Optional<Pos> teleport;
     //todo settings
     //todo items
@@ -29,7 +27,7 @@ public abstract class BaseEffectData {
     public BaseEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            Map<PotionEffect, Integer> potionEffects,
+            Optional<PotionEffectList> potionEffects,
             Optional<Pos> teleport
     ) {
         this.name = name;
@@ -37,7 +35,7 @@ public abstract class BaseEffectData {
         this.timeLimit = timeLimit;
         this.resetHeight = resetHeight;
         this.clearPotionEffects = clearPotionEffects;
-        this.potionEffects = potionEffects;
+        this.potionEffects = potionEffects.orElseGet(PotionEffectList::new);
         this.teleport = teleport;
     }
 
@@ -65,8 +63,12 @@ public abstract class BaseEffectData {
         return clearPotionEffects;
     }
 
-    public @NotNull Map<PotionEffect, Integer> potionEffects() {
+    public @NotNull PotionEffectList potionEffects() {
         return potionEffects;
+    }
+
+    @NotNull Optional<PotionEffectList> optPotionEffects() {
+        return Optional.of(potionEffects);
     }
 
     public @NotNull Optional<Pos> teleport() {

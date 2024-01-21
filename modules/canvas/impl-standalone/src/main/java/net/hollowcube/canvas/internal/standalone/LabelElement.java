@@ -111,6 +111,17 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     }
 
     @Override
+    public void setItemDirect(@NotNull ItemStack itemStack) {
+        itemSprite = itemStack;
+        itemBlank = BLANK_ITEM.with(builder -> {
+            builder.displayName(itemStack.meta().getDisplayName());
+            builder.lore(itemStack.meta().getLore());
+            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+        });
+        context.markDirty();
+    }
+
+    @Override
     public @NotNull LabelElement clone(@NotNull ElementContext context) {
         return new LabelElement(context, this);
     }

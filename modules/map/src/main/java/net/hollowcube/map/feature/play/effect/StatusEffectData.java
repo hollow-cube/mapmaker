@@ -5,10 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class StatusEffectData extends BaseEffectData {
@@ -19,7 +17,7 @@ public class StatusEffectData extends BaseEffectData {
             Codec.INT.optionalFieldOf("timeLimit", 0).forGetter(StatusEffectData::timeLimit),
             Codec.INT.optionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(StatusEffectData::resetHeight),
             Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(StatusEffectData::clearPotionEffects),
-            Codec.unboundedMap(ExtraCodecs.POTION_EFFECT, Codec.INT).optionalFieldOf("potionEffects", Map.of()).forGetter(StatusEffectData::potionEffects),
+            PotionEffectList.CODEC.optionalFieldOf("potionEffects").forGetter(StatusEffectData::optPotionEffects),
             ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(StatusEffectData::teleport),
             // StatusEffectData
             Codec.BOOL.optionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
@@ -32,7 +30,7 @@ public class StatusEffectData extends BaseEffectData {
     public StatusEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            Map<PotionEffect, Integer> potionEffects,
+            Optional<PotionEffectList> potionEffects,
             Optional<Pos> teleport, boolean repeatable,
             int extraTime
     ) {

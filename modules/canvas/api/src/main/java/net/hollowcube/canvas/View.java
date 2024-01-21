@@ -75,11 +75,15 @@ public abstract class View implements Element {
     }
 
     public void pushView(@NotNull Function<Context, View> viewProvider) {
-        context.pushView(viewProvider.apply(context));
+        context.pushView(viewProvider.apply(context), false);
     }
 
     public void pushView(@NotNull View view) {
-        context.pushView(view);
+        context.pushView(view, false);
+    }
+
+    public void pushTransientView(@NotNull Function<Context, View> viewProvider) {
+        context.pushView(viewProvider.apply(context), true);
     }
 
     public void popView() {

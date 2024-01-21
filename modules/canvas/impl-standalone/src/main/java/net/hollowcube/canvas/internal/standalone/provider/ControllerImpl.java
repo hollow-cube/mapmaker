@@ -34,7 +34,7 @@ public class ControllerImpl implements Controller {
         newContextObjects.put("player", player);
 
         var context = new RenderableContext(rootContext, inventory, newContextObjects);
-        inventory.pushView(viewProvider.apply(context));
+        inventory.pushView(viewProvider.apply(context), false);
         if (inventory.getElement().isAnyLoading()) {
             final long end1 = System.currentTimeMillis();
             Thread.startVirtualThread(() -> {

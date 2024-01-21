@@ -1,0 +1,7 @@
+<component width="1" height="1" align="ltr">
+    <switch id="root">
+        <button id="select" translationKey="gui.effect.potion.level" sprite="minecraft:sugar"/>
+        <button id="set_custom" translationKey="gui.effect.potion.level.custom"
+                sprite="minecraft:sugar"/>
+    </switch>
+</component>

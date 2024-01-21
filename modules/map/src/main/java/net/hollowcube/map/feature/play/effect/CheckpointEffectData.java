@@ -5,10 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class CheckpointEffectData extends BaseEffectData {
@@ -21,7 +19,7 @@ public class CheckpointEffectData extends BaseEffectData {
             Codec.INT.optionalFieldOf("timeLimit", 0).forGetter(CheckpointEffectData::timeLimit),
             Codec.INT.optionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(CheckpointEffectData::resetHeight),
             Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(CheckpointEffectData::clearPotionEffects),
-            Codec.unboundedMap(ExtraCodecs.POTION_EFFECT, Codec.INT).optionalFieldOf("potionEffects", Map.of()).forGetter(CheckpointEffectData::potionEffects),
+            PotionEffectList.CODEC.optionalFieldOf("potionEffects").forGetter(CheckpointEffectData::optPotionEffects),
             ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(CheckpointEffectData::teleport),
             // CheckpointEffectData
             Codec.INT.optionalFieldOf("lives", NO_LIVES).forGetter(CheckpointEffectData::lives)
@@ -32,7 +30,7 @@ public class CheckpointEffectData extends BaseEffectData {
     public CheckpointEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            Map<PotionEffect, Integer> potionEffects,
+            Optional<PotionEffectList> potionEffects,
             Optional<Pos> teleport, int lives
     ) {
         super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport);

@@ -14,6 +14,7 @@ public final class HeadCosmetics {
     public static Cosmetic HARD_HAT = builder("hard_hat").rarity(Cosmetic.Rarity.COMMON).build();
     public static Cosmetic HAZARD_HELM_V2 = builder("hazard_helmv2").rarity(Cosmetic.Rarity.COMMON).build();
     public static Cosmetic HAZARD_HELM_V3 = builder("hazard_helmv3").rarity(Cosmetic.Rarity.COMMON).build();
+    public static Cosmetic KNIGHT_V1 = builder("knightv1").rarity(Cosmetic.Rarity.COMMON).build();
     public static Cosmetic KNIGHT_V2 = builder("knightv2").rarity(Cosmetic.Rarity.COMMON).build();
     public static Cosmetic PIRATE_HAT = builder("pirate_hat").rarity(Cosmetic.Rarity.COMMON).build();
     public static Cosmetic SAMURAI_HELM_MASKED = builder("samurai_helm_mask").rarity(Cosmetic.Rarity.COMMON).build();

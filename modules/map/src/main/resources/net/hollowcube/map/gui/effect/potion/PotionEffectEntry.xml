@@ -1,0 +1,6 @@
+<component width="1" height="1" align="ltr">
+    <switch id="root">
+        <button id="edit" translationKey="gui.effect.potion.entry.edit" sprite="minecraft:paper"/>
+        <button id="add" translationKey="gui.effect.potion.entry.add" sprite="minecraft:green_stained_glass_pane"/>
+    </switch>
+</component>
