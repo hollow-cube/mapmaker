@@ -58,6 +58,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.BlockManager;
 import org.jetbrains.annotations.Blocking;
@@ -176,6 +177,10 @@ public abstract class MapServerBase implements MapServer {
         globalEventHandler.addChild(entityEvents);
         MapEntities.init(entityEvents);
         eventNode.addChild(PotionHandler.EVENT_NODE);
+        eventNode.addListener(InventoryPreClickEvent.class, event -> {
+            if (event.getInventory() != null) return;
+            event.setCancelled(true);
+        });
 
         // Common commands
 //        commandManager.register(new HelpCommand(commandManager));

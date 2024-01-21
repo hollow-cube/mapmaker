@@ -27,6 +27,7 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.misc.CoreInit;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -72,6 +73,8 @@ public class DevServer {
 
     public static void main(String[] args) {
         long start = System.nanoTime();
+
+        CoreInit.fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin();
 
         System.setProperty("minestom.chunk-view-distance", "16");
         System.setProperty("minestom.command.async-virtual", "true");
