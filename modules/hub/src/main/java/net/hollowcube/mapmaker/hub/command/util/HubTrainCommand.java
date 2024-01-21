@@ -59,9 +59,10 @@ public class HubTrainCommand extends CommandDsl {
         private final Player target;
         private final Consumer<Player> callback;
         private int state = 0;
-        private final double distanceFromPlayer = 20; // How far the train travels
+        private final double distanceFromPlayer = 30; // How far the train travels
         private final int windupDelay = 20; // How many ticks before the train charges the player
         private final int trainActive = 20; // How many ticks the train will move (and be visible) for
+        private Vec trainDirection;
 
         Train(@NotNull Player target, @NotNull Consumer<Player> callback) {
             this.target = target;
@@ -89,12 +90,12 @@ public class HubTrainCommand extends CommandDsl {
                 return TaskSchedule.tick(windupDelay - 2); // Spare 2 ticks to move it into the right position
             } else if (state == 1) {
                 // Correct position (if the player has been moving)
-                Vec direction = target.getPosition().direction().withY(0).normalize();
-                Pos trainStart = target.getPosition().add(direction.mul(distanceFromPlayer));
+                trainDirection = target.getPosition().direction().withY(0).normalize();
+                Pos trainStart = target.getPosition().add(trainDirection.mul(distanceFromPlayer));
                 int offset = 0;
                 for (NpcItemModel model : train) {
                     // Move further parts of the train back with offset so it doesn't overlap
-                    Pos offsetStart = trainStart.add(direction.mul(5 * offset)).withView(target.getPosition().yaw() + 180f, 0f);
+                    Pos offsetStart = trainStart.add(trainDirection.mul(5 * offset)).withView(target.getPosition().yaw() + 90f, 0f);
                     model.teleport(offsetStart).join();
                     offset++;
                 }
@@ -106,7 +107,7 @@ public class HubTrainCommand extends CommandDsl {
                     // Move further parts of the train back with offset so it doesn't overlap
                     model.getEntityMeta().setScale(new Vec(4));
                     model.getEntityMeta().setPosRotInterpolationDuration(trainActive);
-                    model.teleport(model.getPosition().add(model.getPosition().direction().mul(distanceFromPlayer * 2))).join();
+                    model.teleport(model.getPosition().add(trainDirection.mul(distanceFromPlayer * -2))).join();
                 }
                 state++;
                 return TaskSchedule.tick(trainActive / 2);
