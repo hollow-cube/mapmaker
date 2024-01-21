@@ -75,7 +75,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Action("time_limit")
     public void handleChangeTimeLimit() {
-        pushView(context -> new BaseEffectTimeLimitAnvil(context, data.timeLimit() > 0 ? String.valueOf(data.timeLimit()) : ""));
+        pushView(context -> new BaseEffectTimeLimitAnvil(context, data.timeLimit() > 0 ? String.valueOf((double) data.timeLimit() / 1000) : ""));
     }
 
     @Signal(BaseEffectTimeLimitAnvil.SIG_UPDATE_NAME)
@@ -87,8 +87,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
         }
 
         try {
-            var newTimeLimit = Integer.parseInt(index);
-            if (newTimeLimit < 0 || newTimeLimit >= 86_400) return;
+            var newTimeLimit = (int) (Double.parseDouble(index) * 1000.0);
+            if (newTimeLimit < 0 || newTimeLimit >= 86_400_000) return;
             data.setTimeLimit(newTimeLimit);
             updateFromData();
         } catch (NumberFormatException ignored) {

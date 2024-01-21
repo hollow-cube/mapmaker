@@ -25,7 +25,7 @@ public class CheckpointSettingsTab extends AbstractEffectSettingsTab<CheckpointE
     }
 
     @Signal(CheckpointLivesAnvil.SIG_UPDATE_NAME)
-    public void handleUpdateIndex(@NotNull String index) {
+    public void handleUpdateLives(@NotNull String index) {
         if (index.isEmpty()) {
             data.setLives(CheckpointEffectData.NO_LIVES);
             updateFromData();

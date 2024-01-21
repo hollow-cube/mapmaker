@@ -1,8 +1,9 @@
-package net.hollowcube.map.feature.play.checkpoint;
+package net.hollowcube.map.block.custom;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
+import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
 import net.hollowcube.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.map.gui.effect.EditCheckpointView;
 import net.hollowcube.map.item.BlockItemHandler;
@@ -69,7 +70,8 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 
     @Override
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
         world.callEvent(new MapPlayerCheckpointChangeEvent(player, world, checkpointId, data));

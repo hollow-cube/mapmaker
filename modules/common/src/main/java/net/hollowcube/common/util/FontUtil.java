@@ -78,6 +78,11 @@ public final class FontUtil {
         var defaultGlyphs = new Int2IntArrayMap();
         defaultGlyphs.putAll(GLYPH_WIDTHS);
         result.put("ascii", defaultGlyphs);
+        result.put("line_0", defaultGlyphs);
+        result.put("line_1", defaultGlyphs);
+        result.put("line_2", defaultGlyphs);
+        result.put("line_3", defaultGlyphs);
+        result.put("line_4", defaultGlyphs);
 
         var currencyGlyphs = new Int2IntArrayMap();
         currencyGlyphs.putAll(Map.<Integer, Integer>ofEntries(

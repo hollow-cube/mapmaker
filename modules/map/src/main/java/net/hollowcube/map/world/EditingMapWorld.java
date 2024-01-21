@@ -166,6 +166,10 @@ public class EditingMapWorld implements InternalMapWorld {
         return instance;
     }
 
+    public @Nullable TestingMapWorld testWorld() {
+        return testWorld;
+    }
+
     @Override
     public @Blocking void load() {
         var mapData = server().mapService().getMapWorld(map.id(), true);

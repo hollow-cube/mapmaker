@@ -2,6 +2,7 @@ package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -45,12 +46,18 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         for (var entity : entities) {
             Player player;
             if (entity instanceof Player p) {
-                if (!MapHooks.isPlayerPlaying(p)) continue;
                 player = p;
             } else if (entity.hasTag(MapHooks.ASSOCIATED_PLAYER)) {
                 player = entity.getTag(MapHooks.ASSOCIATED_PLAYER);
             } else continue;
 
+            // To trigger the plate they must be
+            // 1: in the playing state
+            // 2: if this is not a testing state they must have have a start time (ie has moved/started the timer)
+            // 3: be in the bounding box
+            if (!MapHooks.isPlayerPlaying(player)) continue;
+            var saveState = SaveState.optionalFromPlayer(player);
+            if (saveState == null || (saveState.getPlayStartTime() == 0)) continue;
             if (!BOUNDING_BOX.intersectBox(centerPos.sub(entity.getPosition()), entity.getBoundingBox()))
                 continue;
 

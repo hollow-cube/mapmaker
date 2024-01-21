@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.feature.play.checkpoint.CheckpointPlateBlock;
+import net.hollowcube.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
