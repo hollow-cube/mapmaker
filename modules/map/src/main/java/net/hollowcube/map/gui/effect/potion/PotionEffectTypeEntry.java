@@ -1,0 +1,32 @@
+package net.hollowcube.map.gui.effect.potion;
+
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.map.entity.potion.PotionInfo;
+import net.hollowcube.map.feature.play.effect.PotionEffectList;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class PotionEffectTypeEntry extends View {
+    private @Outlet("select") Label selectLabel;
+
+    private final PotionEffectList potionList;
+    private final PotionInfo type;
+
+    public PotionEffectTypeEntry(@NotNull Context context, @NotNull PotionEffectList potionList, @NotNull PotionInfo type) {
+        super(context);
+        this.potionList = potionList;
+        this.type = type;
+
+        //noinspection deprecation
+        selectLabel.setItemDirect(type.icon());
+    }
+
+    @Action("select")
+    public void handleSelectEffect(@NotNull Player player) {
+        pushView(c -> new PotionEffectEditorView(c, potionList.getOrCreate(type)));
+    }
+}

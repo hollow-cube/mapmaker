@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.map.gui.effect.potion ?>
+<component width="9" height="5" wipe_player_inv="true" align="ttb">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.effect.potion.editor.information"/>
+
+        <label id="header" width="5" translationKey="this.will.be.replaced" sprite="minecraft:potion"/>
+
+        <spacer width="2"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer width="2"/>
+
+        <pagination id="entries" width="5" height="1" child="PotionEffectLevelEntry"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <button id="time_neg_5" translationKey="gui.effect.potion.editor.time_neg_5"
+                sprite="minecraft:red_stained_glass_pane"/>
+        <button id="time_neg_1" translationKey="gui.effect.potion.editor.time_neg_1"
+                sprite="minecraft:pink_stained_glass_pane"/>
+
+        <button id="time_edit" width="3" translationKey="gui.effect.potion.editor.time"
+                sprite="minecraft:clock"/>
+
+        <button id="time_pos_1" translationKey="gui.effect.potion.editor.time_pos_1"
+                sprite="minecraft:lime_stained_glass_pane"/>
+        <button id="time_pos_5" translationKey="gui.effect.potion.editor.time_pos_5"
+                sprite="minecraft:green_stained_glass_pane"/>
+    </box>
+
+</component>

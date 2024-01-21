@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.map.gui.effect.potion ?>
+<component width="9" height="4" wipe_player_inv="true" align="ttb">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.effect.potion.list.information"/>
+
+        <spacer width="7"/>
+    </box>
+
+    <box width="9" height="2" align="ltr">
+        <spacer width="1" height="2"/>
+
+        <pagination id="entries" width="7" height="2" child="PotionEffectEntry"/>
+    </box>
+
+</component>

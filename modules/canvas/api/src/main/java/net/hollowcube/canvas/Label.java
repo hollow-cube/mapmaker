@@ -37,6 +37,9 @@ public interface Label extends Element {
     @Deprecated
     void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore);
 
+    @Deprecated
+    void setItemDirect(@NotNull ItemStack itemStack);
+
     void setSpriteColorModifier(@NotNull TextColor color);
 
     interface ActionHandler {

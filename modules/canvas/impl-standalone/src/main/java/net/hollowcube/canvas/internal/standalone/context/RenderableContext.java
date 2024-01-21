@@ -50,8 +50,8 @@ public record RenderableContext(
     }
 
     @Override
-    public void pushView(@NotNull View view) {
-        inventory.pushView(view);
+    public void pushView(@NotNull View view, boolean isTransient) {
+        inventory.pushView(view, isTransient);
     }
 
     @Override
