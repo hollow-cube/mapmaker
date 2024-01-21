@@ -26,6 +26,7 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.potion.Potion;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -165,6 +166,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (!MapHooks.isPlayerPlaying(player)) return;
 
         player.updateViewableRule((p) -> true);
+        player.removeTag(COUNTDOWN_END);
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointChangeEvent event) {
@@ -374,10 +376,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             state.setResetHeight(data.resetHeight());
         }
         if (data.clearPotionEffects()) {
-            //todo
+            player.clearEffects();
         }
         if (!data.potionEffects().isEmpty()) {
-            //todo
+            for (var effect : data.potionEffects()) {
+                player.addEffect(new Potion(
+                        effect.type().vanillaEffect(),
+                        (byte) effect.level(),
+                        effect.duration() <= 0 ? Potion.INFINITE_DURATION : effect.duration(),
+                        Potion.ICON_FLAG
+                ));
+            }
         }
         if (data.teleport().isPresent()) {
             player.teleport(data.teleport().get()); //todo teleport is not immediate, need to handle that.

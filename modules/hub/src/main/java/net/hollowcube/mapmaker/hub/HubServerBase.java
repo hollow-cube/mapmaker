@@ -201,6 +201,7 @@ public abstract class HubServerBase implements HubServer {
         player.setFlyingSpeed(player.getTag(HubServer.DOUBLE_JUMP_TAG) ? 0 : 0.05f);
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
         player.setHealth(20);
+        player.clearEffects();
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);
