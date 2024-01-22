@@ -6,7 +6,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.feature.play.effect.PotionEffectList;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -53,6 +53,7 @@ public class NbtOps implements DynamicOps<NBT> {
     @Override
     public DataResult<Number> getNumberValue(NBT input) {
         return switch (input) {
+            case NBTEnd nbt -> DataResult.success(0);
             case NBTByte nbt -> DataResult.success(nbt.getValue());
             case NBTShort nbt -> DataResult.success(nbt.getValue());
             case NBTInt nbt -> DataResult.success(nbt.getValue());
@@ -126,7 +127,7 @@ public class NbtOps implements DynamicOps<NBT> {
             return DataResult.success(new NBTList<>(list.getSubtagType(), newList));
         }
 
-        if (nbt == null || nbt.getID().equals(NBTType.TAG_End)) {
+        if (nbt == null || nbt instanceof NBTEnd) {
             return DataResult.success(new NBTList<>(value.getID(), List.of(value)));
         }
 
@@ -148,7 +149,7 @@ public class NbtOps implements DynamicOps<NBT> {
             return DataResult.success(new NBTList<>(list.getSubtagType(), newList));
         }
 
-        if (nbt == null || nbt.getID() == null || NBTType.TAG_End.equals(nbt.getID())) {
+        if (nbt == null || nbt instanceof NBTEnd) {
             if (values.isEmpty())
                 return DataResult.success(NBTEnd.INSTANCE);
             return DataResult.success(new NBTList<>(values.get(0).getID(), values));
@@ -161,6 +162,9 @@ public class NbtOps implements DynamicOps<NBT> {
     public DataResult<NBT> mergeToMap(NBT input, NBT key, NBT value) {
         if (!(key instanceof NBTString keyString)) {
             return DataResult.error("Key is not a string: " + key);
+        }
+        if (value instanceof NBTEnd) {
+            return DataResult.success(input);
         }
         if (input == null || input instanceof NBTEnd) {
             return DataResult.success(new NBTCompound(Map.of(keyString.getValue(), value)));
@@ -176,7 +180,10 @@ public class NbtOps implements DynamicOps<NBT> {
     public DataResult<NBT> mergeToMap(NBT input, MapLike<NBT> values) {
         if (input == null || input instanceof NBTEnd) {
             var result = new MutableNBTCompound();
-            values.entries().forEach(e -> result.set(((NBTString) e.getFirst()).getValue(), e.getSecond()));
+            values.entries().forEach(e -> {
+                if (e.getSecond() instanceof NBTEnd) return;
+                result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+            });
             return DataResult.success(result.toCompound());
         }
         if (!(input instanceof NBTCompound compound)) {
@@ -184,7 +191,10 @@ public class NbtOps implements DynamicOps<NBT> {
         }
         var result = new MutableNBTCompound();
         result.putAll(compound);
-        values.entries().forEach(e -> result.set(((NBTString) e.getFirst()).getValue(), e.getSecond()));
+        values.entries().forEach(e -> {
+            if (e.getSecond() instanceof NBTEnd) return;
+            result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+        });
         return DataResult.success(result.toCompound());
     }
 
@@ -193,7 +203,8 @@ public class NbtOps implements DynamicOps<NBT> {
         if (!(input instanceof NBTCompound compound)) {
             return DataResult.error("Not a map: " + input);
         }
-        return DataResult.success(compound.getEntries().stream().map(entry -> Pair.of(createString(entry.getKey()), entry.getValue())));
+        return DataResult.success(compound.getEntries().stream().map(entry ->
+                Pair.of(createString(entry.getKey()), entry.getValue() instanceof NBTEnd ? null : entry.getValue())));
     }
 
     @Override
@@ -238,7 +249,10 @@ public class NbtOps implements DynamicOps<NBT> {
     @Override
     public NBT createMap(Stream<Pair<NBT, NBT>> map) {
         var result = new MutableNBTCompound();
-        map.forEach(e -> result.set(((NBTString) e.getFirst()).getValue(), e.getSecond()));
+        map.forEach(e -> {
+            if (e.getSecond() instanceof NBTEnd) return;
+            result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+        });
         return result.toCompound();
     }
 
@@ -286,7 +300,7 @@ public class NbtOps implements DynamicOps<NBT> {
 
     @Override
     public ListBuilder<NBT> listBuilder() {
-        return DynamicOps.super.listBuilder();
+        return new ArrayBuilder();
     }
 
     private static final class ArrayBuilder implements ListBuilder<NBT> {
@@ -352,6 +366,7 @@ public class NbtOps implements DynamicOps<NBT> {
 
         @Override
         protected MutableNBTCompound append(String key, NBT value, MutableNBTCompound builder) {
+            if (value instanceof NBTEnd) return builder;
             builder.set(key, value);
             return builder;
         }

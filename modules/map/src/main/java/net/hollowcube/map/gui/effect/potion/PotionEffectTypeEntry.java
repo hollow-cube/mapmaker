@@ -5,8 +5,8 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.entity.potion.PotionInfo;
-import net.hollowcube.map.feature.play.effect.PotionEffectList;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

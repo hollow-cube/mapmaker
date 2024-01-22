@@ -2,13 +2,13 @@ package net.hollowcube.mapmaker.map;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -207,7 +207,7 @@ public class SaveState {
                     Codec.INT.optionalFieldOf("progressIndex").forGetter(PlayState::progressIndex),
                     Codec.LONG.optionalFieldOf("timeLimit").forGetter(PlayState::timeLimit),
                     Codec.INT.optionalFieldOf("resetHeight").forGetter(PlayState::resetHeight),
-                    Codec.unboundedMap(ExtraCodecs.POTION_EFFECT, Codec.INT).optionalFieldOf("potionEffects", Map.of()).forGetter(PlayState::potionEffects),
+                    PotionEffectList.NULL_MAPPED_CODEC.forGetter(PlayState::potionEffects),
                     ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
                     Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
                     Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives)
@@ -223,22 +223,22 @@ public class SaveState {
         private Optional<Integer> progressIndex;
         private Optional<Long> timeLimit; // Remaining time limit in ms
         private Optional<Integer> resetHeight;
-        private Map<PotionEffect, Integer> potionEffects;
+        private PotionEffectList potionEffects;
         private Optional<Pos> pos;
         private Optional<Integer> maxLives; // Maximum number of lives for the current state
         private Optional<Integer> lives; // Number of lives remaining for the current state
 
         public PlayState() {
             this(Optional.empty(), List.of(), Optional.empty(),
-                    Optional.empty(), Optional.empty(), Map.of(), Optional.empty(),
-                    Optional.empty(), Optional.empty());
+                    Optional.empty(), Optional.empty(), new PotionEffectList(),
+                    Optional.empty(), Optional.empty(), Optional.empty());
         }
 
         public PlayState(
                 Optional<PlayState> lastState, List<String> statusEffects,
                 Optional<Integer> progressIndex, Optional<Long> timeLimit,
                 Optional<Integer> resetHeight,
-                Map<PotionEffect, Integer> potionEffects, Optional<Pos> pos,
+                PotionEffectList potionEffects, Optional<Pos> pos,
                 Optional<Integer> maxLives, Optional<Integer> lives
         ) {
             this.lastState = lastState;
@@ -246,7 +246,7 @@ public class SaveState {
             this.progressIndex = progressIndex;
             this.timeLimit = timeLimit;
             this.resetHeight = resetHeight;
-            this.potionEffects = new HashMap<>(potionEffects);
+            this.potionEffects = potionEffects;
             this.pos = pos;
             this.maxLives = maxLives;
             this.lives = lives;
@@ -276,7 +276,7 @@ public class SaveState {
             return resetHeight;
         }
 
-        public Map<PotionEffect, Integer> potionEffects() {
+        public PotionEffectList potionEffects() {
             return potionEffects;
         }
 
@@ -316,10 +316,6 @@ public class SaveState {
             this.resetHeight = resetHeight == NO_RESET_HEIGHT ? Optional.empty() : Optional.of(resetHeight);
         }
 
-        public void setPotionEffects(Map<PotionEffect, Integer> potionEffects) {
-            this.potionEffects = potionEffects;
-        }
-
         public void setPos(Optional<Pos> pos) {
             this.pos = pos;
         }
@@ -335,7 +331,7 @@ public class SaveState {
         public @NotNull PlayState copy() {
             return new PlayState(
                     lastState, history, progressIndex, timeLimit, resetHeight,
-                    potionEffects, pos, maxLives, lives
+                    potionEffects.copy(), pos, maxLives, lives
             );
         }
 

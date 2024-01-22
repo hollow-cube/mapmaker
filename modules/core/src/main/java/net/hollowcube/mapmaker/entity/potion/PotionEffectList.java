@@ -1,17 +1,22 @@
-package net.hollowcube.map.feature.play.effect;
+package net.hollowcube.mapmaker.entity.potion;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.map.entity.potion.PotionInfo;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+//todo: it is giga yikes for this to be in the core module. The core module never needs the play or build state from a savestate, so they should be moved
+// to some class MapSaveState extends SaveState and then this should be moved to the map module
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
             .xmap(PotionEffectList::new, PotionEffectList::entries);
+    public static final MapCodec<PotionEffectList> NULL_MAPPED_CODEC = CODEC.optionalFieldOf("potionEffects")
+            .xmap(o -> o.orElseGet(PotionEffectList::new), Optional::ofNullable);
 
     private final List<Entry> entries;
 
@@ -41,16 +46,23 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     }
 
     public @NotNull Entry getOrCreate(@NotNull PotionInfo type) {
+        var existing = get(type);
+        if (existing == null) {
+            existing = new Entry(type, 1, 0);
+            entries.add(existing);
+            Collections.sort(entries);
+        }
+        return existing;
+    }
+
+    public @Nullable Entry get(@NotNull PotionInfo type) {
         Check.notNull(type, "type");
         for (var entry : entries) {
             if (entry.type().equals(type)) {
                 return entry;
             }
         }
-        var entry = new Entry(type, 1, 0);
-        entries.add(entry);
-        Collections.sort(entries);
-        return entry;
+        return null;
     }
 
     public void remove(@NotNull PotionInfo type) {
@@ -62,6 +74,10 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
                 return;
             }
         }
+    }
+
+    public void clear() {
+        entries.clear();
     }
 
     public boolean has(@NotNull PotionInfo type) {
@@ -77,6 +93,14 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     @Override
     public String toString() {
         return entries.toString();
+    }
+
+    public PotionEffectList copy() {
+        var entries = new ArrayList<Entry>();
+        for (var entry : this.entries) {
+            entries.add(new Entry(entry.type(), entry.level(), entry.duration()));
+        }
+        return new PotionEffectList(entries);
     }
 
     public static class Entry implements Comparable<Entry> {

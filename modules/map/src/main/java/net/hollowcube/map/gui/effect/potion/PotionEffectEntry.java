@@ -7,7 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.feature.play.effect.PotionEffectList;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;

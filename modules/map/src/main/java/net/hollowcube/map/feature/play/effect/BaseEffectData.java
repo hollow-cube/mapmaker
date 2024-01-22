@@ -1,5 +1,6 @@
 package net.hollowcube.map.feature.play.effect;
 
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -27,7 +28,7 @@ public abstract class BaseEffectData {
     public BaseEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            Optional<PotionEffectList> potionEffects,
+            PotionEffectList potionEffects,
             Optional<Pos> teleport
     ) {
         this.name = name;
@@ -35,12 +36,16 @@ public abstract class BaseEffectData {
         this.timeLimit = timeLimit;
         this.resetHeight = resetHeight;
         this.clearPotionEffects = clearPotionEffects;
-        this.potionEffects = potionEffects.orElseGet(PotionEffectList::new);
+        this.potionEffects = potionEffects;
         this.teleport = teleport;
     }
 
-    public @NotNull String name() {
+    public @NotNull String displayName() {
         return name.isEmpty() ? "Unnamed" : name;
+    }
+
+    public @NotNull String name() {
+        return name;
     }
 
     public boolean hasName() {
@@ -100,7 +105,7 @@ public abstract class BaseEffectData {
     }
 
     public void sendDebugInfo(@NotNull Player player) {
-        player.sendMessage("Name: " + name());
+        player.sendMessage("Name: " + displayName());
         player.sendMessage("Progress index: " + (progressIndex() == -1 ? "none" : progressIndex()));
         player.sendMessage("Time limit: " + (timeLimit() == -1 ? "none" : timeLimit()));
         player.sendMessage("Reset height: " + (resetHeight() == NO_RESET_HEIGHT ? "inherited" : resetHeight()));

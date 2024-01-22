@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.test;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
@@ -23,13 +23,13 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
             return false;
 
         var eventNode = EventNode.type("map-completion/test", EventFilter.INSTANCE);
-        eventNode.addListener(MapWorldCompleteEvent.class, FutureUtil.virtual(this::handleMapCompletion));
+        eventNode.addListener(MapPlayerCompleteMapEvent.class, FutureUtil.virtual(this::handleMapCompletion));
         world.addScopedEventNode(eventNode);
 
         return true;
     }
 
-    private @Blocking void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {
+    private @Blocking void handleMapCompletion(@NotNull MapPlayerCompleteMapEvent event) {
         var player = event.getPlayer();
         var world = (TestingMapWorld) MapWorld.forPlayer(player);
 

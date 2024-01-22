@@ -1,4 +1,4 @@
-package net.hollowcube.map.entity.potion;
+package net.hollowcube.mapmaker.entity.potion;
 
 import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
