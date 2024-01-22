@@ -39,13 +39,13 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Action("name_text")
     public void handleChangeName() {
-        pushView(context -> new BaseEffectNameAnvil(context, data.hasName() ? data.name() : ""));
+        pushView(context -> new BaseEffectNameAnvil(context, data.hasName() ? data.displayName() : ""));
     }
 
     @Signal(BaseEffectNameAnvil.SIG_UPDATE_NAME)
     public void handleUpdateName(@NotNull String name) {
         name = name.toLowerCase(Locale.ROOT);
-        if (name.isEmpty() || name.equals(data.name())) return;
+        if (name.isEmpty() || name.equals(data.displayName())) return;
         if (name.length() > 16) name = name.substring(0, 16);
         data.setName(name);
         updateFromData();
@@ -119,11 +119,11 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     protected void updateFromData() {
         if (data.hasName()) {
-            progressIndexText.setArgs(Component.text(data.name()));
-            nameText.setText(data.name());
+            progressIndexText.setArgs(Component.text(data.displayName()));
+            nameText.setText(data.displayName());
         } else {
             nameText.setArgs(Component.translatable("gui.effect.name.none"));
-            nameText.setText(data.name(), TextColor.color(0xB0B0B0));
+            nameText.setText(data.displayName(), TextColor.color(0xB0B0B0));
         }
 
         if (data.progressIndex() == -1) {

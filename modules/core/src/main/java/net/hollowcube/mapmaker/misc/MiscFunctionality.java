@@ -17,6 +17,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.Objects;
 
 public final class MiscFunctionality {
@@ -38,6 +40,13 @@ public final class MiscFunctionality {
 
     public static void broadcastTabList(@NotNull Audience audience) {
         broadcastTabList(audience, MinecraftServer.getConnectionManager().getOnlinePlayerCount());
+    }
+
+    private static final Component FADEOUT_TITLE = Component.text(BadSprite.SPRITE_MAP.get("hud/fadeout").fontChar());
+    private static final Title.Times FADEOUT_TIMES = Title.Times.times(Duration.ofMillis(1000), Duration.ofMillis(15000), Duration.ofMillis(0));
+
+    public static void sendFadeout(@NotNull Player player) {
+        player.showTitle(Title.title(FADEOUT_TITLE, Component.empty(), FADEOUT_TIMES));
     }
 
     public static void assignTeam(@NotNull Player player) {

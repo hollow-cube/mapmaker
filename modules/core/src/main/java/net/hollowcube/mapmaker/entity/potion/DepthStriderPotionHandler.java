@@ -1,4 +1,4 @@
-package net.hollowcube.map.entity.potion;
+package net.hollowcube.mapmaker.entity.potion;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Enchantment;

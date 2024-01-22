@@ -15,6 +15,7 @@ import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -73,6 +74,28 @@ public class DevServer {
 
     public static void main(String[] args) {
         long start = System.nanoTime();
+
+//        var pots = new PotionEffectList();
+//        pots.getOrCreate(PotionInfo.SPEED);
+//
+//        var input = new CheckpointEffectData("", -1, 0, BaseEffectData.NO_RESET_HEIGHT, false, Optional.empty(), Optional.empty(), CheckpointEffectData.NO_LIVES);
+//        input.potionEffects().getOrCreate(PotionInfo.SPEED);
+//
+//        var tag = DFU.View(CheckpointEffectData.CODEC);
+//
+//        var tag1 = TagHandler.newHandler();
+//        tag1.setTag(tag, input);
+//
+//        var serialized = tag1.asCompound();
+//        var buffer = NetworkBuffer.makeArray(b -> b.write(NetworkBuffer.NBT, serialized));
+//        var deserialized = (NBTCompound) new NetworkBuffer(ByteBuffer.wrap(buffer)).read(NetworkBuffer.NBT);
+//
+//        var tag2 = TagHandler.fromCompound(deserialized);
+//        var stuff = tag2.getTag(tag);
+//        System.out.println(stuff);
+//
+//        if (true) return;
+
 
         CoreInit.fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin();
 
@@ -299,7 +322,15 @@ public class DevServer {
         }
 
         // Spawn the player into the map
-        var imw = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+        InternalMapWorld imw;
+        try {
+            imw = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+        } catch (Exception e) {
+            logger.error("failed to load map", e);
+            player.kick(Component.text("Failed to load map. Please try again later."));
+            return;
+        }
+
 
         // Resend registry containing the local biomes for this map
         var registry = new HashMap<String, NBT>();

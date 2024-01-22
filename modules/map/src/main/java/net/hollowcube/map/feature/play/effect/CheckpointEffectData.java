@@ -2,6 +2,7 @@ package net.hollowcube.map.feature.play.effect;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -19,7 +20,7 @@ public class CheckpointEffectData extends BaseEffectData {
             Codec.INT.optionalFieldOf("timeLimit", 0).forGetter(CheckpointEffectData::timeLimit),
             Codec.INT.optionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(CheckpointEffectData::resetHeight),
             Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(CheckpointEffectData::clearPotionEffects),
-            PotionEffectList.CODEC.optionalFieldOf("potionEffects").forGetter(CheckpointEffectData::optPotionEffects),
+            PotionEffectList.NULL_MAPPED_CODEC.forGetter(CheckpointEffectData::potionEffects),
             ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(CheckpointEffectData::teleport),
             // CheckpointEffectData
             Codec.INT.optionalFieldOf("lives", NO_LIVES).forGetter(CheckpointEffectData::lives)
@@ -30,7 +31,7 @@ public class CheckpointEffectData extends BaseEffectData {
     public CheckpointEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            Optional<PotionEffectList> potionEffects,
+            PotionEffectList potionEffects,
             Optional<Pos> teleport, int lives
     ) {
         super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport);

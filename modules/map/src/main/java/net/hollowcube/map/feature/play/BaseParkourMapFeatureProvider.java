@@ -15,8 +15,10 @@ import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -27,6 +29,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.potion.Potion;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +45,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
     public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
+
+    private static final Sound ADD_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 1f);
+    private static final Sound REMOVE_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 0.1f);
+    private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
+    private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
@@ -64,6 +72,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         world.addScopedEventNode(eventNode);
 
+        // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
         var itemRegistry = world.itemRegistry();
         itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToCheckpointItem.INSTANCE);
@@ -119,14 +128,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 if (p.isInvisible()) return true;
                 return player.getDistanceSquared(p) > 3.5 * 3.5;
             });
-
-            //todo this should happen async i guess
-//            var authorName = event.getMapWorld().server().playerService().getPlayerDisplayName2(event.mapWorld().map().owner()).build();
-//            player.showTitle(Title.title(
-//                    Component.text(event.mapWorld().map().settings().getName()),
-//                    Component.text("by ", TextColor.color(0xCCCCCC)).append(authorName),
-//                    Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(2000), Duration.ofMillis(500))
-//            ));
         }
     }
 
@@ -189,6 +190,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Apply the checkpoint/effect changes
         state.setTimeLimit(-1); // Time always reset on checkpoint
         player.removeTag(COUNTDOWN_END);
+        updateStateFromPlayer(player, state);
         updateBaseEffectState(player, data, state);
         if (data.lives() > 0) {
             state.setMaxLives(data.lives());
@@ -204,7 +206,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 state.progressIndex(),
                 state.timeLimit(),
                 state.resetHeight(),
-                state.potionEffects(),
+                state.potionEffects().copy(),
                 Optional.of(checkpointPos),
                 state.maxLives(),
                 state.lives()
@@ -228,7 +230,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return; // Player has already passed this progress index.
 
         // Apply the status changes
-        updateStateFromCountdown(player, state);
+        updateStateFromPlayer(player, state);
         updateBaseEffectState(player, data, state);
         if (data.extraTime() > 0 && state.timeLimit().isPresent()) {
             state.setTimeLimit(state.timeLimit().get() + data.extraTime());
@@ -340,7 +342,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var playState = saveState.playState();
         // If they don't have a checkpoint or are on their last life, do a hard reset.
-        if (playState.lastState().isEmpty() || playState.lives().orElse(0) == 1) {
+        var isOutOfLives = playState.lives().orElse(0) == 1;
+        if (playState.lastState().isEmpty() || isOutOfLives) {
+            if (isOutOfLives) {
+                player.playSound(PLAYER_DEATH_SOUND);
+            }
             hardReset(player, saveState);
             return;
         }
@@ -350,9 +356,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // "pop" the last state to the current
         playState = playState.lastState().get();
-        if (playState.lives().isPresent())
+        if (playState.lives().isPresent()) {
             // This is definitely valid, we checked above to see if this was the last life.
             playState.setLives(playState.lives().get() - 1);
+            player.playSound(PLAYER_HURT_SOUND);
+        }
         saveState.setPlayState(playState);
         // Create a copy so that we can reset to the checkpoint again
         playState.setLastState(playState.copy());
@@ -376,16 +384,18 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             state.setResetHeight(data.resetHeight());
         }
         if (data.clearPotionEffects()) {
-            player.clearEffects();
+            // Play 'remove' effect if we had effects and they were removed
+            if (!state.potionEffects().isEmpty() && data.potionEffects().isEmpty()) {
+                player.playSound(REMOVE_EFFECTS_SOUND);
+            }
+            state.potionEffects().clear();
         }
         if (!data.potionEffects().isEmpty()) {
-            for (var effect : data.potionEffects()) {
-                player.addEffect(new Potion(
-                        effect.type().vanillaEffect(),
-                        (byte) effect.level(),
-                        effect.duration() <= 0 ? Potion.INFINITE_DURATION : effect.duration(),
-                        Potion.ICON_FLAG
-                ));
+            player.playSound(ADD_EFFECTS_SOUND);
+            for (var newEffect : data.potionEffects().entries()) {
+                var existingEffect = state.potionEffects().getOrCreate(newEffect.type());
+                existingEffect.setLevel(newEffect.level());
+                existingEffect.setDuration(newEffect.duration());
             }
         }
         if (data.teleport().isPresent()) {
@@ -393,10 +403,24 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void updateStateFromCountdown(@NotNull Player player, @NotNull SaveState.PlayState state) {
+    private void updateStateFromPlayer(@NotNull Player player, @NotNull SaveState.PlayState state) {
+        long now = System.currentTimeMillis();
+
         var countdownEnd = player.getTag(COUNTDOWN_END);
         if (countdownEnd == -1) return;
-        state.setTimeLimit(countdownEnd - System.currentTimeMillis());
+        state.setTimeLimit(countdownEnd - now);
+
+        for (var timedPotion : player.getActiveEffects()) {
+            var potion = timedPotion.getPotion();
+            var effectType = PotionInfo.getByVanillaEffect(potion.effect());
+            if (effectType == null) continue;
+
+            var entry = state.potionEffects().get(effectType);
+            if (entry == null) continue;
+
+            // Potion is valid, update the time remaining
+            entry.setDuration((int) (potion.duration() - (now - timedPotion.getStartingTime())));
+        }
     }
 
     private void updatePlayerFromState(@NotNull Player player, @NotNull SaveState.PlayState state) {
@@ -414,7 +438,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit().get());
         }
 
-        //todo potions
+        // Update the potions on the player
+        player.clearEffects();
+        for (var entry : state.potionEffects().entries()) {
+            player.addEffect(new Potion(
+                    entry.type().vanillaEffect(),
+                    (byte) (entry.level() - 1),
+                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration(),
+                    Potion.ICON_FLAG
+            ));
+        }
     }
 
     private void updateViewership(@NotNull MapWorld world) {

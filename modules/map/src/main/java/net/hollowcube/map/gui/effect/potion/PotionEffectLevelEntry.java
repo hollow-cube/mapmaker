@@ -4,7 +4,7 @@ import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.feature.play.effect.PotionEffectList;
+import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import org.jetbrains.annotations.NotNull;
 
 public class PotionEffectLevelEntry extends View {

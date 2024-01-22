@@ -5,8 +5,8 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldCompleteEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.RateMapView;
 import net.hollowcube.map.util.FireworkUtil;
@@ -43,7 +43,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         var eventNode = EventNode.type("map-completion/play", EventFilter.INSTANCE);
         eventNode.addListener(MapPlayerInitEvent.class, this::handlePlayerInit);
         eventNode.addListener(MapWorldPlayerStopPlayingEvent.class, this::handlePlayerRemove);
-        eventNode.addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+        eventNode.addListener(MapPlayerCompleteMapEvent.class, this::handleMapCompletion);
         world.addScopedEventNode(eventNode);
 
         return true;
@@ -64,9 +64,9 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         event.getPlayer().removeTag(BEST_SAVE_STATE_TAG);
     }
 
-    private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {
+    private void handleMapCompletion(@NotNull MapPlayerCompleteMapEvent event) {
         var player = event.getPlayer();
-        var world = (InternalMapWorld) MapWorld.forPlayer(player);
+        var world = (InternalMapWorld) event.getMapWorld();
 
         var saveState = SaveState.fromPlayer(player);
         saveState.setCompleted(true); // Also stops recording time here
