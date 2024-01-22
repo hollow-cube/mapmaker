@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.play;
+package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;

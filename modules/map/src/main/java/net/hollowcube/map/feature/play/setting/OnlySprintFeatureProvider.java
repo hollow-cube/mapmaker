@@ -18,7 +18,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * {@link net.hollowcube.map.feature.play.NoSneakFeatureProvider} is also enabled to prevent sneaking in only sprint maps.
+ * {@link NoSneakFeatureProvider} is also enabled to prevent sneaking in only sprint maps.
  */
 @AutoService(FeatureProvider.class)
 public class OnlySprintFeatureProvider implements FeatureProvider {

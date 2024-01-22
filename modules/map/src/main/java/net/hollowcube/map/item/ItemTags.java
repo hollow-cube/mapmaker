@@ -13,6 +13,7 @@ import java.util.Set;
 
 public final class ItemTags {
 
+    public static Collection<NamespaceID> SWORDS = builtin("minecraft:swords");
     public static Collection<NamespaceID> SHOVELS = builtin("minecraft:shovels");
     public static Collection<NamespaceID> HOES = builtin("minecraft:hoes");
     public static Collection<NamespaceID> AXES = builtin("minecraft:axes");
