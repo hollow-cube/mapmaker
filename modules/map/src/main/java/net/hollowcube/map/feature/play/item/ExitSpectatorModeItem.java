@@ -1,13 +1,13 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
+import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
-import net.minestom.server.event.EventDispatcher;
-import net.kyori.adventure.text.Component;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +53,7 @@ public class ExitSpectatorModeItem extends ItemHandler {
                     if (checkpoint != null) {
                         player.teleport(checkpoint);
                     } else {
-                        EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
+                        EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
                     }
                     player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
                 }

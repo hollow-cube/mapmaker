@@ -36,8 +36,7 @@ public class HubTrainCommand extends CommandDsl {
         super("train");
         this.server = hubServer;
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
-
-
+        
         addSyntax(playerOnly(this::handleTrainAttack), type, players);
     }
 

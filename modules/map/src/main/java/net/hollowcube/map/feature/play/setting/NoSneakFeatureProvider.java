@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerResetTriggerEvent;
+import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -44,7 +44,7 @@ public class NoSneakFeatureProvider implements FeatureProvider {
         if (Vec.fromPoint(event.getNewPosition()).equals(Vec.fromPoint(player.getPosition()))) return;
 
         var world = MapWorld.forPlayer(player);
-        EventDispatcher.call(new MapPlayerResetTriggerEvent(world, player));
+        EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
         //todo sound effect for sneaking
 //        player.sendMessage("No sneaking!");
     }

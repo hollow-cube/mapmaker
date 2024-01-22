@@ -7,7 +7,7 @@ import dev.hollowcube.replay.change.RecordedPlayerMove;
 import dev.hollowcube.replay.change.RecordedPlayerSpawn;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldCompleteEvent;
+import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -37,7 +37,7 @@ public class RecordingFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/recording", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
-            .addListener(MapWorldCompleteEvent.class, this::handleMapCompletion);
+            .addListener(MapPlayerCompleteMapEvent.class, this::handleMapCompletion);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -90,7 +90,7 @@ public class RecordingFeatureProvider implements FeatureProvider {
 
     }
 
-    private void handleMapCompletion(@NotNull MapWorldCompleteEvent event) {
+    private void handleMapCompletion(@NotNull MapPlayerCompleteMapEvent event) {
         var player = event.getPlayer();
         var state = player.getTag(STATE);
         if (state == null) return;
