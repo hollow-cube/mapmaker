@@ -26,8 +26,6 @@ import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
 import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
-import net.hollowcube.mapmaker.mod.packet.server.HCSetCreativeItemsPacket;
-import net.hollowcube.mapmaker.mod.util.CreativeTab;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
@@ -43,7 +41,6 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -354,11 +351,11 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         event.setSendRegistryData(false);
 
         // Mod init stuff
-        player.sendPacket(new HCSetCreativeItemsPacket(Map.of(
-                CreativeTab.REDSTONE, List.of(new HCSetCreativeItemsPacket.Entry(
-                        Material.BAMBOO_CHEST_RAFT, 0, HCSetCreativeItemsPacket.Position.AFTER, Material.REDSTONE_BLOCK
-                ))
-        )).toPacket(player));
+//        player.sendPacket(new HCSetCreativeItemsPacket(Map.of(
+//                CreativeTab.REDSTONE, List.of(new HCSetCreativeItemsPacket.Entry(
+//                        Material.BAMBOO_CHEST_RAFT, 0, HCSetCreativeItemsPacket.Position.AFTER, Material.REDSTONE_BLOCK
+//                ))
+//        )).toPacket(player));
 
         // Spawn them into the world.
         player.setTag(TARGET_WORLD_TAG, mapWorld);
