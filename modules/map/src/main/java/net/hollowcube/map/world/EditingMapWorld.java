@@ -6,6 +6,7 @@ import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.BlockItemPlaceEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.item.ItemTags;
 import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.map.world.polar.ReadWorldAccess;
 import net.hollowcube.map.world.polar.ReadWriteWorldAccess;
@@ -307,17 +308,11 @@ public class EditingMapWorld implements InternalMapWorld {
             saveState.setPlayStartTime(System.currentTimeMillis());
 
             // Read from savestate
-            player.getInventory().clear();
-            var savedItems = saveState.getInventoryItems();
-            if (savedItems != null) {
-                for (int i = 0; i < savedItems.size(); i++) {
-                    player.getInventory().setItemStack(i, savedItems.get(i));
-                }
-            }
-
-            player.setFlying(saveState.isFlying());
-            var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
-            player.teleport(pos).join();
+            var buildState = saveState.buildState();
+            buildState.inventory().forEach(player.getInventory()::setItemStack);
+            player.setHeldItemSlot((byte) buildState.selectedSlot());
+            player.setFlying(buildState.isFlying());
+            player.teleport(buildState.pos().orElse(map.settings().getSpawnPoint())).join();
 
             if (firstSpawn)
                 player.sendMessage(Component.translatable("build.world.load.first", Component.translatable(map().name())));
@@ -381,11 +376,9 @@ public class EditingMapWorld implements InternalMapWorld {
         getTestWorld().acceptPlayer(player, true);
     }
 
-    private final net.minestom.server.gamedata.tags.@Nullable Tag SWORD_TAG = MinecraftServer.getTagManager().getTag(net.minestom.server.gamedata.tags.Tag.BasicType.ITEMS, "minecraft:swords");
-
     private void preventSwordBreaking(PlayerBlockBreakEvent event) {
         ItemStack item = event.getPlayer().getItemInMainHand();
-        if (SWORD_TAG != null && SWORD_TAG.contains(item.material().namespace())) {
+        if (ItemTags.SWORDS.contains(item.material().namespace())) {
             event.setCancelled(true);
         }
     }
@@ -404,10 +397,17 @@ public class EditingMapWorld implements InternalMapWorld {
 
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
         saveState.updatePlaytime();
-        saveState.setPos(player.getPosition());
-        saveState.setFlying(player.isFlying());
-        saveState.setInventoryItems(List.of(player.getInventory().getItemStacks()));
-        return saveState.getUpdateRequest();
+        var buildState = saveState.buildState();
+        buildState.setPos(player.getPosition());
+        buildState.setFlying(player.isFlying());
+        var inventory = new HashMap<Integer, ItemStack>();
+        for (int i = 0; i < player.getInventory().getInnerSize(); i++) {
+            var itemStack = player.getInventory().getItemStack(i);
+            if (!itemStack.isAir()) inventory.put(i, itemStack);
+        }
+        buildState.setInventory(inventory);
+        buildState.setSelectedSlot(player.getHeldSlot());
+        return saveState.createUpdateRequest();
     }
 
     @Override

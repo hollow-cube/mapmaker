@@ -22,6 +22,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.util.Optional;
 
 public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
@@ -45,6 +46,8 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(Point.class, new PointTypeAdapter())
             .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
             .registerTypeAdapter(SaveState.PlayState.class, DFU.JsonSerializer(SaveState.PlayState.CODEC))
+            .registerTypeAdapter(SaveState.BuildState.class, DFU.JsonSerializer(SaveState.BuildState.CODEC))
+            .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
             .disableJdkUnsafe()
             .create();
 

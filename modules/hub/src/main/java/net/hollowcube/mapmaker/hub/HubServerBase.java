@@ -202,6 +202,7 @@ public abstract class HubServerBase implements HubServer {
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
         player.setHealth(20);
         player.clearEffects();
+        player.setHeldItemSlot((byte) 0);
 
         player.getInventory().clear();
         HubHotbar.applyToPlayer(player);

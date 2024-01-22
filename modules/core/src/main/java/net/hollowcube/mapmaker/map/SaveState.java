@@ -1,24 +1,20 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.annotations.SerializedName;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
 public class SaveState {
@@ -34,8 +30,6 @@ public class SaveState {
         return player.getTag(TAG);
     }
 
-    private transient SaveStateUpdateRequest updates = new SaveStateUpdateRequest();
-
     private String id;
     private String playerId;
     private String mapId;
@@ -44,12 +38,9 @@ public class SaveState {
     private long playtime;
     private transient long playStartTime;
 
+    @SerializedName("editState")
+    private BuildState buildState = null;
     private PlayState playState = null;
-
-    // Editing
-    private Pos pos = null;
-    private boolean isFlying = false;
-    private String inventory = null; // base64 bytes
 
     public SaveState() {
     }
@@ -59,12 +50,6 @@ public class SaveState {
         this.playerId = playerId;
         this.mapId = mapId;
         this.type = type;
-    }
-
-    public @NotNull SaveStateUpdateRequest getUpdateRequest() {
-        var updates = this.updates;
-        this.updates = new SaveStateUpdateRequest();
-        return updates;
     }
 
     public @NotNull String id() {
@@ -88,7 +73,6 @@ public class SaveState {
     }
 
     public void setCompleted(boolean completed) {
-        updates.setCompleted(completed);
         this.completed = completed;
 
         // If completing, update the playtime for the final time.
@@ -103,7 +87,6 @@ public class SaveState {
     }
 
     public void setPlaytime(long playtime) {
-        updates.setPlaytime(playtime);
         this.playtime = playtime;
     }
 
@@ -121,7 +104,14 @@ public class SaveState {
         playStartTime = System.currentTimeMillis();
     }
 
+    public @NotNull BuildState buildState() {
+        Check.stateCondition(type != SaveStateType.EDITING, "Cannot access build state in non-editing save state");
+        if (buildState == null) buildState = new BuildState();
+        return buildState;
+    }
+
     public @NotNull PlayState playState() {
+        Check.stateCondition(type != SaveStateType.PLAYING && type != SaveStateType.VERIFYING, "Cannot access play state in non-playing save state");
         if (playState == null) playState = new PlayState();
         return playState;
     }
@@ -130,68 +120,73 @@ public class SaveState {
         this.playState = playState;
     }
 
-    // OLD STUFF THAT NEEDS TO BE DELETED PROBABLY BELOW
-
-    public @Nullable Pos pos() {
-        return pos;
+    public @NotNull SaveStateUpdateRequest createUpdateRequest() {
+        var req = new SaveStateUpdateRequest()
+                .setPlaytime(playtime)
+                .setCompleted(completed);
+        if (buildState != null) req.setBuildState(buildState);
+        if (playState != null) req.setPlayState(playState);
+        return req;
     }
 
-    public void setPos(Pos pos) {
-        updates.setPos(pos);
-        this.pos = pos;
-    }
+    public static class BuildState {
+        public static final Codec<BuildState> CODEC = RecordCodecBuilder.create(i -> i.group(
+                ExtraCodecs.POS.optionalFieldOf("pos").forGetter(BuildState::pos),
+                Codec.BOOL.optionalFieldOf("isFlying", false).forGetter(BuildState::isFlying),
+                ExtraCodecs.ITEM_STACK_MAP_AS_BASE64.optionalFieldOf("inventory", Map.of()).forGetter(BuildState::inventory),
+                Codec.INT.optionalFieldOf("selectedSlot", 0).forGetter(BuildState::selectedSlot)
+        ).apply(i, BuildState::new));
 
-    public boolean isFlying() {
-        return isFlying;
-    }
+        private Optional<Pos> pos;
+        private boolean isFlying;
+        private Map<Integer, ItemStack> inventory;
+        private int selectedSlot;
 
-    public void setFlying(boolean flying) {
-        updates.setFlying(flying);
-        isFlying = flying;
-    }
+        //todo for adding new build state we could have some kind of "build state contributor" which can supply new codecs which are dispatch-ed to their correct type.
+        // maybe.
 
-    public byte @Nullable [] inventory() {
-        if (inventory == null) return null;
-        return Base64.getDecoder().decode(inventory);
-    }
-
-    // Utilities
-
-    @SuppressWarnings("UnstableApiUsage")
-    public @Nullable List<@NotNull ItemStack> getInventoryItems() {
-        var inventory = inventory();
-        if (inventory == null) return null;
-        try {
-            var compound = (NBTCompound) new NetworkBuffer(ByteBuffer.wrap(inventory)).read(NetworkBuffer.NBT);
-            var items = compound.<NBTCompound>getList("Items");
-            if (items == null) return null;
-            return items.asListView().stream().map(ItemStack::fromItemNBT).toList();
-        } catch (Exception e) {
-            try {
-                logger.warn("Failed to read modern inventory, trying legacy: {}", e.getMessage());
-                return new NetworkBuffer(ByteBuffer.wrap(inventory))
-                        .readCollection(NetworkBuffer.ITEM);
-            } catch (Exception e2) {
-                MinecraftServer.getExceptionManager().handleException(e2);
-                return null;
-            }
+        public BuildState() {
+            this(Optional.empty(), false, Map.of(), 0);
         }
-    }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public void setInventoryItems(@Nullable List<ItemStack> items) {
-        if (items == null) {
-            this.inventory = null;
-        } else {
-            var entries = new ArrayList<NBTCompound>();
-            for (var item : items) entries.add(item.toItemNBT());
-            var inventoryTag = new NBTCompound(Map.of(
-                    "Items", new NBTList<>(NBTType.TAG_Compound, entries)
-                    // Space left for other tags
-            ));
-            this.inventory = Base64.getEncoder().encodeToString(NetworkBuffer.makeArray(b -> b.write(NetworkBuffer.NBT, inventoryTag)));
+        public BuildState(Optional<Pos> pos, boolean isFlying, Map<Integer, ItemStack> inventory, int selectedSlot) {
+            this.pos = pos;
+            this.isFlying = isFlying;
+            this.inventory = inventory;
+            this.selectedSlot = selectedSlot;
         }
-        updates.setInventory(this.inventory);
+
+        public @NotNull Optional<Pos> pos() {
+            return pos;
+        }
+
+        public boolean isFlying() {
+            return isFlying;
+        }
+
+        public @NotNull Map<Integer, ItemStack> inventory() {
+            return inventory;
+        }
+
+        public int selectedSlot() {
+            return selectedSlot;
+        }
+
+        public void setPos(@Nullable Pos pos) {
+            this.pos = Optional.ofNullable(pos);
+        }
+
+        public void setFlying(boolean flying) {
+            isFlying = flying;
+        }
+
+        public void setInventory(@NotNull Map<Integer, ItemStack> inventory) {
+            this.inventory = inventory;
+        }
+
+        public void setSelectedSlot(int selectedSlot) {
+            this.selectedSlot = selectedSlot;
+        }
     }
 
     public static class PlayState {
@@ -316,8 +311,8 @@ public class SaveState {
             this.resetHeight = resetHeight == NO_RESET_HEIGHT ? Optional.empty() : Optional.of(resetHeight);
         }
 
-        public void setPos(Optional<Pos> pos) {
-            this.pos = pos;
+        public void setPos(@Nullable Pos pos) {
+            this.pos = Optional.ofNullable(pos);
         }
 
         public void setMaxLives(int maxLives) {

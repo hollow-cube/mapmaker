@@ -1,4 +1,4 @@
-package net.hollowcube.map.feature.play;
+package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
@@ -10,13 +10,11 @@ import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.potion.Potion;
-import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)
-public class NoJumpFeatureProvider implements FeatureProvider {
-    private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nojump", EventFilter.INSTANCE)
+public class NoSprintFeatureProvider implements FeatureProvider {
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nosprint", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer);
 
@@ -26,7 +24,7 @@ public class NoJumpFeatureProvider implements FeatureProvider {
             return false;
 
         var settings = world.map().settings();
-        if (settings.getVariant() != MapVariant.PARKOUR || !settings.isNoJump())
+        if (settings.getVariant() != MapVariant.PARKOUR || !settings.isNoSprint())
             return false;
 
         world.addScopedEventNode(eventNode);
@@ -38,12 +36,12 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!MapHooks.isPlayerPlaying(player)) return;
 
-        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Integer.MAX_VALUE));
+        player.setFood(6);
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var player = event.getPlayer();
 
-        player.removeEffect(PotionEffect.JUMP_BOOST);
+        player.setFood(20);
     }
 }

@@ -191,8 +191,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
         player.setTag(SaveState.TAG, saveState);
 
-        var pos = Objects.requireNonNullElse(saveState.pos(), map.settings().getSpawnPoint());
-        player.teleport(pos).join(); //todo should probably be done from elsewhere because it depends on checkpoints
+        var pos = saveState.playState().pos().orElse(map.settings().getSpawnPoint());
+        player.teleport(pos).join();
 
         activePlayers.add(player);
         player.setTag(TAG_PLAYING, true);
@@ -271,11 +271,10 @@ public class PlayingMapWorld implements InternalMapWorld {
             if (saveState == null) return;
 
             saveState.updatePlaytime();
-            saveState.setPos(player.getPosition());
+            saveState.playState().setPos(player.getPosition());
+            var update = saveState.createUpdateRequest();
 
             try {
-                var update = saveState.getUpdateRequest();
-
                 var playerData = PlayerDataV2.fromPlayer(player);
                 server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
 
