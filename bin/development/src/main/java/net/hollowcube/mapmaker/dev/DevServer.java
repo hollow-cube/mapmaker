@@ -235,7 +235,7 @@ public class DevServer {
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 
-            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, maps.inviteService(), config)));
+            scope.fork(FutureUtil.call(() -> this.hub.init(hubCommandManager, config)));
             scope.fork(FutureUtil.call(() -> this.maps.init(config, mapCommandManager)));
 
             scope.join();

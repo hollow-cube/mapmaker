@@ -8,6 +8,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -36,6 +37,7 @@ public class InteractionRules {
         block(Block.RESPAWN_ANCHOR, new RespawnAnchorInteractionRule());
         block(BlockTags.CANDLE_CAKES, new CandleCakeInteractionRule());
         block(Block.LEVER, new LeverInteractionRule());
+        block(BlockTags.BUTTONS, new ButtonInteractionRule());
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
@@ -54,6 +56,7 @@ public class InteractionRules {
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {
         eventNode.addListener(PlayerBlockInteractEvent.class, InteractionRules::handleBlockInteract);
         eventNode.addListener(PlayerBlockBreakEvent.class, InteractionRules::handleBlockBreak);
+        eventNode.addListener(PlayerUseItemEvent.class, InteractionRules::handleItemUse);
     }
 
     // Handler functions
@@ -101,6 +104,25 @@ public class InteractionRules {
         var block = event.getBlock();
         if ("true".equals(block.getProperty("waterlogged")))
             event.setResultBlock(Block.WATER);
+    }
+
+    private static void handleItemUse(@NotNull PlayerUseItemEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) return;
+
+        var player = event.getPlayer();
+        var itemStack = event.getItemStack();
+        var rule = itemRules.get(itemStack.material().id());
+        if (!(rule instanceof BlockInteractionRule.AirInteractionRule airRule)
+                || !rule.sneakState().test(player.isSneaking(), !itemStack.isAir())) return;
+
+        var interaction = new BlockInteractionRule.Interaction(
+                player, event.getInstance(), null,
+                null, itemStack, event.getHand()
+        );
+
+        if (airRule.handleAirInteraction(interaction)) {
+            event.setCancelled(true);
+        }
     }
 
     // Utility functions for registering the rules above

@@ -47,9 +47,19 @@ public interface BlockInteractionRule {
         return SneakState.NOT_SNEAKING;
     }
 
-    record Interaction(@NotNull Player player, @NotNull Instance instance, @NotNull Point blockPosition,
-                       @NotNull BlockFace blockFace, @NotNull ItemStack item,
-                       @NotNull Player.Hand hand) implements Block.Getter, Block.Setter {
+    /**
+     * An additional interaction type for right-clicking with an item on air. Must be used on a class
+     * which is already a registered BlockInteractionRule.
+     *
+     * <p>Air Interaction objects always contain null values for blockPosition and blockFace.</p>
+     */
+    interface AirInteractionRule {
+        boolean handleAirInteraction(@NotNull Interaction interaction);
+    }
+
+    record Interaction(@NotNull Player player, @NotNull Instance instance, @UnknownNullability Point blockPosition,
+                       @UnknownNullability BlockFace blockFace, @NotNull ItemStack item,
+                       Player.@NotNull Hand hand) implements Block.Getter, Block.Setter {
 
         public @NotNull WorldBorder worldBorder() {
             return instance.getWorldBorder();

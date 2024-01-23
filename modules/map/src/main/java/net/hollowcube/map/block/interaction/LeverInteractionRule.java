@@ -1,20 +1,14 @@
 package net.hollowcube.map.block.interaction;
 
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class LeverInteractionRule implements BlockInteractionRule {
-    @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
-        var blockPosition = interaction.blockPosition();
-        var block = interaction.getBlock(blockPosition);
-
-        var newState = String.valueOf(!"true".equals(block.getProperty("powered")));
-        interaction.setBlock(blockPosition, block.withProperty("powered", newState));
-        return true;
-    }
+public class LeverInteractionRule extends AbstractToggleInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
-        return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
+    protected void playSound(@NotNull Interaction interaction, @NotNull Block block, boolean newState) {
+        interaction.playBlockSound(SoundEvent.BLOCK_LEVER_CLICK, 0.3f, newState ? 0.6f : 0.5f);
     }
+
 }

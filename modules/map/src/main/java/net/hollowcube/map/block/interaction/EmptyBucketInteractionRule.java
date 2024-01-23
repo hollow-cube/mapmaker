@@ -1,14 +1,18 @@
 package net.hollowcube.map.block.interaction;
 
+import net.hollowcube.map.util.PlayerUtil;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-public class EmptyBucketInteractionRule implements BlockInteractionRule {
+@SuppressWarnings("UnstableApiUsage")
+public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockInteractionRule.AirInteractionRule {
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
+
+        // If the clicked a liquid directly, remove it.
         if (block.isLiquid()) {
             interaction.setBlock(blockPosition, Block.AIR);
             return true;
@@ -20,7 +24,28 @@ public class EmptyBucketInteractionRule implements BlockInteractionRule {
             return true;
         }
 
+        // Check the adjacent block to see if its a liquid
+        var adjacentPosition = blockPosition.relative(interaction.blockFace());
+        var adjacentBlock = interaction.getBlock(adjacentPosition, Block.Getter.Condition.TYPE);
+        if (adjacentBlock.isLiquid()) {
+            interaction.setBlock(adjacentPosition, Block.AIR);
+            return true;
+        }
+
         return false;
     }
 
+    @Override
+    public boolean handleAirInteraction(@NotNull Interaction interaction) {
+        var player = interaction.player();
+        var blockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACE_REACH);
+        if (blockPosition == null) return false;
+
+        var block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
+        if (!block.isLiquid()) return false;
+
+        interaction.setBlock(blockPosition, Block.AIR);
+        return true;
+    }
+    
 }

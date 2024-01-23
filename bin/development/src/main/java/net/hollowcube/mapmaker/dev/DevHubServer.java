@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.hub.HubServerBase;
+import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -60,6 +61,11 @@ public class DevHubServer extends HubServerBase {
     @Override
     public @NotNull PermManager permManager() {
         return permManager;
+    }
+
+    @Override
+    public @NotNull PlayerInviteService inviteService() {
+        return null;
     }
 
     @Override

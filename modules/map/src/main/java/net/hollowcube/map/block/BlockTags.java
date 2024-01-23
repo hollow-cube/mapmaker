@@ -21,6 +21,9 @@ public final class BlockTags {
     public static final Collection<NamespaceID> WALLS = builtin("minecraft:walls");
     public static final Collection<NamespaceID> SLABS = builtin("minecraft:slabs");
     public static final Collection<NamespaceID> BUTTONS = builtin("minecraft:buttons");
+    public static final Collection<NamespaceID> WOODEN_BUTTONS = create(Block.BIRCH_BUTTON, Block.ACACIA_BUTTON, Block.DARK_OAK_BUTTON, Block.JUNGLE_BUTTON, Block.MANGROVE_BUTTON, Block.OAK_BUTTON, Block.SPRUCE_BUTTON);
+    public static final Collection<NamespaceID> STONE_BUTTONS = create(Block.POLISHED_BLACKSTONE_BUTTON, Block.STONE_BUTTON);
+    public static final Collection<NamespaceID> NETHER_WOOD_BUTTONS = create(Block.WARPED_BUTTON, Block.CRIMSON_BUTTON);
     public static final Collection<NamespaceID> FENCES = builtin("minecraft:fences");
     public static final Collection<NamespaceID> WOODEN_FENCES = builtin("minecraft:wooden_fences");
     public static final Collection<NamespaceID> FENCE_GATES = builtin("minecraft:fence_gates");
