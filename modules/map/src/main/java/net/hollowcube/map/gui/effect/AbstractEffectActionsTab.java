@@ -1,6 +1,7 @@
 package net.hollowcube.map.gui.effect;
 
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -16,9 +17,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData> extends View {
-    private @Outlet("potion_effects") Label potionEffectsLabel;
-    private @Outlet("clear_effects") Label clearEffectsLabel;
-    private @Outlet("teleport") Label teleportLabel;
+    private static final Component TELEPORT_NONE = Component.translatable("gui.effect.actions.teleport.none");
+
+    private @Outlet("potion_effects_switch") Switch potionEffectsSwitch;
+    private @Outlet("potion_effects_off") Label potionEffectsOffLabel;
+    private @Outlet("potion_effects_on") Label potionEffectsOnLabel;
+
+    private @Outlet("clear_effects_switch") Switch clearEffectsSwitch;
+    private @Outlet("clear_effects_off") Label clearEffectsOffLabel;
+    private @Outlet("clear_effects_on") Label clearEffectsOnLabel;
+
+    private @Outlet("teleport_switch") Switch teleportSwitch;
+    private @Outlet("teleport_off") Label teleportOffLabel;
+    private @Outlet("teleport_on") Label teleportOnLabel;
+
     private @Outlet("settings") Label settingsLabel;
     private @Outlet("add_item") Label addItemLabel;
     private @Outlet("remove_item") Label removeItemLabel;
@@ -35,8 +47,8 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         updateFromData();
     }
 
-    @Action("potion_effects")
-    public void addPotionEffect() {
+    @Action("potion_effects_off")
+    public void addPotionEffectA() {
         // If this is the first effect go straight to the selector view
         // Otherwise open the list view
         if (data.potionEffects().isEmpty()) {
@@ -46,14 +58,25 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         }
     }
 
-    @Action("clear_effects")
-    public void toggleClearEffects() {
-        data.setClearPotionEffects(!data.clearPotionEffects());
+    @Action("potion_effects_on")
+    public void addPotionEffectB() {
+        addPotionEffectA();
+    }
+
+    @Action("clear_effects_off")
+    public void toggleClearEffectsA() {
+        data.setClearPotionEffects(true);
         updateFromData();
     }
 
-    @Action("teleport")
-    public void handleTeleportInteract(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+    @Action("clear_effects_on")
+    public void toggleClearEffectsB() {
+        data.setClearPotionEffects(false);
+        updateFromData();
+    }
+
+    @Action("teleport_off")
+    public void handleTeleportInteractA(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK) {
             if (data.teleport().isEmpty()) {
                 // Default to the player's current position
@@ -71,23 +94,30 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         }
     }
 
+    @Action("teleport_on")
+    public void handleTeleportInteractB(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        handleTeleportInteractA(player, slot, clickType);
+    }
 
     protected void updateFromData() {
-//        {
-//            potionEffectsLabel.setComponentsDirect();
-//        }
+        potionEffectsSwitch.setOption(data.potionEffects().isEmpty() ? 0 : 1);
 
-        clearEffectsLabel.setArgs(Component.translatable("gui.effect.actions.clear_effects." +
-                (data.clearPotionEffects() ? "enabled" : "disabled")));
+        var clearEffectsState = Component.translatable("gui.effect.actions.clear_effects." +
+                (data.clearPotionEffects() ? "enabled" : "disabled"));
+        clearEffectsOffLabel.setArgs(clearEffectsState);
+        clearEffectsOnLabel.setArgs(clearEffectsState);
+        clearEffectsSwitch.setOption(data.clearPotionEffects() ? 1 : 0);
 
         if (data.teleport().isPresent()) {
+            teleportSwitch.setOption(1);
             var teleTarget = data.teleport().get();
-            teleportLabel.setArgs(Component.translatable("gui.effect.actions.teleport.pos", List.of(
+            teleportOnLabel.setArgs(Component.translatable("gui.effect.actions.teleport.pos", List.of(
                     Component.text(teleTarget.blockX()), Component.text(teleTarget.blockY()), Component.text(teleTarget.blockZ()),
                     Component.text(teleTarget.yaw()), Component.text(teleTarget.pitch())
             )));
         } else {
-            teleportLabel.setArgs(Component.translatable("gui.effect.actions.teleport.none"));
+            teleportSwitch.setOption(0);
+            teleportOffLabel.setArgs(TELEPORT_NONE);
         }
 
         //todo settings

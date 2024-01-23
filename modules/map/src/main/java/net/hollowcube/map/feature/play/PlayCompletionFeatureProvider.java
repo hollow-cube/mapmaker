@@ -100,6 +100,29 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                         Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
             }
 
+//            player.showTitle(Title.title(Component.text("Map Completed", NamedTextColor.GOLD), Component.empty(), Title.Times.of(Duration.ZERO, Duration.of(80, TimeUnit.SERVER_TICK), Duration.ZERO)));
+//            player.sendPacket(new SetTickStatePacket(15, false));
+//            MinecraftServer.getSchedulerManager().submitTask(new Supplier<>() {
+//                private int state = 0;
+//
+//                @Override
+//                public TaskSchedule get() {
+//                    if (state < 10) {
+//                        var newRate = (float) CoordinateUtil.lerp(15.0, 4.0, (float) (state + 1) / 10f);
+//                        player.sendPacket(new SetTickStatePacket(newRate, false));
+//                        state++;
+//                        return TaskSchedule.tick(3);
+//                    }
+//                    if (state == 10) {
+//                        state++;
+//                        return TaskSchedule.tick(50);
+//                    }
+//
+//                    player.sendPacket(new SetTickStatePacket(20, false));
+//                    return TaskSchedule.stop();
+//                }
+//            });
+
             FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
 
             // Show the review GUI for the player if they have not submitted a rating yet

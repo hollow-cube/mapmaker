@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.map.gui.effect.potion ?>
-<component width="9" height="4" wipe_player_inv="true" align="ttb">
+<component width="9" height="4" wipe_player_inv="true" align="ttb" sprite="effect/potion/potion_list">
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>

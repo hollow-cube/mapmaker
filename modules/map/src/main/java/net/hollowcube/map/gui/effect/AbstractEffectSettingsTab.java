@@ -128,7 +128,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
         if (data.progressIndex() == -1) {
             progressIndexText.setArgs(Component.translatable("gui.effect.progress_index.none"));
-            progressIndexText.setText("--", TextColor.color(0xB0B0B0));
+            progressIndexText.setText("None");
         } else {
             progressIndexText.setArgs(Component.text(data.progressIndex()));
             progressIndexText.setText(String.valueOf(data.progressIndex()));

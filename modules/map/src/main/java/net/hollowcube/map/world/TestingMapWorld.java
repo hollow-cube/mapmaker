@@ -7,10 +7,7 @@ import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.ItemRegistry;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -133,7 +130,17 @@ public class TestingMapWorld implements InternalMapWorld {
     public void acceptPlayer(@NotNull Player player, boolean firstSpawn) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        // The save state for verifications needs to be created remotely, but for local testing we can create it here.
+        // todo in the future verification should be done in a VerificationMapWorld or PlayingMapWorld probably.
+        SaveState saveState;
+        if (map().verification() == MapVerification.PENDING) {
+            saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        } else {
+            saveState = new SaveState(
+                    UUID.randomUUID().toString(), playerData.id(), map().id(),
+                    SaveStateType.PLAYING
+            );
+        }
 
         activePlayers.add(player);
         player.setTag(TAG_TESTING, true);

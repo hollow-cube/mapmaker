@@ -60,7 +60,7 @@ public final class CoordinateUtil {
         return new Vec(lerp(zero.x(), one.x(), t), lerp(zero.y(), one.y(), t), lerp(zero.z(), one.z(), t));
     }
 
-    private static double lerp(double zero, double one, float t) {
+    public static double lerp(double zero, double one, float t) {
         return zero + (one - zero) * t;
     }
 }

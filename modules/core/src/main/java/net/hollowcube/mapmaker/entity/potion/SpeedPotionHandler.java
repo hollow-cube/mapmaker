@@ -13,7 +13,6 @@ class SpeedPotionHandler implements PotionHandler {
 
     @Override
     public void apply(@NotNull Player player, int level) {
-        System.out.println("ADD SPEED TO " + player.getUsername() + " LEVEL " + level);
         var modifier = new AttributeModifier(MODIFIER_ID, "speed_potion",
                 0.2 * (level + 1), AttributeOperation.MULTIPLY_TOTAL);
         player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(modifier);
@@ -21,7 +20,6 @@ class SpeedPotionHandler implements PotionHandler {
 
     @Override
     public void remove(@NotNull Player player) {
-        System.out.println("REMOVE SPEED FROM " + player.getUsername());
         player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(MODIFIER_ID);
     }
 }

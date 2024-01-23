@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.map.gui.effect.potion ?>
-<component width="9" height="5" wipe_player_inv="true" align="ttb">
+<component width="9" height="5" wipe_player_inv="true" align="ttb" sprite="effect/potion/potion_editor">
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
@@ -25,18 +25,14 @@
     <box width="9" height="1" align="ltr">
         <spacer/>
 
-        <button id="time_neg_5" translationKey="gui.effect.potion.editor.time_neg_5"
-                sprite="minecraft:red_stained_glass_pane"/>
-        <button id="time_neg_1" translationKey="gui.effect.potion.editor.time_neg_1"
-                sprite="minecraft:pink_stained_glass_pane"/>
+        <button id="time_rem_5" translationKey="gui.effect.potion.time.rem_5"/>
+        <button id="time_rem_1" translationKey="gui.effect.potion.time.rem_1"/>
 
-        <button id="time_edit" width="3" translationKey="gui.effect.potion.editor.time"
+        <button id="time_edit" width="3" translationKey="gui.effect.potion.time.current"
                 sprite="minecraft:clock"/>
 
-        <button id="time_pos_1" translationKey="gui.effect.potion.editor.time_pos_1"
-                sprite="minecraft:lime_stained_glass_pane"/>
-        <button id="time_pos_5" translationKey="gui.effect.potion.editor.time_pos_5"
-                sprite="minecraft:green_stained_glass_pane"/>
+        <button id="time_add_1" translationKey="gui.effect.potion.time.add_1"/>
+        <button id="time_add_5" translationKey="gui.effect.potion.time.add_5"/>
     </box>
 
 </component>

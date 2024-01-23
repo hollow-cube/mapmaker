@@ -5,8 +5,8 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class ActionBar {
 
@@ -30,7 +30,7 @@ public final class ActionBar {
         }
     }
 
-    private final Set<Provider> providers = new HashSet<>();
+    private final Set<Provider> providers = new CopyOnWriteArraySet<>();
     private final Player player;
 
     private ActionBar(@NotNull Player player) {
