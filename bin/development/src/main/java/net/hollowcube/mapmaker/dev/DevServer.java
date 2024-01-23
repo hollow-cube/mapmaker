@@ -31,6 +31,7 @@ import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.misc.CoreInit;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.misc.noop.NoopPlayerInviteService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
@@ -230,8 +231,8 @@ public class DevServer {
 
             var bridge = new DevServerBridge();
 
-            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
-            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager, sessionManager);
+            this.hub = new DevHubServer(bridge, playerService, sessionService, mapService, permManager, sessionManager, new NoopPlayerInviteService());
+            this.maps = new DevMapServer(bridge, playerService, sessionService, mapService, permManager, sessionManager, new NoopPlayerInviteService());
             bridge.setHubServer(hub);
             bridge.setMapServer(maps);
 

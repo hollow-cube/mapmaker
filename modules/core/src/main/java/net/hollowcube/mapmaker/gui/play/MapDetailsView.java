@@ -110,9 +110,9 @@ public class MapDetailsView extends View {
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
 
-    private final PersonalizedMapData map;
+    private final MapData map;
 
-    public MapDetailsView(@NotNull Context context, @NotNull PersonalizedMapData map, @NotNull Component authorName) {
+    public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull Component authorName) {
         super(context);
         this.map = map;
 
@@ -193,7 +193,7 @@ public class MapDetailsView extends View {
 
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             rowOneSwitch.setOption(1);
-            if (map.getUniquePlays() > PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY) {
+            if (map.uniquePlays() > PersonalizedMapData.MIN_PLAYS_FOR_DIFFICULTY) {
                 if (map.getDifficultyName().equals("easy")) {
                     difficultyEasyText.setText("Easy");
                     difficultySwitch.setOption(1);

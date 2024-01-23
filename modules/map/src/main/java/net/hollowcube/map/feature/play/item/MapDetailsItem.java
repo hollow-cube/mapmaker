@@ -4,7 +4,6 @@ import net.hollowcube.map.MapServer;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
-import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -42,8 +41,7 @@ public class MapDetailsItem extends ItemHandler {
             var map = MapWorld.forPlayer(player).map();
             var authorName = server.playerService().getPlayerDisplayName2(map.owner())
                     .build(DisplayName.Context.PLAIN);
-            var personalMapData = new PersonalizedMapData(map, PersonalizedMapData.Progress.NONE);
-            server.newOpenGUI(player, c -> new MapDetailsView(c, personalMapData, authorName));
+            server.newOpenGUI(player, c -> new MapDetailsView(c, map, authorName));
         });
     }
 

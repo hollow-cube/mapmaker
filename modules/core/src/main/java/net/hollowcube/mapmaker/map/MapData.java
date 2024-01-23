@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 
+    public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
+
     public static final String SPAWN_MAP_ID = System.getenv("MAPMAKER_SPAWN_MAP_ID");
 
     private String id;
@@ -27,6 +29,9 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
+
+    private int uniquePlays;
+    private double clearRate;
 
     private MapQuality quality;
 
@@ -100,6 +105,42 @@ public class MapData {
 
     public @UnknownNullability Instant publishedAt() {
         return publishedAt;
+    }
+
+    public int uniquePlays() {
+        return uniquePlays;
+    }
+
+    public double clearRate() {
+        return clearRate;
+    }
+
+    public @NotNull Component getDifficultyComponent() {
+        if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY)
+            return Component.translatable("gui.play_maps.map_display.difficulty.unknown");
+
+        return Component.translatable(
+                "gui.play_maps.map_display.difficulty." + getDifficultyName(),
+                Component.text(getClearRateString())
+        );
+    }
+
+    public @NotNull String getDifficultyName() {
+        var cr = clearRate();
+        if (cr < 0.05) return "nightmare";
+        if (cr < 0.25) return "expert";
+        if (cr < 0.5) return "hard";
+        if (cr < 0.75) return "medium";
+        return "easy";
+    }
+
+    public @NotNull String getClearRateString() {
+        var cr = clearRate() * 100;
+        if (cr >= 100) return "100";
+        else if (cr <= 0) return "0";
+        else if (cr >= 10) return String.format("%.1f", cr);
+        else if (cr >= 1) return String.format("%.2f", cr);
+        else return String.format("%.3f", cr);
     }
 
     public @NotNull MapQuality quality() {
