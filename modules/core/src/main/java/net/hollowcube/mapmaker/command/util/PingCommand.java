@@ -13,7 +13,7 @@ public class PingCommand extends CommandDsl {
     }
 
     private void handlePing(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("latency is " + (player.getLatency() - 50) + "±50ms");
+        player.sendMessage("latency is " + player.getLatency() + "ms");
     }
 
 }

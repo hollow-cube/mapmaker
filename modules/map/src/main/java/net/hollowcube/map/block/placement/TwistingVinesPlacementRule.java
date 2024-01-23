@@ -5,6 +5,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class TwistingVinesPlacementRule extends BaseBlockPlacementRule {
 
     public TwistingVinesPlacementRule(@NotNull Block block) {
@@ -12,19 +13,19 @@ public final class TwistingVinesPlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+        var blockPosition = placement.placePosition();
+        var above = placement.instance().getBlock(blockPosition.add(0, 1, 0), Block.Getter.Condition.TYPE);
+        if (above.id() == Block.TWISTING_VINES.id()) return Block.TWISTING_VINES_PLANT;
         return block;
     }
 
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
         Block block = updateState.currentBlock();
-        Point position = updateState.blockPosition();
-        int x = position.blockX();
-        int y = position.blockY();
-        int z = position.blockZ();
+        Point blockPosition = updateState.blockPosition();
 
-        var above = updateState.instance().getBlock(x, y + 1, z, Block.Getter.Condition.TYPE);
+        var above = updateState.instance().getBlock(blockPosition.add(0, 1, 0), Block.Getter.Condition.TYPE);
         if (above.id() == Block.TWISTING_VINES.id()) return Block.TWISTING_VINES_PLANT;
 
         return block;
