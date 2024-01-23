@@ -5,7 +5,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
-public class FireInteractRule implements BlockInteractionRule {
+public class FireInteractionRule implements BlockInteractionRule {
 
     @Override
     public @NotNull SneakState sneakState() {

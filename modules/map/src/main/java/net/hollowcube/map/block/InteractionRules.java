@@ -42,8 +42,8 @@ public class InteractionRules {
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
         item(Material.BUCKET, new EmptyBucketInteractionRule()); //TODO the client doesnt send a block interact for this. So this only handles unwaterlogging blocks, not removing water or lava blocks themselves
-        item(Material.FLINT_AND_STEEL, new FireInteractRule());
-        item(Material.FIRE_CHARGE, new FireInteractRule());
+        item(Material.FLINT_AND_STEEL, new FireInteractionRule());
+        item(Material.FIRE_CHARGE, new FireInteractionRule());
         item(ItemTags.AXES, new AxeInteractionRule());
         item(ItemTags.SHOVELS, new ShovelInteractionRule());
         item(ItemTags.HOES, new HoeInteractionRule());
@@ -51,6 +51,7 @@ public class InteractionRules {
         item(Material.GLOW_ITEM_FRAME, new ItemFrameInteractionRule(true));
         item(Material.ENDER_EYE, new EnderEyeInteractionRule());
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
+        item(Material.SCAFFOLDING, new ScaffoldingInteractionRule());
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {
