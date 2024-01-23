@@ -146,6 +146,7 @@ public final class PlacementRules {
         register(Block.POINTED_DRIPSTONE, DripstonePlacementRule::new);
         register(Block.SNOW, SnowPlacementRule::new);
         register(Block.SCAFFOLDING, ScaffoldingPlacementRule::new);
+        register(Block.JIGSAW, JigsawPlacementRule::new);
 
         //
         // ==== WARNING ====
