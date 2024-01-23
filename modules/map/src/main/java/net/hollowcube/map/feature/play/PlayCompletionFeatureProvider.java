@@ -92,10 +92,12 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             if (bestSaveState == null) {
                 player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(saveState.getPlaytime(), true))));
             } else {
-                var diffPlaytime = bestSaveState.getPlaytime() - saveState.getPlaytime();
+                // Diff playtime rounded to ticks prior to subtracting for correct display.
+                var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % 50) - (saveState.getPlaytime() - saveState.getPlaytime() % 50);
                 player.sendMessage(Component.translatable("map.completed.with_prior",
                         Component.text(formatMapPlaytime(saveState.getPlaytime(), true)),
-                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), true), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+                        // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
+                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
             }
 
             FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));

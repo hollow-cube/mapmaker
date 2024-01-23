@@ -147,6 +147,7 @@ public final class PlacementRules {
         register(Block.SNOW, SnowPlacementRule::new);
         register(Block.SCAFFOLDING, ScaffoldingPlacementRule::new);
         register(Block.JIGSAW, JigsawPlacementRule::new);
+        register(Block.FIRE, FirePlacementRule::new);
 
         //
         // ==== WARNING ====
