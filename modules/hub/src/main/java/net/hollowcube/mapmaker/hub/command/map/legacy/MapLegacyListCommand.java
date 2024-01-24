@@ -17,21 +17,22 @@ public class MapLegacyListCommand extends CommandDsl {
     private final Argument<String> playerArg = Argument.Word("player");
 
     private final MapService mapService;
+    private final PermManager permManager;
 
     public MapLegacyListCommand(@NotNull MapService mapService, @NotNull PermManager permManager) {
         super("list");
         this.mapService = mapService;
-
-        var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
-
-        addSyntax(playerOnly(this::listLegacyMaps));
-
-        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
+        this.permManager = permManager;
     }
 
     @Override
     public void build(@NotNull CommandBuilder builder) {
-        super.build(builder);
+        builder.executes(playerOnly(this::listLegacyMaps));
+
+        var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
+        builder.child(playerArg, listOther -> listOther
+                .condition(listAnyPerm)
+                .executes(playerOnly(this::listLegacyMaps)));
     }
 
     private void listLegacyMaps(@NotNull Player player, @NotNull CommandContext context) {
