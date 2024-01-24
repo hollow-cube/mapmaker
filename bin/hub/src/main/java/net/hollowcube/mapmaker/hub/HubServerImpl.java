@@ -295,7 +295,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         if (!player.isOnline()) return;
 
         event.setSpawningInstance(instance());
-        player.setRespawnPoint(HUB_SPAWN_POINT);
+        player.setRespawnPoint(spawnPoint(player));
     }
 
     private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {

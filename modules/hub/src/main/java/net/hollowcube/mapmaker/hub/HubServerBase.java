@@ -192,7 +192,7 @@ public abstract class HubServerBase implements HubServer {
 
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
 
-    private @NotNull Pos spawnPoint(@NotNull Player player) {
+    public @NotNull Pos spawnPoint(@NotNull Player player) {
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
         return MIN_SPAWN_POINT.add(
                 (seeded.nextDouble() * 10) % 3,
