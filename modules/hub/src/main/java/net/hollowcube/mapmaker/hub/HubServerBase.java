@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 
@@ -189,7 +190,16 @@ public abstract class HubServerBase implements HubServer {
         }
     }
 
-    public final Pos HUB_SPAWN_POINT = new Pos(0.5, 40, 0.5, 90, 0);
+    private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
+
+    private @NotNull Pos spawnPoint(@NotNull Player player) {
+        var seeded = new Random(player.getUuid().getLeastSignificantBits());
+        return MIN_SPAWN_POINT.add(
+                (seeded.nextDouble() * 10) % 3,
+                0,
+                (seeded.nextDouble() * 10) % 3
+        );
+    }
 
     private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
         var player = event.getPlayer();
@@ -198,7 +208,7 @@ public abstract class HubServerBase implements HubServer {
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setPermissionLevel(4);
-        player.teleport(HUB_SPAWN_POINT);
+        player.teleport(spawnPoint(player));
         player.sendActionBar(Component.empty());
         player.setFlyingSpeed(player.getTag(HubServer.DOUBLE_JUMP_TAG) ? 0 : 0.05f);
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
@@ -247,14 +257,14 @@ public abstract class HubServerBase implements HubServer {
         if (playerPos.x() < lowerHubCoord.x() || playerPos.x() > upperHubCoord.x() ||
                 playerPos.y() < lowerHubCoord.y() || playerPos.y() > upperHubCoord.y() ||
                 playerPos.z() < lowerHubCoord.z() || playerPos.z() > upperHubCoord.z()) {
-            event.getPlayer().teleport(HUB_SPAWN_POINT);
+            event.getPlayer().teleport(spawnPoint(event.getPlayer()));
         }
     }
 
     public void teleportToSpawn(@NotNull Player player) {
         // Check to see if we're in the same world
         if (player.getInstance().equals(world.instance())) {
-            player.teleport(HUB_SPAWN_POINT);
+            player.teleport(spawnPoint(player));
         }
     }
 
