@@ -30,7 +30,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
-        this.legacyUrl = String.format("%s/v1/internal/legacy/maps", url);
+        this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
         this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
 
