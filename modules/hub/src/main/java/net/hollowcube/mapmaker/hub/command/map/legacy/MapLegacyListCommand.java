@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.command.map.legacy;
 
+import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -24,7 +25,13 @@ public class MapLegacyListCommand extends CommandDsl {
         var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
 
         addSyntax(playerOnly(this::listLegacyMaps));
-//        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
+
+        addSyntax(listAnyPerm, playerOnly(this::listLegacyMaps), playerArg);
+    }
+
+    @Override
+    public void build(@NotNull CommandBuilder builder) {
+        super.build(builder);
     }
 
     private void listLegacyMaps(@NotNull Player player, @NotNull CommandContext context) {
