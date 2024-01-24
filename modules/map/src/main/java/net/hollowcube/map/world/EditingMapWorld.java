@@ -309,7 +309,12 @@ public class EditingMapWorld implements InternalMapWorld {
 
             // Read from savestate
             var buildState = saveState.buildState();
-            buildState.inventory().forEach(player.getInventory()::setItemStack);
+            buildState.inventory().ifPresentOrElse(
+                    // Read the inventory items
+                    items -> items.forEach(player.getInventory()::setItemStack),
+                    // Add the builder mode item
+                    () -> player.getInventory().addItemStack(itemRegistry.getItemStack("mapmaker:builder_menu", null))
+            );
             player.setHeldItemSlot((byte) buildState.selectedSlot());
             player.setFlying(buildState.isFlying());
             player.teleport(buildState.pos().orElse(map.settings().getSpawnPoint())).join();

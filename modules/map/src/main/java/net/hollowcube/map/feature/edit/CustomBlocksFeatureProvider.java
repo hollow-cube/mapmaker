@@ -6,6 +6,7 @@ import net.hollowcube.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.map.block.custom.FinishPlateBlock;
 import net.hollowcube.map.block.custom.StatusPlateBlock;
 import net.hollowcube.map.feature.FeatureProvider;
+import net.hollowcube.map.feature.edit.item.BuilderMenuItem;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,9 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             world.itemRegistry().register(CheckpointPlateBlock.ITEM);
             world.itemRegistry().register(BouncePadBlock.ITEM);
             world.itemRegistry().register(StatusPlateBlock.ITEM);
+
+            //todo this shouldnt be registered from here
+            world.itemRegistry().register(BuilderMenuItem.INSTANCE);
             return true;
         }
 

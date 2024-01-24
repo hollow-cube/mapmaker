@@ -133,23 +133,23 @@ public class SaveState {
         public static final Codec<BuildState> CODEC = RecordCodecBuilder.create(i -> i.group(
                 ExtraCodecs.POS.optionalFieldOf("pos").forGetter(BuildState::pos),
                 Codec.BOOL.optionalFieldOf("isFlying", false).forGetter(BuildState::isFlying),
-                ExtraCodecs.ITEM_STACK_MAP_AS_BASE64.optionalFieldOf("inventory", Map.of()).forGetter(BuildState::inventory),
+                ExtraCodecs.ITEM_STACK_MAP_AS_BASE64.optionalFieldOf("inventory").forGetter(BuildState::inventory),
                 Codec.INT.optionalFieldOf("selectedSlot", 0).forGetter(BuildState::selectedSlot)
         ).apply(i, BuildState::new));
 
         private Optional<Pos> pos;
         private boolean isFlying;
-        private Map<Integer, ItemStack> inventory;
+        private Optional<Map<Integer, ItemStack>> inventory;
         private int selectedSlot;
 
         //todo for adding new build state we could have some kind of "build state contributor" which can supply new codecs which are dispatch-ed to their correct type.
         // maybe.
 
         public BuildState() {
-            this(Optional.empty(), false, Map.of(), 0);
+            this(Optional.empty(), false, Optional.empty(), 0);
         }
 
-        public BuildState(Optional<Pos> pos, boolean isFlying, Map<Integer, ItemStack> inventory, int selectedSlot) {
+        public BuildState(Optional<Pos> pos, boolean isFlying, Optional<Map<Integer, ItemStack>> inventory, int selectedSlot) {
             this.pos = pos;
             this.isFlying = isFlying;
             this.inventory = inventory;
@@ -164,7 +164,7 @@ public class SaveState {
             return isFlying;
         }
 
-        public @NotNull Map<Integer, ItemStack> inventory() {
+        public @NotNull Optional<Map<Integer, ItemStack>> inventory() {
             return inventory;
         }
 
@@ -181,7 +181,7 @@ public class SaveState {
         }
 
         public void setInventory(@NotNull Map<Integer, ItemStack> inventory) {
-            this.inventory = inventory;
+            this.inventory = Optional.of(inventory);
         }
 
         public void setSelectedSlot(int selectedSlot) {
