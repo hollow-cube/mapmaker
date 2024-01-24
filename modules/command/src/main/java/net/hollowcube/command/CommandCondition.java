@@ -37,6 +37,18 @@ public interface CommandCondition {
         };
     }
 
+    static @NotNull CommandCondition or(@NotNull CommandCondition... conditions) {
+        return (sender, context) -> {
+            for (var condition : conditions) {
+                var result = condition.test(sender, context);
+                if (result == ALLOW) {
+                    return result;
+                }
+            }
+            return DENY;
+        };
+    }
+
     @MagicConstant(valuesFromClass = CommandCondition.class)
     int test(@NotNull CommandSender sender, @NotNull CommandContext context);
 }

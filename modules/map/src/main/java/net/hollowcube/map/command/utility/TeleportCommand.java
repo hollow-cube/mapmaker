@@ -1,8 +1,11 @@
 package net.hollowcube.map.command.utility;
 
+import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
@@ -15,7 +18,17 @@ public class TeleportCommand extends CommandDsl {
 
     public TeleportCommand() {
         super("tp");
-        setCondition(mapFilter(false, true, false));
+        setCondition(CommandCondition.or(
+                // Always allowed in editing maps for anyone
+                mapFilter(false, true, false),
+                // Allowed in playing maps for people in spectator mode
+                (sender, context) -> {
+                    if (!(sender instanceof Player player)) return CommandCondition.HIDE;
+                    if (!(MapWorld.forPlayerOptional(player) instanceof PlayingMapWorld world))
+                        return CommandCondition.HIDE;
+                    return world.isSpectating(player) ? CommandCondition.ALLOW : CommandCondition.HIDE;
+                }
+        ));
 
         addSyntax(playerOnly(this::handleTeleportToTarget), targetArg);
     }
