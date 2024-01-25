@@ -32,10 +32,7 @@ import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
-import net.hollowcube.mapmaker.command.util.MinestomCommand;
-import net.hollowcube.mapmaker.command.util.PingCommand;
-import net.hollowcube.mapmaker.command.util.WhereCommand;
+import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
@@ -190,6 +187,7 @@ public abstract class MapServerBase implements MapServer {
         commandManager.register(injector.getInstance(PlayCommand.class));
         commandManager.register(injector.getInstance(WhereCommand.class));
         commandManager.register(injector.getInstance(TopTimesCommand.class));
+        commandManager.register(injector.getInstance(ListCommand.class));
 
         commandManager.register(injector.getInstance(RequestCommand.class));
         commandManager.register(injector.getInstance(RejectCommand.class));

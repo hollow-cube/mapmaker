@@ -15,6 +15,7 @@ import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.lang.MapMessages;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -37,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
+import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -282,14 +284,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) continue;
 
-            //todo need to handle spectator checkpoint here
-            // actually this probably doesnt need to be handled here, idk
-//            if (playingMapWorld.isSpectating(player) && player.getPosition().y() < MINIMUM_RESET_HEIGHT) {
-//                var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
-//                if (checkpoint != null)
-//                    player.teleport(checkpoint);
-//            }
-
             var resetHeight = saveState.playState().resetHeight().orElse(-64);
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
@@ -303,6 +297,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 continue;
             }
         }
+
+        // If a player is spectating return them to their checkpoint if they fall below the reset height
+        if (MapWorld.unsafeFromInstance(instance) instanceof PlayingMapWorld pmw) {
+            for (var spectator : pmw.spectators()) {
+                if (spectator.getPosition().y() < -64) {
+                    var checkpoint = spectator.getTag(SPECTATOR_CHECKPOINT);
+                    spectator.teleport(checkpoint == null ? pmw.spawnPoint() : checkpoint);
+                }
+            }
+        }
+
     }
 
     /**

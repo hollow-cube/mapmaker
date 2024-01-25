@@ -6,7 +6,6 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.map.item.impl.DebugStickItem;
 import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.terraform.tool.BuiltinTool;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -149,8 +148,6 @@ public class ItemRegistry {
         var material = Material.fromNamespaceId(namespace);
         if (material == null) return null;
         var builder = ItemStack.builder(material);
-        if (material == Material.DEBUG_STICK)
-            builder.setTag(BuiltinTool.TYPE, "terraform:debug_stick");
         return builder.build();
     }
 

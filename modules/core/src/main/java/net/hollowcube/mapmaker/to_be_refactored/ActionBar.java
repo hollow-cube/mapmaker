@@ -52,18 +52,10 @@ public final class ActionBar {
         //todo in the future, we should make this smarter to not recompute when values haven't changed.
 
         long now = System.currentTimeMillis();
+        providers.removeIf(provider -> provider.expiration() > 0 && provider.expiration() < now);
+
         var builder = new FontUIBuilder();
-
-        var iter = providers.iterator();
-        while (iter.hasNext()) {
-            var provider = iter.next();
-
-            // Remove if expired
-            if (provider.expiration() > 0 && provider.expiration() < now) {
-                iter.remove();
-                continue;
-            }
-
+        for (Provider provider : providers) {
             // Add it to action bar.
             var mark = builder.mark();
             provider.provide(player, builder);

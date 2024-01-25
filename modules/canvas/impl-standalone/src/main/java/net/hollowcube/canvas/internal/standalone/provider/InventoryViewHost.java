@@ -171,7 +171,7 @@ public class InventoryViewHost {
         var contents = element.getContents();
         ItemStack[] top, bottom = null;
 
-        top = new ItemStack[inventory.getInventoryType().getSize()];
+        top = new ItemStack[getInventoryTypeSize(inventory.getInventoryType())];
         Arrays.fill(top, ItemStack.AIR);
         for (int i = 0; i < top.length; i++) {
             if (contents[i] == null) continue;
@@ -182,7 +182,7 @@ public class InventoryViewHost {
             bottom = new ItemStack[9 * playerInventoryRows];
             Arrays.fill(bottom, ItemStack.AIR);
             for (int i = 0; i < bottom.length; i++) {
-                var contentIndex = inventory.getInventoryType().getSize() + i;
+                var contentIndex = getInventoryTypeSize(inventory.getInventoryType()) + i;
                 if (contentIndex >= contents.length || contents[contentIndex] == null) continue;
                 bottom[i] = contents[contentIndex];
             }
@@ -213,6 +213,10 @@ public class InventoryViewHost {
         var viewers = getHandle().getViewers().iterator();
         if (!viewers.hasNext()) throw new IllegalStateException("No viewers");
         return viewers.next();
+    }
+
+    private int getInventoryTypeSize(@NotNull InventoryType type) {
+        return Math.max(type.getSize(), 9);
     }
 
     private class InventoryWrapper extends Inventory {

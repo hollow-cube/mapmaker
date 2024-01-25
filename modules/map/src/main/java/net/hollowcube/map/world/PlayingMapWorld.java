@@ -249,6 +249,10 @@ public class PlayingMapWorld implements InternalMapWorld {
         return spectatingPlayers.contains(player);
     }
 
+    public @NotNull Collection<Player> spectators() {
+        return spectatingPlayers;
+    }
+
     @Override
     public @Blocking void removePlayer(@NotNull Player player) {
         removePlayer(player, true);
