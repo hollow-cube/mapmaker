@@ -62,7 +62,6 @@ public class ProxyPlugin {
         this.logger = logger;
         this.proxy = proxy;
 
-
         var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
         else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt

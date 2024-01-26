@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.player;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
@@ -33,7 +32,6 @@ public class PlayerDataV2 {
 
     private String id;
     private String username;
-    @SerializedName("display_name_v2")
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private JsonObject settings = new JsonObject();
 
