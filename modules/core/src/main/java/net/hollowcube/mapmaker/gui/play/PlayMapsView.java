@@ -175,13 +175,15 @@ public class PlayMapsView extends View {
             final int page = request.page();
             async(() -> {
                 var resp = mapService.getMapProgress(playerData.id(), mapIds);
-                if (page != pagination.page()) {
-                    System.out.println("NOT THE SAME PAGE " + page + " != " + pagination.page());
-                    return;
-                }
-                pagination.<MapEntry>forEachEntry(page, entry -> {
-                    var progress = resp.getProgress(entry.map().id());
-                    if (progress != null) entry.setProgress(progress);
+                player.scheduleNextTick(ignored -> {
+                    if (page != pagination.page()) {
+                        System.out.println("NOT THE SAME PAGE " + page + " != " + pagination.page());
+                        return;
+                    }
+                    pagination.<MapEntry>forEachEntry(page, entry -> {
+                        var progress = resp.getProgress(entry.map().id());
+                        if (progress != null) entry.setProgress(progress);
+                    });
                 });
             });
         } catch (Exception e) {
