@@ -22,7 +22,7 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     private final Class<T> itemClass;
     private final boolean cached;
 
-    private final List<BaseElement> pageCache = new ArrayList<>();
+    private final List<ContainerElement> pageCache = new ArrayList<>();
     private Consumer<PageRequest<T>> pageHandler = null;
     private int maxPage = 0;
     private int page = 0;
@@ -45,6 +45,22 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
         if (super.isAnyLoading()) return true;
         if (page >= pageCache.size()) return true;
         return pageCache.get(page).isAnyLoading();
+    }
+
+    @Override
+    public int page() {
+        return page;
+    }
+
+    @Override
+    public <T extends View> void forEachEntry(int page, @NotNull Consumer<T> consumer) {
+        if (page >= pageCache.size()) return;
+        pageCache.get(page).forEachChild(child -> {
+            if (child instanceof ViewContainer) {
+                //noinspection unchecked
+                consumer.accept((T) ((ViewContainer) child).getAssociatedView());
+            }
+        });
     }
 
     @Override

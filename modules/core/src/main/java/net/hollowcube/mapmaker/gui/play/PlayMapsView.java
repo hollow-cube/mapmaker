@@ -153,10 +153,12 @@ public class PlayMapsView extends View {
         try {
             var sortPreset = playerData.getSetting(SORT_PRESET);
             boolean parkour = playerData.getSetting(PARKOUR), building = playerData.getSetting(BUILDING);
-            var queryResult = mapService.searchMaps(player.getUuid().toString(), sortPreset.getSortName(), request.page(), request.pageSize(), building, parkour, query);
+            var queryResult = mapService.searchMapsV2(player.getUuid().toString(), sortPreset.getSortName(), request.page(), request.pageSize(), building, parkour, query);
 
+            var mapIds = new ArrayList<String>();
             var maps = new ArrayList<MapEntry>();
             for (var map : queryResult.results()) {
+                if (map.isCompletable()) mapIds.add(map.id());
                 maps.add(new MapEntry(request.context(), map));
             }
             request.respond(maps, queryResult.nextPage());
@@ -164,6 +166,18 @@ public class PlayMapsView extends View {
             maxPages = request.page() + 1;
             currentPage = request.page() + 1;
             updatePageText();
+
+            // Fetch the player's current progress on the maps
+            if (mapIds.isEmpty()) return;
+            final int page = request.page();
+            async(() -> {
+                var resp = mapService.getMapProgress(playerData.id(), mapIds);
+                if (page != pagination.page()) return;
+                pagination.<MapEntry>forEachEntry(page, entry -> {
+                    var progress = resp.getProgress(entry.map().id());
+                    if (progress != null) entry.setProgress(progress);
+                });
+            });
         } catch (Exception e) {
             player.closeInventory();
             player.sendMessage(Component.translatable("generic.unknown_error"));

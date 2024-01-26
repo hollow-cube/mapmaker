@@ -267,6 +267,10 @@ public class MapData {
         return comp;
     }
 
+    public boolean isCompletable() {
+        return settings().getVariant() == MapVariant.PARKOUR;
+    }
+
     public static class WithSlot extends MapData {
         private int slot;
 

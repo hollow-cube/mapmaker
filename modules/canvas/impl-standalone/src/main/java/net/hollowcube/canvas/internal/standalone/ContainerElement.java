@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -29,6 +30,12 @@ public class ContainerElement extends BaseElement {
         super(context, other);
         for (var child : other.children) {
             children.add(child.clone(context));
+        }
+    }
+
+    public void forEachChild(@NotNull Consumer<BaseElement> consumer) {
+        for (var child : children) {
+            consumer.accept(child);
         }
     }
 

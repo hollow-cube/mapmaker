@@ -56,6 +56,16 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
     public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
         throw new UnsupportedOperationException("not implemented");
     }

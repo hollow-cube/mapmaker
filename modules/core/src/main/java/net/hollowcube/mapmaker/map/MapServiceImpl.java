@@ -25,11 +25,13 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
 
     private final String url;
+    private final String urlV2;
     private final String legacyUrl;
     private final String perfdumpUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
+        this.urlV2 = String.format("%s/v2/internal/maps", url);
         this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
         this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
@@ -102,6 +104,35 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<PersonalizedMapData>>() {
             });
+            default -> throw new InternalError("Failed to search maps: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
+        logger.log(System.Logger.Level.INFO, "searching maps for " + query);
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV2 + "/search?sort=" + sort + "&page=" + page + "&pageSize=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
+            });
+            default -> throw new InternalError("Failed to search maps: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV2 + "/progress?playerId=" + playerId + "&mapId=" + String.join(",", mapIds)))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapProgressBatchResponse.class);
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }

@@ -4,10 +4,15 @@ import net.hollowcube.canvas.internal.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface Pagination extends Element {
 
     String SIG_PAGE_CHANGED = "pagination/page_changed";
+
+    int page();
+
+    <T extends View> void forEachEntry(int page, @NotNull Consumer<T> consumer);
 
     void reset();
 

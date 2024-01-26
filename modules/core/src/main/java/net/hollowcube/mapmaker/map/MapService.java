@@ -30,6 +30,10 @@ public interface MapService {
 
     @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request);
 
+    @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
+
+    @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
+
     @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);

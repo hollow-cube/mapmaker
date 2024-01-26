@@ -32,15 +32,32 @@ public class MapEntry extends View {
 
     private @Outlet("btn") Label label;
 
-    private final PersonalizedMapData map;
+    private final MapData map;
+    private PersonalizedMapData.Progress progress = null; // null is unknown
     private Component authorName = null;
 
-    public MapEntry(@NotNull Context context, @NotNull PersonalizedMapData map) {
+    public MapEntry(@NotNull Context context, @NotNull MapData map) {
         super(context);
         this.map = map;
 
         label.setState(State.LOADING);
         async(this::updateIcon);
+    }
+
+    public @NotNull MapData map() {
+        return map;
+    }
+
+    public void setProgress(PersonalizedMapData.Progress progress) {
+        this.progress = progress;
+
+        var newTitle = Component.translatable(switch (map.settings().getVariant()) {
+            case PARKOUR -> "gui.play_maps.map_display.map_name.parkour";
+            case BUILDING -> "gui.play_maps.map_display.map_name.building";
+            case ADVENTURE -> "gui.play_maps.map_display.map_name.adventure";
+        }, map.settings().getNameComponent(), getCompletionStateText());
+
+        label.setComponentsDirect(newTitle, null);
     }
 
     @Action("btn")
@@ -68,7 +85,7 @@ public class MapEntry extends View {
             case PARKOUR -> "gui.play_maps.map_display.map_name.parkour";
             case BUILDING -> "gui.play_maps.map_display.map_name.building";
             case ADVENTURE -> "gui.play_maps.map_display.map_name.adventure";
-        }, map.settings().getNameComponent(), map.getCompletionStateText());
+        }, map.settings().getNameComponent(), getCompletionStateText());
 
         var lore = new ArrayList<Component>();
         lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
@@ -171,5 +188,14 @@ public class MapEntry extends View {
         } else {
             return Component.text("Adventure Map", TextColor.color(0x9F0B0B));
         }
+    }
+
+    public @NotNull Component getCompletionStateText() {
+        return Component.translatable(switch (progress) {
+            case null -> "gui.play_maps.map_display.progress_unknown";
+            case NONE -> "gui.play_maps.map_display.progress_none";
+            case STARTED -> "gui.play_maps.map_display.progress_started";
+            case COMPLETE -> "gui.play_maps.map_display.progress_complete";
+        });
     }
 }
