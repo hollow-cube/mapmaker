@@ -168,11 +168,17 @@ public class PlayMapsView extends View {
             updatePageText();
 
             // Fetch the player's current progress on the maps
-            if (mapIds.isEmpty()) return;
+            if (mapIds.isEmpty()) {
+                System.out.println("NO MAPS TO GET PROGRESS FOR ");
+                return;
+            }
             final int page = request.page();
             async(() -> {
                 var resp = mapService.getMapProgress(playerData.id(), mapIds);
-                if (page != pagination.page()) return;
+                if (page != pagination.page()) {
+                    System.out.println("NOT THE SAME PAGE " + page + " != " + pagination.page());
+                    return;
+                }
                 pagination.<MapEntry>forEachEntry(page, entry -> {
                     var progress = resp.getProgress(entry.map().id());
                     if (progress != null) entry.setProgress(progress);
