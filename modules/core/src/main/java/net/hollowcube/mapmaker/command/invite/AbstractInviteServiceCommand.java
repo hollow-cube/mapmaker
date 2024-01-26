@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.invite;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -13,36 +12,32 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class RejectCommand extends CommandDsl {
+abstract class AbstractInviteServiceCommand extends CommandDsl {
 
-    private final PlayerInviteService inviteService;
-    private final PlayerService playerService;
-    private final SessionManager sessionManager;
-    private final Argument<String> targetArg;
+    protected final PlayerInviteService inviteService;
+    protected final PlayerService playerService;
+    protected final SessionManager sessionManager;
+    private final Argument<String> targetArgument;
 
-    @Inject
-    public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
-                         @NotNull SessionManager sessionManager) {
-        super("reject");
+    AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
+                                 @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
+        super(command);
         this.inviteService = inviteService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
 
-        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
-        category = CommandCategory.SOCIAL;
+        this.targetArgument = CoreArgument.AnyOnlinePlayer("player", sessionManager);
+        this.category = CommandCategory.SOCIAL;
 
-        addSyntax(playerOnly(this::handleDefaultReject));
-        addSyntax(playerOnly(this::handleReject), targetArg);
+        this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);
     }
 
-    private void handleDefaultReject(@NotNull Player player, @NotNull CommandContext context) {
-        inviteService.reject(player);
-    }
+    abstract void handle(@NotNull Player sender, @NotNull String targetId);
 
-    private void handleReject(@NotNull Player player, @NotNull CommandContext context) {
-        var targetName = context.getRaw(targetArg);
+    private void handleCommand(@NotNull Player player, @NotNull CommandContext context) {
+        var targetName = context.getRaw(this.targetArgument);
 
-        var targetId = context.get(targetArg);
+        var targetId = context.get(this.targetArgument);
         if (targetId == null) {
             player.sendMessage(Component.translatable("generic.player_offline", Component.text(targetName)));
             return;
@@ -59,6 +54,6 @@ public class RejectCommand extends CommandDsl {
             return;
         }
 
-        this.inviteService.reject(player, targetSession.playerId());
+        this.handle(player, targetSession.playerId());
     }
 }
