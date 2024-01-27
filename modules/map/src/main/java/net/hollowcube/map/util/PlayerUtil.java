@@ -3,6 +3,7 @@ package net.hollowcube.map.util;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,5 +29,17 @@ public final class PlayerUtil {
             if (!instance.getBlock(position, Block.Getter.Condition.TYPE).isAir()) return position;
         }
         return null;
+    }
+
+    public static void swingHand(@NotNull Player player, @NotNull Player.Hand hand, boolean includeSelf) {
+        if (hand == Player.Hand.MAIN) {
+            player.swingMainHand(); // Sends only to viewers
+            if (includeSelf)
+                player.sendPacket(new EntityAnimationPacket(player.getEntityId(), EntityAnimationPacket.Animation.SWING_MAIN_ARM));
+        } else {
+            player.swingOffHand();
+            if (includeSelf)
+                player.sendPacket(new EntityAnimationPacket(player.getEntityId(), EntityAnimationPacket.Animation.SWING_OFF_HAND));
+        }
     }
 }

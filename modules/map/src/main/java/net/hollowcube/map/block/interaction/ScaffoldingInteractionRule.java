@@ -1,5 +1,7 @@
 package net.hollowcube.map.block.interaction;
 
+import net.hollowcube.map.util.PlayerUtil;
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -27,16 +29,20 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
         var block = interaction.getBlock(blockPosition);
         if (block.id() != SCAFFOLDING_BLOCK) return false;
 
+        var worldBorder = interaction.instance().getWorldBorder();
+
         var startPosition = blockPosition;
         var blockFace = interaction.blockFace();
         if (blockFace == BlockFace.TOP) {
             // Interacting with the top face extends the scaffolding out in the direction the player is looking.
 
             var placeFace = BlockFace.fromYaw(interaction.player().getPosition().yaw());
-            for (int i = 0; i < MAX_PLACE_DISTANCE; i++) {
+            // Add 2 because this is triggering before the block, and the block position is exactly on so need to move in from the wb.
+            for (int i = 0; i < MAX_PLACE_DISTANCE && worldBorder.isInside(CoordinateUtil.abs(blockPosition).add(2)); i++) {
                 blockPosition = blockPosition.relative(placeFace);
                 block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
                 if (block.id() == SCAFFOLDING_BLOCK) continue;
+                if (!block.isAir()) break;
 
                 // We found a non-scaffolding block. Place one there.
                 interaction.instance().placeBlock(new BlockHandler.PlayerPlacement(
@@ -48,8 +54,10 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
                 // Vanilla only allows placement up to 7 blocks away so will stop playing the sound after that.
                 // We play the sound for cases where the player is placing scaffolding further than vanilla allows.
                 if (startPosition.distanceSquared(blockPosition) > VANILLA_PLACE_DISTANCE) {
-                    interaction.player().playSound(Sound.sound(SoundEvent.BLOCK_SCAFFOLDING_PLACE, Sound.Source.BLOCK, 1f, 1f),
+                    var player = interaction.player();
+                    player.playSound(Sound.sound(SoundEvent.BLOCK_SCAFFOLDING_PLACE, Sound.Source.BLOCK, 1f, 1f),
                             blockPosition.x(), blockPosition.y(), blockPosition.z());
+                    PlayerUtil.swingHand(player, interaction.hand(), true);
                 }
 
                 break;
@@ -61,6 +69,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
                 blockPosition = blockPosition.add(0, 1, 0);
                 block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
                 if (block.id() == SCAFFOLDING_BLOCK) continue;
+                if (!block.isAir()) break;
 
                 // We found a non-scaffolding block. Place one there as a player placement because this is the real place position.
                 interaction.instance().placeBlock(new BlockHandler.PlayerPlacement(

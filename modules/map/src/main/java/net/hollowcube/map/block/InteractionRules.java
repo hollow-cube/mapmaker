@@ -12,6 +12,7 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +22,8 @@ import java.util.Objects;
 public class InteractionRules {
     private static final Int2ObjectMap<BlockInteractionRule> blockRules = new Int2ObjectArrayMap<>();
     private static final Int2ObjectMap<BlockInteractionRule> itemRules = new Int2ObjectArrayMap<>();
+
+    private static final Tag<Long> LAST_INTERACT_TICK = Tag.Long("last_interact_tick");
 
     static {
         block(Block.LECTERN, new LecternInteractionRule());
