@@ -26,7 +26,8 @@ public class ScaffoldingPlacementRule extends BaseBlockPlacementRule {
 
     private @NotNull Block getState(@NotNull Block.Getter instance, @NotNull Point blockPosition, @NotNull Block current) {
         var blockBelow = instance.getBlock(blockPosition.add(0, -1, 0), Block.Getter.Condition.TYPE);
-        return current.withProperty("bottom", String.valueOf(blockBelow.isAir()));
+        var isBottom = !blockBelow.registry().collisionShape().isFaceFull(BlockFace.TOP);
+        return current.withProperty("bottom", String.valueOf(isBottom));
     }
 
     @Override
