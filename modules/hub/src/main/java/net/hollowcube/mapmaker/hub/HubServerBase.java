@@ -7,6 +7,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
@@ -127,7 +128,7 @@ public abstract class HubServerBase implements HubServer {
         });
 
         // Command init
-//        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new HelpCommand(commandManager));
         commandManager.register(new EmojisCommand());
         commandManager.register(new MinestomCommand());
         commandManager.register(createDebugCommand());

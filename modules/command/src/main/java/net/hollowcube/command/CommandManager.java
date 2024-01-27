@@ -2,9 +2,11 @@ package net.hollowcube.command;
 
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.util.CommandReflection;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
@@ -60,5 +62,16 @@ public interface CommandManager {
 
     @NotNull
     DeclareCommandsPacket createCommandPacket(@NotNull Player player);
+
+    /**
+     * Provides access to the command manager's reflection API, which can be used to inspect the command graph.
+     *
+     * <p>Note that this API is relatively unstable and may change over time. The primary use case is
+     * {@link net.hollowcube.command.util.HelpCommand}</p>
+     *
+     * @return The command reflection API
+     */
+    @ApiStatus.Experimental
+    @NotNull CommandReflection reflect();
 
 }

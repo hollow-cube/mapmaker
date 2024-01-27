@@ -1,7 +1,9 @@
 package net.hollowcube.command;
 
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -9,10 +11,15 @@ import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class CommandManagerImpl implements CommandManager {
     private final RootCommandNode root = new RootCommandNode();
+    private final ReflectionImpl reflection = new ReflectionImpl();
 
     @Override
     public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
@@ -59,5 +66,47 @@ public class CommandManagerImpl implements CommandManager {
     @Override
     public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
         return root.createCommandPacket(player);
+    }
+
+    @Override
+    public @NotNull CommandReflection reflect() {
+        return reflection;
+    }
+
+    private class ReflectionImpl implements CommandReflection {
+
+        @Override
+        public @NotNull Collection<Map.Entry<String, CommandNode>> commands(@NotNull CommandSender sender, boolean includeAliases) {
+            var commands = new ArrayList<Map.Entry<String, CommandNode>>();
+            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode node) : root.children) {
+                if (!includeAliases && node.redirect != null) continue;
+
+                // Test the permissions on the command
+                if (node.condition != null) {
+                    var result = node.condition.test(sender, new CommandNode.ConditionContext(sender, CommandContext.Pass.SUGGEST));
+                    if (result == CommandCondition.HIDE) continue;
+                }
+
+                commands.add(Map.entry(argument.id(), node));
+            }
+            return commands;
+        }
+
+        @Override
+        public @NotNull Collection<Map.Entry<Argument<?>, CommandNode>> children(@NotNull CommandNode node, @NotNull CommandSender sender) {
+            if (node.children == null) return List.of();
+            var commands = new ArrayList<Map.Entry<Argument<?>, CommandNode>>();
+            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode child) : node.children) {
+
+                // Test the permissions on the command
+                if (child.condition != null) {
+                    var result = child.condition.test(sender, new CommandNode.ConditionContext(sender, CommandContext.Pass.SUGGEST));
+                    if (result == CommandCondition.HIDE) continue;
+                }
+
+                commands.add(Map.entry(argument, child));
+            }
+            return commands;
+        }
     }
 }
