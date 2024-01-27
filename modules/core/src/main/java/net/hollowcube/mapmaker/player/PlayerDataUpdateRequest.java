@@ -17,7 +17,7 @@ public class PlayerDataUpdateRequest {
     private List<String> ipHistory = null;
     private Instant lastOnline = null;
 
-    @SerializedName("settings_updates")
+    @SerializedName("settingsUpdates")
     private JsonObject settings = null;
 
     private JsonObject cosmetics = null;
