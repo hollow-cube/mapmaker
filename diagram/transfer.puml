@@ -1,0 +1,72 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant hub as "Hub Server"
+participant maps as "Map Server"
+participant proxy as "Proxy"
+participant session as "session-service"
+
+database redis as "Redis"
+queue kafka as "Kafka"
+
+title Moving between servers
+
+== Joining a Map from the Hub ==
+autonumber
+
+hub->session: joinMapV2
+session->redis: Find first map server
+note right: This is a missing implementation\nit needs to choose one based on readiness\n\
+and whether a map server already has the map\nAND if you have any friends on the map in the future
+redis->session: Map server (10.2.2.3)
+session->kafka: Send MapJoinInfo {serverId,playerId,mapId,state}
+session->hub: OK {serverId,serverAddress}
+
+hub->proxy: TransferPlayer {serverAddress}
+proxy->maps: Move Player
+
+maps->kafka: Read MapJoinInfo
+kafka->maps: MapJoinInfo {serverId,playerId,mapId,state}
+maps->session: TransferSession {serverId,playerId,presence}
+
+
+== Map to Hub ==
+autonumber
+
+maps->session: JoinHubV2
+session->redis: Find first hub server
+redis->session: Hub server (10.3.3.3)
+session->maps: OK {serverId,serverAddress}
+
+maps->proxy: TransferPlayer {serverAddress}
+proxy->hub: Move Player
+
+hub->session: TransferSession {serverId,playerId,presence}
+
+
+== Map to Map (Self) ==
+autonumber
+
+maps->session: joinMapV2
+session->redis: Find first map server
+redis->session: Map server (10.2.2.3)
+session->kafka: Send MapJoinInfo {serverId,playerId,mapId,state}
+session->maps: OK {serverId,serverAddress}
+
+alt serverId is current server
+maps->maps: Player into config state
+else serverId is different server
+hub->proxy: TransferPlayer {serverAddress}
+proxy->maps: Move Player
+end
+
+maps->kafka: Read MapJoinInfo
+kafka->maps: MapJoinInfo {serverId,playerId,mapId,state}
+maps->session: TransferSession {serverId,playerId,presence}
+
+
+== Map to Map (Other) ==
+autonumber
+
+
+@enduml

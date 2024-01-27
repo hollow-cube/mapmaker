@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant source as "Source Server"
+participant dest as "Destination Server"
+participant proxy as "Proxy"
+participant session as "session-service"
+
+database redis as "Redis"
+queue kafka as "Kafka"
+
+title Moving between servers
+
+note right of source: The server where the\nplayer will be moved FROM
+note right of dest: The server where the\nplayer will be moved TO
+
+== Accept Invite ==
+autonumber
+
+source->session: AcceptInviteOrRequest {senderId,recipientId}
+session->redis: Get invite senderId<>recipientId
+redis->session: Valid Invite
+session->kafka: MapInviteAccepted {senderId,recipientId,mapId}
+session->source: InviteData {senderId,recipientId,mapId}
+
+kafka->source: MapInviteAccepted {...}
+source->source: JoinMap (see transfer diagram)
+
+kafka->dest: MapInviteAccepted {...}
+dest->dest: Inform player invite was accepted
+
+== Accept Request ==
+autonumber
+
+dest->session: AcceptInviteOrRequest {senderId,recipientId}
+session->redis: Get request senderId<>recipientId
+redis->session: Valid Request
+session->kafka: MapRequestAccepted {senderId,recipientId,mapId}
+session->dest: InviteData {...}
+
+kafka->dest: MapRequestAccepted {...}
+dest->dest: Inform player request was accepted
+
+kafka->source: MapRequestAccepted {...}
+source->source: JoinMap (see transfer diagram)
+
+@enduml

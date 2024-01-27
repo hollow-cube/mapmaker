@@ -27,8 +27,6 @@ import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.StandaloneServer;
 import net.hollowcube.mapmaker.misc.noop.*;
-import net.hollowcube.mapmaker.mod.packet.server.HCSetCreativeItemsPacket;
-import net.hollowcube.mapmaker.mod.util.CreativeTab;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
