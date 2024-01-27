@@ -8,6 +8,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.map.biome.SetBiomeCommand;
 import net.hollowcube.map.block.InteractionRules;
 import net.hollowcube.map.block.PlacementRules;
@@ -178,7 +179,7 @@ public abstract class MapServerBase implements MapServer {
         });
 
         // Common commands
-//        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new HelpCommand(commandManager));
         commandManager.register(injector.getInstance(EmojisCommand.class));
         commandManager.register(injector.getInstance(MinestomCommand.class));
         commandManager.register(createDebugCommand());
