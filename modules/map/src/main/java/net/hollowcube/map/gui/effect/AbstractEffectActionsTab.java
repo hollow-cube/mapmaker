@@ -1,10 +1,12 @@
 package net.hollowcube.map.gui.effect;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.gui.effect.potion.PotionEffectListView;
@@ -13,6 +15,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 
@@ -36,13 +39,15 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     private @Outlet("remove_item") Label removeItemLabel;
 
     protected EffectData data;
+    protected Runnable save;
 
     protected AbstractEffectActionsTab(@NotNull Context context) {
         super(context);
     }
 
-    public void setData(@NotNull EffectData data) {
+    public void setData(@NotNull EffectData data, @UnknownNullability Runnable save) {
         this.data = data;
+        this.save = save;
 
         updateFromData();
     }
@@ -52,9 +57,9 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         // If this is the first effect go straight to the selector view
         // Otherwise open the list view
         if (data.potionEffects().isEmpty()) {
-            pushTransientView(c -> new PotionEffectSelectorView(c, data.potionEffects()));
+            pushTransientView(c -> new PotionEffectSelectorView(c, data.potionEffects(), save));
         } else {
-            pushView(c -> new PotionEffectListView(c, data.potionEffects()));
+            pushView(c -> new PotionEffectListView(c, data.potionEffects(), save));
         }
     }
 
@@ -72,6 +77,11 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     @Action("clear_effects_on")
     public void toggleClearEffectsB() {
         data.setClearPotionEffects(false);
+        updateFromData();
+    }
+
+    @Signal(Element.SIG_MOUNT)
+    public void onMount() {
         updateFromData();
     }
 

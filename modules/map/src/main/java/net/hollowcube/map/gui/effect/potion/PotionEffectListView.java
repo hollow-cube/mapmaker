@@ -18,20 +18,22 @@ public class PotionEffectListView extends View {
     private @Outlet("entries") Pagination pagination;
 
     private final PotionEffectList effectList;
+    private final Runnable save;
 
-    public PotionEffectListView(@NotNull Context context, @NotNull PotionEffectList effectList) {
+    public PotionEffectListView(@NotNull Context context, @NotNull PotionEffectList effectList, @NotNull Runnable save) {
         super(context);
         this.effectList = effectList;
+        this.save = save;
     }
 
     @Action("entries")
     public void handleBuildEntries(@NotNull Pagination.PageRequest<PotionEffectEntry> request) {
         var result = new ArrayList<PotionEffectEntry>();
         for (var type : effectList) {
-            result.add(new PotionEffectEntry(request.context(), null, type));
+            result.add(new PotionEffectEntry(request.context(), null, type, save));
         }
         if (!effectList.isFull()) {
-            result.add(new PotionEffectEntry(request.context(), effectList, null));
+            result.add(new PotionEffectEntry(request.context(), effectList, null, save));
         }
         request.respond(result, false);
     }

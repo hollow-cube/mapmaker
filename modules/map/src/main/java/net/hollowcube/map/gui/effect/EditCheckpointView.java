@@ -18,15 +18,15 @@ public class EditCheckpointView extends View {
     private @Outlet("actions") CheckpointActionsTab actionsTab;
 
     private final CheckpointEffectData data;
-    private final Runnable onClose;
+    private final Runnable save;
 
-    public EditCheckpointView(@NotNull Context context, @NotNull CheckpointEffectData data, int maxResetHeight, @NotNull Runnable onClose) {
+    public EditCheckpointView(@NotNull Context context, @NotNull CheckpointEffectData data, int maxResetHeight, @NotNull Runnable save) {
         super(context);
         this.data = data;
-        this.onClose = onClose;
+        this.save = save;
 
         settingsTab.setData(data, maxResetHeight);
-        actionsTab.setData(data);
+        actionsTab.setData(data, save);
     }
 
     @Action("tab_settings")
@@ -41,7 +41,7 @@ public class EditCheckpointView extends View {
 
     @Signal(Element.SIG_CLOSE)
     public void onClose() {
-        if (this.onClose != null) this.onClose.run();
+        if (this.save != null) this.save.run();
     }
 
 }

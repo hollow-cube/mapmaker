@@ -1,5 +1,6 @@
 package net.hollowcube.map.gui.effect.potion;
 
+import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
@@ -18,10 +19,12 @@ public class PotionEffectEditorView extends View {
     private @Outlet("time_edit") Label timeEditLabel;
 
     private final PotionEffectList.Entry effect;
+    private final Runnable save;
 
-    public PotionEffectEditorView(@NotNull Context context, @NotNull PotionEffectList.Entry effect) {
+    public PotionEffectEditorView(@NotNull Context context, @NotNull PotionEffectList.Entry effect, @NotNull Runnable save) {
         super(context);
         this.effect = effect;
+        this.save = save;
 
         //noinspection deprecation
         headerLabel.setItemDirect(effect.type().icon());
@@ -34,13 +37,13 @@ public class PotionEffectEditorView extends View {
 
         if (effect.type().maxLevel() > 1 && effect.type().maxLevel() <= 5) {
             for (int i = 1; i <= 5; i++) {
-                result.add(new PotionEffectLevelEntry(request.context(), effect, i));
+                result.add(new PotionEffectLevelEntry(request.context(), effect, i, save));
             }
         } else if (effect.type().maxLevel() > 4) {
             for (int i = 1; i <= 4; i++) {
-                result.add(new PotionEffectLevelEntry(request.context(), effect, i));
+                result.add(new PotionEffectLevelEntry(request.context(), effect, i, save));
             }
-            result.add(new PotionEffectLevelEntry(request.context(), effect, -1));
+            result.add(new PotionEffectLevelEntry(request.context(), effect, -1, save));
         } else {
             // cant be edited, probably should have some empty switch for this
         }
@@ -85,6 +88,7 @@ public class PotionEffectEditorView extends View {
             var newDuration = (int) (Double.parseDouble(input) * 1000.0);
             effect.setDuration(Math.max(0, newDuration));
             updateFromEffect();
+            save.run();
         } catch (NumberFormatException ignored) {
         }
     }
@@ -92,10 +96,16 @@ public class PotionEffectEditorView extends View {
     private void adjustDuration(int change) {
         effect.setDuration(Math.max(0, effect.duration() + change));
         updateFromEffect();
+        save.run();
     }
 
     private void updateFromEffect() {
         timeEditLabel.setArgs(effect.durationComponent());
+    }
+
+    @Signal(Element.SIG_CLOSE)
+    public void onClose() {
+        save.run();
     }
 
 }

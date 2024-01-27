@@ -24,11 +24,13 @@ public class PotionEffectEntry extends View {
 
     private final PotionEffectList effectList;
     private final PotionEffectList.Entry effect;
+    private final Runnable save;
 
-    public PotionEffectEntry(@NotNull Context context, @Nullable PotionEffectList effectList, @Nullable PotionEffectList.Entry effect) {
+    public PotionEffectEntry(@NotNull Context context, @Nullable PotionEffectList effectList, @Nullable PotionEffectList.Entry effect, @NotNull Runnable save) {
         super(context);
         this.effectList = effectList;
         this.effect = effect;
+        this.save = save;
 
         root.setOption(effect == null ? 1 : 0);
         if (effect != null) {
@@ -43,15 +45,16 @@ public class PotionEffectEntry extends View {
     public void handleEdit(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (effect == null) return;
         if (clickType == ClickType.LEFT_CLICK) {
-            pushView(c -> new PotionEffectEditorView(c, effect));
+            pushView(c -> new PotionEffectEditorView(c, effect, save));
         } else if (clickType == ClickType.RIGHT_CLICK) {
             performSignal(SIG_REMOVE, effect.type());
+            save.run();
         }
     }
 
     @Action("add")
     public void handleAdd(@NotNull Player player) {
-        pushTransientView(c -> new PotionEffectSelectorView(c, effectList));
+        pushTransientView(c -> new PotionEffectSelectorView(c, effectList, save));
     }
 
 }

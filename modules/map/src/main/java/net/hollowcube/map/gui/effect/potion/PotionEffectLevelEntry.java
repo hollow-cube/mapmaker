@@ -9,10 +9,14 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PotionEffectLevelEntry extends View {
     public static final String SIG_UPDATE = "potion_level.update";
@@ -24,11 +28,22 @@ public class PotionEffectLevelEntry extends View {
 
     private final PotionEffectList.Entry effect;
     private final int level;
+    private final Runnable save;
 
-    public PotionEffectLevelEntry(@NotNull Context context, @NotNull PotionEffectList.Entry effect, int level) {
+    public PotionEffectLevelEntry(@NotNull Context context, @NotNull PotionEffectList.Entry effect, int level, @NotNull Runnable save) {
         super(context);
         this.effect = effect;
         this.level = level;
+        this.save = save;
+
+        if (level != -1) {
+            var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("effect/potion/level/" + level), "effect/potion/level/" + level);
+            var item = ItemStack.builder(Material.DIAMOND)
+                    .meta(m -> m.customModelData(sprite.cmd()))
+                    .build();
+            selectLabel.setItemSprite(item);
+            selectSelectedLabel.setItemSprite(item);
+        }
 
         updateFromEffect();
     }
@@ -39,6 +54,7 @@ public class PotionEffectLevelEntry extends View {
 
         effect.setLevel(level);
         performSignal(SIG_UPDATE);
+        save.run();
     }
 
     @Action("set_custom")
@@ -60,6 +76,7 @@ public class PotionEffectLevelEntry extends View {
             if (level < 1 || level > effect.type().maxLevel()) return;
             effect.setLevel(level);
             performSignal(SIG_UPDATE);
+            save.run();
         } catch (NumberFormatException ignored) {
 
         }

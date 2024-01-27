@@ -1,9 +1,9 @@
 <component width="1" height="1" align="ltr">
     <switch id="root">
         <button id="select" translationKey="gui.effect.potion.level"
-                sprite="effect/potion/level/one" backgroundSprite="effect/potion/level/background_off"/>
+                sprite="effect/potion/level/1" backgroundSprite="effect/potion/level/background_off"/>
         <button id="select_selected" translationKey="gui.effect.potion.level.selected"
-                sprite="effect/potion/level/one" backgroundSprite="effect/potion/level/background_on"/>
+                sprite="effect/potion/level/1" backgroundSprite="effect/potion/level/background_on"/>
         <button id="set_custom" translationKey="gui.effect.potion.level.custom"
                 sprite="effect/potion/level/extra" backgroundSprite="effect/potion/level/background_off"/>
         <button id="set_custom_selected" translationKey="gui.effect.potion.level.custom.selected"

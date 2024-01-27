@@ -12,10 +12,12 @@ import java.util.ArrayList;
 
 public class PotionEffectSelectorView extends View {
     private final PotionEffectList potionList;
+    private final Runnable save;
 
-    public PotionEffectSelectorView(@NotNull Context context, @NotNull PotionEffectList potionList) {
+    public PotionEffectSelectorView(@NotNull Context context, @NotNull PotionEffectList potionList, @NotNull Runnable save) {
         super(context);
         this.potionList = potionList;
+        this.save = save;
     }
 
     @Action("entries")
@@ -23,7 +25,7 @@ public class PotionEffectSelectorView extends View {
         var result = new ArrayList<PotionEffectTypeEntry>();
         for (var type : PotionInfo.sortedValues()) {
             if (potionList.has(type)) continue;
-            result.add(new PotionEffectTypeEntry(request.context(), potionList, type));
+            result.add(new PotionEffectTypeEntry(request.context(), potionList, type, save));
         }
         request.respond(result, false);
     }

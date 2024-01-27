@@ -24,7 +24,7 @@ public class EditStatusView extends View {
         this.onClose = onClose;
 
         settingsTab.setData(data, maxResetHeight);
-        actionsTab.setData(data);
+        actionsTab.setData(data, onClose);
     }
 
     @Action("tab_settings")

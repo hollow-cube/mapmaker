@@ -15,11 +15,13 @@ public class PotionEffectTypeEntry extends View {
 
     private final PotionEffectList potionList;
     private final PotionInfo type;
+    private final Runnable save;
 
-    public PotionEffectTypeEntry(@NotNull Context context, @NotNull PotionEffectList potionList, @NotNull PotionInfo type) {
+    public PotionEffectTypeEntry(@NotNull Context context, @NotNull PotionEffectList potionList, @NotNull PotionInfo type, @NotNull Runnable save) {
         super(context);
         this.potionList = potionList;
         this.type = type;
+        this.save = save;
 
         //noinspection deprecation
         selectLabel.setItemDirect(type.icon());
@@ -27,6 +29,7 @@ public class PotionEffectTypeEntry extends View {
 
     @Action("select")
     public void handleSelectEffect(@NotNull Player player) {
-        pushView(c -> new PotionEffectEditorView(c, potionList.getOrCreate(type)));
+        save.run();
+        pushView(c -> new PotionEffectEditorView(c, potionList.getOrCreate(type), save));
     }
 }
