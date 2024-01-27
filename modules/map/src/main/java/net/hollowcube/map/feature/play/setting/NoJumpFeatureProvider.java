@@ -38,7 +38,7 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!MapHooks.isPlayerPlaying(player)) return;
 
-        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Integer.MAX_VALUE));
+        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Potion.INFINITE_DURATION));
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {

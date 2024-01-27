@@ -23,6 +23,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -334,6 +335,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.teleport(world.map().settings().getSpawnPoint()).thenRun(() -> {
             updatePlayerFromState(player, newPlayState);
             player.setTag(MapHooks.PLAYING, true);
+
+            EventDispatcher.call(new MapPlayerInitEvent(world, player, true));
         });
     }
 
@@ -373,7 +376,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
         // Apply the current state to the player and teleport them
         updatePlayerFromState(player, playState);
-        player.teleport(playState.pos().orElseThrow()).thenRun(() -> player.setTag(MapHooks.PLAYING, true));
+        player.teleport(playState.pos().orElseThrow()).thenRun(() -> {
+            player.setTag(MapHooks.PLAYING, true);
+
+            var world = MapWorld.forPlayer(player);
+            EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+        });
     }
 
     private void updateBaseEffectState(@NotNull Player player, @NotNull BaseEffectData data, @NotNull SaveState.PlayState state) {
