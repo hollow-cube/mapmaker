@@ -45,7 +45,7 @@ public record DisplayName(
                 case "username" -> {
                     //todo get colors from placeholder file
                     var color = TextColor.color(0xB0B0B0);
-                    if (part.color != null) color = TextColor.fromCSSHexString(part.color);
+                    if (part.color != null && part.color.isEmpty()) color = TextColor.fromCSSHexString(part.color);
                     builder.append(Component.text(part.text, color));
                 }
                 case "badge" -> {
