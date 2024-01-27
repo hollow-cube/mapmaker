@@ -440,7 +440,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             if (entry == null) continue;
 
             // Potion is valid, update the time remaining
-            entry.setDuration((int) (potion.duration() - (now - timedPotion.getStartingTime())));
+            entry.setDuration(Math.max(0, (int) (potion.duration() - (now - timedPotion.getStartingTime()))));
         }
     }
 
