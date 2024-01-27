@@ -2,23 +2,28 @@
 <?import net.hollowcube.map.gui.effect ?>
 <component width="9" height="4" align="ttb">
 
-    <box width="9" align="ltr">
-        <text id="name_text" width="7" font="line_1"
+    <box width="9" align="ltr" sprite="effect/settings/header">
+        <text id="name_text" width="6" font="line_1" shift="19"
               translationKey="gui.effect.name"/>
-        <text id="progress_index_text" width="2" font="line_1"
+        <text id="progress_index_text" width="3" font="line_1" centered="true"
               translationKey="gui.effect.progress_index"/>
     </box>
 
     <box width="9" height="3" align="ltr">
-        <button id="repeatable" width="3" height="3"
-                translationKey="gui.status.repeatable"
-                sprite="minecraft:comparator"/>
+        <switch id="repeatable_switch" width="3" height="3">
+            <button id="repeatable_off" width="3" height="3"
+                    translationKey="gui.status.repeatable"
+                    sprite="effect/status/repeatable_off"/>
+            <button id="repeatable_on" width="3" height="3"
+                    translationKey="gui.status.repeatable"
+                    sprite="effect/status/repeatable_on"/>
+        </switch>
         <button id="time_limit" width="3" height="3"
                 translationKey="gui.effect.time_limit"
-                sprite="minecraft:clock"/>
+                sprite="effect/settings/time_limit"/>
         <button id="reset_height" width="3" height="3"
                 translationKey="gui.effect.reset_height"
-                sprite="minecraft:iron_boots"/>
+                sprite="effect/settings/reset_height"/>
     </box>
 
 </component>

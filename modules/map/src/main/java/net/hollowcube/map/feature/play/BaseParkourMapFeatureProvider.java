@@ -329,6 +329,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var newPlayState = new SaveState.PlayState();
         saveState.setPlayState(newPlayState);
 
+        player.removeTag(SPECTATOR_CHECKPOINT);
         player.removeTag(COUNTDOWN_END);
 
         var world = MapWorld.forPlayer(player);
@@ -347,6 +348,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
      */
     public void softReset(@NotNull Player player, @NotNull SaveState saveState) {
         if (saveState.isCompleted()) return;
+
+        // If they have a spectator checkpoint return to that always.
+        var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+        if (checkpoint != null) {
+            player.teleport(checkpoint);
+            return;
+        }
 
         var playState = saveState.playState();
         // If they don't have a checkpoint or are on their last life, do a hard reset.

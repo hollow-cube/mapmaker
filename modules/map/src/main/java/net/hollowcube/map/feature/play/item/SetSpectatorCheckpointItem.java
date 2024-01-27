@@ -1,8 +1,11 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.util.GenericTempActionBarProvider;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +40,18 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
+        if (player.isSneaking()) {
+            player.removeTag(SPECTATOR_CHECKPOINT);
+            sendActionBar(player, "Cleared temporary checkpoint!");
+        } else {
+            player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
+            sendActionBar(player, "Added temporary checkpoint!");
+        }
     }
+
+    private void sendActionBar(@NotNull Player player, @NotNull String message) {
+        var ab = ActionBar.forPlayer(player);
+        ab.addProvider(new GenericTempActionBarProvider(message, 1000L));
+    }
+
 }

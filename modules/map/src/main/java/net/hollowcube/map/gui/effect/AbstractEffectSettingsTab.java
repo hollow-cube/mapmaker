@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.MathUtils;
@@ -119,7 +120,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     protected void updateFromData() {
         if (data.hasName()) {
-            progressIndexText.setArgs(Component.text(data.displayName()));
+            nameText.setArgs(Component.text(data.displayName()));
             nameText.setText(data.displayName());
         } else {
             nameText.setArgs(Component.translatable("gui.effect.name.none"));
@@ -137,7 +138,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
         resetHeightLabel.setArgs(data.resetHeight() == BaseEffectData.NO_RESET_HEIGHT ?
                 Component.translatable("gui.effect.reset_height.none") : Component.text(data.resetHeight()));
         timeLimitLabel.setArgs(data.timeLimit() == BaseEffectData.NO_TIME_LIMIT ?
-                Component.translatable("gui.effect.time_limit.none") : Component.text(data.timeLimit()));
+                Component.translatable("gui.effect.time_limit.none") : Component.text(NumberUtil.formatDuration(data.timeLimit())));
     }
 
 }

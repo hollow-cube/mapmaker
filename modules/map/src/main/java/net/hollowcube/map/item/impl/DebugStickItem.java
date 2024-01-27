@@ -2,10 +2,9 @@ package net.hollowcube.map.item.impl;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -131,41 +130,7 @@ public class DebugStickItem extends ItemHandler {
 
     private void sendActionBar(@NotNull Player player, @NotNull String message) {
         var ab = ActionBar.forPlayer(player);
-        ab.addProvider(new ActionBarProvider(message));
-    }
-
-    private static final class ActionBarProvider implements ActionBar.Provider {
-        private final long expiration = System.currentTimeMillis() + 1000;
-        private final String message;
-        private final int width;
-
-        private ActionBarProvider(@NotNull String message) {
-            this.message = message;
-            this.width = FontUtil.measureText(message);
-        }
-
-        @Override
-        public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-            builder.pos((-width / 2) - 1);
-            builder.append(message);
-        }
-
-        @Override
-        public long expiration() {
-            return expiration;
-        }
-
-        // Always hash and equal any instance of this class, so if we set another it will replace the old one always.
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof ActionBarProvider;
-        }
-
-        @Override
-        public int hashCode() {
-            return DebugStickItem.class.hashCode();
-        }
+        ab.addProvider(new GenericTempActionBarProvider(message, 1000L));
     }
 
 }

@@ -56,7 +56,7 @@ public record PotionInfo(
     public static final PotionInfo DEPTH_STRIDER = builder("depth_strider").maxLevel(3).setVanillaEffect(PotionEffect.BAD_OMEN).setIcon(Material.PRISMARINE_SHARD).setHandler(new DepthStriderPotionHandler()).build();
     public static final PotionInfo LEVITATION = builder("levitation").maxLevel(255).setVanillaEffect(PotionEffect.LEVITATION).setIcon(Material.CHAINMAIL_BOOTS).build();
     public static final PotionInfo SLOW_FALL = builder("slow_fall").setVanillaEffect(PotionEffect.SLOW_FALLING).setIcon(Material.FEATHER).build();
-    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon(Material.ANVIL).build();
+    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon(Material.ANVIL).setHandler(new SlownessPotionHandler()).build();
     public static final PotionInfo BLINDNESS = builder("blindness").maxLevel(255).setVanillaEffect(PotionEffect.BLINDNESS).setIcon(Material.SPIDER_EYE).build();
     public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon(Material.BLACK_WOOL).build();
     public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon(Material.CHICKEN).build();

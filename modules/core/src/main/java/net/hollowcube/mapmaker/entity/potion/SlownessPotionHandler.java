@@ -8,13 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-class SpeedPotionHandler implements PotionHandler {
-    private static final UUID MODIFIER_ID = UUID.fromString("91AEAA56-376B-4498-935B-2F7F68070635");
+class SlownessPotionHandler implements PotionHandler {
+    private static final UUID MODIFIER_ID = UUID.fromString("7107DE5E-7CE8-4030-940E-514C1F160890");
 
     @Override
     public void apply(@NotNull Player player, int level) {
-        var modifier = new AttributeModifier(MODIFIER_ID, "speed_potion",
-                0.2 * (level + 1), AttributeOperation.MULTIPLY_TOTAL);
+        var modifier = new AttributeModifier(MODIFIER_ID, "slowness_potion",
+                -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL);
         player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(modifier);
     }
 

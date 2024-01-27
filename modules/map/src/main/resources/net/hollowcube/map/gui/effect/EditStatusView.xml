@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.map.gui.effect ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="effect/checkpoint/container">
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
@@ -9,18 +9,16 @@
 
         <spacer width="5"/>
 
-        <button translationKey="gui.status.executor"
-                sprite="minecraft:nether_star"/>
-        <button id="pick_up" translationKey="gui.status.pick_up"
-                sprite="minecraft:minecart"/>
+        <button translationKey="gui.checkpoint.executor"
+                sprite="effect/executor_menu"/>
+        <button id="pick_up" translationKey="gui.checkpoint.pick_up"
+                sprite="effect/pick_up"/>
     </box>
 
     <switch id="tab_switch" width="9" height="4">
         <StatusSettingsTab id="settings"/>
         <StatusActionsTab id="actions"/>
     </switch>
-
-    <spacer width="9" height="2"/>
 
     <!-- Tab Buttons -->
     <box width="9" height="1" align="ltr">

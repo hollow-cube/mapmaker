@@ -49,12 +49,7 @@ public class ExitSpectatorModeItem extends ItemHandler {
                 playingWorld.removePlayer(player, false);
                 playingWorld.acceptPlayer(player, true);
                 if (world.map().settings().isOnlySprint()) {
-                    var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
-                    if (checkpoint != null) {
-                        player.teleport(checkpoint);
-                    } else {
-                        EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
-                    }
+                    EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
                     player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
                 }
                 player.removeTag(SPECTATOR_CHECKPOINT);

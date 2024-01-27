@@ -65,6 +65,39 @@ public final class NumberUtil {
         return result.toString();
     }
 
+    public static @NotNull String formatDuration(long time) {
+        var result = new StringBuilder();
+        var days = time / 86400000;
+        if (days > 0) {
+            result.append(days).append("d ");
+            time %= 86400000;
+        }
+
+        var hours = time / 3600000;
+        if (hours > 0) {
+            result.append(hours).append("h ");
+            time %= 3600000;
+        }
+
+        var minutes = time / 60000;
+        if (minutes > 0) {
+            result.append(minutes).append("m");
+            time %= 60000;
+        }
+
+        var seconds = time / 1000.0;
+        if (seconds > 0) {
+            result.append(String.format("%.2f", seconds)).append("s");
+        }
+
+        if (result.isEmpty()) {
+            // Less than 1s
+            return "0s";
+        }
+
+        return result.toString();
+    }
+
     private NumberUtil() {
     }
 }

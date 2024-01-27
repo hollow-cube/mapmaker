@@ -12,8 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
-
 public class ReturnToCheckpointItem extends ItemHandler {
 
     public static final String ID = "mapmaker:return_to_checkpoint";
@@ -38,15 +36,9 @@ public class ReturnToCheckpointItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-
-        var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
-        if (checkpoint != null) {
-            player.teleport(checkpoint);
-        } else {
-            var world = MapWorld.forPlayerOptional(player);
-            if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
-                EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
-            }
+        var world = MapWorld.forPlayerOptional(player);
+        if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
+            EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
         }
     }
 
