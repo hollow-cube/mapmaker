@@ -1,16 +1,11 @@
 package net.hollowcube.mapmaker.invite;
 
-import net.hollowcube.mapmaker.bridge.ServerBridge;
-import net.hollowcube.mapmaker.bridge.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.player.SessionService;
-import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -30,19 +25,14 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final String url;
     private final MapService mapService;
     private final PlayerService playerService;
-    private final SessionService sessionService;
     private final SessionManager sessionManager;
-    private final ServerBridge serverBridge;
 
-    public PlayerInviteServiceImpl(String url, MapService mapService, PlayerService playerService,
-                                   SessionService sessionService, SessionManager sessionManager,
-                                   ServerBridge serverBridge) {
+    public PlayerInviteServiceImpl(@NotNull String url, @NotNull MapService mapService,
+                                   @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
         this.url = String.format("%s/v2/internal/invites", url);
         this.mapService = mapService;
         this.playerService = playerService;
-        this.sessionService = sessionService;
         this.sessionManager = sessionManager;
-        this.serverBridge = serverBridge;
     }
 
     @Override
@@ -157,13 +147,11 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var targetDisplayName = this.playerService.getPlayerDisplayName2(invite.recipientId());
+                var inviteTargetId = isInvite ? invite.recipientId() : invite.senderId();
+                var targetDisplayName = this.playerService.getPlayerDisplayName2(inviteTargetId);
+
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
                 sender.sendMessage(Component.translatable(translateString, targetDisplayName, Component.text(inviteMap.name())));
-
-                if (accept) {
-                    this.joinMap(sender, invite.senderId(), inviteMap, isInvite);
-                }
             }
             case 400 -> {
                 InviteError error = GSON.fromJson(response.body(), InviteError.class);
@@ -173,32 +161,8 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
     }
 
-    private MapData getCurrentMap(@NotNull Player player) {
+    private @Nullable MapData getCurrentMap(@NotNull Player player) {
         return MiscFunctionality.getCurrentMap(this.sessionManager, this.mapService, player);
-    }
-
-    private void joinMap(@NotNull Player sender, @NotNull String requestSenderId, @NotNull MapData map, boolean isInvite) {
-        if (isInvite) {
-            this.joinSenderToTargetMap(sender, map);
-        } else {
-            // For requests, we use the invite sender's ID, different from the sender of the accept's ID
-            this.joinTargetToSenderMap(sender, requestSenderId, map);
-        }
-    }
-
-    private void joinSenderToTargetMap(@NotNull Player sender, @NotNull MapData map) {
-        this.serverBridge.joinMap(sender, map.id(), map.isPublished() ? JoinMapState.PLAYING : JoinMapState.EDITING);
-    }
-
-    private void joinTargetToSenderMap(@NotNull Player sender, @NotNull String requestSenderId, @NotNull MapData map) {
-        var presence = map.isPublished() ? MapPresence.STATE_PLAYING : MapPresence.STATE_EDITING;
-        var response = this.sessionService.joinMapV2(new JoinMapRequest(requestSenderId, map.id(), presence));
-
-        TransferOtherRequest request = new TransferOtherRequest(UUID.fromString(requestSenderId), response.serverClusterIp());
-        sender.sendPluginMessage("mapmaker:transfer_other", GSON.toJson(request).getBytes());
-    }
-
-    private record TransferOtherRequest(@NotNull UUID targetPlayerId, @NotNull String serverName) {
     }
 
     private static void processAcceptOrRejectError(@NotNull InviteError error, @NotNull Player sender, String acceptReject) {
@@ -221,7 +185,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         return player.getUuid().equals(UUID.fromString(map.owner()));
     }
 
-    private record InviteError(int errorCode, String errorText) {
+    private record InviteError(int errorCode, @NotNull String errorText) {
     }
 
     private static final class ErrorCodes {

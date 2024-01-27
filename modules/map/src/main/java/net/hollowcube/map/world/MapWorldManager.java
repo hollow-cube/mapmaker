@@ -1,5 +1,6 @@
 package net.hollowcube.map.world;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.MapServer;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
@@ -9,9 +10,15 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.message.Messenger;
+import net.minestom.server.network.packet.server.common.TagsPacket;
+import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -55,6 +62,10 @@ public class MapWorldManager {
         return activeMaps;
     }
 
+    public boolean hasMap(@NotNull String mapId, boolean editing) {
+        return activeMaps.containsKey(new InstanceId(mapId, editing));
+    }
+
     @Blocking
     public @NotNull Future<InternalMapWorld> getOrCreateMapWorld(@NotNull MapData map, ServerBridge.JoinMapState state) {
         boolean isEditing = state == HubToMapBridge.JoinMapState.EDITING;
@@ -74,18 +85,7 @@ public class MapWorldManager {
     }
 
     public @Blocking void joinMap(@NotNull Player player, @NotNull MapData map, HubToMapBridge.JoinMapState joinMapState) {
-        boolean isEditing = joinMapState == HubToMapBridge.JoinMapState.EDITING;
-        var activeWorld = activeMaps.get(new InstanceId(map.id(), isEditing));
-
-        // Create a new world if there is not one present
-        if (activeWorld == null) {
-            var world = isEditing ? new EditingMapWorld(server, map) : new PlayingMapWorld(server, map);
-            activeWorld = VIRTUAL_EXECUTOR.submit(() -> {
-                world.load();
-                return world;
-            });
-            activeMaps.put(new InstanceId(map.id(), isEditing), activeWorld);
-        }
+        var activeWorld = getOrCreateMapWorld(map, joinMapState);
 
         // Spawn player in world with loading screen (todo this should be blindness + stop player from moving i guess)
         try {
@@ -97,7 +97,6 @@ public class MapWorldManager {
 
             player.setTag(MapHooks.TARGET_WORLD, activeWorld);
             player.startConfigurationPhase();
-
 
 //            var world = activeWorld.get(); // wait for the world to load
 //

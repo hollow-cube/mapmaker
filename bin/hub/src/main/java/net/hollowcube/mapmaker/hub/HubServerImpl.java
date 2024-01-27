@@ -139,16 +139,16 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         // Has to go here to ensure the session manager and bridge initialised.
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null) {
-            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionService, sessionManager, bridge);
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionManager);
         } else if (noopServices) {
             this.inviteService = new NoopPlayerInviteService();
         } else {
-            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionService, sessionManager, bridge); // tilt
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionManager); // tilt
         }
 
         if (!noopServices) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
         }
 
         var packetListenerManager = MinecraftServer.getPacketListenerManager();

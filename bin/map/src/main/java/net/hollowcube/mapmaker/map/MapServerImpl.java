@@ -72,7 +72,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
     private static final long SHUTDOWN_MAX_WAIT_MILLIS = 10 * 1000; // 10 seconds
 
-    private static final Tag<MapJoinInfo> JOIN_INFO_TAG = Tag.Transient("mapmaker:join_info");
+//    private static final Tag<MapJoinInfo> JOIN_INFO_TAG = Tag.Transient("mapmaker:join_info");
     private static final Tag<MapWorld> TARGET_WORLD_TAG = Tag.Transient("mapmaker:target_world");
 
     private PlayerService playerService;
@@ -159,16 +159,16 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         // Has to go here to ensure the session manager and bridge are initialised.
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null) {
-            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionService, sessionManager, bridge);
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, mapService, playerService, sessionManager);
         } else if (noopServices) {
             this.inviteService = new NoopPlayerInviteService();
         } else {
-            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionService, sessionManager, bridge); // tilt
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", mapService, playerService, sessionManager); // tilt
         }
 
         if (!noopServices) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
         }
 
         if (!noopServices) {
@@ -183,7 +183,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         // Standalone hub specific events
         EVENT_HANDLER
-                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
+//                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handlePlayerDisconnect)
@@ -306,58 +306,33 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         return pendingJoin;
     }
 
-    private void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
-        var player = event.getPlayer();
-        var playerId = player.getUuid().toString();
-
-        try {
-            var joinInfo = FutureUtil.getUnchecked(getPendingJoin(playerId, false));
-            if (joinInfo == null) {
-                logger.error("timed out waiting for join info for {}", playerId);
-                player.kick(Component.text("Failed to join. Please try again later."));
-                return;
-            }
-
-            logger.info("got join info for {}: {}", playerId, joinInfo);
-            player.setTag(JOIN_INFO_TAG, joinInfo);
-            var transferReq = new SessionTransferRequest(
-                    AbstractHttpService.hostname,
-                    Presence.TYPE_MAPMAKER_MAP,
-                    joinInfo.state(),
-                    joinInfo.mapId()
-            );
-            var playerData = sessionService.transferSessionV2(player.getUuid().toString(), transferReq);
-            player.setTag(PlayerDataV2.TAG, playerData);
-
-            var mapPlayerData = mapService.getMapPlayerData(playerData.id());
-            player.setTag(MapPlayerData.TAG, mapPlayerData);
-            logger.info("loaded map player data: {}", mapPlayerData);
-
-
-//        } catch (SessionService.UnauthorizedError ignored) {
-//            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
-//                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
-//                    .append(Component.text(" for more information.")));
-        } catch (Exception e) {
-            logger.error("failed to transfer session", e);
-            player.kick(Component.text("Failed to login. Please try again later."));
-        }
-    }
-
     private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
+        var playerId = player.getUuid().toString();
 
         // Apply the resource pack, making sure not to continue if apply fails.
         ResourcePackManager.sendResourcePack(player).join();
         if (!player.isOnline()) return;
 
-        var joinInfo = player.getTag(JOIN_INFO_TAG);
+        var joinInfo = FutureUtil.getUnchecked(getPendingJoin(playerId, false));
         if (joinInfo == null) {
-            logger.error("missing join info for {}", event.getPlayer().getUuid());
+            logger.error("timed out waiting for join info for {}", playerId);
             player.kick(Component.text("Failed to join. Please try again later."));
             return;
         }
-        player.removeTag(JOIN_INFO_TAG);
+
+        var transferReq = new SessionTransferRequest(
+                AbstractHttpService.hostname,
+                Presence.TYPE_MAPMAKER_MAP,
+                joinInfo.state(),
+                joinInfo.mapId()
+        );
+        var playerData = sessionService.transferSessionV2(player.getUuid().toString(), transferReq);
+        player.setTag(PlayerDataV2.TAG, playerData);
+
+        var mapPlayerData = mapService.getMapPlayerData(playerData.id());
+        player.setTag(MapPlayerData.TAG, mapPlayerData);
+        logger.info("loaded map player data: {}", mapPlayerData);
 
         // Create the world, holding the player here until it is ready for them to join.
         var map = mapService.getMap(joinInfo.playerId(), joinInfo.mapId());
