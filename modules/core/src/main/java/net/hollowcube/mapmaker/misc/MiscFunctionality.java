@@ -51,12 +51,13 @@ public final class MiscFunctionality {
 
     public static void assignTeam(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
-        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
-            case "dev_3", "mod_3", "ct_3" -> CoreTeams.RED;
-            case "dev_2", "mod_2", "ct_2" -> CoreTeams.CYAN;
-            case "dev_1", "mod_1", "ct_1" -> CoreTeams.GREEN;
-            case null, default -> CoreTeams.DEFAULT;
-        });
+        player.setTeam(CoreTeams.DEFAULT);
+//        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
+//            case "dev_3", "mod_3", "ct_3" -> CoreTeams.RED;
+//            case "dev_2", "mod_2", "ct_2" -> CoreTeams.CYAN;
+//            case "dev_1", "mod_1", "ct_1" -> CoreTeams.GREEN;
+//            case null, default -> CoreTeams.DEFAULT;
+//        });
     }
 
     public static void broadcastTabList(@NotNull Audience audience, int onlinePlayers) {

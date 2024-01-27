@@ -408,7 +408,7 @@ public class DevServer {
 
         var targetWorld = player.getTag(MapHooks.TARGET_WORLD);
         if (targetWorld != null) {
-            player.setDisplayName(playerData.displayName()); //todo this is a Minestom bug, the display name needs to be re-sent automatically.
+            player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST)); //todo this is a Minestom bug, the display name needs to be re-sent automatically.
             MiscFunctionality.broadcastTabList(Audiences.all());
 
             var imw = FutureUtil.getUnchecked(targetWorld);
@@ -426,7 +426,7 @@ public class DevServer {
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(MiscFunctionality::buildExperienceBar);
 
-        player.setDisplayName(playerData.displayName());
+        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST));
         Emoji.sendTabCompletions(player);
         MiscFunctionality.broadcastTabList(Audiences.all());
 

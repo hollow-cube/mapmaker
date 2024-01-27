@@ -22,7 +22,9 @@ public record DisplayName(
 
     public enum Context {
         DEFAULT,
-        PLAIN
+        PLAIN,
+        // Like DEFAULT, but includes an ordering character before the badge
+        TAB_LIST
     }
 
     public DisplayName {
@@ -50,6 +52,16 @@ public record DisplayName(
                 }
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
+
+                    if (context == Context.TAB_LIST) {
+                        builder.append(Component.text(switch (part.text) {
+                            case "dev_3", "mod_3", "ct_3" -> '\uF830';
+                            case "dev_2", "mod_2", "ct_2" -> '\uF831';
+                            case "dev_1", "mod_1", "ct_1" -> '\uF832';
+                            case null, default -> '\uF833';
+                        }));
+                    }
+
                     var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("icon/staff/" + part.text), "unknown badge sprite " + part.text);
                     builder.append(Component.text(sprite.fontChar() + FontUtil.computeOffset(1), FontUtil.NO_SHADOW)
                             .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));

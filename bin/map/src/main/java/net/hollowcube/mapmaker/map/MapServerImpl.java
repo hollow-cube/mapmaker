@@ -396,7 +396,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         // Player init
-        player.setDisplayName(playerData.displayName());
+        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST));
         MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
