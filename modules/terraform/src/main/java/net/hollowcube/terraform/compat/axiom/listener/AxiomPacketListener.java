@@ -6,6 +6,10 @@ import net.hollowcube.terraform.compat.axiom.packet.server.AxiomAckWorldProperty
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomChunkDataResponsePacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
 import net.hollowcube.terraform.compat.axiom.world.property.WorldPropertiesRegistry;
+import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
+import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
+import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
+import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -20,6 +24,7 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
@@ -162,7 +167,6 @@ public final class AxiomPacketListener {
 
     public void handleSpawnEntities(@NotNull Player player, @NotNull AxiomClientSpawnEntitiesPacket packet) {
         if (!Axiom.isEnabled(player)) return;
-        logger.debug("Received axiom spawn entities ({}) from {}", packet.entries().size(), player.getUuid());
 
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
@@ -175,12 +179,15 @@ public final class AxiomPacketListener {
                 var entityType = EntityType.fromNamespaceId(entityTypeName);
                 if (entityType == null) throw new NullPointerException("unknown entity type: " + entityTypeName);
 
-                var entity = new Entity(entityType, UUID.randomUUID()) {{
-                    setNoGravity(true);
-                    hasPhysics = false;
-                }};
+                var preEvent = new TerraformPreSpawnEntityEvent(player, instance);
+                EventDispatcher.call(preEvent);
+                if (preEvent.isCancelled()) continue;
+
+                var entity = preEvent.getConstructor().apply(entityType, UUID.randomUUID());
                 applyEntityMetadataFromNbt(entity.getEntityMeta(), nbt);
-                entity.setInstance(instance, entry.pos());
+
+                var event = new TerraformSpawnEntityEvent(player, instance, entity, entry.pos());
+                EventDispatcher.callCancellable(event, () -> event.getEntity().setInstance(instance, event.getPosition()));
 
                 //todo handle passengers
             } catch (Exception e) {
@@ -192,7 +199,6 @@ public final class AxiomPacketListener {
 
     public void handleModifyEntities(@NotNull Player player, @NotNull AxiomClientModifyEntitiesPacket packet) {
         if (!Axiom.isEnabled(player)) return;
-        logger.debug("Received axiom modify entities ({}) from {}", packet.entries().size(), player.getUuid());
 
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
@@ -210,12 +216,13 @@ public final class AxiomPacketListener {
                 var newZ = (entry.flags() & AxiomClientModifyEntitiesPacket.FLAG_Z) != 0 ? entity.getPosition().z() + entryPos.z() : entryPos.z();
                 var newYaw = (entry.flags() & AxiomClientModifyEntitiesPacket.FLAG_YAW) != 0 ? entity.getPosition().yaw() + entryPos.yaw() : entryPos.yaw();
                 var newPitch = (entry.flags() & AxiomClientModifyEntitiesPacket.FLAG_PITCH) != 0 ? entity.getPosition().pitch() + entryPos.pitch() : entryPos.pitch();
-                entity.teleport(new Pos(newX, newY, newZ, newYaw, newPitch));
+
+                var event = new TerraformMoveEntityEvent(player, entity, new Pos(newX, newY, newZ, newYaw, newPitch));
+                EventDispatcher.callCancellable(event, () -> entity.teleport(event.getNewPosition()));
             }
 
             applyEntityMetadataFromNbt(entity.getEntityMeta(), entry.nbt());
-
-            System.out.println(packet);
+            EventDispatcher.call(new TerraformModifyEntityEvent(entity));
 
             //todo passengers
         }
@@ -223,7 +230,6 @@ public final class AxiomPacketListener {
 
     public void handleDeleteEntities(@NotNull Player player, @NotNull AxiomClientDeleteEntitiesPacket packet) {
         if (!Axiom.isEnabled(player)) return;
-        logger.debug("Received axiom delete entities ({}) from {}", packet.uuids().size(), player.getUuid());
 
         var instance = player.getInstance();
         for (var uuid : packet.uuids()) {

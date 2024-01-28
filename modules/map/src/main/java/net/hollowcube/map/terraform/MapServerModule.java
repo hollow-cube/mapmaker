@@ -2,8 +2,13 @@ package net.hollowcube.map.terraform;
 
 import net.hollowcube.map.block.BlockTags;
 import net.hollowcube.map.block.handler.BlockHandlers;
+import net.hollowcube.map.entity.MapEntityType;
 import net.hollowcube.terraform.TerraformModule;
+import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.utils.NamespaceID;
@@ -14,6 +19,9 @@ import java.util.*;
 @SuppressWarnings("UnstableApiUsage")
 public class MapServerModule implements TerraformModule {
 
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("map-terraform", EventFilter.INSTANCE)
+            .addListener(TerraformPreSpawnEntityEvent.class, this::handleSpawnEntity);
+
     @Override
     public @NotNull Set<TerraformStorage.Factory> storageTypes() {
         var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
@@ -23,6 +31,11 @@ public class MapServerModule implements TerraformModule {
         return Set.of(
                 new TerraformStorage.Factory("http", () -> new TerraformStorageHttp(mapServiceUrlFinal))
         );
+    }
+
+    @Override
+    public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
+        return Set.of(eventNode);
     }
 
     @Override
@@ -60,6 +73,10 @@ public class MapServerModule implements TerraformModule {
             var block = Objects.requireNonNull(Block.fromNamespaceId(blockId));
             register(overrides, block, handler);
         }
+    }
+
+    private void handleSpawnEntity(@NotNull TerraformPreSpawnEntityEvent event) {
+        event.setConstructor(MapEntityType::create);
     }
 
 }

@@ -61,7 +61,7 @@ public final class HubHotbar {
             .meta(meta -> meta.customModelData(PLAY_ITEM_CMD))
             .build();
 
-    private static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
+    public static final ItemStack CREATE_MAPS_ITEM = ItemStack.builder(Material.DIAMOND)
             .displayName(Component.translatable("item.mapmaker.create_maps.name"))
             .lore(LanguageProviderV2.translateMulti("item.mapmaker.create_maps.lore", List.of()))
             .meta(meta -> meta.customModelData(CREATE_ITEM_CMD))

@@ -1,6 +1,7 @@
 package net.hollowcube.map.entity;
 
 import net.hollowcube.map.MapHooks;
+import net.hollowcube.map.entity.impl.DisplayEntity;
 import net.hollowcube.map.entity.impl.EndCrystalEntity;
 import net.hollowcube.map.entity.impl.ItemFrameEntity;
 import net.hollowcube.map.world.MapWorld;
@@ -22,6 +23,10 @@ public final class MapEntities {
         MapEntityType.override(EntityType.GLOW_ITEM_FRAME, ItemFrameEntity.Glowing::new);
 
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
+
+        MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity::new);
+        MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity::new);
+        MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity::new);
     }
 
     private static void handleEntityInteract(@NotNull PlayerEntityInteractEvent event) {

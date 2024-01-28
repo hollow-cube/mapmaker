@@ -19,6 +19,10 @@ public class MapEntityType {
 
     public static @NotNull Entity create(@NotNull String id, @NotNull UUID uuid) {
         var entityType = Objects.requireNonNull(EntityType.fromNamespaceId(id));
+        return create(entityType, uuid);
+    }
+
+    public static @NotNull Entity create(@NotNull EntityType entityType, @NotNull UUID uuid) {
         var constructor = constructorMap.getOrDefault(entityType, MapEntityType::defaultConstructor);
         return constructor.apply(entityType, uuid);
     }

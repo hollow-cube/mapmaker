@@ -176,6 +176,10 @@ public class DevServer {
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
 
+//    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
+//            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
+//            .build();
+
     @Blocking
     public void start(@NotNull ConfigLoaderV3 config) {
         var velocityConfig = config.get(VelocityConfig.class);
@@ -277,6 +281,47 @@ public class DevServer {
             logger.error("failed during startup", e);
             System.exit(1);
         }
+
+//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+//                "mapmaker:test1",
+//                "mapmaker:test1",
+//                RecipeCategory.Crafting.MISC,
+//                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+//                HubHotbar.CREATE_MAPS_ITEM
+//        ) {
+//            @Override
+//            public boolean shouldShow(@NotNull Player player) {
+//                return true;
+//            }
+//        });
+//
+//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+//                "mapmaker:test2",
+//                "mapmaker:test2",
+//                RecipeCategory.Crafting.MISC,
+//                List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.DIRT, 1)))),
+//                ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 2)
+//                        .withDisplayName(Component.text("test2"))
+//        ) {
+//            @Override
+//            public boolean shouldShow(@NotNull Player player) {
+//                return true;
+//            }
+//        });
+//
+//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+//                "mapmaker:test3",
+//                "mapmaker:test3",
+//                RecipeCategory.Crafting.MISC,
+//                List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.GOLD_INGOT, 1)))),
+//                ItemStack.of(Material.DIAMOND_PICKAXE, 3)
+//                        .withDisplayName(Component.text("test3"))
+//        ) {
+//            @Override
+//            public boolean shouldShow(@NotNull Player player) {
+//                return true;
+//            }
+//        });
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {
@@ -431,6 +476,30 @@ public class DevServer {
         MiscFunctionality.broadcastTabList(Audiences.all());
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
+
+//        var recipes = new DeclareRecipesPacket(List.of(
+//                new DeclareRecipesPacket.DeclaredShapedCraftingRecipe(
+//                        "mapmaker:shaped", 1, 1,
+//                        "mapmaker:my_group", RecipeCategory.Crafting.MISC,
+//                        List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.STONE)))),
+//                        ItemStack.of(Material.STICK), false
+//                )
+//                new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
+//                        "mapmaker:shaped",
+//                        "awfhiauw", RecipeCategory.Crafting.BUILDING,
+//                        List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.STONE)))),
+//                        ItemStack.of(Material.STICK)
+//                )
+//        ));
+//        player.sendPacket(recipes);
+
+//        player.sendPacket(new UnlockRecipesPacket(
+//                0, false, false, false, false, false, false, false, false,
+//                List.of("minecraft:shaped"),
+//                List.of("minecraft:shaped")
+//        ));
+
+//        player.getInventory().setItemStack(10, BLANK_ITEM);
     }
 
 }
