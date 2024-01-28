@@ -10,7 +10,7 @@
         <label width="5" translationKey="gui.checkpoint.summary"
                sprite="minecraft:heavy_weighted_pressure_plate"/>
 
-        <button translationKey="gui.checkpoint.executor"
+        <button translationKey="gui.checkpoint.custom_blocks"
                 sprite="minecraft:nether_star"/>
         <button id="pick_up" translationKey="gui.checkpoint.pick_up"
                 sprite="minecraft:minecart"/>

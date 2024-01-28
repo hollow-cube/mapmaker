@@ -44,7 +44,7 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
         } else {
             // Not sure what should really happen here, for now just tell them
             // they completed the map and send them back to editing mode
-            player.sendMessage("Completed map");
+            player.sendMessage(Component.translatable("testing_mode.finish"));
             world.exitTestMode(player);
         }
     }
