@@ -8,6 +8,7 @@ import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.Blocking;
