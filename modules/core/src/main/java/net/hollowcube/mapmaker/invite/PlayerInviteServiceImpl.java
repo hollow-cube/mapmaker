@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -74,7 +75,10 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String translateString = "map." + (senderMap.isPublished() ? "play" : "build") + ".invite.sent";
                 sender.sendMessage(Component.translatable(translateString, targetDisplayName, senderMapName));
             }
-            case 409 -> sender.sendMessage(Component.translatable("map.invite.already_present", targetDisplayName));
+            case 409 -> {
+                SessionError error = GSON.fromJson(response.body(), SessionError.class);
+                processRegisterError(sender, targetDisplayName, error, true);
+            }
             default -> throw new InternalError("Failed to register invite: " + response.body());
         }
     }
@@ -107,9 +111,23 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String translateString = "map." + (targetMap.isPublished() ? "play" : "build") + ".request.sent";
                 sender.sendMessage(Component.translatable(translateString, targetDisplayName, Component.text(targetMap.name())));
             }
-            case 409 -> sender.sendMessage(Component.translatable("map.request.already_present", targetDisplayName));
+            case 409 -> {
+                SessionError error = GSON.fromJson(response.body(), SessionError.class);
+                processRegisterError(sender, targetDisplayName, error, false);
+            }
             default -> throw new InternalError("Failed to register request: " + response.body());
         }
+    }
+
+    private static void processRegisterError(@NotNull Player sender, @NotNull DisplayName targetDisplayName,
+                                             @NotNull SessionError error, boolean invite) {
+        var translationString = switch (error.code()) {
+            case "invite_exists" -> "map.invite.already_present";
+            case "request_exists" -> "map.request.already_present";
+            case "already_on_map" -> invite ? "map.invite.same_map" : "map.request.same_map";
+            default -> throw new IllegalStateException("Unexpected error (" + error.code() + "): " + error.message());
+        };
+        sender.sendMessage(Component.translatable(translationString, targetDisplayName));
     }
 
     @Override
@@ -169,9 +187,6 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         String translationKey = switch (error.errorCode()) {
             case ErrorCodes.INVITE_NOT_FOUND, ErrorCodes.REQUEST_NOT_FOUND, ErrorCodes.NO_INVITES_OR_REQUESTS ->
                     "map.invite_and_request.cant_" + acceptReject;
-            case ErrorCodes.MULTIPLE_INVITES -> "map.invite.multiple";
-            case ErrorCodes.MULTIPLE_REQUESTS -> "map.request.multiple";
-            case ErrorCodes.INVITE_AND_REQUEST -> "map.invite_and_request.both";
             case ErrorCodes.INVITE_SENDER_LEFT_MAP -> "map.invite.sender_left_map";
             case ErrorCodes.INVITE_SENDER_OFFLINE -> "map.invite.sender_offline";
             case ErrorCodes.REQUEST_TARGET_LEFT_MAP -> "map.request.target_left_map";
@@ -188,13 +203,16 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private record InviteError(int errorCode, @NotNull String errorText) {
     }
 
+    private record SessionError(@NotNull String code, @NotNull String message) {
+    }
+
     private static final class ErrorCodes {
 
         static final int INVITE_NOT_FOUND = 0;
         static final int REQUEST_NOT_FOUND = 1;
-        static final int MULTIPLE_INVITES = 2;
-        static final int MULTIPLE_REQUESTS = 3;
-        static final int INVITE_AND_REQUEST = 4;
+        static final int INVITE_ALREADY_EXISTS = 2;
+        static final int REQUEST_ALREADY_EXISTS = 3;
+        static final int ALREADY_ON_MAP = 4;
         static final int INVITE_SENDER_LEFT_MAP = 5;
         static final int INVITE_SENDER_OFFLINE = 6;
         static final int REQUEST_TARGET_LEFT_MAP = 7;
