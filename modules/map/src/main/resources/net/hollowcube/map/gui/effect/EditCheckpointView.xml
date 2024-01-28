@@ -9,7 +9,7 @@
 
         <spacer width="5"/>
 
-        <button translationKey="gui.checkpoint.executor"
+        <button translationKey="gui.checkpoint.custom_blocks"
                 sprite="effect/executor_menu"/>
         <button id="pick_up" translationKey="gui.checkpoint.pick_up"
                 sprite="effect/pick_up"/>
