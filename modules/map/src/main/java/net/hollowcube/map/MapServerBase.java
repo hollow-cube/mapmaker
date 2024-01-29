@@ -27,6 +27,7 @@ import net.hollowcube.map.world.MapWorldManager;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
+import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
@@ -241,6 +242,8 @@ public abstract class MapServerBase implements MapServer {
             logger.error("Failed to initialize features", e);
             throw new RuntimeException(e);
         }
+
+        ChatAnnouncer.setupAnnouncements(config);
 
         // Sync sessions with remote
         sessionManager().sync();

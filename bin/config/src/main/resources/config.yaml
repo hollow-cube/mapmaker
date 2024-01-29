@@ -18,3 +18,10 @@ unleash:
   enabled: false
   address: ""
   token: ""
+
+announcements:
+  items:
+      # The message to announce. This is a MiniMessage string.
+    - message: "<gradient:#f0bd33:#3995ff><bold>Hollow Cube</bold></gradient> <gray>|</gray> <green>Visit the store! store.hollowcube.net</green>"
+      # The interval to send the announcement, in seconds.
+      interval: 1800

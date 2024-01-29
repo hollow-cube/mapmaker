@@ -9,6 +9,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
+import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
@@ -160,6 +161,8 @@ public abstract class HubServerBase implements HubServer {
             logger.info("Loading feature {}", feature.getClass().getName());
             feature.init(this);
         }
+
+        ChatAnnouncer.setupAnnouncements(config);
 
         // Sync sessions with remote
         //todo this throws interrupted exception when not in vthread and i have no idea why

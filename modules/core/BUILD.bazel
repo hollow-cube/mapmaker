@@ -29,6 +29,7 @@ java_library(
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:net_kyori_adventure_text_minimessage",
         "@maven//:org_apache_kafka_kafka_clients",
         "@maven//:org_slf4j_jul_to_slf4j",
         "@maven//:org_spongepowered_configurate_core",
