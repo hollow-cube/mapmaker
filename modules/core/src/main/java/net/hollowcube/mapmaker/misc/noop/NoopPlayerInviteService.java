@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NoopPlayerInviteService implements PlayerInviteService {
     @Override
-    public void join(@NotNull Player sender, @NotNull Player target) {
+    public void join(@NotNull Player sender, @NotNull String targetId) {
         sender.sendMessage("not implemented");
     }
 

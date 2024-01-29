@@ -2,63 +2,28 @@ package net.hollowcube.mapmaker.command.invite;
 
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
-import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class RejectCommand extends CommandDsl {
-
-    private final PlayerInviteService inviteService;
-    private final PlayerService playerService;
-    private final SessionManager sessionManager;
-    private final Argument<String> targetArg;
+public class RejectCommand extends AbstractInviteServiceCommand {
 
     @Inject
     public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("reject");
-        this.inviteService = inviteService;
-        this.playerService = playerService;
-        this.sessionManager = sessionManager;
+        super("reject", inviteService, playerService, sessionManager);
 
-        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
-        category = CommandCategory.SOCIAL;
+        this.addSyntax(playerOnly(this::handleDefaultReject));
+    }
 
-        addSyntax(playerOnly(this::handleDefaultReject));
-        addSyntax(playerOnly(this::handleReject), targetArg);
+    @Override
+    void handle(@NotNull Player sender, @NotNull String targetId) {
+        this.inviteService.reject(sender, targetId);
     }
 
     private void handleDefaultReject(@NotNull Player player, @NotNull CommandContext context) {
-        inviteService.reject(player);
-    }
-
-    private void handleReject(@NotNull Player player, @NotNull CommandContext context) {
-        var targetName = context.getRaw(targetArg);
-
-        var targetId = context.get(targetArg);
-        if (targetId == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(targetName)));
-            return;
-        }
-
-        var targetSession = this.sessionManager.getSession(targetId);
-        var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
-        if (targetSession == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", targetDisplayName));
-            return;
-        }
-        if (player.getUuid().toString().equals(targetSession.playerId())) {
-            player.sendMessage(Component.translatable("generic.other_players_only"));
-            return;
-        }
-
-        this.inviteService.reject(player, targetSession.playerId());
+        this.inviteService.reject(player);
     }
 }

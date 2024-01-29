@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.invite;
 
+import net.hollowcube.mapmaker.bridge.ServerBridge;
+import net.hollowcube.mapmaker.bridge.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
@@ -7,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -27,19 +30,54 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
+    private final ServerBridge serverBridge;
 
     public PlayerInviteServiceImpl(@NotNull String url, @NotNull MapService mapService,
-                                   @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
+                                   @NotNull PlayerService playerService, @NotNull SessionManager sessionManager,
+                                   @NotNull ServerBridge serverBridge) {
         this.url = String.format("%s/v2/internal/invites", url);
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
+        this.serverBridge = serverBridge;
     }
 
     @Override
-    public void join(@NotNull Player sender, @NotNull Player target) {
-        // TODO: Figure out if this is even used and if so, what it's for
-        throw new UnsupportedOperationException("Not implemented");
+    public void join(@NotNull Player sender, @NotNull String targetId) {
+        var senderSession = this.sessionManager.getSession(sender.getUuid().toString());
+        if (senderSession == null) {
+            // Yeah this is very bad
+            sender.sendMessage(Component.translatable("command.generic.sanity_check_failed"));
+            return;
+        }
+
+        var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
+        var targetSession = this.sessionManager.getSession(targetId);
+        if (targetSession == null) {
+            sender.sendMessage(Component.translatable("map.join.target_offline", targetDisplayName));
+            return;
+        }
+
+        var targetPresence = targetSession.presence();
+        if (targetPresence.type().equals(Presence.TYPE_MAPMAKER_HUB)) {
+            sender.sendMessage(Component.translatable("map.join.target_not_in_map", targetDisplayName));
+            return;
+        }
+
+        if (senderSession.presence().mapId().equals(targetPresence.mapId())) {
+            sender.sendMessage(Component.translatable("map.join.already_on_map", targetDisplayName));
+            return;
+        }
+
+        var targetMap = this.mapService.getMap(targetId, targetPresence.mapId());
+        // TODO: When trusted members exist for maps, check if the player is a trusted member
+        if (!targetMap.isPublished()) {
+            sender.sendMessage(Component.translatable("map.join.no_permission", targetDisplayName));
+            return;
+        }
+
+        var joinState = targetMap.isPublished() ? JoinMapState.PLAYING : JoinMapState.EDITING;
+        this.serverBridge.joinMap(sender, targetMap.id(), joinState);
     }
 
     @Override
@@ -187,10 +225,10 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         String translationKey = switch (error.errorCode()) {
             case ErrorCodes.INVITE_NOT_FOUND, ErrorCodes.REQUEST_NOT_FOUND, ErrorCodes.NO_INVITES_OR_REQUESTS ->
                     "map.invite_and_request.cant_" + acceptReject;
-            case ErrorCodes.INVITE_SENDER_LEFT_MAP -> "map.invite.sender_left_map";
-            case ErrorCodes.INVITE_SENDER_OFFLINE -> "map.invite.sender_offline";
-            case ErrorCodes.REQUEST_TARGET_LEFT_MAP -> "map.request.target_left_map";
-            case ErrorCodes.REQUEST_TARGET_OFFLINE -> "map.request.target_offline";
+            case ErrorCodes.INVITE_SENDER_LEFT_MAP -> "map.invite.left_map";
+            case ErrorCodes.INVITE_SENDER_OFFLINE -> "map.invite.offline";
+            case ErrorCodes.REQUEST_TARGET_LEFT_MAP -> "map.request.left_map";
+            case ErrorCodes.REQUEST_TARGET_OFFLINE -> "map.request.offline";
             default -> throw new IllegalStateException("Unexpected error code: " + error.errorCode() + " (message: " + error.errorText() + ")");
         };
         sender.sendMessage(Component.translatable(translationKey));

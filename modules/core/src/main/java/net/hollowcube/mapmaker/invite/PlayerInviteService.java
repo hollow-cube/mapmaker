@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PlayerInviteService {
 
-    void join(@NotNull Player sender, @NotNull Player target);
+    void join(@NotNull Player sender, @NotNull String targetId);
 
     void registerInvite(@NotNull Player sender, @NotNull String targetId);
 
