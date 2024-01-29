@@ -22,6 +22,6 @@ unleash:
 announcements:
   items:
       # The message to announce. This is a MiniMessage string.
-    - message: "<gradient:#f0bd33:#3995ff><bold>Hollow Cube</bold></gradient> <gray>|</gray> <green>Visit the store! store.hollowcube.net</green>"
+    - message: "<#3895FF><bold>Hollow Cube</bold></#3895FF> <#696969>|</#696969> <#CCCCCC>This is a test announcement.</#CCCCCC>"
       # The interval to send the announcement, in seconds.
       interval: 1800
