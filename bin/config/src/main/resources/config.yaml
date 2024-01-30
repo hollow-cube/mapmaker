@@ -20,7 +20,7 @@ unleash:
   token: ""
 
 announcements:
-  interval: 5
+  interval: 1800
   messages:
     - key: "announcement.test1"
     - key: "announcement.test2"
