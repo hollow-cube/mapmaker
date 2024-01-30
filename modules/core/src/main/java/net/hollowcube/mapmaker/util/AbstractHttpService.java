@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.util;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.leangen.geantyref.TypeToken;
 import net.hollowcube.mapmaker.cosmetic.CraftingMaterial;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;

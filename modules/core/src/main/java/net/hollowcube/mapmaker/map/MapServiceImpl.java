@@ -434,7 +434,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> res.body().isEmpty() ? null : GSON.fromJson(res.body(), SaveStateUpdateResponse.class);
+            case 200 -> {
+                if (res.body().isEmpty()) yield null;
+                else yield GSON.fromJson(res.body(), SaveStateUpdateResponse.class);
+            }
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update savestate: " + res.body());
         };
