@@ -465,7 +465,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.addEffect(new Potion(
                     entry.type().vanillaEffect(),
                     (byte) (entry.level() - 1),
-                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration(),
+                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration() / 50,
                     Potion.ICON_FLAG
             ));
         }

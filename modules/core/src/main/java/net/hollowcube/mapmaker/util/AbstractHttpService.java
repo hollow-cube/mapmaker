@@ -2,9 +2,13 @@ package net.hollowcube.mapmaker.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.leangen.geantyref.TypeToken;
+import net.hollowcube.mapmaker.cosmetic.CraftingMaterial;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.RewardType;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -22,6 +26,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractHttpService {
@@ -30,6 +35,8 @@ public abstract class AbstractHttpService {
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
+            .registerTypeAdapter(CraftingMaterial.class, new EnumTypeAdapter<>(CraftingMaterial.class))
+            .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
             .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumOrdinalTypeAdapter<>(PersonalizedMapData.Progress.class))
@@ -48,6 +55,8 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(SaveState.PlayState.class, DFU.JsonSerializer(SaveState.PlayState.CODEC))
             .registerTypeAdapter(SaveState.BuildState.class, DFU.JsonSerializer(SaveState.BuildState.CODEC))
             .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
+            .registerTypeAdapter(AppliedRewards.class, new FieldSerializer<>(AppliedRewards::new, AppliedRewards::entries, new TypeToken<List<AppliedRewards.Entry>>() {
+            }.getType()))
             .disableJdkUnsafe()
             .create();
 

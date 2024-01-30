@@ -75,7 +75,7 @@ public interface MapService {
 
     @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
 
-    void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+    @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
 
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 

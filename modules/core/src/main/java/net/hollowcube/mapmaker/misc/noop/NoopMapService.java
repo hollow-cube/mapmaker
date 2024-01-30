@@ -160,8 +160,8 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
-
+    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+        return null;
     }
 
     @Override

@@ -425,7 +425,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -433,8 +433,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return; // Ok
-        throw new InternalError("Failed to update savestate: " + res.body());
+        return switch (res.statusCode()) {
+            case 200 -> res.body().isEmpty() ? null : GSON.fromJson(res.body(), SaveStateUpdateResponse.class);
+            case 404 -> throw new NotFoundError(id);
+            default -> throw new InternalError("Failed to update savestate: " + res.body());
+        };
     }
 
     @Override
