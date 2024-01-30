@@ -162,7 +162,7 @@ public abstract class HubServerBase implements HubServer {
             feature.init(this);
         }
 
-        ChatAnnouncer.setupAnnouncements(config);
+        ChatAnnouncer.setupAnnouncements(config, sessionManager());
 
         // Sync sessions with remote
         //todo this throws interrupted exception when not in vthread and i have no idea why

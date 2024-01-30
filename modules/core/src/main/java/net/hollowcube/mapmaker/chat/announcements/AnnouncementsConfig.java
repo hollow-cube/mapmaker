@@ -6,5 +6,5 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import java.util.List;
 
 @ConfigSerializable
-public record AnnouncementsConfig(@NotNull List<Announcement> items) {
+public record AnnouncementsConfig(int interval, @NotNull List<Announcement> messages) {
 }

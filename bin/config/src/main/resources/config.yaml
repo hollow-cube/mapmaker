@@ -20,8 +20,16 @@ unleash:
   token: ""
 
 announcements:
-  items:
-      # The message to announce. This is a MiniMessage string.
-    - message: "<#3895FF><bold>Hollow Cube</bold></#3895FF> <#696969>|</#696969> <#CCCCCC>This is a test announcement.</#CCCCCC>"
-      # The interval to send the announcement, in seconds.
-      interval: 1800
+  interval: 5
+  messages:
+    - key: "announcement.test1"
+    - key: "announcement.test2"
+    - key: "announcement.test3"
+    - key: "announcement.test4"
+    - key: "announcement.filter.type"
+      filters:
+        session_type: "mapmaker:map"
+    - key: "announcement.filter.type_and_state"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"

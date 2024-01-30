@@ -243,7 +243,7 @@ public abstract class MapServerBase implements MapServer {
             throw new RuntimeException(e);
         }
 
-        ChatAnnouncer.setupAnnouncements(config);
+        ChatAnnouncer.setupAnnouncements(config, sessionManager());
 
         // Sync sessions with remote
         sessionManager().sync();
