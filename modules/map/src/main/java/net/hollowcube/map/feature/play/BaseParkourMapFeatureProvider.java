@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -87,7 +88,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         itemRegistry.registerSilent(ReturnToSpectatorCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_SPECTATOR);
         itemRegistry.registerSilent(SetSpectatorCheckpointItem.INSTANCE_TESTING);
-        itemRegistry.registerSilent(ToggleFlightItem.INSTANCE);
+        itemRegistry.registerSilent(ToggleFlightItem.INSTANCE_ON);
+        itemRegistry.registerSilent(ToggleFlightItem.INSTANCE_OFF);
         itemRegistry.registerSilent(RateMapItem.INSTANCE);
 
         // Controls player visibility
@@ -144,7 +146,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
         inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_SPECTATOR, null));
         inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
-        inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID, null));
+        inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID_ON, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
     }
@@ -302,7 +304,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // If a player is spectating return them to their checkpoint if they fall below the reset height
         if (MapWorld.unsafeFromInstance(instance) instanceof PlayingMapWorld pmw) {
             for (var spectator : pmw.spectators()) {
-                if (spectator.getPosition().y() < -64) {
+                if (spectator.getPosition().y() < pmw.instance().getDimensionType().getMinY()) {
                     var checkpoint = spectator.getTag(SPECTATOR_CHECKPOINT);
                     spectator.teleport(checkpoint == null ? pmw.spawnPoint() : checkpoint);
                 }
@@ -450,8 +452,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
             player.setHealth(2 * state.lives().get());
         } else {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
-            player.setHealth(20);
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
+            player.setHealth(Attribute.MAX_HEALTH.defaultValue());
         }
 
         // Update the countdown timer (time may have been added
@@ -465,7 +467,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.addEffect(new Potion(
                     entry.type().vanillaEffect(),
                     (byte) (entry.level() - 1),
-                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration() / 50,
+                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration() / MinecraftServer.TICK_MS, // Convert from milliseconds to ticks
                     Potion.ICON_FLAG
             ));
         }

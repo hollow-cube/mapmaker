@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
@@ -93,7 +94,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                 player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(saveState.getPlaytime(), true))));
             } else {
                 // Diff playtime rounded to ticks prior to subtracting for correct display.
-                var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % 50) - (saveState.getPlaytime() - saveState.getPlaytime() % 50);
+                var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % MinecraftServer.TICK_MS) - (saveState.getPlaytime() - saveState.getPlaytime() % MinecraftServer.TICK_MS);
                 player.sendMessage(Component.translatable("map.completed.with_prior",
                         Component.text(formatMapPlaytime(saveState.getPlaytime(), true)),
                         // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
