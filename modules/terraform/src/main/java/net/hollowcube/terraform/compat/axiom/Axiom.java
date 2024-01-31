@@ -107,7 +107,8 @@ public class Axiom {
             Map.entry("axiom:set_time", AxiomClientSetTimePacket::new),
             Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
             Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
-            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new)
+            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new),
+            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new)
     );
 
     /**
@@ -127,7 +128,9 @@ public class Axiom {
             "axiom:initialize_hotbars",
             "axiom:custom_blocks", // todo
             "axiom:editor_warning", // todo
-            "axiom:register_world_properties"
+            "axiom:register_world_properties",
+            "axiom:marker_nbt_response",
+            "axiom:marker_data"
     );
 
     private interface ReadableAxiomPacket<T extends AxiomClientPacket> {

@@ -246,6 +246,10 @@ public final class AxiomPacketListener {
         }
     }
 
+    public void handleRequestMarkerData(@NotNull Player player, @NotNull AxiomClientMarkerNbtRequestPacket packet) {
+
+    }
+
     private void applyEntityMetadataFromNbt(@NotNull EntityMeta entityMeta, @NotNull NBTCompound nbt) {
         //todo i would prefer to generate this. need to look into including entity metadata in minestom data.
         entityMeta.setNotifyAboutChanges(false);
