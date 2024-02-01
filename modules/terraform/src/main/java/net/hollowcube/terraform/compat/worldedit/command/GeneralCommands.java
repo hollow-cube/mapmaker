@@ -1,70 +1,88 @@
 package net.hollowcube.terraform.compat.worldedit.command;
 
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.session.LocalSession;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
-import net.minestom.server.command.builder.CommandContext;
+import net.hollowcube.terraform.util.Messages;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class GeneralCommands {
-    private GeneralCommands() {
-    }
 
-    public static final class Undo extends Command {
+    public static final class Undo extends WECommand {
+        private final Argument<Integer> times = Argument.Int("times").clamp(1, 50).defaultValue(1);
 
         public Undo() {
             super("/undo");
 
-            setDefaultExecutor(this::undoblah);
+            addSyntax(playerOnly(this::undo));
+            addSyntax(playerOnly(this::undo), times);
         }
 
-        private void undoblah(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player))
-                throw new UnsupportedOperationException("only implemented for players");
+        private void undo(@NotNull Player player, @NotNull CommandContext context) {
+            int count = context.get(times);
 
             var session = LocalSession.forPlayer(player);
-            int undone = session.undo(1);
-            player.sendMessage("Undone " + undone + " actions");
+            int undone = session.undo(count);
+
+            player.sendMessage(Messages.HISTORY_UNDO.with(undone));
         }
 
     }
 
-    public static final class Redo extends Command {
+    public static final class Redo extends WECommand {
+        private final Argument<Integer> times = Argument.Int("times").clamp(1, 50).defaultValue(1);
 
         public Redo() {
             super("/redo");
 
-            setDefaultExecutor(this::redoblah);
+            addSyntax(playerOnly(this::redo));
+            addSyntax(playerOnly(this::redo), times);
         }
 
-        private void redoblah(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player))
-                throw new UnsupportedOperationException("only implemented for players");
+        private void redo(@NotNull Player player, @NotNull CommandContext context) {
+            int count = context.get(times);
 
             var session = LocalSession.forPlayer(player);
-            int undone = session.redo(1);
-            player.sendMessage("Redone " + undone + " actions");
+            int undone = session.redo(count);
+
+            player.sendMessage(Messages.HISTORY_REDO.with(undone));
         }
 
     }
 
-    public static final class ClearHistory extends Command {
+    public static final class ClearHistory extends WECommand {
 
         public ClearHistory() {
             super("/clearhistory");
 
-            setDefaultExecutor(this::clearHistory);
+            addSyntax(playerOnly(this::handleClearHistory));
         }
 
-        private void clearHistory(@NotNull CommandSender sender, @NotNull CommandContext context) {
-            if (!(sender instanceof Player player))
-                throw new UnsupportedOperationException("only implemented for players");
-
+        private void handleClearHistory(@NotNull Player player, @NotNull CommandContext context) {
             var session = LocalSession.forPlayer(player);
             session.clearHistory();
-            player.sendMessage("Cleared history");
+
+            player.sendMessage(Messages.HISTORY_CLEARED);
         }
 
+    }
+
+    public static final class GMask extends WECommand {
+
+        public GMask() {
+            super("/gmask");
+
+            addSyntax(playerOnly(this::handleGMask));
+        }
+
+        private void handleGMask(@NotNull Player player, @NotNull CommandContext context) {
+            player.sendMessage("todo //gmask");
+        }
+
+    }
+
+    private GeneralCommands() {
     }
 }

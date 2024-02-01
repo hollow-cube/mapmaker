@@ -1,4 +1,4 @@
-package net.hollowcube.map.item;
+package net.hollowcube.map.item.handler;
 
 import net.hollowcube.map.event.BlockItemPlaceEvent;
 import net.minestom.server.event.EventDispatcher;

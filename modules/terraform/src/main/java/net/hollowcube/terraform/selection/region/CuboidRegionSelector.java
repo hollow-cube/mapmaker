@@ -88,63 +88,14 @@ public class CuboidRegionSelector implements RegionSelector {
         renderer.end("cuboid");
     }
 
-    // TODO: Refactor me into explicit expand/contract operations
-    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-        if (pos1 == null || pos2 == null) return;
+    @Override
+    public void reshape(@NotNull Point low, @NotNull Point high) {
+        var region = region();
+        if (region == null) return;
 
-        //todo regions should be allowed to go outside of world bounds, but block updates will not have an effect
-
-
-//        Point minPoint = CoordinateUtil.min(pos1, pos2); // Don't use region, as that adds 1 to the end.
-//        Point maxPoint = CoordinateUtil.max(pos1, pos2); // Region will be called after this function to regrab the region boundaries, which will add 1 to our calculation
-//        if (changeVertical) {
-//            int yMin = minPoint.blockY();
-//            int yMax = minPoint.blockY();
-//            yMin -= delta; // We subtract from yMin and add to yMax. Positive numbers will expand, negative numbers will shrink
-//            yMax += delta;
-//            if (yMin >= yMax) {
-//                // If we shrink beyond appropriate bounds, what do we do?
-//                // Clamp to midpoint
-//                yMax = (minPoint.blockY() + maxPoint.blockY()) / 2;
-//                yMin = yMax;
-//            }
-//            // Clamp to world bounds
-//            if (player.getInstance() != null) {
-//                yMax = Math.min(yMax, player.getInstance().getDimensionType().getMaxY());
-//                yMin = Math.max(yMin, player.getInstance().getDimensionType().getMinY());
-//            }
-//            selectPrimary(minPoint.withY(yMin), false);
-//            selectSecondary(maxPoint.withY(yMax), false);
-//            if (changeHorizontal) {
-//                //Recalculate min/maxPoint
-//                minPoint = CoordinateUtil.min(pos1, pos2);
-//                maxPoint = CoordinateUtil.max(pos1, pos2);
-//            }
-//        }
-//        if (changeHorizontal) {
-//            int xMin = minPoint.blockX();
-//            int xMax = maxPoint.blockX();
-//            int zMin = minPoint.blockZ();
-//            int zMax = maxPoint.blockZ();
-//            xMin -= delta;
-//            xMax += delta;
-//            zMin -= delta;
-//            zMax += delta;
-//            if (xMin >= xMax) {
-//                // Clamp to midpoint
-//                xMax = (minPoint.blockX() + maxPoint.blockX()) / 2;
-//                xMin = xMax;
-//            }
-//            if (zMin >= zMax) {
-//                // Clamp to midpoint
-//                zMax = (minPoint.blockZ() + maxPoint.blockZ()) / 2;
-//                zMin = zMax;
-//            }
-//            Point primary = boundToWorldBorder(minPoint.withX(xMin).withZ(zMin), player.getInstance());
-//            Point secondary = boundToWorldBorder(maxPoint.withX(xMax).withZ(zMax), player.getInstance());
-//            selectPrimary(primary, false);
-//            selectSecondary(secondary, false);
-//        }
+        pos1 = region.min().add(low);
+        pos2 = region.max().add(high).sub(1);
+        updateRender();
     }
 
     @Override

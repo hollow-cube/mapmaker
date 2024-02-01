@@ -151,7 +151,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
-        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, type);
+        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, type == null ? SaveStateType.EDITING : type);
     }
 
     @Override

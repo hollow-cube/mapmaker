@@ -12,6 +12,7 @@ import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
 import net.hollowcube.terraform.task.TaskResult;
 import net.hollowcube.terraform.task.edit.WorldView;
+import net.hollowcube.terraform.tool.ToolHandler;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.ThreadUtil;
 import net.minestom.server.MinecraftServer;
@@ -46,6 +47,8 @@ public final class TerraformImpl implements Terraform {
     private final TerraformRegistry registry;
     private final TerraformStorage storage;
 
+    private final ToolHandler toolHandler;
+
     // Tasks
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
@@ -61,6 +64,9 @@ public final class TerraformImpl implements Terraform {
             this.eventNode = EventNode.type("terraform", EventFilter.INSTANCE);
             MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
         }
+
+        this.toolHandler = new ToolHandler(true);
+        this.eventNode.addChild(this.toolHandler.eventNode());
 
         this.registry = new TerraformRegistry(this, modules, commandManager, commandCondition);
 
@@ -79,6 +85,11 @@ public final class TerraformImpl implements Terraform {
     @Override
     public @NotNull TerraformStorage storage() {
         return storage;
+    }
+
+    @Override
+    public @NotNull ToolHandler toolHandler() {
+        return toolHandler;
     }
 
     // Sessions

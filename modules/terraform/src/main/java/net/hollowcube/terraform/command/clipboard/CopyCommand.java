@@ -39,7 +39,7 @@ public class CopyCommand extends CommandDsl {
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
 
         // Take away the blocks, then add the undo batch to the clipboard
-        localSession.buildTask("cut")
+        localSession.buildTask("copy")
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, Pattern.block(Block.AIR)))
                 .post(result -> {

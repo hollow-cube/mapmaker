@@ -50,11 +50,8 @@ Statuses are as follows:
 - ❌ /we tz - No snapshot system
 - ❌ /we report - Either a separate in game report system or discord or something
 - ✅ //undo
-    - 🚧 //undo [player]
 - ✅ //redo
-    - 🚧 //redo [player]
 - ✅ //clearhistory
-    - 🚧 //clearhistory [player]
 - ❌ //limit - Perf/limits are not configurable via commands
 - ❌ //timeout - Perf/limits are not configurable via commands
 - ❌ //perf - Perf/limits are not configurable via commands
@@ -63,8 +60,7 @@ Statuses are as follows:
 - ❌ //world - Cross world operations are not supported
     - caveat: eventually clipboard may be global
 - ❌ //watchdog - Watchdog not supported
-- 🚧 //gmask
-    - caveat: sets globally for a specific player
+- ⚠️ //gmask
 - ❌ //toggleplace - Will add if someone asks for it
 - ❌ //searchitem - Unrelated to world building
 
@@ -79,32 +75,32 @@ Statuses are as follows:
 - ✅ //hpos1
 - ✅ //hpos2
 - ✅ //chunk - sets primary in min corner, secondary in max corner. Thats all.
-- 🚧 //wand - Really just an alias for the wand tool
+- ✅ //wand - Really just an alias for the wand tool
 - ❌ //toggleeditwand - Terraform tools are locked to a specific instance of an item, not all items of the type.
 - 🚧 //contract
-- 🚧 //shift
+- ✅ //shift
 - ✅ //outset
 - ✅ //inset
-- ✅ //size
-- 🚧 //count
-- 🚧 //distr
-- 🚧 //sel
-- 🚧 //expand
+- ⚠️ //size
+- ✅ //count
+- ⚠️ //distr
+- ⚠️ //sel
+- ✅ //expand
 
 ### REGION
 
-- ⚠️ //set
+- ✅ //set
 - 🚧 //line
 - 🚧 //curve
-- 🚧 //replace
-- 🚧 //overlay
-- 🚧 //center
+- ✅ //replace
+- ✅ //overlay
+- ✅ //center
 - 🚧 //naturalize
-- 🚧 //walls
-- 🚧 //faces
+- ✅ //walls
+- ✅ //faces
 - 🚧 //smooth
-- 🚧 //move
-- 🚧 //stack
+- ✅ //move
+- ✅ //stack
 - ❌ //regen - World generation not supported
 - ❌ //deform - Expression language not supported
 - 🚧 //hollow
@@ -113,14 +109,14 @@ Statuses are as follows:
 
 ### GENERATION
 
-- 🚧 //hcyl
-- 🚧 //cyl
-- 🚧 //hsphere
-- 🚧 //sphere
+- ✅ //hcyl
+- ✅ //cyl
+- ✅ //hsphere
+- ✅ //sphere
 - ❌ //forestgen - World generation not supported
 - ❌ //pumpkins - World generation not supported
-- 🚧 //hpyramid
-- 🚧 //pyramid
+- ✅ //hpyramid
+- ✅ //pyramid
 - ❌ //generate - Expression language not supported
 - ❌ //generatebiome - Expression language not supported
 
@@ -130,16 +126,16 @@ Schematic commands are a bit up in the air. It is unclear how we will handle sav
 schematics so people can load them later, or are they locked to the current session? Or maybe both where most people
 lost their saved schematics when they leave the world but if you pay for extra worldedit then you get to keep them.
 
-- 🚧 //schem list
-- 🚧 //schem formats
-- 🚧 //schem load
-- 🚧 //schem delete
-- 🚧 //schem save
+- ⚠️ //schem list
+- ✅ //schem formats
+- ✅ //schem load
+- ✅ //schem delete
+- ✅ //schem save
 - ✅ //copy
 - ✅ //cut
 - ✅ //paste
-- 🚧 //rotate
-- 🚧 //flip
+- ✅ //rotate
+- ✅ //flip
 - ✅ //clearclipboard
 
 ### TOOL
@@ -216,10 +212,10 @@ lost their saved schematics when they leave the world but if you pay for extra w
 - 🚧 //drain
 - 🚧 //fixlava
 - 🚧 //fixwater
-- 🚧 //removeabove
-- 🚧 //removebelow
-- 🚧 //removenear
-- 🚧 //replacenear
+- ✅ //removeabove
+- ✅ //removebelow
+- ✅ //removenear
+- ✅ //replacenear
 - ❌ //snow - Same comment as above
 - ❌ //thaw - Same comment as above
 - ❌ //green - Same comment as above

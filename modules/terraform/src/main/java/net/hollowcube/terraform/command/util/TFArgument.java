@@ -84,8 +84,13 @@ public final class TFArgument {
         });
     }
 
+    @Deprecated
     public static @NotNull Argument<Pattern> Pattern(@NotNull String id, @NotNull Terraform tf) {
-        return new ArgumentPattern(id, tf);
+        return new ArgumentPattern(id);
+    }
+
+    public static @NotNull Argument<Pattern> Pattern(@NotNull String id) {
+        return new ArgumentPattern(id);
     }
 
     public static @NotNull Argument<Mask> Mask(@NotNull String id) {

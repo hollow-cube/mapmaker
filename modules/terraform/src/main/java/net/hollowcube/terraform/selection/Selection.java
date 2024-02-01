@@ -66,7 +66,7 @@ public final class Selection {
         // Clamp the position to the world (border and height) of our instance.
         var clamped = clampPointToWorld(point);
         //if (explain && !point.equals(clamped)) {
-            //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO I think I misinterpreted what this message was supposed to be. I still don't know what it is for tbh lol
+        //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO I think I misinterpreted what this message was supposed to be. I still don't know what it is for tbh lol
         //}
 
         if (selector.selectPrimary(clamped, explain)) {
@@ -80,7 +80,7 @@ public final class Selection {
         // Clamp the position to the world (border and height) of our instance.
         var clamped = clampPointToWorld(point);
         //if (explain && !point.equals(clamped)) {
-            //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO same as above
+        //session.cui().sendMessage("terraform.warn.border_exceeded"); //TODO same as above
         //}
 
         if (selector.selectSecondary(clamped, explain)) {
@@ -102,9 +102,9 @@ public final class Selection {
         return cachedRegion;
     }
 
-    @Deprecated //todo delete me or change the mechanism
-    public void changeSize(int delta, boolean changeVertical, boolean changeHorizontal) {
-//        selector.changeSize(delta, changeVertical, changeHorizontal);
+    public void reshape(@NotNull Point low, @NotNull Point high) {
+        selector.reshape(low, high);
+        cachedRegion = null;
     }
 
     // Serialization

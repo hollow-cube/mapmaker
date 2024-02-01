@@ -2,7 +2,7 @@ package net.hollowcube.map.block.custom;
 
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
-import net.hollowcube.map.item.BlockItemHandler;
+import net.hollowcube.map.item.handler.BlockItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;

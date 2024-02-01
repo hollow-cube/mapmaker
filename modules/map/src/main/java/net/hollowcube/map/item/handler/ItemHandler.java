@@ -1,4 +1,4 @@
-package net.hollowcube.map.item;
+package net.hollowcube.map.item.handler;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.world.MapWorld;

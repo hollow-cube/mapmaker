@@ -22,7 +22,7 @@ public class ArgumentLiteral extends Argument<String> {
         var compareValue = literal.toLowerCase(Locale.ROOT);
 
         int pos = reader.pos();
-        var word = reader.readWord(WordType.ALPHANUMERIC).toLowerCase(Locale.ROOT);
+        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
         if (compareValue.equals(word)) return success(literal);
         else if (compareValue.startsWith(word)) return partial();
         else return syntaxError(pos);

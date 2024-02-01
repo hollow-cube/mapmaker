@@ -36,6 +36,10 @@ public abstract class Argument<T> {
         return new ArgumentFloat(id);
     }
 
+    public static @NotNull ArgumentDouble Double(@NotNull String id) {
+        return new ArgumentDouble(id);
+    }
+
     public static <E extends Enum<?>> ArgumentEnum<E> Enum(@NotNull String id, Class<E> enumType) {
         return new ArgumentEnum<>(id, enumType);
     }

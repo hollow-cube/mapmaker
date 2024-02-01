@@ -20,9 +20,6 @@ import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import net.hollowcube.terraform.storage.TerraformStorageMemory;
-import net.hollowcube.terraform.tool.ToolHandler;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -31,7 +28,6 @@ import java.util.Set;
  * The base terraform module, which provides the default registry assets.
  */
 final class BaseModule implements TerraformModule {
-    private final ToolHandler toolHandler = new ToolHandler();
 
     @Override
     public @NotNull Set<RegionSelector.Factory> regionTypes() {
@@ -41,11 +37,6 @@ final class BaseModule implements TerraformModule {
     @Override
     public @NotNull Set<TerraformStorage.Factory> storageTypes() {
         return Set.of(TerraformStorageMemory.FACTORY);
-    }
-
-    @Override
-    public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
-        return Set.of(toolHandler.eventNode());
     }
 
     @Override
@@ -81,7 +72,7 @@ final class BaseModule implements TerraformModule {
                 new SchemCommand(),
 
                 // Tools
-                new ToolCommand(toolHandler)
+                new ToolCommand(terraform.toolHandler())
         );
     }
 }

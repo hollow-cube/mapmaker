@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;

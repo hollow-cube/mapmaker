@@ -1,4 +1,4 @@
-package net.hollowcube.map.item;
+package net.hollowcube.map.item.handler;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.gamedata.tags.Tag;

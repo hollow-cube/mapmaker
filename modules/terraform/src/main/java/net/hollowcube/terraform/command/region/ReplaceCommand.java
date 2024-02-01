@@ -16,13 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ReplaceCommand extends CommandDsl {
     private final Argument<Mask> maskArg = TFArgument.Mask("mask");
-    private final Argument<Pattern> patternArg;
+    private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
     public ReplaceCommand(@NotNull Terraform tf) {
         super("replace");
-
-        patternArg = TFArgument.Pattern("pattern", tf);
 
         addSyntax(playerOnly(this::handleReplaceMaskInRegion), maskArg, patternArg);
         addSyntax(playerOnly(this::handleReplaceMaskInRegion), maskArg, patternArg, selectionArg);

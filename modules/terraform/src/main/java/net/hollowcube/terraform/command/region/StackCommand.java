@@ -3,15 +3,14 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
+import net.hollowcube.terraform.compute.RegionFunctions;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.terraform.util.math.CoordinateUtil;
+import net.hollowcube.terraform.util.Messages;
+import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -43,34 +42,14 @@ public class StackCommand extends CommandDsl {
             return;
         }
 
-        var dir = CoordinateUtil.directionFromView(player.getPosition());
-        var direction = new Vec(dir.normalX(), dir.normalY(), dir.normalZ())
-                // Multiply by the region size to get the offset in the direction
-                // Works because direction will be (0 1 0), so only the height is affected
-                .mul(region.max().sub(region.min()));
+        var direction = DirectionUtil.fromView(player.getPosition());
+        var generator = RegionFunctions.stack(region, direction, count);
 
-        // Execute the change
         var session = LocalSession.forPlayer(player);
         session.buildTask("stack")
                 .metadata() //todo
-                .compute((task, world) -> {
-                    //todo we can compute the known block buffer size here (which is more efficient)
-                    var buffer = BlockBuffer.builder(world);
-                    for (int i = 0; i < count; i++) {
-                        var blockOffset = direction.mul(i + 1);
-
-                        // Copy every block to offset
-                        for (var pos : region) {
-                            //todo block entities
-                            buffer.set(pos.add(blockOffset), world.getBlock(pos, Block.Getter.Condition.TYPE).stateId());
-                        }
-                    }
-                    return buffer.build();
-                })
-                .post(result -> {
-                    player.sendMessage(Component.translatable("terraform.selection.stack",
-                            Component.translatable(String.valueOf(result.blocksChanged()))));
-                })
+                .compute(generator)
+                .post(result -> player.sendMessage(Messages.SELECTION_STACKED.with(result.blocksChanged())))
                 .submit();
     }
 }

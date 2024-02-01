@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.experimental.pathtool;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;

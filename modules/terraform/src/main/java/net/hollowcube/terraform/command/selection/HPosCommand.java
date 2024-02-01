@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -22,14 +23,7 @@ public sealed abstract class HPosCommand extends CommandDsl permits HPosCommand.
 
     private void handleSelectionUpdate(@NotNull Player player, @NotNull CommandContext context) {
         // Determine the target position
-        Point targetBlock;
-        try {
-            targetBlock = player.getTargetBlockPosition(512); //todo could be an option somewhere maybe
-        } catch (NullPointerException e) {
-            if (!e.getMessage().contains("Unloaded chunk"))
-                throw new RuntimeException(e);
-            targetBlock = null;
-        }
+        var targetBlock = PlayerUtil.getTargetBlock(player, 512);
         if (targetBlock == null) {
             player.sendMessage(Component.translatable("command.terraform.hpos.no_block"));
             return;

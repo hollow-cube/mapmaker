@@ -9,13 +9,14 @@ import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.item.handler.ItemRegistry;
 import net.hollowcube.map.world.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -258,7 +259,8 @@ public class PlayingMapWorld implements InternalMapWorld {
         removePlayer(player, true);
     }
 
-    public @Blocking void removePlayer(@NotNull Player player, boolean save) {
+    @Blocking
+    public @Nullable SaveStateUpdateResponse removePlayer(@NotNull Player player, boolean save) {
         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
 
         player.removeTag(TAG_PLAYING);
@@ -270,9 +272,10 @@ public class PlayingMapWorld implements InternalMapWorld {
 
         MapWorldHelpers.resetPlayer(player);
 
+        SaveStateUpdateResponse resp = null;
         if (save) {
             var saveState = SaveState.optionalFromPlayer(player);
-            if (saveState == null) return;
+            if (saveState == null) return null;
 
             saveState.updatePlaytime();
             saveState.playState().setPos(player.getPosition());
@@ -280,7 +283,7 @@ public class PlayingMapWorld implements InternalMapWorld {
 
             try {
                 var playerData = PlayerDataV2.fromPlayer(player);
-                server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
+                resp = server.mapService().updateSaveState(map.id(), playerData.id(), saveState.id(), update);
 
                 logger.info("Updated savestate for {}", player.getUuid());
             } catch (Exception e) {
@@ -288,6 +291,7 @@ public class PlayingMapWorld implements InternalMapWorld {
             }
         }
         player.removeTag(SaveState.TAG);
+        return resp;
     }
 
     private @NotNull String getDimensionName() {

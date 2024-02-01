@@ -3,16 +3,13 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
+import net.hollowcube.terraform.compute.RegionFunctions;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.terraform.util.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 public class MoveCommand extends CommandDsl {
@@ -44,36 +41,14 @@ public class MoveCommand extends CommandDsl {
             return;
         }
 
-        var dir = CoordinateUtil.directionFromView(player.getPosition());
-        var offset = new Vec(dir.normalX(), dir.normalY(), dir.normalZ())
-                // Multiply by the region size to get the offset in the direction
-                // Works because direction will be (0 1 0), so only the height is affected
-                .mul(count);
+        var direction = DirectionUtil.fromView(player.getPosition());
+        var generator = RegionFunctions.move(region, direction, count);
 
         // Execute the change
         var session = LocalSession.forPlayer(player);
         session.buildTask("move")
                 .metadata() //todo
-                .compute((task, world) -> {
-                    //todo we can compute the known block buffer size here (which is more efficient)
-                    var buffer = BlockBuffer.builder(world);
-                    for (var pos : region) {
-                        Block block = world.getBlock(pos);
-                        // Don't move air
-                        if (block.isAir()) continue;
-
-                        buffer.set(pos, Block.AIR); // Fill block buffer with air at old locations to delete our current selection
-                        // We do this first in order to not overwrite our valid blocks with air
-                    }
-                    for (var pos : region) {
-                        Block block = world.getBlock(pos);
-                        // Don't move air
-                        if (block.isAir()) continue;
-
-                        buffer.set(pos.add(offset), block); // Fill block buffer with our valid blocks at the new location
-                    }
-                    return buffer.build();
-                })
+                .compute(generator)
                 .post(result -> {
                     player.sendMessage(Component.translatable("terraform.selection.move",
                             Component.translatable(String.valueOf(result.blocksChanged()))));

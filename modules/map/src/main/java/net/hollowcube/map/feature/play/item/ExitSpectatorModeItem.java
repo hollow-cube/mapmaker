@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;

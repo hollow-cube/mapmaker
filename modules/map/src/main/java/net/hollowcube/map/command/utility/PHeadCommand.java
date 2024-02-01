@@ -5,7 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map.item.ExtraItemTags;
+import net.hollowcube.map.item.handler.ExtraItemTags;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.item.ItemStack;

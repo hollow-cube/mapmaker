@@ -6,7 +6,7 @@ import net.hollowcube.map.biome.BiomeContainer;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.item.ItemRegistry;
+import net.hollowcube.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;

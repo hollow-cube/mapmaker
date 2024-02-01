@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.experimental.object;
 
-import net.hollowcube.map.item.BlockItemHandler;
+import net.hollowcube.map.item.handler.BlockItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.minestom.server.instance.block.Block;
@@ -14,7 +14,8 @@ public class TestObjectBlock implements ObjectBlockHandler {
     public static final TestObjectBlock INSTANCE = new TestObjectBlock();
     public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE, Block.COAL_BLOCK);
 
-    private TestObjectBlock() {}
+    private TestObjectBlock() {
+    }
 
     @Override
     public @NotNull ObjectType objectType() {

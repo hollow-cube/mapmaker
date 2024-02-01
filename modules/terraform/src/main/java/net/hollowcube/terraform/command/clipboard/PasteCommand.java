@@ -1,31 +1,36 @@
 package net.hollowcube.terraform.command.clipboard;
 
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.command.util.TFArgument;
+import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class PasteCommand extends CommandDsl {
+    private final Argument<Mask> maskArg = TFArgument.Mask("mask").defaultValue(Mask.always());
 
     public PasteCommand() {
         super("paste");
 
         addSyntax(playerOnly(this::handlePasteClipboard));
+        addSyntax(playerOnly(this::handlePasteClipboard), maskArg);
     }
 
     private void handlePasteClipboard(@NotNull Player player, @NotNull CommandContext context) {
-        var playerSession = PlayerSession.forPlayer(player);
-        var localSession = LocalSession.forPlayer(player);
-        var playerPosition = player.getPosition();
+        var mask = context.get(maskArg);
 
         //todo should have arg for this
+        var localSession = LocalSession.forPlayer(player);
         var selection = localSession.selection(Selection.DEFAULT);
         var region = selection.region();
         if (region == null) {
@@ -34,15 +39,26 @@ public class PasteCommand extends CommandDsl {
         }
 
         //todo should have arg for this
+        var playerSession = PlayerSession.forPlayer(player);
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
 
-        //clipboard.getAsBuffer()
-        localSession.buildTask("paste")
+        execute(player, clipboard, mask);
+    }
+
+    public void execute(@NotNull Player player, @NotNull Clipboard source, @NotNull Mask sourceMask) {
+        var playerPosition = player.getPosition();
+
+        var session = LocalSession.forPlayer(player);
+        session.buildTask("paste")
                 .metadata()
                 .compute((task, world) -> {
                     var buffer = BlockBuffer.builder(world);
-                    clipboard.getSchematicWithRotations().apply(Rotation.NONE, (p, block) -> {
-                        buffer.set(p.add(playerPosition), block.stateId());
+                    var schem = source.getSchematicWithRotations();
+                    var schemWorld = WorldView.empty(task);
+                    schem.apply(Rotation.NONE, (p, block) -> {
+                        // Test the mask against the schematic
+                        if (!sourceMask.test(schemWorld, p, block)) return;
+                        buffer.set(p.add(playerPosition), block);
                     });
                     return buffer.build();
                 })

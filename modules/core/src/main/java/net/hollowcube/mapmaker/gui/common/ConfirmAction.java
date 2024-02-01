@@ -8,8 +8,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
-
 public class ConfirmAction extends View {
     private @NotNull Runnable confirmationCallback;
 
@@ -25,12 +23,10 @@ public class ConfirmAction extends View {
     @Action("yes")
     private void handleYesClick() {
         confirmationCallback.run();
-        System.out.println("skibidi bop bop bop skibidi yes yes yes");
     }
 
     @Action("no")
     private void handleNoClick() {
         popView();
-        System.out.println("no");
     }
 }

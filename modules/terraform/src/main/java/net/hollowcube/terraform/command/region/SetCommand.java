@@ -9,6 +9,7 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -41,9 +42,7 @@ public final class SetCommand extends CommandDsl {
         session.buildTask("set")
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, pattern))
-                .post(result -> {
-                    player.sendMessage(Component.translatable("terraform.selection.set", Component.translatable(String.valueOf(result.blocksChanged()))));
-                })
+                .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
 
     }

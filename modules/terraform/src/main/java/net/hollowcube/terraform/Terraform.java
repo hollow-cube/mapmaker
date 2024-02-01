@@ -4,9 +4,11 @@ import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.terraform.compat.axiom.AxiomModule;
+import net.hollowcube.terraform.compat.worldedit.WorldEditModule;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.hollowcube.terraform.tool.ToolHandler;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -27,6 +29,8 @@ import java.util.function.Supplier;
 public sealed interface Terraform permits TerraformImpl {
     @NotNull
     Supplier<TerraformModule> BASE_MODULE = BaseModule::new;
+    @NotNull
+    Supplier<TerraformModule> WORLDEDIT_MODULE = WorldEditModule::new;
     @NotNull
     Supplier<TerraformModule> AXIOM_MODULE = AxiomModule::new;
 
@@ -70,6 +74,9 @@ public sealed interface Terraform permits TerraformImpl {
 
     @Blocking
     void saveLocalSession(@NotNull Player player, boolean drop);
+
+    //todo rework how tools are handled completely
+    @NotNull ToolHandler toolHandler();
 
 
     class Builder {

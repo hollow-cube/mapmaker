@@ -3,7 +3,7 @@ package net.hollowcube.map.block;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.map.block.interaction.*;
-import net.hollowcube.map.item.ItemTags;
+import net.hollowcube.map.item.handler.ItemTags;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;

@@ -126,6 +126,7 @@ public abstract class MapServerBase implements MapServer {
                 .globalCommandCondition(mapFilter(false, true, false))
                 .module(Terraform.BASE_MODULE)
                 .module(Terraform.AXIOM_MODULE)
+                .module(Terraform.WORLDEDIT_MODULE)
                 .module(MapServerModule::new)
                 .storage(mapService() instanceof NoopMapService ? "memory" : "http")
                 .build();

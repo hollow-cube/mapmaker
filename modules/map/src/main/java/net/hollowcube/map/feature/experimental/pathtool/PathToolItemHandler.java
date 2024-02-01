@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.experimental.pathtool;
 
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,6 @@ public class PathToolItemHandler extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
 //        var map = MapWorld.forPlayer(player);
-
 
 
         if (player.isSneaking()) {

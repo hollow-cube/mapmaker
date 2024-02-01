@@ -16,6 +16,7 @@ import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.event.EventFilter;
@@ -82,7 +83,12 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         FutureUtil.submitVirtual(() -> {
             // Remove the player from the world itself, they are no longer playing (but will remain in the instance)
             // This will also cause their savestate to be written to DB
-            world.removePlayer(player);
+            SaveStateUpdateResponse resp = null;
+            if (world instanceof PlayingMapWorld pmw) {
+                resp = pmw.removePlayer(player, true);
+            } else {
+                world.removePlayer(player);
+            }
             if (world instanceof PlayingMapWorld pmw) {
                 pmw.startFinished(player, false);
             }

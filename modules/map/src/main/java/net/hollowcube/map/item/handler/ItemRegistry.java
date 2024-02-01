@@ -1,10 +1,10 @@
-package net.hollowcube.map.item;
+package net.hollowcube.map.item.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
-import net.hollowcube.map.item.impl.DebugStickItem;
+import net.hollowcube.map.item.DebugStickItem;
 import net.hollowcube.map.world.MapWorld;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;

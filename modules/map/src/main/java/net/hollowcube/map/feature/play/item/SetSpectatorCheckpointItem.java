@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;

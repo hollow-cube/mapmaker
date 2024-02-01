@@ -28,4 +28,10 @@ public class AppliedRewards {
         }
     }
 
+    @Override
+    public String toString() {
+        return "AppliedRewards{" +
+                "entries=" + entries +
+                '}';
+    }
 }

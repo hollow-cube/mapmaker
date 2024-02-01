@@ -46,7 +46,20 @@ public interface RegionSelector {
 
     // Modification
 
-    //todo expand, contract on xyz individually.
+    /**
+     * Reshapes the region by shifting the "low" and "high" points by the given amounts. The "low" and "high" points
+     * are subject to the implementation of the region, and reshape may not be supported at all in some cases.
+     *
+     * <p>Example 1: to shift the selection over by 10 on the X you would pass 10,0,0 and 10,0,0.</p>
+     * <p>Example 2: to uniformly expand by 5 you would pass -5,-5,-5 and 5,5,5.</p>
+     *
+     * @param low  The shift amount for the "low" points
+     * @param high The shift amount for the "high" points
+     * @throws UnsupportedOperationException If the region does not support reshaping
+     */
+    default void reshape(@NotNull Point low, @NotNull Point high) {
+        throw new UnsupportedOperationException("Region does not support reshaping");
+    }
 
     // Serialization
 

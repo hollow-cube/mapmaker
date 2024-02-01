@@ -13,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface WorldView extends Block.Getter {
 
+    static @NotNull WorldView empty(@NotNull Task task) {
+        return new WorldViewEmpty(task);
+    }
+
     static @NotNull WorldView snapshot(@NotNull Task task, @NotNull Instance instance) {
         return new WorldViewInstanceSnapshot(task, SnapshotUpdater.update(instance), instance.getWorldBorder());
     }

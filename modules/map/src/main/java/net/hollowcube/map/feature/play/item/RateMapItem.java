@@ -2,7 +2,7 @@ package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.gui.RateMapView;
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;

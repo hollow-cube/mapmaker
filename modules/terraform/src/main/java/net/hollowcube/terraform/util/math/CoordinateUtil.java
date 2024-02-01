@@ -1,9 +1,9 @@
 package net.hollowcube.terraform.util.math;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
@@ -14,6 +14,14 @@ public final class CoordinateUtil {
 
     public static @NotNull Point floor(@NotNull Point point) {
         return new Vec(point.blockX(), point.blockY(), point.blockZ());
+    }
+
+    public static @NotNull Vec ceil(@NotNull Point point) {
+        return new Vec(Math.ceil(point.x()), Math.ceil(point.y()), Math.ceil(point.z()));
+    }
+
+    public static @NotNull Vec round(@NotNull Point point) {
+        return new Vec(Math.round(point.x()), Math.round(point.y()), Math.round(point.z()));
     }
 
     public static @NotNull Point min(@NotNull Point a, @NotNull Point b) {
@@ -30,24 +38,6 @@ public final class CoordinateUtil {
                 Math.max(a.y(), b.y()),
                 Math.max(a.z(), b.z())
         );
-    }
-
-
-    public static @NotNull Direction directionFromView(@NotNull Pos pos) {
-        float pitch = pos.pitch(), yaw = pos.yaw();
-        if (pitch <= -45) {
-            return Direction.UP;
-        } else if (pitch >= 45) {
-            return Direction.DOWN;
-        } else if (yaw >= -45 && yaw < 45) {
-            return Direction.SOUTH;
-        } else if (yaw >= 45 && yaw < 135) {
-            return Direction.WEST;
-        } else if (yaw >= -135 && yaw < -45) {
-            return Direction.EAST;
-        } else {
-            return Direction.NORTH;
-        }
     }
 
     public static @NotNull NBTCompound toNBT(@NotNull Point pos) {
@@ -73,6 +63,10 @@ public final class CoordinateUtil {
         } else {
             return new Vec(x, y, z);
         }
+    }
+
+    public static @NotNull Component prettyBlockPos(@NotNull Point point) {
+        return Component.text(String.format("%d, %d, %d", point.blockX(), point.blockY(), point.blockZ()));
     }
 
 }

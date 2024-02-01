@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;

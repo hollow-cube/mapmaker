@@ -111,7 +111,6 @@ public class MapEntity extends Entity {
             return Metadata.Entry.read(type, b1);
         });
         for (var entry : loadedMetadata.entrySet()) {
-            System.out.println(entry.getKey() + " -> " + entry.getValue());
             metadata.setIndex(entry.getKey(), entry.getValue());
         }
 

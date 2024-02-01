@@ -5,6 +5,8 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public interface Mask {
 
     // Constants
@@ -15,6 +17,13 @@ public interface Mask {
 
     static @NotNull Mask never() {
         return (world, point, block) -> false;
+    }
+
+    static @NotNull Mask air() {
+        class Holder {
+            static final Mask INSTANCE = new BlockMask(Block.AIR.id(), Map.of());
+        }
+        return Holder.INSTANCE;
     }
 
     // Logic operations

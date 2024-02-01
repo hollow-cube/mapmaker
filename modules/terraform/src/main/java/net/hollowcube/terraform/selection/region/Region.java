@@ -1,14 +1,17 @@
 package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.cui.ClientInterface;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.function.BiFunction;
 
 public interface Region extends Iterable<@NotNull Point> {
 
-    enum Type {
+    enum Type implements ComponentLike {
         CUBOID(CuboidRegionSelector::new),
         LINE(LineRegionSelector::new),
         BEZIER_SURFACE(BezierSurfaceRegionSelector::new);
@@ -22,6 +25,11 @@ public interface Region extends Iterable<@NotNull Point> {
         public @NotNull RegionSelector newSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
             return factory.apply(cui, selectionId);
         }
+
+        @Override
+        public @NotNull Component asComponent() {
+            return Component.translatable("terraform.region." + name().toLowerCase(Locale.ROOT));
+        }
     }
 
     /**
@@ -33,6 +41,10 @@ public interface Region extends Iterable<@NotNull Point> {
      * Maximum rectangular bounding pos (exclusive)
      */
     @NotNull Point max();
+
+    default @NotNull Point size() {
+        return max().sub(min());
+    }
 
     default int volume() {
         var min = min();

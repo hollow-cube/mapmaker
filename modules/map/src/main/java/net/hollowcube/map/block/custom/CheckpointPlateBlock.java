@@ -7,7 +7,7 @@ import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
 import net.hollowcube.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.map.gui.effect.EditCheckpointView;
-import net.hollowcube.map.item.BlockItemHandler;
+import net.hollowcube.map.item.handler.BlockItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.command.util.DebugCommand;

@@ -7,7 +7,7 @@ import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.terraform.util.math.CoordinateUtil;
+import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -42,7 +42,7 @@ public class SmearCommand extends CommandDsl {
             return;
         }
 
-        var dir = CoordinateUtil.directionFromView(player.getPosition());
+        var dir = DirectionUtil.fromView(player.getPosition());
         var direction = new Vec(dir.normalX(), dir.normalY(), dir.normalZ());
 
         // Execute the change

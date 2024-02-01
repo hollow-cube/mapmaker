@@ -1,4 +1,4 @@
-package net.hollowcube.map.item;
+package net.hollowcube.map.item.handler;
 
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.TagHandler;

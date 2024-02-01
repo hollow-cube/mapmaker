@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.MapServer;
-import net.hollowcube.map.item.ItemHandler;
+import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.player.DisplayName;
