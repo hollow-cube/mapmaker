@@ -34,7 +34,7 @@ public class MapEntry extends View {
 
     private final MapData map;
     private PersonalizedMapData.Progress progress = null; // null is unknown
-    private Component authorName = null;
+    private DisplayName authorName = null;
 
     public MapEntry(@NotNull Context context, @NotNull MapData map) {
         super(context);
@@ -77,8 +77,7 @@ public class MapEntry extends View {
 
         // todo we could update the icon + title immediately and only update the lore once we have the player name perhaps
         if (authorName == null) {
-            authorName = playerService.getPlayerDisplayName2(map.owner())
-                    .build(DisplayName.Context.PLAIN);
+            authorName = playerService.getPlayerDisplayName2(map.owner());
         }
 
         var title = Component.translatable(switch (map.settings().getVariant()) {

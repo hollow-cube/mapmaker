@@ -264,7 +264,7 @@ public class EditMap extends View {
 
         // Open the map details view for the newly published map
         var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-        pushView(c -> new MapDetailsView(c, map, authorName.build(DisplayName.Context.PLAIN)));
+        pushView(c -> new MapDetailsView(c, map, authorName));
     }
 
     private static final int MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment() ? 1 : 5 * 60 * 1000; // 5 minutes

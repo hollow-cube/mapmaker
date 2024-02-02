@@ -39,8 +39,7 @@ public class MapDetailsItem extends ItemHandler {
             var server = MapServer.StaticAbuse.instance;
 
             var map = MapWorld.forPlayer(player).map();
-            var authorName = server.playerService().getPlayerDisplayName2(map.owner())
-                    .build(DisplayName.Context.PLAIN);
+            var authorName = server.playerService().getPlayerDisplayName2(map.owner());
             server.newOpenGUI(player, c -> new MapDetailsView(c, map, authorName));
         });
     }

@@ -79,4 +79,11 @@ public record DisplayName(
         return null;
     }
 
+    public @Nullable String getUsername() {
+        for (var part : parts) {
+            if (part.type.equals("username")) return part.text;
+        }
+        return null;
+    }
+
 }

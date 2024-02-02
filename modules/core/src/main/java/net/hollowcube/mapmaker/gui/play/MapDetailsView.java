@@ -112,7 +112,7 @@ public class MapDetailsView extends View {
 
     private final MapData map;
 
-    public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull Component authorName) {
+    public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull DisplayName authorName) {
         super(context);
         this.map = map;
 
@@ -296,16 +296,14 @@ public class MapDetailsView extends View {
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
-        if (authorName instanceof TextComponent tc) {
-            //todo this is cursed code.
-            if (tc.content().isEmpty()) tc = (TextComponent) tc.children().get(0);
-            authorText.setText(tc.content());
+        String username = authorName.getUsername();
+        if (username != null) {
+            authorText.setText(username);
         } else {
-            var plainAuthorName = PlainTextComponentSerializer.plainText().serialize(authorName);
-            authorText.setText(plainAuthorName);
+            // Fall back to uuid
+            authorText.setText(map.owner());
         }
-        authorText.setArgs(authorName);
-
+        authorText.setArgs(authorName.build(DisplayName.Context.PLAIN));
     }
 
     public void handleReportMap(@NotNull Player player) {
