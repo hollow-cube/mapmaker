@@ -20,13 +20,16 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
@@ -296,16 +299,27 @@ public class MapDetailsView extends View {
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
-        if (authorName instanceof TextComponent tc) {
-            //todo this is cursed code.
-            if (tc.content().isEmpty()) tc = (TextComponent) tc.children().get(0);
-            authorText.setText(tc.content());
+        // Set author name
+        String uuid = map.owner();
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(uuid));
+        if (player != null) {
+            authorText.setText(player.getUsername());
         } else {
-            var plainAuthorName = PlainTextComponentSerializer.plainText().serialize(authorName);
-            authorText.setText(plainAuthorName);
+            var json = MojangUtils.fromUuid(uuid);
+            if (json == null) {
+                // Failed to retrieve, just display UUID
+                authorText.setText(uuid);
+            } else {
+                // https://wiki.vg/Mojang_API#UUID_to_Profile_and_Skin.2FCape
+                try {
+                    String name = json.get("name").getAsString();
+                    authorText.setText(name);
+                } catch (UnsupportedOperationException | IllegalStateException e) {
+                    authorText.setText(uuid);
+                }
+            }
         }
         authorText.setArgs(authorName);
-
     }
 
     public void handleReportMap(@NotNull Player player) {
