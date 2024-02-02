@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.mask.script;
+package net.hollowcube.terraform.util.script;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +19,6 @@ public class Lexer {
 
     public @Nullable Token next() {
         start = cursor;
-
-        // Identifier chars are a-z, A-Z, 0-9, -, _
 
         if (atEnd()) return null;
         consumeWhitespace();

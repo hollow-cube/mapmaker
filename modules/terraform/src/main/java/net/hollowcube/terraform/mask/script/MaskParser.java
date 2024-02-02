@@ -1,5 +1,7 @@
 package net.hollowcube.terraform.mask.script;
 
+import net.hollowcube.terraform.util.script.Lexer;
+import net.hollowcube.terraform.util.script.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

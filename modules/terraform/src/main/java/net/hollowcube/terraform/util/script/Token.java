@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.mask.script;
+package net.hollowcube.terraform.util.script;
 
 import org.jetbrains.annotations.NotNull;
 
