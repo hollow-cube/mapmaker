@@ -3,7 +3,6 @@ package net.hollowcube.map.feature.play.item;
 import net.hollowcube.map.item.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

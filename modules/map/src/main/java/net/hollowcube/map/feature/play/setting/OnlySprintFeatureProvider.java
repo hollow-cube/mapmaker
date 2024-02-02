@@ -7,7 +7,6 @@ import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
-import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -15,7 +14,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStopSprintingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 @AutoService(FeatureProvider.class)
 public class OnlySprintFeatureProvider implements FeatureProvider {
     private static final Tag<Point> ONLY_SPRINT_TAG = Tag.Transient("onlysprint");
-
-    private static final Sound NOSPRINT_RESET_SOUND = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_PLING, Sound.Source.PLAYER, 1f, 0.7f);
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/onlysprint", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
@@ -62,7 +58,7 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
         var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
-        player.playSound(NOSPRINT_RESET_SOUND);
+        //todo sound effect for sprint stopped
     }
 
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
@@ -78,6 +74,6 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
         player.removeTag(ONLY_SPRINT_TAG);
         var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
-        player.playSound(NOSPRINT_RESET_SOUND);
+        //todo sound effect for sprint stopped
     }
 }
