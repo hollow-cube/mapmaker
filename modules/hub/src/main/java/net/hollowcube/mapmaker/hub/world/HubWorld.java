@@ -47,9 +47,9 @@ public class HubWorld {
 
         instance = new MapInstance("mapmaker:hub");
 //        instance = new MapInstance("mapmaker:hub", DimensionType.OVERWORLD);
+//        instance.setChunkSupplier(LightingChunk::new);
         instance.setTag(MARKER, true);
         instance.setTag(THIS_TAG, this);
-//        instance.setChunkSupplier(LightingChunk::new);
 
         var eventNode = instance.eventNode();
         eventNode.addChild(HubHotbar.eventNode());
