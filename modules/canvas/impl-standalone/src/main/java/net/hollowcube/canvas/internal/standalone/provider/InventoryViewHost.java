@@ -112,7 +112,7 @@ public class InventoryViewHost {
         height = element.height();
 
         // Special case for anvil GUIs
-        if (id.equals("anvil")) {
+        if ("anvil".equals(id)) {
             playerInventoryRows = element.height() - 1;
             return InventoryType.ANVIL;
         }

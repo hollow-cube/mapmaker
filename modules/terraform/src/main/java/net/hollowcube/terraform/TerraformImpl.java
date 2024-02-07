@@ -77,11 +77,11 @@ public final class TerraformImpl implements Terraform {
             MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
         }
 
-        // Construct the registry immediately
-        this.registry = new TerraformRegistry(injector, modules, this.eventNode, commandManager, commandCondition);
-
         this.toolHandler = new ToolHandler(true);
         this.eventNode.addChild(this.toolHandler.eventNode());
+
+        // Construct the registry immediately
+        this.registry = new TerraformRegistry(injector, modules, this.eventNode, commandManager, commandCondition);
 
         var storageFactory = Objects.requireNonNull(this.registry.storage(storage),
                 "No matching storage implementation: " + storage);

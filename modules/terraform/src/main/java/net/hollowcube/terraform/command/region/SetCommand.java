@@ -3,7 +3,6 @@ package net.hollowcube.terraform.command.region;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
@@ -18,10 +17,10 @@ public final class SetCommand extends CommandDsl {
     private final Argument<Pattern> patternArg;
     private final Argument<Selection> selectionArg = TFArgument.Selection("selection");
 
-    public SetCommand(@NotNull Terraform tf) {
+    public SetCommand() {
         super("set");
 
-        this.patternArg = TFArgument.Pattern("pattern", tf);
+        this.patternArg = TFArgument.Pattern("pattern");
 
         addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg);
         addSyntax(playerOnly(this::handleSetRegionToPattern), patternArg, selectionArg);

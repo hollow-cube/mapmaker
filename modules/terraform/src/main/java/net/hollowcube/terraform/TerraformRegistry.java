@@ -67,12 +67,16 @@ public final class TerraformRegistry {
             }
 
             for (var commandClass : module.commands()) {
-                var command = injector.getInstance(commandClass);
-                if (condition != null) {
-                    var existing = command.getCondition();
-                    command.setCondition(existing == null ? condition : and(existing, condition));
+                try {
+                    var command = injector.getInstance(commandClass);
+                    if (condition != null) {
+                        var existing = command.getCondition();
+                        command.setCondition(existing == null ? condition : and(existing, condition));
+                    }
+                    commandManager.register(command);
+                } catch (Exception e) {
+                    logger.error("Failed to register command {}", commandClass.getName(), e);
                 }
-                commandManager.register(command);
             }
 
             for (var state : module.blockStateOverrides().entrySet()) {

@@ -128,7 +128,7 @@ public abstract class MapServerBase implements MapServer {
                 .module(Terraform.AXIOM_MODULE)
                 .module(Terraform.WORLDEDIT_MODULE)
                 .module(MapServerModule::new)
-                .storage(mapService() instanceof NoopMapService ? "memory" : "http")
+                .storage(mapService() instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
                 .build();
 
         this.guiController = Controller.make(Map.of(
