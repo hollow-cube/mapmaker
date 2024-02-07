@@ -6,6 +6,9 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.snapshot.SnapshotUpdater;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Immutable view of a "world".
  * <p>
@@ -31,5 +34,9 @@ public interface WorldView extends Block.Getter {
     @NotNull Task task();
 
     boolean contains(int x, int y, int z);
+
+    default @NotNull Random random() {
+        return ThreadLocalRandom.current();
+    }
 
 }

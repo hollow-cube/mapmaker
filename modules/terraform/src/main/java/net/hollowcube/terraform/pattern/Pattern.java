@@ -8,14 +8,11 @@ import org.jetbrains.annotations.NotNull;
 public interface Pattern {
 
     static @NotNull Pattern air() {
-        class Holder {
-            static final Pattern AIR = (world, blockPosition) -> Block.AIR;
-        }
-        return Holder.AIR;
+        return BlockPattern.AIR;
     }
 
     static @NotNull Pattern block(@NotNull Block block) {
-        return (world, blockPosition) -> block;
+        return new BlockPattern(block);
     }
 
     @NotNull Block blockAt(@NotNull WorldView world, @NotNull Point blockPosition);

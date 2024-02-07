@@ -61,6 +61,10 @@ public class CommandDsl {
         }
     }
 
+    public @Nullable CommandCondition getCondition() {
+        return condition;
+    }
+
     public void setCondition(@Nullable CommandCondition condition) {
         this.condition = condition;
     }

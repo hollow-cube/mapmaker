@@ -11,8 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TerraformStorageMemory implements TerraformStorage {
-    public static final Factory FACTORY = new Factory("memory", TerraformStorageMemory::new);
-
     private final Map<String, byte[]> sessionData = new ConcurrentHashMap<>();
     private final Map<String, byte[]> localSessionData = new ConcurrentHashMap<>();
 
@@ -20,6 +18,9 @@ public class TerraformStorageMemory implements TerraformStorage {
     }
 
     private final Map<String, List<Schem>> schematics = new ConcurrentHashMap<>();
+
+    public TerraformStorageMemory() {
+    }
 
     @Override
     public byte @Nullable [] loadPlayerSession(@NotNull String playerId) {

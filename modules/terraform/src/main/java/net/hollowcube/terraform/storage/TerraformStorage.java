@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Storage API for Terraform.
@@ -18,9 +17,6 @@ import java.util.function.Supplier;
  */
 @Blocking
 public interface TerraformStorage {
-
-    record Factory(@NotNull String name, @NotNull Supplier<TerraformStorage> newStorageFunc) {
-    }
 
     // Sessions
 

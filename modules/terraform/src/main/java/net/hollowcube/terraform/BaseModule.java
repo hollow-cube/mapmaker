@@ -35,44 +35,44 @@ final class BaseModule implements TerraformModule {
     }
 
     @Override
-    public @NotNull Set<TerraformStorage.Factory> storageTypes() {
-        return Set.of(TerraformStorageMemory.FACTORY);
+    public @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
+        return Set.of(TerraformStorageMemory.class);
     }
 
     @Override
-    public @NotNull Set<CommandDsl> commands(@NotNull Terraform terraform) {
+    public @NotNull Set<Class<? extends CommandDsl>> commands() {
         return Set.of(
                 // Root/Debug
-                new TerraformCommand(),
+                TerraformCommand.class,
 
                 // Selection
-                new PosCommand.Primary(), new PosCommand.Secondary(),
-                new HPosCommand.Primary(), new HPosCommand.Secondary(),
-                new SelCommand(),
+                PosCommand.Primary.class, PosCommand.Secondary.class,
+                HPosCommand.Primary.class, HPosCommand.Secondary.class,
+                SelCommand.class,
 //                new SelectionCommands.Outset(condition),
 //                new SelectionCommands.Inset(condition),
 //                new SelectionCommands.Chunk(condition),
 //                new SelectionCommands.Size(condition),
 
                 // Region
-                new SetCommand(terraform), new ReplaceCommand(terraform),
-                new StackCommand(), new SmearCommand(),
-                new MoveCommand(),
-                new SetLightCommand(),
+                SetCommand.class, ReplaceCommand.class,
+                StackCommand.class, SmearCommand.class,
+                MoveCommand.class,
+                SetLightCommand.class,
 
                 // History
-                new UndoCommand(), new RedoCommand(),
-                new ClearHistoryCommand(),
+                UndoCommand.class, RedoCommand.class,
+                ClearHistoryCommand.class,
 
                 // Clipboard
-                new CopyCommand(), new CutCommand(), new PasteCommand(),
-                new ClipboardCommand(),
+                CopyCommand.class, CutCommand.class, PasteCommand.class,
+                ClipboardCommand.class,
 
                 // Schematic
-                new SchemCommand(),
+                SchemCommand.class,
 
                 // Tools
-                new ToolCommand(terraform.toolHandler())
+                ToolCommand.class
         );
     }
 }

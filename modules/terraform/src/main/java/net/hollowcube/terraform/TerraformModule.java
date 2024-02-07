@@ -25,7 +25,7 @@ public interface TerraformModule {
         return Set.of();
     }
 
-    default @NotNull Set<TerraformStorage.Factory> storageTypes() {
+    default @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
         return Set.of();
     }
 
@@ -35,11 +35,8 @@ public interface TerraformModule {
 
     /**
      * Returns any commands to register.
-     *
-     * @param terraform The terraform instance being loaded. <b>Note that the instance has
-     *                  not been fully initialized at this point, it should only be stored.</b>
      */
-    default @NotNull Set<CommandDsl> commands(@NotNull Terraform terraform) {
+    default @NotNull Set<Class<? extends CommandDsl>> commands() {
         return Set.of();
     }
 

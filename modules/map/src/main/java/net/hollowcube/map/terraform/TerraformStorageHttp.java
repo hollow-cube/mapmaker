@@ -20,8 +20,11 @@ import java.util.List;
 public class TerraformStorageHttp extends AbstractHttpService implements TerraformStorage {
     private final String url;
 
-    public TerraformStorageHttp(@NotNull String url) {
-        this.url = url + "/v1/internal/terraform";
+    public TerraformStorageHttp() {
+        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
+        if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
+
+        this.url = mapServiceUrl + "/v1/internal/terraform";
     }
 
     @Override

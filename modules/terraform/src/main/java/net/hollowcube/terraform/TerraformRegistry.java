@@ -1,9 +1,12 @@
 package net.hollowcube.terraform;
 
+import com.google.inject.Injector;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.collection.ObjectArray;
 import org.jetbrains.annotations.NotNull;
@@ -12,10 +15,10 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
+
+import static net.hollowcube.command.CommandCondition.and;
 
 /**
  * An immutable registry of all terraform assets (modules, region types, tools, brushes, etc).
@@ -27,7 +30,7 @@ public final class TerraformRegistry {
     private static final Logger logger = LoggerFactory.getLogger(TerraformRegistry.class);
 
     private final Map<String, RegionSelector.Factory> regionTypes;
-    private final Map<String, TerraformStorage.Factory> storageTypes;
+    private final Set<Class<? extends TerraformStorage>> storageTypes;
 
     private final CommandManager commandManager;
 
@@ -35,11 +38,12 @@ public final class TerraformRegistry {
     private final ObjectArray<Block> BLOCK_STATES = ObjectArray.singleThread(16384);
 
     TerraformRegistry(
-            @NotNull TerraformImpl tf, @NotNull Collection<Supplier<TerraformModule>> modules,
+            @NotNull Injector injector, @NotNull Collection<Supplier<TerraformModule>> modules,
+            @NotNull EventNode<InstanceEvent> rootEventNode,
             @NotNull CommandManager commandManager, @Nullable CommandCondition condition
     ) {
         var regionTypes = new HashMap<String, RegionSelector.Factory>();
-        var storageTypes = new HashMap<String, TerraformStorage.Factory>();
+        var storageTypes = new HashSet<Class<? extends TerraformStorage>>();
 
         // Copy vanilla blocks by their state IDs
         for (short i = 0; i < Short.MAX_VALUE; i++) {
@@ -56,16 +60,18 @@ public final class TerraformRegistry {
                 regionTypes.put(regionType.id(), regionType);
             }
 
-            for (var storageType : module.storageTypes()) {
-                storageTypes.put(storageType.name(), storageType);
-            }
+            storageTypes.addAll(module.storageTypes());
 
             for (var eventNode : module.eventNodes()) {
-                tf.eventNode.addChild(eventNode);
+                rootEventNode.addChild(eventNode);
             }
 
-            for (var command : module.commands(tf)) {
-                if (condition != null) command.setCondition(condition);
+            for (var commandClass : module.commands()) {
+                var command = injector.getInstance(commandClass);
+                if (condition != null) {
+                    var existing = command.getCondition();
+                    command.setCondition(existing == null ? condition : and(existing, condition));
+                }
                 commandManager.register(command);
             }
 
@@ -76,7 +82,7 @@ public final class TerraformRegistry {
         }
 
         this.regionTypes = Map.copyOf(regionTypes);
-        this.storageTypes = Map.copyOf(storageTypes);
+        this.storageTypes = Set.copyOf(storageTypes);
         this.commandManager = commandManager;
 
         BLOCK_STATES.trim();
@@ -87,8 +93,18 @@ public final class TerraformRegistry {
         return regionTypes.get(id);
     }
 
-    public TerraformStorage.@UnknownNullability Factory storage(@NotNull String name) {
-        return storageTypes.get(name);
+    public @Nullable Class<? extends TerraformStorage> storage(@NotNull String name) {
+        Class<? extends TerraformStorage> type = null;
+        for (var storageTypeClass : storageTypes) {
+            if (storageTypeClass.getName().endsWith(name)) {
+                if (type != null) {
+                    throw new IllegalStateException("Storage name matches multiple implementations: " +
+                            type.getName() + " and " + storageTypeClass.getName());
+                }
+                type = storageTypeClass;
+            }
+        }
+        return type;
     }
 
     public @UnknownNullability Block blockState(int stateId) {

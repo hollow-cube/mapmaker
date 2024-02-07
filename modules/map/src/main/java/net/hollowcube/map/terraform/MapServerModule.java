@@ -23,14 +23,8 @@ public class MapServerModule implements TerraformModule {
             .addListener(TerraformPreSpawnEntityEvent.class, this::handleSpawnEntity);
 
     @Override
-    public @NotNull Set<TerraformStorage.Factory> storageTypes() {
-        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-        if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
-        final var mapServiceUrlFinal = mapServiceUrl;
-
-        return Set.of(
-                new TerraformStorage.Factory("http", () -> new TerraformStorageHttp(mapServiceUrlFinal))
-        );
+    public @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
+        return Set.of(TerraformStorageHttp.class);
     }
 
     @Override
