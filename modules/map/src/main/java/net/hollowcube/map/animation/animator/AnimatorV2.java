@@ -4,13 +4,13 @@ import net.hollowcube.map.animation.Animator;
 import net.hollowcube.map.animation.property.Keyframe;
 import net.hollowcube.map.animation.property.KeyframeSequence;
 import net.hollowcube.map.animation.property.Property;
+import net.hollowcube.map.mod.packet.server.HCUpdateAnimationDataPacket;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityMetadataStealer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.BundlePacket;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class AnimatorV2 implements Animator {
 
     @Override
     public void seek(int tick) {
-        Check.argCondition(tick < 0, "tick cannot be negative");
+        tick = Math.max(0, tick);
 
         if (entity.getEntityMeta() instanceof AbstractDisplayMeta meta) {
             meta.setNotifyAboutChanges(false);
@@ -176,6 +176,13 @@ public class AnimatorV2 implements Animator {
         }
 
         t++;
+    }
+
+    public @NotNull HCUpdateAnimationDataPacket.Entry createAddObjectEntry() {
+        return new HCUpdateAnimationDataPacket.AddObject(
+                entity.getUuid(), entity.getEntityId(),
+                List.copyOf(keyframes.values())
+        );
     }
 
     private class AnimatingEntity extends Entity {

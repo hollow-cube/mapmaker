@@ -44,7 +44,7 @@ public class AnimCommand extends CommandDsl {
         var builder = editingWorld.animationBuilder();
 
         var tick = context.get(tickArg);
-        builder.seek(tick);
+        builder.seek(tick, true);
     }
 
     private void handlePlayAnimation(@NotNull Player player, @NotNull CommandContext context) {

@@ -6,11 +6,13 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.SlotState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.kyori.adventure.permission.PermissionChecker;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

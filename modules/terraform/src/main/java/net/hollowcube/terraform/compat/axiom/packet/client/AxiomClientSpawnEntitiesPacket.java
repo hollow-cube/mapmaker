@@ -24,13 +24,14 @@ public record AxiomClientSpawnEntitiesPacket(
     }
 
     public record Entry(
+            @NotNull UUID uuid,
             @NotNull Pos pos,
             @Nullable UUID copyFrom,
             @NotNull NBTCompound nbt
     ) {
 
         public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
-            this(ProtocolUtil.readPos(buffer),
+            this(buffer.read(NetworkBuffer.UUID), ProtocolUtil.readPos(buffer),
                     buffer.readOptional(NetworkBuffer.UUID),
                     (NBTCompound) buffer.read(NetworkBuffer.NBT));
         }
