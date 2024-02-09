@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class AxiomPacketListener {
@@ -183,7 +182,7 @@ public final class AxiomPacketListener {
                 EventDispatcher.call(preEvent);
                 if (preEvent.isCancelled()) continue;
 
-                var entity = preEvent.getConstructor().apply(entityType, UUID.randomUUID());
+                var entity = preEvent.getConstructor().apply(entityType, entry.uuid());
                 applyEntityMetadataFromNbt(entity.getEntityMeta(), nbt);
 
                 var event = new TerraformSpawnEntityEvent(player, instance, entity, entry.pos());

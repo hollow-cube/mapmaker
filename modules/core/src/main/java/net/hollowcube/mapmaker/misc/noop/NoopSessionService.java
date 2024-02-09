@@ -66,6 +66,6 @@ public class NoopSessionService implements SessionService {
 
     @Override
     public @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req) {
-        throw new UnsupportedOperationException();
+        return new JoinMapResponse("1", "2");
     }
 }

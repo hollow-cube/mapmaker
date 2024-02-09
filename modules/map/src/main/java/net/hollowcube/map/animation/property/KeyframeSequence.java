@@ -1,6 +1,7 @@
 package net.hollowcube.map.animation.property;
 
 import net.minestom.server.entity.Entity;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * Sequence represents the keyframes for a single property of an object.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class KeyframeSequence<T> {
     public final Property<T> property;
     public List<Keyframe<T>> keyframes = new ArrayList<>();
@@ -120,5 +122,9 @@ public class KeyframeSequence<T> {
         property.apply(entity, from.value(), to.value(), progress);
     }
 
+    public void write(@NotNull NetworkBuffer buffer) {
+        buffer.write(NetworkBuffer.STRING, property.name());
+        buffer.writeCollection(keyframes, (b, keyframe) -> b.write(NetworkBuffer.VAR_INT, keyframe.time()));
+    }
 
 }

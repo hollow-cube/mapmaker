@@ -3,7 +3,11 @@ package net.hollowcube.map.animation;
 import net.hollowcube.map.animation.animator.AnimatorV2;
 import net.hollowcube.map.animation.property.Properties;
 import net.hollowcube.map.animation.property.Property;
+import net.hollowcube.map.mod.HCModListener;
+import net.hollowcube.map.mod.packet.server.HCSetAnimationStatePacket;
+import net.hollowcube.map.mod.packet.server.HCUpdateAnimationDataPacket;
 import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
@@ -19,6 +23,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
@@ -26,6 +31,7 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,33 +50,40 @@ public class AnimationBuilder {
 
     private Task task = null;
 
+    public static AnimationBuilder instance;
+
     public AnimationBuilder(@NotNull EditingMapWorld world) {
+        instance = this;
         this.world = world;
+        var lis = new HCModListener();
         this.eventNode = EventNode.type("animation_builder", EventFilter.INSTANCE, this::isEventRelevant)
                 .addListener(TerraformSpawnEntityEvent.class, this::handleEntitySpawn)
                 .addListener(TerraformMoveEntityEvent.class, this::handleEntityMove)
-                .addListener(TerraformModifyEntityEvent.class, this::handleEntityModified);
+                .addListener(TerraformModifyEntityEvent.class, this::handleEntityModified)
+                .addListener(PlayerPluginMessageEvent.class, lis::handlePluginMessage)
+                .addListener(PlayerSpawnInInstanceEvent.class, this::handlePlayerSpawn);
         world.addScopedEventNode(eventNode);
     }
 
-    public void seek(int tick) {
+    public void seek(int tick, boolean needsSync) {
         var wasPlaying = task != null;
         if (wasPlaying) {
             pause();
             world.instance().scheduleNextTick(instance -> {
-                seek(tick);
+                seek(tick, false);
                 play();
-
             });
             return;
         }
-
 
         this.tick = tick;
         animators.forEach(animator -> {
             animator.seek(tick);
             animator.sync();
         });
+        if (needsSync) {
+            PacketUtils.sendPacket(audience, new HCSetAnimationStatePacket(tick, 1f));
+        }
     }
 
     public void play() {
@@ -78,26 +91,22 @@ public class AnimationBuilder {
     }
 
     public void play(int delay) {
-        if (task != null) {
-            throw new IllegalStateException("Animation is already playing");
-        }
+        if (task != null) return; // Already playing
 
         this.task = world.instance().scheduler().scheduleTask(this::tick, TaskSchedule.tick(delay), TaskSchedule.tick(1));
     }
 
     public void pause() {
-        if (task == null) {
-            throw new IllegalStateException("Animation is not playing");
-        }
+        if (task == null) return; // Already paused
 
         task.cancel();
         task = null;
 
-        seek(tick);
+        seek(tick, false);
     }
 
     public void step() {
-        seek(tick + 1);
+        seek(tick + 1, false);
     }
 
     private void tick() {
@@ -126,6 +135,19 @@ public class AnimationBuilder {
         return isActive() && world.instance().equals(instance);
     }
 
+    private void handlePlayerSpawn(@NotNull PlayerSpawnInInstanceEvent event) {
+        var player = event.getPlayer();
+
+        var actionbar = ActionBar.forPlayer(player);
+        actionbar.addProvider(new ActionBarProvider());
+
+        // Send the existing data to them
+        for (var animator : animators) {
+            PacketUtils.sendPacket(player, new HCUpdateAnimationDataPacket(animator.createAddObjectEntry()));
+
+        }
+    }
+
     private void handleEntitySpawn(@NotNull TerraformSpawnEntityEvent event) {
         var animator = new AnimatorV2(world.instance(), event.getEntity(), tick);
         event.setEntity(animator.getEntity());
@@ -134,6 +156,8 @@ public class AnimationBuilder {
         // Add an initial keyframe with the position
         animator.keyframe(Properties.POSITION).setValue(event.getPosition());
         buildParticleData();
+
+        PacketUtils.sendPacket(audience, new HCUpdateAnimationDataPacket(animator.createAddObjectEntry()));
 
         audience.sendMessage(Component.text("Added entity " + event.getEntity().getUuid()));
     }
@@ -144,7 +168,9 @@ public class AnimationBuilder {
 
         animator.keyframe(Properties.POSITION).setValue(event.getNewPosition());
         buildParticleData();
-        System.out.println("MOVED ENTITY " + event.getEntity().getUuid() + " TO " + event.getNewPosition() + " AT " + tick);
+        PacketUtils.sendPacket(audience, new HCUpdateAnimationDataPacket(
+                new HCUpdateAnimationDataPacket.UpdateProperty(animator.getEntity().getUuid(), animator.getKeyframes().get(Properties.POSITION))
+        ));
     }
 
     private void handleEntityModified(@NotNull TerraformModifyEntityEvent event) {
@@ -170,8 +196,10 @@ public class AnimationBuilder {
 
         // The value seems to have changed, so we should assign it
         animator.keyframe(property).setValue(newValue);
-        System.out.println(property + "=" + newValue + " at t=" + tick);
         buildParticleData();
+        PacketUtils.sendPacket(audience, new HCUpdateAnimationDataPacket(
+                new HCUpdateAnimationDataPacket.UpdateProperty(animator.getEntity().getUuid(), animator.getKeyframes().get(property))
+        ));
     }
 
     private @Nullable AnimatorV2 getAnimatorForEntity(@NotNull Entity entity) {
@@ -219,23 +247,24 @@ public class AnimationBuilder {
     }
 
     private void buildParticleData() {
-        var points = new ArrayList<Point>();
+        var particles = new ArrayList<ParticlePacket>();
 
         for (var animator : animators) {
+            var points = new ArrayList<Point>();
+
             var positionFrames = animator.getKeyframes().get(Properties.POSITION);
             if (positionFrames == null) continue;
 
             for (var keyframe : positionFrames.keyframes) {
                 points.add((Pos) keyframe.value());
             }
-        }
 
-        var particles = new ArrayList<ParticlePacket>();
-        for (int i = 0; i < points.size() - 1; i++) {
-            var from = points.get(i);
-            var to = points.get(i + 1);
+            for (int i = 0; i < points.size() - 1; i++) {
+                var from = points.get(i);
+                var to = points.get(i + 1);
 
-            particles.addAll(createParticleLine(from, to, 0.1f, 0xFF0000));
+                particles.addAll(createParticleLine(from, to, 0.1f, 0xFF0000));
+            }
         }
 
         this.particles = particles;

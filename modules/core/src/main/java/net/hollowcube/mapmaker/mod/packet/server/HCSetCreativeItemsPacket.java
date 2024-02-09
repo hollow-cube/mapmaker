@@ -25,7 +25,7 @@ public record HCSetCreativeItemsPacket(
     }
 
     @Override
-    public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
+    public void write0(@NotNull NetworkBuffer buffer) {
         ProtocolUtil.writeMap(buffer, STRING, (entries, buf) -> buf.writeCollection(entries, (b, entry) -> entry.write(b)), entriesByGroup);
     }
 

@@ -41,6 +41,20 @@ public final class ProtocolUtil {
         }
     }
 
+    public static <K, V> void writeMap(
+            @NotNull NetworkBuffer buffer,
+            @NotNull BiConsumer<K, NetworkBuffer> keyWriter,
+            @NotNull BiConsumer<V, NetworkBuffer> valueWriter,
+            @NotNull Map<K, V> map
+
+    ) {
+        buffer.write(VAR_INT, map.size());
+        for (var entry : map.entrySet()) {
+            keyWriter.accept(entry.getKey(), buffer);
+            valueWriter.accept(entry.getValue(), buffer);
+        }
+    }
+
     public static <K, V> @NotNull Map<K, V> readMap(
             @NotNull NetworkBuffer buffer,
             @NotNull NetworkBuffer.Type<K> keyType,
