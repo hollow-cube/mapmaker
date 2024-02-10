@@ -1,6 +1,7 @@
 package net.hollowcube.proxy;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -22,7 +23,9 @@ import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.player.SessionServiceImpl;
+import net.hollowcube.mapmaker.punishments.Punishment;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +74,7 @@ public class ProxyPlugin {
         limboServer = proxy.getServer("limbo").orElse(null);
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
+        Translations.init();
         logger.info("hello, world!!!!");
     }
 
@@ -111,13 +115,29 @@ public class ProxyPlugin {
             playersWithSession.add(player.getUniqueId());
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
-        } catch (SessionService.UnauthorizedError ignored) {
+        } catch (SessionService.UnauthorizedError error) {
+            if (error.getError().code().equals("banned")) {
+                event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getError())));
+                return;
+            }
+
             // this is ok, they will be sent to the limbo
             logger.info("player {} is not in the beta", player.getUsername());
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
         }
+    }
+
+    private @NotNull Component buildBannedMessage(@NotNull GenericServiceError error) {
+        if (error.context() == null) {
+            throw new IllegalStateException("banned error without context");
+        }
+
+        var banContext = error.context().get("ban");
+        var punishment = AbstractHttpService.GSON.fromJson(banContext, Punishment.class);
+
+        return Component.translatable("punishments.banned", Component.text(punishment.comment()));
     }
 
     @Subscribe

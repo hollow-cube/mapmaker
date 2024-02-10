@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.GenericServiceError;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -48,7 +49,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
-            case 401 -> throw new UnauthorizedError();
+            case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -76,7 +77,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
-            case 401 -> throw new UnauthorizedError();
+            case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -92,7 +93,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), TransferSessionResponse.class);
-            case 401 -> throw new UnauthorizedError();
+            case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -150,7 +151,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
-            case 401 -> throw new UnauthorizedError();
+            case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to join map (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -166,8 +167,13 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
-            case 401 -> throw new UnauthorizedError();
+            case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to join hub (" + res.statusCode() + "): " + res.body());
         };
+    }
+
+    private static @NotNull UnauthorizedError createUnauthorizedError(@NotNull HttpResponse<String> response) {
+        var error = GSON.fromJson(response.body(), GenericServiceError.class);
+        return new UnauthorizedError(error);
     }
 }

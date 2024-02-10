@@ -32,6 +32,9 @@ import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
+import net.hollowcube.mapmaker.command.punish.BanCommand;
+import net.hollowcube.mapmaker.command.punish.KickCommand;
+import net.hollowcube.mapmaker.command.punish.MuteCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
@@ -61,6 +64,8 @@ import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.punishments.PunishmentService;
+import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -104,6 +109,7 @@ public abstract class AbstractMapServer implements MapServer {
     private final PlayerService playerService;
     private final MapService mapService;
     private final PermManager permManager;
+    private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
     // Listeners for other features
@@ -136,9 +142,17 @@ public abstract class AbstractMapServer implements MapServer {
         } else this.metrics = new MetricWriterNoop();
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
-        if (playerServiceUrl != null) playerService = new PlayerServiceImpl(otel, playerServiceUrl);
-        else if (globalConfig.noop()) playerService = new NoopPlayerService();
-        else playerService = new PlayerServiceImpl(otel, "http://localhost:9126"); // tilt
+        if (playerServiceUrl != null) {
+            playerService = new PlayerServiceImpl(otel, playerServiceUrl);
+            punishmentService = new PunishmentServiceImpl(playerServiceUrl);
+        } else if (globalConfig.noop()) {
+            playerService = new NoopPlayerService();
+            punishmentService = new NoopPunishmentService();
+        } else {
+            var localUrl = "http://localhost:9126"; // tilt
+            playerService = new PlayerServiceImpl(otel, localUrl);
+            punishmentService = new PunishmentServiceImpl(localUrl);
+        }
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
@@ -266,6 +280,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
+    public @NotNull PunishmentService punishmentService() {
+        return punishmentService;
+    }
+
+    @Override
     public @NotNull PlayerInviteService inviteService() {
         return inviteService;
     }
@@ -315,6 +334,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");
         addBinding(PermManager.class, permManager, "permManager");
+        addBinding(PunishmentService.class, punishmentService, "punishmentService");
         addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
 
         addBinding(MapAllocator.class, allocator, "allocator");
@@ -343,6 +363,9 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(createInstance(VanishCommand.class));
         commandManager.register(createInstance(UnvanishCommand.class));
+        commandManager.register(createInstance(BanCommand.class));
+        commandManager.register(createInstance(MuteCommand.class));
+        commandManager.register(createInstance(KickCommand.class));
     }
 
     public @NotNull Collection<HealthCheck> readinessChecks() {

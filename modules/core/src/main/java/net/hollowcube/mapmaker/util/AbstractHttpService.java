@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
+import net.hollowcube.mapmaker.punishments.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -30,12 +31,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractHttpService {
@@ -68,6 +73,7 @@ public abstract class AbstractHttpService {
             }.getType()))
             .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
+            .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))
             .disableJdkUnsafe()
             .create();
     public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {
@@ -150,4 +156,36 @@ public abstract class AbstractHttpService {
         hostname = hn;
     }
 
+    protected static @NotNull UrlQueryBuilder urlQueryBuilder() {
+        return new UrlQueryBuilder();
+    }
+
+    protected static final class UrlQueryBuilder {
+
+        private final Map<String, String> parts = new HashMap<>();
+
+        public UrlQueryBuilder add(@NotNull String key, @NotNull String value) {
+            this.parts.put(key, value);
+            return this;
+        }
+
+        public @NotNull String build() {
+            var result = new StringBuilder();
+            boolean first = true;
+
+            for (var entry : this.parts.entrySet()) {
+                if (first) {
+                    first = false;
+                    result.append('?');
+                } else {
+                    result.append('&');
+                }
+                result.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                result.append('=');
+                result.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+            }
+
+            return result.toString();
+        }
+    }
 }

@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +27,7 @@ public interface MapServer {
     @NotNull PlayerService playerService();
     @NotNull MapService mapService();
     @NotNull PermManager permManager();
+    @NotNull PunishmentService punishmentService();
     @NotNull PlayerInviteService inviteService();
 
     // Higher level managers
