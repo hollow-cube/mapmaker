@@ -27,7 +27,7 @@ public record ChatMessageData(
     ) {
 
         public enum Type {
-            RAW, EMOJI, MAP
+            RAW, EMOJI, MAP, URL
         }
 
     }

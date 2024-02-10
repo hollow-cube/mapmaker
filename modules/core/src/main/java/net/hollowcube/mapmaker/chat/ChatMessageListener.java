@@ -15,6 +15,9 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -133,6 +136,11 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                                 builder.append(Component.text("[map - todo]"));
 //                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
 //                                builder.append(MapData.createMapHoverText(map));
+                            }
+                            case URL -> {
+                                builder.append(Component.text(part.text(), NamedTextColor.GRAY)
+                                        .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
+                                        .clickEvent(ClickEvent.openUrl(part.text())));
                             }
                         }
                     }
