@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_library")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
 
 java_library(
     name = "core",
@@ -36,5 +37,21 @@ java_library(
         "@maven//:org_slf4j_jul_to_slf4j",
         "@maven//:org_spongepowered_configurate_core",
         "@maven//:org_spongepowered_configurate_yaml",
+    ],
+)
+
+java_junit5_test(
+    name = "core_test",
+    srcs = glob(include = ["src/test/java/**/*.java"]),
+    resources = glob(include = ["src/test/resources/**/*"]),
+    test_class = "net.hollowcube.mapmaker.CoreTestSuite",
+    deps = [
+        ":core",
+        "//modules/test",
+        "//third_party:minestom",
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
     ],
 )
