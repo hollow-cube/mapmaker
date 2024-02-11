@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     @Override
     public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip) {
         logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1})", id, username, ip);
-        var reqBody = GSON.toJson(new SessionCreateRequest(hostname, username, ip)); // TODO hostname parameter should be supplied in arguments, like with createSessionV2 (in the body request class)
+        var reqBody = GSON.toJson(new SessionCreateRequest(ServerRuntime.getRuntime().hostname(), username, ip)); // TODO hostname parameter should be supplied in arguments, like with createSessionV2 (in the body request class)
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + id))

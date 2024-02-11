@@ -60,8 +60,6 @@ public abstract class AbstractHttpService {
             .disableJdkUnsafe()
             .create();
 
-    public static final String hostname; //todo replace me with ServerRuntime call
-
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
@@ -80,16 +78,6 @@ public abstract class AbstractHttpService {
         } catch (IOException e) {
             throw new MapService.InternalError(e);
         }
-    }
-
-    static {
-        String hn;
-        try {
-            hn = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            hn = "unknown";
-        }
-        hostname = hn;
     }
 
 }
