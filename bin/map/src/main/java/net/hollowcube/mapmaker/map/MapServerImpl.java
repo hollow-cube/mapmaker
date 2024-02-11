@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.dep.MapBridge;
+import net.hollowcube.mapmaker.map.runtime.MapRuntime;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -91,6 +92,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
     private CommandManager commandManager;
 
+    private MapRuntime mapRuntime;
+
     private boolean isReady = false; // Corresponds to readiness check
     private boolean isShuttingDown = false;
 
@@ -154,7 +157,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         if (!noopServices) mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
 
-        bridge = new MapBridge(sessionService);
+        bridge = new MapBridge(sessionService, mapRuntime);
 
         // Has to go here to ensure the session manager and bridge are initialised.
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
@@ -180,6 +183,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         // Command init
         commandManager = new CommandManagerImpl();
         CONNECTION_MANAGER.setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
+
+        mapRuntime = ServiceLoader.load(MapRuntime.class).findFirst().orElseThrow();
 
         // Standalone hub specific events
         EVENT_HANDLER
@@ -322,7 +327,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         }
 
         var transferReq = new SessionTransferRequest(
-                AbstractHttpService.hostname,
+                mapRuntime.hostname(),
                 Presence.TYPE_MAPMAKER_MAP,
                 joinInfo.state(),
                 joinInfo.mapId()
@@ -412,12 +417,12 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     private class MapJoinConsumer extends BaseConsumer<MapJoinInfoMessage> {
 
         protected MapJoinConsumer(@NotNull String bootstrapServers) {
-            super("map-join", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
+            super("map-join", mapRuntime.hostname(), s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
         }
 
         @Override
         protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull MapJoinInfoMessage message) {
-            if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
+            if (!mapRuntime.hostname().equals(message.serverId())) return; // Not for this server, ignore.
 
             logger.info("received join info for {}: {}", message.playerId(), message);
             var pendingJoin = getPendingJoin(message.playerId(), true);

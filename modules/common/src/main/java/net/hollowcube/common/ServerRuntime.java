@@ -42,9 +42,7 @@ public interface ServerRuntime {
         }
         if (Holder.hostname == null) {
             try {
-                Holder.hostname = String.format("%s-%s",
-                        InetAddress.getLocalHost().getHostName(),
-                        ThreadLocalRandom.current().nextInt(1000, 9999));
+                Holder.hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             }

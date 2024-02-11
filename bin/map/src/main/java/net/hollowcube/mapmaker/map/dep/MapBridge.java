@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.dep;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.mapmaker.map.runtime.MapRuntime;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -23,9 +24,11 @@ public class MapBridge implements MapToHubBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapBridge.class);
 
     private final SessionService sessionService;
+    private final MapRuntime mapRuntime;
 
-    public MapBridge(@NotNull SessionService sessionService) {
+    public MapBridge(@NotNull SessionService sessionService, @NotNull MapRuntime mapRuntime) {
         this.sessionService = sessionService;
+        this.mapRuntime = mapRuntime;
     }
 
     @Override
@@ -49,8 +52,7 @@ public class MapBridge implements MapToHubBridge {
             }));
             logger.info("join map result: {}", response);
 
-            var currentServerId = AbstractHttpService.hostname;
-            if (currentServerId.equals(response.server())) {
+            if (mapRuntime.hostname().equals(response.server())) {
                 logger.info("moving between maps on this server");
                 this.moveBetweenMapsOnThisServer(player);
             } else {

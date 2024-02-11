@@ -5,6 +5,7 @@ import io.helidon.webserver.ServerResponse;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.map.block.custom.FinishPlateBlock;
@@ -14,6 +15,7 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.hub.dep.HubBridge;
 import net.hollowcube.mapmaker.hub.dep.NoopHubBridge;
+import net.hollowcube.mapmaker.hub.runtime.HubRuntime;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -32,7 +34,6 @@ import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -85,6 +87,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
     private boolean isShuttingDown = false;
 
     private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
+    private HubRuntime hubRuntime;
 
     @Override
     public @Blocking void start(@NotNull ConfigLoaderV3 config) {
@@ -154,8 +157,11 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
         if (!noopServices) {
             chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
-            packetListenerManager.setListener(ClientChatMessagePacket.class, chatMessageListener);
+            packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
         }
+
+        // Runtime init
+        hubRuntime = ServiceLoader.load(HubRuntime.class).findFirst().orElseThrow();
 
         // Command init
         commandManager = new CommandManagerImpl();
@@ -268,7 +274,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
         try {
             var transferReq = new SessionTransferRequest(
-                    AbstractHttpService.hostname,
+                    hubRuntime.hostname(),
                     "mapmaker:hub", "", "hub"
             );
             var playerData = sessionService.transferSessionV2(player.getUuid().toString(), transferReq);

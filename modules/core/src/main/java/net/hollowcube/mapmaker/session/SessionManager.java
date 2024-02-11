@@ -146,7 +146,7 @@ public class SessionManager {
     private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
 
         protected ConsumerImpl(@NotNull String bootstrapServers) {
-            super("session-updates", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, SessionUpdateMessage.class), bootstrapServers);
+            super("session-updates", s -> AbstractHttpService.GSON.fromJson(s, SessionUpdateMessage.class), bootstrapServers);
         }
 
         @Override

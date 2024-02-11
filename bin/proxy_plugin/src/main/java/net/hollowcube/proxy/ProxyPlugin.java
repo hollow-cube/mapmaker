@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.util.GameProfile;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -55,6 +56,7 @@ public class ProxyPlugin {
 
     private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
+    private final ServerRuntime serverRuntime;
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -70,6 +72,8 @@ public class ProxyPlugin {
 
         limboServer = proxy.getServer("limbo").orElse(null);
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
+
+        serverRuntime = ServerRuntime.getRuntime();
 
         logger.info("hello, world!!!!");
     }
@@ -102,7 +106,7 @@ public class ProxyPlugin {
             var pd = sessionService.createSessionV2(
                     player.getUniqueId().toString(),
                     new SessionCreateRequestV2(
-                            AbstractHttpService.hostname,
+                            serverRuntime.hostname(),
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
                             new PlayerSkin(skinTexture, skinSignature)
