@@ -63,6 +63,11 @@ public class CommandNode {
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull StringReader reader) {
         // If this is a redirect, completely defer handling
         if (redirect != null) {
+            if (redirect.condition != null) {
+                var result = redirect.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
+                if (result != CommandCondition.ALLOW) return Suggestion.EMPTY;
+            }
+
             return redirect.suggest(sender, reader);
         }
 
@@ -105,6 +110,12 @@ public class CommandNode {
     public @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull CommandContextImpl context) {
         // If this is a redirect, completely defer handling
         if (redirect != null) {
+            if (redirect.condition != null) {
+                var result = redirect.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
+                if (result == CommandCondition.DENY) return CommandResult.denied(this);
+                if (result == CommandCondition.HIDE) return CommandResult.syntaxError(reader.pos(), null, true);
+            }
+
             return redirect.execute(sender, reader, context);
         }
 
