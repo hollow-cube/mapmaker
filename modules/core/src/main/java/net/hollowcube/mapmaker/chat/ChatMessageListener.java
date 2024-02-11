@@ -51,7 +51,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private final FriendlyProducer producer;
 
     public ChatMessageListener(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String kafkaBrokers) {
-        super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
+        super(CHAT_OUT_TOPIC, ChatMessageListener::fromJson, kafkaBrokers);
         this.playerService = playerService;
         this.mapService = mapService;
         this.producer = new FriendlyProducer(kafkaBrokers);

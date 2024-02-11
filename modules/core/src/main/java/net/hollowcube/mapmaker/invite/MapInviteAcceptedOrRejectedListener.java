@@ -33,7 +33,7 @@ public final class MapInviteAcceptedOrRejectedListener extends BaseConsumer<MapI
     public MapInviteAcceptedOrRejectedListener(@NotNull MapService mapService, @NotNull PlayerService playerService,
                                                @NotNull SessionManager sessionManager,
                                                @NotNull ServerBridge serverBridge, @NotNull String kafkaBrokers) {
-        super(INVITE_ACCEPT_REJECT_TOPIC, "invites", MapInviteAcceptedOrRejectedListener::fromJson, kafkaBrokers);
+        super(INVITE_ACCEPT_REJECT_TOPIC, MapInviteAcceptedOrRejectedListener::fromJson, kafkaBrokers);
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;

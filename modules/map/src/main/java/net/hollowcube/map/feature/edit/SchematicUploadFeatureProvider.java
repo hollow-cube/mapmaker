@@ -52,12 +52,10 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
         private static final System.Logger logger = System.getLogger(SchematicUploadConsumer.class.getName());
 
         private static final String TOPIC_NAME = "schematic-mgmt";
-        private static final String GROUP_ID = ServerRuntime.getRuntime().hostname();
-
         private static final byte[] ERR_NOT_EDITING = "You are not currently editing a map.".getBytes(StandardCharsets.UTF_8);
 
         protected SchematicUploadConsumer(@NotNull String bootstrapServers) {
-            super(TOPIC_NAME, GROUP_ID, SchematicMgmt::fromJson, bootstrapServers);
+            super(TOPIC_NAME, SchematicMgmt::fromJson, bootstrapServers);
             setAutocommit(false);
         }
 

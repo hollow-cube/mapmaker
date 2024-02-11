@@ -417,7 +417,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
     private class MapJoinConsumer extends BaseConsumer<MapJoinInfoMessage> {
 
         protected MapJoinConsumer(@NotNull String bootstrapServers) {
-            super("map-join", mapRuntime.hostname(), s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
+            super("map-join", s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
         }
 
         @Override
