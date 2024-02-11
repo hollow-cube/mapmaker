@@ -9,11 +9,13 @@ public record Token(@NotNull Type type, int start, int end) {
 
         BANG,       // !
         PERCENT,    // %
+        COLON,      // :
         HASH,       // #
         COMMA,      // ,
         PIPE,       // |
         AMP,        // &
         EQUALS,     // =
+        STAR,       // *
         LPAREN,     // (
         RPAREN,     // )
         LBRACKET,   // [

@@ -44,15 +44,22 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
+import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
+import net.minestom.server.network.packet.server.play.UnlockRecipesPacket;
+import net.minestom.server.recipe.RecipeCategory;
+import net.minestom.server.recipe.ShapelessRecipe;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -176,9 +183,9 @@ public class DevServer {
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
 
-//    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
-//            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
-//            .build();
+    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
+            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
+            .build();
 
     @Blocking
     public void start(@NotNull ConfigLoaderV3 config) {
@@ -282,46 +289,87 @@ public class DevServer {
             System.exit(1);
         }
 
-//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-//                "mapmaker:test1",
-//                "mapmaker:test1",
-//                RecipeCategory.Crafting.MISC,
-//                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-//                HubHotbar.CREATE_MAPS_ITEM
-//        ) {
-//            @Override
-//            public boolean shouldShow(@NotNull Player player) {
-//                return true;
-//            }
-//        });
-//
-//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-//                "mapmaker:test2",
-//                "mapmaker:test2",
-//                RecipeCategory.Crafting.MISC,
-//                List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.DIRT, 1)))),
-//                ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 2)
-//                        .withDisplayName(Component.text("test2"))
-//        ) {
-//            @Override
-//            public boolean shouldShow(@NotNull Player player) {
-//                return true;
-//            }
-//        });
-//
-//        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-//                "mapmaker:test3",
-//                "mapmaker:test3",
-//                RecipeCategory.Crafting.MISC,
-//                List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.GOLD_INGOT, 1)))),
-//                ItemStack.of(Material.DIAMOND_PICKAXE, 3)
-//                        .withDisplayName(Component.text("test3"))
-//        ) {
-//            @Override
-//            public boolean shouldShow(@NotNull Player player) {
-//                return true;
-//            }
-//        });
+
+        //
+        //
+        //
+        //
+        //
+        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+                "minecraft:i9376",
+                "",
+                RecipeCategory.Crafting.REDSTONE,
+                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+                ItemStack.of(Material.GHAST_TEAR, 1)
+                        .withMeta(meta -> meta.customModelData(1))
+                        .withDisplayName(Component.text("FIRST"))
+        ) {
+            @Override
+            public boolean shouldShow(@NotNull Player player) {
+                return false;
+            }
+        });
+
+        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+                "minecraft:i9783",
+                "",
+                RecipeCategory.Crafting.REDSTONE,
+                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+                ItemStack.of(Material.GHAST_TEAR, 1)
+                        .withMeta(meta -> meta.customModelData(1))
+                        .withDisplayName(Component.text("SECOND"))
+        ) {
+            @Override
+            public boolean shouldShow(@NotNull Player player) {
+                return false;
+            }
+        });
+
+        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+                "minecraft:i2671",
+                "",
+                RecipeCategory.Crafting.REDSTONE,
+                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+                ItemStack.of(Material.GHAST_TEAR, 1)
+                        .withMeta(meta -> meta.customModelData(1))
+                        .withDisplayName(Component.text("THIRD"))
+        ) {
+            @Override
+            public boolean shouldShow(@NotNull Player player) {
+                return false;
+            }
+        });
+
+        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+                "minecraft:i1822",
+                "",
+                RecipeCategory.Crafting.REDSTONE,
+                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+                ItemStack.of(Material.GHAST_TEAR, 1)
+                        .withMeta(meta -> meta.customModelData(1))
+                        .withDisplayName(Component.text("FOURTH"))
+        ) {
+            @Override
+            public boolean shouldShow(@NotNull Player player) {
+                return false;
+            }
+        });
+
+        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
+                "minecraft:i5203",
+                "",
+                RecipeCategory.Crafting.REDSTONE,
+                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
+                ItemStack.of(Material.GHAST_TEAR, 1)
+                        .withMeta(meta -> meta.customModelData(1))
+                        .withDisplayName(Component.text("FIFTH"))
+        ) {
+            @Override
+            public boolean shouldShow(@NotNull Player player) {
+                return false;
+            }
+        });
+
     }
 
     public @NotNull List<HealthCheck> readinessChecks() {
@@ -477,27 +525,20 @@ public class DevServer {
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
-//        var recipes = new DeclareRecipesPacket(List.of(
-//                new DeclareRecipesPacket.DeclaredShapedCraftingRecipe(
-//                        "mapmaker:shaped", 1, 1,
-//                        "mapmaker:my_group", RecipeCategory.Crafting.MISC,
-//                        List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.STONE)))),
-//                        ItemStack.of(Material.STICK), false
-//                )
-//                new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
-//                        "mapmaker:shaped",
-//                        "awfhiauw", RecipeCategory.Crafting.BUILDING,
-//                        List.of(new DeclareRecipesPacket.Ingredient(List.of(ItemStack.of(Material.STONE)))),
-//                        ItemStack.of(Material.STICK)
-//                )
-//        ));
-//        player.sendPacket(recipes);
-
-//        player.sendPacket(new UnlockRecipesPacket(
-//                0, false, false, false, false, false, false, false, false,
-//                List.of("minecraft:shaped"),
-//                List.of("minecraft:shaped")
-//        ));
+        // Having an empty second list stops the weird expanding animation. it seems like wikivg is just wrong about this.
+        var recipes = List.of(
+                "minecraft:i9376",
+                "minecraft:i9783",
+                "minecraft:i2671",
+                "minecraft:i1822",
+                "minecraft:i5203"
+        );
+        player.sendPacket(new UnlockRecipesPacket(
+                0,
+                false, false, false, false,
+                false, false, false, false,
+                recipes, List.of()
+        ));
 
 //        player.getInventory().setItemStack(10, BLANK_ITEM);
     }

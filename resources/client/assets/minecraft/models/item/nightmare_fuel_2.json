@@ -1,0 +1,6 @@
+{
+  "parent": "item/numbered_recipe_base",
+  "textures": {
+    "0": "item/nightmare_fuel_2"
+  }
+}
