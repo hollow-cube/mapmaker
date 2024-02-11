@@ -2,6 +2,9 @@ package net.hollowcube.mapmaker.util;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 public final class NumberUtil {
@@ -14,19 +17,16 @@ public final class NumberUtil {
      * <p>For example: 1.23k, 1, 11, 10k, 100m, 200b</p>
      */
     public static @NotNull String formatCurrency(long value) {
-        //todo this method is wrong, it can create values like `100.1k`, but i am lazy and will fix later.
-        if (value > 999_999_999_999L) return "999n";
-        if (value > 999_999_999) return createTwoDecimal(value / 1_000_000_000f) + "b";
-        if (value > 999_999) return createTwoDecimal(value / 1_000_000f) + "m";
-        if (value > 999) return createTwoDecimal(value / 1_000f) + "k";
+        if (value > 999_999_999_999L) return "999t";
+        if (value > 999_999_999) return roundToThreeSigFigs(value / 1_000_000_000f, 'b');
+        if (value > 999_999) return roundToThreeSigFigs(value / 1_000_000f, 'm');
+        if (value > 999) return roundToThreeSigFigs(value / 1_000f, 'k');
         return String.valueOf(value);
     }
 
-    private static @NotNull String createTwoDecimal(double value) {
-        var str = String.format("%.2f", value);
-        if (str.endsWith(".00")) return str.substring(0, str.length() - 3);
-        if (str.endsWith("0")) return str.substring(0, str.length() - 1);
-        return str;
+    private static @NotNull String roundToThreeSigFigs(double value, char suffix) {
+        BigDecimal decimal = new BigDecimal(value, MathContext.DECIMAL64);
+        return decimal.round(new MathContext(3, RoundingMode.HALF_UP)).stripTrailingZeros().toPlainString() + suffix;
     }
 
     public static @NotNull String formatMapPlaytime(long time, boolean roundToTicks) {
