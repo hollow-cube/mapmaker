@@ -29,6 +29,7 @@ java_library(
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_key",
         "@maven//:net_kyori_adventure_text_minimessage",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:net_kyori_adventure_text_serializer_plain",

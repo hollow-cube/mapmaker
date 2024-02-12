@@ -89,6 +89,41 @@ public class SpriteTransform {
                         serverSpriteConf.addProperty("width", 0);
                         serverSpriteConf.addProperty("offsetX", 0);
                         context.getServerSprites().add(serverSpriteConf);
+                    } else if (config.get("type").getAsString().equals("numbered")) {
+                        BufferedImage baseImage = ImageIO.read(imageFile.toFile());
+                        if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
+                            throw new RuntimeException("Numbered sprites must be 16x");
+
+                        BufferedImage rescaledImage = new BufferedImage(18, 18, baseImage.getType());
+                        Graphics2D g = rescaledImage.createGraphics();
+                        g.drawImage(baseImage, 1, 1, 16, 16, null);
+
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ImageIO.write(rescaledImage, "png", baos);
+
+                        String texId = context.writeTexture("item", name, baos.toByteArray());
+
+                        int firstCmd = -1;
+                        for (int i = 1; i <= config.get("max_stack").getAsInt(); i++) {
+                            String numberedName = name + "_" + i;
+                            JsonObject modelObj = new JsonObject();
+                            modelObj.addProperty("parent", "item/numbered_recipe_base");
+                            JsonObject textures = new JsonObject();
+                            textures.addProperty("0", texId);
+                            textures.addProperty("1", "item/numbers_18x/" + i);
+                            modelObj.add("textures", textures);
+                            String modelId = context.writeModel(numberedName, modelObj);
+
+                            int cmd = context.addBasicItem(ModelType.DEFAULT, numberedName, modelId);
+                            if (firstCmd == -1) firstCmd = cmd;
+                        }
+
+                        JsonObject serverSpriteConf = new JsonObject();
+                        serverSpriteConf.addProperty("name", name);
+                        serverSpriteConf.addProperty("cmd", firstCmd);
+                        serverSpriteConf.addProperty("width", 0);
+                        serverSpriteConf.addProperty("offsetX", 0);
+                        context.getServerSprites().add(serverSpriteConf);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to process " + name, e);

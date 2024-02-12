@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.cosmetic.CraftingMaterial;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
@@ -38,28 +39,26 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.CoreTeams;
+import net.hollowcube.mapmaker.util.RecipeBookHack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.network.packet.client.play.ClientCraftRecipeRequest;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.network.packet.server.play.UnlockRecipesPacket;
-import net.minestom.server.recipe.RecipeCategory;
-import net.minestom.server.recipe.ShapelessRecipe;
+import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -69,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -82,28 +82,6 @@ public class DevServer {
 
     public static void main(String[] args) {
         long start = System.nanoTime();
-
-//        var pots = new PotionEffectList();
-//        pots.getOrCreate(PotionInfo.SPEED);
-//
-//        var input = new CheckpointEffectData("", -1, 0, BaseEffectData.NO_RESET_HEIGHT, false, Optional.empty(), Optional.empty(), CheckpointEffectData.NO_LIVES);
-//        input.potionEffects().getOrCreate(PotionInfo.SPEED);
-//
-//        var tag = DFU.View(CheckpointEffectData.CODEC);
-//
-//        var tag1 = TagHandler.newHandler();
-//        tag1.setTag(tag, input);
-//
-//        var serialized = tag1.asCompound();
-//        var buffer = NetworkBuffer.makeArray(b -> b.write(NetworkBuffer.NBT, serialized));
-//        var deserialized = (NBTCompound) new NetworkBuffer(ByteBuffer.wrap(buffer)).read(NetworkBuffer.NBT);
-//
-//        var tag2 = TagHandler.fromCompound(deserialized);
-//        var stuff = tag2.getTag(tag);
-//        System.out.println(stuff);
-//
-//        if (true) return;
-
 
         CoreInit.fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin();
 
@@ -182,10 +160,6 @@ public class DevServer {
 
 
     public static Pattern onlinePlayersPattern = Pattern.compile("");
-
-    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
-            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
-            .build();
 
     @Blocking
     public void start(@NotNull ConfigLoaderV3 config) {
@@ -288,87 +262,6 @@ public class DevServer {
             logger.error("failed during startup", e);
             System.exit(1);
         }
-
-
-        //
-        //
-        //
-        //
-        //
-        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-                "minecraft:i9376",
-                "",
-                RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-                ItemStack.of(Material.GHAST_TEAR, 1)
-                        .withMeta(meta -> meta.customModelData(1))
-                        .withDisplayName(Component.text("FIRST"))
-        ) {
-            @Override
-            public boolean shouldShow(@NotNull Player player) {
-                return false;
-            }
-        });
-
-        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-                "minecraft:i9783",
-                "",
-                RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-                ItemStack.of(Material.GHAST_TEAR, 1)
-                        .withMeta(meta -> meta.customModelData(1))
-                        .withDisplayName(Component.text("SECOND"))
-        ) {
-            @Override
-            public boolean shouldShow(@NotNull Player player) {
-                return false;
-            }
-        });
-
-        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-                "minecraft:i2671",
-                "",
-                RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-                ItemStack.of(Material.GHAST_TEAR, 1)
-                        .withMeta(meta -> meta.customModelData(1))
-                        .withDisplayName(Component.text("THIRD"))
-        ) {
-            @Override
-            public boolean shouldShow(@NotNull Player player) {
-                return false;
-            }
-        });
-
-        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-                "minecraft:i1822",
-                "",
-                RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-                ItemStack.of(Material.GHAST_TEAR, 1)
-                        .withMeta(meta -> meta.customModelData(1))
-                        .withDisplayName(Component.text("FOURTH"))
-        ) {
-            @Override
-            public boolean shouldShow(@NotNull Player player) {
-                return false;
-            }
-        });
-
-        MinecraftServer.getRecipeManager().addRecipe(new ShapelessRecipe(
-                "minecraft:i5203",
-                "",
-                RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(BLANK_ITEM))),
-                ItemStack.of(Material.GHAST_TEAR, 1)
-                        .withMeta(meta -> meta.customModelData(1))
-                        .withDisplayName(Component.text("FIFTH"))
-        ) {
-            @Override
-            public boolean shouldShow(@NotNull Player player) {
-                return false;
-            }
-        });
 
     }
 
@@ -525,14 +418,13 @@ public class DevServer {
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
+        // Declare recipes
+        var declareRecipesPacket = new DeclareRecipesPacket(Arrays.stream(CraftingMaterial.values())
+                .map(cm -> cm.getRecipePlaceholder(1)).toList());
+        player.sendPacket(declareRecipesPacket);
+
         // Having an empty second list stops the weird expanding animation. it seems like wikivg is just wrong about this.
-        var recipes = List.of(
-                "minecraft:i9376",
-                "minecraft:i9783",
-                "minecraft:i2671",
-                "minecraft:i1822",
-                "minecraft:i5203"
-        );
+        var recipes = Arrays.stream(CraftingMaterial.values()).map(CraftingMaterial::recipeBookId).toList();
         player.sendPacket(new UnlockRecipesPacket(
                 0,
                 false, false, false, false,
@@ -540,7 +432,12 @@ public class DevServer {
                 recipes, List.of()
         ));
 
-//        player.getInventory().setItemStack(10, BLANK_ITEM);
+        player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM);
+
+        MinecraftServer.getPacketListenerManager().setPlayListener(ClientCraftRecipeRequest.class, (packet, p1) -> {
+            player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM);
+            System.out.println("clicked recipe id " + packet.recipe() + " is shift? " + packet.makeAll());
+        });
     }
 
 }

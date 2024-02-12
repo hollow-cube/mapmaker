@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import net.minestom.server.color.Color;
 import net.minestom.server.item.ItemHideFlag;
 import net.minestom.server.item.ItemStack;
@@ -35,18 +34,6 @@ public class Cosmetic {
 
     public static @NotNull Comparator<Cosmetic> comparingRarity() {
         return Comparator.comparingInt(c -> c.rarity.ordinal());
-    }
-
-    public enum Rarity implements ComponentLike {
-        COMMON,
-        RARE,
-        EPIC,
-        LEGENDARY;
-
-        @Override
-        public @NotNull Component asComponent() {
-            return Component.translatable("cosmetic.rarity." + name().toLowerCase());
-        }
     }
 
     private final CosmeticType type;
