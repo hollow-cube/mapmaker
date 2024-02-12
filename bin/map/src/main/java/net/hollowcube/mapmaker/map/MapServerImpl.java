@@ -10,6 +10,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapServerBase;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -40,7 +41,10 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.*;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerPluginMessageEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
@@ -72,7 +76,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
     private static final long SHUTDOWN_MAX_WAIT_MILLIS = 10 * 1000; // 10 seconds
 
-//    private static final Tag<MapJoinInfo> JOIN_INFO_TAG = Tag.Transient("mapmaker:join_info");
+    //    private static final Tag<MapJoinInfo> JOIN_INFO_TAG = Tag.Transient("mapmaker:join_info");
     private static final Tag<MapWorld> TARGET_WORLD_TAG = Tag.Transient("mapmaker:target_world");
 
     private PlayerService playerService;
@@ -128,6 +132,7 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
         else if (noopServices) playerService = new NoopPlayerService();
         else playerService = new PlayerServiceImpl("http://localhost:9126"); // tilt
+        PlayerService.StaticAbuse.BAD_BAD_BAD = playerService;
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
@@ -332,7 +337,10 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
 
         var mapPlayerData = mapService.getMapPlayerData(playerData.id());
         player.setTag(MapPlayerData.TAG, mapPlayerData);
-        logger.info("loaded map player data: {}", mapPlayerData);
+
+        var backpack = new PlayerBackpack(player);
+        player.setTag(PlayerBackpack.TAG, backpack);
+        backpack.update(playerService.getPlayerBackpack(playerData.id()));
 
         // Create the world, holding the player here until it is ready for them to join.
         var map = mapService.getMap(joinInfo.playerId(), joinInfo.mapId());
@@ -379,6 +387,8 @@ class MapServerImpl extends MapServerBase implements StandaloneServer {
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(MiscFunctionality::buildExperienceBar);
+
+        PlayerBackpack.fromPlayer(player).refresh();
 
         // Garbage below
 

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.misc.noop;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.player.*;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,11 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
 
+    }
+
+    @Override
+    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
+        return new JsonObject();
     }
 
     @Override

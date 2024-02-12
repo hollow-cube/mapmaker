@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.cosmetic;
+package net.hollowcube.mapmaker.backpack;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;

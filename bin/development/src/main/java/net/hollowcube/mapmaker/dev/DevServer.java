@@ -18,12 +18,12 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.world.InternalMapWorld;
 import net.hollowcube.map.world.MapWorld;
 import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
-import net.hollowcube.mapmaker.cosmetic.CraftingMaterial;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapPlayerDataMgmtConsumer;
@@ -39,7 +39,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.CoreTeams;
-import net.hollowcube.mapmaker.util.RecipeBookHack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -53,12 +52,8 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
-import net.minestom.server.network.packet.client.play.ClientCraftRecipeRequest;
 import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
-import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
-import net.minestom.server.network.packet.server.play.UnlockRecipesPacket;
-import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -68,7 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -180,6 +174,7 @@ public class DevServer {
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl == null) playerServiceUrl = "http://localhost:9126";
         playerService = new PlayerServiceImpl(playerServiceUrl);
+        PlayerService.StaticAbuse.BAD_BAD_BAD = playerService;
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl == null) sessionServiceUrl = "http://localhost:9127";
@@ -284,7 +279,10 @@ public class DevServer {
 
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
-            logger.info("loaded map player data: {}", mapPlayerData);
+
+            var backpack = new PlayerBackpack(player);
+            player.setTag(PlayerBackpack.TAG, backpack);
+            backpack.update(playerService.getPlayerBackpack(playerData.id()));
         } catch (SessionService.UnauthorizedError ignored) {
             player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
                     .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
@@ -415,29 +413,10 @@ public class DevServer {
         player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST));
         Emoji.sendTabCompletions(player);
         MiscFunctionality.broadcastTabList(Audiences.all());
+        PlayerBackpack.fromPlayer(player).refresh();
 
         Audiences.all().sendMessage(Component.translatable("chat.player.join", playerData.displayName()));
 
-        // Declare recipes
-        var declareRecipesPacket = new DeclareRecipesPacket(Arrays.stream(CraftingMaterial.values())
-                .map(cm -> cm.getRecipePlaceholder(1)).toList());
-        player.sendPacket(declareRecipesPacket);
-
-        // Having an empty second list stops the weird expanding animation. it seems like wikivg is just wrong about this.
-        var recipes = Arrays.stream(CraftingMaterial.values()).map(CraftingMaterial::recipeBookId).toList();
-        player.sendPacket(new UnlockRecipesPacket(
-                0,
-                false, false, false, false,
-                false, false, false, false,
-                recipes, List.of()
-        ));
-
-        player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM);
-
-        MinecraftServer.getPacketListenerManager().setPlayListener(ClientCraftRecipeRequest.class, (packet, p1) -> {
-            player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM);
-            System.out.println("clicked recipe id " + packet.recipe() + " is shift? " + packet.makeAll());
-        });
     }
 
 }

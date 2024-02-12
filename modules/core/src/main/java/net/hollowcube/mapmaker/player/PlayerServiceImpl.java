@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonObject;
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -37,6 +38,20 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new SessionService.InternalError("Failed to update session (" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + id + "/backpack"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), JsonObject.class);
+            case 404 -> new JsonObject();
+            default ->
+                    throw new SessionService.InternalError("Failed to get player backpack (" + res.statusCode() + "): " + res.body());
+        };
     }
 
     @Override

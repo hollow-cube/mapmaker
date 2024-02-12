@@ -1,17 +1,24 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Blocking
 public interface PlayerService {
+    class StaticAbuse {
+        public static PlayerService BAD_BAD_BAD = null;
+    }
+
 
     @NotNull DisplayName getPlayerDisplayName2(@NotNull String id);
 
     @NotNull String getPlayerId(@NotNull String idOrUsername);
 
     void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update);
+
+    @NotNull JsonObject getPlayerBackpack(@NotNull String id);
 
     @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query);
 

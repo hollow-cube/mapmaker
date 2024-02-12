@@ -1,7 +1,6 @@
 package net.hollowcube.map.block.custom;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
@@ -56,8 +55,6 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 
         var player = interaction.getPlayer();
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
-
-        if (!MapFeatureFlags.CHECKPOINT_EDITOR.test(player)) return true;
 
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);

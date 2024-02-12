@@ -8,6 +8,7 @@ import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.map.block.custom.FinishPlateBlock;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -109,6 +110,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
         else if (noopServices) playerService = new NoopPlayerService();
         else playerService = new PlayerServiceImpl("http://localhost:9126"); // tilt
+        PlayerService.StaticAbuse.BAD_BAD_BAD = playerService;
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
@@ -267,6 +269,7 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         var player = event.getPlayer();
 
         try {
+            // This is currently a kinda yikes waterfall of requests, should improve someday
             var transferReq = new SessionTransferRequest(
                     AbstractHttpService.hostname,
                     "mapmaker:hub", "", "hub"
@@ -276,7 +279,10 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
 
             var mapPlayerData = mapService.getMapPlayerData(playerData.id());
             player.setTag(MapPlayerData.TAG, mapPlayerData);
-            logger.info("loaded map player data: {}", mapPlayerData);
+
+            var backpack = new PlayerBackpack(player);
+            player.setTag(PlayerBackpack.TAG, backpack);
+            backpack.update(playerService.getPlayerBackpack(playerData.id()));
         } catch (SessionService.UnauthorizedError ignored) {
             player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
                     .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
@@ -310,6 +316,8 @@ class HubServerImpl extends HubServerBase implements StandaloneServer {
         MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
         MiscFunctionality.sendBetaHeader(player);
+
+        PlayerBackpack.fromPlayer(player).refresh();
 
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);

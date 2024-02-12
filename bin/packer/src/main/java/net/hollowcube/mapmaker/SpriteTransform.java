@@ -104,7 +104,7 @@ public class SpriteTransform {
                         String texId = context.writeTexture("item", name, baos.toByteArray());
 
                         int firstCmd = -1;
-                        for (int i = 1; i <= config.get("max_stack").getAsInt(); i++) {
+                        for (int i = 0; i <= config.get("max_stack").getAsInt(); i++) {
                             String numberedName = name + "_" + i;
                             JsonObject modelObj = new JsonObject();
                             modelObj.addProperty("parent", "item/numbered_recipe_base");

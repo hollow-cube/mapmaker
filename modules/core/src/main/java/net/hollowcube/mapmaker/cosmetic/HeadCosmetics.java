@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.cosmetic;
 
+import net.hollowcube.mapmaker.backpack.Rarity;
 import org.jetbrains.annotations.NotNull;
 
 public final class HeadCosmetics {

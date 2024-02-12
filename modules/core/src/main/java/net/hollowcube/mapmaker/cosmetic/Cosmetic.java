@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.color.Color;

@@ -1,8 +1,7 @@
-package net.hollowcube.mapmaker.cosmetic;
+package net.hollowcube.mapmaker.backpack;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.util.RecipeBookHack;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -12,46 +11,59 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
-public enum CraftingMaterial {
-    // The ordering of this enum defines the ordering of the crafting material in the recipe book
+import static net.hollowcube.mapmaker.backpack.BackpackCategory.MATERIAL;
+
+public enum BackpackItem {
+    // The ordering of this enum defines the ordering in the recipe book
     // WARNING: IF YOU CHANGE A RARITY HERE YOU MUST ALSO GO EDIT THE FILE IN RESOURCES TO CHANGE THE MAX
     //          STACK SIZE TO MATCH.
     // WARNING: IF YOU ADD OR REMOVE AN ENTRY YOU MUST ALSO GO EDIT RecipeBookHack.java TO MATCH THE SAME
     //          AMOUNT OF ENTRIES.
 
-    BRICKS(Rarity.COMMON),
-    CLOTH(Rarity.COMMON),
-    GEM(Rarity.COMMON),
-    GOO(Rarity.COMMON),
-    METAL(Rarity.COMMON),
-    STRING(Rarity.COMMON),
+    // Materials
+    BRICKS(MATERIAL, Rarity.COMMON),
+    CLOTH(MATERIAL, Rarity.COMMON),
+    GEM(MATERIAL, Rarity.COMMON),
+    GOO(MATERIAL, Rarity.COMMON),
+    METAL(MATERIAL, Rarity.COMMON),
+    STRING(MATERIAL, Rarity.COMMON),
+    BONE_FRAGMENT(MATERIAL, Rarity.RARE),
+    CONTROLLER(MATERIAL, Rarity.RARE),
+    FLOWER_PETAL(MATERIAL, Rarity.RARE),
+    SUGAR_CUBE(MATERIAL, Rarity.RARE),
+    DRAGON_SCALE(MATERIAL, Rarity.EPIC),
+    FIREWORK_DUST(MATERIAL, Rarity.EPIC),
+    INFERNAL_FLAME(MATERIAL, Rarity.EPIC),
+    GOLD_CHUNK(MATERIAL, Rarity.LEGENDARY),
+    NIGHTMARE_FUEL(MATERIAL, Rarity.LEGENDARY),
+    STARDUST(MATERIAL, Rarity.LEGENDARY),
 
-    BONE_FRAGMENT(Rarity.RARE),
-    CONTROLLER(Rarity.RARE),
-    FLOWER_PETAL(Rarity.RARE),
-    SUGAR_CUBE(Rarity.RARE),
+    // Dyes
 
-    DRAGON_SCALES(Rarity.EPIC),
-    FIREWORK_DUST(Rarity.EPIC),
-    INFERNAL_FLAME(Rarity.EPIC),
-
-    GOLD_CHUNK(Rarity.LEGENDARY),
-    NIGHTMARE_FUEL(Rarity.LEGENDARY),
-    STARDUST(Rarity.LEGENDARY),
     ;
-    private static final int START_SORTED_ID = 0;
 
+    private static final List<DeclareRecipesPacket.Ingredient> CRAFTABLE = List.of(new DeclareRecipesPacket.Ingredient(List.of(RecipeBookHack.BLANK_ITEM_CRAFTABLE)));
+    private static final List<DeclareRecipesPacket.Ingredient> UNCRAFTABLE = List.of(new DeclareRecipesPacket.Ingredient(List.of(RecipeBookHack.BLANK_ITEM_UNCRAFTABLE)));
+
+    private final BackpackCategory category;
     private final Rarity rarity;
     private final BadSprite sprite;
     private final String recipeBookId;
 
-    CraftingMaterial(@NotNull Rarity rarity) {
+    BackpackItem(@NotNull BackpackCategory category, @NotNull Rarity rarity) {
+        this.category = category;
         this.rarity = rarity;
-        var spriteName = String.format("cosmetic/material/%s", name().toLowerCase());
+
+        var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
         this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
-        this.recipeBookId = RecipeBookHack.getOrderedId(START_SORTED_ID + ordinal());
+        this.recipeBookId = RecipeBookHack.getOrderedId(ordinal());
+    }
+
+    public @NotNull BackpackCategory category() {
+        return category;
     }
 
     public @NotNull Rarity rarity() {
@@ -72,21 +84,21 @@ public enum CraftingMaterial {
     }
 
     public @NotNull ItemStack getItemStack(int amount) {
-        Check.argCondition(amount < 1 || amount > maxStackSize(), "amount must be between 1 and " + maxStackSize() + ", inclusive");
+        Check.argCondition(amount < 0 || amount > maxStackSize(), "amount must be between 1 and " + maxStackSize() + ", inclusive");
         var translationKeyBase = "item.mapmaker." + name().toLowerCase();
         return ItemStack.builder(Material.DIAMOND)
-                .meta(meta -> meta.customModelData(sprite.cmd() + amount - 1))
+                .meta(meta -> meta.customModelData(sprite.cmd() + amount))
                 .displayName(Component.text(ordinal() + " -> " + recipeBookId))
                 .displayName(Component.translatable(translationKeyBase + ".name"))
                 .lore(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()))
                 .build();
     }
 
-    public @NotNull DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
+    @NotNull DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
         return new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
                 recipeBookId, "",
                 RecipeCategory.Crafting.REDSTONE,
-                List.of(new DeclareRecipesPacket.Ingredient(List.of(RecipeBookHack.BLANK_ITEM))),
+                amount == 0 ? UNCRAFTABLE : CRAFTABLE,
                 getItemStack(amount)
         );
     }

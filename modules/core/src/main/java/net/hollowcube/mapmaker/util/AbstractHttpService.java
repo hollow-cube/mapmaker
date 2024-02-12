@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.util;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.hollowcube.mapmaker.cosmetic.CraftingMaterial;
+import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.AppliedRewards;
@@ -35,7 +35,7 @@ public abstract class AbstractHttpService {
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
-            .registerTypeAdapter(CraftingMaterial.class, new EnumTypeAdapter<>(CraftingMaterial.class))
+            .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
             .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
