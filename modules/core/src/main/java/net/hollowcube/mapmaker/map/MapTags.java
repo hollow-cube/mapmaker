@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.kyori.adventure.text.Component;
-
 public final class MapTags {
     public enum TagType {
         GAMEPLAY,

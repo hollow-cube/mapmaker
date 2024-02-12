@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.metrics;
 
 import com.google.gson.Gson;
 import org.apache.kafka.common.serialization.Serializer;
+
 import java.nio.charset.StandardCharsets;
 
 public class MetricSerializer implements Serializer<Metric> {
