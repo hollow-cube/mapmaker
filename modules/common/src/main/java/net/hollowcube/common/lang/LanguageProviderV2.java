@@ -81,8 +81,8 @@ public class LanguageProviderV2 {
         if (partial == null) return translatable;
 
         // Apply the args to the partial (after translating the args)
-        var args = translatable.args().stream()
-                .map(LanguageProviderV2::translate)
+        var args = translatable.arguments().stream()
+                .map(translationArgument -> translate(translationArgument.asComponent()))
                 .toList();
         Component result;
         try {

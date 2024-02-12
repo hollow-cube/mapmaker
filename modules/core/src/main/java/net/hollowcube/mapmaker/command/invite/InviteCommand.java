@@ -1,14 +1,9 @@
 package net.hollowcube.mapmaker.command.invite;
 
 import com.google.inject.Inject;
-import net.hollowcube.command.CommandContext;
-import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

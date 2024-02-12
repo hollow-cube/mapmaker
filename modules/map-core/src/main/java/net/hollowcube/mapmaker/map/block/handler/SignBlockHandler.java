@@ -67,7 +67,7 @@ public class SignBlockHandler implements BlockHandler {
 
     static {
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        packetListenerManager.setListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
+        packetListenerManager.setPlayListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
 
         DYE_MAP.put(Material.WHITE_DYE.id(), "white");
         DYE_MAP.put(Material.LIGHT_GRAY_DYE.id(), "light_gray");

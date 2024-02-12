@@ -200,7 +200,7 @@ public class InventoryViewHost {
     }
 
     static {
-        MinecraftServer.getPacketListenerManager().setListener(ClientNameItemPacket.class, InventoryViewHost::handleAnvilInput);
+        MinecraftServer.getPacketListenerManager().setPlayListener(ClientNameItemPacket.class, InventoryViewHost::handleAnvilInput);
     }
 
     private static void handleAnvilInput(@NotNull ClientNameItemPacket packet, @NotNull Player player) {
