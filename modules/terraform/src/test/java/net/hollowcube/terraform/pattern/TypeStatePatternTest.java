@@ -25,8 +25,8 @@ class TypeStatePatternTest {
     void removeWaterlogged() {
         assertPatternResultEquals(
                 new TypeStatePattern(-1, Map.of("waterlogged", "false")),
-                Block.IRON_BARS,
-                Block.IRON_BARS.withProperty("waterlogged", "true")
+                Block.STONE_STAIRS.withProperty("facing", "east"),
+                Block.STONE_STAIRS.withProperty("facing", "east").withProperty("waterlogged", "true")
         );
     }
 

@@ -74,6 +74,10 @@ public class LocalSession {
         return playerSession.terraform();
     }
 
+    public @NotNull PlayerSession parent() {
+        return playerSession;
+    }
+
     public @NotNull String id() {
         return id;
     }

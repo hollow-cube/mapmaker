@@ -9,6 +9,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.terraform.compute.RegionFunctions.setBlock;
+
 /**
  * Contains functions for computing a variety of common shapes.
  */
@@ -52,21 +54,21 @@ public final class ShapeFunctions {
 
                         // We compute one octant and mirror it across all axes
                         var pos = position.add(x, y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(x, -y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(x, y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, -y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(x, -y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, -y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                     }
                 }
             }
@@ -119,13 +121,13 @@ public final class ShapeFunctions {
                     // Fill in all 4 quadrants for each height
                     for (int y = 0; y < dimensions.blockY(); ++y) {
                         var pos = position.add(x, y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, y, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(x, y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                         pos = position.add(-x, y, -z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                     }
                 }
             }
@@ -161,7 +163,7 @@ public final class ShapeFunctions {
                             continue;
 
                         var pos = position.add(x, i, z);
-                        buffer.set(pos, pattern.blockAt(world, pos));
+                        setBlock(buffer, world, pos, pattern);
                     }
                 }
             }

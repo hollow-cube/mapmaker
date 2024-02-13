@@ -34,6 +34,25 @@ class WEPatternBuildTest {
         }
 
         @Test
+        public void testSinglePropertyValid() {
+            var pattern = assertBuilds(BlockPattern.class, "stone_stairs[facing=east]");
+            assertEquals(Block.STONE_STAIRS.withProperty("facing", "east"), pattern.block());
+        }
+
+        @Test
+        public void testMultiplePropertiesValid() {
+            var pattern = assertBuilds(BlockPattern.class, "stone_stairs[facing=east,shape=inner_left]");
+            assertEquals(Block.STONE_STAIRS.withProperty("facing", "east")
+                    .withProperty("shape", "inner_left"), pattern.block());
+        }
+
+        @Test
+        public void testDuplicatePropertyValid() {
+            var pattern = assertBuilds(BlockPattern.class, "stone_stairs[facing=east,facing=east]");
+            assertEquals(Block.STONE_STAIRS.withProperty("facing", "east"), pattern.block());
+        }
+
+        @Test
         public void testPlainStateInvalid() {
             assertDoesNotBuild("no such block: minecraft:not_a_block", "not_a_block");
         }
@@ -41,6 +60,31 @@ class WEPatternBuildTest {
         @Test
         public void testOpenBracketNoClose() {
             assertDoesNotBuild("expected property or ']'", "stone[");
+        }
+
+        @Test
+        public void testTrailingCommaWithClose() {
+            assertDoesNotBuild("expected property", "stone_stairs[facing=east,]");
+        }
+
+        @Test
+        public void testInvalidPropertyValue() {
+            assertDoesNotBuild("no such value for property facing: invalid", "stone_stairs[facing=invalid]");
+        }
+
+        @Test
+        public void testInvalidPropertyKeyValue() {
+            assertDoesNotBuild("no such property: invalid", "stone_stairs[invalid=north]");
+        }
+
+        @Test
+        public void testPartialKey() {
+            assertDoesNotBuild("expected '='", "stone_stairs[facin]");
+        }
+
+        @Test
+        public void testMissingValue() {
+            assertDoesNotBuild("expected value", "stone_stairs[facing=]");
         }
     }
 
@@ -212,6 +256,7 @@ class WEPatternBuildTest {
             assertDoesNotBuild("no such block: minecraft:sto", "^sto");
         }
     }
+
 
     private static <T extends Pattern> @NotNull T assertBuilds(@NotNull Class<T> type, @NotNull String input) {
         var parser = new PatternParser(input);

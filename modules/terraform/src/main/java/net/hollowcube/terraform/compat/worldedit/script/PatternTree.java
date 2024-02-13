@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.terraform.TerraformRegistry;
 import net.hollowcube.terraform.mask.script.Tree;
@@ -48,12 +49,21 @@ public interface PatternTree extends ParseTree<Pattern> {
         @Override
         public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
             var block = namespaceId.toBlock();
+            var propertyList = props().toPropertyList();
 
-            // Evaluate properties
-            if (props.openBracket != -1 && props.closeBracket == -1)
-                throw new ParseException(props.end, props.end, "expected property or ']'");
-
-            //todo properties
+            // Apply the properties, handling the case where there is an invalid property for the particular block
+            if (!propertyList.isEmpty()) {
+                var possibilities = PropertyList.POSSIBLE_PROPERTIES.getOrDefault(block.id(), Object2ObjectMaps.emptyMap());
+                for (var entry : propertyList.entrySet()) {
+                    var propertyKey = entry.getKey();
+                    var possibleValues = possibilities.get(propertyKey);
+                    if (possibleValues == null)
+                        throw new ParseException(props().start(), props().end(), "no such property: " + propertyKey);
+                    if (!possibleValues.contains(entry.getValue()))
+                        throw new ParseException(props().start(), props().end(), "no such value for property " + propertyKey + ": " + entry.getValue());
+                }
+                block = block.withProperties(propertyList);
+            }
 
             // Remap the block to the Terraform registry block
             var registryBlock = registry.blockState(block.stateId());
@@ -189,9 +199,9 @@ public interface PatternTree extends ParseTree<Pattern> {
                 throw new ParseException(start(), end(), "block id or properties are required");
 
             int blockId = namespaceId == null ? -1 : namespaceId.toBlock().id();
-            //todo: parse properties
+            Map<String, String> props = this.props == null ? Map.of() : this.props.toPropertyList();
 
-            return new TypeStatePattern(blockId, Map.of());
+            return new TypeStatePattern(blockId, props);
         }
 
         @Override
@@ -410,6 +420,24 @@ public interface PatternTree extends ParseTree<Pattern> {
             return properties.size();
         }
 
+        public @NotNull Map<String, String> toPropertyList() throws ParseException {
+            if (openBracket == -1 && closeBracket == -1) return Map.of();
+            if (closeBracket == -1)
+                throw new ParseException(end, end, "expected property or ']'");
+            if (trailingComma != -1)
+                throw new ParseException(trailingComma, trailingComma, "expected property");
+
+            var result = new HashMap<String, String>();
+            for (var entry : properties) {
+                if (entry.equals == -1)
+                    throw new ParseException(entry.end, entry.end, "expected '='");
+                if (entry.value == null)
+                    throw new ParseException(entry.end, entry.end, "expected value");
+                result.put(entry.key, entry.value);
+            }
+            return result;
+        }
+
         public void suggest(@NotNull Suggestion suggestion, @Nullable Block block) {
             if (closeBracket != -1) return;
 
@@ -434,8 +462,7 @@ public interface PatternTree extends ParseTree<Pattern> {
 
             // If we are at the start of a property, handle that.
             if (size() == 0 || trailingComma != -1) {
-                suggestion.setAbsolute(trailingComma == -1 ? openBracket : trailingComma);
-                if (size() == 0) suggestion.add("]"); // Valid to close right now
+                suggestion.setAbsolute(trailingComma == -1 ? openBracket + 1 : trailingComma);
                 suggest:
                 for (var entry : validProperties.entrySet()) {
 

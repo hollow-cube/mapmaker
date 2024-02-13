@@ -6,7 +6,9 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.task.ComputeFunc;
+import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
@@ -24,7 +26,7 @@ public final class RegionFunctions {
             for (var pos : region) {
                 var block = world.getBlock(pos);
                 if (!mask.test(world, pos, block)) continue;
-                buffer.set(pos, pattern.blockAt(world, pos).stateId());
+                setBlock(buffer, world, pos, pattern);
                 //todo block entities
             }
             return buffer.build();
@@ -44,23 +46,23 @@ public final class RegionFunctions {
                         // If not hollow always set the block
                         var pos = new Vec(x, y, z);
                         if (!hollow) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                             continue;
                         }
 
                         // Otherwise we only set on particular faces
                         if (faceSet.contains(Direction.UP) && y == region.max().blockY() - 1) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         } else if (faceSet.contains(Direction.DOWN) && y == region.min().blockY()) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         } else if (faceSet.contains(Direction.NORTH) && z == region.min().blockZ()) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         } else if (faceSet.contains(Direction.SOUTH) && z == region.max().blockZ() - 1) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         } else if (faceSet.contains(Direction.WEST) && x == region.min().blockX()) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         } else if (faceSet.contains(Direction.EAST) && x == region.max().blockX() - 1) {
-                            buffer.set(pos, pattern.blockAt(world, pos));
+                            setBlock(buffer, world, pos, pattern);
                         }
                     }
                 }
@@ -119,7 +121,7 @@ public final class RegionFunctions {
                 Block block = world.getBlock(pos);
                 if (!mask.test(world, pos, block)) continue;
 
-                buffer.set(pos, replacement.blockAt(world, pos));
+                setBlock(buffer, world, pos, replacement);
             }
 
             // Second pass, add the moved blocks
@@ -132,6 +134,10 @@ public final class RegionFunctions {
 
             return buffer.build();
         };
+    }
+
+    static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) {
+        target.set(pos, pattern.blockAt(source, pos));
     }
 
     private RegionFunctions() {

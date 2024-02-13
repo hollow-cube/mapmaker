@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 @FunctionalInterface
 public interface ComputeFunc {
 
+    @Deprecated //todo should use RegionFunctions
     static @NotNull ComputeFunc set(@NotNull Region region, @NotNull Pattern pattern) {
         return (task, world) -> {
             var buffer = BlockBuffer.builder(world, region.min(), region.max());
@@ -27,6 +28,7 @@ public interface ComputeFunc {
         };
     }
 
+    @Deprecated //todo should use RegionFunctions
     static @NotNull ComputeFunc replace(@NotNull Region region, @Nullable Mask mask, @NotNull Pattern pattern) {
         return (task, world) -> {
             var buffer = BlockBuffer.builder(world, region.min(), region.max());

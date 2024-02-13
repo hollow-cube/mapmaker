@@ -26,7 +26,7 @@ public interface ParseTree<T> {
      * @param suggestion the suggestion to add
      */
     default void suggest(@NotNull TerraformRegistry registry, @NotNull Suggestion suggestion) {
-        throw new UnsupportedOperationException("suggestions are not supported");
+        throw new UnsupportedOperationException("suggestions are not supported on " + getClass().getSimpleName());
     }
 
 }

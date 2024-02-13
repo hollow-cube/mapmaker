@@ -16,5 +16,5 @@ public interface Pattern {
     }
 
     @NotNull Block blockAt(@NotNull WorldView world, @NotNull Point blockPosition);
-
+    
 }

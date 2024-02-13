@@ -101,7 +101,7 @@ public class WEPatternSuggestTest {
         void testSinglePropNoInput() {
             assertPropertyListSuggestions(
                     new PatternTree.PropertyList(0, 1, 0, -1, -1, List.of()),
-                    Block.WATER_CAULDRON, "]", "level"
+                    Block.WATER_CAULDRON, "level"
             );
         }
 
@@ -109,7 +109,7 @@ public class WEPatternSuggestTest {
         void testMultiPropStartNewPropEmpty() {
             assertPropertyListSuggestions(
                     new PatternTree.PropertyList(0, 4, 0, -1, -1, List.of()),
-                    Block.STONE_STAIRS, "]", "facing", "half", "shape", "waterlogged"
+                    Block.STONE_STAIRS, "facing", "half", "shape", "waterlogged"
             );
         }
 
