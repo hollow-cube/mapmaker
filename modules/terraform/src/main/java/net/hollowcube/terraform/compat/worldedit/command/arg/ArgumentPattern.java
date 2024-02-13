@@ -31,15 +31,15 @@ public class ArgumentPattern extends Argument<Pattern> {
         var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
         var tree = new PatternParser(word).parse();
         if (tree == null) {
-            System.out.println("tree: none");
+//            System.out.println("tree: none");
             return partial();
         }
 
         try {
-            System.out.println("tree: " + tree);
+//            System.out.println("tree: " + tree);
             return success(tree.into(session.terraform().registry()));
         } catch (ParseException e) {
-            System.out.println(e.getMessage());
+//            System.out.println(e.getMessage());
             return partial();
         }
     }
