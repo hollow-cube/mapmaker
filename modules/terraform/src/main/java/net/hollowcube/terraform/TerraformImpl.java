@@ -242,10 +242,11 @@ public final class TerraformImpl implements Terraform {
                                 paletteData[paletteIndex] = stateId;
                             } else {
                                 //todo bad bad very bad
-                                chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
+                                if (!task.isDryRun())
+                                    chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
 
                                 paletteData[paletteIndex] = newBlockState.stateId();
-                                if (newBlockState.handler() != null || newBlockState.hasNbt()) {
+                                if (!task.isDryRun() && (newBlockState.handler() != null || newBlockState.hasNbt())) {
                                     chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
                                 }
 
