@@ -23,6 +23,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.ChunkHack;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
@@ -240,6 +241,9 @@ public final class TerraformImpl implements Terraform {
                             if (newBlockState == null) {
                                 paletteData[paletteIndex] = stateId;
                             } else {
+                                //todo bad bad very bad
+                                chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
+
                                 paletteData[paletteIndex] = newBlockState.stateId();
                                 if (newBlockState.handler() != null || newBlockState.hasNbt()) {
                                     chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
