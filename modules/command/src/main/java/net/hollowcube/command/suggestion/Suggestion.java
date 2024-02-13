@@ -12,11 +12,13 @@ public final class Suggestion {
     @ApiStatus.Internal
     public static final Suggestion EMPTY = new Suggestion(0, 0);
 
+    private final int zero;
     private int start;
     private int length;
     private final List<SuggestionEntry> entries = new ArrayList<>();
 
     public Suggestion(int start, int length) {
+        this.zero = start;
         this.start = start;
         this.length = length;
     }
@@ -27,6 +29,10 @@ public final class Suggestion {
 
     public void setStart(int start) {
         this.start = start;
+    }
+
+    public void setAbsolute(int start) {
+        this.start = this.zero + start;
     }
 
     public int getLength() {
@@ -55,5 +61,11 @@ public final class Suggestion {
 
     public @NotNull List<SuggestionEntry> getEntries() {
         return entries;
+    }
+
+    public void addAll(@NotNull Iterable<String> suggestions) {
+        for (var suggestion : suggestions) {
+            add(suggestion);
+        }
     }
 }

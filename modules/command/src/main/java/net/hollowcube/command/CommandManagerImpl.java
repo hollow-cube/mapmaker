@@ -9,6 +9,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
+    public @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
         return root.createCommandPacket(player);
     }
 

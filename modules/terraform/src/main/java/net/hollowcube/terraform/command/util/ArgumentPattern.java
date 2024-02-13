@@ -54,8 +54,8 @@ public class ArgumentPattern extends Argument<Pattern> {
                 suggestion.add(block.asString());
             }
 
-            if (suggestion.getEntries().size() > 20) {
-                break;
+            if (suggestion.getEntries().size() >= 20) {
+                return;
             }
         }
     }

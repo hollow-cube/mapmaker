@@ -16,6 +16,7 @@ public record Token(@NotNull Type type, int start, int end) {
         AMP,        // &
         EQUALS,     // =
         STAR,       // *
+        CARET,      // ^
         LPAREN,     // (
         RPAREN,     // )
         LBRACKET,   // [

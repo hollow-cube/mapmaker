@@ -88,6 +88,7 @@ public class Lexer {
             case '&' -> new Token(Token.Type.AMP, start, cursor);
             case '=' -> new Token(Token.Type.EQUALS, start, cursor);
             case '*' -> new Token(Token.Type.STAR, start, cursor);
+            case '^' -> new Token(Token.Type.CARET, start, cursor);
             case '(' -> new Token(Token.Type.LPAREN, start, cursor);
             case ')' -> new Token(Token.Type.RPAREN, start, cursor);
             case '[' -> new Token(Token.Type.LBRACKET, start, cursor);

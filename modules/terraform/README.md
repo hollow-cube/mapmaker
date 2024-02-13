@@ -3,6 +3,11 @@
 Terraform is a set of world manipulation tools. It is designed as a Minestom-native alternative to WorldEdit,
 VoxelSniper, etc.
 
+maybe we should just make commands, masks, patterns each an option eg you can say you want
+// - WorldEdit commands
+// - Terraform masks
+// - Terraform patterns
+
 ## Concepts
 
 ### Selection

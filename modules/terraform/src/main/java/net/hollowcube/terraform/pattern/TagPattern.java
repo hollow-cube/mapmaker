@@ -35,6 +35,7 @@ public record TagPattern(
     }
 
     private static @NotNull List<Block> lookupTag(@NotNull String nsid) {
+        //todo this should lookup from Terraform registry
         var tag = TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, nsid);
         Check.notNull(tag, "no such tag: " + nsid);
 

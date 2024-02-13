@@ -2,6 +2,7 @@ package net.hollowcube.terraform.demo;
 
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
@@ -52,10 +53,13 @@ public class DemoServer {
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
 
         var commandManager = new CommandManagerImpl();
+        commandManager.register(new HelpCommand(commandManager));
         MinecraftServer.getConnectionManager().setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
 
         var terraform = Terraform.builder()
+                .rootCommandManager(commandManager)
                 .module(Terraform.BASE_MODULE)
+                .module(Terraform.WORLDEDIT_MODULE)
                 .build();
 
         MinecraftServer.getGlobalEventHandler()

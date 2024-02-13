@@ -3,6 +3,7 @@ package net.hollowcube.terraform.pattern;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -13,6 +14,12 @@ public record RandomPatternPattern(
 ) implements Pattern {
 
     public record Entry(int weight, @NotNull Pattern pattern) {
+    }
+
+    public RandomPatternPattern {
+        Check.argCondition(entries.isEmpty(), "Random pattern must have at least one entry");
+        Check.argCondition(total <= 0, "Total weight must be positive");
+        entries = List.copyOf(entries);
     }
 
     @Override

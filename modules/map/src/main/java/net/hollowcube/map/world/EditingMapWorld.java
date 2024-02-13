@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EditingMapWorld implements InternalMapWorld {
@@ -239,6 +240,7 @@ public class EditingMapWorld implements InternalMapWorld {
             }
 
             // Save the players data
+            activePlayers.removeIf(Predicate.not(Player::isOnline)); // Sanity
             for (var player : activePlayers) {
                 var playerData = PlayerDataV2.fromPlayer(player);
 
@@ -330,10 +332,9 @@ public class EditingMapWorld implements InternalMapWorld {
     public @Blocking void removePlayer(@NotNull Player player) {
         if (map.verification() == MapVerification.PENDING) return;
 
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState != null) {
-            try {
-
+        try {
+            var saveState = SaveState.optionalFromPlayer(player);
+            if (saveState != null) {
                 //todo handle these errors better
                 var playerData = PlayerDataV2.fromPlayer(player);
 
@@ -349,14 +350,14 @@ public class EditingMapWorld implements InternalMapWorld {
 //                playerData.setLastEditedMap(map.id());
 
                 logger.info("Updated data for {}", player.getUuid());
-            } catch (Exception e) {
-                logger.error("Failed to save player state for {}", player.getUuid(), e);
             }
+        } catch (Exception e) {
+            logger.error("Failed to save player state for {}", player.getUuid(), e);
+        } finally {
+            player.removeTag(SaveState.TAG);
+            player.removeTag(TAG_EDITING);
+            activePlayers.remove(player);
         }
-
-        player.removeTag(SaveState.TAG);
-        player.removeTag(TAG_EDITING);
-        activePlayers.remove(player);
     }
 
     @Blocking

@@ -6,6 +6,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -38,7 +39,9 @@ final class RootCommandNode extends CommandNode {
         return result;
     }
 
-    public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
+    public @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
+        if (children == null || children.isEmpty()) return null;
+
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);

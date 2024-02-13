@@ -1,5 +1,7 @@
 package net.hollowcube.terraform.compat.worldedit.script;
 
+import net.minestom.testing.Env;
+import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -60,6 +62,7 @@ class WEPatternParseTest {
             assertEquals(6, blockState.end());
 
             assertEquals("stone", blockState.namespaceId().left());
+            assertNull(blockState.namespaceId().right());
             assertEquals(5, blockState.props().openBracket());
             assertEquals(-1, blockState.props().closeBracket());
         }
@@ -155,6 +158,42 @@ class WEPatternParseTest {
             assertEquals("facing", prop1.key());
             assertEquals("north", prop1.value());
         }
+
+        @Test
+        public void testSingleStatePartialKeyA() {
+            var parser = new PatternParser("stone[aaa");
+            var tree = assertDoesNotThrow(parser::parse);
+            var blockState = assertInstanceOf(PatternTree.BlockState.class, tree);
+            assertEquals(0, blockState.start());
+            assertEquals(9, blockState.end());
+
+            assertEquals("stone", blockState.namespaceId().left());
+            assertEquals(5, blockState.props().openBracket());
+            assertEquals(-1, blockState.props().closeBracket());
+        }
+
+        @Test
+        public void testSingleStatePartialKeyB() {
+            var parser = new PatternParser("stone[aaa=");
+            var tree = assertDoesNotThrow(parser::parse);
+            var blockState = assertInstanceOf(PatternTree.BlockState.class, tree);
+            assertEquals(0, blockState.start());
+            assertEquals(10, blockState.end());
+
+            assertEquals("stone", blockState.namespaceId().left());
+            assertEquals(5, blockState.props().openBracket());
+            assertEquals(-1, blockState.props().closeBracket());
+        }
+
+        @Test
+        public void testSingleWithTrailingComma() {
+            var parser = new PatternParser("stone[a=b,");
+            var tree = assertDoesNotThrow(parser::parse);
+            var blockState = assertInstanceOf(PatternTree.BlockState.class, tree);
+            assertEquals(0, blockState.start());
+            assertEquals(10, blockState.end());
+            assertEquals(9, blockState.props().trailingComma());
+        }
     }
 
     @Nested
@@ -198,13 +237,29 @@ class WEPatternParseTest {
     }
 
     @Nested
-    public class WeightedList {
+    class WeightedList {
+
+        @Test
+        void partialWeightedSingle() {
+            var parser = new PatternParser("5%");
+            var tree = assertDoesNotThrow(parser::parse);
+            assertInstanceOf(PatternTree.WeightedList.class, tree);
+        }
+
+        @Test
+        void singleWithTrailing() {
+            var parser = new PatternParser("stone,");
+            var tree = assertDoesNotThrow(parser::parse);
+            var weightedList = assertInstanceOf(PatternTree.WeightedList.class, tree);
+            assertEquals(5, weightedList.trailingComma());
+        }
 
         @Test
         void twoEntriesNoWeights() {
             var parser = new PatternParser("1,2");
             var tree = assertDoesNotThrow(parser::parse);
             var weightedList = assertInstanceOf(PatternTree.WeightedList.class, tree);
+            assertEquals(-1, weightedList.trailingComma());
             assertEquals(0, weightedList.start());
             assertEquals(3, weightedList.end());
             assertEquals(2, weightedList.entries().size());
@@ -235,7 +290,7 @@ class WEPatternParseTest {
     }
 
     @Nested
-    public class RandomState {
+    class RandomState {
 
         @Test
         void onlyStar() {
@@ -258,6 +313,113 @@ class WEPatternParseTest {
             assertEquals("stone_stairs", randomState.namespaceId().left());
         }
 
+    }
+
+    @Nested
+    @EnvTest //todo very bad, can remove once using tf registry to lookup tags
+    class Tag {
+
+        @Test
+        void doubleHashOnly(Env env) {
+            var tree = assertDoesNotThrow(new PatternParser("##")::parse);
+            var tag = assertInstanceOf(PatternTree.Tag.class, tree);
+            assertEquals(0, tag.start());
+            assertEquals(2, tag.end());
+            assertEquals(-1, tag.star());
+            assertNull(tag.namespaceId());
+        }
+
+        @Test
+        void doubleHashStar(Env env) {
+            var tree = assertDoesNotThrow(new PatternParser("##*")::parse);
+            var tag = assertInstanceOf(PatternTree.Tag.class, tree);
+            assertEquals(0, tag.start());
+            assertEquals(3, tag.end());
+            assertEquals(2, tag.star());
+            assertNull(tag.namespaceId());
+        }
+
+        @Test
+        void doubleHashStarNamespace(Env env) {
+            var tree = assertDoesNotThrow(new PatternParser("##*ston")::parse);
+            var tag = assertInstanceOf(PatternTree.Tag.class, tree);
+            assertEquals(0, tag.start());
+            assertEquals(7, tag.end());
+            assertEquals(2, tag.star());
+            assertNotNull(tag.namespaceId());
+            assertEquals("ston", tag.namespaceId().left());
+        }
+
+    }
+
+    @Nested
+    class TypeStateApply {
+
+        @Test
+        void onlyCaret() {
+            var tree = assertDoesNotThrow(new PatternParser("^")::parse);
+            var typeState = assertInstanceOf(PatternTree.TypeStateApply.class, tree);
+            assertEquals(0, typeState.start());
+            assertEquals(1, typeState.end());
+            assertNull(typeState.namespaceId());
+            assertNull(typeState.props());
+        }
+
+        @Test
+        void namespaceOnly() {
+            var tree = assertDoesNotThrow(new PatternParser("^sto")::parse);
+            var typeState = assertInstanceOf(PatternTree.TypeStateApply.class, tree);
+            assertEquals(0, typeState.start());
+            assertEquals(4, typeState.end());
+
+            assertNotNull(typeState.namespaceId());
+            assertEquals("sto", typeState.namespaceId().left());
+
+            assertNull(typeState.props());
+        }
+
+        @Test
+        void propertiesOnly() {
+            var tree = assertDoesNotThrow(new PatternParser("^[facing=east]")::parse);
+            var typeState = assertInstanceOf(PatternTree.TypeStateApply.class, tree);
+            assertEquals(0, typeState.start());
+            assertEquals(14, typeState.end());
+            assertNull(typeState.namespaceId());
+
+            // Not much needed here because its already tested extensively elsewhere (its reused)
+            assertNotNull(typeState.props());
+            assertEquals(1, typeState.props().size());
+        }
+
+        @Test
+        void fullSample() {
+            var tree = assertDoesNotThrow(new PatternParser("^minecraft:stone[facing=east]")::parse);
+            var typeState = assertInstanceOf(PatternTree.TypeStateApply.class, tree);
+            assertEquals(0, typeState.start());
+            assertEquals(29, typeState.end());
+
+            assertNotNull(typeState.namespaceId());
+            assertEquals("minecraft", typeState.namespaceId().left());
+            assertEquals("stone", typeState.namespaceId().right());
+
+            // Not much needed here because its already tested extensively elsewhere (its reused)
+            assertNotNull(typeState.props());
+            assertEquals(1, typeState.props().size());
+        }
+
+        @Test
+        void ageRegression() {
+            var tree = assertDoesNotThrow(new PatternParser("^[age=12")::parse);
+            var typeState = assertInstanceOf(PatternTree.TypeStateApply.class, tree);
+            assertEquals(0, typeState.start());
+            assertEquals(8, typeState.end());
+
+            assertNotNull(typeState.props());
+            assertEquals(1, typeState.props().size());
+            var prop = typeState.props().get(0);
+            assertEquals("age", prop.key());
+            assertEquals("12", prop.value());
+        }
     }
 
 }

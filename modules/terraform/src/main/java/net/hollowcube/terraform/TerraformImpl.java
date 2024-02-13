@@ -81,7 +81,7 @@ public final class TerraformImpl implements Terraform {
         this.eventNode.addChild(this.toolHandler.eventNode());
 
         // Construct the registry immediately
-        this.registry = new TerraformRegistry(injector, modules, this.eventNode, commandManager, commandCondition);
+        this.registry = new TerraformRegistryImpl(injector, modules, this.eventNode, commandManager, commandCondition);
 
         var storageFactory = Objects.requireNonNull(this.registry.storage(storage),
                 "No matching storage implementation: " + storage);

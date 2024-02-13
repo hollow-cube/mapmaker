@@ -6,10 +6,7 @@ import net.hollowcube.command.util.CommandReflection;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
+import org.jetbrains.annotations.*;
 
 import java.util.function.Consumer;
 
@@ -60,7 +57,7 @@ public interface CommandManager {
     @NotNull
     CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
 
-    @NotNull
+    @Nullable
     DeclareCommandsPacket createCommandPacket(@NotNull Player player);
 
     /**

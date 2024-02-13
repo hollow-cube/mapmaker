@@ -28,3 +28,15 @@ Statuses are as follows:
 - 🚧 Biome
 - ✅ #surface
     - 🚧 Parsing
+
+### Patterns
+
+- ✅ Single block
+    - ✅ Legacy block IDs (ie `0` for `air`)
+- ✅ Random (multiple patterns, ie `stone,stone_stair,dirt`)
+- ✅ Random state (ie `*stone_stairs`)
+- 🚧 Clipboard
+    - TODO: Patterns currently have no way to access the clipboard of the Player at any phase
+- ✅ Type/state preserving (ie `^oak_stairs`)
+- ✅ Tags (ie `##stairs`)
+- ❌ Special blocks - Not supported until requested, it seems really gross (will have args variant in tf patterns)

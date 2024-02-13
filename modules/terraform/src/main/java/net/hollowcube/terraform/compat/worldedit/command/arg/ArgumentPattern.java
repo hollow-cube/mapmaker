@@ -5,23 +5,19 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.terraform.compat.worldedit.script.PatternParser;
+import net.hollowcube.terraform.compat.worldedit.script.PatternTree;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.script.ParseException;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
-import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Locale;
 
 // This is notably distinct from the other ArgumentPattern. This is for WorldEdit patterns specifically.
 public class ArgumentPattern extends Argument<Pattern> {
-    private static final List<NamespaceID> BLOCKS = Block.values().stream()
-            .map(Block::namespace).sorted().toList();
 
     ArgumentPattern(@NotNull String id) {
         super(id);
@@ -29,35 +25,36 @@ public class ArgumentPattern extends Argument<Pattern> {
 
     @Override
     public @NotNull ParseResult<Pattern> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        if (!(sender instanceof Player player)) {
-            return syntaxError();
+        if (!(sender instanceof Player player)) return syntaxError();
+        var session = LocalSession.forPlayer(player);
+
+        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
+        var tree = new PatternParser(word).parse();
+        if (tree == null) {
+            System.out.println("tree: none");
+            return partial();
         }
 
-        var word = reader.readWord(WordType.GREEDY);
         try {
-            var rawBlockState = ArgumentBlockState.staticParse(word);
-
-            // Remap the block state using the registry, todo just rework this whole thing to use tf registry to start.
-            var tf = LocalSession.forPlayer(player).terraform();
-            var blockState = tf.registry().blockState(rawBlockState.stateId());
-
-            return success((world, blockPosition) -> blockState);
-        } catch (ArgumentSyntaxException e) {
+            System.out.println("tree: " + tree);
+            return success(tree.into(session.terraform().registry()));
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
             return partial();
         }
     }
 
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
-        var word = raw.toLowerCase(Locale.ROOT);
-        for (var block : BLOCKS) {
-            if (block.asString().startsWith(word) || block.path().startsWith(word)) {
-                suggestion.add(block.asString());
-            }
+        if (!(sender instanceof Player player)) return;
+        var session = LocalSession.forPlayer(player);
+        var registry = session.terraform().registry();
 
-            if (suggestion.getEntries().size() > 20) {
-                break;
-            }
+        var tree = new PatternParser(raw).parse();
+        if (tree == null) {
+            PatternTree.fillEmptySuggestion(registry, suggestion, 0);
+        } else {
+            tree.suggest(registry, suggestion);
         }
     }
 }

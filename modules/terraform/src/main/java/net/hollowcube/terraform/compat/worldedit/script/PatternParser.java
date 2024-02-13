@@ -15,7 +15,7 @@ public class PatternParser {
         this.lexer = new Lexer(source);
     }
 
-    public PatternTree parse() {
+    public @Nullable PatternTree parse() {
         return list();
     }
 
@@ -25,28 +25,28 @@ public class PatternParser {
      * @return the parsed pattern tree
      */
     private @Nullable PatternTree list() {
+        int trailingComma = -1;
         var entries = new ArrayList<PatternTree>();
         while (true) {
             var entry = single(true);
             if (entry == null)
                 break;
             entries.add(entry);
+            trailingComma = -1;
 
             var tok = lexer.peek();
             if (tok == null || tok.type() != Token.Type.COMMA)
                 break;
+            trailingComma = tok.start();
             lexer.next(); // Eat the comma
         }
 
         if (entries.isEmpty())
             return null;
-        if (entries.size() == 1)
+        // If there is only one unweighted entry, return it alone.
+        if (trailingComma == -1 && entries.size() == 1 && !(entries.get(0) instanceof PatternTree.Weighted))
             return entries.get(0);
-        return new PatternTree.WeightedList(
-                entries.get(0).start(),
-                entries.get(entries.size() - 1).end(),
-                entries
-        );
+        return new PatternTree.WeightedList(trailingComma, entries);
     }
 
     private @Nullable PatternTree single(boolean topLevel) {
@@ -58,6 +58,8 @@ public class PatternParser {
                     topLevel ? weightOrBlockId() : legacyBlock(lexer.next());
             case IDENT -> blockState();
             case STAR -> randomState();
+            case HASH -> tagOrNamed();
+            case CARET -> typeStateApply();
             default -> {
                 lexer.next(); // Eat the bad symbol
                 yield new PatternTree.Error(tok.start(), tok.end());
@@ -77,17 +79,67 @@ public class PatternParser {
         return new PatternTree.RandomState(starTok.start(), namespaceId == null ? starTok.end() : namespaceId.end(), namespaceId);
     }
 
-//    private @NotNull PatternTree randomState() {
-//        var starTok = Objects.requireNonNull(lexer.next());
-//        PatternTree.NamespaceId namespaceId = null;
-//
-//        var tok = lexer.peek();
-//        if (tok != null && tok.type() == Token.Type.IDENT) {
-//            namespaceId = namespaceId();
-//        }
-//
-//        return new PatternTree.RandomState(starTok.start(), namespaceId == null ? starTok.end() : namespaceId.end(), namespaceId);
-//    }
+    private @NotNull PatternTree tagOrNamed() {
+        var firstHash = Objects.requireNonNull(lexer.next());
+        var next = lexer.peek();
+        // There is a subtle detail here that if we reach end of input, we return a 'named'
+        // which means suggestions for that will be returned, not for tags.
+        // If this behavior needs to change to suggest both, most likely we will need some TagOrNamed tree value.
+        if (next != null && next.type() == Token.Type.HASH) {
+            return tag(firstHash);
+        } else {
+            return named(firstHash);
+        }
+    }
+
+    private @NotNull PatternTree tag(@NotNull Token firstHashTok) {
+        var secondHashTok = Objects.requireNonNull(lexer.next());
+        int start = firstHashTok.start(), end = secondHashTok.end();
+
+        // Consume the * if it exists
+        int star = -1;
+        var tok = lexer.peek();
+        if (tok != null && tok.type() == Token.Type.STAR) {
+            star = tok.start();
+            lexer.next();
+            end = tok.end();
+        }
+
+        // Read the namespaceId following
+        PatternTree.NamespaceId namespaceId = null;
+        if ((tok = lexer.peek()) != null && tok.type() == Token.Type.IDENT) {
+            namespaceId = namespaceId();
+            end = namespaceId.end();
+        }
+
+        return new PatternTree.Tag(start, end, star, namespaceId);
+    }
+
+    private @NotNull PatternTree typeStateApply() {
+        var tok = Objects.requireNonNull(lexer.next());
+        int start = tok.start(), end = tok.end();
+
+
+        PatternTree.NamespaceId namespaceId = null;
+        if ((tok = lexer.peek()) != null && tok.type() == Token.Type.IDENT) {
+            namespaceId = namespaceId();
+            end = namespaceId.end();
+        }
+
+        PatternTree.PropertyList propertyList = null;
+        if ((tok = lexer.peek()) != null && tok.type() == Token.Type.LBRACKET) {
+            propertyList = propertyList();
+            end = propertyList.end();
+        }
+
+        return new PatternTree.TypeStateApply(start, end, namespaceId, propertyList);
+    }
+
+    private @NotNull PatternTree named(@NotNull Token firstHashTok) {
+        //todo named args should be implemented with command args. Basically any Argument<> should be a valid argument to one of these.
+        // it means suggestions are automatically valid and things like patterns and masks are immediately valid.
+        throw new UnsupportedOperationException("not implemented");
+    }
 
     private @NotNull PatternTree weightOrBlockId() {
         var numTok = Objects.requireNonNull(lexer.next());
@@ -147,8 +199,8 @@ public class PatternParser {
             if (tok != null && tok.type() == Token.Type.IDENT) {
                 end = tok.end();
                 lexer.next();
-            }
-        }
+            } else tok = null;
+        } else tok = null;
         return new PatternTree.NamespaceId(start, end, colon, lexer.span(ident),
                 tok == null ? null : lexer.span(tok));
     }
@@ -161,6 +213,7 @@ public class PatternParser {
         int start = lexer.pos(), end = start;
         int openBracket = -1, closeBracket = -1;
         var props = new ArrayList<PatternTree.PropertyList.Property>();
+        int trailingComma = -1;
 
         var openBracketToken = lexer.peek();
         if (openBracketToken != null && openBracketToken.type() == Token.Type.LBRACKET) {
@@ -172,15 +225,19 @@ public class PatternParser {
             while (tok != null && tok.type() == Token.Type.IDENT) {
                 String name = lexer.span(tok), value = null;
                 int propStart = tok.start(), propEnd = tok.end();
+                end = propEnd;
                 lexer.next();
+                trailingComma = -1;
 
+                int equals = -1;
                 tok = lexer.peek();
                 if (tok != null && tok.type() == Token.Type.EQUALS) {
                     end = propEnd = tok.end();
+                    equals = tok.start();
                     lexer.next();
 
                     tok = lexer.peek();
-                    if (tok != null && tok.type() == Token.Type.IDENT) {
+                    if (tok != null && (tok.type() == Token.Type.IDENT || tok.type() == Token.Type.NUMBER)) {
                         value = lexer.span(tok);
                         propEnd = tok.end();
                         lexer.next();
@@ -189,12 +246,14 @@ public class PatternParser {
                     }
                 }
 
-                props.add(new PatternTree.PropertyList.Property(propStart, propEnd, name, value));
+                end = propEnd;
+                props.add(new PatternTree.PropertyList.Property(propStart, propEnd, equals, name, value));
 
                 // If there is a comma following, eat that and continue
                 if (tok != null && tok.type() == Token.Type.COMMA) {
                     end = tok.end();
                     lexer.next();
+                    trailingComma = tok.start();
                     tok = lexer.peek();
                 }
             }
@@ -209,6 +268,6 @@ public class PatternParser {
             }
         }
 
-        return new PatternTree.PropertyList(start, end, openBracket, closeBracket, props);
+        return new PatternTree.PropertyList(start, end, openBracket, closeBracket, trailingComma, props);
     }
 }
