@@ -4,9 +4,9 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.map.worldold.EditingMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.TestingMapWorld;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -44,6 +44,6 @@ public class TestCommand extends CommandDsl {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return CommandCondition.HIDE;
 
-        return (world.flags() & (MapWorld.FLAG_TESTING | MapWorld.FLAG_EDITING)) != 0 ? CommandCondition.ALLOW : CommandCondition.HIDE;
+        return world.canEdit(player) || world instanceof TestingMapWorld ? CommandCondition.ALLOW : CommandCondition.HIDE;
     }
 }

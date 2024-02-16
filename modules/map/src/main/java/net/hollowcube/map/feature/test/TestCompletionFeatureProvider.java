@@ -4,8 +4,8 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.TestingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.text.Component;
@@ -20,12 +20,12 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         // Only enable this feature if the world is testing _and not playing
-        if ((world.flags() & MapWorld.FLAG_TESTING) == 0)
+        if (!(world instanceof TestingMapWorld))
             return false;
 
         var eventNode = EventNode.type("map-completion/test", EventFilter.INSTANCE);
         eventNode.addListener(MapPlayerCompleteMapEvent.class, FutureUtil.virtual(this::handleMapCompletion));
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         return true;
     }
@@ -40,7 +40,7 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
             var saveState = SaveState.fromPlayer(player);
             saveState.setCompleted(true);
 
-            world.server().bridge().sendPlayerToHub(player);
+            world.server().bridge().joinHub(player);
 
         } else {
             // Not sure what should really happen here, for now just tell them

@@ -1,10 +1,10 @@
 package net.hollowcube.map.feature.play.item;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventDispatcher;
@@ -12,7 +12,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
@@ -40,20 +39,18 @@ public class ExitSpectatorModeItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = (InternalMapWorld) MapWorld.forPlayer(player);
-        //todo should not depend on implementation details of InternalMapWorld
+        var world = MapWorld.forPlayer(player);
+        if (!(world instanceof PlayingMapWorld)) return;
 
-        world.removePlayer(player);
-        if (world instanceof PlayingMapWorld playingWorld) {
-            CompletableFuture.runAsync(() -> {
-                playingWorld.removePlayer(player, false);
-                playingWorld.acceptPlayer(player, true);
-                if (world.map().settings().isOnlySprint()) {
-                    EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
-                    player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
-                }
-                player.removeTag(SPECTATOR_CHECKPOINT);
-            });
-        }
+        FutureUtil.submitVirtual(() -> {
+            player.removeTag(SPECTATOR_CHECKPOINT);
+            world.removePlayer(player); // Remove spectator
+            world.addPlayer(player); // Add back as playing player
+
+            if (world.map().settings().isOnlySprint()) {
+                EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
+                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
+            }
+        });
     }
 }

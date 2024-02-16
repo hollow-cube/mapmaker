@@ -135,6 +135,12 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         this.spectators.remove(player);
     }
 
+    @Deprecated
+    public void removePlayerImmediate(@NotNull Player player) {
+        this.players.remove(player);
+        this.spectators.remove(player);
+    }
+
     /**
      * Returns this map if the player is currently playing it, or a sub map if the player is in a sub map.
      *
@@ -161,7 +167,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
     @Blocking
     public void load() {
-
+        this.biomes().init();
     }
 
     @Blocking
@@ -169,5 +175,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         logger.info("Closing world {}", this);
         Set.copyOf(players).forEach(this::removePlayer);
         Set.copyOf(spectators).forEach(this::removePlayer);
+        players.clear();
+        spectators.clear();
     }
 }

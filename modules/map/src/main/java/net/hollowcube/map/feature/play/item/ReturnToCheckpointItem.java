@@ -1,10 +1,10 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
-import net.hollowcube.map.worldold.TestingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;

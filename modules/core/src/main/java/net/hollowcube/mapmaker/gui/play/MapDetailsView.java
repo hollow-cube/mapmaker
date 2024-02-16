@@ -12,7 +12,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -323,7 +322,7 @@ public class MapDetailsView extends View {
 
         try {
             player.closeInventory();
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
+            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
             logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());

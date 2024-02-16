@@ -1,11 +1,10 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
-import net.hollowcube.map.worldold.TestingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.event.EventDispatcher;
@@ -38,7 +37,7 @@ public class ResetSaveStateItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = (InternalMapWorld) MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
 
         var saveState = SaveState.optionalFromPlayer(player);
@@ -48,9 +47,8 @@ public class ResetSaveStateItem extends ItemHandler {
             }
         } else {
             // The player has no save state because they are spectating, so just re-add them to the world
-            if (world instanceof PlayingMapWorld playingWorld) playingWorld.removePlayer(player, false);
-            else world.removePlayer(player);
-            world.acceptPlayer(player, true);
+            world.removePlayer(player);
+            world.addPlayer(player);
         }
     }
 

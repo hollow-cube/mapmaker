@@ -5,7 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.util.MapMessages;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;

@@ -6,7 +6,7 @@
       <blaze-user-flag>RESOURCE_PACK_SHA=dev</blaze-user-flag>
       <blaze-user-flag>--define</blaze-user-flag>
       <blaze-user-flag>MAPMAKER_UNLEASH_ENABLED=true</blaze-user-flag>
-      <blaze-user-flag>--jvmopt=&quot;-Dmapmaker.noop=true&quot;</blaze-user-flag>
+      <blaze-user-flag>--jvmopt=&quot;-Dmapmaker.noop=false&quot;</blaze-user-flag>
       <blaze-user-flag>--jvmopt=&quot;-Dunleash.default=true&quot;</blaze-user-flag>
     </blaze-settings>
     <method v="2">

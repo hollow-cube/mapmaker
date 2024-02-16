@@ -1,17 +1,19 @@
 package net.hollowcube.map2.runtime;
 
-import com.google.inject.Injector;
 import jdk.incubator.concurrent.StructuredTaskScope;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
-import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.Injectors;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.map2.MapServer;
 import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.util.DynamicController;
+import net.hollowcube.map2.util.DynamicInjector;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -58,15 +60,16 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
@@ -88,8 +91,8 @@ public abstract class AbstractMapServer implements MapServer {
 
     private final CommandManager commandManager = new CommandManagerImpl();
 
-    private Controller guiController;
-    private Injector injector;
+    private DynamicController guiController = new DynamicController();
+    private DynamicInjector injector = new DynamicInjector();
 
     private volatile boolean isReady = false; // Corresponds to the associated health check
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
@@ -182,14 +185,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager());
 
-        var injectorBindings = new HashMap<Class<?>, Object>();
-        var guiControllerBindings = new HashMap<String, Object>();
-        postInit(injectorBindings, guiControllerBindings);
-
-        this.guiController = Controller.make(guiControllerBindings);
-        injectorBindings.put(Controller.class, guiController);
-        this.injector = Injectors.anonymous(injectorBindings);
-
+        injector.bind(Controller.class, guiController);
         prepareStart();
 
         // Finally, mark the service as ready for Kubernetes
@@ -235,45 +231,23 @@ public abstract class AbstractMapServer implements MapServer {
         return commandManager;
     }
 
-//    @Override
-//    public @NotNull List<FeatureProvider> features() {
-//        return null;
-//    }
-
-    /**
-     * Called after all dependencies have been initialized, but before the injector is created.
-     *
-     * <p>Should be used to contribute bindings to the injector.</p>
-     */
-    protected void postInit(@NotNull Map<Class<?>, Object> injectorBindings, @NotNull Map<String, Object> guiBindings) {
-        injectorBindings.put(MapServer.class, this);
-        guiBindings.put("mapServer", this);
-        guiBindings.put("server", this);
-        injectorBindings.put(ConfigLoaderV3.class, this);
-
-        injectorBindings.put(SessionService.class, sessionService);
-        guiBindings.put("sessionService", sessionService);
-        injectorBindings.put(PlayerService.class, playerService);
-        guiBindings.put("playerService", playerService);
-        injectorBindings.put(MapService.class, mapService);
-        guiBindings.put("mapService", mapService);
-        injectorBindings.put(PermManager.class, permManager);
-        guiBindings.put("permManager", permManager);
-        injectorBindings.put(PlayerInviteService.class, inviteService);
-        guiBindings.put("playerInviteService", inviteService);
-
-        injectorBindings.put(MapAllocator.class, allocator);
-        guiBindings.put("allocator", allocator);
-        injectorBindings.put(SessionManager.class, sessionManager);
-        guiBindings.put("bridge", bridge());
-        injectorBindings.put(ServerBridge.class, bridge());
-    }
-
     /**
      * Called just before the server starts, but after all services have been initialized.
      */
     protected void prepareStart() {
-        commandManager.register(new HelpCommand(commandManager));
+        addBinding(MapServer.class, this, "mapServer", "server");
+        addBinding(ConfigLoaderV3.class, config);
+
+        addBinding(SessionService.class, sessionService, "sessionService");
+        addBinding(PlayerService.class, playerService, "playerService");
+        addBinding(MapService.class, mapService, "mapService");
+        addBinding(PermManager.class, permManager, "permManager");
+        addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
+
+        addBinding(MapAllocator.class, allocator, "allocator");
+        addBinding(SessionManager.class, sessionManager, "sessionManager");
+        addBinding(ServerBridge.class, bridge(), "bridge");
+
         commandManager.register(createInstance(EmojisCommand.class));
         commandManager.register(createDebugCommand());
         commandManager.register(createInstance(PingCommand.class));
@@ -305,13 +279,35 @@ public abstract class AbstractMapServer implements MapServer {
         return shutdowner;
     }
 
+    protected <T> void addBinding(@Nullable Class<T> type, @NotNull T instance, @NotNull String... names) {
+        if (type != null) injector.bind(type, instance);
+        for (var name : names) {
+            guiController.addBinding(name, instance);
+        }
+    }
+
     @Override
     public <T> @NotNull T createInstance(@NotNull Class<T> type) {
+        return createInstance(type, null);
+    }
+
+    @Override
+    public <T> @NotNull T createInstance(@NotNull Class<T> type, @Nullable Map<Class<?>, Object> context) {
         try {
+            var injector = this.injector.injector();
+            if (context != null && !context.isEmpty()) {
+                injector = Injectors.child(injector, context);
+            }
+
             return injector.getInstance(type);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create instance of " + type, e);
         }
+    }
+
+    @Override
+    public void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
+        guiController.show(player, viewProvider);
     }
 
     /**
@@ -331,7 +327,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        return injector.getInstance(DebugCommand.class);
+        return createInstance(DebugCommand.class);
     }
 
     public void handleUncaughtException(@NotNull Throwable t) {

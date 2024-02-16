@@ -1,8 +1,8 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.MapServer;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -33,13 +33,13 @@ public class MapDetailsItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        Thread.startVirtualThread(() -> {
-            var player = click.player();
-            var server = MapServer.StaticAbuse.instance;
+        var player = click.player();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
 
-            var map = MapWorld.forPlayer(player).map();
-            var authorName = server.playerService().getPlayerDisplayName2(map.owner());
-            server.newOpenGUI(player, c -> new MapDetailsView(c, map, authorName));
+        FutureUtil.submitVirtual(() -> {
+            var authorName = world.server().playerService().getPlayerDisplayName2(world.map().owner());
+            world.server().showView(player, c -> new MapDetailsView(c, world.map(), authorName));
         });
     }
 

@@ -3,6 +3,8 @@ package net.hollowcube.map.world;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapServer;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map2.polar.ReadWorldAccess;
 import net.hollowcube.map2.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.instance.MapInstance;
@@ -13,6 +15,7 @@ import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -50,19 +53,19 @@ public class PlayingMapWorld extends AbstractMapWorld {
     }
 
     @Override
-    protected void load() {
+    public void load() {
         // Load the map itself (eg blocks, if present)
         var mapData = server().mapService().getMapWorld(map().id(), true);
         if (mapData != null) {
             instance.load(mapData, new ReadWorldAccess(this));
         }
 
-        this.biomes().init();
-        this.enabledFeatures.addAll(MapWorldHelpers.loadFeatures(this));
+        super.load();
+        //todo load features
     }
 
     @Override
-    protected void close() {
+    public void close() {
         super.close(); // Remove players & spectators
         instance.unload();
     }
@@ -79,7 +82,7 @@ public class PlayingMapWorld extends AbstractMapWorld {
 
         super.addPlayer(player); // Add to player list & reset inventory.
 
-//        EventDispatcher.call(new MapPlayerInitEvent(this, player, firstSpawn)); todo
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
         if (saveState.getPlaytime() > 0) {
             // If the playtime is non-zero (ie they have played before) start timing immediately.
             // Otherwise, we will start timing when they move the first time.
@@ -127,9 +130,9 @@ public class PlayingMapWorld extends AbstractMapWorld {
     }
 
     public @Nullable SaveStateUpdateResponse removeActivePlayer(@NotNull Player player) {
-        if (!isPlaying(player)) return null;
+//        if (!isPlaying(player)) return null; //todo cannot enable this, see comment in PlayCompletionFeatureProvider where this is called.
 
-        //         EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
+        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
         super.removePlayer(player); // Remove from player list
 
         // Update the playtime and playing state to the current state
@@ -159,6 +162,17 @@ public class PlayingMapWorld extends AbstractMapWorld {
         super.removePlayer(player); // Remove from player list & reset
 
         // ActionBar.forPlayer(player).removeProvider(spectatingActionBarProvider);
-        //        ActionBar.forPlayer(player).removeProvider(finishedActionBarProvider);
+        // ActionBar.forPlayer(player).removeProvider(finishedActionBarProvider);
     }
+
+//    private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+//        builder.pushColor(FontUtil.NO_SHADOW);
+//        builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
+//    }
+//
+//    private void buildFinishedWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+//        builder.pushColor(FontUtil.NO_SHADOW);
+//        builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
+//    }
+
 }

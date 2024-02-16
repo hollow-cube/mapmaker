@@ -2,11 +2,12 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.map.feature.play.item.ReturnToHubItem;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -21,12 +22,10 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
-            return false;
-        if (world.map().settings().getVariant() != MapVariant.BUILDING)
+        if (!(world instanceof PlayingMapWorld) || world.map().settings().getVariant() != MapVariant.BUILDING)
             return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         var itemRegistry = world.itemRegistry();
         itemRegistry.registerSilent(MapDetailsItem.INSTANCE);

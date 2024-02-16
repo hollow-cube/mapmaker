@@ -1,6 +1,6 @@
 package net.hollowcube.map.item.experimental;
 
-import net.hollowcube.map.item.handler.ItemHandler;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 public class MarkerItem extends ItemHandler {

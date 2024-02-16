@@ -7,7 +7,6 @@ import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -112,7 +111,7 @@ public class CreateMaps extends View {
             return;
 
         try {
-            bridge.joinMap(player, spawnMapId, HubToMapBridge.JoinMapState.EDITING);
+            bridge.joinMap(player, spawnMapId, ServerBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("generic.map.edit.fail"));
             MinecraftServer.getExceptionManager().handleException(e);
@@ -121,8 +120,8 @@ public class CreateMaps extends View {
         }
     }
 
-    @Signal(Element.SIG_CLOSE)
-    private void onClose() {
+    @Signal(Element.SIG_UNMOUNT)
+    private void onUnmount() {
         playerData.writeUpdatesUpstream(playerService);
     }
 

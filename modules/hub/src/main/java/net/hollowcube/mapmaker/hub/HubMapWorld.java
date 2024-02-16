@@ -60,8 +60,6 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private static HubMapWorld instance; // Currently just ensures there is only ever one hub per runtime.
 
-    private volatile boolean isRegistered = false;
-
     private final EventNode<InstanceEvent> eventNode = EventNode.type("hub-events", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
@@ -79,6 +77,11 @@ public class HubMapWorld extends AbstractMapWorld {
         instance().setGenerator(MapGenerators.voidWorld());
 
         instance().eventNode().addChild(eventNode); // Needs spectators, so register on instance.
+
+        itemRegistry().register(server().createInstance(PlayMapsItem.class));
+        itemRegistry().register(server().createInstance(CreateMapsItem.class));
+        itemRegistry().register(server().createInstance(OrgMapsItem.class));
+        itemRegistry().register(server().createInstance(OpenCosmeticsMenuItem.class));
     }
 
     @Override
@@ -121,15 +124,6 @@ public class HubMapWorld extends AbstractMapWorld {
     @Override
     public void addPlayer(@NotNull Player player) {
         super.addPlayer(player);
-
-        if (!isRegistered) {
-            //todo need to move this. It is inconvenient because i need the injector which doesnt exist at this point.
-            isRegistered = true;
-            itemRegistry().register(server().createInstance(PlayMapsItem.class));
-            itemRegistry().register(server().createInstance(CreateMapsItem.class));
-            itemRegistry().register(server().createInstance(OrgMapsItem.class));
-            itemRegistry().register(server().createInstance(OpenCosmeticsMenuItem.class));
-        }
 
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);

@@ -1,9 +1,10 @@
 package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.MinecraftServer;
@@ -23,7 +24,7 @@ public class MapRatingFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerInitEvent.class, this::handlePlayerInit);
 
     public static boolean isMapRatable(@NotNull MapWorld world) {
-        return world.map().isPublished() && world.flags() == MapWorld.FLAG_PLAYING;
+        return world.map().isPublished() && world instanceof PlayingMapWorld;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class MapRatingFeatureProvider implements FeatureProvider {
         if (!isMapRatable(world))
             return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
         return true;
     }
 

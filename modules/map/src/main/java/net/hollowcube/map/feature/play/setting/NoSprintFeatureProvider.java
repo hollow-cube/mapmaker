@@ -2,10 +2,12 @@ package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -20,14 +22,14 @@ public class NoSprintFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & (MapWorld.FLAG_PLAYING | MapWorld.FLAG_TESTING)) == 0)
+        if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
 
         var settings = world.map().settings();
         if (settings.getVariant() != MapVariant.PARKOUR || !settings.isNoSprint())
             return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         return true;
     }
