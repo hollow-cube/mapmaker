@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.item.handler.ItemRegistry;
 import net.hollowcube.map.item.handler.ItemUtils;
-import net.hollowcube.map.lang.MapMessages;
+import net.hollowcube.map.util.MapMessages;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;

@@ -9,7 +9,9 @@ java_library(
         "//modules/canvas:api",
         "//modules/common",
         "//modules/core",
-        "//modules/terraform",  # Included for schematics
+        "//modules/map-core",
+        "//modules/terraform",  # Included for schematics, todo both terraform and this module should get schem from central
+        "//third_party:helidon",
         "//third_party:minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_miguelfonseca_completely_completely_core",

@@ -271,6 +271,10 @@ public class MapData {
         return settings().getVariant() == MapVariant.PARKOUR;
     }
 
+    public @NotNull String createDimensionName(char classifier) {
+        return String.format("mapmaker:map/%s/%s", id().substring(0, 8), classifier);
+    }
+
     public static class WithSlot extends MapData {
         private int slot;
 

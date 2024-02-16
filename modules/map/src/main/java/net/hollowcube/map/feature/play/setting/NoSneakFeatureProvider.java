@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventDispatcher;

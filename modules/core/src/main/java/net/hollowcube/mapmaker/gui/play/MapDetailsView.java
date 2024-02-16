@@ -10,16 +10,15 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.bridge.ServerBridge;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -33,6 +32,7 @@ public class MapDetailsView extends View {
 
     private @ContextObject ServerBridge bridge;
     private @ContextObject PlayerService playerService;
+    private @ContextObject SessionManager sessionManager;
 
     private @OutletGroup("report_button_.+") Label[] reportButtons;
 
@@ -314,7 +314,8 @@ public class MapDetailsView extends View {
     @Action(value = "play_map", async = true)
     public void handlePlayMap(@NotNull Player player) {
         // Do not allow players to join maps if they are already in the same map
-        if (map.id().equals(bridge.getCurrentMap(player))) {
+        var presence = sessionManager.getPresence(PlayerDataV2.fromPlayer(player).id());
+        if (presence != null && map.id().equals(presence.mapId())) {
             player.sendMessage(Component.translatable("gui.map_details.already_in_map"));
             player.closeInventory();
             return;

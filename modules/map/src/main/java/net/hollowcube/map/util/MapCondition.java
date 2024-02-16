@@ -1,7 +1,7 @@
 package net.hollowcube.map.util;
 
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.InstanceEvent;

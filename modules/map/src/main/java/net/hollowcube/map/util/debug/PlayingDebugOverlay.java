@@ -2,7 +2,7 @@ package net.hollowcube.map.util.debug;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
@@ -22,7 +22,7 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || !MapHooks.isPlayerPlaying(player)) return;
-        
+
         var sliced = slice(saveState.playState().toString(false));
         builder.offset(-FontUtil.measureText(sliced) / 2).append("line_0", sliced);
     }

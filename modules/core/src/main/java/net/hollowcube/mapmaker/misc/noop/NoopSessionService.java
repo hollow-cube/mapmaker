@@ -8,6 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class NoopSessionService implements SessionService {
+
+    @Override
+    public boolean ready() {
+        return true;
+    }
+
     @Override
     public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip) {
         return new PlayerDataV2(

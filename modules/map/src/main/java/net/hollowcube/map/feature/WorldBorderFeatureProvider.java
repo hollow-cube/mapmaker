@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.MapSize;
 import org.jetbrains.annotations.NotNull;
 

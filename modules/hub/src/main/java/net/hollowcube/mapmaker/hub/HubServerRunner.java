@@ -1,0 +1,127 @@
+package net.hollowcube.mapmaker.hub;
+
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.spi.ClassServiceLoader;
+import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.map2.runtime.AbstractMapServer;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
+import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.misc.ResourcePackManager;
+import net.hollowcube.mapmaker.session.Presence;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.timer.Scheduler;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
+public final class HubServerRunner extends AbstractMapServer {
+    private static final Logger logger = LoggerFactory.getLogger(HubServerRunner.class);
+    private static final Presence HUB_PRESENCE = new Presence("mapmaker:hub",
+            "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
+
+    private HubMapWorld world;
+
+    HubServerRunner(@NotNull ConfigLoaderV3 config) {
+        super(config);
+
+        MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
+                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
+                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+    }
+
+    @Override
+    public @NotNull ServerBridge bridge() {
+        return new ServerBridge() {
+            @Override
+            public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+                throw new UnsupportedOperationException("Hub server cannot join maps");
+            }
+
+            @Override
+            public void joinHub(@NotNull Player player) {
+                throw new UnsupportedOperationException("Hub server cannot join itself");
+            }
+        };
+    }
+
+    @Override
+    public @NotNull Collection<HealthCheck> readinessChecks() {
+        var checks = new ArrayList<>(super.readinessChecks());
+        checks.add(() -> sessionService().ready() ? HealthCheckResponse.up("session-service") : HealthCheckResponse.down("session-service"));
+        return checks;
+    }
+
+    @Override
+    protected void postInit(@NotNull Map<Class<?>, Object> injectorBindings, @NotNull Map<String, Object> guiBindings) {
+        super.postInit(injectorBindings, guiBindings);
+
+        // Create the hub world once, which will never go away.
+        this.world = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
+
+        injectorBindings.put(HubMapWorld.class, world);
+        guiBindings.put("world", world);
+        guiBindings.put("hubWorld", world);
+        guiBindings.put("hubMapWorld", world);
+        injectorBindings.put(Scheduler.class, world.instance().scheduler());
+    }
+
+    @Override
+    protected void prepareStart() {
+        super.prepareStart();
+
+        commandManager().register(createInstance(HubFlyCommand.class));
+        commandManager().register(createInstance(HubSpawnCommand.class));
+        commandManager().register(createInstance(HubTrainCommand.class));
+
+        // Load hub features
+        for (var featureClass : ClassServiceLoader.load(HubFeature.class)) {
+            try {
+                logger.info("Loading feature {}", featureClass.getName());
+                createInstance(featureClass);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load feature " + featureClass.getName(), e);
+            }
+        }
+    }
+
+    private void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
+        transferPlayerSession(event.getPlayer(), HUB_PRESENCE);
+        // Result ignored because nothing happens here, but if above returns false the player was kicked.
+    }
+
+    private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+        var player = event.getPlayer();
+
+        ResourcePackManager.sendResourcePack(player).join();
+        if (!player.isOnline()) return;
+
+        // Setup the player in the world
+        world.configurePlayer(event);
+    }
+
+    private void handleSpawn(@NotNull PlayerSpawnEvent event) {
+        if (!event.isFirstSpawn()) return;
+        super.handleFirstSpawn(event.getPlayer());
+    }
+
+    private void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
+        super.handlePlayerDisconnect(event.getPlayer());
+    }
+}

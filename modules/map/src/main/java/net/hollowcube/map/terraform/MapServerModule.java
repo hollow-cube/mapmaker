@@ -2,7 +2,7 @@ package net.hollowcube.map.terraform;
 
 import net.hollowcube.map.block.BlockTags;
 import net.hollowcube.map.block.handler.BlockHandlers;
-import net.hollowcube.map.entity.MapEntityType;
+import net.hollowcube.map2.entity.MapEntityType;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.storage.TerraformStorage;

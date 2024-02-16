@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 public class NoopPermManager implements PermManager {
     @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPerm perm) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean hasMapPermission(@NotNull Player player, @NotNull String mapId, @NotNull MapPerm perm) {
-        return false;
+        return true;
     }
 }

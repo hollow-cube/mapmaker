@@ -7,7 +7,6 @@ import net.hollowcube.command.arg.ArgumentEntity;
 import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -18,6 +17,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,14 +29,14 @@ public class HubTrainCommand extends CommandDsl {
 
     private final ArgumentWord type = Argument.Word("type").with("kick", "test");
     private final ArgumentEntity players = Argument.Entity("player").onlyPlayers(true);
-    private final HubServer server;
+    private final Scheduler scheduler;
 
     @Inject
-    public HubTrainCommand(@NotNull HubServer hubServer, @NotNull PermManager permManager) {
+    public HubTrainCommand(@NotNull PermManager permManager, @NotNull Scheduler scheduler) {
         super("train");
-        this.server = hubServer;
+        this.scheduler = scheduler;
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
-        
+
         addSyntax(playerOnly(this::handleTrainAttack), type, players);
     }
 
@@ -48,7 +48,7 @@ public class HubTrainCommand extends CommandDsl {
         for (Entity entity : context.get(players).find(player)) {
             if (entity instanceof Player target) {
                 Train train = new Train(target, callback);
-                server.scheduler().submitTask(train::getTask);
+                scheduler.submitTask(train::getTask);
             }
         }
     }

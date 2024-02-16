@@ -5,7 +5,7 @@ import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;

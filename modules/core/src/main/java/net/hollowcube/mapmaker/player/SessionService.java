@@ -9,6 +9,9 @@ import java.util.List;
 @Blocking
 public interface SessionService {
 
+    @Blocking
+    boolean ready();
+
     @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip);
 
     void deleteSession(@NotNull String id);

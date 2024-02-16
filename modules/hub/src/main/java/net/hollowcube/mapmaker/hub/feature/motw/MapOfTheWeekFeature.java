@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.feature.motw;
 
 import com.google.auto.service.AutoService;
+import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.bridge.ServerBridge;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
@@ -15,6 +15,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,26 +28,26 @@ public class MapOfTheWeekFeature implements HubFeature {
     private static final Pos MAP_ENTITY_POS = new Pos(-38 + 0.5, 43, 54 + 0.5, 0, -90);
     private static final int MAP_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private HubToMapBridge bridge;
+    private ServerBridge bridge;
 
     private final NpcItemModel mapEntity = new NpcItemModel();
     private int mapEntityRotationTarget = 0;
 
-    @Override
-    public void init(@NotNull HubServer hub) {
-        this.bridge = hub.bridge();
+    @Inject
+    public MapOfTheWeekFeature(@NotNull ServerBridge bridge, @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+        this.bridge = bridge;
 
         // Timer init (the big countdown above the map)
-        var timer = new CountdownTimer(hub.instance());
-        hub.scheduler().submitTask(timer, ExecutionType.SYNC);
+        var timer = new CountdownTimer(world.instance());
+        scheduler.submitTask(timer, ExecutionType.SYNC);
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
         mapEntity.setModel(Material.STICK, 5);
         mapEntity.getEntityMeta().setScale(new Vec(4));
-        mapEntity.setInstance(hub.instance(), MAP_ENTITY_POS).join();
+        mapEntity.setInstance(world.instance(), MAP_ENTITY_POS).join();
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0)).join();
-        hub.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.SYNC);
+        scheduler.submitTask(this::mapEntityUpdate, ExecutionType.SYNC);
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {

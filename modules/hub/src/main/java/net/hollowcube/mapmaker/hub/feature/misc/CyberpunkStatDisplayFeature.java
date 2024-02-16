@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
+import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -20,6 +21,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
@@ -44,8 +46,8 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     private BlockDisplayMeta tickTimeBar;
     private BlockDisplayMeta memoryUsageBar;
 
-    @Override
-    public void init(@NotNull HubServer hub) {
+    @Inject
+    public CyberpunkStatDisplayFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
         BENCHMARK_MANAGER.enable(Duration.of(2, TimeUnit.SECOND));
 
@@ -59,13 +61,13 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         var tickTimeBarPos = new Pos(-113.76 - 32, 73.1 - 9, -52.998 - 20);
         var memoryUsageBarPos = new Pos(-113.76 - 32, 72.35 - 9, -52.998 - 20);
 
-        leftText = createTextEntity(hub.instance(), staticTextPos);
-        rightText = createTextEntity(hub.instance(), staticTextPos);
-        tickTimeBar = createBarEntity(hub.instance(), tickTimeBarPos);
-        memoryUsageBar = createBarEntity(hub.instance(), memoryUsageBarPos);
+        leftText = createTextEntity(world.instance(), staticTextPos);
+        rightText = createTextEntity(world.instance(), staticTextPos);
+        tickTimeBar = createBarEntity(world.instance(), tickTimeBarPos);
+        memoryUsageBar = createBarEntity(world.instance(), memoryUsageBarPos);
         // Add backgrounds for the bars
-        createBarEntity(hub.instance(), tickTimeBarPos.sub(0, 0, 0.001));
-        createBarEntity(hub.instance(), memoryUsageBarPos.sub(0, 0, 0.001));
+        createBarEntity(world.instance(), tickTimeBarPos.sub(0, 0, 0.001));
+        createBarEntity(world.instance(), memoryUsageBarPos.sub(0, 0, 0.001));
 
         // Static title text, no need to update all the time
         leftText.setText(Component.text()
@@ -82,7 +84,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         rightText.setAlignRight(true);
 
         // Start the task
-        hub.scheduler().submitTask(this::handleDisplayUpdate, ExecutionType.SYNC);
+        scheduler.submitTask(this::handleDisplayUpdate, ExecutionType.SYNC);
     }
 
     public TaskSchedule handleDisplayUpdate() {

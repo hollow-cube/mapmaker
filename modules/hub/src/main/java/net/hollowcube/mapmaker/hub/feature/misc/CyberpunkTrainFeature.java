@@ -1,14 +1,16 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
+import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.Material;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,8 +27,8 @@ public class CyberpunkTrainFeature implements HubFeature {
 
     private boolean moving = false;
 
-    @Override
-    public void init(@NotNull HubServer hub) {
+    @Inject
+    public CyberpunkTrainFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         trainFront.setModel(Material.STICK, 7);
         trainFront.getEntityMeta().setScale(new Vec(4));
         var metaFront = trainFront.getEntityMeta();
@@ -34,18 +36,18 @@ public class CyberpunkTrainFeature implements HubFeature {
                 Math.toRadians(-90)).into());
         metaFront.setTranslation(new Vec(-10, 0, 1));
         metaFront.setBrightnessOverride(240);
-        trainFront.setInstance(hub.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
+        trainFront.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
 
-        trainMiddle.setInstance(hub.instance(), new Vec(0, 40, 0)).join();
+        trainMiddle.setInstance(world.instance(), new Vec(0, 40, 0)).join();
         trainMiddle.setModel(Material.STICK, 6);
         trainMiddle.getEntityMeta().setScale(new Vec(4));
         var metaMiddle = trainMiddle.getEntityMeta();
         metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         metaMiddle.setBrightnessOverride(240);
-        trainMiddle.setInstance(hub.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
+        trainMiddle.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0)).join();
 
-        trainBack.setInstance(hub.instance(), new Vec(0, 40, 0)).join();
+        trainBack.setInstance(world.instance(), new Vec(0, 40, 0)).join();
         trainBack.setModel(Material.STICK, 7);
         trainBack.getEntityMeta().setScale(new Vec(4));
         var metaBack = trainBack.getEntityMeta();
@@ -53,9 +55,9 @@ public class CyberpunkTrainFeature implements HubFeature {
                 Math.toRadians(-90)).into());
         metaBack.setTranslation(new Vec(-5, 0, -1));
         metaBack.setBrightnessOverride(240);
-        trainBack.setInstance(hub.instance(), new Pos(TRAIN_START, -180 + 26f, 0)).join();
+        trainBack.setInstance(world.instance(), new Pos(TRAIN_START, -180 + 26f, 0)).join();
 
-        hub.scheduler().submitTask(this::trainUpdate);
+        scheduler.submitTask(this::trainUpdate);
     }
 
     private @NotNull TaskSchedule trainUpdate() {

@@ -15,9 +15,9 @@ import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.world.InternalMapWorld;
-import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.worldold.InternalMapWorld;
+import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.worldold.PlayingMapWorld;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -220,6 +220,7 @@ public class DevServer {
             scope.fork(FutureUtil.call(() -> this.maps.init(config, mapCommandManager)));
 
             scope.join();
+
         } catch (Exception e) {
             logger.error("failed during startup", e);
             System.exit(1);

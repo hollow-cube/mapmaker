@@ -1,13 +1,16 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import com.google.auto.service.AutoService;
+import com.google.inject.Inject;
 import net.hollowcube.common.ServerRuntime;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -25,16 +28,17 @@ public class MainLeaderboardFeature implements HubFeature {
     private final Leaderboard1 testlb = new Leaderboard1(0);
     private final Leaderboard1 testlb2 = new Leaderboard1(0);
 
-    @Override
-    public void init(@NotNull HubServer hub) {
+    @Inject
+    public MainLeaderboardFeature(@NotNull MapService mapService, @NotNull PlayerService playerService,
+                                  @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         if (ServerRuntime.getRuntime().isDevelopment()) return;
-        
+
         parkourLeaderboard = new Leaderboard2(
-                () -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
-                playerId -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
-                () -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, null),
-                playerId -> hub.mapService().getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-                playerId -> hub.playerService().getPlayerDisplayName2(playerId).build(),
+                () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
+                playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
+                () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, null),
+                playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, playerId).player().score(),
+                playerId -> playerService.getPlayerDisplayName2(playerId).build(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,
@@ -50,14 +54,14 @@ public class MainLeaderboardFeature implements HubFeature {
         parkourLeaderboard.right.setSubtitle(Component.text("ᴀʟʟ ᴛɪᴍᴇ", NamedTextColor.GRAY));
 
         parkourLeaderboard.update();
-        parkourLeaderboard.setInstance(hub.instance(), new Pos(6, 39, -22.5, 90, 0));
+        parkourLeaderboard.setInstance(world.instance(), new Pos(6, 39, -22.5, 90, 0));
         buildingLeaderboard.update();
-        buildingLeaderboard.setInstance(hub.instance(), new Pos(6, 39, 23.5, 90, 0));
+        buildingLeaderboard.setInstance(world.instance(), new Pos(6, 39, 23.5, 90, 0));
 
-        testlb.setInstance(hub.instance(), new Pos(-25.5, 41, 53.5, 90 + 45, 0));
-        testlb2.setInstance(hub.instance(), new Pos(-49.5, 41, 53.5, 90 + 45 + 90, 0));
+        testlb.setInstance(world.instance(), new Pos(-25.5, 41, 53.5, 90 + 45, 0));
+        testlb2.setInstance(world.instance(), new Pos(-49.5, 41, 53.5, 90 + 45 + 90, 0));
 
-        hub.scheduler().scheduleTask(this::update, SCHEDULE, SCHEDULE);
+        scheduler.scheduleTask(this::update, SCHEDULE, SCHEDULE);
     }
 
     // Called once every minute to update the leaderboards (tick up the time since update then update if necessary)

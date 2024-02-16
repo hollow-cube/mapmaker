@@ -6,7 +6,7 @@ import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.map.feature.play.item.ReturnToHubItem;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;

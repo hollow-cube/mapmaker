@@ -7,7 +7,7 @@ import net.hollowcube.map.block.custom.FinishPlateBlock;
 import net.hollowcube.map.block.custom.StatusPlateBlock;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.edit.item.BuilderMenuItem;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 

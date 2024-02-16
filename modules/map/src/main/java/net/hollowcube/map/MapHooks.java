@@ -1,8 +1,8 @@
 package net.hollowcube.map;
 
-import net.hollowcube.map.world.EditingMapWorld;
-import net.hollowcube.map.world.InternalMapWorld;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.EditingMapWorld;
+import net.hollowcube.map.worldold.InternalMapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.ApiStatus;

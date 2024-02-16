@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.map.MapServer;
 import net.hollowcube.map.MapServerBase;
-import net.hollowcube.map.world.InternalMapWorld;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.InternalMapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.bridge.MapToHubBridge;
 import net.hollowcube.mapmaker.hub.HubServer;

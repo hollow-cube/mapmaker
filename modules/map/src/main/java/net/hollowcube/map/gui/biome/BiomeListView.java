@@ -8,7 +8,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.map.biome.BiomeContainer;
+import net.hollowcube.map2.biome.BiomeContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
