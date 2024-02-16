@@ -2,7 +2,8 @@ package net.hollowcube.map.util.debug;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
@@ -18,7 +19,7 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
         var world = MapWorld.forPlayerOptional(player);
-        if (world == null || (world.flags() & MapWorld.FLAG_PLAYING) == 0) return;
+        if (!(world instanceof PlayingMapWorld)) return;
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || !MapHooks.isPlayerPlaying(player)) return;

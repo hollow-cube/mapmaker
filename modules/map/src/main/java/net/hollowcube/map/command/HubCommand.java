@@ -4,10 +4,8 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.mapmaker.bridge.MapToHubBridge;
-import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.map2.MapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -18,28 +16,21 @@ import java.util.List;
 public class HubCommand extends CommandDsl {
     private static final Logger logger = LoggerFactory.getLogger(HubCommand.class);
 
-    private final MapToHubBridge bridge;
-    private final PlayerInviteService inviteService;
+    private final ServerBridge bridge;
 
     @Inject
-    public HubCommand(@NotNull MapToHubBridge bridge, PlayerInviteService inviteService) {
+    public HubCommand(@NotNull ServerBridge bridge) {
         super("hub", "leave", "l", "lobby");
         this.bridge = bridge;
-        this.inviteService = inviteService;
 
         addSyntax(playerOnly(this::returnToHub));
     }
 
     private void returnToHub(@NotNull Player player, @NotNull CommandContext context) {
         try {
-            //todo this code is duplicated hella
-            //player.sendMessage("Returning to hub");
-
             var world = MapWorld.forPlayerOptional(player);
-            if (world instanceof InternalMapWorld internalWorld) {
-                internalWorld.removePlayer(player);
-            }
-            bridge.sendPlayerToHub(player);
+            if (world != null) world.removePlayer(player);
+            bridge.joinHub(player);
         } catch (Exception e) {
             logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
             LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())

@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.TestingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +37,6 @@ public class BuildCommand extends CommandDsl {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return CommandCondition.HIDE;
 
-        return (world.flags() & MapWorld.FLAG_TESTING) != 0 ? CommandCondition.ALLOW : CommandCondition.HIDE;
+        return world instanceof TestingMapWorld ? CommandCondition.ALLOW : CommandCondition.HIDE;
     }
 }

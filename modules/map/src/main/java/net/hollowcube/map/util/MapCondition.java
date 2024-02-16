@@ -1,7 +1,10 @@
 package net.hollowcube.map.util;
 
 import net.hollowcube.command.CommandCondition;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -15,6 +18,7 @@ import static net.hollowcube.command.CommandCondition.HIDE;
 import static net.hollowcube.mapmaker.feature.FeatureFlag.map;
 
 public final class MapCondition {
+    //todo(mattw) check over these i think i broke them tbh
 
     public static @NotNull Predicate<InstanceEvent> eventFilter(boolean playing, boolean editing, boolean testing) {
         return event -> {
@@ -24,9 +28,16 @@ public final class MapCondition {
             else world = MapWorld.unsafeFromInstance(event.getInstance());
             if (world == null) return false;
 
-            if (playing && (world.flags() & MapWorld.FLAG_PLAYING) == 0) return false;
-            if (editing && (world.flags() & MapWorld.FLAG_EDITING) == 0) return false;
-            if (testing && (world.flags() & MapWorld.FLAG_TESTING) == 0) return false;
+            if (event instanceof PlayerEvent playerEvent) {
+                var player = playerEvent.getPlayer();
+                if (playing && !(world instanceof PlayingMapWorld || world.isPlaying(player))) return false;
+                if (editing && !world.canEdit(player)) return false;
+                if (testing && !(world instanceof TestingMapWorld || !world.isPlaying(player))) return false;
+            } else {
+                if (playing && !(world instanceof PlayingMapWorld)) return false;
+                if (editing && !(world instanceof EditingMapWorld)) return false;
+                if (testing && !(world instanceof TestingMapWorld)) return false;
+            }
 
             return true;
         };
@@ -38,9 +49,9 @@ public final class MapCondition {
             var world = MapWorld.forPlayerOptional(player);
             if (world == null) return HIDE;
 
-            if (playing && (world.flags() & MapWorld.FLAG_PLAYING) == 0) return HIDE;
-            if (editing && (world.flags() & MapWorld.FLAG_EDITING) == 0) return HIDE;
-            if (testing && (world.flags() & MapWorld.FLAG_TESTING) == 0) return HIDE;
+            if (playing && !world.isPlaying(player)) return HIDE;
+            if (editing && !world.canEdit(player)) return HIDE;
+            if (testing && !(world instanceof TestingMapWorld || !world.isPlaying(player))) return HIDE;
 
             return ALLOW;
         };

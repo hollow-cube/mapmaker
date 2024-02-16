@@ -1,9 +1,8 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.MapServer;
 import net.hollowcube.map.gui.RateMapView;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +33,10 @@ public class RateMapItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var server = MapServer.StaticAbuse.instance;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
 
-        var map = MapWorld.forPlayer(player).map();
-        server.newOpenGUI(player, c -> new RateMapView(c, map.id()));
+        world.server().showView(player, c -> new RateMapView(c, world.map().id()));
     }
 
 }

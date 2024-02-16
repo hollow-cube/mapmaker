@@ -1,9 +1,9 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
@@ -37,17 +37,20 @@ public class EnterSpectatorModeItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = (InternalMapWorld) MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
+        if (!(world instanceof PlayingMapWorld)) return;
 
-        if (player.isOnGround()) {
-            if (world instanceof PlayingMapWorld playingWorld) {
-                world.removePlayer(player);
-                playingWorld.startSpectating(player, false);
-                player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
-            }
-        } else {
+        // Must be standing on the ground (not falling) to enter spectator mode
+        if (!player.isOnGround()) {
             player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
+            return;
         }
+
+        FutureUtil.submitVirtual(() -> {
+            world.removePlayer(player);
+            world.addSpectator(player);
+            player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
+        });
     }
 
 }

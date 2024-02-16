@@ -4,10 +4,10 @@ import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.map.feature.play.effect.StatusEffectData;
 import net.hollowcube.map.gui.effect.EditStatusView;
-import net.hollowcube.map.item.handler.BlockItemHandler;
-import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.object.ObjectBlockHandler;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.BlockItemHandler;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.object.ObjectType;
@@ -44,16 +44,16 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        var world = MapWorld.forPlayerOptional(interaction.getPlayer());
-        if (world == null || (world.flags() & MapWorld.FLAG_EDITING) == 0) return true;
-
         var player = interaction.getPlayer();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.canEdit(player)) return true;
+
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
         var maxResetHeight = interaction.getBlockPosition().blockY() - 1;
-        world.server().newOpenGUI(player, c -> new EditStatusView(c, data, maxResetHeight, () -> {
+        world.server().showView(player, c -> new EditStatusView(c, data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
             instance.setBlock(blockPosition, interaction.getBlock().withTag(DATA_TAG, data));

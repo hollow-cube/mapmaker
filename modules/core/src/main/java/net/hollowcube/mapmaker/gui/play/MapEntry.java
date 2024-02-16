@@ -8,7 +8,6 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -63,7 +62,7 @@ public class MapEntry extends View {
     @Action("btn")
     private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case START_SHIFT_CLICK -> bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
+            case START_SHIFT_CLICK -> bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING);
             case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
         }
     }

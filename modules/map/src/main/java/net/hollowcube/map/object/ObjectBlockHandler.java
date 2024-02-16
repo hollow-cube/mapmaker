@@ -1,7 +1,7 @@
 package net.hollowcube.map.object;
 
 import net.hollowcube.map.worldold.EditingMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.minestom.server.coordinate.Point;

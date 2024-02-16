@@ -5,7 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.gui.biome.BiomeListView;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +29,7 @@ public class BiomesCommand extends CommandDsl {
 
     private void openCustomBiomeList(@NotNull Player player, @NotNull CommandContext context) {
         var world = MapWorld.forPlayer(player);
-        world.server().newOpenGUI(player, c -> new BiomeListView(c, world.biomes()));
+        world.server().showView(player, c -> new BiomeListView(c, world.biomes()));
     }
 
 }

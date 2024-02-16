@@ -1,9 +1,9 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -42,13 +42,11 @@ public class ReturnToHubItem extends ItemHandler {
         var player = click.player();
         var world = MapWorld.forPlayer(player);
 
-        Thread.startVirtualThread(() -> {
+        FutureUtil.submitVirtual(() -> {
             try {
                 player.removeTag(SPECTATOR_CHECKPOINT);
-                if (world instanceof InternalMapWorld internalWorld) {
-                    internalWorld.removePlayer(player);
-                }
-                world.server().bridge().sendPlayerToHub(player);
+                world.removePlayer(player);
+                world.server().bridge().joinHub(player);
             } catch (Exception e) {
                 logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
                 LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())

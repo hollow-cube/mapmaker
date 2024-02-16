@@ -37,6 +37,10 @@ public final class FutureUtil {
         };
     }
 
+    public static @NotNull Runnable wrapVirtual(@NotNull Runnable runnable) {
+        return () -> submitVirtual(runnable);
+    }
+
     public static void submitVirtual(@NotNull Runnable runnable) {
         Thread.startVirtualThread(() -> {
             try {

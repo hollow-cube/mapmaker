@@ -2,8 +2,9 @@ package net.hollowcube.map.feature.experimental.pathtool;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -19,7 +20,7 @@ public class PathToolFeatureHandler implements FeatureProvider {
     @Override
     public boolean initMap(@NotNull MapWorld world) {
         // Only enabled in editing worlds.
-        if ((world.flags() & MapWorld.FLAG_EDITING) == 0 || true)
+        if (!(world instanceof EditingMapWorld) || true)
             return false;
 
         world.itemRegistry().register(PATH_TOOL_ITEM);
@@ -33,7 +34,7 @@ public class PathToolFeatureHandler implements FeatureProvider {
         node.addListener(InstanceTickEvent.class, event -> {
             thePath.tick();
         });
-        world.addScopedEventNode(node);
+        world.eventNode().addChild(node);
 
         return true;
     }

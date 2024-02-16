@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature.experimental.pathtool;
 
-import net.hollowcube.map.item.handler.ItemHandler;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 

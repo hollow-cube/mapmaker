@@ -1,60 +1,56 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.map.MapServer;
-import net.hollowcube.map.MapServerBase;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.bridge.MapToHubBridge;
-import net.hollowcube.mapmaker.hub.HubServer;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.map2.AbstractMapWorld;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.Blocking;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class DevServerBridge implements HubToMapBridge, MapToHubBridge {
-    private HubServer hub = null;
-    private MapServer mapServer = null;
+import java.util.concurrent.Future;
 
-    public void setHubServer(@NotNull HubServer hub) {
-        this.hub = hub;
-    }
+public class DevServerBridge implements ServerBridge {
+    public static final Tag<Future<AbstractMapWorld>> TARGET_WORLD = Tag.Transient("mapmaker:map/target_world");
 
-    public void setMapServer(@NotNull MapServer map) {
-        this.mapServer = map;
+    @Override
+    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @Nullable String getCurrentMap(@NotNull Player player) {
-        var world = MapWorld.forPlayerOptional(player);
-        return world == null ? null : world.map().id();
+    public void joinHub(@NotNull Player player) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
-    //
-    // HubToMapBridge implementation
-    //
-
-    @Override
-    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-        var playerData = PlayerDataV2.fromPlayer(player);
-        var map = mapServer.mapService().getMap(playerData.id(), mapId);
-        ((MapServerBase) mapServer).joinMap(player, map, joinMapState);
-    }
-
-
-    //
-    // MapToHubBridge implementation
-    //
-
-    @Override
-    public @Blocking void sendPlayerToHub(@NotNull Player player) {
-        var world = MapWorld.forPlayerOptional(player);
-        if (world instanceof InternalMapWorld internalWorld) {
-            internalWorld.removePlayer(player);
-        }
-
-        if (!player.isOnline()) return;
-        player.setInstance(hub.world().instance(), player.getPosition().withCoord(0.5, 4, 0.5)).join();
-    }
+//    @Override
+//    public @Nullable String getCurrentMap(@NotNull Player player) {
+//        var world = MapWorld.forPlayerOptional(player);
+//        return world == null ? null : world.map().id();
+//    }
+//
+//    //
+//    // HubToMapBridge implementation
+//    //
+//
+//    @Override
+//    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+//        var playerData = PlayerDataV2.fromPlayer(player);
+//        var map = mapServer.mapService().getMap(playerData.id(), mapId);
+//        ((MapServerBase) mapServer).joinMap(player, map, joinMapState);
+//    }
+//
+//
+//    //
+//    // MapToHubBridge implementation
+//    //
+//
+//    @Override
+//    public @Blocking void sendPlayerToHub(@NotNull Player player) {
+//        var world = MapWorld.forPlayerOptional(player);
+//        if (world instanceof InternalMapWorld internalWorld) {
+//            internalWorld.removePlayer(player);
+//        }
+//
+//        if (!player.isOnline()) return;
+//        player.setInstance(hub.world().instance(), player.getPosition().withCoord(0.5, 4, 0.5)).join();
+//    }
 }

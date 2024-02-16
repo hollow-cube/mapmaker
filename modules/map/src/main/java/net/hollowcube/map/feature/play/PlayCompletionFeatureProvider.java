@@ -3,16 +3,15 @@ package net.hollowcube.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.map.MapFeatureFlags;
-import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.RateMapView;
 import net.hollowcube.map.util.FireworkUtil;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.AbstractMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -38,15 +37,14 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        // Only enable this feature if the world is playing _and not testing_
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0 || (world.flags() & MapWorld.FLAG_TESTING) != 0)
+        if (!(world instanceof PlayingMapWorld))
             return false;
 
         var eventNode = EventNode.type("map-completion/play", EventFilter.INSTANCE);
         eventNode.addListener(MapPlayerInitEvent.class, this::handlePlayerInit);
         eventNode.addListener(MapWorldPlayerStopPlayingEvent.class, this::handlePlayerRemove);
         eventNode.addListener(MapPlayerCompleteMapEvent.class, this::handleMapCompletion);
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         return true;
     }
@@ -68,7 +66,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
     private void handleMapCompletion(@NotNull MapPlayerCompleteMapEvent event) {
         var player = event.getPlayer();
-        var world = (InternalMapWorld) event.getMapWorld();
+        var world = event.getMapWorld();
 
         var saveState = SaveState.fromPlayer(player);
         saveState.setCompleted(true); // Also stops recording time here
@@ -78,20 +76,19 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         //todo this is a bad solution. Basically we need to remove the player immediately, but the remove method runs in a virtual thread
         // which means it will have a tiny scheduling delay which means duplicates can trigger. To get around this we just remove these
         // two tags immediately which will stop them from triggering new events. Its a terrible solution and needs to be reworked.
-        player.removeTag(PlayingMapWorld.TAG_PLAYING);
-        player.removeTag(MapHooks.PLAYING);
+        ((AbstractMapWorld) world).removePlayerImmediate(player);
 
         FutureUtil.submitVirtual(() -> {
             // Remove the player from the world itself, they are no longer playing (but will remain in the instance)
             // This will also cause their savestate to be written to DB
             SaveStateUpdateResponse resp = null;
             if (world instanceof PlayingMapWorld pmw) {
-                resp = pmw.removePlayer(player, true);
+                resp = pmw.removeActivePlayer(player);
             } else {
                 world.removePlayer(player);
             }
             if (world instanceof PlayingMapWorld pmw) {
-                pmw.startFinished(player, false);
+//                pmw.startFinished(player, false); //todo
             }
 
             // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
@@ -137,7 +134,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                 if (MapRatingFeatureProvider.isMapRatable(world)) {
                     var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
                     if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
-                        world.server().newOpenGUI(player, c -> new RateMapView(c, world.map().id()));
+                        world.server().showView(player, c -> new RateMapView(c, world.map().id()));
                     }
                 }
             }

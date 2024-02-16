@@ -2,7 +2,7 @@ package net.hollowcube.map.command.utility;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.command.CommandCategory;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -22,8 +22,10 @@ public class SpawnCommand extends CommandDsl {
     }
 
     private void handleTeleportToSpawn(@NotNull Player player, @NotNull CommandContext context) {
-        var world = MapWorld.forPlayer(player);
-        if ((world.flags() & MapWorld.FLAG_EDITING) != 0) {
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return;
+
+        if (world.canEdit(player)) {
             player.teleport(world.map().settings().getSpawnPoint());
             player.sendMessage(Component.translatable("teleport.spawn"));
         } else {

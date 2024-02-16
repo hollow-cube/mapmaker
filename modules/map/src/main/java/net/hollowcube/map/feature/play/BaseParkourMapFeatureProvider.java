@@ -3,10 +3,6 @@ package net.hollowcube.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapPlayerStartFinishedEvent;
-import net.hollowcube.map.event.MapPlayerStartSpectatorEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.event.vnext.MapPlayerStatusChangeEvent;
@@ -14,8 +10,13 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.util.MapMessages;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.map.worldold.PlayingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapPlayerStartFinishedEvent;
+import net.hollowcube.map2.event.MapPlayerStartSpectatorEvent;
+import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -69,12 +70,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
+        if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
         var itemRegistry = world.itemRegistry();
@@ -108,7 +109,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        if ((event.getMapWorld().flags() & MapWorld.FLAG_TESTING) != 0) {
+        if (event.getMapWorld() instanceof TestingMapWorld) {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
             inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_TESTING, null));
@@ -306,7 +307,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             for (var spectator : pmw.spectators()) {
                 if (spectator.getPosition().y() < pmw.instance().getDimensionType().getMinY()) {
                     var checkpoint = spectator.getTag(SPECTATOR_CHECKPOINT);
-                    spectator.teleport(checkpoint == null ? pmw.spawnPoint() : checkpoint);
+                    spectator.teleport(checkpoint == null ? pmw.spawnPoint(spectator) : checkpoint);
                 }
             }
         }

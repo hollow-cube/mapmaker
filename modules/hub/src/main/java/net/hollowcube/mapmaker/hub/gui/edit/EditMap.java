@@ -9,7 +9,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -216,7 +215,7 @@ public class EditMap extends View {
             }
 
             player.closeInventory();
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.EDITING);
+            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("edit.map.failure"));
             MinecraftServer.getExceptionManager().handleException(e);
@@ -235,7 +234,7 @@ public class EditMap extends View {
         // Send the player to the map
         try {
             player.closeInventory();
-            bridge.joinMap(player, map.id(), HubToMapBridge.JoinMapState.PLAYING);
+            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING);
         } catch (Exception e) {
             player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
             MinecraftServer.getExceptionManager().handleException(e);

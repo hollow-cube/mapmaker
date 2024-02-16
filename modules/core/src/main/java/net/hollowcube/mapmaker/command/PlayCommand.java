@@ -5,7 +5,6 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -41,7 +40,7 @@ public class PlayCommand extends CommandDsl {
     }
 
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
-        bridge.joinMap(player, context.get(mapArg).id(), HubToMapBridge.JoinMapState.PLAYING);
+        bridge.joinMap(player, context.get(mapArg).id(), ServerBridge.JoinMapState.PLAYING);
     }
 
     private void mapArgErrorHandler(@NotNull CommandSender sender, @NotNull CommandContext context) {

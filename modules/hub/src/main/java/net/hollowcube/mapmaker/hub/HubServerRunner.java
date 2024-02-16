@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.spi.ClassServiceLoader;
 import net.hollowcube.map.runtime.ServerBridge;
@@ -27,9 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
-public final class HubServerRunner extends AbstractMapServer {
+public class HubServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServerRunner.class);
     private static final Presence HUB_PRESENCE = new Presence("mapmaker:hub",
             "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
@@ -69,44 +70,45 @@ public final class HubServerRunner extends AbstractMapServer {
     }
 
     @Override
-    protected void postInit(@NotNull Map<Class<?>, Object> injectorBindings, @NotNull Map<String, Object> guiBindings) {
-        super.postInit(injectorBindings, guiBindings);
-
-        // Create the hub world once, which will never go away.
-        this.world = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
-
-        injectorBindings.put(HubMapWorld.class, world);
-        guiBindings.put("world", world);
-        guiBindings.put("hubWorld", world);
-        guiBindings.put("hubMapWorld", world);
-        injectorBindings.put(Scheduler.class, world.instance().scheduler());
-    }
-
-    @Override
     protected void prepareStart() {
         super.prepareStart();
 
-        commandManager().register(createInstance(HubFlyCommand.class));
-        commandManager().register(createInstance(HubSpawnCommand.class));
-        commandManager().register(createInstance(HubTrainCommand.class));
+        // Create the hub world once, which will never go away.
+        this.world = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
+        addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
+        addBinding(Scheduler.class, world.instance().scheduler());
 
-        // Load hub features
+        registerCommands(this, commandManager());
+        loadHubFeatures(this);
+    }
+
+    // Static so it can be referenced from DevHubServer
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
+        commandManager.register(new HelpCommand(commandManager));
+
+        commandManager.register(server.createInstance(HubFlyCommand.class));
+        commandManager.register(server.createInstance(HubSpawnCommand.class));
+        commandManager.register(server.createInstance(HubTrainCommand.class));
+    }
+
+    // Static so it can be referenced from DevHubServer
+    public static void loadHubFeatures(@NotNull AbstractMapServer server) {
         for (var featureClass : ClassServiceLoader.load(HubFeature.class)) {
             try {
                 logger.info("Loading feature {}", featureClass.getName());
-                createInstance(featureClass);
+                server.createInstance(featureClass);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load feature " + featureClass.getName(), e);
             }
         }
     }
 
-    private void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
+    protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
         transferPlayerSession(event.getPlayer(), HUB_PRESENCE);
         // Result ignored because nothing happens here, but if above returns false the player was kicked.
     }
 
-    private void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+    protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
 
         ResourcePackManager.sendResourcePack(player).join();
@@ -116,12 +118,12 @@ public final class HubServerRunner extends AbstractMapServer {
         world.configurePlayer(event);
     }
 
-    private void handleSpawn(@NotNull PlayerSpawnEvent event) {
+    protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
         super.handleFirstSpawn(event.getPlayer());
     }
 
-    private void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
+    protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
         super.handlePlayerDisconnect(event.getPlayer());
     }
 }

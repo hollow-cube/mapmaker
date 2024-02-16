@@ -4,9 +4,8 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.map.worldold.InternalMapWorld;
-import net.hollowcube.map.worldold.MapWorld;
-import net.hollowcube.mapmaker.bridge.MapToHubBridge;
+import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.map2.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
@@ -20,10 +19,10 @@ public class RemoveCommand extends CommandDsl {
 
     private final Argument<EntityFinder> targetArg = Argument.Entity("player").onlyPlayers(true);
 
-    private final MapToHubBridge bridge;
+    private final ServerBridge bridge;
 
     @Inject
-    public RemoveCommand(@NotNull MapToHubBridge bridge) {
+    public RemoveCommand(@NotNull ServerBridge bridge) {
         super("remove");
         this.bridge = bridge;
         setCondition(mapFilter(false, true, false));
@@ -61,11 +60,9 @@ public class RemoveCommand extends CommandDsl {
         // All preconditions OK, actually remove the player from the map.
         try {
             var world = MapWorld.forPlayerOptional(target);
-            if (world instanceof InternalMapWorld internalWorld) {
-                internalWorld.removePlayer(target);
-            }
+            if (world != null) world.removePlayer(target);
 
-            bridge.sendPlayerToHub(target);
+            bridge.joinHub(target);
             target.sendMessage(Component.translatable("map.build.removed", Component.text(player.getUsername())));
             player.sendMessage(Component.translatable("map.build.remove", Component.text(target.getUsername())));
 

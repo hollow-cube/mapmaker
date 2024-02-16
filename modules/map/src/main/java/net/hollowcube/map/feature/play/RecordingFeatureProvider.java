@@ -6,10 +6,11 @@ import dev.hollowcube.replay.ReplayRecorder;
 import dev.hollowcube.replay.change.RecordedPlayerMove;
 import dev.hollowcube.replay.change.RecordedPlayerSpawn;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -44,12 +45,10 @@ public class RecordingFeatureProvider implements FeatureProvider {
         // DISABLE FOR NOW IT IS VERY BUGGY
         if (true) return false;
 
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
-            return false;
-        if (world.map().settings().getVariant() != MapVariant.PARKOUR)
+        if (!(world instanceof PlayingMapWorld) || world.map().settings().getVariant() != MapVariant.PARKOUR)
             return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         return true;
     }

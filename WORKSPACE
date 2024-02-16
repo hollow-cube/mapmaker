@@ -123,7 +123,7 @@ maven_install(
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "io.getunleash:unleash-client-java:9.2.0",
         "com.velocitypowered:velocity-api:3.1.1",
-        "com.google.inject:guice:5.0.1",
+        "com.google.inject:guice:7.0.0",
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
 
         # Adventure

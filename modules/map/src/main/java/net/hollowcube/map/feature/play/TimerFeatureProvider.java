@@ -3,10 +3,12 @@ package net.hollowcube.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.event.MapPlayerInitEvent;
-import net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
@@ -32,13 +34,13 @@ public class TimerFeatureProvider implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_PLAYING) == 0)
+        if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
 
         var settings = world.map().settings();
         if (settings.getVariant() != MapVariant.PARKOUR) return false;
 
-        world.addScopedEventNode(eventNode);
+        world.eventNode().addChild(eventNode);
 
         return true;
     }
@@ -56,7 +58,7 @@ public class TimerFeatureProvider implements FeatureProvider {
         if (!MapHooks.isPlayerPlaying(player)) return;
 
         var world = MapWorld.forPlayerOptional(player);
-        var isTestingMode = (world.flags() & MapWorld.FLAG_TESTING) != 0;
+        var isTestingMode = world instanceof TestingMapWorld;
 
         var saveState = SaveState.fromPlayer(player);
 

@@ -1,5 +1,7 @@
 package net.hollowcube.map2;
 
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.map2.runtime.MapAllocator;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -8,7 +10,12 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.function.Function;
 
 public interface MapServer {
 
@@ -26,7 +33,8 @@ public interface MapServer {
 
     // Other
     <T> @NotNull T createInstance(@NotNull Class<T> type);
+    <T> @NotNull T createInstance(@NotNull Class<T> type, @Nullable Map<Class<?>, Object> context);
 
-    // Map features
-//    @NotNull List<FeatureProvider> features();
+    void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
+
 }

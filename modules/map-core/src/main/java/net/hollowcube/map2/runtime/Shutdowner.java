@@ -37,6 +37,10 @@ public class Shutdowner implements Service, HealthCheck {
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownImmediately));
     }
 
+    public boolean isShuttingDown() {
+        return gracefulShutdownFuture != null;
+    }
+
     /**
      * Queues a hook to be run when the server is shutting down.
      *

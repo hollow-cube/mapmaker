@@ -68,4 +68,8 @@ public final class Suggestion {
             add(suggestion);
         }
     }
+
+    public void addAll(@NotNull Suggestion other) {
+        entries.addAll(other.entries);
+    }
 }

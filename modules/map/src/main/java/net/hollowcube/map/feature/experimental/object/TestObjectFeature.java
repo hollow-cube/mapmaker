@@ -2,7 +2,8 @@ package net.hollowcube.map.feature.experimental.object;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ public class TestObjectFeature implements FeatureProvider {
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
-        if ((world.flags() & MapWorld.FLAG_EDITING) != 0 && false) {
+        if (world instanceof EditingMapWorld && false) {
             world.itemRegistry().register(TestObjectBlock.ITEM);
             return true;
         }

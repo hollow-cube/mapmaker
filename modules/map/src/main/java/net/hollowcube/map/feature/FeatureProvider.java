@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature;
 
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;
@@ -44,7 +44,7 @@ public interface FeatureProvider {
      * other implementation details used in the map.
      * <p>
      * Note that all players will be gone by the time this is called.
-     * {@link net.hollowcube.map.event.MapWorldPlayerStopPlayingEvent} should be used for player cleanup.
+     * {@link net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent} should be used for player cleanup.
      *
      * @param world The {@link MapWorld} being cleaned up
      */

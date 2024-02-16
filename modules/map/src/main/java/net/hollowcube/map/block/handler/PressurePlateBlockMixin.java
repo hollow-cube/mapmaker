@@ -1,7 +1,8 @@
 package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
@@ -81,7 +82,7 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         //noinspection UnstableApiUsage,DataFlowIssue
         if (TickThread.current().getTick() % 20 != 0) return;
         var world = MapWorld.unsafeFromInstance(instance);
-        if (world == null || ((world.flags()) & MapWorld.FLAG_EDITING) == 0) return;
+        if (!(world instanceof EditingMapWorld)) return;
 
         PacketUtils.sendGroupedPacket(world.players(), ParticleCreator.createParticlePacket(
                 Particle.DUST, true,

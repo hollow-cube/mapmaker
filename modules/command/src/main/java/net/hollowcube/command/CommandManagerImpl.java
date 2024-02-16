@@ -1,5 +1,6 @@
 package net.hollowcube.command;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
@@ -7,24 +8,35 @@ import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
+import static net.minestom.server.network.NetworkBuffer.VAR_INT;
+
 public class CommandManagerImpl implements CommandManager {
+    private final CommandManagerImpl parent;
     private final RootCommandNode root = new RootCommandNode();
     private final ReflectionImpl reflection = new ReflectionImpl();
 
+    public CommandManagerImpl() {
+        this(null);
+    }
+
+    public CommandManagerImpl(@Nullable CommandManager parent) {
+        this.parent = (CommandManagerImpl) parent;
+    }
+
     @Override
     public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
-        return root.xpath(path, followRedirects);
+        var result = root.xpath(path, followRedirects);
+        if (result != null) return result;
+        return parent == null ? null : parent.xpath(path, followRedirects);
     }
 
     @Override
@@ -54,19 +66,59 @@ public class CommandManagerImpl implements CommandManager {
     @Override
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
-        return root.suggest(sender, reader);
+        var result = root.suggest(sender, reader);
+        if (parent != null) {
+            var parentResult = parent.suggest(sender, input);
+            result.addAll(parentResult);
+        }
+        return result;
     }
 
     @Override
     public @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
         var context = new CommandContextImpl(sender);
-        return root.execute(sender, reader, context);
+        var result = root.execute(sender, reader, context);
+        if (parent != null && result instanceof CommandResult.SyntaxError syntaxError && syntaxError.isNotFound())
+            return parent.execute(sender, input);
+        return result;
     }
 
     @Override
     public @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
-        return root.createCommandPacket(player);
+        var nodes = new ArrayList<DeclareCommandsPacket.Node>();
+        var root = new DeclareCommandsPacket.Node();
+        nodes.add(root);
+
+        // Note about redirects:
+        // Currently we just tell brigadier that they are a new root literal node which works fine since we never
+        // actually send real arguments to the client. However, once we do, they will need to be handled better.
+
+        var rootNodes = new IntArrayList();
+        for (var entry : reflect().commands(player, true)) {
+            if (entry.getValue().condition != null) {
+                var result = entry.getValue().condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+                if (result == CommandCondition.HIDE) continue;
+            }
+
+            var args = new DeclareCommandsPacket.Node();
+            args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
+            args.name = "args";
+            args.parser = "brigadier:string";
+            args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
+            args.suggestionsType = "minecraft:ask_server";
+            nodes.add(args);
+
+            var node = new DeclareCommandsPacket.Node();
+            node.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
+            node.name = entry.getKey().toLowerCase(Locale.ROOT);
+            node.children = new int[]{nodes.size() - 1};
+            rootNodes.add(nodes.size());
+            nodes.add(node);
+        }
+        root.children = rootNodes.toIntArray();
+
+        return new DeclareCommandsPacket(nodes, 0);
     }
 
     @Override
@@ -78,8 +130,12 @@ public class CommandManagerImpl implements CommandManager {
 
         @Override
         public @NotNull Collection<Map.Entry<String, CommandNode>> commands(@NotNull CommandSender sender, boolean includeAliases) {
+            var allCommands = new ArrayList<CommandNode.ArgumentPair>();
+            if (root.children != null) allCommands.addAll(root.children);
+            if (parent != null && parent.root.children != null) allCommands.addAll(parent.root.children);
+
             var commands = new ArrayList<Map.Entry<String, CommandNode>>();
-            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode node) : root.children) {
+            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode node) : allCommands) {
                 if (!includeAliases && node.redirect != null) continue;
 
                 // Test the permissions on the command

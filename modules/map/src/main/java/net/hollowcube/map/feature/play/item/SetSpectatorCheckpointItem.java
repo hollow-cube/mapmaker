@@ -1,7 +1,7 @@
 package net.hollowcube.map.feature.play.item;
 
-import net.hollowcube.map.item.handler.ItemHandler;
 import net.hollowcube.map.util.GenericTempActionBarProvider;
+import net.hollowcube.map2.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.coordinate.Pos;
@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class SetSpectatorCheckpointItem extends ItemHandler {
 
-    public static Tag<Pos> SPECTATOR_CHECKPOINT = Tag.Transient("mapmaker:spectator_checkpoint");
+    public static Tag<Pos> SPECTATOR_CHECKPOINT = Tag.Transient("mapmaker:spectator_checkpoint"); //todo the usage of this needs to be centralized. its used in sooooo many places
 
     public static final String ID_SPECTATOR = "mapmaker:set_spectator_checkpoint";
     public static final SetSpectatorCheckpointItem INSTANCE_SPECTATOR = new SetSpectatorCheckpointItem(ID_SPECTATOR);

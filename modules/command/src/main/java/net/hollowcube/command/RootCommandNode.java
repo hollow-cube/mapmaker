@@ -1,17 +1,9 @@
 package net.hollowcube.command;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.hollowcube.command.arg.Argument;
-import net.minestom.server.entity.Player;
-import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Locale;
-
-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 final class RootCommandNode extends CommandNode {
 
@@ -37,43 +29,5 @@ final class RootCommandNode extends CommandNode {
     protected @NotNull CommandResult unwrap(@NotNull CommandResult result) {
         // See the comment on the base implementation of this method
         return result;
-    }
-
-    public @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
-        if (children == null || children.isEmpty()) return null;
-
-        var nodes = new ArrayList<DeclareCommandsPacket.Node>();
-        var root = new DeclareCommandsPacket.Node();
-        nodes.add(root);
-
-        // Note about redirects:
-        // Currently we just tell brigadier that they are a new root literal node which works fine since we never
-        // actually send real arguments to the client. However, once we do, they will need to be handled better.
-
-        var rootNodes = new IntArrayList();
-        for (ArgumentPair(Argument<?> argument, CommandNode childNode) : children) {
-            if (childNode.condition != null) {
-                var result = childNode.condition.test(player, new ConditionContext(player, CommandContext.Pass.BUILD));
-                if (result == CommandCondition.HIDE) continue;
-            }
-
-            var args = new DeclareCommandsPacket.Node();
-            args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
-            args.name = "args";
-            args.parser = "brigadier:string";
-            args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
-            args.suggestionsType = "minecraft:ask_server";
-            nodes.add(args);
-
-            var node = new DeclareCommandsPacket.Node();
-            node.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
-            node.name = argument.id().toLowerCase(Locale.ROOT);
-            node.children = new int[]{nodes.size() - 1};
-            rootNodes.add(nodes.size());
-            nodes.add(node);
-        }
-        root.children = rootNodes.toIntArray();
-
-        return new DeclareCommandsPacket(nodes, 0);
     }
 }
