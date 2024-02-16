@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.bridge;
 
+import net.hollowcube.map.runtime.ServerBridge;
+
 /**
  * Implements required communication from hub servers to all available map servers.
  * <p>

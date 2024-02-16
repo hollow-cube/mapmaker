@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.item.experimental.MarkerItem;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)

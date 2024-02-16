@@ -1,9 +1,9 @@
 package net.hollowcube.map.feature.play.item;
 
 import net.hollowcube.map.item.handler.ItemHandler;
-import net.hollowcube.map.world.InternalMapWorld;
-import net.hollowcube.map.world.MapWorld;
-import net.hollowcube.map.world.PlayingMapWorld;
+import net.hollowcube.map.worldold.InternalMapWorld;
+import net.hollowcube.map.worldold.MapWorld;
+import net.hollowcube.map.worldold.PlayingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;

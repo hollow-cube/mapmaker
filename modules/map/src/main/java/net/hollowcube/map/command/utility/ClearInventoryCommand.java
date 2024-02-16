@@ -2,7 +2,7 @@ package net.hollowcube.map.command.utility;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.map.lang.MapMessages;
+import net.hollowcube.map.util.MapMessages;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

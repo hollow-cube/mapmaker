@@ -7,7 +7,6 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
-        ":biomes_java_proto",
         "//modules/canvas:api",
         "//modules/command",
         "//modules/common",
@@ -24,14 +23,4 @@ java_library(
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
     ],
-)
-
-java_proto_library(
-    name = "biomes_java_proto",
-    deps = [":biomes_proto"],
-)
-
-proto_library(
-    name = "biomes_proto",
-    srcs = ["src/proto/biomes.proto"],
 )

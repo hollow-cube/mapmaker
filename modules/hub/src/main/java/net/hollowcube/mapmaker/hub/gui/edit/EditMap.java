@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
@@ -31,7 +32,7 @@ import java.util.Objects;
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
-    private @ContextObject HubToMapBridge bridge;
+    private @ContextObject ServerBridge bridge;
     private @ContextObject MapService mapService;
     private @ContextObject PlayerService playerService;
 

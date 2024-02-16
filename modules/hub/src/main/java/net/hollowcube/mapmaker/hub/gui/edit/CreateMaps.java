@@ -5,9 +5,9 @@ import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.bridge.HubToMapBridge;
-import net.hollowcube.mapmaker.hub.HubHandler;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -25,8 +25,7 @@ public class CreateMaps extends View {
 
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
-    private @ContextObject HubToMapBridge bridge;
-    private @ContextObject("handler") HubHandler mapHandler;
+    private @ContextObject ServerBridge bridge;
 
     private @Outlet("switch") Switch switcher;
     private @Outlet("editor") EditMap editor;

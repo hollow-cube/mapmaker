@@ -1,6 +1,6 @@
 package net.hollowcube.map.event.trait;
 
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;

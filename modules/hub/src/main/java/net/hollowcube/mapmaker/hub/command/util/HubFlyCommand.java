@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub.command.util;
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.kyori.adventure.text.Component;
@@ -21,9 +21,9 @@ public class HubFlyCommand extends CommandDsl {
     }
 
     private void handleToggleFly(@NotNull Player player, @NotNull CommandContext context) {
-        var newValue = !player.getTag(HubServer.DOUBLE_JUMP_TAG);
+        var newValue = !player.getTag(DoubleJumpFeature.TAG);
         player.sendMessage(Component.translatable("command.fly.hub", Component.translatable(newValue ? "off" : "on")));
-        player.setTag(HubServer.DOUBLE_JUMP_TAG, newValue);
+        player.setTag(DoubleJumpFeature.TAG, newValue);
         player.setFlyingSpeed(newValue ? 0f : 0.05f);
         if (newValue) player.setFlying(false);
     }

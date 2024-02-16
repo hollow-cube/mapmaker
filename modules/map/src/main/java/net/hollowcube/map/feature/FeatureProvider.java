@@ -1,6 +1,6 @@
 package net.hollowcube.map.feature;
 
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;

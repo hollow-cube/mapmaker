@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.dev.command.map.world;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map.world.MapWorldManager;
+import net.hollowcube.map.worldold.MapWorldManager;
 import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;

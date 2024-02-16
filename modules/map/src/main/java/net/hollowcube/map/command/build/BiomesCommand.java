@@ -5,7 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.map.MapFeatureFlags;
 import net.hollowcube.map.gui.biome.BiomeListView;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

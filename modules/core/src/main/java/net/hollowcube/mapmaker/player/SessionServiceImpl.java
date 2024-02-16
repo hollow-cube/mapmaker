@@ -13,14 +13,27 @@ import java.util.List;
 public class SessionServiceImpl extends AbstractHttpService implements SessionService {
     private static final System.Logger logger = System.getLogger(SessionServiceImpl.class.getName());
 
+    private final String baseUrl;
     private final String url;
     private final String urlV2;
     private final String urlShortV2;
 
     public SessionServiceImpl(@NotNull String url) {
+        this.baseUrl = url;
         this.url = String.format("%s/v1/internal/session", url);
         this.urlV2 = String.format("%s/v2/internal/session", url);
         this.urlShortV2 = String.format("%s/v2/internal", url);
+    }
+
+    @Override
+    public boolean ready() {
+        var req = HttpRequest.newBuilder()
+                .GET().uri(URI.create(baseUrl + "/ready"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.discarding());
+        if (res.statusCode() != 200)
+            throw new InternalError("Readiness check failed: " + res.body());
+        return true;
     }
 
     @Override

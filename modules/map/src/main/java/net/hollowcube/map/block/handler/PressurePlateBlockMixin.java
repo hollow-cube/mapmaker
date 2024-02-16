@@ -1,7 +1,7 @@
 package net.hollowcube.map.block.handler;
 
 import net.hollowcube.map.MapHooks;
-import net.hollowcube.map.world.MapWorld;
+import net.hollowcube.map.worldold.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
