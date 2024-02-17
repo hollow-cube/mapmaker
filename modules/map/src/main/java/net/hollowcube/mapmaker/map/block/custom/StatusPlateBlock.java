@@ -22,6 +22,8 @@ import java.util.Set;
 
 public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<StatusEffectData> DATA_TAG = DFU.View(StatusEffectData.CODEC);
+    private static final Tag<Long> APPLY_COOLDOWN_TAG = Tag.Transient("mapmaker:status_plate_cooldown");
+    private static final long COOLDOWN_TIME = 250L;
 
     public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:status_plate")
             .requiredVariant(MapVariant.PARKOUR)
@@ -65,6 +67,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
+        if (isCoolingDown(player)) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var statusId = createObjectId(tick.getBlockPosition());
         world.callEvent(new MapPlayerStatusChangeEvent(player, world, statusId, data));
@@ -73,6 +76,14 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
         block.getTag(DATA_TAG).sendDebugInfo(player);
+    }
+
+    private boolean isCoolingDown(@NotNull Player player) {
+        if (!player.hasTag(APPLY_COOLDOWN_TAG)) {
+            return false;
+        }
+        long time = player.getTag(APPLY_COOLDOWN_TAG);
+        return time + COOLDOWN_TIME > System.currentTimeMillis();
     }
 
 }

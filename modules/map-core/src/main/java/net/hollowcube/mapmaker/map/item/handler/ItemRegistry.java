@@ -70,6 +70,8 @@ public class ItemRegistry {
     }
 
     private static final Tag<Boolean> TRIGGER_TAG = Tag.Transient("mapmaker:triggered");
+    private static final Tag<Long> COOLDOWN_TAG = Tag.Transient("mapmaker:hotbar_cooldown");
+    private static final long COOLDOWN_TIME = 250L;
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:item/registry", EventFilter.INSTANCE)
             .addListener(PlayerBlockInteractEvent.class, this::handleUseItemOnBlock)
@@ -178,6 +180,8 @@ public class ItemRegistry {
         // so is playerUseItemOnBlockEvent so we filter this one out.
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
+        // Cooldown
+        if (isCoolingDown(player)) return;
 
         player.setTag(TRIGGER_TAG, true);
         event.setCancelled(true);
@@ -189,6 +193,7 @@ public class ItemRegistry {
                 null, null,
                 null, null
         ));
+        player.setTag(COOLDOWN_TAG, System.currentTimeMillis());
     }
 
     private void handleUseItemOnBlock(@NotNull PlayerBlockInteractEvent event) {
@@ -200,6 +205,8 @@ public class ItemRegistry {
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
+        // Cooldown
+        if (isCoolingDown(player)) return;
 
         event.setBlockingItemUse(true);
         player.setTag(TRIGGER_TAG, true);
@@ -212,6 +219,7 @@ public class ItemRegistry {
                 event.getBlockFace(),
                 null
         ));
+        player.setTag(COOLDOWN_TAG, System.currentTimeMillis());
     }
 
     private void handleUseItemOnEntity(@NotNull PlayerEntityInteractEvent event) {
@@ -223,6 +231,7 @@ public class ItemRegistry {
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
+        if (isCoolingDown(player)) return;
 
         player.setTag(TRIGGER_TAG, true);
         itemHandler.rightClicked(new ItemHandler.Click(
@@ -233,6 +242,7 @@ public class ItemRegistry {
                 null,
                 event.getTarget()
         ));
+        player.setTag(COOLDOWN_TAG, System.currentTimeMillis());
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
@@ -241,6 +251,7 @@ public class ItemRegistry {
         var itemStack = event.getPlayer().getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
+        if (isCoolingDown(event.getPlayer())) return;
 
         event.setCancelled(true);
         var placeOffset = event.getBlockFace().toDirection();
@@ -254,12 +265,14 @@ public class ItemRegistry {
                 event.getBlockFace(),
                 null
         ));
+        event.getPlayer().setTag(COOLDOWN_TAG, System.currentTimeMillis());
     }
 
     private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {
         var itemStack = event.getPlayer().getItemInHand(Player.Hand.MAIN);
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_BLOCK)) return;
+        if (isCoolingDown(event.getPlayer())) return;
 
         event.setCancelled(true);
         itemHandler.leftClicked(new ItemHandler.Click(
@@ -272,6 +285,7 @@ public class ItemRegistry {
                 event.getBlockFace(),
                 null
         ));
+        event.getPlayer().setTag(COOLDOWN_TAG, System.currentTimeMillis());
     }
 
     private void handleHitEntity(@NotNull EntityAttackEvent event) {
@@ -299,4 +313,13 @@ public class ItemRegistry {
         return customModelDataToItemHandler.get(itemStack.meta().getCustomModelData());
     }
 
+    private boolean isCoolingDown(@NotNull Player player) {
+        if (!player.hasTag(COOLDOWN_TAG)) {
+            return false;
+        }
+
+        long time = player.getTag(COOLDOWN_TAG);
+
+        return time + COOLDOWN_TIME > System.currentTimeMillis();
+    }
 }
