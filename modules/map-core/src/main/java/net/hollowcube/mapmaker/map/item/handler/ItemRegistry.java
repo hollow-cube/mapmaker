@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -76,6 +77,7 @@ public class ItemRegistry {
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock)
             .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
+            .addListener(EntityAttackEvent.class, this::handleHitEntity)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick);
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -269,6 +271,25 @@ public class ItemRegistry {
                 null,
                 event.getBlockFace(),
                 null
+        ));
+    }
+
+    private void handleHitEntity(@NotNull EntityAttackEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (player.getTag(TRIGGER_TAG) != null) return;
+
+        var itemStack = player.getItemInMainHand();
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_ENTITY)) return;
+
+        player.setTag(TRIGGER_TAG, true);
+        itemHandler.leftClicked(new ItemHandler.Click(
+                itemHandler, player,
+                itemStack, Player.Hand.MAIN,
+                null,
+                null,
+                null,
+                event.getTarget()
         ));
     }
 
