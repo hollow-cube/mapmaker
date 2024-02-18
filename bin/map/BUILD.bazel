@@ -5,6 +5,9 @@ java_binary(
     srcs = glob(include = [
         "src/main/java/**/*.java",
     ]),
+    javacopts = [
+        "-Xplugin:HollowCubeCompilePlugin",
+    ],
     main_class = "net.hollowcube.mapmaker.map.Main",
     resources = glob(include = [
         "src/main/resources/**/*",

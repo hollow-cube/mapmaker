@@ -10,8 +10,6 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.*;
 
-// MUST COMPILE WITH JAVA 11
-// This is a Bazel limitation in building `java_plugin` dependencies as far as I can tell.
 public class BlockingClassRewriter extends TreeScanner<Void, Void> {
     private final Context context;
     private final Log log;

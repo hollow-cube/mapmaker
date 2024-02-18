@@ -67,7 +67,7 @@ jobs:
 
       # Build server
       - name: Build standalone binary
-        run: bazel build //bin/map:map_deploy.jar
+        run: bazel build //bin/map:map_deploy.jar --action_env=HOLLOWCUBE_STRIPPED_BINARY=true
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -106,7 +106,7 @@ jobs:
 
       # Build server
       - name: Build standalone binary
-        run: bazel build //bin/hub:hub_deploy.jar
+        run: bazel build //bin/hub:hub_deploy.jar --action_env=HOLLOWCUBE_STRIPPED_BINARY=true
 
       # Build and push docker image
       - name: Set up Docker Buildx

@@ -10,6 +10,7 @@ java_plugin(
         "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
         "--add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
     ],
+    resources = glob(include = ["src/main/resources/**"]),
     visibility = ["//visibility:public"],
     deps = [
         "//third_party:auto_service",

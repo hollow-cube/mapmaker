@@ -67,12 +67,7 @@ maven_install(
         "com.google.protobuf:protobuf-java:3.24.4",
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "io.getunleash:unleash-client-java:9.2.0",
-        maven.artifact(
-            "com.velocitypowered",
-            "velocity-api",
-            "3.1.1",
-            neverlink = True,
-        ),
+        "com.velocitypowered:velocity-api:3.1.1",
         "com.google.inject:guice:7.0.0",
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
 

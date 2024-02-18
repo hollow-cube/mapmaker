@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -21,14 +22,21 @@ public class ConfigLoaderV3 {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoaderV3.class);
 
-    public static @NotNull ConfigLoaderV3 loadDefault() {
+    public static @NotNull ConfigLoaderV3 loadDefault(String[] args) {
         try (var is = ConfigLoaderV3.class.getResourceAsStream("/config.yaml")) {
             if (is == null) {
                 logger.error("config.yaml not present in binary");
                 System.exit(1);
             }
 
-            return loadFromText(is.readAllBytes(), System.getenv());
+            var envmap = new HashMap<>(System.getenv());
+            for (var arg : args) {
+                var split = arg.split("=");
+                if (split.length != 2) continue;
+                envmap.put(split[0], split[1]);
+            }
+
+            return loadFromText(is.readAllBytes(), envmap);
         } catch (IOException e) {
             logger.error("failed to load config file", e);
 

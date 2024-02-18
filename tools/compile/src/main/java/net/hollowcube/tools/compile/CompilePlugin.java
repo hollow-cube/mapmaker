@@ -13,8 +13,6 @@ import org.burningwave.core.function.ThrowingRunnable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 
-// MUST COMPILE WITH JAVA 11
-// This is a Bazel limitation in building `java_plugin` dependencies as far as I can tell.
 public class CompilePlugin implements Plugin {
 
     static {
@@ -68,7 +66,7 @@ public class CompilePlugin implements Plugin {
                         if (classDecl.sym.isInterface() || !isBlockingClass(classDecl))
                             return super.visitClass(node, unused);
 
-                        log.printRawLines(Log.WriterKind.ERROR, "Blocking class: " + classDecl.sym.name);
+//                        log.printRawLines(Log.WriterKind.ERROR, "Blocking class: " + classDecl.sym.name);
                         classDecl.accept(new BlockingClassRewriter(task.getContext(), log), null);
 
                         return super.visitClass(node, unused);
