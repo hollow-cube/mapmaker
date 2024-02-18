@@ -10,6 +10,7 @@ import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.util.PaletteUtil;
 import net.hollowcube.terraform.util.ProtocolUtil;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -88,6 +89,11 @@ public record AxiomClientSetBufferPacket(
                     // Reached the end, exit normally w/o overflow. this is the normal case
                     return updates;
                 }
+                int chunkX = PaletteUtil.unpackX(index);
+                int sectionY = PaletteUtil.unpackY(index);
+                int chunkZ = PaletteUtil.unpackZ(index);
+
+                System.out.println("pos: " + chunkX + ", " + sectionY + ", " + chunkZ);
 
                 var palette = readAxiomPalette(buffer);
                 var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
@@ -126,9 +132,11 @@ public record AxiomClientSetBufferPacket(
         @SuppressWarnings("UnstableApiUsage")
         static @NotNull Palette readAxiomPalette(@NotNull NetworkBuffer buffer) {
             var bitsPerEntry = buffer.read(NetworkBuffer.BYTE);
+            System.out.println("section bpe: " + bitsPerEntry);
             return switch (bitsPerEntry) {
                 case 0 -> { // Vanilla: fixed palette
                     var blockId = buffer.read(NetworkBuffer.VAR_INT);
+                    Check.stateCondition(buffer.read(LONG_ARRAY).length != 0, "fixed palette must have zero data");
                     yield new FixedPalette(blockId == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : blockId);
                 }
                 case 1, 2, 3, 4 -> { // Vanilla: Linear palette (always bpe 4)

@@ -14,6 +14,7 @@ public record ClientChatMessageData(
 ) {
 
     public enum Type {
-        CHAT_UNSIGNED
+        CHAT_UNSIGNED,
+        CHAT_SYSTEM
     }
 }

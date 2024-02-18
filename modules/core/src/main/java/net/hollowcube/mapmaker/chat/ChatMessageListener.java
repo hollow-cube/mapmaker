@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.chat;
 
 import com.google.gson.Gson;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
@@ -26,11 +27,13 @@ import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.sound.SoundEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
@@ -92,65 +95,79 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
     @Override
     protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull ChatMessageData message) {
-        Thread.startVirtualThread(() -> {
-            logger.info("Received chat message: {}", message);
-            try {
-                // This is braindead inefficient
-                // Awful garbage code
+        switch (message.type()) {
+            case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> handleChatUnsigned(message));
+            case CHAT_SYSTEM -> handleChatSystem(message);
+        }
+    }
 
-                var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
-                var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
-                var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
+    @Blocking
+    protected void handleChatUnsigned(@NotNull ChatMessageData message) {
+        logger.info("Received chat message: {}", message);
+        try {
+            // This is braindead inefficient
+            // Awful garbage code
 
-                var maps = new HashMap<String, MapData>();
+            var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
+            var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
+            var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
 
-                for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                    var builder = Component.text();
+            var maps = new HashMap<String, MapData>();
 
-                    boolean hasDing = false;
-                    for (var part : message.parts()) {
-                        switch (part.type()) {
-                            case RAW -> {
-                                Component component = Component.text(part.text());
+            for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                var builder = Component.text();
 
-                                var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
-                                if (namePattern.matcher(part.text()).find()) {
-                                    if (!hasDing && !recipient.getUuid().toString().equals(message.sender()))
-                                        recipient.playSound(TAG_DING);
-                                    hasDing = true;
-                                    component = component.replaceText(TextReplacementConfig.builder()
-                                            .match(namePattern)
-                                            .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
-                                            .build());
-                                }
+                boolean hasDing = false;
+                for (var part : message.parts()) {
+                    switch (part.type()) {
+                        case RAW -> {
+                            Component component = Component.text(part.text());
 
-                                builder.append(component);
+                            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
+                            if (namePattern.matcher(part.text()).find()) {
+                                if (!hasDing && !recipient.getUuid().toString().equals(message.sender()))
+                                    recipient.playSound(TAG_DING);
+                                hasDing = true;
+                                component = component.replaceText(TextReplacementConfig.builder()
+                                        .match(namePattern)
+                                        .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
+                                        .build());
                             }
-                            case EMOJI -> {
-                                var emoji = Emoji.findByName(part.name());
-                                if (emoji == null) {
-                                    builder.append(Component.text(":" + part.name() + ":"));
-                                } else builder.append(emoji.component());
-                            }
-                            case MAP -> {
-                                builder.append(Component.text("[map - todo]"));
+
+                            builder.append(component);
+                        }
+                        case EMOJI -> {
+                            var emoji = Emoji.findByName(part.name());
+                            if (emoji == null) {
+                                builder.append(Component.text(":" + part.name() + ":"));
+                            } else builder.append(emoji.component());
+                        }
+                        case MAP -> {
+                            builder.append(Component.text("[map - todo]"));
 //                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
 //                                builder.append(MapData.createMapHoverText(map));
-                            }
-                            case URL -> {
-                                builder.append(Component.text(part.text(), NamedTextColor.GRAY)
-                                        .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                                        .clickEvent(ClickEvent.openUrl(part.text())));
-                            }
+                        }
+                        case URL -> {
+                            builder.append(Component.text(part.text(), NamedTextColor.GRAY)
+                                    .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
+                                    .clickEvent(ClickEvent.openUrl(part.text())));
                         }
                     }
-
-                    recipient.sendMessage(Component.translatable(key, sender, builder.build()));
                 }
-            } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+
+                recipient.sendMessage(Component.translatable(key, sender, builder.build()));
             }
-        });
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
+    }
+
+    protected void handleChatSystem(@NotNull ChatMessageData message) {
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.target()));
+        if (player == null) return; // Not relevant to this server
+
+        var parts = message.argsSafe().stream().map(Component::text).toList();
+        player.sendMessage(Component.translatable(message.key(), parts));
     }
 
 }
