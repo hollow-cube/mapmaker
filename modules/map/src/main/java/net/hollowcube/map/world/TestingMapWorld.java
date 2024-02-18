@@ -1,7 +1,6 @@
 package net.hollowcube.map.world;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.map2.biome.BiomeContainer;
 import net.hollowcube.map2.event.MapPlayerInitEvent;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class TestingMapWorld extends AbstractMapWorld {
+public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
 
     private final EditingMapWorld parent;
@@ -37,7 +36,7 @@ public final class TestingMapWorld extends AbstractMapWorld {
     private final EventNode<InstanceEvent> eventNode = EventNode.event("testing-node", EventFilter.INSTANCE, this::testEvent);
 
     public TestingMapWorld(@NotNull EditingMapWorld parent) {
-        super(parent.server(), parent.map(), (MapInstance) parent.instance());
+        super(parent.server(), parent.map(), parent.features(), (MapInstance) parent.instance());
         this.parent = parent;
 
         parent.instance().eventNode().addChild(eventNode);

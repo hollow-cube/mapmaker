@@ -39,6 +39,15 @@ public sealed interface MapWorld permits AbstractMapWorld {
         return instance.getTag(AbstractMapWorld.SELF_TAG);
     }
 
+    /**
+     * A unique identifier for this world <i>locally to this physical server</i>. This is not the map id.
+     *
+     * <p>No guarantees are made of the format and it should not be depended on.</p>
+     *
+     * @return the locally unique id of this world.
+     */
+    @NotNull String worldId();
+
     @NotNull MapServer server();
     @NotNull MapData map();
 
@@ -74,11 +83,9 @@ public sealed interface MapWorld permits AbstractMapWorld {
     }
 
     /**
-     * Gets the {@link EventNode} for this world. This node only triggers player events for players
-     * who are actively playing, NOT spectators. If listening for spectators is required, an event
-     * should be registered on the instance event node directly.
+     * Gets the {@link EventNode} for this world.
      *
-     * @return An event node for the active players in the world.
+     * @return An event node for the active players and spectators in the world.
      */
     @NotNull EventNode<InstanceEvent> eventNode();
     default void callEvent(@NotNull InstanceEvent event) {

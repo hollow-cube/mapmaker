@@ -2,7 +2,6 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FontUtil;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
@@ -55,9 +54,9 @@ public class TimerFeatureProvider implements FeatureProvider {
     }
 
     private void buildWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        if (!MapHooks.isPlayerPlaying(player)) return;
-
         var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
+
         var isTestingMode = world instanceof TestingMapWorld;
 
         var saveState = SaveState.fromPlayer(player);

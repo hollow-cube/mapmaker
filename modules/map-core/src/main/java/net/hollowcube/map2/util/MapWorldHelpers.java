@@ -18,40 +18,6 @@ public final class MapWorldHelpers {
     private MapWorldHelpers() {
     }
 
-//    public static @NotNull List<FeatureProvider> loadFeatures(@NotNull MapWorld world) {
-//        var enabledFeatures = new ArrayList<FeatureProvider>();
-//        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-//            // Load each feature in parallel
-//            var features = world.server().features();
-//            var enabledFutures = new Future[features.size()];
-//            for (int i = 0; i < features.size(); i++) {
-//                var feature = features.get(i);
-//                enabledFutures[i] = scope.fork(() -> {
-//                    try {
-//                        return feature.initMap(world);
-//                    } catch (Exception e) {
-//                        MinecraftServer.getExceptionManager().handleException(new RuntimeException(
-//                                "failed to load feature " + feature.getClass().getName(), e));
-//                        return false;
-//                    }
-//                });
-//            }
-//
-//            scope.join();
-//
-//            // Add each feature to the enabled list if it is enabled.
-//            for (int i = 0; i < features.size(); i++) {
-//                var feature = features.get(i);
-//                if ((boolean) enabledFutures[i].resultNow()) {
-//                    enabledFeatures.add(feature);
-//                }
-//            }
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-//        return enabledFeatures;
-//    }
-
     @Blocking
     public static @NotNull SaveState getOrCreateSaveState(
             @NotNull MapWorld world,

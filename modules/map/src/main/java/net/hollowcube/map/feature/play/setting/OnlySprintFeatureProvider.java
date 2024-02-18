@@ -1,7 +1,6 @@
 package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -47,25 +46,26 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         player.setTag(ONLY_SPRINT_TAG, player.getPosition());
     }
 
     public void onStopSprinting(@NotNull PlayerStopSprintingEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        var world = MapWorld.forPlayer(player);
+        if (!world.isPlaying(player)) return;
 
         player.removeTag(ONLY_SPRINT_TAG);
 
-        var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
         //todo sound effect for sprint stopped
     }
 
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        var world = MapWorld.forPlayer(player);
+        if (!world.isPlaying(player)) return;
         if (player.isSprinting() || !player.hasTag(ONLY_SPRINT_TAG)) return;
 
         var startPos = player.getTag(ONLY_SPRINT_TAG);
@@ -74,7 +74,6 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
 
         // They moved >1 block before starting sprinting, reset them
         player.removeTag(ONLY_SPRINT_TAG);
-        var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
         //todo sound effect for sprint stopped
     }

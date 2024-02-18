@@ -1,8 +1,9 @@
 package net.hollowcube.map.world;
 
+import com.google.inject.Inject;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.feature.FeatureList;
 import net.hollowcube.map.object.ObjectBlockHandler;
-import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapServer;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.map2.event.BlockItemPlaceEvent;
@@ -52,12 +53,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 @SuppressWarnings("UnstableApiUsage")
-public class EditingMapWorld extends AbstractMapWorld {
+public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(EditingMapWorld.class);
 
     private static final int MAP_AUTOSAVE_INTERVAL_SEC = 60 * 5; // 5 minutes
 
     private final Terraform terraform;
+
     private final EventNode<InstanceEvent> readWriteNode = EventNode.event("editing-events-rw", EventFilter.INSTANCE, this::canEventWrite)
             .addListener(InstanceTickEvent.class, ev -> tick())
             .addListener(PlayerUseItemEvent.class, this::handleItemUse)
@@ -74,8 +76,12 @@ public class EditingMapWorld extends AbstractMapWorld {
     private final ReentrantLock saveLock = new ReentrantLock();
     private Task autoSaveTask = null;
 
-    public EditingMapWorld(@NotNull MapServer server, @NotNull Terraform terraform, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('e')));
+    @Inject
+    public EditingMapWorld(
+            @NotNull MapServer server, @NotNull Terraform terraform,
+            @NotNull FeatureList features, @NotNull MapData map
+    ) {
+        super(server, map, features, new MapInstance(map.createDimensionName('e')));
         this.terraform = terraform;
 
         instance.setGenerator(MapGenerators.voidWorld());
@@ -149,7 +155,6 @@ public class EditingMapWorld extends AbstractMapWorld {
         }
 
         super.load();
-        //todo enable features
 
         // Kick off autosave
         if (map().verification() == MapVerification.UNVERIFIED) {

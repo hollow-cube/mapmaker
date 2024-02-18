@@ -1,7 +1,12 @@
 package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.map.world.EditingMapWorld;
+import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.map2.AbstractMapWorld;
+import net.hollowcube.map2.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -9,48 +14,36 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.Future;
 
 public class DevServerBridge implements ServerBridge {
-    public static final Tag<Future<AbstractMapWorld>> TARGET_WORLD = Tag.Transient("mapmaker:map/target_world");
+    public static final Tag<Future<? extends AbstractMapWorld>> TARGET_WORLD = Tag.Transient("mapmaker:map/target_world");
+
+    private final MapService mapService;
+    private final MapAllocator allocator;
+
+    public DevServerBridge(@NotNull MapService mapService, @NotNull MapAllocator allocator) {
+        this.mapService = mapService;
+        this.allocator = allocator;
+    }
 
     @Override
     public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-        throw new UnsupportedOperationException("not implemented");
+        var playerId = PlayerDataV2.fromPlayer(player).id();
+
+        var map = mapService.getMap(playerId, mapId);
+        Class<? extends AbstractMapWorld> worldType = switch (joinMapState) {
+            case PLAYING, SPECTATING -> PlayingMapWorld.class;
+            case EDITING -> EditingMapWorld.class;
+        };
+        var worldFuture = allocator.create(map, worldType);
+
+        player.setTag(TARGET_WORLD, worldFuture);
+        player.startConfigurationPhase();
     }
 
     @Override
     public void joinHub(@NotNull Player player) {
-        throw new UnsupportedOperationException("not implemented");
+        // Any player reconfiguring without that tag will be sent to the hub, so simply remove it and reconfigure.
+        player.removeTag(TARGET_WORLD);
+        player.startConfigurationPhase();
     }
 
-//    @Override
-//    public @Nullable String getCurrentMap(@NotNull Player player) {
-//        var world = MapWorld.forPlayerOptional(player);
-//        return world == null ? null : world.map().id();
-//    }
-//
-//    //
-//    // HubToMapBridge implementation
-//    //
-//
-//    @Override
-//    public @Blocking void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-//        var playerData = PlayerDataV2.fromPlayer(player);
-//        var map = mapServer.mapService().getMap(playerData.id(), mapId);
-//        ((MapServerBase) mapServer).joinMap(player, map, joinMapState);
-//    }
-//
-//
-//    //
-//    // MapToHubBridge implementation
-//    //
-//
-//    @Override
-//    public @Blocking void sendPlayerToHub(@NotNull Player player) {
-//        var world = MapWorld.forPlayerOptional(player);
-//        if (world instanceof InternalMapWorld internalWorld) {
-//            internalWorld.removePlayer(player);
-//        }
-//
-//        if (!player.isOnline()) return;
-//        player.setInstance(hub.world().instance(), player.getPosition().withCoord(0.5, 4, 0.5)).join();
-//    }
 }

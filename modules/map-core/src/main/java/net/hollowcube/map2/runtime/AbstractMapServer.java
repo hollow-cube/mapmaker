@@ -12,6 +12,7 @@ import net.hollowcube.common.util.Injectors;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.map2.MapServer;
 import net.hollowcube.map2.MapWorld;
+import net.hollowcube.map2.entity.MapEntities;
 import net.hollowcube.map2.util.DynamicController;
 import net.hollowcube.map2.util.DynamicInjector;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -53,6 +54,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -162,7 +165,7 @@ public abstract class AbstractMapServer implements MapServer {
             FeatureFlagProvider.replaceGlobals(provider);
         }
 
-        allocator = MapAllocator.create(this);
+        allocator = createAllocator();
         shutdowner.queue(allocator::close);
 
         var kafkaConfig = config.get(KafkaConfig.class);
@@ -231,10 +234,18 @@ public abstract class AbstractMapServer implements MapServer {
         return commandManager;
     }
 
+    protected abstract @NotNull MapAllocator createAllocator();
+
     /**
      * Called just before the server starts, but after all services have been initialized.
      */
     protected void prepareStart() {
+        var globalEventHandler = MinecraftServer.getGlobalEventHandler();
+
+        var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
+        globalEventHandler.addChild(entityEvents);
+        MapEntities.init(entityEvents);
+
         addBinding(MapServer.class, this, "mapServer", "server");
         addBinding(ConfigLoaderV3.class, config);
 
@@ -407,5 +418,6 @@ public abstract class AbstractMapServer implements MapServer {
     protected void handlePlayerDisconnect(@NotNull Player player) {
         logger.info("disconnect - {}", player.getUsername());
     }
+
 
 }

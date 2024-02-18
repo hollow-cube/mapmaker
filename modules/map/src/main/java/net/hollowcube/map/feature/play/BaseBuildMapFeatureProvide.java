@@ -1,7 +1,6 @@
 package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.map.feature.play.item.ReturnToHubItem;
@@ -36,7 +35,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();

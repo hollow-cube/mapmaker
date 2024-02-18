@@ -17,6 +17,7 @@ java_binary(
         "//modules/canvas:impl-standalone",
         "//modules/common",
         "//modules/core",
+        "//modules/map-core",
         "//modules/map",
         "//modules/terraform",
         "//third_party:adventure_all",
