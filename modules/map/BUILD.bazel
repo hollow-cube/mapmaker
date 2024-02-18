@@ -1,5 +1,4 @@
 load("@rules_java//java:defs.bzl", "java_library", "java_proto_library")
-load("@rules_proto//proto:defs.bzl", "proto_library")
 
 java_library(
     name = "map",
@@ -16,7 +15,6 @@ java_library(
         "//modules/terraform",
         "//third_party:helidon",
         "//third_party:minestom",
-        "@com_google_protobuf//java/core",
         "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",

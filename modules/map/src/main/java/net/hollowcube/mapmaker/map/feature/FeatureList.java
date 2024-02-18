@@ -1,8 +1,7 @@
 package net.hollowcube.mapmaker.map.feature;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.StructuredTaskScope;
 
 public class FeatureList {
     private static final Logger logger = LoggerFactory.getLogger(FeatureList.class);
@@ -50,7 +49,7 @@ public class FeatureList {
         var enabledFeatures = new ArrayList<FeatureProvider>();
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Load each feature in parallel
-            var enabledFutures = new Future[features.size()];
+            var enabledFutures = new StructuredTaskScope.Subtask[features.size()];
             for (int i = 0; i < features.size(); i++) {
                 var feature = features.get(i);
                 enabledFutures[i] = scope.fork(() -> {
@@ -69,7 +68,7 @@ public class FeatureList {
             // Add each feature to the enabled list if it is enabled.
             for (int i = 0; i < features.size(); i++) {
                 var feature = features.get(i);
-                if ((boolean) enabledFutures[i].resultNow()) {
+                if ((boolean) enabledFutures[i].get()) {
                     enabledFeatures.add(feature);
                 }
             }

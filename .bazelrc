@@ -1,7 +1,8 @@
-build --java_language_version=20
-build --tool_java_runtime_version=20
-build --java_runtime_version=zulu_20
+build --noenable_bzlmod
+build --java_language_version=21
+build --tool_java_language_version=21
+build --tool_java_runtime_version=remotejdk_21
+build --java_runtime_version=remotejdk_21
 
-build --jvmopt --enable-preview
-build --jvmopt "--add-modules jdk.incubator.concurrent"
-build --jvmopt "--add-exports java.management/sun.management=ALL-UNNAMED"
+build --jvmopt "--enable-preview"
+build --javacopt "--enable-preview"

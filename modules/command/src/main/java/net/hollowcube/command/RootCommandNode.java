@@ -16,8 +16,8 @@ final class RootCommandNode extends CommandNode {
     void register(@NotNull String name, @NotNull CommandNode node) {
         if (this.children == null) this.children = new ArrayList<>();
 
-        for (ArgumentPair(Argument<?> argument, CommandNode unused) : this.children) {
-            if (argument.id().equalsIgnoreCase(name)) {
+        for (var pair : this.children) {
+            if (pair.argument().id().equalsIgnoreCase(name)) {
                 throw new IllegalArgumentException("duplicate child name: " + name);
             }
         }

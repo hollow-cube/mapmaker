@@ -135,7 +135,8 @@ public class CommandManagerImpl implements CommandManager {
             if (parent != null && parent.root.children != null) allCommands.addAll(parent.root.children);
 
             var commands = new ArrayList<Map.Entry<String, CommandNode>>();
-            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode node) : allCommands) {
+            for (var pair : allCommands) {
+                var node = pair.node();
                 if (!includeAliases && node.redirect != null) continue;
 
                 // Test the permissions on the command
@@ -144,7 +145,7 @@ public class CommandManagerImpl implements CommandManager {
                     if (result == CommandCondition.HIDE) continue;
                 }
 
-                commands.add(Map.entry(argument.id(), node));
+                commands.add(Map.entry(pair.argument().id(), node));
             }
             return commands;
         }
@@ -153,7 +154,8 @@ public class CommandManagerImpl implements CommandManager {
         public @NotNull Collection<Map.Entry<Argument<?>, CommandNode>> children(@NotNull CommandNode node, @NotNull CommandSender sender) {
             if (node.children == null) return List.of();
             var commands = new ArrayList<Map.Entry<Argument<?>, CommandNode>>();
-            for (CommandNode.ArgumentPair(Argument<?> argument, CommandNode child) : node.children) {
+            for (var pair : node.children) {
+                var child = pair.node();
 
                 // Test the permissions on the command
                 if (child.condition != null) {
@@ -161,7 +163,7 @@ public class CommandManagerImpl implements CommandManager {
                     if (result == CommandCondition.HIDE) continue;
                 }
 
-                commands.add(Map.entry(argument, child));
+                commands.add(Map.entry(pair.argument(), child));
             }
             return commands;
         }

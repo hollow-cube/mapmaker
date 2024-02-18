@@ -1,5 +1,4 @@
 load("@rules_java//java:defs.bzl", "java_library", "java_proto_library")
-load("@rules_proto//proto:defs.bzl", "proto_library")
 
 java_library(
     name = "map-core",
@@ -7,14 +6,12 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
-        ":biomes_java_proto",
         "//modules/canvas:api",
         "//modules/common",
         "//modules/core",
         "//modules/terraform",
         "//third_party:helidon",
         "//third_party:minestom",
-        "@com_google_protobuf//java/core",
         "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",
@@ -24,14 +21,4 @@ java_library(
         "@maven//:net_kyori_adventure_api",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
-)
-
-java_proto_library(
-    name = "biomes_java_proto",
-    deps = [":biomes_proto"],
-)
-
-proto_library(
-    name = "biomes_proto",
-    srcs = ["src/proto/biomes.proto"],
 )

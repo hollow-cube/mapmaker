@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.runtime;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
@@ -66,6 +65,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 

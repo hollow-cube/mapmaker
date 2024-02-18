@@ -1,70 +1,14 @@
-load("@bazel_tools//tools/jdk:remote_java_repository.bzl", "remote_java_repository")
-
-remote_java_repository(
-    name = "zulu_20_macos_aarch64",
-    prefix = "zulu",
-    sha256 = "a2eff6a940c2df3a2352278027e83f5959f34dcfc8663034fe92be0f1b91ce6f",
-    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-macosx_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:macos",
-    ],
-    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-macosx_aarch64.tar.gz",
-    version = "20",
-)
-
-remote_java_repository(
-    name = "zulu_20_macos_x64",
-    prefix = "zulu",
-    sha256 = "fde6cc17a194ea0d9b0c6c0cb6178199d8edfc282d649eec2c86a9796e843f86",
-    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-macosx_x64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-macosx_x64.tar.gz",
-    version = "20",
-)
-
-remote_java_repository(
-    name = "zulu_20_linux_x64",
-    prefix = "zulu",
-    sha256 = "0386418db7f23ae677d05045d30224094fc13423593ce9cd087d455069893bac",
-    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-linux_x64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-linux_x64.tar.gz",
-    version = "20",
-)
-
-remote_java_repository(
-    name = "zulu_20_windows_x64",
-    prefix = "zulu",
-    sha256 = "ac5f6a7d84dbbb0bb4d376feb331cc4c49a9920562f2a5e85b7a6b4863b10e1e",
-    strip_prefix = "zulu20.28.85-ca-jdk20.0.0-win_x64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    url = "https://mirror.bazel.build/cdn.azul.com/zulu/bin/zulu20.28.85-ca-jdk20.0.0-win_x64.zip",
-    version = "20",
-)
-
-register_toolchains("//:azul_jdk20_definition")
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-RULES_JVM_EXTERNAL_TAG = "4.5"
+RULES_JVM_EXTERNAL_TAG = "5.3"
 
-RULES_JVM_EXTERNAL_SHA = "b17d7388feb9bfa7f2fa09031b32707df529f26c91ab9e5d909eb1676badd9a6"
+RULES_JVM_EXTERNAL_SHA = "d31e369b854322ca5098ea12c69d7175ded971435e55c18dd9dd5f29cc5249ac"
 
 http_archive(
     name = "rules_jvm_external",
     sha256 = RULES_JVM_EXTERNAL_SHA,
     strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
+    url = "https://github.com/bazelbuild/rules_jvm_external/releases/download/%s/rules_jvm_external-%s.tar.gz" % (RULES_JVM_EXTERNAL_TAG, RULES_JVM_EXTERNAL_TAG),
 )
 
 load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
@@ -95,6 +39,7 @@ load("//third_party/rules_jmh:defs.bzl", "rules_jmh_maven_deps")
 rules_jmh_maven_deps()
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_jvm_external//:specs.bzl", "maven")
 
 maven_install(
     artifacts = [
@@ -122,7 +67,12 @@ maven_install(
         "com.google.protobuf:protobuf-java:3.24.4",
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "io.getunleash:unleash-client-java:9.2.0",
-        "com.velocitypowered:velocity-api:3.1.1",
+        maven.artifact(
+            "com.velocitypowered",
+            "velocity-api",
+            "3.1.1",
+            neverlink = True,
+        ),
         "com.google.inject:guice:7.0.0",
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
 
@@ -158,6 +108,9 @@ maven_install(
         # Compiler plugin util
         "org.burningwave:core:12.62.7",
     ],
+    excluded_artifacts = [
+        "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
+    ],
     fetch_sources = True,
     repositories = [
         "https://repo1.maven.org/maven2",
@@ -165,18 +118,3 @@ maven_install(
         "https://repo.papermc.io/repository/maven-public/",
     ],
 )
-
-http_archive(
-    name = "rules_proto",
-    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
-    strip_prefix = "rules_proto-5.3.0-21.7",
-    urls = [
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
-    ],
-)
-
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-rules_proto_dependencies()
-
-rules_proto_toolchains()

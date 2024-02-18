@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.biome;
 
-import net.hollowcube.mapmaker.map.biome.BiomeProtos;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
 import net.minestom.server.world.biomes.Biome;
@@ -133,32 +132,32 @@ public class BiomeInfo {
 
     // Serialization
 
-    public BiomeInfo(@NotNull BiomeProtos.BiomeInfo bi) {
-        this.name = bi.getName();
-        this.displayItem = Material.fromNamespaceId(bi.getDisplayItem());
-
-        this.precipitation = Biome.Precipitation.values()[bi.getPrecipitation()];
-
-        this.skyColor = bi.getSkyColor();
-        this.fogColor = bi.getFogColor();
-        this.waterColor = bi.getWaterColor();
-        this.waterFogColor = bi.getWaterFogColor();
-        if (bi.hasGrassColor()) this.grassColor = bi.getGrassColor();
-        if (bi.hasFoliageColor()) this.foliageColor = bi.getFoliageColor();
-    }
-
-    public @NotNull BiomeProtos.BiomeInfo toProto() {
-        var builder = BiomeProtos.BiomeInfo.newBuilder()
-                .setName(name)
-                .setDisplayItem(displayItem.name())
-                .setPrecipitation(precipitation.ordinal())
-                .setSkyColor(skyColor)
-                .setFogColor(fogColor)
-                .setWaterColor(waterColor)
-                .setWaterFogColor(waterFogColor);
-        if (grassColor != null) builder = builder.setGrassColor(grassColor);
-        if (foliageColor != null) builder = builder.setFoliageColor(foliageColor);
-        return builder.build();
-    }
+//    public BiomeInfo(@NotNull BiomeProtos.BiomeInfo bi) {
+//        this.name = bi.getName();
+//        this.displayItem = Material.fromNamespaceId(bi.getDisplayItem());
+//
+//        this.precipitation = Biome.Precipitation.values()[bi.getPrecipitation()];
+//
+//        this.skyColor = bi.getSkyColor();
+//        this.fogColor = bi.getFogColor();
+//        this.waterColor = bi.getWaterColor();
+//        this.waterFogColor = bi.getWaterFogColor();
+//        if (bi.hasGrassColor()) this.grassColor = bi.getGrassColor();
+//        if (bi.hasFoliageColor()) this.foliageColor = bi.getFoliageColor();
+//    }
+//
+//    public @NotNull BiomeProtos.BiomeInfo toProto() {
+//        var builder = BiomeProtos.BiomeInfo.newBuilder()
+//                .setName(name)
+//                .setDisplayItem(displayItem.name())
+//                .setPrecipitation(precipitation.ordinal())
+//                .setSkyColor(skyColor)
+//                .setFogColor(fogColor)
+//                .setWaterColor(waterColor)
+//                .setWaterFogColor(waterFogColor);
+//        if (grassColor != null) builder = builder.setGrassColor(grassColor);
+//        if (foliageColor != null) builder = builder.setFoliageColor(foliageColor);
+//        return builder.build();
+//    }
 
 }

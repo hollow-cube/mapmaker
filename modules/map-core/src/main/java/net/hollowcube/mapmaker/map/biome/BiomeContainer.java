@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map.biome;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import net.hollowcube.mapmaker.map.biome.BiomeProtos;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.NetworkBuffer;
@@ -127,29 +125,29 @@ public class BiomeContainer {
     public void read(@NotNull NetworkBuffer buffer) {
         Check.stateCondition(!biomes.isEmpty(), "Biomes should only be read once");
 
-        BiomeProtos.BiomeContainer proto;
-        try {
-            var bytes = buffer.read(NetworkBuffer.BYTE_ARRAY);
-            proto = BiomeProtos.BiomeContainer.parseFrom(bytes);
-        } catch (InvalidProtocolBufferException e) {
-            MinecraftServer.getExceptionManager().handleException(e);
-            return;
-        }
-
-        for (var biome : proto.getBiomeList()) {
-            biomes.add(new BiomeInfo(biome));
-        }
+//        BiomeProtos.BiomeContainer proto;
+//        try {
+//            var bytes = buffer.read(NetworkBuffer.BYTE_ARRAY);
+//            proto = BiomeProtos.BiomeContainer.parseFrom(bytes);
+//        } catch (InvalidProtocolBufferException e) {
+//            MinecraftServer.getExceptionManager().handleException(e);
+//            return;
+//        }
+//
+//        for (var biome : proto.getBiomeList()) {
+//            biomes.add(new BiomeInfo(biome));
+//        }
 
         init();
     }
 
     public void write(@NotNull NetworkBuffer buffer) {
-        var builder = BiomeProtos.BiomeContainer.newBuilder();
-        for (var biome : biomes) {
-            builder = builder.addBiome(biome.toProto());
-        }
-
-        buffer.write(NetworkBuffer.BYTE_ARRAY, builder.build().toByteArray());
+//        var builder = BiomeProtos.BiomeContainer.newBuilder();
+//        for (var biome : biomes) {
+//            builder = builder.addBiome(biome.toProto());
+//        }
+//
+//        buffer.write(NetworkBuffer.BYTE_ARRAY, builder.build().toByteArray());
     }
 
     private @Nullable Biome createMinestomBiome(@NotNull BiomeInfo bi) {
