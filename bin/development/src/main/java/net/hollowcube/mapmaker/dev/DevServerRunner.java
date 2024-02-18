@@ -4,16 +4,16 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.MapServerRunner;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
-import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
+import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -47,8 +47,6 @@ public class DevServerRunner extends AbstractMapServer {
     private FeatureList features;
 
     // Common stuff
-    private DevServerBridge bridge;
-
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
     private final CommandManager mapCommandManager = new CommandManagerImpl(super.commandManager());
 
@@ -63,19 +61,17 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     @Override
-    public @NotNull ServerBridge bridge() {
-        return bridge;
-    }
-
-    @Override
     protected @NotNull MapAllocator createAllocator() {
         return new LocalMapAllocator(this);
     }
 
     @Override
-    protected void prepareStart() {
-        this.bridge = new DevServerBridge(mapService(), allocator());
+    protected @NotNull ServerBridge createBridge() {
+        return new DevServerBridge(mapService(), allocator());
+    }
 
+    @Override
+    protected void prepareStart() {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {

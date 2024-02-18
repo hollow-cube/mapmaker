@@ -4,18 +4,18 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.spi.ClassServiceLoader;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.session.Presence;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -49,21 +49,6 @@ public class HubServerRunner extends AbstractMapServer {
     }
 
     @Override
-    public @NotNull ServerBridge bridge() {
-        return new ServerBridge() {
-            @Override
-            public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-                throw new UnsupportedOperationException("Hub server cannot join maps");
-            }
-
-            @Override
-            public void joinHub(@NotNull Player player) {
-                throw new UnsupportedOperationException("Hub server cannot join itself");
-            }
-        };
-    }
-
-    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         var checks = new ArrayList<>(super.readinessChecks());
         checks.add(() -> sessionService().ready() ? HealthCheckResponse.up("session-service") : HealthCheckResponse.down("session-service"));
@@ -73,6 +58,12 @@ public class HubServerRunner extends AbstractMapServer {
     @Override
     protected @NotNull MapAllocator createAllocator() {
         return MapAllocator.direct(this);
+    }
+
+    @Override
+    protected @NotNull ServerBridge createBridge() {
+        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
+        return noopServices ? new NoopServerBridge() : new HubServerBridge(sessionService());
     }
 
     @Override

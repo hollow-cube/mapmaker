@@ -2,21 +2,16 @@ package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
+import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.item.handler.ItemTags;
+import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
-import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.instance.generation.MapGenerators;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.Axiom;
@@ -209,7 +204,10 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
             // Save the players data
             Set.copyOf(players()).forEach(p -> {
-                if (!p.isOnline()) removePlayer(p); // Sanity
+                if (!p.isOnline()) {
+                    logger.warn("Player {} is not online, removing from map {}", p.getUsername(), map().id());
+                    removePlayer(p); // Sanity
+                }
             });
             for (var player : players()) {
                 var playerData = PlayerDataV2.fromPlayer(player);
@@ -245,6 +243,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         var playerData = PlayerDataV2.fromPlayer(player);
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        player.setTag(SaveState.TAG, saveState);
 
         super.addPlayer(player);
 
