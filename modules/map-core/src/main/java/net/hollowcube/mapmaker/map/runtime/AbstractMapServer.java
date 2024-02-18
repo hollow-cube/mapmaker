@@ -9,12 +9,6 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.Injectors;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.entity.MapEntities;
-import net.hollowcube.mapmaker.map.util.DynamicController;
-import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -36,9 +30,10 @@ import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.map.MapPlayerData;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.entity.MapEntities;
+import net.hollowcube.mapmaker.map.util.DynamicController;
+import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
@@ -87,6 +82,8 @@ public abstract class AbstractMapServer implements MapServer {
 
     // Listeners for other features
     private MapAllocator allocator;
+    private ServerBridge bridge;
+
     private SessionManager sessionManager;
     private ChatMessageListener chatMessageListener;
     private MapInviteListener mapInviteListener;
@@ -167,6 +164,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         allocator = createAllocator();
         shutdowner.queue(allocator::close);
+        bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
         sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
@@ -226,6 +224,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
+    public @NotNull ServerBridge bridge() {
+        return bridge;
+    }
+
+    @Override
     public @NotNull SessionManager sessionManager() {
         return sessionManager;
     }
@@ -235,6 +238,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull MapAllocator createAllocator();
+    protected abstract @NotNull ServerBridge createBridge();
 
     /**
      * Called just before the server starts, but after all services have been initialized.

@@ -4,6 +4,12 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.command.util.DebugCommand;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.kafka.BaseConsumer;
+import net.hollowcube.mapmaker.kafka.KafkaConfig;
+import net.hollowcube.mapmaker.map.block.InteractionRules;
+import net.hollowcube.mapmaker.map.block.PlacementRules;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.BiomesCommand;
 import net.hollowcube.mapmaker.map.command.build.BuildCommand;
@@ -11,19 +17,11 @@ import net.hollowcube.mapmaker.map.command.build.SetSpawnCommand;
 import net.hollowcube.mapmaker.map.command.build.TestCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
-import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
-import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.map.block.InteractionRules;
-import net.hollowcube.mapmaker.map.block.PlacementRules;
-import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.session.Presence;
@@ -31,7 +29,6 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -46,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -79,29 +77,24 @@ public class MapServerRunner extends AbstractMapServer {
     }
 
     @Override
-    public @NotNull ServerBridge bridge() {
-        return new ServerBridge() {
-            @Override
-            public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-                throw new UnsupportedOperationException("Not implemented");
-            }
-
-            @Override
-            public void joinHub(@NotNull Player player) {
-                throw new UnsupportedOperationException("Not implemented");
-            }
-        };
-    }
-
-    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         return super.readinessChecks();
         //todo
     }
 
+    public void addPendingJoin(@NotNull String playerId, @NotNull String mapId, @NotNull String state) {
+        pendingPlayerJoins.put(playerId, CompletableFuture.completedFuture(new MapJoinInfo(playerId, mapId, state)));
+    }
+
     @Override
     protected @NotNull MapAllocator createAllocator() {
         return new LocalMapAllocator(this);
+    }
+
+    @Override
+    protected @NotNull ServerBridge createBridge() {
+        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
+        return noopServices ? new NoopServerBridge() : new MapServerBridge(this);
     }
 
     @Override
@@ -200,11 +193,9 @@ public class MapServerRunner extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
-            var mapWorld = allocator().allocateDirect(map, EditingMapWorld.class); //todo this is obviously wrong
-//            var pendingWorld = worldManager().getOrCreateMapWorld(map, Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
-//                    ? ServerBridge.JoinMapState.EDITING : ServerBridge.JoinMapState.PLAYING);
-//            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(pendingWorld));
-
+            Class<? extends AbstractMapWorld> worldType = Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
+                    ? EditingMapWorld.class : PlayingMapWorld.class;
+            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldType)));
 
             // Ensure resource pack was applied before allowing the player in
             resourcePackFuture.join();
