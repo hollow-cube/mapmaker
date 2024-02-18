@@ -32,7 +32,7 @@ public final class MapServerInitializer {
             "minestom.shutdown-on-signal", "false" // We have our own shutdown logic which will call stopCleanly
     );
 
-    public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory) {
+    public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull String[] args) {
         long start = System.nanoTime();
 
         SYSTEM_PROPERTIES.forEach(System::setProperty);
@@ -45,7 +45,7 @@ public final class MapServerInitializer {
 
         // Init tasks (minestom server, map server components, web server)
 
-        var config = ConfigLoaderV3.loadDefault();
+        var config = ConfigLoaderV3.loadDefault(args);
 
         var minecraftServer = MinecraftServer.init();
         var server = serverFactory.apply(config);
