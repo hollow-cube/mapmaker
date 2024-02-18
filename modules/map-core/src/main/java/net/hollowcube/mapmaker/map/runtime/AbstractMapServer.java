@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.command.util.ListCommand;
 import net.hollowcube.mapmaker.command.util.PingCommand;
 import net.hollowcube.mapmaker.command.util.WhereCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.config.GlobalConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
@@ -73,6 +74,7 @@ public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
     protected final ConfigLoaderV3 config;
+    protected final GlobalConfig globalConfig;
 
     private final SessionService sessionService;
     private final PlayerService playerService;
@@ -99,25 +101,24 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
         this.config = config;
-
-        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
+        this.globalConfig = config.get(GlobalConfig.class);
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
-        else if (noopServices) playerService = new NoopPlayerService();
+        else if (globalConfig.noop()) playerService = new NoopPlayerService();
         else playerService = new PlayerServiceImpl("http://localhost:9126"); // tilt
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
-        else if (noopServices) sessionService = new NoopSessionService();
+        else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl("http://localhost:9127"); // tilt
 
         var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
         if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
-        else if (noopServices) mapService = new NoopMapService();
+        else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
 
-        if (noopServices) {
+        if (globalConfig.noop()) {
             permManager = new NoopPermManager();
         } else {
             var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
@@ -130,7 +131,7 @@ public abstract class AbstractMapServer implements MapServer {
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null) this.inviteService = new NoopPlayerInviteService();
 //        if (inviteServiceUrl != null) this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, this);
-        else if (noopServices) this.inviteService = new NoopPlayerInviteService();
+        else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
         else this.inviteService = new NoopPlayerInviteService(); // tilt
 //        else this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", this); // tilt
     }
@@ -153,8 +154,6 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Dependent service init
 
-        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
-
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
@@ -167,11 +166,11 @@ public abstract class AbstractMapServer implements MapServer {
         bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, noopServices);
+        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, globalConfig.noop());
         shutdowner.queue(sessionManager::close);
         sessionManager().sync(); // Sync existing sessions with remote
 
-        if (!noopServices) {
+        if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
             shutdowner.queue(mapInviteListener::close);
 

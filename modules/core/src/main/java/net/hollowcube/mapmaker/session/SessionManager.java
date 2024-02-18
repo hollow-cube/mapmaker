@@ -60,7 +60,7 @@ public class SessionManager {
     }
 
     public void close() {
-        consumer.close();
+        if (consumer != null) consumer.close();
     }
 
     public @Nullable PlayerSession getSession(@NotNull String playerId) {

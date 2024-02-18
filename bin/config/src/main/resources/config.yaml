@@ -11,6 +11,9 @@ minestom:
 velocity:
   secret: ""
 
+global:
+  noop: false
+
 kafka:
   bootstrap_servers: localhost:9092
 
@@ -18,6 +21,7 @@ unleash:
   enabled: false
   address: ""
   token: ""
+  default_action: false
 
 announcements:
   interval: 1800
