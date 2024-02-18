@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
@@ -152,6 +153,8 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new HelpCommand(commandManager));
 
         commandManager.register(server.createInstance(HubCommand.class));
+
+        commandManager.register(server.createInstance(TopTimesCommand.class));
 
         commandManager.register(server.createInstance(TestCommand.class));
         commandManager.register(server.createInstance(BuildCommand.class));
