@@ -12,9 +12,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
-    private static final boolean DEFAULT_ACTION = Boolean.getBoolean("unleash.default");
-
     private final Unleash client;
+    private final boolean defaultAction;
 
     public UnleashFeatureFlagProvider(@NotNull UnleashConfig config) {
         var runtime = ServerRuntime.getRuntime();
@@ -27,11 +26,12 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
                 .build();
         var mapIds = new MapIdStrategy();
         this.client = new DefaultUnleash(unleashConfig, mapIds);
+        this.defaultAction = config.defaultAction();
     }
 
     @Override
     public boolean test(@NotNull String name, @NotNull Object... context) {
-        if (client == null) return DEFAULT_ACTION;
+        if (client == null) return defaultAction;
         var unleashContext = UnleashContext.builder();
         for (var ctx : context) {
             switch (ctx) {

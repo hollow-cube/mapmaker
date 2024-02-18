@@ -2,6 +2,7 @@
   <configuration default="false" name="DevServer (local)" type="BlazeCommandRunConfigurationType" factoryName="Bazel Command">
     <blaze-settings handler-id="BlazeJavaRunConfigurationHandlerProvider" kind="java_binary" blaze-command="run" blaze-binary="/opt/homebrew/bin/bazel">
       <blaze-target>//bin/development:development</blaze-target>
+      <blaze-user-exe-flag>MAPMAKER_UNLEASH_DEFAULT_ACTION=true</blaze-user-exe-flag>
       <env_state>
         <envs />
       </env_state>

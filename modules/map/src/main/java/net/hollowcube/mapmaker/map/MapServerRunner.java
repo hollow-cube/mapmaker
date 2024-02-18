@@ -93,17 +93,15 @@ public class MapServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
-        return noopServices ? new NoopServerBridge() : new MapServerBridge(this);
+        return globalConfig.noop() ? new NoopServerBridge() : new MapServerBridge(this);
     }
 
     @Override
     protected void prepareStart() {
         super.prepareStart();
 
-        boolean noopServices = Boolean.getBoolean("mapmaker.noop");
         var kafkaConfig = config.get(KafkaConfig.class);
-        if (!noopServices) {
+        if (!globalConfig.noop()) {
             mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
             shutdowner().queue(mapJoinConsumer::close);
         }
