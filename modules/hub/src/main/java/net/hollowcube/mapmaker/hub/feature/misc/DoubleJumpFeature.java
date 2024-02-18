@@ -12,6 +12,8 @@ import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 @AutoService(HubFeature.class)
 public class DoubleJumpFeature implements HubFeature {
     public static final Tag<Boolean> TAG = net.minestom.server.tag.Tag.Boolean("mapmaker:hub-double-jump").defaultValue(true);
@@ -34,7 +36,9 @@ public class DoubleJumpFeature implements HubFeature {
         player.setVelocity(boostVelocity);
         player.setTag(COOLDOWN_TAG, true);
         player.setAllowFlying(false);
-        player.playSound(Sound.sound(SoundEvent.ITEM_ARMOR_EQUIP_ELYTRA, Sound.Source.PLAYER, 1f, 0.8f), Sound.Emitter.self());
+
+        var randomPitch = ThreadLocalRandom.current().nextFloat(0.9f, 1f);
+        player.playSound(Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch), Sound.Emitter.self());
     }
 
     private void handleMovement(@NotNull PlayerMoveEvent event) {
