@@ -362,7 +362,7 @@ public abstract class AbstractMapServer implements MapServer {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             var transferReq = new SessionTransferRequest(
                     presence.instanceId(), presence.type(),
-                    presence.mapId(), presence.state()
+                    presence.state(), presence.mapId()
             );
             var playerDataFuture = scope.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
             var mapPlayerDataFuture = scope.fork(() -> mapService.getMapPlayerData(playerId));
