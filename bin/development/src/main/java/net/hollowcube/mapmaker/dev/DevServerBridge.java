@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.map.runtime.ServerBridge;
-import net.hollowcube.map.world.EditingMapWorld;
-import net.hollowcube.map.world.PlayingMapWorld;
-import net.hollowcube.map2.AbstractMapWorld;
-import net.hollowcube.map2.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;

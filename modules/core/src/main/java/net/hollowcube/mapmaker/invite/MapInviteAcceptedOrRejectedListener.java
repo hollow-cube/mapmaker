@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.invite;
 
 import com.google.gson.Gson;
-import net.hollowcube.map.runtime.ServerBridge;
-import net.hollowcube.map.runtime.ServerBridge.JoinMapState;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;

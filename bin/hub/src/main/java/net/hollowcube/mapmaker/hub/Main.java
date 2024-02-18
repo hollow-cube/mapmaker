@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.map2.runtime.MapServerInitializer;
+import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class Main {
 

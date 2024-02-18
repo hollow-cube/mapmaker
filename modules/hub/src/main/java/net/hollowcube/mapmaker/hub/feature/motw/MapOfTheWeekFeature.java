@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub.feature.motw;
 import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;

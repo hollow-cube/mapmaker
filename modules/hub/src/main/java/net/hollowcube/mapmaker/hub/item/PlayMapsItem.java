@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.hub.item;
 
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.map2.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.gui.play.PlayMapsView;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;

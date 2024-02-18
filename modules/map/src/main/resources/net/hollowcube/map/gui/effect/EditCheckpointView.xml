@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<?import net.hollowcube.map.gui.effect ?>
+<?import net.hollowcube.mapmaker.map.gui.effect ?>
 <component width="9" height="10" align="ttb" sprite="effect/checkpoint/container">
     <!-- Header -->
     <box width="9" align="ltr">

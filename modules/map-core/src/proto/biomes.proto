@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package net.hollowcube.map.biome;
+package net.hollowcube.mapmaker.map.biome;
 
 //option java_multiple_files = true;
-option java_package = "net.hollowcube.map.biome";
+option java_package = "net.hollowcube.mapmaker.map.biome";
 option java_outer_classname = "BiomeProtos";
 
 message BiomeInfo {
