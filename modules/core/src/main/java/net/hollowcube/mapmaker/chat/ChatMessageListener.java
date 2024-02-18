@@ -90,19 +90,27 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerData.id(), message, "global", null); //currentMap == null ? null : currentMap.map().id());
         logger.info("{}: {}", playerData.username(), messageData);
-        this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(messageData));
+        sendChatMessage(messageData);
+    }
+
+    public void sendChatMessage(@NotNull ClientChatMessageData message) {
+        FutureUtil.submitVirtual(() -> this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(message)));
     }
 
     @Override
     protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull ChatMessageData message) {
         switch (message.type()) {
-            case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> handleChatUnsigned(message));
+            case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
+                if ("global".equals(message.channel()))
+                    handleGlobalChatUnsigned(message);
+                else handleDirectMessage(message);
+            });
             case CHAT_SYSTEM -> handleChatSystem(message);
         }
     }
 
     @Blocking
-    protected void handleChatUnsigned(@NotNull ChatMessageData message) {
+    protected void handleGlobalChatUnsigned(@NotNull ChatMessageData message) {
         logger.info("Received chat message: {}", message);
         try {
             // This is braindead inefficient
@@ -162,12 +170,53 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         }
     }
 
-    protected void handleChatSystem(@NotNull ChatMessageData message) {
-        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.target()));
-        if (player == null) return; // Not relevant to this server
+    private void handleDirectMessage(@NotNull ChatMessageData message) {
+        System.out.println(message);
+        var target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.channel()));
+        if (target == null) return; // Not relevant to this server
 
-        var parts = message.argsSafe().stream().map(Component::text).toList();
-        player.sendMessage(Component.translatable(message.key(), parts));
+        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName2().build();
+        var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
+
+        var builder = Component.text();
+        for (var part : message.parts()) {
+            switch (part.type()) {
+                case RAW -> {
+                    builder.append(Component.text(part.text()));
+                }
+                case EMOJI -> {
+                    var emoji = Emoji.findByName(part.name());
+                    if (emoji == null) {
+                        builder.append(Component.text(":" + part.name() + ":"));
+                    } else builder.append(emoji.component());
+                }
+                case MAP -> {
+                    builder.append(Component.text("[map - todo]"));
+//                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
+//                                builder.append(MapData.createMapHoverText(map));
+                }
+                case URL -> {
+                    builder.append(Component.text(part.text(), NamedTextColor.GRAY)
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
+                            .clickEvent(ClickEvent.openUrl(part.text())));
+                }
+            }
+        }
+
+        target.playSound(TAG_DING);
+        target.sendMessage(Component.translatable("chat.dm", senderDisplayName, targetDisplayName, builder.build()));
+    }
+
+    protected void handleChatSystem(@NotNull ChatMessageData message) {
+        try {
+            var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.target()));
+            if (player == null) return; // Not relevant to this server
+
+            var parts = message.argsSafe().stream().map(Component::text).toList();
+            player.sendMessage(Component.translatable(message.key(), parts));
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
     }
 
 }

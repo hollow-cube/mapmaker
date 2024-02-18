@@ -16,10 +16,7 @@ import net.hollowcube.mapmaker.command.MapCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
-import net.hollowcube.mapmaker.command.util.ListCommand;
-import net.hollowcube.mapmaker.command.util.PingCommand;
-import net.hollowcube.mapmaker.command.util.WhereCommand;
+import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.GlobalConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
@@ -180,6 +177,7 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue(mapInviteAcceptedOrRejectedListener::close);
 
             chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+            injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue(chatMessageListener::close);
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -272,6 +270,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(PlayCommand.class));
         commandManager.register(createInstance(WhereCommand.class));
         commandManager.register(createInstance(ListCommand.class));
+        commandManager.register(createInstance(MsgCommand.class));
 
         commandManager.register(createInstance(RequestCommand.class));
         commandManager.register(createInstance(RejectCommand.class));
