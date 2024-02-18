@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<?import net.hollowcube.map.gui.effect ?>
+<?import net.hollowcube.mapmaker.map.gui.effect ?>
 <component width="9" height="4" align="ttb">
 
     <box width="9" align="ltr" sprite="effect/settings/header">

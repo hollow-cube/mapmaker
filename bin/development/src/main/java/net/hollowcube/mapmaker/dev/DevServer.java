@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.map2.runtime.MapServerInitializer;
+import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class DevServer {
     public static void main(String[] args) {

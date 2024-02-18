@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.map.MapServerRunner;
-import net.hollowcube.map2.runtime.MapServerInitializer;
+import net.hollowcube.mapmaker.map.MapServerRunner;
+import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class Main {
     public static void main(String[] args) {

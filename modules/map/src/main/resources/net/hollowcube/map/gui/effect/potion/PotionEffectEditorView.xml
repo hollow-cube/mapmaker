@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<?import net.hollowcube.map.gui.effect.potion ?>
+<?import net.hollowcube.mapmaker.map.gui.effect.potion ?>
 <component width="9" height="5" wipe_player_inv="true" align="ttb" sprite="effect/potion/potion_editor">
     <!-- Header -->
     <box width="9" align="ltr">

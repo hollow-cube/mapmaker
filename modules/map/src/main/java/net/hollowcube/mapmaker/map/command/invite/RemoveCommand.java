@@ -1,0 +1,77 @@
+package net.hollowcube.mapmaker.map.command.invite;
+
+import com.google.inject.Inject;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import net.minestom.server.utils.entity.EntityFinder;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
+
+import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
+
+public class RemoveCommand extends CommandDsl {
+
+    private final Argument<EntityFinder> targetArg = Argument.Entity("player").onlyPlayers(true);
+
+    private final ServerBridge bridge;
+
+    @Inject
+    public RemoveCommand(@NotNull ServerBridge bridge) {
+        super("remove");
+        this.bridge = bridge;
+        setCondition(mapFilter(false, true, false));
+
+        addSyntax(playerOnly(this::handleRemoveTarget), targetArg);
+    }
+
+    private void handleRemoveTarget(@NotNull Player player, @NotNull CommandContext context) {
+        var target = context.get(targetArg).findFirstPlayer(player);
+        String playerName = context.getRaw(targetArg);
+        if (target == null) {
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(playerName)));
+            return;
+        }
+        if (player.equals(target)) {
+            player.sendMessage(Component.translatable("generic.other_players_only"));
+            return;
+        }
+        if (playerName.length() > 16 || playerName.length() < 3) {
+            player.sendMessage(Component.text("generic.player_name_length"));
+            return;
+        }
+
+        var senderMap = MapWorld.forPlayer(player); // Always present due to command condition
+        if (!doesPlayerOwnMap(player, senderMap)) {
+            player.sendMessage(Component.translatable("map.build.cant_remove"));
+            return;
+        }
+        var targetMap = MapWorld.forPlayerOptional(target);
+        if (!senderMap.equals(targetMap)) {
+            player.sendMessage(Component.translatable("map.build.remove.same_map"));
+            return;
+        }
+
+        // All preconditions OK, actually remove the player from the map.
+        try {
+            var world = MapWorld.forPlayerOptional(target);
+            if (world != null) world.removePlayer(target);
+
+            bridge.joinHub(target);
+            target.sendMessage(Component.translatable("map.build.removed", Component.text(player.getUsername())));
+            player.sendMessage(Component.translatable("map.build.remove", Component.text(target.getUsername())));
+
+        } catch (Exception e) {
+            throw new RuntimeException("failed to remove player from map", e);
+        }
+    }
+
+    private static boolean doesPlayerOwnMap(@NotNull Player player, @NotNull MapWorld mapWorld) {
+        return player.getUuid().equals(UUID.fromString(mapWorld.map().owner()));
+    }
+}
