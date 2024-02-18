@@ -4,9 +4,11 @@ import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +34,7 @@ public class DoubleJumpFeature implements HubFeature {
         player.setVelocity(boostVelocity);
         player.setTag(COOLDOWN_TAG, true);
         player.setAllowFlying(false);
+        player.playSound(Sound.sound(SoundEvent.ITEM_ARMOR_EQUIP_ELYTRA, Sound.Source.PLAYER, 1f, 0.8f), Sound.Emitter.self());
     }
 
     private void handleMovement(@NotNull PlayerMoveEvent event) {
