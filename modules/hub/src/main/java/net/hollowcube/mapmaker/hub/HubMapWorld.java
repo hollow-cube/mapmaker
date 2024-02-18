@@ -3,8 +3,6 @@ package net.hollowcube.mapmaker.hub;
 import com.google.inject.Inject;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.Uuids;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.CreateMapsItem;
@@ -13,7 +11,9 @@ import net.hollowcube.mapmaker.hub.item.OrgMapsItem;
 import net.hollowcube.mapmaker.hub.item.PlayMapsItem;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
@@ -52,7 +52,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
     public static final MapData HUB_MAP_DATA = new MapData(
-            "hub", MapData.SPAWN_MAP_ID == null ? Uuids.ZERO : MapData.SPAWN_MAP_ID,
+            MapData.SPAWN_MAP_ID == null ? Uuids.ZERO : MapData.SPAWN_MAP_ID, Uuids.ZERO,
             new MapSettings(), 0, Instant.now()
     );
 
