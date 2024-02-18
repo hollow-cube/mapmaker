@@ -29,6 +29,7 @@ import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
@@ -80,7 +81,7 @@ public abstract class AbstractMapServer implements MapServer {
     private final PlayerService playerService;
     private final MapService mapService;
     private final PermManager permManager;
-    private final PlayerInviteService inviteService;
+    private PlayerInviteService inviteService; // So many dependencies very yikes
 
     // Listeners for other features
     private MapAllocator allocator;
@@ -127,13 +128,6 @@ public abstract class AbstractMapServer implements MapServer {
             if (spicedbToken == null) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
         }
-
-        var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
-        if (inviteServiceUrl != null) this.inviteService = new NoopPlayerInviteService();
-//        if (inviteServiceUrl != null) this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, this);
-        else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
-        else this.inviteService = new NoopPlayerInviteService(); // tilt
-//        else this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", this); // tilt
     }
 
     @Blocking
@@ -169,6 +163,14 @@ public abstract class AbstractMapServer implements MapServer {
         sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, globalConfig.noop());
         shutdowner.queue(sessionManager::close);
         sessionManager().sync(); // Sync existing sessions with remote
+
+        // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
+        var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
+        if (inviteServiceUrl != null)
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, playerService, mapService, sessionManager, bridge);
+        else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
+        else
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
 
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
