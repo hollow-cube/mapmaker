@@ -1,26 +1,26 @@
-name: Quality
-
-on:
-  pull_request:
-    branches: [ never ]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 19
-        uses: actions/setup-java@v2
-        with:
-          java-version: 19
-          distribution: 'temurin'
-          cache: 'gradle'
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Run tests
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: test
+#name: Quality
+#
+#on:
+#  pull_request:
+#    branches: [ never ]
+#
+#jobs:
+#  test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up JDK 21
+#        uses: actions/setup-java@v2
+#        with:
+#          java-version: 21
+#          distribution: 'temurin'
+#          cache: 'gradle'
+#      - name: Validate Gradle wrapper
+#        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+#      - name: Run tests
+#        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+#        with:
+#          arguments: test
   # Sonarqube analysis for main branch
 #  sonar:
 #    runs-on: ubuntu-latest

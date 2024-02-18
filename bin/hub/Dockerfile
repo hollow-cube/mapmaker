@@ -1,4 +1,4 @@
-FROM eclipse-temurin:20-jre-ubi9-minimal
+FROM eclipse-temurin:21-jre-ubi9-minimal
 
 WORKDIR /app
 
@@ -10,4 +10,4 @@ RUN chmod +x async-profiler/profiler.sh
 COPY ./hub_deploy.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "--add-modules", "jdk.incubator.concurrent", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-jar", "server.jar"]

@@ -51,10 +51,10 @@ public class CommandNode {
             remaining = "";
         }
 
-        for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
-            if (!argument.id().equalsIgnoreCase(next)) continue;
+        for (var pair : children) {
+            if (!pair.argument().id().equalsIgnoreCase(next)) continue;
 
-            return node.xpath(remaining, followRedirects);
+            return pair.node().xpath(remaining, followRedirects);
         }
 
         return null;
@@ -80,14 +80,15 @@ public class CommandNode {
         var mark = reader.mark();
         // the +1 here is to skip the space, but i think its kinda wrong
         var suggestion = new Suggestion(reader.pos(mark) + 1, reader.remaining());
-        for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
+        for (var pair : children) {
+            var node = pair.node();
             // If there is a condition on the child node we need to evaluate it
             if (node.condition != null) {
                 var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.SUGGEST));
                 if (result == CommandCondition.HIDE) continue;
             }
 
-            var result = argument.parse(sender, reader);
+            var result = pair.argument().parse(sender, reader);
 
             // If we have more space to read and get an exact match we can suggest the child
             if (reader.canRead() && result instanceof ParseResult.Success<?>) {
@@ -96,7 +97,7 @@ public class CommandNode {
 
             // If we consumed the entire remainder and have a partial match we can suggest the child.
             if (!reader.canRead() && !(result instanceof ParseResult.Failure<?>)) {
-                argument.suggest(sender, reader.rawSince(mark), suggestion);
+                pair.argument().suggest(sender, reader.rawSince(mark), suggestion);
                 // Do not return here, we will try to collect suggestions from the other args as well.
             }
 
@@ -137,7 +138,9 @@ public class CommandNode {
         // Try to apply one of the children
         if (children != null && !children.isEmpty()) {
             CommandResult.SyntaxError pendingError = null;
-            for (ArgumentPair(Argument<?> argument, CommandNode node) : children) {
+            for (var pair : children) {
+                var node = pair.node();
+                var argument = pair.argument();
                 // If there is a condition on the child we need to evaluate it
                 if (node.condition != null) {
                     var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
@@ -217,13 +220,14 @@ public class CommandNode {
     CommandNode nodeFor(@NotNull Argument<?> argument) {
         Check.stateCondition(this.redirect != null, "Cannot add child to a redirect node!");
         if (children == null) children = new ArrayList<>();
-        for (ArgumentPair(Argument<?> existing, CommandNode node) : children) {
+        for (var pair : children) {
+            var existing = pair.argument();
             if (!existing.id().equalsIgnoreCase(argument.id())) continue;
 
             // Test equality on the argument objects
             Check.argCondition(!existing.equals(argument), "Argument '" + argument.id() + "' already exists but differs in value: " + existing + " != " + argument);
 
-            return node;
+            return pair.node();
         }
 
         // Argument was not found so add it
