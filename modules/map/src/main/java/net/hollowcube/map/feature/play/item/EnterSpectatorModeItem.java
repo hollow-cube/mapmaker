@@ -49,6 +49,7 @@ public class EnterSpectatorModeItem extends ItemHandler {
         FutureUtil.submitVirtual(() -> {
             world.removePlayer(player);
             world.addSpectator(player);
+
             player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
         });
     }

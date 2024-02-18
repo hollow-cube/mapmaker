@@ -6,6 +6,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.spi.ClassServiceLoader;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.map2.runtime.AbstractMapServer;
+import net.hollowcube.map2.runtime.MapAllocator;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
@@ -67,6 +68,11 @@ public class HubServerRunner extends AbstractMapServer {
         var checks = new ArrayList<>(super.readinessChecks());
         checks.add(() -> sessionService().ready() ? HealthCheckResponse.up("session-service") : HealthCheckResponse.down("session-service"));
         return checks;
+    }
+
+    @Override
+    protected @NotNull MapAllocator createAllocator() {
+        return MapAllocator.direct(this);
     }
 
     @Override

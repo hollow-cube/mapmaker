@@ -1,7 +1,6 @@
 package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -40,12 +39,12 @@ public class NoSneakFeatureProvider implements FeatureProvider {
     //            since you cannot tell the client to stop sneaking from the server
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player) || !player.isSneaking()) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player) || !player.isSneaking()) return;
 
         // Player is sneaking, reset them if this move is anything besides a head look
         if (Vec.fromPoint(event.getNewPosition()).equals(Vec.fromPoint(player.getPosition()))) return;
 
-        var world = MapWorld.forPlayer(player);
         EventDispatcher.call(new MapPlayerResetEvent(player, world, true));
         //todo sound effect for sneaking
 //        player.sendMessage("No sneaking!");

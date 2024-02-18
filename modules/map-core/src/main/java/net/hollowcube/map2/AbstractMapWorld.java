@@ -3,6 +3,8 @@ package net.hollowcube.map2;
 import net.hollowcube.map2.biome.BiomeContainer;
 import net.hollowcube.map2.item.handler.ItemRegistry;
 import net.hollowcube.map2.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.entity.potion.PotionHandler;
+import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.MapData;
 import net.minestom.server.MinecraftServer;
@@ -25,15 +27,14 @@ import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapWorld.class);
     static final Tag<MapWorld> SELF_TAG = Tag.Transient("mapworld");
+
+    private final String worldId = UUID.randomUUID().toString();
 
     private final MapServer server;
     private final MapData map;
@@ -58,9 +59,19 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         instance.eventNode().addChild(eventNode);
         instance.eventNode().addChild(itemRegistry.eventNode()); // Needs spectator events so register on instance.
 
+        // Add support for adding and removing potion effects
+        eventNode().addChild(PotionHandler.EVENT_NODE);
+
+        instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, this::handleInstanceLeave);
+
         // Set the instance self tag so that this world can be discovered via MapWorld#unsafeFromInstance
         // If there is already a tag do nothing, it means that this is a child world and the parent has already set the tag.
         if (!instance.hasTag(SELF_TAG)) instance.setTag(SELF_TAG, this);
+    }
+
+    @Override
+    public @NotNull String worldId() {
+        return worldId;
     }
 
     @Override
@@ -135,22 +146,27 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         this.spectators.remove(player);
     }
 
+    //todo not a fan of this, but idk a better solution
     @Deprecated
     public void removePlayerImmediate(@NotNull Player player) {
         this.players.remove(player);
         this.spectators.remove(player);
     }
 
+    //todo not a fan of this, but idk a better solution
+    @Deprecated
+    public void addPlayerImmediate(@NotNull Player player) {
+        this.players.add(player);
+    }
+
     /**
      * Returns this map if the player is currently playing it, or a sub map if the player is in a sub map.
-     *
-     * <p>Note that spectators never return from this function.</p>
      *
      * @param player The player to get the map for
      * @return The map that the player is currently playing, or null if they are not in a map of this tree, or are spectating.
      */
     protected @Nullable MapWorld getMapForPlayer(@NotNull Player player) {
-        return players().contains(player) ? this : null;
+        return players().contains(player) || spectators().contains(player) ? this : null;
     }
 
     @Override
@@ -161,8 +177,18 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private boolean testEvent(@NotNull InstanceEvent event) {
         if (event instanceof PlayerEvent pe)
             // There is a subtle detail here that spectators do not trigger instance events on the map node.
-            return this == getMapForPlayer(pe.getPlayer());
+            return isPlaying(pe.getPlayer()) || isSpectating(pe.getPlayer());
         return true;
+    }
+
+    private void handleInstanceLeave(@NotNull PlayerInstanceLeaveEvent event) {
+        if (event.getInstance() != instance()) return; // Sanity
+
+        // Sanity: If they are still in this world, remove them from it.
+        var player = event.getPlayer();
+        if (isPlaying(player) || isSpectating(player)) {
+            removePlayer(player);
+        }
     }
 
     @Blocking

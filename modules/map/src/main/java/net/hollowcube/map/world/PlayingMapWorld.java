@@ -1,9 +1,12 @@
 package net.hollowcube.map.world;
 
+import com.google.inject.Inject;
+import net.hollowcube.map.feature.FeatureList;
 import net.hollowcube.map.feature.FeatureProvider;
-import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapServer;
 import net.hollowcube.map2.event.MapPlayerInitEvent;
+import net.hollowcube.map2.event.MapPlayerStartFinishedEvent;
+import net.hollowcube.map2.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.map2.polar.ReadWorldAccess;
 import net.hollowcube.map2.util.MapWorldHelpers;
@@ -33,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PlayingMapWorld extends AbstractMapWorld {
+public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private final Logger logger = LoggerFactory.getLogger(PlayingMapWorld.class);
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("playing-events", EventFilter.INSTANCE)
@@ -45,8 +48,9 @@ public class PlayingMapWorld extends AbstractMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
-    public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('p')));
+    @Inject
+    public PlayingMapWorld(@NotNull MapServer server, @NotNull FeatureList features, @NotNull MapData map) {
+        super(server, map, features, new MapInstance(map.createDimensionName('p')));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.
@@ -92,12 +96,20 @@ public class PlayingMapWorld extends AbstractMapWorld {
 
     @Override
     public void addSpectator(@NotNull Player player) {
+        addSpectator(player, false);
+    }
+
+    public void addSpectator(@NotNull Player player, boolean isFinishedMode) {
+
         super.addSpectator(player); // Add to spectator list & reset inventory.
 
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setInvisible(true);
 
+        callEvent(isFinishedMode
+                ? new MapPlayerStartFinishedEvent(this, player)
+                : new MapPlayerStartSpectatorEvent(this, player));
 
 //        ActionBar.forPlayer(player).addProvider(spectatingActionBarProvider);
 //        instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));

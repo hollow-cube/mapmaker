@@ -1,6 +1,7 @@
-package net.hollowcube.map.feature;
+package net.hollowcube.map.feature.common;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.EditingMapWorld;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.mapmaker.map.MapSize;

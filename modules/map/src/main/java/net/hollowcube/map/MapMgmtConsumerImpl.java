@@ -4,15 +4,14 @@ import net.hollowcube.mapmaker.map.MapMgmtConsumer;
 import org.jetbrains.annotations.NotNull;
 
 public class MapMgmtConsumerImpl extends MapMgmtConsumer {
-    private final MapServerBase server;
+//    private final MapServerBase server;
 
-    public MapMgmtConsumerImpl(@NotNull String bootstrapServers, @NotNull MapServerBase server) {
+    public MapMgmtConsumerImpl(@NotNull String bootstrapServers) {
         super(bootstrapServers);
-        this.server = server;
     }
 
     @Override
     protected void handleMapDelete(@NotNull String mapId) {
-        server.worldManager().forceShutdownMap(mapId);
+//        server.worldManager().forceShutdownMap(mapId); //todo
     }
 }

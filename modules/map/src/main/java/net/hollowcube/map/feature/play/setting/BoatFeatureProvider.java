@@ -39,7 +39,7 @@ public class BoatFeatureProvider implements FeatureProvider {
 
     private void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         var boat = new Entity(EntityType.BOAT);
         boat.setTag(MapHooks.ASSOCIATED_PLAYER, player);

@@ -15,6 +15,8 @@ import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarReader;
@@ -26,10 +28,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
-import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -49,6 +48,8 @@ import java.util.concurrent.CompletableFuture;
 public class HubMapWorld extends AbstractMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(HubMapWorld.class);
 
+    private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("selected_slot", 0);
+
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
     public static final MapData HUB_MAP_DATA = new MapData(
             "hub", MapData.SPAWN_MAP_ID == null ? Uuids.ZERO : MapData.SPAWN_MAP_ID,
@@ -66,7 +67,8 @@ public class HubMapWorld extends AbstractMapWorld {
             .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true))
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
-            .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMove)
+            .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot);
 
     @Inject
     public HubMapWorld(@NotNull MapServer server) {
@@ -125,9 +127,11 @@ public class HubMapWorld extends AbstractMapWorld {
     public void addPlayer(@NotNull Player player) {
         super.addPlayer(player);
 
+        var playerData = PlayerDataV2.fromPlayer(player);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
+        player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
 
         // Hotbar items
         var inventory = player.getInventory();
@@ -140,6 +144,20 @@ public class HubMapWorld extends AbstractMapWorld {
         if (CoreFeatureFlags.COSMETICS.test(player)) {
             inventory.setItemStack(8, itemRegistry().getItemStack(OpenCosmeticsMenuItem.ID, null));
         }
+    }
+
+    @Override
+    public void removePlayer(@NotNull Player player) {
+        // Write their settings to the database
+        var playerData = PlayerDataV2.fromPlayer(player);
+        playerData.writeUpdatesUpstream(server().playerService());
+
+        super.removePlayer(player);
+    }
+
+    private void handleSwitchSlot(@NotNull PlayerChangeHeldSlotEvent event) {
+        var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
+        playerData.setSetting(SELECTED_SLOT, (int) event.getSlot());
     }
 
     private void handlePlayerMove(@NotNull PlayerMoveEvent event) {

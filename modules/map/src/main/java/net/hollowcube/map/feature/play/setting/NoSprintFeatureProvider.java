@@ -1,7 +1,6 @@
 package net.hollowcube.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
@@ -36,7 +35,8 @@ public class NoSprintFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
 
         player.setFood(6);
     }

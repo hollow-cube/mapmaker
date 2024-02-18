@@ -5,7 +5,6 @@ import dev.hollowcube.replay.ReplayFactory;
 import dev.hollowcube.replay.ReplayRecorder;
 import dev.hollowcube.replay.change.RecordedPlayerMove;
 import dev.hollowcube.replay.change.RecordedPlayerSpawn;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.world.PlayingMapWorld;
@@ -55,7 +54,7 @@ public class RecordingFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         var oldState = player.getTag(STATE);
         if (oldState != null) {

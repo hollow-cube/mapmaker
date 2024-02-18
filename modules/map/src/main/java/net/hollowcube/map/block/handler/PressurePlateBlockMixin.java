@@ -31,6 +31,9 @@ public interface PressurePlateBlockMixin extends BlockHandler {
     @Override
     default void tick(@NotNull Tick tick) {
         var instance = tick.getInstance();
+        var world = MapWorld.unsafeFromInstance(instance);
+        if (world == null) return;
+
         var pos = tick.getBlockPosition();
         var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
 
@@ -56,7 +59,7 @@ public interface PressurePlateBlockMixin extends BlockHandler {
             // 1: in the playing state
             // 2: if this is not a testing state they must have have a start time (ie has moved/started the timer)
             // 3: be in the bounding box
-            if (!MapHooks.isPlayerPlaying(player)) continue;
+            if (!world.isPlaying(player)) continue;
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null || (saveState.getPlayStartTime() == 0)) continue;
             if (!BOUNDING_BOX.intersectBox(centerPos.sub(entity.getPosition()), entity.getBoundingBox()))

@@ -4,9 +4,13 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.map.MapServerRunner;
+import net.hollowcube.map.feature.FeatureList;
+import net.hollowcube.map.runtime.LocalMapAllocator;
 import net.hollowcube.map.runtime.ServerBridge;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.map2.runtime.AbstractMapServer;
+import net.hollowcube.map2.runtime.MapAllocator;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -15,6 +19,7 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -34,12 +39,18 @@ import java.util.Objects;
 public class DevServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServerRunner.class);
 
+    // Hub stuff
     private HubMapWorld hubWorld;
 
-    private DevServerBridge bridge = new DevServerBridge();
+    // Map stuff
+    private Terraform terraform;
+    private FeatureList features;
 
-    private CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
-    private CommandManager mapCommandManager = new CommandManagerImpl(super.commandManager());
+    // Common stuff
+    private DevServerBridge bridge;
+
+    private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
+    private final CommandManager mapCommandManager = new CommandManagerImpl(super.commandManager());
 
     public DevServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
@@ -57,7 +68,14 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     @Override
+    protected @NotNull MapAllocator createAllocator() {
+        return new LocalMapAllocator(this);
+    }
+
+    @Override
     protected void prepareStart() {
+        this.bridge = new DevServerBridge(mapService(), allocator());
+
         super.prepareStart();
 
         MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
@@ -83,7 +101,14 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     private void performMapInit() {
-        //todo
+        this.terraform = MapServerRunner.initBuildLogic(mapService(), commandManager());
+        addBinding(Terraform.class, terraform);
+
+        MapServerRunner.registerCommands(this, mapCommandManager);
+
+        this.features = FeatureList.load(config);
+        addBinding(FeatureList.class, features);
+        shutdowner().queue(features::close);
     }
 
     protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
@@ -117,17 +142,22 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
-        var player = event.getPlayer();
+        try {
+            var player = event.getPlayer();
 
-        var targetWorld = player.getTag(DevServerBridge.TARGET_WORLD);
-        if (targetWorld == null) {
-            hubWorld.configurePlayer(event); // Spawn into hub
-            return;
+            var targetWorld = player.getTag(DevServerBridge.TARGET_WORLD);
+            if (targetWorld == null) {
+                hubWorld.configurePlayer(event); // Spawn into hub
+                return;
+            }
+
+            // Spawn the player into the targeted map
+            var world = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+            world.configurePlayer(event);
+        } catch (Exception e) {
+            logger.error("Error during config phase", e);
+            event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
         }
-
-        // Spawn the player into the targeted map
-        var world = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
-        world.configurePlayer(event);
     }
 
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {

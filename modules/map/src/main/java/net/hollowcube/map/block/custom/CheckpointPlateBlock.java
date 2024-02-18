@@ -1,9 +1,7 @@
 package net.hollowcube.map.block.custom;
 
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
-import net.hollowcube.map.feature.play.checkpoint.CheckpointSetting;
 import net.hollowcube.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.map.gui.effect.EditCheckpointView;
 import net.hollowcube.map.object.ObjectBlockHandler;
@@ -86,14 +84,16 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         var args = new ArrayList<Component>();
         var isEmpty = true;
 
-        int resetHeight = tag.getTag(CheckpointSetting.RESET_HEIGHT);
-        args.add(CheckpointSetting.RESET_HEIGHT_TEXT_FUNCTION.apply(resetHeight));
-        if (resetHeight != -1) isEmpty = false;
+        //todo reimplement
 
-        // If the NBT has settings, set the lore to the "with data" variant, otherwise leave the default.
-        if (!isEmpty)
-            builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
-        builder.meta(m -> m.setTag(BlockItemHandler.BLOCK_DATA, tag.asCompound()));
+//        int resetHeight = tag.getTag(CheckpointSetting.RESET_HEIGHT);
+//        args.add(CheckpointSetting.RESET_HEIGHT_TEXT_FUNCTION.apply(resetHeight));
+//        if (resetHeight != -1) isEmpty = false;
+//
+//        // If the NBT has settings, set the lore to the "with data" variant, otherwise leave the default.
+//        if (!isEmpty)
+//            builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
+//        builder.meta(m -> m.setTag(BlockItemHandler.BLOCK_DATA, tag.asCompound()));
     }
 
 }

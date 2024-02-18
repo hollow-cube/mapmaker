@@ -8,14 +8,12 @@ import net.hollowcube.map.feature.FeatureProvider;
 import net.hollowcube.map.gui.RateMapView;
 import net.hollowcube.map.util.FireworkUtil;
 import net.hollowcube.map.world.PlayingMapWorld;
-import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.map2.event.MapPlayerInitEvent;
 import net.hollowcube.map2.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -66,7 +64,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
     private void handleMapCompletion(@NotNull MapPlayerCompleteMapEvent event) {
         var player = event.getPlayer();
-        var world = event.getMapWorld();
+        var world = (PlayingMapWorld) event.getMapWorld(); // Safe because this is only enabled on playing worlds.
 
         var saveState = SaveState.fromPlayer(player);
         saveState.setCompleted(true); // Also stops recording time here
@@ -76,20 +74,15 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         //todo this is a bad solution. Basically we need to remove the player immediately, but the remove method runs in a virtual thread
         // which means it will have a tiny scheduling delay which means duplicates can trigger. To get around this we just remove these
         // two tags immediately which will stop them from triggering new events. Its a terrible solution and needs to be reworked.
-        ((AbstractMapWorld) world).removePlayerImmediate(player);
+        world.removePlayerImmediate(player);
 
         FutureUtil.submitVirtual(() -> {
             // Remove the player from the world itself, they are no longer playing (but will remain in the instance)
             // This will also cause their savestate to be written to DB
-            SaveStateUpdateResponse resp = null;
-            if (world instanceof PlayingMapWorld pmw) {
-                resp = pmw.removeActivePlayer(player);
-            } else {
-                world.removePlayer(player);
-            }
-            if (world instanceof PlayingMapWorld pmw) {
-//                pmw.startFinished(player, false); //todo
-            }
+            // Then re-add the player to the world as a spectator (in finished mode)
+
+            var resp = world.removeActivePlayer(player);
+            world.addSpectator(player, true);
 
             // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
             var bestSaveState = FutureUtil.getUnchecked(finishFuture);

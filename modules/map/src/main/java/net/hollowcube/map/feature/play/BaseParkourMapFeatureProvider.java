@@ -2,7 +2,6 @@ package net.hollowcube.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.map.MapFeatureFlags;
-import net.hollowcube.map.MapHooks;
 import net.hollowcube.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.map.event.vnext.MapPlayerStatusChangeEvent;
@@ -12,6 +11,7 @@ import net.hollowcube.map.feature.play.item.*;
 import net.hollowcube.map.util.MapMessages;
 import net.hollowcube.map.world.PlayingMapWorld;
 import net.hollowcube.map.world.TestingMapWorld;
+import net.hollowcube.map2.AbstractMapWorld;
 import net.hollowcube.map2.MapWorld;
 import net.hollowcube.map2.event.MapPlayerInitEvent;
 import net.hollowcube.map2.event.MapPlayerStartFinishedEvent;
@@ -104,7 +104,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
@@ -170,7 +170,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         player.updateViewableRule((p) -> true);
         player.removeTag(COUNTDOWN_END);
@@ -249,7 +249,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handlePlayerReset(@NotNull MapPlayerResetEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return;
@@ -263,7 +263,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private void handleInitTimerFromMove(@NotNull PlayerMoveEvent event) {
         var player = event.getPlayer();
-        if (!MapHooks.isPlayerPlaying(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || saveState.getPlayStartTime() != 0) return;
@@ -279,12 +280,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleTick(@NotNull InstanceTickEvent event) {
         var instance = event.getInstance();
+        var world = MapWorld.unsafeFromInstance(instance);
+        if (world == null) return; // Sanity
 
         long now = System.currentTimeMillis();
 
         var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
         for (var player : players) {
-            if (!MapHooks.isPlayerPlaying(player)) continue;
+            if (!world.isPlaying(player)) continue;
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) continue;
 
@@ -322,9 +325,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
      */
     public void hardReset(@NotNull Player player, @NotNull SaveState saveState) {
         if (saveState.isCompleted()) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (!(world instanceof AbstractMapWorld abstractWorld)) return;
 
         // Remove the playing tag so that they can't trigger a checkpoint/status/completion
-        player.removeTag(MapHooks.PLAYING);
+        abstractWorld.removePlayerImmediate(player);
 
         saveState.setCompleted(false);
         saveState.setPlaytime(0);
@@ -335,10 +340,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(SPECTATOR_CHECKPOINT);
         player.removeTag(COUNTDOWN_END);
 
-        var world = MapWorld.forPlayer(player);
         player.teleport(world.map().settings().getSpawnPoint()).thenRun(() -> {
             updatePlayerFromState(player, newPlayState);
-            player.setTag(MapHooks.PLAYING, true);
+            abstractWorld.addPlayerImmediate(player);
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, true));
         });
@@ -351,6 +355,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
      */
     public void softReset(@NotNull Player player, @NotNull SaveState saveState) {
         if (saveState.isCompleted()) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (!(world instanceof AbstractMapWorld abstractWorld)) return;
 
         // If they have a spectator checkpoint return to that always.
         var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
@@ -371,7 +377,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Remove the playing tag so that they can't trigger a checkpoint/status/completion
-        player.removeTag(MapHooks.PLAYING);
+        abstractWorld.removePlayerImmediate(player);
 
         // "pop" the last state to the current
         playState = playState.lastState().get();
@@ -388,9 +394,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Apply the current state to the player and teleport them
         updatePlayerFromState(player, playState);
         player.teleport(playState.pos().orElseThrow()).thenRun(() -> {
-            player.setTag(MapHooks.PLAYING, true);
+            abstractWorld.addPlayerImmediate(player);
 
-            var world = MapWorld.forPlayer(player);
             EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
         });
     }
