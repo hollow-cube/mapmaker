@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -24,6 +25,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
 import net.minestom.server.message.Messenger;
+import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.sound.SoundEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -32,12 +34,16 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
+
+    private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
     private static final String CHAT_TOPIC = "chat";
     private static final String CHAT_OUT_TOPIC = "chat-messages";
@@ -80,15 +86,16 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-//        var currentMap = MapWorld.forPlayerOptional(player);
-//        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
-//            player.sendMessage(Component.text("You are not in a published map.")); //todo message
-//            return;
-//        }
+        var currentMap = MapWorld.forPlayerOptional(player);
+        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
+            player.sendMessage(Component.text("You are not in a published map.")); //todo message
+            return;
+        }
 
         var playerData = PlayerDataV2.fromPlayer(player);
         var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                playerData.id(), message, "global", null); //currentMap == null ? null : currentMap.map().id());
+                playerData.id(), message, ClientChatMessageData.CHANNEL_GLOBAL,
+                currentMap == null ? null : currentMap.map().id());
         logger.info("{}: {}", playerData.username(), messageData);
         sendChatMessage(messageData);
     }
@@ -101,7 +108,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull ChatMessageData message) {
         switch (message.type()) {
             case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
-                if ("global".equals(message.channel()))
+                if (ClientChatMessageData.CHANNEL_GLOBAL.equals(message.channel()))
                     handleGlobalChatUnsigned(message);
                 else handleDirectMessage(message);
             });
@@ -172,10 +179,14 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
     private void handleDirectMessage(@NotNull ChatMessageData message) {
         System.out.println(message);
-        var target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.channel()));
-        if (target == null) return; // Not relevant to this server
 
-        var targetDisplayName = PlayerDataV2.fromPlayer(target).displayName2().build();
+        var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
+        var target = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.channel()));
+        var spies = new ArrayList<Player>(); // People spying todo
+
+        if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
+
+        var targetDisplayName = playerService.getPlayerDisplayName2(message.channel()).build();
         var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
 
         var builder = Component.text();
@@ -203,8 +214,17 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             }
         }
 
-        target.playSound(TAG_DING);
-        target.sendMessage(Component.translatable("chat.dm", senderDisplayName, targetDisplayName, builder.build()));
+        var args = List.of(senderDisplayName, targetDisplayName, builder.build());
+        if (target != null) {
+            target.playSound(TAG_DING);
+            target.sendMessage(Component.translatable("chat.channel.dm.receive", args));
+        }
+        if (sender != null) {
+            sender.sendMessage(Component.translatable("chat.channel.dm.send", args));
+        }
+        for (var spy : spies) {
+            spy.sendMessage(Component.translatable("chat.channel.dm.spy", args));
+        }
     }
 
     protected void handleChatSystem(@NotNull ChatMessageData message) {

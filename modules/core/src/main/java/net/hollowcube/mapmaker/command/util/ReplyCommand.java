@@ -6,45 +6,29 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
-import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MsgCommand extends CommandDsl {
-    private final Argument<String> targetArg;
+public class ReplyCommand extends CommandDsl {
     private final Argument<String> messageArg = Argument.GreedyString("message");
 
     private final ChatMessageListener messageListener;
 
     @Inject
-    public MsgCommand(@NotNull SessionManager sessionManager, @NotNull ChatMessageListener messageListener) {
-        super("msg");
+    public ReplyCommand(@NotNull ChatMessageListener messageListener) {
+        super("reply", "r");
         this.messageListener = messageListener;
 
-        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
-
-        addSyntax(playerOnly(this::handleSendDirectMessage), targetArg, messageArg);
+        addSyntax(playerOnly(this::handleReplyDirectMessage), messageArg);
     }
 
-    private void handleSendDirectMessage(@NotNull Player player, @NotNull CommandContext context) {
-        var target = context.get(targetArg);
+    private void handleReplyDirectMessage(@NotNull Player player, @NotNull CommandContext context) {
         var message = context.get(messageArg);
 
-        if (target == null) {
-            player.sendMessage("Player not online");
-            return;
-        }
-
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-        if (playerId.equals(target)) {
-            player.sendMessage("You can't message yourself");
-            return;
-        }
 
         message = FontUtil.stripInvalidChars(message).trim();
         if (message.isEmpty()) return;
@@ -55,9 +39,10 @@ public class MsgCommand extends CommandDsl {
             return;
         }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
         messageListener.sendChatMessage(new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
-                playerId, message, target, // Target is the channel id
+                playerId, message, ClientChatMessageData.CHANNEL_REPLY,
                 currentMap == null ? null : currentMap.map().id()
         ));
     }

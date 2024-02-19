@@ -13,6 +13,9 @@ public record ClientChatMessageData(
         @Nullable String currentMap
 ) {
 
+    public static final String CHANNEL_GLOBAL = "global";
+    public static final String CHANNEL_REPLY = "reply";
+
     public enum Type {
         CHAT_UNSIGNED,
         CHAT_SYSTEM
