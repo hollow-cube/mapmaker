@@ -271,6 +271,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(WhereCommand.class));
         commandManager.register(createInstance(ListCommand.class));
         commandManager.register(createInstance(MsgCommand.class));
+        commandManager.register(createInstance(ReplyCommand.class));
 
         commandManager.register(createInstance(RequestCommand.class));
         commandManager.register(createInstance(RejectCommand.class));
