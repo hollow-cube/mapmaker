@@ -7,7 +7,8 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -19,11 +20,15 @@ public class MsgCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<String> messageArg = Argument.GreedyString("message");
 
+    private final SessionManager sessionManager;
+    private final MapService mapService;
     private final ChatMessageListener messageListener;
 
     @Inject
-    public MsgCommand(@NotNull SessionManager sessionManager, @NotNull ChatMessageListener messageListener) {
+    public MsgCommand(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull ChatMessageListener messageListener) {
         super("msg");
+        this.sessionManager = sessionManager;
+        this.mapService = mapService;
         this.messageListener = messageListener;
 
         this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
@@ -49,16 +54,20 @@ public class MsgCommand extends CommandDsl {
         message = FontUtil.stripInvalidChars(message).trim();
         if (message.isEmpty()) return;
 
-        var currentMap = MapWorld.forPlayerOptional(player);
-        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
-            player.sendMessage(Component.text("You are not in a published map.")); //todo message
-            return;
+        String currentMapId = null;
+        if (message.contains("[map]")) {
+            var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+            if (currentMap == null || !currentMap.isPublished()) {
+                player.sendMessage(Component.text("You are not in a published map.")); //todo message
+                return;
+            }
+            currentMapId = currentMap.id();
         }
 
         messageListener.sendChatMessage(new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerId, message, target, // Target is the channel id
-                currentMap == null ? null : currentMap.map().id()
+                currentMapId
         ));
     }
 }

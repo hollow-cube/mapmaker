@@ -176,7 +176,7 @@ public abstract class AbstractMapServer implements MapServer {
             mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
             shutdowner.queue(mapInviteAcceptedOrRejectedListener::close);
 
-            chatMessageListener = new ChatMessageListener(playerService, mapService, kafkaConfig.bootstrapServersStr());
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, kafkaConfig.bootstrapServersStr());
             injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue(chatMessageListener::close);
             var packetListenerManager = MinecraftServer.getPacketListenerManager();

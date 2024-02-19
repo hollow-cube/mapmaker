@@ -6,11 +6,12 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.misc.Emoji;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -55,12 +56,14 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             .volume(5)
             .build();
 
+    private final SessionManager sessionManager;
     private final PlayerService playerService;
     private final MapService mapService;
     private final FriendlyProducer producer;
 
-    public ChatMessageListener(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String kafkaBrokers) {
+    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String kafkaBrokers) {
         super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
+        this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
         this.producer = new FriendlyProducer(kafkaBrokers);
@@ -86,16 +89,20 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-        var currentMap = MapWorld.forPlayerOptional(player);
-        if ((currentMap == null || !currentMap.map().isPublished()) && message.contains("[map]")) {
-            player.sendMessage(Component.text("You are not in a published map.")); //todo message
-            return;
+        String currentMapId = null;
+        if (message.contains("[map]")) {
+            var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+            if (currentMap == null || !currentMap.isPublished()) {
+                player.sendMessage(Component.text("You are not in a published map.")); //todo message
+                return;
+            }
+            currentMapId = currentMap.id();
         }
 
         var playerData = PlayerDataV2.fromPlayer(player);
         var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerData.id(), message, ClientChatMessageData.CHANNEL_GLOBAL,
-                currentMap == null ? null : currentMap.map().id());
+                currentMapId);
         logger.info("{}: {}", playerData.username(), messageData);
         sendChatMessage(messageData);
     }
