@@ -88,7 +88,7 @@ public sealed interface MapWorld permits AbstractMapWorld {
      */
     @NotNull EventNode<InstanceEvent> eventNode();
     default void callEvent(@NotNull InstanceEvent event) {
-        eventNode().call(event);
+        instance().eventNode().call(event);
     }
 
 }

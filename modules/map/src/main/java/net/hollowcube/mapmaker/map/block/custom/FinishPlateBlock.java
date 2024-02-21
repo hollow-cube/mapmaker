@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;

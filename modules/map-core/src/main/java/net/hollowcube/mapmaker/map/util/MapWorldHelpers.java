@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.util;
 
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -50,10 +50,6 @@ public final class MapWorldHelpers {
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);
         MiscFunctionality.applyCosmetics(player, playerData);
-
-//        if (MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
-//            ActionBar.forPlayer(player).addProvider(PlayingDebugOverlay.INSTANCE);
-//        }
     }
 
 }

@@ -1,7 +1,12 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
+import net.hollowcube.mapmaker.entity.potion.PotionInfo;
+import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
+import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
+import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
+import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
@@ -11,15 +16,6 @@ import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
-import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
-import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.entity.potion.PotionInfo;
-import net.hollowcube.mapmaker.map.MapVariant;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
@@ -28,10 +24,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
@@ -41,8 +36,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
+import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -66,7 +61,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
             .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
-            .addListener(InstanceTickEvent.class, this::handleTick);
+            .addListener(PlayerTickEvent.class, this::handlePlayerTick);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -278,43 +273,33 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         saveState.setPlayStartTime(System.currentTimeMillis());
     }
 
-    public void handleTick(@NotNull InstanceTickEvent event) {
-        var instance = event.getInstance();
-        var world = MapWorld.unsafeFromInstance(instance);
+    public void handlePlayerTick(@NotNull PlayerTickEvent event) {
+        var player = event.getPlayer();
+        var world = MapWorld.forPlayerOptional(player);
         if (world == null) return; // Sanity
 
-        long now = System.currentTimeMillis();
-
-        var players = instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS);
-        for (var player : players) {
-            if (!world.isPlaying(player)) continue;
+        if (world.isPlaying(player)) {
             var saveState = SaveState.optionalFromPlayer(player);
-            if (saveState == null) continue;
+            if (saveState == null) return;
 
             var resetHeight = saveState.playState().resetHeight().orElse(-64);
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
-                continue;
+                return;
             }
 
             var countdownEnd = player.getTag(COUNTDOWN_END);
-            if (countdownEnd != -1 && countdownEnd < now) {
+            if (countdownEnd != -1 && countdownEnd < System.currentTimeMillis()) {
                 player.sendMessage("you ran out of time, todo add a sound effect or something");
                 softReset(player, saveState);
-                continue;
+                return;
+            }
+        } else if (world.isSpectating(player)) {
+            if (player.getPosition().y() < world.instance().getDimensionType().getMinY()) {
+                var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+                player.teleport(checkpoint == null ? world.spawnPoint(player) : checkpoint);
             }
         }
-
-        // If a player is spectating return them to their checkpoint if they fall below the reset height
-        if (MapWorld.unsafeFromInstance(instance) instanceof PlayingMapWorld pmw) {
-            for (var spectator : pmw.spectators()) {
-                if (spectator.getPosition().y() < pmw.instance().getDimensionType().getMinY()) {
-                    var checkpoint = spectator.getTag(SPECTATOR_CHECKPOINT);
-                    spectator.teleport(checkpoint == null ? pmw.spawnPoint(spectator) : checkpoint);
-                }
-            }
-        }
-
     }
 
     /**

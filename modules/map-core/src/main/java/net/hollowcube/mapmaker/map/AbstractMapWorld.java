@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.mapmaker.map.biome.BiomeContainer;
-import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
-import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.map.biome.BiomeContainer;
+import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
@@ -56,7 +56,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
         // Configure the events from the instance & managers
         instance.eventNode().addChild(eventNode);
-        instance.eventNode().addChild(itemRegistry.eventNode()); // Needs spectator events so register on instance.
+        instance.eventNode().addChild(itemRegistry.eventNode());
 
         // Add support for adding and removing potion effects
         eventNode().addChild(PotionHandler.EVENT_NODE);
@@ -173,9 +173,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         return eventNode;
     }
 
-    private boolean testEvent(@NotNull InstanceEvent event) {
+    protected boolean testEvent(@NotNull InstanceEvent event) {
         if (event instanceof PlayerEvent pe)
-            // There is a subtle detail here that spectators do not trigger instance events on the map node.
             return isPlaying(pe.getPlayer()) || isSpectating(pe.getPlayer());
         return true;
     }

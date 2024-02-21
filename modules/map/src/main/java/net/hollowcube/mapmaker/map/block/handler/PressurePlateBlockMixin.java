@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
 import net.hollowcube.mapmaker.map.MapHooks;
-import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -31,13 +31,21 @@ public interface PressurePlateBlockMixin extends BlockHandler {
     @Override
     default void tick(@NotNull Tick tick) {
         var instance = tick.getInstance();
+
+        // Particles trigger in editing worlds, so handle this first.
+        particleTick(instance, tick.getBlockPosition());
+
+        // The rest requires the playable world, so extract that
         var world = MapWorld.unsafeFromInstance(instance);
+        if (world instanceof EditingMapWorld editingWorld) {
+            // This is a bit of a specific exception, probably this should be rewritten to use MapWorld.forPlayerOptional
+            // on every nearby player which will return the testing world _only_ if they are in it.
+            world = editingWorld.testWorld();
+        }
         if (world == null) return;
 
         var pos = tick.getBlockPosition();
         var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
-
-        particleTick(instance, tick.getBlockPosition());
 
         Set<Player> newPlayers = new HashSet<>(), currentPlayers = getPlayersOnPlate();
 
