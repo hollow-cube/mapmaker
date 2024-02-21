@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
+import net.hollowcube.mapmaker.map.item.DebugStickItem;
 import net.hollowcube.mapmaker.map.item.handler.ItemTags;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -83,6 +84,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         instance.setGenerator(MapGenerators.voidWorld());
         instance.eventNode().addChild(readWriteNode); // Needs spectators, so register on instance.
         instance.eventNode().addChild(readOnlyNode); // Needs spectators, so register on instance.
+
+        itemRegistry().register(DebugStickItem.INSTANCE);
 
         //todo remove this/refactor objects to work with entities and make more sense
         readWriteNode.addListener(BlockItemPlaceEvent.class, event -> {
