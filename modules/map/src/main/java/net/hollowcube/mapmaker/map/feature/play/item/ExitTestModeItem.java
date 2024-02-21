@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -40,11 +40,12 @@ public class ExitTestModeItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var world = MapWorld.forPlayer(player);
-        if (!(world instanceof TestingMapWorld)) return;
+        if (!(world instanceof TestingMapWorld testWorld)) return;
 
         FutureUtil.submitVirtual(() -> {
             player.removeTag(SPECTATOR_CHECKPOINT);
-            world.removePlayer(player);
+            testWorld.exitTestMode(player);
+
         });
     }
 
