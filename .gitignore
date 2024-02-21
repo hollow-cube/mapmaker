@@ -21,3 +21,4 @@ bazel-*
 /modules/canvas/*/build
 
 profile.jfr
+/test.http
