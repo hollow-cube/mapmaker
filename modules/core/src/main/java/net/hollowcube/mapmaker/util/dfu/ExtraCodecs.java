@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.utils.validate.Check;
@@ -38,6 +39,15 @@ public final class ExtraCodecs {
             Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(Pos::yaw),
             Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(Pos::pitch)
     ).apply(i, Pos::new));
+
+    public static final Codec<Material> MATERIAL = Codec.STRING
+            .xmap(Material::fromNamespaceId, Material::name);
+
+    // Enum as ordinal integer
+    public static <T extends Enum<T>> @NotNull Codec<T> EnumI(@NotNull Class<T> enumClass) {
+        var values = enumClass.getEnumConstants();
+        return Codec.INT.xmap(ord -> values[ord], Enum::ordinal);
+    }
 
     /**
      * Admittedly this is kinda disgusting, but it writes the item map as a base64

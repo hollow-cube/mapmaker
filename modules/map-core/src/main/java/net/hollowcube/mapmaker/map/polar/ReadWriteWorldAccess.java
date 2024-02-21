@@ -25,7 +25,8 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         logger.debug("writing polar world data");
         buffer.write(NetworkBuffer.BYTE, (byte) VERSION_LATEST);
 
-        mapWorld.biomes().write(buffer);
+        var worldData = mapWorld.instance().tagHandler().asCompound();
+        buffer.write(NetworkBuffer.NBT, worldData);
     }
 
     @Override

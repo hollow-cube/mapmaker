@@ -8,9 +8,11 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.world.biomes.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
 public class ReadWorldAccess implements PolarWorldAccess {
     private final Logger logger = LoggerFactory.getLogger(ReadWorldAccess.class);
 
-    public static final int VERSION_LATEST = 3; // Versioning changes to world data
-    public static final int VERSION_PRE_PROTO = 1;
+    public static final int VERSION_LATEST = 4; // Versioning changes to world data
+    public static final int VERSION_PRE_NBT = 3;
 
     protected final MapWorld mapWorld;
 
@@ -42,12 +44,19 @@ public class ReadWorldAccess implements PolarWorldAccess {
         }
         logger.debug("reading polar world data (version {})", version);
 
-        if (version <= VERSION_PRE_PROTO) {
+        if (version <= VERSION_PRE_NBT) {
             // Legacy support
             return;
         }
 
-        mapWorld.biomes().read(buffer);
+        // There is an issue here. I cannot call TagHandler#updateContent because it will wipe any existing tags.
+        // I cannot get the compound, merge, and then #updateContent because it will still wipe any transient tags.
+        // The result solution is to set each individual key on its own, which is really yikes. But it does work...
+        var worldTag = mapWorld.instance().tagHandler();
+        var worldData = (NBTCompound) buffer.read(NetworkBuffer.NBT);
+        for (var entry : worldData.getEntries()) {
+            worldTag.setTag(Tag.NBT(entry.getKey()), entry.getValue());
+        }
     }
 
     @Override
@@ -68,12 +77,12 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
     @Override
     public @NotNull Biome getBiome(@NotNull String name) {
-        return mapWorld.biomes().getBiome(name);
+        return mapWorld.biomes().getLoadedBiome(name);
     }
 
     @Override
     public @NotNull String getBiomeName(int id) {
-        return mapWorld.biomes().getBiomeName(id);
+        return mapWorld.biomes().getLoadedBiomeName(id);
     }
 
     private @NotNull CompletableFuture<Void> readEntity(@NotNull Chunk chunk, @NotNull NetworkBuffer buffer) {

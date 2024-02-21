@@ -29,7 +29,7 @@ public class BiomeEntry extends View {
 
         int type = 1; // add (disabled)
         if (biomeInfo != null)
-            type = biomeInfo.isLoaded() ? 2 : 3;
+            type = container.isLoaded(biomeInfo) ? 2 : 3;
         else if (container.size() < container.maxSize())
             type = 0;
         typeSwitch.setOption(type);

@@ -33,6 +33,7 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.EffectPacket;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.Blocking;
@@ -198,6 +199,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
             // Save the world data (if it is unverified only)
             if (map().verification() == MapVerification.UNVERIFIED) {
+                biomes().write(this);
+
                 var worldData = instance.save(new ReadWriteWorldAccess(this));
                 server().mapService().updateMapWorld(map().id(), worldData);
             }
@@ -300,6 +303,16 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             player.removeTag(SaveState.TAG);
             super.removePlayer(player);
         }
+    }
+
+    @Override
+    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        instance().setTag(tag, value);
+    }
+
+    @Override
+    public void removeTag(@NotNull Tag<?> tag) {
+        instance().removeTag(tag);
     }
 
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {

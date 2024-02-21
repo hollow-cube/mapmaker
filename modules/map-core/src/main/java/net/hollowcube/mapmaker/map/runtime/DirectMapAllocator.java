@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -31,9 +31,14 @@ final class DirectMapAllocator implements MapAllocator {
 
     @Override
     public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType) {
-        var world = server.createInstance(worldType, Map.of(MapData.class, map));
-        world.load();
-        return world;
+        try {
+            var world = server.createInstance(worldType, Map.of(MapData.class, map));
+            world.load();
+            return world;
+        } catch (Exception e) {
+            logger.error("failed to allocate world", e);
+            throw new RuntimeException("failed to allocate world", e);
+        }
     }
 
     @Override

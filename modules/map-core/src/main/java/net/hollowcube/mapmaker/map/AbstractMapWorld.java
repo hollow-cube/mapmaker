@@ -112,19 +112,24 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     public void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
 
-        // Send registry data outself
-        var registry = new HashMap<String, NBT>();
-        registry.put("minecraft:chat_type", Messenger.chatRegistry());
-        registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
-        registry.put("minecraft:worldgen/biome", biomes().toNBT());
-        registry.put("minecraft:damage_type", DamageType.getNBT());
-        player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
-        player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
-        event.setSendRegistryData(false);
+        try {
+            // Send registry data outself
+            var registry = new HashMap<String, NBT>();
+            registry.put("minecraft:chat_type", Messenger.chatRegistry());
+            registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
+            registry.put("minecraft:worldgen/biome", biomes().toNBT());
+            registry.put("minecraft:damage_type", DamageType.getNBT());
+            player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
+            player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
+            event.setSendRegistryData(false);
 
-        // Set the instance and spawn point of the player.
-        event.setSpawningInstance(instance());
-        player.setRespawnPoint(spawnPoint(player));
+            // Set the instance and spawn point of the player.
+            event.setSpawningInstance(instance());
+            player.setRespawnPoint(spawnPoint(player));
+        } catch (Exception e) {
+            logger.error("Failed to configure player", e);
+            player.kick("An unexpected error occurred while configuring your player. Please try again.");
+        }
     }
 
     @Override
@@ -191,7 +196,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
     @Blocking
     public void load() {
-        this.biomes().init();
+        this.biomes().init(this);
     }
 
     @Blocking

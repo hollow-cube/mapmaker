@@ -1,16 +1,36 @@
 package net.hollowcube.mapmaker.map.biome;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biomes.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
+import java.util.Optional;
 
-@SuppressWarnings("UnstableApiUsage")
 public class BiomeInfo {
+
+    private static final String DEFAULT_SKY_COLOR = "#78A7FF";
+    private static final String DEFAULT_FOG_COLOR = "#C0D8FF";
+    private static final String DEFAULT_WATER_COLOR = "#3F76E4";
+    private static final String DEFAULT_WATER_FOG_COLOR = "#050533";
+
+    public static final Codec<BiomeInfo> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.STRING.optionalFieldOf("name", "").forGetter(BiomeInfo::getName),
+            ExtraCodecs.MATERIAL.optionalFieldOf("displayItem", Material.GRASS_BLOCK).forGetter(BiomeInfo::getDisplayItem),
+            ExtraCodecs.EnumI(Biome.Precipitation.class).optionalFieldOf("precipitation", Biome.Precipitation.NONE).forGetter(BiomeInfo::getPrecipitation),
+            Codec.STRING.optionalFieldOf("skyColor", DEFAULT_SKY_COLOR).forGetter(BiomeInfo::getSkyColor),
+            Codec.STRING.optionalFieldOf("fogColor", DEFAULT_FOG_COLOR).forGetter(BiomeInfo::getFogColor),
+            Codec.STRING.optionalFieldOf("waterColor", DEFAULT_WATER_COLOR).forGetter(BiomeInfo::getWaterColor),
+            Codec.STRING.optionalFieldOf("waterFogColor", DEFAULT_WATER_FOG_COLOR).forGetter(BiomeInfo::getWaterFogColor),
+            Codec.STRING.optionalFieldOf("grassColor").forGetter(BiomeInfo::getGrassColorSafe),
+            Codec.STRING.optionalFieldOf("foliageColor").forGetter(BiomeInfo::getFoliageColorSafe)
+    ).apply(i, BiomeInfo::new));
 
     private String name = "";
     private Material displayItem = Material.GRASS_BLOCK;
@@ -18,10 +38,10 @@ public class BiomeInfo {
     private Biome.Precipitation precipitation = Biome.Precipitation.NONE;
     private Object particle = null; //todo
 
-    private String skyColor = "#78A7FF";
-    private String fogColor = "#C0D8FF";
-    private String waterColor = "#3F76E4";
-    private String waterFogColor = "#050533";
+    private String skyColor = DEFAULT_SKY_COLOR;
+    private String fogColor = DEFAULT_FOG_COLOR;
+    private String waterColor = DEFAULT_WATER_COLOR;
+    private String waterFogColor = DEFAULT_WATER_FOG_COLOR;
     private String grassColor = null;
     private String foliageColor = null;
 
@@ -30,10 +50,26 @@ public class BiomeInfo {
     private String additionsSound = null; //todo
     private String moodSound = null; //todo
 
-    private transient Biome minestomBiome = null;
-
     public BiomeInfo() {
 
+    }
+
+    public BiomeInfo(
+            @NotNull String name, @NotNull Material displayItem,
+            @NotNull Biome.Precipitation precipitation,
+            @NotNull String skyColor, @NotNull String fogColor,
+            @NotNull String waterColor, @NotNull String waterFogColor,
+            @NotNull Optional<String> grassColor, @NotNull Optional<String> foliageColor
+    ) {
+        this.name = name;
+        this.displayItem = displayItem;
+        this.precipitation = precipitation;
+        this.skyColor = skyColor;
+        this.fogColor = fogColor;
+        this.waterColor = waterColor;
+        this.waterFogColor = waterFogColor;
+        this.grassColor = grassColor.orElse(null);
+        this.foliageColor = foliageColor.orElse(null);
     }
 
     public @NotNull String getName() {
@@ -42,6 +78,11 @@ public class BiomeInfo {
 
     public void setName(@NotNull String name) {
         this.name = name;
+    }
+
+    public @Nullable NamespaceID namespace() {
+        if (getName().isEmpty()) return null;
+        return NamespaceID.from("custom", getName());
     }
 
     public @NotNull Material getDisplayItem() {
@@ -100,6 +141,10 @@ public class BiomeInfo {
         return grassColor;
     }
 
+    public @NotNull Optional<String> getGrassColorSafe() {
+        return Optional.ofNullable(grassColor);
+    }
+
     public void setGrassColor(@Nullable String grassColor) {
         if (grassColor != null)
             Objects.requireNonNull(TextColor.fromCSSHexString(grassColor), "Invalid color: " + grassColor);
@@ -110,54 +155,14 @@ public class BiomeInfo {
         return foliageColor;
     }
 
+    public @NotNull Optional<String> getFoliageColorSafe() {
+        return Optional.ofNullable(foliageColor);
+    }
+
     public void setFoliageColor(@Nullable String foliageColor) {
         if (foliageColor != null)
             Objects.requireNonNull(TextColor.fromCSSHexString(foliageColor), "Invalid color: " + foliageColor);
         this.foliageColor = foliageColor;
     }
-
-    // Minestom biome association
-
-    public boolean isLoaded() {
-        return minestomBiome != null;
-    }
-
-    public @UnknownNullability Biome getMinestomBiome() {
-        return minestomBiome;
-    }
-
-    public void setMinestomBiome(@Nullable Biome minestomBiome) {
-        this.minestomBiome = minestomBiome;
-    }
-
-    // Serialization
-
-//    public BiomeInfo(@NotNull BiomeProtos.BiomeInfo bi) {
-//        this.name = bi.getName();
-//        this.displayItem = Material.fromNamespaceId(bi.getDisplayItem());
-//
-//        this.precipitation = Biome.Precipitation.values()[bi.getPrecipitation()];
-//
-//        this.skyColor = bi.getSkyColor();
-//        this.fogColor = bi.getFogColor();
-//        this.waterColor = bi.getWaterColor();
-//        this.waterFogColor = bi.getWaterFogColor();
-//        if (bi.hasGrassColor()) this.grassColor = bi.getGrassColor();
-//        if (bi.hasFoliageColor()) this.foliageColor = bi.getFoliageColor();
-//    }
-//
-//    public @NotNull BiomeProtos.BiomeInfo toProto() {
-//        var builder = BiomeProtos.BiomeInfo.newBuilder()
-//                .setName(name)
-//                .setDisplayItem(displayItem.name())
-//                .setPrecipitation(precipitation.ordinal())
-//                .setSkyColor(skyColor)
-//                .setFogColor(fogColor)
-//                .setWaterColor(waterColor)
-//                .setWaterFogColor(waterFogColor);
-//        if (grassColor != null) builder = builder.setGrassColor(grassColor);
-//        if (foliageColor != null) builder = builder.setFoliageColor(foliageColor);
-//        return builder.build();
-//    }
 
 }

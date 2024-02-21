@@ -8,15 +8,15 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagWritable;
+import org.jetbrains.annotations.*;
 
 import java.util.Collection;
 import java.util.Objects;
 
-public sealed interface MapWorld permits AbstractMapWorld {
+public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
 
     @NonBlocking
     static @NotNull MapWorld forPlayer(@NotNull Player player) {
@@ -91,4 +91,22 @@ public sealed interface MapWorld permits AbstractMapWorld {
         instance().eventNode().call(event);
     }
 
+    // TagReadable/TagWritable read-only implementation (EditingMapWorld overrides the write methods to make it writable)
+
+    @Override
+    default boolean hasTag(@NotNull Tag<?> tag) {
+        return instance().hasTag(tag);
+    }
+    @Override
+    default <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+        return instance().getTag(tag);
+    }
+    @Override
+    default <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
+    @Override
+    default void removeTag(@NotNull Tag<?> tag) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
 }

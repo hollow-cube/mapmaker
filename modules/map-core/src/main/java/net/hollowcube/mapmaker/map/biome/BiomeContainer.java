@@ -1,13 +1,20 @@
 package net.hollowcube.mapmaker.map.biome;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.validate.Check;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.server.world.biomes.BiomeEffects;
 import net.minestom.server.world.biomes.BiomeManager;
+import net.minestom.server.world.biomes.VanillaBiome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
@@ -28,19 +35,86 @@ import java.util.*;
  * <b>may not</b> be set in the world. The world needs to be reloaded for the new biomes to apply or changes
  * to existing ones to take effect</p>
  *
- * <p>Minestom biome IDs ({@link Biome#id()}) are inconsistent across runtimes, so only the namespace ID should
+ * <p>Protocol biome IDs are inconsistent across runtimes, so only the namespace ID should
  * be used to identify a biome in stored data.</p>
  */
 @SuppressWarnings("UnstableApiUsage")
 public class BiomeContainer {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
 
+    // Exists because DFU.Tag requires an object, not a list.
+    private record TagWrapper(List<BiomeInfo> biomes) {
+    }
+
+    private static final Tag<TagWrapper> TAG = DFU.Tag(RecordCodecBuilder.create(i -> i.group(
+            Codec.list(BiomeInfo.CODEC).optionalFieldOf("biomes", List.of()).forGetter(TagWrapper::biomes)
+    ).apply(i, TagWrapper::new)), "biomes");
+    private static final Biome DEFAULT_BIOME = VanillaBiome.PLAINS;
+
+    private static final int FIRST_BIOME_ID;
+
+    static {
+        // This is the parent to all biome containers, so load vanilla biomes in it. Then compute the max id to start from.
+        var biomeManager = MinecraftServer.getBiomeManager();
+        biomeManager.loadVanillaBiomes();
+
+        var maxId = 0;
+        for (var biome : biomeManager.unmodifiableCollection())
+            maxId = Math.max(maxId, biomeManager.getId(biome));
+        FIRST_BIOME_ID = maxId + 1;
+    }
+
     private final BiomeManager parent = MinecraftServer.getBiomeManager();
-    private final List<BiomeInfo> biomes = new ArrayList<>();
-    private final Collection<BiomeInfo> unmodifiableBiomes = Collections.unmodifiableCollection(biomes);
-    private final List<Biome> loadedBiomes = new ArrayList<>();
+    private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
+    private final Int2ObjectMap<Biome> loadedBiomes = new Int2ObjectArrayMap<>(); // Custom biomes that are loaded (ie have a Minestom biome)
     private boolean initialized = false;
 
+    /**
+     * Returns the biome associated with the given name, including from the parent biome manager.
+     *
+     * <p>Note: only loaded biomes will be returned correctly. If not, the default biome will be returned.</p>
+     *
+     * @param name The name of the biome
+     * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
+     */
+    public @NotNull Biome getLoadedBiome(@NotNull String name) {
+        var namespace = NamespaceID.from(name);
+
+        for (var biome : loadedBiomes.values()) {
+            if (biome.namespace().equals(namespace)) return biome;
+        }
+
+        return Objects.requireNonNullElse(parent.getByName(namespace), DEFAULT_BIOME);
+    }
+
+    /**
+     * Returns the biome associated with the given id, including from the parent biome manager.
+     *
+     * <p>Note: only loaded biomes will be returned correctly. If not, the default biome will be returned.</p>
+     *
+     * @param id The protocol ID of the biome
+     * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
+     */
+    public @NotNull String getLoadedBiomeName(int id) {
+        return Objects.requireNonNullElseGet(
+                loadedBiomes.get(id), // Try from local biomes first, then from parent
+                () -> Objects.requireNonNullElse(parent.getById(id), DEFAULT_BIOME)
+        ).name();
+    }
+
+    public int getLoadedBiomeId(@NotNull Biome biome) {
+        for (var entry : loadedBiomes.int2ObjectEntrySet()) {
+            if (entry.getValue().equals(biome)) return entry.getIntKey();
+        }
+        return parent.getId(biome);
+    }
+
+    /**
+     * Creates a new unloaded biome. For now it is required to leave and rejoin the world to make the biome load for
+     * any players.
+     *
+     * @return the new biome, or null if the maximum number of biomes has been reached
+     */
     public @Nullable BiomeInfo createBiome() {
         if (biomes.size() >= maxSize()) return null;
 
@@ -49,26 +123,12 @@ public class BiomeContainer {
         return biome;
     }
 
-    public @NotNull Biome getBiome(@NotNull String name) {
-        var namespace = NamespaceID.from(name);
-
-        for (var biome : loadedBiomes) {
-            if (biome.name().equals(namespace)) return biome;
-        }
-
-        return Objects.requireNonNullElse(parent.getByName(namespace), Biome.PLAINS);
-    }
-
-    public @NotNull String getBiomeName(int id) {
-        for (var biome : loadedBiomes) {
-            if (biome.id() == id) return biome.name().asString();
-        }
-
-        return Objects.requireNonNullElse(parent.getById(id), Biome.PLAINS).name().asString();
-    }
-
     public boolean hasCustomBiome(@NotNull String name) {
         return biomes.stream().anyMatch(b -> b.getName().equals(name));
+    }
+
+    public boolean isLoaded(@NotNull BiomeInfo info) {
+        return loadedBiomes.values().stream().anyMatch(b -> b.namespace().equals(info.namespace()));
     }
 
     public int size() {
@@ -80,25 +140,34 @@ public class BiomeContainer {
     }
 
     public @NotNull Collection<BiomeInfo> values() {
-        return unmodifiableBiomes;
+        return Collections.unmodifiableCollection(biomes);
     }
 
     public @NotNull List<Biome> loadedBiomes() {
         var allBiomes = new ArrayList<>(parent.unmodifiableCollection());
-        allBiomes.addAll(loadedBiomes);
+        allBiomes.addAll(loadedBiomes.values());
         return allBiomes;
     }
 
     public NBTCompound toNBT() {
         var allBiomesNbt = new ArrayList<NBTCompound>();
+        //todo should probably cache this nbt
 
         // Add parent biomes
         for (var biome : parent.unmodifiableCollection()) {
-            allBiomesNbt.add(biome.toNbt());
+            allBiomesNbt.add(NBT.Compound(Map.of(
+                    "id", NBT.Int(getLoadedBiomeId(biome)),
+                    "name", NBT.String(biome.namespace().toString()),
+                    "element", biome.toNbt()
+            )));
         }
         // Add overwrite biomes
-        for (var biome : loadedBiomes) {
-            allBiomesNbt.add(biome.toNbt());
+        for (var biome : loadedBiomes.values()) {
+            allBiomesNbt.add(NBT.Compound(Map.of(
+                    "id", NBT.Int(getLoadedBiomeId(biome)),
+                    "name", NBT.String(biome.namespace().toString()),
+                    "element", biome.toNbt()
+            )));
         }
 
         return NBT.Compound(Map.of(
@@ -106,52 +175,30 @@ public class BiomeContainer {
                 "value", NBT.List(NBTType.TAG_Compound, allBiomesNbt)));
     }
 
-    // Serialization
-
-    public void init() {
+    public void init(@NotNull TagReadable dataReader) {
         if (initialized) return;
         initialized = true;
 
+        biomes.addAll(dataReader.getTag(TAG).biomes());
+
+        int nextId = FIRST_BIOME_ID;
         for (var biome : biomes) {
             var minestomBiome = createMinestomBiome(biome);
             if (minestomBiome == null) continue;
 
-            biome.setMinestomBiome(minestomBiome);
-            loadedBiomes.add(minestomBiome);
-            logger.info("Loaded custom biome {} (global id #{})", minestomBiome.name(), minestomBiome.id());
+            var protocolId = nextId++;
+            loadedBiomes.put(protocolId, minestomBiome);
+            logger.info("Loaded custom biome {} (id #{})", minestomBiome.name(), protocolId);
         }
     }
 
-    public void read(@NotNull NetworkBuffer buffer) {
-        Check.stateCondition(!biomes.isEmpty(), "Biomes should only be read once");
-
-//        BiomeProtos.BiomeContainer proto;
-//        try {
-//            var bytes = buffer.read(NetworkBuffer.BYTE_ARRAY);
-//            proto = BiomeProtos.BiomeContainer.parseFrom(bytes);
-//        } catch (InvalidProtocolBufferException e) {
-//            MinecraftServer.getExceptionManager().handleException(e);
-//            return;
-//        }
-//
-//        for (var biome : proto.getBiomeList()) {
-//            biomes.add(new BiomeInfo(biome));
-//        }
-
-        init();
-    }
-
-    public void write(@NotNull NetworkBuffer buffer) {
-//        var builder = BiomeProtos.BiomeContainer.newBuilder();
-//        for (var biome : biomes) {
-//            builder = builder.addBiome(biome.toProto());
-//        }
-//
-//        buffer.write(NetworkBuffer.BYTE_ARRAY, builder.build().toByteArray());
+    public void write(@NotNull TagWritable dataWriter) {
+        dataWriter.setTag(TAG, new TagWrapper(biomes));
     }
 
     private @Nullable Biome createMinestomBiome(@NotNull BiomeInfo bi) {
-        if (bi.getName().isEmpty()) return null;
+        var namespace = bi.namespace();
+        if (namespace == null) return null;
 
         var effectBuilder = BiomeEffects.builder()
                 .skyColor(TextColor.fromCSSHexString(bi.getSkyColor()).value())
@@ -168,8 +215,7 @@ public class BiomeContainer {
         }
 
         return Biome.builder()
-                .name(NamespaceID.from("custom", bi.getName()))
-                .category(Biome.Category.NONE)
+                .name(namespace)
                 .temperature(0.8F) // IDK what this affects
                 .downfall(0.4F) // IDK what this affects
                 .depth(0.125F) // IDK what this affects
