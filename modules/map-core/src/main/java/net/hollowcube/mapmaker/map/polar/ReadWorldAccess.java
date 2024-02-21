@@ -53,9 +53,10 @@ public class ReadWorldAccess implements PolarWorldAccess {
         // I cannot get the compound, merge, and then #updateContent because it will still wipe any transient tags.
         // The result solution is to set each individual key on its own, which is really yikes. But it does work...
         var worldTag = mapWorld.instance().tagHandler();
-        var worldData = (NBTCompound) buffer.read(NetworkBuffer.NBT);
-        for (var entry : worldData.getEntries()) {
-            worldTag.setTag(Tag.NBT(entry.getKey()), entry.getValue());
+        if (buffer.read(NetworkBuffer.NBT) instanceof NBTCompound worldData) {
+            for (var entry : worldData.getEntries()) {
+                worldTag.setTag(Tag.NBT(entry.getKey()), entry.getValue());
+            }
         }
     }
 

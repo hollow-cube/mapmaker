@@ -179,7 +179,8 @@ public class BiomeContainer {
         if (initialized) return;
         initialized = true;
 
-        biomes.addAll(dataReader.getTag(TAG).biomes());
+        var tag = dataReader.getTag(TAG);
+        if (tag != null) biomes.addAll(tag.biomes());
 
         int nextId = FIRST_BIOME_ID;
         for (var biome : biomes) {
