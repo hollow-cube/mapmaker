@@ -1,9 +1,14 @@
 package net.hollowcube.mapmaker.punishments;
 
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.mapmaker.punishments.types.Punishment;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -11,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.util.*;
 
 public class PunishmentServiceImpl extends AbstractHttpService implements PunishmentService {
+    private static final Logger logger = LoggerFactory.getLogger(PunishmentServiceImpl.class);
 
     private final String url;
 
@@ -112,7 +118,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
             throw new InternalError("More than one punishment ladder returned for id: " + id);
         }
 
-        return ladders.get(0);
+        return ladders.getFirst();
     }
 
     private @NotNull List<PunishmentLadder> getLadders(@NotNull String query) {

@@ -23,10 +23,11 @@ import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.player.SessionServiceImpl;
-import net.hollowcube.mapmaker.punishments.Punishment;
+import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -228,6 +229,16 @@ public class ProxyPlugin {
         if ("limbo".equals(serverName)) {
             event.setResult(KickedFromServerEvent.DisconnectPlayer.create(event.getServerKickReason().orElse(Component.empty())));
             return;
+        }
+
+        var reason = event.getServerKickReason().orElse(null);
+        if (reason != null) {
+            // TODO: This feels like a bad way to do this. What's the proper way?
+            var text = PlainTextComponentSerializer.plainText().serialize(reason);
+            if (text.contains("banned") || text.contains("kicked")) {
+                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(reason));
+                return;
+            }
         }
 
         // 'anyhub' points to the clusterip service for all the hub instances, so if you are kicked from it

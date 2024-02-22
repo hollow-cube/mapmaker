@@ -5,42 +5,40 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
-import net.hollowcube.mapmaker.session.SessionManager;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class KickCommand extends CommandDsl {
+public class UnbanCommand extends CommandDsl {
 
-    private final PunishmentService service;
+    private final PunishmentService punishmentService;
 
     private final Argument<String> targetArgument;
     private final Argument<String> reasonArgument = Argument.GreedyString("reason");
 
     @Inject
-    public KickCommand(@NotNull PunishmentService service, @NotNull SessionManager sessionManager) {
-        super("kick");
-        this.service = service;
-        this.targetArgument = CoreArgument.AnyOnlinePlayer("target", sessionManager);
+    public UnbanCommand(@NotNull PunishmentService punishmentService, @NotNull PlayerService playerService) {
+        super("unban");
+
+        this.punishmentService = punishmentService;
+        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
 
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);
     }
 
-    private void execute(@NotNull Player sender, @NotNull CommandContext context) {
+    private void execute(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(this.targetArgument);
+        if (target == null) return;
+
+        var targetId = UUID.fromString(target);
         var reason = context.get(this.reasonArgument);
 
-        if (target == null || reason == null) {
-            return;
-        }
-
-        var executorId = sender.getUuid();
-        var targetId = UUID.fromString(target);
-
-        this.service.createPunishment(targetId, executorId, PunishmentType.KICK, reason, null);
-        sender.sendMessage("Kicked " + target + " for " + reason);
+        this.punishmentService.revokePunishment(targetId, PunishmentType.BAN, player.getUuid(), reason);
+        player.sendMessage(Component.text("Unbanned " + target + " for " + reason));
     }
 }

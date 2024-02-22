@@ -35,6 +35,7 @@ import net.hollowcube.mapmaker.command.staff.VanishCommand;
 import net.hollowcube.mapmaker.command.punish.BanCommand;
 import net.hollowcube.mapmaker.command.punish.KickCommand;
 import net.hollowcube.mapmaker.command.punish.MuteCommand;
+import net.hollowcube.mapmaker.command.punish.UnbanCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
@@ -64,6 +65,7 @@ import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.punishments.PunishmentCreatedListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
@@ -233,6 +235,9 @@ public abstract class AbstractMapServer implements MapServer {
             mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
             shutdowner.queue(mapInviteAcceptedOrRejectedListener::close);
 
+            var punishmentCreatedListener = new PunishmentCreatedListener(kafkaConfig.bootstrapServersStr());
+            shutdowner.queue(punishmentCreatedListener::close);
+
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, kafkaConfig.bootstrapServersStr());
             injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue(chatMessageListener::close);
@@ -366,6 +371,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(BanCommand.class));
         commandManager.register(createInstance(MuteCommand.class));
         commandManager.register(createInstance(KickCommand.class));
+        commandManager.register(createInstance(UnbanCommand.class));
     }
 
     public @NotNull Collection<HealthCheck> readinessChecks() {

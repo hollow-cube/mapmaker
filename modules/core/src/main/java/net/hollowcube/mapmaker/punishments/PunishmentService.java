@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.punishments;
 
+import net.hollowcube.mapmaker.punishments.types.Punishment;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

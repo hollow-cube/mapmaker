@@ -17,7 +17,7 @@ import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
-import net.hollowcube.mapmaker.punishments.PunishmentType;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;

@@ -5,9 +5,10 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.punishments.PunishmentLadder;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
-import net.hollowcube.mapmaker.punishments.PunishmentType;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -25,13 +26,13 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
     AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull SessionManager sessionManager) {
+                          @NotNull PlayerService playerService) {
         super(name);
 
         this.service = service;
         this.type = type;
 
-        this.targetArgument = CoreArgument.AnyOnlinePlayer("target", sessionManager);
+        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
         this.ladderArgument = Argument.Word("ladder").map(
                 (sender, raw) -> {
                     try {

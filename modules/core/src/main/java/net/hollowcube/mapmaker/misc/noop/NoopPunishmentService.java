@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.misc.noop;
 
-import net.hollowcube.mapmaker.punishments.Punishment;
-import net.hollowcube.mapmaker.punishments.PunishmentLadder;
+import net.hollowcube.mapmaker.punishments.types.Punishment;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
-import net.hollowcube.mapmaker.punishments.PunishmentType;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
