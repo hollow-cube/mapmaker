@@ -29,7 +29,7 @@ public final class MapInviteListener extends BaseConsumer<CreatedMapInviteMessag
 
     public MapInviteListener(@NotNull MapService mapService, @NotNull PlayerService playerService,
                              @NotNull SessionManager sessionManager, @NotNull String kafkaBrokers) {
-        super(INVITE_TOPIC, "invites", MapInviteListener::fromJson, kafkaBrokers);
+        super(INVITE_TOPIC, MapInviteListener::fromJson, kafkaBrokers);
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;

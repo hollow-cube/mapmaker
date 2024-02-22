@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -25,10 +24,9 @@ public abstract class MapMgmtConsumer extends BaseConsumer<MapMgmtConsumer.MapUp
     }
 
     private static final String TOPIC_NAME = "map_mgmt";
-    private static final String GROUP_ID = ServerRuntime.getRuntime().hostname();
 
     public MapMgmtConsumer(@NotNull String bootstrapServers) {
-        super(TOPIC_NAME, GROUP_ID, MapUpdateMessage::fromJson, bootstrapServers);
+        super(TOPIC_NAME, MapUpdateMessage::fromJson, bootstrapServers);
         setAutocommit(false);
     }
 

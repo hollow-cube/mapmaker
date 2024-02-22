@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.invite;
 
 import com.google.gson.Gson;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -33,7 +33,7 @@ public final class MapInviteAcceptedOrRejectedListener extends BaseConsumer<MapI
     public MapInviteAcceptedOrRejectedListener(@NotNull MapService mapService, @NotNull PlayerService playerService,
                                                @NotNull SessionManager sessionManager,
                                                @NotNull ServerBridge serverBridge, @NotNull String kafkaBrokers) {
-        super(INVITE_ACCEPT_REJECT_TOPIC, "invites", MapInviteAcceptedOrRejectedListener::fromJson, kafkaBrokers);
+        super(INVITE_ACCEPT_REJECT_TOPIC, MapInviteAcceptedOrRejectedListener::fromJson, kafkaBrokers);
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;

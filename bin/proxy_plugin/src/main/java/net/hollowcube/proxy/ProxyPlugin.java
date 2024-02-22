@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.util.GameProfile;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -102,7 +103,7 @@ public class ProxyPlugin {
             var pd = sessionService.createSessionV2(
                     player.getUniqueId().toString(),
                     new SessionCreateRequestV2(
-                            AbstractHttpService.hostname,
+                            ServerRuntime.getRuntime().hostname(),
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
                             new PlayerSkin(skinTexture, skinSignature)

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DevServer (local)" type="BlazeCommandRunConfigurationType" factoryName="Bazel Command">
-    <blaze-settings handler-id="BlazeJavaRunConfigurationHandlerProvider" kind="java_binary" blaze-command="run" blaze-binary="/opt/homebrew/bin/bazel">
+    <blaze-settings handler-id="BlazeJavaRunConfigurationHandlerProvider" kind="java_binary" blaze-command="run">
       <blaze-target>//bin/development:development</blaze-target>
       <blaze-user-flag>--define</blaze-user-flag>
       <blaze-user-flag>RESOURCE_PACK_SHA=dev</blaze-user-flag>

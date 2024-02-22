@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,6 +57,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     private MapJoinConsumer mapJoinConsumer;
     private Terraform terraform;
+    private final ServerRuntime runtime;
 
     private FeatureList features;
 
@@ -70,6 +72,9 @@ public class MapServerRunner extends AbstractMapServer {
 
     public MapServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
+
+        // Runtime init
+        runtime = ServiceLoader.load(ServerRuntime.class).findFirst().orElseThrow();
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
@@ -94,7 +99,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new MapServerBridge(this);
+        return globalConfig.noop() ? new NoopServerBridge() : new MapServerBridge(this, runtime);
     }
 
     @Override
@@ -270,12 +275,12 @@ public class MapServerRunner extends AbstractMapServer {
     private class MapJoinConsumer extends BaseConsumer<MapJoinInfoMessage> {
 
         protected MapJoinConsumer(@NotNull String bootstrapServers) {
-            super("map-join", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
+            super("map-join", s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
         }
 
         @Override
         protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull MapJoinInfoMessage message) {
-            if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
+            if (!runtime.hostname().equals(message.serverId())) return; // Not for this server, ignore.
 
             logger.info("received join info for {}: {}", message.playerId(), message);
             var pendingJoin = getPendingJoin(message.playerId(), true);

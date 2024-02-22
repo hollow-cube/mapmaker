@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.MapPresence;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -19,9 +19,11 @@ public class MapServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapServerBridge.class);
 
     private final MapServerRunner server;
+    private final ServerRuntime runtime;
 
-    public MapServerBridge(@NotNull MapServerRunner server) {
+    public MapServerBridge(@NotNull MapServerRunner server, @NotNull ServerRuntime runtime) {
         this.server = server;
+        this.runtime = runtime;
     }
 
     @Override
@@ -38,8 +40,7 @@ public class MapServerBridge implements ServerBridge {
             var response = server.sessionService().joinMapV2(new JoinMapRequest(playerId, mapId, targetState));
             logger.info("join map result: {}", response);
 
-            var currentServerId = AbstractHttpService.hostname;
-            if (currentServerId.equals(response.server())) {
+            if (runtime.hostname().equals(response.server())) {
                 logger.info("moving between maps on this server");
                 this.moveBetweenMapsOnThisServer(player, mapId, targetState);
             } else {

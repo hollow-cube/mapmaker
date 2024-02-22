@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -27,10 +26,9 @@ public class MapPlayerDataMgmtConsumer extends BaseConsumer<MapPlayerDataMgmtCon
     }
 
     private static final String TOPIC_NAME = "map_player_data_mgmt";
-    private static final String GROUP_ID = ServerRuntime.getRuntime().hostname();
 
     public MapPlayerDataMgmtConsumer(@NotNull String bootstrapServers) {
-        super(TOPIC_NAME, GROUP_ID, MapPlayerDataUpdateMessage::fromJson, bootstrapServers);
+        super(TOPIC_NAME, MapPlayerDataUpdateMessage::fromJson, bootstrapServers);
         setAutocommit(false);
     }
 

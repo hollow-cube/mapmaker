@@ -27,7 +27,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     // will see it, close, and then complete it allowing shutdown to finalize.
     private volatile CompletableFuture<Void> closeFuture = null;
 
-    protected BaseConsumer(@NotNull String topic, @NotNull String groupId,
+    protected BaseConsumer(@NotNull String topic,
                            @NotNull Function<String, T> deserializer,
                            @NotNull String bootstrapServers) {
         if (bootstrapServers.isEmpty()) {

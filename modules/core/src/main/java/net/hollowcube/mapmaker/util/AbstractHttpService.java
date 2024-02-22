@@ -20,8 +20,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -60,8 +58,6 @@ public abstract class AbstractHttpService {
             .disableJdkUnsafe()
             .create();
 
-    public static final String hostname; //todo replace me with ServerRuntime call
-
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
@@ -81,15 +77,4 @@ public abstract class AbstractHttpService {
             throw new MapService.InternalError(e);
         }
     }
-
-    static {
-        String hn;
-        try {
-            hn = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            hn = "unknown";
-        }
-        hostname = hn;
-    }
-
 }
