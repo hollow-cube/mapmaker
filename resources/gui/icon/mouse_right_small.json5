@@ -1,0 +1,12 @@
+{
+  "type": "sprite",
+  // Overrides the size
+  "size": [
+    4,
+    7
+  ],
+  "origin": [
+    0,
+    6
+  ]
+}
