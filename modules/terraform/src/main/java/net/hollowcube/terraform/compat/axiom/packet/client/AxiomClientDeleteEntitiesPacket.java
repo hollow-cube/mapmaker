@@ -10,12 +10,13 @@ import java.util.UUID;
 public record AxiomClientDeleteEntitiesPacket(
         @NotNull List<@NotNull UUID> uuids
 ) implements AxiomClientPacket {
+    private static final int MAX_ENTRIES = 1024;
 
     public AxiomClientDeleteEntitiesPacket {
         uuids = List.copyOf(uuids);
     }
 
     public AxiomClientDeleteEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.readCollection(NetworkBuffer.UUID));
+        this(buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES));
     }
 }

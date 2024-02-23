@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
@@ -41,11 +42,14 @@ public class HubServerRunner extends AbstractMapServer {
     HubServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
+        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
+
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
                 .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+
     }
 
     @Override

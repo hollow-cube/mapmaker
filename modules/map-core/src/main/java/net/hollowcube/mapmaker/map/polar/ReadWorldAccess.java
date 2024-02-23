@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.polar;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerLoader;
 import net.hollowcube.polar.PolarWorldAccess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Chunk;
@@ -26,9 +28,15 @@ public class ReadWorldAccess implements PolarWorldAccess {
     public static final int VERSION_PRE_NBT = 3;
 
     protected final MapWorld mapWorld;
+    private final MarkerLoader markerLoader;
 
     public ReadWorldAccess(@NotNull MapWorld mapWorld) {
+        this(mapWorld, null);
+    }
+
+    public ReadWorldAccess(@NotNull MapWorld mapWorld, @Nullable MarkerLoader markerLoader) {
         this.mapWorld = mapWorld;
+        this.markerLoader = markerLoader;
     }
 
     @Override
@@ -96,6 +104,15 @@ public class ReadWorldAccess implements PolarWorldAccess {
         var entity = MapEntityType.create(entityType, uuid);
         if (entity instanceof MapEntity mapEntity)
             mapEntity.load(buffer, VERSION_LATEST);
+
+        var spawnPosition = new Pos(pos, yaw, pitch);
+        if (entity instanceof MarkerEntity marker && markerLoader != null) {
+            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getMarkerData(), spawnPosition);
+            if (!shouldSpawn) {
+                entity.remove();
+                return CompletableFuture.completedFuture(null);
+            }
+        }
 
         return entity.setInstance(chunk.getInstance(), new Pos(pos, yaw, pitch));
     }

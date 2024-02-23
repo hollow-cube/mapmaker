@@ -7,6 +7,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Injectors;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -71,6 +72,7 @@ import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
@@ -424,7 +426,10 @@ public abstract class AbstractMapServer implements MapServer {
             player.kick("unknown error");
             return;
         }
-        world.addPlayer(player);
+        FutureUtil.submitVirtual(() -> {
+            world.addPlayer(player);
+            player.setAutoViewEntities(true); // See comment in AbstractMapWorld#configurePlayer
+        });
 
         // Garbage below
 

@@ -14,13 +14,14 @@ import java.util.UUID;
 public record AxiomClientSpawnEntitiesPacket(
         @NotNull List<@NotNull Entry> entries
 ) implements AxiomClientPacket {
+    private static final int MAX_ENTRIES = 1024;
 
     public AxiomClientSpawnEntitiesPacket {
         entries = List.copyOf(entries);
     }
 
     public AxiomClientSpawnEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion)));
+        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion), MAX_ENTRIES));
     }
 
     public record Entry(

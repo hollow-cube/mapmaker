@@ -2,8 +2,10 @@ package net.hollowcube.terraform.compat.axiom;
 
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
+import net.hollowcube.terraform.compat.axiom.packet.server.AxiomServerPacket;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +43,23 @@ public class Axiom {
 
     static final Tag<Boolean> ENABLED_TAG = Tag.Boolean("terraform:axiom/enabled");
     public static final Tag<ClientInfo> CLIENT_INFO_TAG = Tag.Structure("terraform:axiom/client_info", ClientInfo.class);
+
+    public static void sendPacket(@NotNull Player player, @NotNull AxiomServerPacket packet) {
+        if (!Axiom.isPresent(player) || !Axiom.isEnabled(player)) return;
+        player.sendPacket(packet.toPacket(player));
+    }
+
+    public static void sendPacket(@NotNull Collection<Player> players, @NotNull AxiomServerPacket packet) {
+        for (var player : players) {
+            if (!Axiom.isPresent(player) || !Axiom.isEnabled(player))
+                continue;
+            player.sendPacket(packet.toPacket(player));
+        }
+    }
+
+    public static void sendPacket(@NotNull Instance instance, @NotNull AxiomServerPacket packet) {
+        sendPacket(instance.getPlayers(), packet);
+    }
 
     /**
      * Returns true if the player has axiom installed on their client. This does not say whether it is currently enabled.

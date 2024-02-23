@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.hub;
 
 import com.google.inject.Inject;
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.backpack.RecipeBookHack;
+import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.CreateMapsItem;
 import net.hollowcube.mapmaker.hub.item.OpenCosmeticsMenuItem;
@@ -15,6 +16,7 @@ import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
@@ -98,8 +100,9 @@ public class HubMapWorld extends AbstractMapWorld {
 
     @Override
     public void load() {
+        logger.info("Loading hub world (map id = {})", map().id());
         byte[] mapWorldData;
-        if (!ServerRuntime.getRuntime().isDevelopment()) {
+        if (!map().id().equals(Uuids.ZERO)) {
             mapWorldData = server().mapService().getMapWorld(map().id(), false);
             Check.notNull(mapWorldData, "No world generated for hub world!");
         } else {
@@ -112,7 +115,9 @@ public class HubMapWorld extends AbstractMapWorld {
         }
 
         var instance = (MapInstance) instance();
-        instance.setChunkLoader(new PolarLoader(PolarReader.read(mapWorldData)).setLoadLighting(false));
+        instance.setChunkLoader(new PolarLoader(PolarReader.read(mapWorldData))
+                .setWorldAccess(new ReadWorldAccess(this, new HubMarkerLoader()))
+                .setLoadLighting(false));
 
         var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
         ChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
@@ -132,6 +137,8 @@ public class HubMapWorld extends AbstractMapWorld {
         player.setAllowFlying(true);
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
         player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
+
+        player.getInventory().setItemStack(10, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
 
         // Hotbar items
         var inventory = player.getInventory();

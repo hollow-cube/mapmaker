@@ -13,6 +13,8 @@ import static net.minestom.server.network.NetworkBuffer.VECTOR3D;
 
 @SuppressWarnings("UnstableApiUsage")
 public class Replay {
+    private static final int MAX_ENTRIES = Integer.MAX_VALUE;
+
     public static final int VERSION = 1;
 
     public static @NotNull Replay read(@NotNull ReplayFactory factory, InputStream data) {
@@ -35,7 +37,7 @@ public class Replay {
         var changes = buffer.readCollection($ -> buffer.readCollection($$ -> {
             var entryId = buffer.read(VAR_INT);
             return factory.readEntry(entryId, metadata, buffer);
-        }));
+        }, MAX_ENTRIES), MAX_ENTRIES);
 
         return new Replay(changes);
     }

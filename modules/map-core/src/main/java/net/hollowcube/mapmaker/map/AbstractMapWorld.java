@@ -126,6 +126,15 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());
             player.setRespawnPoint(spawnPoint(player));
+
+            // addPlayer is called during PlayerSpawnEvent meaning that the player is already in the instance,
+            // and all of the entity `updateNewViewer` calls were already made. This makes it unsafe to call
+            // MapWorld#forPlayer during viewer add which is unexpected and strange behavior.
+            // To fix it, we disable auto entity viewing during config, and then reenable it after the player is added
+            // to the world.
+            // todo: this only happens during reconfiguration, not when using the spectator item or enter/exiting test mode
+            //       Those two cases need to be fixed in a generic way that handles all other cases.
+            player.setAutoViewEntities(false);
         } catch (Exception e) {
             logger.error("Failed to configure player", e);
             player.kick("An unexpected error occurred while configuring your player. Please try again.");

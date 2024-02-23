@@ -129,7 +129,7 @@ public class SnapshotViewerServer {
                     var expected = buffer.read(BYTE_ARRAY);
                     var actual = buffer.read(BYTE_ARRAY);
                     return new Failure(id, expected, actual);
-                });
+                }, Integer.MAX_VALUE);
                 if (failures.isEmpty()) return;
 
                 var testId = failures.get(0).id();

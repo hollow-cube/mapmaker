@@ -22,6 +22,8 @@ public class AxiomModule implements TerraformModule {
     private final EventNode<Event> axiomEvents = EventNode.all("tf/compat/axiom")
             .addListener(PlayerSpawnEvent.class, this::handlePlayerConfig)
             .addListener(PlayerPluginMessageEvent.class, this::handlePluginMessage);
+//            .addListener(EntitySpawnEvent.class, this::handleEntitySpawn)
+//            .addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemove);
 
     private final AxiomPacketListener handler = new AxiomPacketListener();
 
@@ -69,6 +71,24 @@ public class AxiomModule implements TerraformModule {
             case null -> logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
         }
     }
+
+//    private void handleEntitySpawn(@NotNull EntitySpawnEvent event) {
+//        var entity = event.getEntity();
+//        if (!entity.getEntityType().equals(EntityType.MARKER)) return;
+//
+//        var addPacket = new AxiomMarkerDataPacket(List.of(
+//                new AxiomMarkerDataPacket.Entry(entity.getUuid(), entity.getPosition(), null, null, null)
+//        ), List.of());
+//        Axiom.sendPacket(event.getSpawnInstance(), addPacket);
+//    }
+//
+//    private void handleEntityRemove(@NotNull RemoveEntityFromInstanceEvent event) {
+//        var entity = event.getEntity();
+//        if (!entity.getEntityType().equals(EntityType.MARKER)) return;
+//
+//        var removePacket = new AxiomMarkerDataPacket(List.of(), List.of(entity.getUuid()));
+//        Axiom.sendPacket(event.getInstance(), removePacket);
+//    }
 
     private void handleRegisterPluginMessageChannels(@NotNull Player player, @NotNull String data) {
         for (var channel : data.split("\0")) {

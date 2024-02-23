@@ -1,0 +1,16 @@
+{
+  "trades": [
+    {
+      "result": {
+        "type": "cosmetic",
+        "id": "head/hard_hat"
+      },
+      "inputs": [
+        {
+          "type": "cubits",
+          "count": 50
+        }
+      ]
+    }
+  ]
+}

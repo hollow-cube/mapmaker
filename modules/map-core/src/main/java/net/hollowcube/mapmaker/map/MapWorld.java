@@ -46,6 +46,9 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
      * @return the locally unique id of this world.
      */
     @NotNull String worldId();
+    default boolean isReadOnly() {
+        return true;
+    }
 
     @NotNull MapServer server();
     @NotNull MapData map();

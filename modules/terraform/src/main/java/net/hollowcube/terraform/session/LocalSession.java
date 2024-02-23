@@ -40,6 +40,8 @@ public class LocalSession {
     // todo: turn these into player capabilities
     private static final int MAX_HISTORY_SIZE = 10;
 
+    private static final int ABSOLUTE_MAX_SELECTIONS = 1024;
+
     public static @NotNull LocalSession forPlayer(@NotNull Player player) {
         return Objects.requireNonNull(forPlayerOptional(player), "Local session not initialized");
     }
@@ -201,7 +203,7 @@ public class LocalSession {
         Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
 
         // Selections
-        var selections = buffer.readCollection(b -> new Selection(this, b));
+        var selections = buffer.readCollection(b -> new Selection(this, b), ABSOLUTE_MAX_SELECTIONS);
         selections.forEach(s -> this.selections.put(s.name(), s));
         assertMarker(buffer, "selections");
 

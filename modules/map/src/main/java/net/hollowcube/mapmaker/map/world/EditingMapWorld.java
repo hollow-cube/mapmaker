@@ -108,6 +108,11 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
     public boolean canEdit(@NotNull Player player) {
         return isPlaying(player);
     }

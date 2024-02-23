@@ -14,9 +14,10 @@ public record AxiomClientSetEditorViewsPacket(
         @NotNull UUID uuid,
         @NotNull List<View> views
 ) implements AxiomClientPacket {
+    private static final int MAX_VIEWS = 1024;
 
     public AxiomClientSetEditorViewsPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(NetworkBuffer.UUID), buffer.readCollection(b1 -> new View(b1, apiVersion)));
+        this(buffer.read(NetworkBuffer.UUID), buffer.readCollection(b1 -> new View(b1, apiVersion), MAX_VIEWS));
     }
 
     public record View(

@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.entity.impl.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.ItemFrameEntity;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -26,6 +27,8 @@ public final class MapEntities {
         MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity::new);
         MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity::new);
         MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity::new);
+
+        MapEntityType.override(EntityType.MARKER, MarkerEntity::new);
     }
 
     private static void handleEntityInteract(@NotNull PlayerEntityInteractEvent event) {

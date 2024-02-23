@@ -8,19 +8,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Common logic for player-like NPCs in the hub.
+ */
 @SuppressWarnings("UnstableApiUsage")
-public class NpcPlayer extends BaseNpcEntity {
+public class NpcPlayerEntity extends BaseNpcEntity {
+    private static final Team NPC_TEAM = MinecraftServer.getTeamManager().createBuilder("npcs")
+            .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+            .build();
+
     private final String username;
     private final PlayerSkin skin;
 
-    public NpcPlayer(@NotNull String username, @Nullable PlayerSkin skin) {
+    public NpcPlayerEntity(@NotNull String username, @Nullable PlayerSkin skin) {
         this(UUID.randomUUID(), username, skin);
     }
 
-    public NpcPlayer(@NotNull UUID uuid, @NotNull String username, @Nullable PlayerSkin skin) {
+    public NpcPlayerEntity(@NotNull UUID uuid, @NotNull String username, @Nullable PlayerSkin skin) {
         super(EntityType.PLAYER, uuid);
         this.username = username;
         this.skin = skin;
@@ -57,6 +65,11 @@ public class NpcPlayer extends BaseNpcEntity {
 
         // Enable skin layers
         player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
+
+        // Put them on the NPC team to hide their name tag
+        final TeamsPacket addPlayerPacket = new TeamsPacket(NPC_TEAM.getTeamName(),
+                new TeamsPacket.AddEntitiesToTeamAction(List.of(this.username)));
+        sendPacketToViewers(addPlayerPacket);
     }
 
     @Override

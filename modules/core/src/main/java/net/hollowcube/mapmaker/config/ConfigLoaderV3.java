@@ -35,7 +35,7 @@ public class ConfigLoaderV3 {
                 if (split.length != 2) continue;
                 envmap.put(split[0], split[1]);
             }
-
+            
             return loadFromText(is.readAllBytes(), envmap);
         } catch (IOException e) {
             logger.error("failed to load config file", e);

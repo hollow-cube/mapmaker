@@ -6,7 +6,7 @@ java_binary(
         "src/main/java/**/*.java",
     ]),
     javacopts = [
-        "-Xplugin:HollowCubeCompilePlugin",
+        #        "-Xplugin:HollowCubeCompilePlugin",
     ],
     main_class = "net.hollowcube.mapmaker.hub.Main",
     resources = glob(include = [

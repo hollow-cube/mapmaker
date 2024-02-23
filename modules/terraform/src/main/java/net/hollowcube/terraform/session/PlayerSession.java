@@ -34,6 +34,8 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
 public class PlayerSession {
     private static final Logger logger = LoggerFactory.getLogger(PlayerSession.class);
 
+    private static final int ABSOLUTE_MAX_CLIPBOARDS = 1024;
+
     /**
      * Returns the {@link PlayerSession} for the given player.
      *
@@ -158,7 +160,7 @@ public class PlayerSession {
         var version = buffer.read(SHORT);
         Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
 
-        var clipboards = buffer.readCollection(Clipboard::new);
+        var clipboards = buffer.readCollection(Clipboard::new, ABSOLUTE_MAX_CLIPBOARDS);
         clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
         assertMarker(buffer, "clipboards");
 

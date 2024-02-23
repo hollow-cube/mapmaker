@@ -5,13 +5,15 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
-import net.minestom.server.particle.ParticleCreator;
+import net.minestom.server.particle.data.DustParticleData;
 import net.minestom.server.thread.TickThread;
 import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -95,15 +97,10 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         var world = MapWorld.unsafeFromInstance(instance);
         if (!(world instanceof EditingMapWorld)) return;
 
-        PacketUtils.sendGroupedPacket(world.players(), ParticleCreator.createParticlePacket(
-                Particle.DUST, true,
-                blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
-                0.25f, 0.25f, 0.25f, 0f, 5, buffer -> {
-                    buffer.writeFloat(0f); // red
-                    buffer.writeFloat(1f); // green
-                    buffer.writeFloat(0f); // blue
-                    buffer.writeFloat(1f); // scale
-                }
+        PacketUtils.sendGroupedPacket(world.players(), new ParticlePacket(
+                Particle.DUST.withData(new DustParticleData(new Color(0, 255, 0), 1f)),
+                true, blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
+                0.25f, 0.25f, 0.25f, 0, 5
         ));
     }
 

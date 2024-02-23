@@ -15,6 +15,8 @@ import java.util.UUID;
 public record AxiomClientModifyEntitiesPacket(
         @NotNull List<Entry> entries
 ) implements AxiomClientPacket {
+    private static final int MAX_ENTRIES = 512;
+
     public static final byte FLAG_X = 1 << 0;
     public static final byte FLAG_Y = 1 << 1;
     public static final byte FLAG_Z = 1 << 2;
@@ -26,7 +28,7 @@ public record AxiomClientModifyEntitiesPacket(
     }
 
     public AxiomClientModifyEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion)));
+        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion), MAX_ENTRIES));
     }
 
     public record Entry(
@@ -52,7 +54,7 @@ public record AxiomClientModifyEntitiesPacket(
             var pos = flags > 0 ? ProtocolUtil.readPos(buffer) : null;
             var nbt = buffer.read(NetworkBuffer.NBT) instanceof NBTCompound nbtCompound ? nbtCompound : NBTCompound.EMPTY;
             var passengerChange = buffer.readEnum(PassengerChange.class);
-            var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID) : null;
+            var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES) : null;
             return new Entry(uuid, flags, pos, nbt, passengerChange, passengers);
         }
     }

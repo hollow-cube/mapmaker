@@ -11,11 +11,9 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
 import net.hollowcube.mapmaker.map.block.PlacementRules;
+import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.HubCommand;
-import net.hollowcube.mapmaker.map.command.build.BiomesCommand;
-import net.hollowcube.mapmaker.map.command.build.BuildCommand;
-import net.hollowcube.mapmaker.map.command.build.SetSpawnCommand;
-import net.hollowcube.mapmaker.map.command.build.TestCommand;
+import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.runtime.*;
@@ -139,6 +137,7 @@ public class MapServerRunner extends AbstractMapServer {
                 .build();
 
         // Block/item rules
+        BlockHandlers.init();
         PlacementRules.init(terraform);
         var interactionEvents = EventNode.event("mapmaker:map/interaction", EventFilter.INSTANCE,
                 eventFilter(false, true, false));
@@ -171,6 +170,8 @@ public class MapServerRunner extends AbstractMapServer {
 
         commandManager.register(server.createInstance(BiomesCommand.class));
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));
+
+        commandManager.register(server.createInstance(AddMarkerCommand.class));
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {

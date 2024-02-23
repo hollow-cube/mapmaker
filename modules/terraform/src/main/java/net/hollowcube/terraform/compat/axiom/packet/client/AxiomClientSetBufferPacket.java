@@ -29,6 +29,8 @@ public record AxiomClientSetBufferPacket(
 ) implements AxiomClientPacket {
     private static final Logger logger = LoggerFactory.getLogger(AxiomClientSetBufferPacket.class);
 
+    private static final int MAX_PALETTE_SIZE = 4096;
+
     public AxiomClientSetBufferPacket(@NotNull AxiomClientSetBufferPacket other) {
         this(other.dimensionName, other.correlationId, other.isContinuation, other.sourceInfo, other.buffer);
     }
@@ -114,7 +116,7 @@ public record AxiomClientSetBufferPacket(
                 switch (buffer.read(BYTE)) {
                     case 0 -> buffer.read(VAR_INT); // Fixed
                     case 1, 2, 3, 4, 5, 6, 7, 8 -> { // Linear or HashMap
-                        buffer.readCollection(VAR_INT); // Palette
+                        buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE); // Palette
                         buffer.read(LONG_ARRAY); // Data
                     }
                     default -> buffer.read(LONG_ARRAY); // Global
@@ -141,7 +143,7 @@ public record AxiomClientSetBufferPacket(
                 }
                 case 1, 2, 3, 4 -> { // Vanilla: Linear palette (always bpe 4)
                     var palette = new NaivePalette(); //todo need to not use this, its bad. NaivePalette should be package private.
-                    var rawPalette = buffer.readCollection(VAR_INT);
+                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
                     var paletteEntries = new int[rawPalette.size()];
                     for (int i = 0; i < paletteEntries.length; i++) {
                         // Convert to our internal representation
@@ -160,7 +162,7 @@ public record AxiomClientSetBufferPacket(
                 }
                 case 5, 6, 7, 8 -> { // Vanilla: Hashmap palette (bpe = bits)
                     var palette = new NaivePalette();
-                    var rawPalette = buffer.readCollection(VAR_INT);
+                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
                     var paletteEntries = new int[rawPalette.size()];
                     for (int i = 0; i < paletteEntries.length; i++) {
                         // Convert to our internal representation

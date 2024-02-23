@@ -1,10 +1,10 @@
 package net.hollowcube.terraform.compat.axiom.listener;
 
 import net.hollowcube.terraform.compat.axiom.Axiom;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomAckWorldPropertyPacket;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomChunkDataResponsePacket;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
+import net.hollowcube.terraform.compat.axiom.packet.server.*;
 import net.hollowcube.terraform.compat.axiom.world.property.WorldPropertiesRegistry;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
 import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
@@ -200,6 +200,7 @@ public final class AxiomPacketListener {
     public void handleModifyEntities(@NotNull Player player, @NotNull AxiomClientModifyEntitiesPacket packet) {
         if (!Axiom.isEnabled(player)) return;
 
+        //todo this does not handle fake entities, it probably should. That would be particularly useful for markers.
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
             var entity = Entity.getEntity(entry.uuid());
@@ -221,8 +222,14 @@ public final class AxiomPacketListener {
                 EventDispatcher.callCancellable(event, () -> entity.teleport(event.getNewPosition()));
             }
 
-            applyEntityMetadataFromNbt(entity.getEntityMeta(), entry.nbt());
-            EventDispatcher.call(new TerraformModifyEntityEvent(entity));
+            if (entity.getEntityType().equals(EntityType.MARKER)) {
+                // Markers have special NBT handling for now.
+                var event = new TerraformAxiomUpdateMarkerDataEvent(player, entry.uuid(), entry.nbt());
+                EventDispatcher.call(event);
+            } else {
+                applyEntityMetadataFromNbt(entity.getEntityMeta(), entry.nbt());
+                EventDispatcher.call(new TerraformModifyEntityEvent(entity));
+            }
 
             //todo passengers
         }
@@ -247,7 +254,20 @@ public final class AxiomPacketListener {
     }
 
     public void handleRequestMarkerData(@NotNull Player player, @NotNull AxiomClientMarkerNbtRequestPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
 
+        var event = new TerraformAxiomRequestMarkerDataEvent(player, packet.uuid());
+        EventDispatcher.callCancellable(event, () -> {
+            if (event.getData() == null) return;
+
+            var responsePacket = new AxiomMarkerNbtResponsePacket(packet.uuid(), event.getData());
+            player.sendPacket(responsePacket.toPacket(player));
+        });
+    }
+
+    private @Nullable AxiomMarkerDataPacket.Entry createAddMarkerEntry(@NotNull Entity entity) {
+        if (!entity.getEntityType().equals(EntityType.MARKER)) return null;
+        return new AxiomMarkerDataPacket.Entry(entity.getUuid(), entity.getPosition(), null, null, null, 0, 0, 0);
     }
 
     private void applyEntityMetadataFromNbt(@NotNull EntityMeta entityMeta, @NotNull NBTCompound nbt) {
@@ -262,8 +282,7 @@ public final class AxiomPacketListener {
                 case BlockDisplayMeta blockDisplayMeta -> applyBlockDisplayMetaField(blockDisplayMeta, key, value);
                 case ItemDisplayMeta itemDisplayMeta -> applyItemDisplayMetaField(itemDisplayMeta, key, value);
                 case TextDisplayMeta textDisplayMeta -> applyTextDisplayMetaField(textDisplayMeta, key, value);
-                default ->
-                        throw new IllegalStateException("unexpected entity type: " + entityMeta.getClass().getName());
+                default -> applyEntityMetaField(entityMeta, key, value);
             };
             if (!applied) {
                 logger.warn("Unhandled entity metadata field: {} -> {}", key, value);

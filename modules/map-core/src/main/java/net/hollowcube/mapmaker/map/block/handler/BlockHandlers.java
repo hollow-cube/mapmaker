@@ -24,7 +24,7 @@ public final class BlockHandlers {
     public static final BlockHandler BELL = new NoopBlockHandler("minecraft:bell");
     public static final BlockHandler DECORATED_POT = new DecoratedPotBlockHandler();
 
-    static {
+    public static void init() {
         Consumer<BlockHandler> register = handler -> MinecraftServer.getBlockManager()
                 .registerHandler(handler.getNamespaceId(), () -> handler);
 
@@ -44,5 +44,4 @@ public final class BlockHandlers {
         register.accept(BELL);
         register.accept(DECORATED_POT);
     }
-
 }
