@@ -127,8 +127,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     protected void handleGlobalChatUnsigned(@NotNull ChatMessageData message) {
         logger.info("Received chat message: {}", message);
         try {
-            // This is braindead inefficient
-            // Awful garbage code
+            // todo This is braindead inefficient
+            //  Awful garbage code
 
             var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
             var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
