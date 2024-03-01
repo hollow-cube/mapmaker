@@ -29,9 +29,8 @@ import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
-import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
+import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.misc.Emoji;
@@ -190,8 +189,7 @@ public abstract class AbstractMapServer implements MapServer {
         injector.bind(Controller.class, guiController);
         prepareStart();
 
-        var ignored1 = CheckpointPlateBlock.OBJECT_TYPE; // Will fix when reworking ram usage
-        var ignored2 = FinishPlateBlock.OBJECT_TYPE; // Will fix when reworking ram usage
+        var ignored = ObjectTypes.CHECKPOINT_PLATE; // Will fix when reworking ram usage
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;

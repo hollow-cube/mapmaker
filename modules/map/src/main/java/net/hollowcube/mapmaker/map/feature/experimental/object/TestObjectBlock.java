@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.experimental.object;
 
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
+import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;

@@ -1,15 +1,15 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.mapmaker.command.util.DebugCommand;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.entity.Player;

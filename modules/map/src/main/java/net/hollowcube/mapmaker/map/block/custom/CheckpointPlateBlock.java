@@ -1,14 +1,14 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.mapmaker.command.util.DebugCommand;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
+import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
@@ -26,10 +26,6 @@ import java.util.Set;
 public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
 
-    public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:checkpoint_plate")
-            .requiredVariant(MapVariant.PARKOUR)
-            .build();
-
     public static final CheckpointPlateBlock INSTANCE = new CheckpointPlateBlock();
     public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE,
             Block.HEAVY_WEIGHTED_PRESSURE_PLATE, CheckpointPlateBlock::updateItemStack);
@@ -38,7 +34,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 
     @Override
     public @NotNull ObjectType objectType() {
-        return OBJECT_TYPE;
+        return ObjectTypes.CHECKPOINT_PLATE;
     }
 
     @Override
