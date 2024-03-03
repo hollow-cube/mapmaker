@@ -39,14 +39,14 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
 
         var targetId = context.get(this.targetArgument);
         if (targetId == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", Component.text(targetName)));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(targetName)));
             return;
         }
 
         var targetSession = this.sessionManager.getSession(targetId);
         var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
         if (targetSession == null) {
-            player.sendMessage(Component.translatable("generic.player_offline", targetDisplayName));
+            player.sendMessage(Component.translatable("generic.player.offline", targetDisplayName));
             return;
         }
         if (player.getUuid().toString().equals(targetSession.playerId())) {

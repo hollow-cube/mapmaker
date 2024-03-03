@@ -49,7 +49,7 @@ public class ModelTransform {
                 int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
                 JsonObject serverSpriteConf = new JsonObject();
-                String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "");
+                String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "").replace("\\", "/");
                 System.out.println("processing " + fullName);
                 serverSpriteConf.addProperty("name", fullName);
                 serverSpriteConf.addProperty("cmd", cmd);

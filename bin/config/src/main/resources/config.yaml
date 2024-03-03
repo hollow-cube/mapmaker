@@ -26,14 +26,56 @@ unleash:
 announcements:
   interval: 1800
   messages:
-    - key: "announcement.test1"
-    - key: "announcement.test2"
-    - key: "announcement.test3"
-    - key: "announcement.test4"
-    - key: "announcement.filter.type"
+    - key: "announcement.global.omega_parkour"
+    - key: "announcement.global.leaderboards"
+    - key: "announcement.global.lobby"
+    - key: "announcement.global.verify"
+    - key: "announcement.global.find"
+    - key: "announcement.play.spectator_mode"
       filters:
         session_type: "mapmaker:map"
-    - key: "announcement.filter.type_and_state"
+        session_state: "playing"
+    - key: "announcement.play.player_visibility"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "playing"
+    - key: "announcement.play.savestate"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "playing"
+    - key: "announcement.build.map_tags"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.invite"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.display_item"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.memory"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.reverify"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.give"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.test"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.setspawn"
+      filters:
+        session_type: "mapmaker:map"
+        session_state: "editing"
+    - key: "announcement.build.schematic"
       filters:
         session_type: "mapmaker:map"
         session_state: "editing"
