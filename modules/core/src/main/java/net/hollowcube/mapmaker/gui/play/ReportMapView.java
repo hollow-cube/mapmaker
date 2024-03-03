@@ -82,11 +82,12 @@ public class ReportMapView extends View {
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.header", List.of()));
             for (var category : categories) {
                 lore.add(Component.translatable("gui.report_map.submit.category",
-                        Component.translatable("gui.report_map.category." + category.name().toLowerCase() + ".name")));
+                        Component.translatable("gui.report_map.category." + category.name().toLowerCase() + ".on.name")));
             }
 
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.footer", List.of(getCommentText())));
         } else {
+            title = Component.translatable("gui.report_map.submit.missing_categories.name");
             lore.add(Component.translatable("gui.report_map.submit.missing_categories.lore"));
         }
 
@@ -95,9 +96,9 @@ public class ReportMapView extends View {
 
     @Action("add_comment")
     private void handleAddComment(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             pushView(c -> new SetReportCommentView(c, comment));
-        } else if (clickType == ClickType.RIGHT_CLICK) {
+        } else if (clickType == ClickType.START_SHIFT_CLICK) {
             updateCommentText("");
         }
     }

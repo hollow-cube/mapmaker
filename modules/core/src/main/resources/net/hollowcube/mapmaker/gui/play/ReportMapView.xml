@@ -1,65 +1,60 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ltr">
-
-    <spacer/>
-
-    <box width="7" height="5" align="ttb">
+    <box width="9" height="5" align="ttb">
         <!-- Top bar -->
-        <box width="7" align="ltr">
+        <box width="9" align="ltr">
             <BackButton/>
             <label translationKey="gui.report_map.information"/>
-            <spacer width="3"/>
+            <spacer width="5"/>
             <!--            <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"-->
             <!--                  font="play_maps_page" centered="true"/>-->
-            <label translationKey="gui.report_map.location"
-                   sprite="minecraft:compass"/>
-            <button id="add_comment" translationKey="gui.report_map.add_comment"
+            <button width="2" id="add_comment" translationKey="gui.report_map.add_comment"
                     sprite="minecraft:paper"/>
         </box>
 
         <spacer/>
 
         <!-- Buttons -->
-        <box width="7" height="1" align="ltr">
-            <spacer/>
+        <box width="9" height="1" align="ltr">
+            <spacer width="2"/>
 
             <switch id="switch_cheated">
-                <button id="reason_cheated_off" translationKey="gui.report_map.category.cheated"
+                <button id="reason_cheated_off" translationKey="gui.report_map.category.cheated.off"
                         sprite="minecraft:feather"/>
-                <button id="reason_cheated_on" translationKey="gui.report_map.category.cheated"
+                <button id="reason_cheated_on" translationKey="gui.report_map.category.cheated.on"
                         sprite="minecraft:feather"/>
             </switch>
             <switch id="switch_discrimination">
-                <button id="reason_discrimination_off" translationKey="gui.report_map.category.discrimination"
+                <button id="reason_discrimination_off" translationKey="gui.report_map.category.discrimination.off"
                         sprite="minecraft:pumpkin"/>
-                <button id="reason_discrimination_on" translationKey="gui.report_map.category.discrimination"
+                <button id="reason_discrimination_on" translationKey="gui.report_map.category.discrimination.on"
                         sprite="minecraft:pumpkin"/>
             </switch>
             <switch id="switch_explicit_content">
-                <button id="reason_explicit_content_off" translationKey="gui.report_map.category.explicit_content"
+                <button id="reason_explicit_content_off" translationKey="gui.report_map.category.explicit_content.off"
                         sprite="minecraft:painting"/>
-                <button id="reason_explicit_content_on" translationKey="gui.report_map.category.explicit_content"
+                <button id="reason_explicit_content_on" translationKey="gui.report_map.category.explicit_content.on"
                         sprite="minecraft:painting"/>
             </switch>
             <switch id="switch_spam">
-                <button id="reason_spam_off" translationKey="gui.report_map.category.spam"
+                <button id="reason_spam_off" translationKey="gui.report_map.category.spam.off"
                         sprite="minecraft:writable_book"/>
-                <button id="reason_spam_on" translationKey="gui.report_map.category.spam"
+                <button id="reason_spam_on" translationKey="gui.report_map.category.spam.on"
                         sprite="minecraft:writable_book"/>
             </switch>
             <switch id="switch_troll">
-                <button id="reason_troll_off" translationKey="gui.report_map.category.troll"
+                <button id="reason_troll_off" translationKey="gui.report_map.category.troll.off"
                         sprite="minecraft:tnt"/>
-                <button id="reason_troll_on" translationKey="gui.report_map.category.troll"
+                <button id="reason_troll_on" translationKey="gui.report_map.category.troll.on"
                         sprite="minecraft:tnt"/>
             </switch>
         </box>
 
-        <spacer/>
+        <spacer width="2"/>
 
-        <box width="7" height="1" align="ltr">
-            <spacer/>
+        <box width="9" height="1" align="ltr">
+            <spacer width="2"/>
 
             <button id="submit" width="5" height="1"
                     translationKey="gui.report_map.submit"
