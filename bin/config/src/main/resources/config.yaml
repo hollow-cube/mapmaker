@@ -27,15 +27,13 @@ announcements:
   interval: 1800
   messages:
     - key: "announcement.global.omega_parkour"
-    - key: "announcement.global.leaderboards"
     - key: "announcement.global.lobby"
-    - key: "announcement.global.verify"
     - key: "announcement.global.find"
-    - key: "announcement.play.spectator_mode"
+    - key: "announcement.play.leaderboards"
       filters:
         session_type: "mapmaker:map"
         session_state: "playing"
-    - key: "announcement.play.player_visibility"
+    - key: "announcement.play.spectator_mode"
       filters:
         session_type: "mapmaker:map"
         session_state: "playing"
@@ -48,18 +46,6 @@ announcements:
         session_type: "mapmaker:map"
         session_state: "editing"
     - key: "announcement.build.invite"
-      filters:
-        session_type: "mapmaker:map"
-        session_state: "editing"
-    - key: "announcement.build.display_item"
-      filters:
-        session_type: "mapmaker:map"
-        session_state: "editing"
-    - key: "announcement.build.memory"
-      filters:
-        session_type: "mapmaker:map"
-        session_state: "editing"
-    - key: "announcement.build.reverify"
       filters:
         session_type: "mapmaker:map"
         session_state: "editing"

@@ -14,6 +14,21 @@ caveat audit_log_hack(never_set bool) {
     never_set
 }
 
+// This caveat is used to handle expiration of hypercube. The hypercube relationship is the source of truth
+// for whether a player has hypercube, and when it will expire. This caveat will deny any hypercube requests
+// after the expiration time.
+//
+// The `expiration` field is ALWAYS set on write, and `current_time` is always provided on read. Additionally,
+// it is valid to lookup this relationship and fetch `expiration` from context to determine expiration.
+//
+// Implementation note: While this does handle expiration as expected, spicedb will currently not remove the
+// expired relationship on its own after expiration. This means that we will end up with a lot of dead relationships
+// if not collected ourselves, so the player-service will be responsible for garbage collecting these relationships.
+// See this issue for the feature in spicedb: https://github.com/authzed/spicedb/issues/1262
+caveat is_not_expired(start_time timestamp, term duration, current_time timestamp) {
+    current_time < (start_time + term)
+}
+
 // Role definitions for the entirety of mapmaker. There is a single platform
 // for all of mapmaker, always with the id "0".
 //
@@ -24,6 +39,8 @@ definition mapmaker/platform {
     relation dev: mapmaker/player with audit_log_hack
     relation mod: mapmaker/player with audit_log_hack
     relation crt: mapmaker/player
+
+    relation hypercube: mapmaker/player with is_not_expired
 
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
     permission global_map_superadmin = admin
@@ -42,6 +59,9 @@ definition mapmaker/platform {
     permission ip_ban_player = mod + admin
     permission ban_player = mod + admin
     permission mute_player = ban_player
+
+    // Hypercube
+    permission has_hypercube = hypercube
 }
 
 // A player is any player on mapmaker (identified by their uuid)
