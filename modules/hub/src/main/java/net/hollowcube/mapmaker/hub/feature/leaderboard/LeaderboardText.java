@@ -61,6 +61,10 @@ public class LeaderboardText {
                 .append(Component.text("Your Score: ---")));
     }
 
+    public void setEntriesRaw(@NotNull Component entriesText) {
+        entriesEntity.getEntityMeta().setText(entriesText);
+    }
+
     public @NotNull CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos pos) {
         return CompletableFuture.allOf(
                 entriesEntity.setInstance(instance, pos),

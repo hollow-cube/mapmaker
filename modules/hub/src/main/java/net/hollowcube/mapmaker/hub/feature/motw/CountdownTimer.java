@@ -30,15 +30,7 @@ public class CountdownTimer implements Supplier<TaskSchedule> {
         remaining -= hours * 60;
         var minutes = remaining;
         var newDigits = new int[]{days, hours / 10, hours % 10, minutes / 10, minutes % 10};
-
-        // Diff the digits and change the relevant schematics
-        for (int i = 0; i < 5; i++) {
-            if (digits[i] == newDigits[i]) continue;
-            digits[i] = newDigits[i];
-
-            // Update the schematic
-            CountdownUtil.applySchematic(instance, i, digits[i]);
-        }
+        setDigits(newDigits);
 
         return TaskSchedule.seconds(timeToNextMinute());
     }
@@ -52,5 +44,16 @@ public class CountdownTimer implements Supplier<TaskSchedule> {
         LocalDateTime nextSundayMidnight = now.with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).toLocalDate().atStartOfDay();
 
         return ChronoUnit.MINUTES.between(now, nextSundayMidnight);
+    }
+
+    public void setDigits(int[] newDigits) {
+        // Diff the digits and change the relevant schematics
+        for (int i = 0; i < 5; i++) {
+            if (digits[i] == newDigits[i]) continue;
+            digits[i] = newDigits[i];
+
+            // Update the schematic
+            CountdownUtil.applySchematic(instance, i, digits[i]);
+        }
     }
 }

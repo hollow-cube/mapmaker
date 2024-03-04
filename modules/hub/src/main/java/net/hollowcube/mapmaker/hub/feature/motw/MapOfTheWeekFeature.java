@@ -3,12 +3,12 @@ package net.hollowcube.mapmaker.hub.feature.motw;
 import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.hub.feature.leaderboard.Leaderboard1;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -33,13 +33,17 @@ public class MapOfTheWeekFeature implements HubFeature {
     private final NpcItemModel mapEntity = new NpcItemModel();
     private int mapEntityRotationTarget = 0;
 
+    private final Leaderboard1 testlb = new Leaderboard1(0);
+    private final Leaderboard1 testlb2 = new Leaderboard1(0);
+
     @Inject
     public MapOfTheWeekFeature(@NotNull ServerBridge bridge, @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         this.bridge = bridge;
 
         // Timer init (the big countdown above the map)
         var timer = new CountdownTimer(world.instance());
-        scheduler.submitTask(timer, ExecutionType.SYNC);
+        timer.setDigits(new int[]{0, 0, 0, 0, 0});
+//        scheduler.submitTask(timer, ExecutionType.SYNC);
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
@@ -48,17 +52,21 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS).join();
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0)).join();
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.SYNC);
+        
+        testlb.setInstance(world.instance(), new Pos(-25.5, 41, 53.5, 90 + 45, 0));
+        testlb2.setInstance(world.instance(), new Pos(-49.5, 41, 53.5, 90 + 45 + 90, 0));
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {
-        try {
-            player.sendMessage(Component.translatable("motw.joining"));
-            bridge.joinMap(player, "14b8a361-7cba-49ec-933c-14faad11f385", ServerBridge.JoinMapState.PLAYING);
-        } catch (Exception e) {
-            // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
-            logger.error("failed to join motw for {}: {}", PlayerDataV2.fromPlayer(player).id(), e.getMessage());
-            player.sendMessage(Component.translatable("command.generic.unknown_error"));
-        }
+        player.sendMessage(Component.translatable("motw.coming_soon"));
+//        try {
+//            player.sendMessage(Component.translatable("motw.joining"));
+//            bridge.joinMap(player, "14b8a361-7cba-49ec-933c-14faad11f385", ServerBridge.JoinMapState.PLAYING);
+//        } catch (Exception e) {
+//             If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
+//            logger.error("failed to join motw for {}: {}", PlayerDataV2.fromPlayer(player).id(), e.getMessage());
+//            player.sendMessage(Component.translatable("command.generic.unknown_error"));
+//        }
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

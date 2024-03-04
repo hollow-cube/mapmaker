@@ -3,7 +3,8 @@ package net.hollowcube.mapmaker.hub.feature.leaderboard;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
-import net.hollowcube.mapmaker.player.DisplayName;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
@@ -38,7 +39,8 @@ public class Leaderboard1 {
                 Math.toRadians(screenAngle)).into());
 
         text = new LeaderboardText(0, screenAngle);
-        text.setData(s -> new DisplayName(List.of(new DisplayName.Part("username", s, null))), data);
+        text.setEntriesRaw(Component.text("ᴄᴏᴍɪɴɢ ѕᴏᴏɴ...", NamedTextColor.DARK_GRAY));
+//        text.setData(s -> new DisplayName(List.of(new DisplayName.Part("username", s, null))), data);
     }
 
     public void setInstance(@NotNull Instance instance, @NotNull Pos pos) {

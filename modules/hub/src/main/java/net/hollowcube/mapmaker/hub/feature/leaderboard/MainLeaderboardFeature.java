@@ -25,9 +25,6 @@ public class MainLeaderboardFeature implements HubFeature {
     private Leaderboard2 parkourLeaderboard;
     private Leaderboard2 buildingLeaderboard;
 
-    private final Leaderboard1 testlb = new Leaderboard1(0);
-    private final Leaderboard1 testlb2 = new Leaderboard1(0);
-
     @Inject
     public MainLeaderboardFeature(@NotNull MapService mapService, @NotNull PlayerService playerService,
                                   @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
@@ -57,9 +54,6 @@ public class MainLeaderboardFeature implements HubFeature {
         parkourLeaderboard.setInstance(world.instance(), new Pos(6, 39, -22.5, 90, 0));
         buildingLeaderboard.update();
         buildingLeaderboard.setInstance(world.instance(), new Pos(6, 39, 23.5, 90, 0));
-
-        testlb.setInstance(world.instance(), new Pos(-25.5, 41, 53.5, 90 + 45, 0));
-        testlb2.setInstance(world.instance(), new Pos(-49.5, 41, 53.5, 90 + 45 + 90, 0));
 
         scheduler.scheduleTask(this::update, SCHEDULE, SCHEDULE);
     }
