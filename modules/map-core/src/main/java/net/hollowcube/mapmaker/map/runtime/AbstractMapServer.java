@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.GlobalConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
@@ -90,6 +91,7 @@ public abstract class AbstractMapServer implements MapServer {
     private ChatMessageListener chatMessageListener;
     private MapInviteListener mapInviteListener;
     private MapInviteAcceptedOrRejectedListener mapInviteAcceptedOrRejectedListener;
+    private PlayerDataUpdateConsumer playerDataUpdateConsumer;
 
     private final CommandManager commandManager = new CommandManagerImpl();
 
@@ -152,6 +154,8 @@ public abstract class AbstractMapServer implements MapServer {
             logger.info("Unleash is enabled, loading feature flag provider");
             var provider = new UnleashFeatureFlagProvider(unleashConfig);
             FeatureFlagProvider.replaceGlobals(provider);
+        } else {
+            FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());
         }
 
         allocator = createAllocator();
@@ -183,6 +187,9 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue(chatMessageListener::close);
             var packetListenerManager = MinecraftServer.getPacketListenerManager();
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
+
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr());
+            shutdowner.queue(playerDataUpdateConsumer::close);
         }
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager());

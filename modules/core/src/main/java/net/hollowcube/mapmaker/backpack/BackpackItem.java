@@ -22,6 +22,9 @@ public enum BackpackItem {
     //          STACK SIZE TO MATCH.
     // WARNING: IF YOU ADD OR REMOVE AN ENTRY YOU MUST ALSO GO EDIT RecipeBookHack.java TO MATCH THE SAME
     //          AMOUNT OF ENTRIES.
+    // WARNING: THESE VALUES ARE MIRRORED IN THE PLAYER SERVICE AND MUST BE MAINTAINED ACROSS BOTH TO AVOID
+    //          CREATING INVALID CONFIGURATIONS. WOULD PREFER TO READ THIS DATA FROM THE PLAYER SERVICE IN
+    //          THE FUTURE I SUPPOSE.
 
     // Materials
     BRICKS(MATERIAL, Rarity.COMMON),
@@ -94,7 +97,8 @@ public enum BackpackItem {
                 .build();
     }
 
-    @NotNull DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
+    @NotNull
+    DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
         return new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
                 recipeBookId, "",
                 RecipeCategory.Crafting.REDSTONE,

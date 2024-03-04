@@ -132,8 +132,16 @@ public class PlayerDataV2 {
         return coins;
     }
 
+    public void setCoins(int coins) {
+        this.coins = coins;
+    }
+
     public int cubits() {
         return cubits;
+    }
+
+    public void setCubits(int cubits) {
+        this.cubits = cubits;
     }
 
     public @Nullable String getCosmetic(@NotNull CosmeticType type) {
@@ -147,7 +155,7 @@ public class PlayerDataV2 {
     }
 
     public @NotNull Set<String> unlockedCosmetics() {
-        return unlockedCosmetics;
+        return unlockedCosmetics == null ? Set.of() : unlockedCosmetics;
     }
 
 

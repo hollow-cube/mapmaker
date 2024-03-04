@@ -3,12 +3,17 @@ package net.hollowcube.mapmaker.feature.unleash;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
+import io.getunleash.event.UnleashSubscriber;
+import io.getunleash.repository.FeatureToggleResponse;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.FlagContext;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
 public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
@@ -23,6 +28,13 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
                 .unleashAPI(config.address())
                 .apiKey(config.token())
                 .synchronousFetchOnInitialisation(true)
+                .subscriber(new UnleashSubscriber() {
+                    @Override
+                    public void togglesFetched(@NotNull FeatureToggleResponse response) {
+                        //todo it would be nice if the event held the old and new state so that you could check if a flag changed.
+                        FutureUtil.submitVirtual(() -> EventDispatcher.call(new FeatureFlagReloadEvent()));
+                    }
+                })
                 .build();
         var mapIds = new MapIdStrategy();
         this.client = new DefaultUnleash(unleashConfig, mapIds);

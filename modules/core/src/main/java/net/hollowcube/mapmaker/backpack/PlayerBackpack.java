@@ -1,10 +1,8 @@
 package net.hollowcube.mapmaker.backpack;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -85,7 +83,7 @@ public class PlayerBackpack {
 
     private static void handleRecipeBookClick(@NotNull ClientCraftRecipeRequest packet, @NotNull Player player) {
         if (!CoreFeatureFlags.BACKPACK.test(player)) return;
-        
+
         // Remove the ghost recipe
         player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }
@@ -97,10 +95,7 @@ public class PlayerBackpack {
         var playerData = PlayerDataV2.fromPlayer(player);
         playerData.setSetting(IS_BACKPACK_OPEN, packet.bookOpen());
         playerData.setSetting(IS_BACKPACK_FILTERED, packet.filterActive());
-
-        //todo need to get this, but not sure where to get it from.
-        var playerService = PlayerService.StaticAbuse.BAD_BAD_BAD;
-        FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(playerService));
+        // No need to write updates, the player data will be saved when leaving the hub
     }
 
 }

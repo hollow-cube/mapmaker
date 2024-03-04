@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
@@ -57,6 +58,8 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
             .registerTypeAdapter(AppliedRewards.class, new FieldSerializer<>(AppliedRewards::new, AppliedRewards::entries, new TypeToken<List<AppliedRewards.Entry>>() {
             }.getType()))
+            .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
+            .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
             .disableJdkUnsafe()
             .create();
 
