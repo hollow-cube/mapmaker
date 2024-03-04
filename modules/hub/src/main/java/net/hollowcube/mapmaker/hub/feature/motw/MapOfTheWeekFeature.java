@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
-import net.hollowcube.mapmaker.hub.feature.leaderboard.Leaderboard1;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -33,9 +32,6 @@ public class MapOfTheWeekFeature implements HubFeature {
     private final NpcItemModel mapEntity = new NpcItemModel();
     private int mapEntityRotationTarget = 0;
 
-    private final Leaderboard1 testlb = new Leaderboard1(0);
-    private final Leaderboard1 testlb2 = new Leaderboard1(0);
-
     @Inject
     public MapOfTheWeekFeature(@NotNull ServerBridge bridge, @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         this.bridge = bridge;
@@ -52,9 +48,6 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS).join();
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0)).join();
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.SYNC);
-        
-        testlb.setInstance(world.instance(), new Pos(-25.5, 41, 53.5, 90 + 45, 0));
-        testlb2.setInstance(world.instance(), new Pos(-49.5, 41, 53.5, 90 + 45 + 90, 0));
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {
