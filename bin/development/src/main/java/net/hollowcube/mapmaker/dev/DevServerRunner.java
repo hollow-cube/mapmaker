@@ -84,8 +84,8 @@ public class DevServerRunner extends AbstractMapServer {
 
         addBinding(Scheduler.class, MinecraftServer.getSchedulerManager());
 
+        performMapInit(); // Map first so placements are registered
         performHubInit();
-        performMapInit();
     }
 
     private void performHubInit() {

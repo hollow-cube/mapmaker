@@ -42,8 +42,6 @@ public class HubServerRunner extends AbstractMapServer {
     HubServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
-        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
-
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
                 .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
@@ -72,6 +70,8 @@ public class HubServerRunner extends AbstractMapServer {
     @Override
     protected void prepareStart() {
         super.prepareStart();
+
+        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
 
         // Create the hub world once, which will never go away.
         this.world = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
