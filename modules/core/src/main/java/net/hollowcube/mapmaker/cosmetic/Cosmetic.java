@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.cosmetic;
 
+import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -17,9 +18,23 @@ import java.util.*;
 public class Cosmetic {
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
+    public static final Codec<Cosmetic> CODEC = Codec.STRING.xmap(Cosmetic::byPathRequired, Cosmetic::path);
+
     static {
         // Class init required
         var ignored = HeadCosmetics.CROWN;
+    }
+
+    // In the form type/id
+    public static @NotNull Cosmetic byPathRequired(@NotNull String path) {
+        return Objects.requireNonNull(byPath(path), "Cosmetic not found: " + path);
+    }
+
+    // In the form type/id
+    public static @Nullable Cosmetic byPath(@NotNull String path) {
+        String[] split = path.split("/");
+        if (split.length != 2) return null;
+        return byId(CosmeticType.valueOf(split[0].toUpperCase(Locale.ROOT)), split[1]);
     }
 
     public static @Nullable Cosmetic byId(@NotNull CosmeticType type, @Nullable String id) {
@@ -67,6 +82,10 @@ public class Cosmetic {
 
     public @NotNull String id() {
         return id;
+    }
+
+    public @NotNull String path() {
+        return type.id() + "/" + id;
     }
 
     public @NotNull Rarity rarity() {

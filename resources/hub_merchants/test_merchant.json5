@@ -1,16 +1,17 @@
 {
   "trades": [
     {
-      "result": {
-        "type": "cosmetic",
-        "id": "head/hard_hat"
+      "result": "head/hard_hat",
+      "inputs": {
+        "cubits": 50
       },
-      "inputs": [
-        {
-          "type": "cubits",
-          "count": 50
-        }
-      ]
+    },
+    {
+      "result": "head/crown",
+      "inputs": {
+        "coins": 60000,
+        "nightmare_fuel": 2
+      },
     }
   ]
 }

@@ -65,7 +65,7 @@ public final class DFU {
         }
     }
 
-    private static <T> @NotNull T unwrap(@NotNull DataResult<T> result) {
+    public static <T> @NotNull T unwrap(@NotNull DataResult<T> result) {
         if (result.result().isPresent()) {
             return result.result().get();
         } else if (result.error().isPresent()) {

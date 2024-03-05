@@ -107,6 +107,18 @@
     "type": "sprite",
     "ref": "icon/staff/dev_3"
   },
+  "COINS": {
+    "type": "sprite",
+    "ref": "icon/store/coins",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
+  "CUBITS": {
+    "type": "sprite",
+    "ref": "icon/store/cubits",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
   // Standard Colors
   // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
   "dark_gray": {

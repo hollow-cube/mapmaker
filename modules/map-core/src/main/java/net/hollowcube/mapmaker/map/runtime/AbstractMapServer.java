@@ -249,6 +249,10 @@ public abstract class AbstractMapServer implements MapServer {
         return commandManager;
     }
 
+    public @NotNull Controller guiController() {
+        return guiController;
+    }
+
     protected abstract @NotNull MapAllocator createAllocator();
     protected abstract @NotNull ServerBridge createBridge();
 

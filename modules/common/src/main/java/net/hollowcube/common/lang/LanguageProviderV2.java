@@ -137,7 +137,7 @@ public class LanguageProviderV2 {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
             .build();
 
-    private static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
+    public static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
 
     private record PlaceholderTag(int index) implements Tag {
         private static final TagResolver RESOLVER = new TagResolver() {

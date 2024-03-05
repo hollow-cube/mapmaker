@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.hub.merchant.gui ?>
+<component width="9" height="10" align="ttb">
+
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.merchant.information"/>
+        <spacer width="7"/>
+    </box>
+
+    <box width="9" height="5" align="ltr">
+        <spacer width="1" height="5"/>
+
+        <pagination id="trade_list" width="7" height="5" child="TradeEntry"/>
+
+        <spacer width="1" height="5"/>
+    </box>
+
+</component>

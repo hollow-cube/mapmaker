@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.backpack;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
@@ -9,6 +10,7 @@ import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.RecipeCategory;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +67,18 @@ public enum BackpackItem {
         this.recipeBookId = RecipeBookHack.getOrderedId(ordinal());
     }
 
+    public static @Nullable BackpackItem byId(@NotNull String item) {
+        try {
+            return BackpackItem.valueOf(item.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public @NotNull String id() {
+        return name().toLowerCase(Locale.ROOT);
+    }
+
     public @NotNull BackpackCategory category() {
         return category;
     }
@@ -86,13 +100,23 @@ public enum BackpackItem {
         return recipeBookId;
     }
 
+    public @NotNull Component displayName() {
+        return Component.translatable("item.mapmaker." + name().toLowerCase() + ".name");
+    }
+
+    public @NotNull Component iconComponent() {
+        //todo the base sprite should also contain this sprite
+        var iconSprite = "icon/material/" + name().toLowerCase();
+        return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar(), FontUtil.NO_SHADOW);
+    }
+
     public @NotNull ItemStack getItemStack(int amount) {
         Check.argCondition(amount < 0 || amount > maxStackSize(), "amount must be between 1 and " + maxStackSize() + ", inclusive");
         var translationKeyBase = "item.mapmaker." + name().toLowerCase();
         return ItemStack.builder(Material.DIAMOND)
                 .meta(meta -> meta.customModelData(sprite.cmd() + amount))
                 .displayName(Component.text(ordinal() + " -> " + recipeBookId))
-                .displayName(Component.translatable(translationKeyBase + ".name"))
+                .displayName(displayName())
                 .lore(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()))
                 .build();
     }
