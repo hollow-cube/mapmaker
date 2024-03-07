@@ -159,12 +159,6 @@ public class DevServerRunner extends AbstractMapServer {
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
         super.handleFirstSpawn(event.getPlayer());
-
-//        var tradeString = """
-//                {"trades":[{"result":"head/hard_hat","inputs":{"cubits":50}},{"result":"head/crown","inputs":{"coins":60000,"nightmare_fuel":2}}]}
-//                                """;
-//        var result = MerchantData.CODEC.decode(JsonOps.INSTANCE, new Gson().fromJson(tradeString, JsonObject.class));
-//        guiController().show(event.getPlayer(), c -> new MerchantShopView(c, DFU.unwrap(result).getFirst()));
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {

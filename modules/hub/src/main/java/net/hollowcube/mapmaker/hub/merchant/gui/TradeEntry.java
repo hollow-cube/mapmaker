@@ -8,9 +8,9 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
-import net.hollowcube.mapmaker.hub.merchant.TradeInput;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.store.CostEntry;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -46,13 +46,13 @@ public class TradeEntry extends View {
 
         Integer cubits = null, coins = null;
         Map<String, Integer> items = null;
-        for (var entry : trade.inputs().entrySet()) {
+        for (var entry : trade.inputs().entries().entrySet()) {
             var type = entry.getKey();
-            if (type instanceof TradeInput.Coins c)
+            if (type instanceof CostEntry.Coins)
                 coins = entry.getValue();
-            else if (type instanceof TradeInput.Cubits c)
+            else if (type instanceof CostEntry.Cubits)
                 cubits = entry.getValue();
-            else if (type instanceof TradeInput.BackpackItem i) {
+            else if (type instanceof CostEntry.BackpackItem i) {
                 if (items == null) items = new HashMap<>();
                 items.put(i.entry().id(), entry.getValue());
             }

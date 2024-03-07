@@ -1,4 +1,5 @@
-package net.hollowcube.mapmaker.hub.merchant;
+package net.hollowcube.mapmaker.store;
+
 
 import com.mojang.serialization.Codec;
 import net.hollowcube.common.util.FontUtil;
@@ -8,22 +9,22 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public sealed interface TradeInput permits TradeInput.Cubits, TradeInput.Coins, TradeInput.BackpackItem {
-    Codec<TradeInput> CODEC = Codec.STRING.xmap(ti -> {
-        if (ti.equals("cubits")) return TradeInput.Cubits.INSTANCE;
-        if (ti.equals("coins")) return TradeInput.Coins.INSTANCE;
-        return new TradeInput.BackpackItem(net.hollowcube.mapmaker.backpack.BackpackItem.byId(ti));
+public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, CostEntry.BackpackItem {
+    Codec<CostEntry> CODEC = Codec.STRING.xmap(ti -> {
+        if (ti.equals("cubits")) return CostEntry.Cubits.INSTANCE;
+        if (ti.equals("coins")) return CostEntry.Coins.INSTANCE;
+        return new CostEntry.BackpackItem(net.hollowcube.mapmaker.backpack.BackpackItem.byId(ti));
     }, ti -> {
-        if (ti instanceof TradeInput.Cubits) return "cubits";
-        if (ti instanceof TradeInput.Coins) return "coins";
-        return ((TradeInput.BackpackItem) ti).entry.id();
+        if (ti instanceof CostEntry.Cubits) return "cubits";
+        if (ti instanceof CostEntry.Coins) return "coins";
+        return ((CostEntry.BackpackItem) ti).entry.id();
     });
 
     @NotNull
     Component displayName();
     int getCount(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack);
 
-    final class Cubits implements TradeInput {
+    final class Cubits implements CostEntry {
         public static final Cubits INSTANCE = new Cubits();
 
         @Override
@@ -37,7 +38,7 @@ public sealed interface TradeInput permits TradeInput.Cubits, TradeInput.Coins, 
         }
     }
 
-    final class Coins implements TradeInput {
+    final class Coins implements CostEntry {
         public static final Coins INSTANCE = new Coins();
 
         @Override
@@ -51,7 +52,7 @@ public sealed interface TradeInput permits TradeInput.Cubits, TradeInput.Coins, 
         }
     }
 
-    record BackpackItem(@Nullable net.hollowcube.mapmaker.backpack.BackpackItem entry) implements TradeInput {
+    record BackpackItem(@Nullable net.hollowcube.mapmaker.backpack.BackpackItem entry) implements CostEntry {
         private static final Component NULL_COMPONENT = Component.text("null");
 
         @Override

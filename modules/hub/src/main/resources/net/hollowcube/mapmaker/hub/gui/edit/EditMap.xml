@@ -170,9 +170,9 @@
                 </box>
             </switch>
 
-            <switch id="map_tags_tab_switch" width="9" height="3">
+            <switch id="map_tags_tab_switch" width="9" height="2">
                 <!-- VISUAL TAB -->
-                <box width="9" height="3" sprite="create_maps/tab_tags/tab_visual/container" align="ltr">
+                <box width="9" height="2" sprite="create_maps/tab_tags/tab_visual/container" align="ltr">
                     <!-- These names MUST be synced with the MapTags.java enum -->
                     <spacer width="1"/>
                     <box width="7" height="2" align="ttb">
@@ -263,7 +263,7 @@
                     </box>
                 </box>
                 <!-- GAMEPLAY TAB -->
-                <box width="9" height="3" sprite="create_maps/tab_tags/tab_gameplay/container" align="ltr">
+                <box width="9" height="2" sprite="create_maps/tab_tags/tab_gameplay/container" align="ltr">
                     <!-- These names MUST be synced with MapTags.java enum -->
                     <spacer width="1"/>
                     <box width="7" height="2" align="ttb">
@@ -366,6 +366,13 @@
                     </box>
                 </box>
             </switch>
+
+            <box width="9" height="1" align="ltr">
+                <spacer width="3"/>
+                <text id="map_tags_max_counter" width="3" height="1"
+                      translationKey="todo"
+                      font="line_4" centered="true"/>
+            </box>
         </box>
 
         <!-- SETTINGS TAB -->

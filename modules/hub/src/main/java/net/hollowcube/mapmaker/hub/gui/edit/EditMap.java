@@ -8,10 +8,10 @@ import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -70,6 +70,7 @@ public class EditMap extends View {
     // The order is determined by the order in which the elements exist in the GUI xml file.
     private @OutletGroup("map_tag_.+_switch") Switch[] mapTagsSwitches;
     private @Outlet("map_tags_locked_container_switch") Switch mapTagsLockedContainerSwitch;
+    private @Outlet("map_tags_max_counter") Text mapTagsMaxCounterText;
 
     // MAP SETTINGS
     private @Outlet("map_settings_tab_switch") Switch mapSettingsTabSwitch;
@@ -415,35 +416,31 @@ public class EditMap extends View {
     private void selectMapTagVisual() {
         if (mapTagsTabSwitch.getOption() == 0) return;
         mapTagsTabSwitch.setOption(0);
+        fillTagsCounter(MapTags.TagType.VISUAL);
     }
 
     @Action("map_tags_tab_gameplay")
     private void selectMapTagGameplay() {
         if (mapTagsTabSwitch.getOption() == 1 || map.settings().getVariant() == MapVariant.BUILDING) return;
         mapTagsTabSwitch.setOption(1);
+        fillTagsCounter(MapTags.TagType.GAMEPLAY);
+    }
+
+    private void fillTagsCounter(@NotNull MapTags.TagType tagType) {
+        var typedMaxTags = map.settings().getVariant().maxTags(tagType);
+        var currentTags = map.settings().getTags().stream()
+                .filter(tag -> tag.getType() == tagType)
+                .count();
+        mapTagsMaxCounterText.setText(String.format("%d/%d Tags", currentTags, typedMaxTags));
     }
 
     // TAG HELPER FUNCTIONS
 
     private boolean canAddAnotherTag(MapTags.TagType tagType) {
-        var visualTags = map.settings().getTags().stream().filter(
-                tag -> tag.getType() == MapTags.TagType.VISUAL
-        ).toList();
-        if (map.settings().getVariant() == MapVariant.BUILDING) {
-            // Max 3 visual tags
-            return visualTags.size() < 3;
-        } else if (map.settings().getVariant() == MapVariant.PARKOUR) {
-            // Max 2 visual and 2 gameplay tags
-            var gameplayTags = map.settings().getTags().stream().filter(
-                    tag -> tag.getType() == MapTags.TagType.GAMEPLAY
-            ).toList();
-            if (tagType.equals(MapTags.TagType.VISUAL) && visualTags.size() >= 2)
-                return false;
-            return !tagType.equals(MapTags.TagType.GAMEPLAY) || gameplayTags.size() < 2;
-        } else {
-            System.out.println("unsupported map variant type");
-        }
-        return true;
+        var typedMaxTags = map.settings().getVariant().maxTags(tagType);
+        return typedMaxTags > map.settings().getTags().stream()
+                .filter(tag -> tag.getType() == tagType)
+                .count();
     }
 
     private void tagClickHandler(MapTags.Tag tag, boolean set) {
@@ -559,6 +556,7 @@ public class EditMap extends View {
         }
 
         // TAGS
+        fillTagsCounter(mapTagsTabSwitch.getOption() == 0 ? MapTags.TagType.VISUAL : MapTags.TagType.GAMEPLAY);
         var tags = map.settings().getTags();
         for (int i = 0; i < mapTagsSwitches.length; i++) {
             mapTagsSwitches[i].setOption(tags.contains(MapTags.Tag.values()[i]) ? 1 : 0);
