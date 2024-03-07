@@ -8,7 +8,6 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -25,11 +24,13 @@ public class CosmeticEntry extends View {
 
     private final PlayerDataV2 playerData;
     private final Cosmetic cosmetic;
+    private final boolean isLocked;
 
-    public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull Cosmetic cosmetic) {
+    public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull Cosmetic cosmetic, boolean isLocked) {
         super(context);
         this.playerData = playerData;
         this.cosmetic = cosmetic;
+        this.isLocked = isLocked;
 
         var itemIcon = cosmetic.icon();
         offIcon.setItemSprite(itemIcon);
@@ -44,12 +45,8 @@ public class CosmeticEntry extends View {
 
         {
             var lore = new ArrayList<>(itemIcon.getLore());
-            lore.add(Component.text(""));
-            if (playerData.unlockedCosmetics().contains(cosmetic.id())) {
-                lore.add(Component.translatable("cosmetic.select"));
-            } else {
-                lore.add(Component.translatable("cosmetic.locked"));
-            }
+            lore.add(Component.empty());
+            lore.add(Component.translatable(isLocked ? "cosmetic.locked" : "cosmetic.select"));
             offIcon.setComponentsDirect(itemIcon.getDisplayName(), lore);
         }
 
@@ -58,17 +55,15 @@ public class CosmeticEntry extends View {
 
     @Action("off")
     public void handleSelectCosmetic(@NotNull Player player) {
-//        if (!playerData.unlockedCosmetics().contains(cosmetic.id())) {
-//            return;
-//        }
+        if (isLocked) return;
 
-        playerData.setCosmetic(CosmeticType.HEAD, cosmetic);
+        playerData.setCosmetic(cosmetic.type(), cosmetic);
         performSignal(UPDATE_SELECTED);
     }
 
     @Action("on")
     public void handleDeselectCosmetic(@NotNull Player player) {
-        playerData.setCosmetic(CosmeticType.HEAD, null);
+        playerData.setCosmetic(cosmetic.type(), null);
         performSignal(UPDATE_SELECTED);
     }
 
@@ -80,6 +75,6 @@ public class CosmeticEntry extends View {
     }
 
     private boolean isSelected() {
-        return cosmetic.id().equals(playerData.getCosmetic(CosmeticType.HEAD));
+        return cosmetic.id().equals(playerData.getCosmetic(cosmetic.type()));
     }
 }

@@ -12,21 +12,17 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class PlayerDataV2 {
-    private static final Logger logger = LoggerFactory.getLogger(PlayerDataV2.class);
-
     public static final Tag<PlayerDataV2> TAG = Tag.Transient("mapmaker:player_data");
 
     public static @NotNull PlayerDataV2 fromPlayer(@NotNull Player player) {
         return player.getTag(TAG);
     }
-
-    public static final int MAX_MAP_SLOTS = 5;
 
     private transient PlayerDataUpdateRequest updates = new PlayerDataUpdateRequest();
 
@@ -41,8 +37,6 @@ public class PlayerDataV2 {
 
     private int coins = 0;
     private int cubits = 0;
-
-    private Set<String> unlockedCosmetics = new HashSet<>();
 
     public PlayerDataV2() {
     }
@@ -153,10 +147,5 @@ public class PlayerDataV2 {
         if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
         setSetting(type.setting(), cosmetic == null ? "" : cosmetic.id());
     }
-
-    public @NotNull Set<String> unlockedCosmetics() {
-        return unlockedCosmetics == null ? Set.of() : unlockedCosmetics;
-    }
-
 
 }

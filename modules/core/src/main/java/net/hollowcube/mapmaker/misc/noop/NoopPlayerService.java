@@ -1,11 +1,15 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.HeadCosmetics;
 import net.hollowcube.mapmaker.player.*;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class NoopPlayerService implements PlayerService {
@@ -34,6 +38,16 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
 
+    }
+
+    @Override
+    public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
+        return Set.of(HeadCosmetics.CROWN.path());
+    }
+
+    @Override
+    public void buyCosmetic(@NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits, @Nullable JsonObject items) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

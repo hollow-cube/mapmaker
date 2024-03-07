@@ -1,16 +1,20 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import io.prometheus.client.Summary;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlayerServiceImpl extends AbstractHttpService implements PlayerService {
@@ -34,6 +38,38 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/players/" + id))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 200)
+            throw new SessionService.InternalError("Failed to update session (" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId + "/cosmetics"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<Set<String>>() {
+            }.getType());
+            case 404 -> Set.of();
+            default ->
+                    throw new SessionService.InternalError("Failed to get unlocked cosmetics (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    @Override
+    public void buyCosmetic(@NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits, @Nullable JsonObject items) {
+        logger.log(System.Logger.Level.INFO, "buy cosmetic for {0}: {1}", id, cosmetic.path());
+        var reqBodyData = new JsonObject();
+        reqBodyData.addProperty("cosmeticId", cosmetic.path());
+        if (coins != null) reqBodyData.addProperty("coins", coins);
+        if (cubits != null) reqBodyData.addProperty("cubits", cubits);
+        if (items != null) reqBodyData.add("items", items);
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(GSON.toJson(reqBodyData)))
+                .uri(URI.create(url + "/players/" + id + "/cosmetics"))
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)

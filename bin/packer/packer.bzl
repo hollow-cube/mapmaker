@@ -7,6 +7,7 @@ def packer_bundle(name, srcs, visibility = None):
             "fonts.json",
             "en_US.json",
             "sprites.json",
+            "dynamic.json",
         ],
         cmd = "python3 bin/packer/build_server.py '$(location //bin/packer:packer)' $(OUTS)",
         tools = ["//bin/packer"],

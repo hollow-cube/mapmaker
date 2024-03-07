@@ -38,6 +38,8 @@ public class PackContext {
 
     private JsonArray serverSprites = new JsonArray();
 
+    public final JsonObject dynamicData = new JsonObject();
+
 
     public PackContext(Path resources, Path out) throws IOException {
         this.resources = resources;
@@ -189,6 +191,9 @@ public class PackContext {
             sprites = sprites.replace("\\\\", "\\");
         }
         Files.writeString(serverSpritesPath, sprites);
+
+        Files.writeString(out().resolve("server").resolve("dynamic.json"), gson.toJson(dynamicData));
+
 
     }
 

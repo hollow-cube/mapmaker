@@ -52,16 +52,19 @@ public class CosmeticView extends View {
         pagination.reset();
     }
 
-    @Action("cosmetic_list")
+    @Action(value = "cosmetic_list", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<CosmeticEntry> request) {
         var entries = new ArrayList<CosmeticEntry>();
+
+        var unlockedCosmetics = playerService.getUnlockedCosmetics(playerData.id());
 
         boolean showLocked = playerData.getSetting(SHOW_LOCKED);
         Cosmetic.values(CosmeticType.HEAD).stream()
                 .sorted(Cosmetic.comparingRarity())
-                .filter(cosmetic -> showLocked || playerData.unlockedCosmetics().contains(cosmetic.id()))
                 .forEach(cosmetic -> {
-                    entries.add(new CosmeticEntry(request.context(), playerData, cosmetic));
+                    var isLocked = !unlockedCosmetics.contains(cosmetic.id());
+                    if (!showLocked && isLocked) return;
+                    entries.add(new CosmeticEntry(request.context(), playerData, cosmetic, isLocked));
                 });
 
         request.respond(entries, false);

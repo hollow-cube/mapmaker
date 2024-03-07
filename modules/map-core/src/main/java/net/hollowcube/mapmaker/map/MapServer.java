@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -37,6 +38,9 @@ public interface MapServer {
     SessionManager sessionManager();
     @NotNull
     ServerBridge bridge();
+
+    @NotNull
+    Controller guiController();
 
     // Other
     <T> @NotNull T createInstance(@NotNull Class<T> type);

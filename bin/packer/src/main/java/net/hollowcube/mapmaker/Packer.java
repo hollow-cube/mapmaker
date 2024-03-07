@@ -55,7 +55,9 @@ public class Packer {
         modelTransform.init(ctx, fontTransform);
         modelTransform.process(ctx);
 
-        ctx.cleanup();
+        DynamicDataTransform hubMerchantsTransform = new DynamicDataTransform("hub_merchants");
+        hubMerchantsTransform.process(ctx);
 
+        ctx.cleanup();
     }
 }

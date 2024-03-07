@@ -249,6 +249,7 @@ public abstract class AbstractMapServer implements MapServer {
         return commandManager;
     }
 
+    @Override
     public @NotNull Controller guiController() {
         return guiController;
     }
