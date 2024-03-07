@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 import net.hollowcube.mapmaker.map.block.BlockTags;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -23,5 +25,11 @@ abstract class BaseBlockPlacementRule extends BlockPlacementRule {
     @Override
     public int maxUpdateDistance() {
         return 0;
+    }
+
+    protected void placeOtherBlock(@NotNull Block.Getter getter, @NotNull Point point, @NotNull Block block) {
+        if (getter instanceof Instance instance) {
+            instance.setBlock(point, block);
+        }
     }
 }
