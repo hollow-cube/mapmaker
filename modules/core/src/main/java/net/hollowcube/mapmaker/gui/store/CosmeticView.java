@@ -62,7 +62,7 @@ public class CosmeticView extends View {
         Cosmetic.values(CosmeticType.HEAD).stream()
                 .sorted(Cosmetic.comparingRarity())
                 .forEach(cosmetic -> {
-                    var isLocked = !unlockedCosmetics.contains(cosmetic.id());
+                    var isLocked = !unlockedCosmetics.contains(cosmetic.path());
                     if (!showLocked && isLocked) return;
                     entries.add(new CosmeticEntry(request.context(), playerData, cosmetic, isLocked));
                 });
