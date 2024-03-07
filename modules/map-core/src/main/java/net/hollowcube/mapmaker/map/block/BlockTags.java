@@ -105,7 +105,9 @@ public final class BlockTags {
             Block.ROSE_BUSH,
             Block.LILAC,
             Block.SUNFLOWER,
-            Block.LARGE_FERN
+            Block.LARGE_FERN,
+            Block.PEONY,
+            Block.PITCHER_PLANT
     );
     public static final Collection<NamespaceID> ANY_WITH_LIT = createFromProperty("lit");
     public static Collection<NamespaceID> FARMLAND_CONVERTABLE = create(Block.DIRT, Block.GRASS_BLOCK, Block.DIRT_PATH);

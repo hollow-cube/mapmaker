@@ -11,6 +11,7 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 /**
@@ -57,9 +58,11 @@ public interface BlockInteractionRule {
         boolean handleAirInteraction(@NotNull Interaction interaction);
     }
 
-    record Interaction(@NotNull Player player, @NotNull Instance instance, @UnknownNullability Point blockPosition,
-                       @UnknownNullability BlockFace blockFace, @NotNull ItemStack item,
-                       Player.@NotNull Hand hand) implements Block.Getter, Block.Setter {
+    record Interaction(
+            @NotNull Player player, @NotNull Instance instance, @UnknownNullability Point blockPosition,
+            @UnknownNullability BlockFace blockFace, @Nullable Point cursorPosition,
+            @NotNull ItemStack item, Player.@NotNull Hand hand
+    ) implements Block.Getter, Block.Setter {
 
         public @NotNull WorldBorder worldBorder() {
             return instance.getWorldBorder();

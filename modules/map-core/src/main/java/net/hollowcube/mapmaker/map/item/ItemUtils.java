@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.item.handler;
+package net.hollowcube.mapmaker.map.item;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;

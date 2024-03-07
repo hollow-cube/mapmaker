@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ShovelInteractionRule implements BlockInteractionRule {
+    public static final ShovelInteractionRule INSTANCE = new ShovelInteractionRule();
+
+    private ShovelInteractionRule() {
+    }
 
     @Override
     public @NotNull SneakState sneakState() {

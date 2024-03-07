@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.item.handler;
+package net.hollowcube.mapmaker.map.item;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.gamedata.tags.Tag;
@@ -19,6 +19,7 @@ public final class ItemTags {
     public static Collection<NamespaceID> AXES = builtin("minecraft:axes");
     public static Collection<NamespaceID> LEAVES = builtin("minecraft:leaves");
     public static Collection<NamespaceID> SAPLINGS = builtin("minecraft:saplings");
+    public static Collection<NamespaceID> BOOKSHELF_BOOKS = builtin("minecraft:bookshelf_books");
 
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {

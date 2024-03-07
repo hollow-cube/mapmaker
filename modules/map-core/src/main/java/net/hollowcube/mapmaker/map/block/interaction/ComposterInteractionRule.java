@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.item.handler.ItemTags;
+import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;

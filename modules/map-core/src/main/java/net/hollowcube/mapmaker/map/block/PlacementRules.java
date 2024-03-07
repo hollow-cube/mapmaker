@@ -62,6 +62,7 @@ public final class PlacementRules {
         register(Block.SCULK_VEIN, b -> new VinePlacementRule(b, true));
         register(Block.BIG_DRIPLEAF, BigDripleafPlacementRule::new);
         register(Block.SMALL_DRIPLEAF, SmallDripleafPlacementRule::new);
+        register(Block.KELP, KelpPlacementRule::new);
 
         register(Block.CHEST, ChestPlacementRule::new);
         register(Block.TRAPPED_CHEST, ChestPlacementRule::new);
@@ -96,6 +97,8 @@ public final class PlacementRules {
         register(Block.SMOKER, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.COMPARATOR, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.REPEATER, b -> new FacingHorizontalPlacementRule(b, true));
+        register(Block.CHISELED_BOOKSHELF, b -> new FacingHorizontalPlacementRule(b, true));
+        register(Block.END_PORTAL_FRAME, b -> new FacingHorizontalPlacementRule(b, true));
 
         register(Block.DISPENSER, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.DROPPER, b -> new FacingAllAxisPlacementRule(b, false));
@@ -106,6 +109,7 @@ public final class PlacementRules {
         register(Block.CHAIN_COMMAND_BLOCK, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.REPEATING_COMMAND_BLOCK, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.CALIBRATED_SCULK_SENSOR, b -> new FacingHorizontalPlacementRule(b, false));
+        register(Block.BARREL, b -> new FacingAllAxisPlacementRule(b, false));
 
         register(Block.LIGHTNING_ROD, b -> new ClickFacePlacementRule(b, true));
         register(Block.END_ROD, b -> new ClickFacePlacementRule(b, true));
@@ -123,7 +127,8 @@ public final class PlacementRules {
         register(Block.LANTERN, LanternPlacementRule::new);
         register(Block.SOUL_LANTERN, LanternPlacementRule::new);
 
-        register(Block.LADDER, FacingClickHorizontalPlacementRule::new);
+        register(Block.LADDER, b -> new FacingClickHorizontalPlacementRule(b, false));
+        register(Block.COCOA, b -> new FacingClickHorizontalPlacementRule(b, true));
 
         register(Block.PLAYER_HEAD, HeadPlacementRule::new);
         register(BlockTags.SKULLS, HeadPlacementRule::new);

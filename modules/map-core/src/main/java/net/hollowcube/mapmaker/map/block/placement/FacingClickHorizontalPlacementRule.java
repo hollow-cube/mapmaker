@@ -19,20 +19,22 @@ public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
 
     private static final String PROP_FACING = "facing";
 
-    public FacingClickHorizontalPlacementRule(@NotNull Block block) {
+    private final boolean invert;
+
+    public FacingClickHorizontalPlacementRule(@NotNull Block block, boolean invert) {
         super(block);
+        this.invert = invert;
     }
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
-        return switch (blockFace) {
-            case NORTH, SOUTH, EAST, WEST -> block.withProperty(PROP_FACING, blockFace.name().toLowerCase());
-            case TOP, BOTTOM -> {
-                var implicitFace = getImplicitFace(placementState);
-                yield implicitFace == null ? null : block.withProperty(PROP_FACING, implicitFace.name().toLowerCase());
-            }
+        var targetFace = switch (blockFace) {
+            case NORTH, SOUTH, EAST, WEST -> blockFace;
+            case TOP, BOTTOM -> getImplicitFace(placementState);
         };
+        if (targetFace == null) return null;
+        return block.withProperty(PROP_FACING, (invert ? targetFace.getOppositeFace() : targetFace).name().toLowerCase());
     }
 
     // Computes the horizontal face "closest" to the player in case they clicked the top or bottom face.

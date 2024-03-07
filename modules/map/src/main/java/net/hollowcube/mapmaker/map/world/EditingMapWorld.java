@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.item.DebugStickItem;
-import net.hollowcube.mapmaker.map.item.handler.ItemTags;
+import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;

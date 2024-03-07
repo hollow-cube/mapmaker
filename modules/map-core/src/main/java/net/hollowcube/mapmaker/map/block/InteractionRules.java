@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.block;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.map.block.interaction.*;
-import net.hollowcube.mapmaker.map.item.handler.ItemTags;
+import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
@@ -41,20 +41,23 @@ public class InteractionRules {
         block(BlockTags.CANDLE_CAKES, new CandleCakeInteractionRule());
         block(Block.LEVER, new LeverInteractionRule());
         block(BlockTags.BUTTONS, new ButtonInteractionRule());
+        block(Block.REPEATER, new RepeaterInteractionRule());
+        block(Block.COMPARATOR, new ComparatorInteractionRule());
+        block(Block.CHISELED_BOOKSHELF, ChiseledBookshelfInteractionRule.INSTANCE);
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
         item(Material.BUCKET, new EmptyBucketInteractionRule());
         item(Material.FLINT_AND_STEEL, new FireInteractionRule());
         item(Material.FIRE_CHARGE, new FireInteractionRule());
-        item(ItemTags.AXES, new AxeInteractionRule());
-        item(ItemTags.SHOVELS, new ShovelInteractionRule());
-        item(ItemTags.HOES, new HoeInteractionRule());
+        item(ItemTags.AXES, AxeInteractionRule.INSTANCE);
+        item(ItemTags.SHOVELS, ShovelInteractionRule.INSTANCE);
+        item(ItemTags.HOES, HoeInteractionRule.INSTANCE);
         item(Material.ITEM_FRAME, new ItemFrameInteractionRule(false));
         item(Material.GLOW_ITEM_FRAME, new ItemFrameInteractionRule(true));
         item(Material.ENDER_EYE, new EnderEyeInteractionRule());
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
-        item(Material.SCAFFOLDING, new ScaffoldingInteractionRule());
+        item(Material.SCAFFOLDING, ScaffoldingInteractionRule.INSTANCE);
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {
@@ -79,7 +82,8 @@ public class InteractionRules {
         if (rule != null && rule.sneakState().test(player.isSneaking(), !itemStack.isAir())) {
             var interaction = new BlockInteractionRule.Interaction(
                     player, event.getInstance(), event.getBlockPosition(),
-                    event.getBlockFace(), itemStack, event.getHand()
+                    event.getBlockFace(), event.getCursorPosition(),
+                    itemStack, event.getHand()
             );
 
             if (rule.handleInteraction(interaction)) {
@@ -96,7 +100,8 @@ public class InteractionRules {
 
         var interaction = new BlockInteractionRule.Interaction(
                 player, event.getInstance(), event.getBlockPosition(),
-                event.getBlockFace(), itemStack, event.getHand()
+                event.getBlockFace(), event.getCursorPosition(),
+                itemStack, event.getHand()
         );
 
         if (rule.handleInteraction(interaction)) {
@@ -121,7 +126,8 @@ public class InteractionRules {
 
         var interaction = new BlockInteractionRule.Interaction(
                 player, event.getInstance(), null,
-                null, itemStack, event.getHand()
+                null, null,
+                itemStack, event.getHand()
         );
 
         if (airRule.handleAirInteraction(interaction)) {

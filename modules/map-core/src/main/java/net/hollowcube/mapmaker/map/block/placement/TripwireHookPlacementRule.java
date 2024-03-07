@@ -10,7 +10,7 @@ public class TripwireHookPlacementRule extends FacingClickHorizontalPlacementRul
     private static final String PROP_ATTACHED = "attached";
 
     public TripwireHookPlacementRule(@NotNull Block block) {
-        super(block);
+        super(block, false);
     }
 
     @Override

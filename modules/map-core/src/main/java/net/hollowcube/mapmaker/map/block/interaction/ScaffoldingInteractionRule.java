@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ScaffoldingInteractionRule implements BlockInteractionRule {
+    public static final ScaffoldingInteractionRule INSTANCE = new ScaffoldingInteractionRule();
+
     // This is registered as an item interaction rule, i'm not sure it makes any difference at all but item is
     // more selective i guess. The implementation confirms that both the block & item are scaffolding, so it
     // doesn't really matter and could be changed to block without issue.
@@ -20,6 +22,9 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
     private static final int VANILLA_PLACE_DISTANCE = 7 * 7;
     private static final int SCAFFOLDING_BLOCK = Block.SCAFFOLDING.id();
     private static final int SCAFFOLDING_ITEM = Material.SCAFFOLDING.id();
+
+    private ScaffoldingInteractionRule() {
+    }
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {

@@ -7,7 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class AxeInteractionRule implements BlockInteractionRule {
+    public static final AxeInteractionRule INSTANCE = new AxeInteractionRule();
+
     private static final Int2IntArrayMap STRIP_MAP; // Map of pre -> post right click, and reverse
+
+    private AxeInteractionRule() {
+    }
 
     @Override
     public @NotNull SneakState sneakState() {

@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public class HoeInteractionRule implements BlockInteractionRule {
+    public static final HoeInteractionRule INSTANCE = new HoeInteractionRule();
+
+    private HoeInteractionRule() {
+    }
 
     @Override
     public @NotNull SneakState sneakState() {
