@@ -10,9 +10,9 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -26,12 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
+
 public class MapDetailsView extends View {
     private static final Logger logger = LoggerFactory.getLogger(MapDetailsView.class);
 
     private @ContextObject ServerBridge bridge;
     private @ContextObject PlayerService playerService;
     private @ContextObject SessionManager sessionManager;
+    private @ContextObject MapService mapService;
 
     private @OutletGroup("report_button_.+") Label[] reportButtons;
 
@@ -108,12 +111,28 @@ public class MapDetailsView extends View {
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
+    private @Outlet("play_map") Label playMapButton;
 
     private final MapData map;
 
     public MapDetailsView(@NotNull Context context, @NotNull MapData map, @NotNull DisplayName authorName) {
         super(context);
         this.map = map;
+
+        // Fetch the latest save state for the player to fill in the "play" button
+        async(() -> {
+            try {
+                var playerData = MapPlayerData.fromPlayer(context.player());
+                var saveState = mapService.getLatestSaveState(map.id(), playerData.id(), SaveStateType.PLAYING);
+
+                var name = Component.translatable("gui.map_details.play_map.name");
+                var lore = LanguageProviderV2.translateMulti("gui.map_details.continue_map.lore",
+                        List.of(Component.text(formatMapPlaytime(saveState.getPlaytime(), true))));
+                playMapButton.setComponentsDirect(name, lore);
+            } catch (MapService.NotFoundError ignored) {
+                // Its ok, leave as default key
+            }
+        });
 
         for (var reportButton : reportButtons) {
             var buttonId = Objects.requireNonNull(reportButton.id());
