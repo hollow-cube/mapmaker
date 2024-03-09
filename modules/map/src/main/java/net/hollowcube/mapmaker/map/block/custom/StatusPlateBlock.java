@@ -27,8 +27,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
             .requiredVariant(MapVariant.PARKOUR)
             .build();
 
-    public static final StatusPlateBlock INSTANCE = new StatusPlateBlock();
-    public static final ItemHandler ITEM = new BlockItemHandler(INSTANCE, Block.STONE_PRESSURE_PLATE);
+    public static final ItemHandler ITEM = new BlockItemHandler(StatusPlateBlock::new, Block.STONE_PRESSURE_PLATE);
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

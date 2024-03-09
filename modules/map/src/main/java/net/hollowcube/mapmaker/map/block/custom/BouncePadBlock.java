@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.map.block.custom;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -22,8 +22,7 @@ public class BouncePadBlock implements BlockHandler, PressurePlateBlockMixin, De
     private static final NamespaceID ID = NamespaceID.from("mapmaker:bounce_pad");
     private static final Tag<Data> DATA_TAG = DFU.View(Data.CODEC);
 
-    public static final BouncePadBlock INSTANCE = new BouncePadBlock();
-    public static final ItemHandler ITEM = new BlockItemHandler(INSTANCE, Block.CHERRY_PRESSURE_PLATE);
+    public static final ItemHandler ITEM = new BlockItemHandler(BouncePadBlock::new, Block.CHERRY_PRESSURE_PLATE);
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

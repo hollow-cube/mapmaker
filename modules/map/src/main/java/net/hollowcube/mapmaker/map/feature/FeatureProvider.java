@@ -1,13 +1,14 @@
 package net.hollowcube.mapmaker.map.feature;
 
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface FeatureProvider {
 
@@ -23,7 +24,7 @@ public interface FeatureProvider {
     default void shutdown() {
     }
 
-    default @NotNull List<BlockHandler> blockHandlers() {
+    default @NotNull List<Supplier<BlockHandler>> blockHandlers() {
         return List.of();
     }
 

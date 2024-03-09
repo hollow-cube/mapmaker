@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.terraform;
 
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
@@ -52,6 +53,8 @@ public class MapServerModule implements TerraformModule {
         register(overrides, Block.CONDUIT, BlockHandlers.CONDUIT);
         register(overrides, Block.BELL, BlockHandlers.BELL);
         register(overrides, Block.DECORATED_POT, BlockHandlers.DECORATED_POT);
+
+        register(overrides, Block.BIG_DRIPLEAF, DripleafBlock.INSTANCE);
 
         return overrides;
     }

@@ -26,8 +26,7 @@ import java.util.Set;
 public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
 
-    public static final CheckpointPlateBlock INSTANCE = new CheckpointPlateBlock();
-    public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE,
+    public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,
             Block.HEAVY_WEIGHTED_PRESSURE_PLATE, CheckpointPlateBlock::updateItemStack);
 
     private final Set<Player> playersOnPlate = new HashSet<>();

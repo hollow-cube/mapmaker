@@ -14,6 +14,7 @@ import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class BlockItemHandler extends ItemHandler {
     public static final Tag<NBT> BLOCK_DATA = Tag.NBT("block_data").defaultValue(new NBTCompound());
@@ -22,18 +23,18 @@ public class BlockItemHandler extends ItemHandler {
     private final Material material;
     private final ItemUpdateFunc updateFunc;
 
-    public BlockItemHandler(@NotNull BlockHandler blockHandler, @NotNull Block block) {
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block) {
         this(blockHandler, block, null, null);
     }
 
 
-    public BlockItemHandler(@NotNull BlockHandler blockHandler, @NotNull Block block, @NotNull ItemUpdateFunc updateFunc) {
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull ItemUpdateFunc updateFunc) {
         this(blockHandler, block, null, updateFunc);
     }
 
-    public BlockItemHandler(@NotNull BlockHandler blockHandler, @NotNull Block block, @Nullable Material material, @Nullable ItemUpdateFunc updateFunc) {
-        super(blockHandler.getNamespaceId().asString(), RIGHT_CLICK_BLOCK);
-        this.block = block.withHandler(blockHandler);
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @Nullable Material material, @Nullable ItemUpdateFunc updateFunc) {
+        super(blockHandler.get().getNamespaceId().asString(), RIGHT_CLICK_BLOCK);
+        this.block = block.withHandler(blockHandler.get());
         this.material = material != null ? material :
                 Objects.requireNonNull(block.registry().material(), "Block has no material: " + block);
         this.updateFunc = updateFunc;

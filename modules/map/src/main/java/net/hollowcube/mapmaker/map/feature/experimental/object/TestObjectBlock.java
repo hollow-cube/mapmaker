@@ -12,7 +12,7 @@ public class TestObjectBlock implements ObjectBlockHandler {
             .build();
 
     public static final TestObjectBlock INSTANCE = new TestObjectBlock();
-    public static final BlockItemHandler ITEM = new BlockItemHandler(INSTANCE, Block.COAL_BLOCK);
+    public static final BlockItemHandler ITEM = new BlockItemHandler(() -> INSTANCE, Block.COAL_BLOCK);
 
     private TestObjectBlock() {
     }

@@ -24,7 +24,7 @@ public class FeatureList {
             for (var feature : ServiceLoader.load(FeatureProvider.class)) {
                 features.add(feature);
                 for (var blockHandler : feature.blockHandlers()) {
-                    blockManager.registerHandler(blockHandler.getNamespaceId(), () -> blockHandler);
+                    blockManager.registerHandler(blockHandler.get().getNamespaceId(), blockHandler);
                 }
                 scope.fork(Executors.callable(() -> feature.init(config)));
             }
