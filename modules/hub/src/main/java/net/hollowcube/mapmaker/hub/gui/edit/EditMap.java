@@ -83,6 +83,7 @@ public class EditMap extends View {
     private @Outlet("map_settings_nosprint_switch") Switch mapSettingsNoSprint;
     private @Outlet("map_settings_onlysprint_switch") Switch mapSettingsOnlySprint;
     private @Outlet("map_settings_nosneak_switch") Switch mapSettingsNoSneak;
+    private @Outlet("map_settings_nospec_switch") Switch mapSettingsNoSpec;
 
     private MapData map;
     private int slot;
@@ -492,6 +493,8 @@ public class EditMap extends View {
                 map.settings().setNoJump(true);
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
                 map.settings().setNoSneak(true);
+            } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
+                map.setSetting(MapSettings.NO_SPECTATOR, true);
             }
         } else {
             if (setting.equals(MapSettings.Setting.NOSPRINT)) {
@@ -502,6 +505,8 @@ public class EditMap extends View {
                 map.settings().setNoJump(false);
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
                 map.settings().setNoSneak(false);
+            } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
+                map.setSetting(MapSettings.NO_SPECTATOR, false);
             }
         }
         updateElementsFromMap();
@@ -567,6 +572,7 @@ public class EditMap extends View {
         mapSettingsNoSprint.setOption(map.settings().isNoSprint() ? 1 : 0);
         mapSettingsNoJump.setOption(map.settings().isNoJump() ? 1 : 0);
         mapSettingsNoSneak.setOption(map.settings().isNoSneak() ? 1 : 0);
+        mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : 0);
 
         async(() -> {
             publishSwitch.setOption(getPublishState().ordinal());

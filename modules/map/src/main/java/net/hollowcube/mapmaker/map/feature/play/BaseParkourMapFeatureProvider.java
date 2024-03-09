@@ -118,7 +118,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
             }
 
-            inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+            if (!event.getMap().getSetting(MapSettings.NO_SPECTATOR)) {
+                inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+            }
 
             inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));

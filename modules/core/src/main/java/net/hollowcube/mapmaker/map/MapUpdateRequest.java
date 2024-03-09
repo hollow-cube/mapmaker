@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.minestom.server.coordinate.Pos;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ public class MapUpdateRequest {
     Boolean noJump = null;
     Boolean noSneak = null;
     Boolean boat = null;
+    JsonObject extra = null;
 
     List<MapTags.Tag> tags = null;
 
@@ -28,11 +32,12 @@ public class MapUpdateRequest {
 
     MapQuality qualityOverride = null;
 
+
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
                 onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null ||
                 tags != null || !newObjects.isEmpty() || !removedObjects.isEmpty() || size != null ||
-                qualityOverride != null;
+                qualityOverride != null || extra != null;
     }
 
     public void setName(@Nullable String name) {
@@ -85,5 +90,10 @@ public class MapUpdateRequest {
 
     public void setQualityOverride(@Nullable MapQuality qualityOverride) {
         this.qualityOverride = qualityOverride;
+    }
+
+    public void setExtraUpdate(@NotNull String key, @NotNull JsonElement value) {
+        if (extra == null) extra = new JsonObject();
+        extra.add(key, value);
     }
 }

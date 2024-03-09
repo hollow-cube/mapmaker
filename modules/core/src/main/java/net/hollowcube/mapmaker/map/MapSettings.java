@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -16,6 +17,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MapSettings {
+    public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Embedded("only_sprint", MapSettings::isOnlySprint, MapUpdateRequest::setOnlySprint);
+    public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Embedded("no_sprint", MapSettings::isNoSprint, MapUpdateRequest::setNoSprint);
+    public static final MapSetting<Boolean> NO_JUMP = MapSetting.Embedded("no_jump", MapSettings::isNoJump, MapUpdateRequest::setNoJump);
+    public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Embedded("no_sneak", MapSettings::isNoSneak, MapUpdateRequest::setNoSneak);
+
+    public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
 
     transient MapUpdateRequest updates = new MapUpdateRequest();
     transient ReentrantLock updateLock = new ReentrantLock();
@@ -27,6 +34,8 @@ public class MapSettings {
     private String subvariant;
 
     private Pos spawnPoint;
+
+    private JsonObject extra;
 
     // Settings
     public enum SettingType {
@@ -46,6 +55,7 @@ public class MapSettings {
         NOSPRINT(SettingType.GAMEPLAY, "No Sprint"),
         NOJUMP(SettingType.GAMEPLAY, "No Jump"),
         NOSNEAK(SettingType.GAMEPLAY, "No Sneak"),
+        NOSPEC(SettingType.GAMEPLAY, "No Spectator"),
         ;
 
         SettingType type;
@@ -543,5 +553,10 @@ public class MapSettings {
         } finally {
             updateLock.unlock();
         }
+    }
+
+    public @NotNull JsonObject extra() {
+        if (this.extra == null) this.extra = new JsonObject();
+        return this.extra;
     }
 }

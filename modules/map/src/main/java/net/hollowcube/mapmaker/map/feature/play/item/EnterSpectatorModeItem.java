@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
@@ -39,6 +40,7 @@ public class EnterSpectatorModeItem extends ItemHandler {
         var player = click.player();
         var world = MapWorld.forPlayerOptional(player);
         if (!(world instanceof PlayingMapWorld)) return;
+        if (world.map().getSetting(MapSettings.NO_SPECTATOR)) return;
 
         // Must be standing on the ground (not falling) to enter spectator mode
         if (!player.isOnGround()) {

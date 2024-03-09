@@ -79,6 +79,14 @@ public class MapData {
         return settings;
     }
 
+    public <T> @NotNull T getSetting(@NotNull MapSetting<T> setting) {
+        return setting.read(settings);
+    }
+
+    public <T> void setSetting(@NotNull MapSetting<T> setting, @NotNull T value) {
+        setting.write(settings, value);
+    }
+
     public boolean needsVerification() {
         return settings().getVariant() != MapVariant.BUILDING;
     }
