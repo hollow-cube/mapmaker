@@ -14,7 +14,7 @@ env:
   MAPMAKER_COMMIT_SHA: "$COMMIT_SHA"
   MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
 
-  MAPMAKER_TRACING_OTLP_HTTP: "grafana-k8s-monitoring-grafana-agent.mapmaker.svc.cluster.local:4318"
+  MAPMAKER_TRACING_OTLP_ENDPOINT: "grafana-k8s-monitoring-grafana-agent.mapmaker.svc.cluster.local:4318"
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
 

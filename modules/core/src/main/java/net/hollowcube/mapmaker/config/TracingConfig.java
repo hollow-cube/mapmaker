@@ -4,5 +4,5 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public record TracingConfig(@Setting("otlp_http") String otlpHttp) {
+public record TracingConfig(@Setting("otlp_endpoint") String otlpHttp) {
 }
