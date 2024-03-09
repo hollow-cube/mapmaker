@@ -69,10 +69,15 @@ public class MapServerRunner extends AbstractMapServer {
     public MapServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
-        MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
+        MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+    }
+
+    @Override
+    protected @NotNull String name() {
+        return "mapmaker-map";
     }
 
     @Override

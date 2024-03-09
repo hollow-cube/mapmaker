@@ -150,6 +150,8 @@ public abstract class AbstractMapServer implements MapServer {
         }
     }
 
+    protected abstract @NotNull String name();
+
     @Blocking
     public final void start() {
         // Minestom init bits
@@ -380,7 +382,7 @@ public abstract class AbstractMapServer implements MapServer {
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
         Resource resource = Resource.getDefault().toBuilder()
-                .put(ResourceAttributes.SERVICE_NAME, "mapmaker")
+                .put(ResourceAttributes.SERVICE_NAME, name())
                 .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
                 .build();
 

@@ -51,6 +51,11 @@ public class HubServerRunner extends AbstractMapServer {
     }
 
     @Override
+    protected @NotNull String name() {
+        return "mapmaker-hub";
+    }
+
+    @Override
     public @NotNull Collection<HealthCheck> readinessChecks() {
         var checks = new ArrayList<>(super.readinessChecks());
         checks.add(() -> sessionService().ready() ? HealthCheckResponse.up("session-service") : HealthCheckResponse.down("session-service"));

@@ -61,6 +61,11 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     @Override
+    protected @NotNull String name() {
+        return "mapmaker-dev";
+    }
+
+    @Override
     protected @NotNull MapAllocator createAllocator() {
         return new LocalMapAllocator(this);
     }
