@@ -8,6 +8,9 @@ minestom:
   # Translation mode: server,proxy
   translation: server
 
+tracing:
+  otlp_endpoint: ""
+
 velocity:
   secret: ""
 

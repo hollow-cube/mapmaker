@@ -90,6 +90,15 @@ maven_install(
         "io.prometheus:simpleclient:0.16.0",
         "io.prometheus:simpleclient_hotspot:0.16.0",
         "io.pyroscope:agent:0.11.1",
+        "io.opentelemetry:opentelemetry-api:1.36.0",
+        "io.opentelemetry:opentelemetry-context:1.36.0",
+        "io.opentelemetry:opentelemetry-sdk:1.36.0",
+        "io.opentelemetry:opentelemetry-sdk-common:1.36.0",
+        "io.opentelemetry:opentelemetry-sdk-trace:1.36.0",
+        "io.opentelemetry:opentelemetry-extension-trace-propagators:1.36.0",
+        "io.opentelemetry:opentelemetry-exporter-logging:1.36.0",
+        "io.opentelemetry:opentelemetry-exporter-otlp:1.36.0",
+        "io.opentelemetry.semconv:opentelemetry-semconv:1.23.1-alpha",
 
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",

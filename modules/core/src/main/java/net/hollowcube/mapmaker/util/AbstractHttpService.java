@@ -3,6 +3,13 @@ package net.hollowcube.mapmaker.util;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.propagation.TextMapSetter;
+import io.opentelemetry.semconv.SemanticAttributes;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
@@ -19,6 +26,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -62,10 +70,57 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
             .disableJdkUnsafe()
             .create();
+    public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {
+        if (carrier == null) return;
+        carrier.header(key, value);
+    };
 
     public static final String hostname; //todo replace me with ServerRuntime call
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final OpenTelemetry otel;
+    protected final Tracer tracer;
+
+    protected AbstractHttpService() {
+        this(null);
+    }
+
+    protected AbstractHttpService(@Nullable OpenTelemetry otel) {
+        this.otel = otel;
+        if (otel == null) {
+            this.tracer = null;
+            return;
+        }
+        this.tracer = otel.getTracer(getClass().getName(), ServerRuntime.getRuntime().version());
+    }
+
+    protected <T> HttpResponse<T> doRequest(@NotNull String name, @NotNull HttpRequest.Builder reqBuilder, HttpResponse.BodyHandler<T> handler) {
+        var span = tracer.spanBuilder(name).setSpanKind(SpanKind.CLIENT).startSpan();
+        var context = Context.root().with(span);
+        try {
+            // Append propagation headers to the request
+            otel.getPropagators().getTextMapPropagator().inject(context, reqBuilder, CONTEXT_PROPAGATOR);
+            var req = reqBuilder.build();
+            span.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, req.method());
+            span.setAttribute(SemanticAttributes.URL_FULL, req.uri().toString());
+
+            logger.log(System.Logger.Level.DEBUG, "{0} {1}", req.method(), req.uri());
+            var res = httpClient.send(req, handler);
+            if (res.statusCode() == 403) {
+                // We simply convert auth issues to 404s
+                logger.log(System.Logger.Level.ERROR, "auth failed for request: " + req.method() + " " + req.uri());
+                throw new MapService.NotFoundError("???");
+            }
+            return res;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MapService.InternalError(e);
+        } catch (IOException e) {
+            throw new MapService.InternalError(e);
+        } finally {
+            span.end();
+        }
+    }
 
     protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
         try {

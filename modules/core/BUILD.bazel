@@ -20,6 +20,7 @@ java_library(
         "//third_party:helidon",
         "//third_party:minestom",
         "//third_party:spicedb",
+        "//third_party:otel",
         #        "//tools/compile",
         "@maven//:com_github_ben_manes_caffeine_caffeine",
         "@maven//:com_github_hollow_cube_datafixerupper",

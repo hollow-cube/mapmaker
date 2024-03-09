@@ -1,11 +1,25 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.semconv.ResourceAttributes;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Injectors;
@@ -21,6 +35,7 @@ import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.GlobalConfig;
+import net.hollowcube.mapmaker.config.TracingConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
@@ -107,10 +122,12 @@ public abstract class AbstractMapServer implements MapServer {
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
+        var otel = initTracing(config);
+
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
-        if (playerServiceUrl != null) playerService = new PlayerServiceImpl(playerServiceUrl);
+        if (playerServiceUrl != null) playerService = new PlayerServiceImpl(otel, playerServiceUrl);
         else if (globalConfig.noop()) playerService = new NoopPlayerService();
-        else playerService = new PlayerServiceImpl("http://localhost:9126"); // tilt
+        else playerService = new PlayerServiceImpl(otel, "http://localhost:9126"); // tilt
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
@@ -359,6 +376,34 @@ public abstract class AbstractMapServer implements MapServer {
         //todo
         return CompletableFuture.runAsync(() -> {
         }, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
+    }
+
+    private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
+        Resource resource = Resource.getDefault().toBuilder()
+                .put(ResourceAttributes.SERVICE_NAME, "mapmaker")
+                .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
+                .build();
+
+        var tracingConfig = config.get(TracingConfig.class);
+        SpanExporter spanExporter;
+        if (tracingConfig.otlpHttp() != null && !tracingConfig.otlpHttp().isEmpty()) {
+            spanExporter = OtlpHttpSpanExporter.builder()
+                    .setEndpoint(tracingConfig.otlpHttp())
+                    .build();
+        } else {
+            spanExporter = LoggingSpanExporter.create();
+        }
+
+        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+                .setResource(resource)
+                .build();
+
+        return OpenTelemetrySdk.builder()
+                .setTracerProvider(sdkTracerProvider)
+                .setPropagators(ContextPropagators.create(TextMapPropagator
+                        .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+                .buildAndRegisterGlobal();
     }
 
     protected @NotNull DebugCommand createDebugCommand() {

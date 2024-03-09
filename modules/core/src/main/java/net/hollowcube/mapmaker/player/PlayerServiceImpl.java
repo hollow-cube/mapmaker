@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -27,7 +28,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     private final String url;
 
-    public PlayerServiceImpl(String url) {
+    public PlayerServiceImpl(@Nullable OpenTelemetry otel, @NotNull String url) {
+        super(otel);
         this.url = String.format("%s/v1/internal", url);
     }
 
@@ -37,9 +39,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/players/" + id))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/players/" + id));
+        var res = doRequest("updatePlayerData", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new SessionService.InternalError("Failed to update session (" + res.statusCode() + "): " + res.body());
     }
@@ -47,9 +48,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     @Override
     public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + playerId + "/cosmetics"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/players/" + playerId + "/cosmetics"));
+        var res = doRequest("getUnlockedCosmetics", req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), new TypeToken<Set<String>>() {
             }.getType());
@@ -69,9 +69,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         if (items != null) reqBodyData.add("items", items);
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(GSON.toJson(reqBodyData)))
-                .uri(URI.create(url + "/players/" + id + "/cosmetics"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/players/" + id + "/cosmetics"));
+        var res = doRequest("buyCosmetic", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new SessionService.InternalError("Failed to update session (" + res.statusCode() + "): " + res.body());
     }
@@ -79,9 +78,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     @Override
     public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + id + "/backpack"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/players/" + id + "/backpack"));
+        var res = doRequest("getPlayerBackpack", req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), JsonObject.class);
             case 404 -> new JsonObject();
@@ -93,9 +91,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     @Override
     public @NotNull String getPlayerId(@NotNull String idOrUsername) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + idOrUsername + "/id"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/players/" + idOrUsername + "/id"));
+        var res = doRequest("getPlayerId", req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> res.body();
             case 404 -> throw new NotFoundError();
@@ -116,9 +113,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
         try (var $ = remoteFetchDisplayNameTime.startTimer()) {
             var req = HttpRequest.newBuilder()
-                    .uri(URI.create(url + "/players/" + id + "/displayname?v=2"))
-                    .build();
-            var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                    .uri(URI.create(url + "/players/" + id + "/displayname?v=2"));
+            var res = doRequest("getPlayerDisplayName2", req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
                 case 200 -> GSON.fromJson(res.body(), DisplayName.class);
                 case 404 -> new DisplayName(List.of());
@@ -135,9 +131,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var reqBody = GSON.toJson(Map.of("query", query));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/tab_complete"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/tab_complete"));
+        var res = doRequest("getUsernameTabCompletions", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new InternalError("Failed to get tab completions (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), TabCompleteResponse.class);
@@ -153,9 +148,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         ));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/payments/checkout"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/payments/checkout"));
+        var res = doRequest("createCheckoutLink", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 201)
             throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
@@ -171,9 +165,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         ));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/payments/checkout"))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+                .uri(URI.create(url + "/payments/checkout"));
+        var res = doRequest("createCheckoutLink", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 201)
             throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
