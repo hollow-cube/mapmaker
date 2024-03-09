@@ -36,5 +36,4 @@ public class BedPlacementRule extends BaseBlockPlacementRule {
 
         return headBlock.withProperty(PROP_PART, "foot");
     }
-
 }

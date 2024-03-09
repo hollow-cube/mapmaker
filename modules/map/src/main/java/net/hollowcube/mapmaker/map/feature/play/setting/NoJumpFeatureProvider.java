@@ -1,13 +1,15 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
+import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -19,7 +21,8 @@ import org.jetbrains.annotations.NotNull;
 public class NoJumpFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nojump", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer)
+            .addListener(MapSpectatorToggleFlightEvent.class, this::handleSpectatorFlightToggle);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -40,12 +43,27 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.isPlaying(player)) return;
 
-        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Potion.INFINITE_DURATION));
+        addEffect(player);
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
-        var player = event.getPlayer();
+        removeEffect(event.getPlayer());
+    }
 
+    public void handleSpectatorFlightToggle(@NotNull MapSpectatorToggleFlightEvent event) {
+        var player = event.player();
+        if (event.newState()) {
+            addEffect(player);
+        } else {
+            removeEffect(player);
+        }
+    }
+
+    private void addEffect(@NotNull Player player) {
+        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Potion.INFINITE_DURATION));
+    }
+
+    private void removeEffect(@NotNull Player player) {
         player.removeEffect(PotionEffect.JUMP_BOOST);
     }
 }

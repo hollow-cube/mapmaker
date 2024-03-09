@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -32,6 +34,9 @@ public class ToggleFlightItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isSpectating(player)) return;
+
         if (activeFlight) {
             player.setFlying(true);
             player.setAllowFlying(true);
@@ -43,6 +48,7 @@ public class ToggleFlightItem extends ItemHandler {
             // Replace clicked item
             player.getInventory().setItemInMainHand(INSTANCE_ON.buildItemStack(null));
         }
+        world.callEvent(new MapSpectatorToggleFlightEvent(world, player, !activeFlight));
     }
 
     @Override
