@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -145,9 +146,9 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
     }
 
     @Override
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (super.shouldIgnoreInput() || page >= pageCache.size())
-            return CLICK_DENY;
+            return null;
         return pageCache.get(page).handleClick(player, slot, clickType);
     }
 

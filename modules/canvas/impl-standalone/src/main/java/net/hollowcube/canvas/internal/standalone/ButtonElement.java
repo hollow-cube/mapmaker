@@ -11,15 +11,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class ButtonElement extends LabelElement {
     @FunctionalInterface
     public interface ClickHandler {
-        boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType);
+        @Nullable
+        Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType);
     }
 
-    private final List<ClickHandler> handlers = new ArrayList<>();
+    private ClickHandler handler;
+
+//    private final List<ClickHandler> handlers = new ArrayList<>();
 
     public ButtonElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
                          @NotNull String translationKey) {
@@ -31,50 +35,63 @@ public class ButtonElement extends LabelElement {
     }
 
     @Override
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (shouldIgnoreInput()) return CLICK_DENY;
-
-        for (var handler : handlers) {
-            handler.handleClick(player, slot, clickType);
-        }
-        return CLICK_DENY;
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (shouldIgnoreInput() || handler == null) return null;
+        return handler.handleClick(player, slot, clickType);
     }
 
     @Override
     public void wireAction(@NotNull View owner, @NotNull Object handler, @NotNull Action.Descriptor action) {
+        if (this.handler != null)
+            throw new IllegalStateException("Cannot wire multiple action handlers to a button");
         switch (handler) {
             case Method method -> {
                 method.setAccessible(true); // NOSONAR
-                handlers.add((player, slot, clickType) -> {
-                    if (method.getParameterCount() < 3 && clickType != ClickType.LEFT_CLICK)
-                        return CLICK_DENY;
-                    Runnable doCall = () -> {
-                        try {
-                            var args = new ArrayList<>();
-                            if (method.getParameterCount() > 0)
-                                args.add(player);
-                            if (method.getParameterCount() > 1)
-                                args.add(slot);
-                            if (method.getParameterCount() > 2)
-                                args.add(clickType);
-                            method.invoke(owner, args.toArray());
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to invoke action method " + method, e);
+                this.handler = (player, slot, clickType) -> {
+                    try {
+                        if (method.getParameterCount() < 3 && clickType != ClickType.LEFT_CLICK)
+                            return null;
+                        Callable<@Nullable Future<Void>> doCall = () -> {
+                            try {
+                                var args = new ArrayList<>();
+                                if (method.getParameterCount() > 0)
+                                    args.add(player);
+                                if (method.getParameterCount() > 1)
+                                    args.add(slot);
+                                if (method.getParameterCount() > 2)
+                                    args.add(clickType);
+                                var result = method.invoke(owner, args.toArray());
+                                if (result instanceof Future)
+                                    return (Future<Void>) result;
+                                return null;
+                            } catch (Exception e) {
+                                throw new RuntimeException("Failed to invoke action method " + method, e);
+                            }
+                        };
+                        if (action.async()) {
+                            return VIRTUAL_EXECUTOR.submit(() -> {
+                                try {
+                                    var future = doCall.call();
+                                    if (future != null)
+                                        future.get();
+                                    return null;
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                        } else {
+                            return doCall.call();
                         }
-                    };
-                    if (action.async()) {
-                        Thread.startVirtualThread(doCall);
-                    } else {
-                        doCall.run();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                    return CLICK_DENY;
-                });
+                };
             }
             case Label.ActionHandler actionHandler -> {
-                handlers.add((player, slot, clickType) -> {
+                this.handler = (player, slot, clickType) -> {
                     actionHandler.handle(player, slot, clickType);
-                    return CLICK_DENY;
-                });
+                    return null;
+                };
             }
             default -> throw new UnsupportedOperationException("Unsupported action handler: " + handler);
         }

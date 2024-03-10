@@ -29,6 +29,8 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class InventoryViewHost {
     private static final Scheduler SCHEDULER = MinecraftServer.getSchedulerManager();
@@ -48,6 +50,8 @@ public class InventoryViewHost {
     private int playerInventoryRows = 0;
 
     private final Deque<View> history = new ArrayDeque<>();
+
+    private ReentrantLock clickLock = new ReentrantLock();
 
     public boolean canPopView() {
         return !history.isEmpty();
@@ -308,11 +312,33 @@ public class InventoryViewHost {
         private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
             if (element == null) return false;
 
-//            deferredDirty = true;
-            var result = element.handleClick(player, index, clickType);
-//            deferredDirty = false;
-            if (dirty) drawCurrentElement();
-            return result;
+            BaseElement.VIRTUAL_EXECUTOR.submit(() -> {
+                if (!clickLock.tryLock()) {
+                    logger.log(System.Logger.Level.INFO, "CLICK LOCK IS HELD BY OTHER!!!!!!!! SKIPPING");
+                    return;
+                }
+
+                Future<Void> result = null;
+                try {
+                    result = element.handleClick(player, index, clickType);
+                    if (result != null) {
+                        try {
+                            result.get();
+                        } catch (Exception e) {
+                            logger.log(System.Logger.Level.ERROR, "Failed to handle click", e);
+                        } finally {
+                            clickLock.unlock();
+                        }
+                    }
+                    if (dirty) drawCurrentElement();
+                } finally {
+                    // If result was set to a future then the click was async and will be released later.
+                    if (result == null) {
+                        clickLock.unlock();
+                    }
+                }
+            });
+            return false;
         }
 
         private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {

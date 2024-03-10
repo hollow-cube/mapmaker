@@ -17,9 +17,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 public abstract class BaseElement implements Element, Loadable {
+    public static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
     public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
             .meta(meta -> meta.customModelData(2))
             .build();
@@ -140,8 +145,8 @@ public abstract class BaseElement implements Element, Loadable {
      * @param clickType The type of click they did
      * @return {@link #CLICK_ALLOW} or {@link #CLICK_DENY}
      */
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        return CLICK_DENY;
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        return null;
     }
 
     public void wireAction(@NotNull View view, @NotNull Object handler, @NotNull Action.Descriptor action) {

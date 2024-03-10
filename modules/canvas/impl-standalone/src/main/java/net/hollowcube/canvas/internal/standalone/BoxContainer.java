@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.concurrent.Future;
 
 public class BoxContainer extends ContainerElement implements SpriteHolder {
 
@@ -58,14 +59,15 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
     }
 
     @Override
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (shouldIgnoreInput()) return CLICK_DENY;
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (shouldIgnoreInput()) return null;
 
         int x = slot % width(), y = slot / width();
         if (align == Align.LTR) {
             for (var child : children()) {
                 if (x < child.width()) {
-                    if (y >= child.height()) return CLICK_DENY; // TODO: Weirdness, if you have a spacer element at the top of the view, it always fails to proceed?
+                    if (y >= child.height())
+                        return null; // TODO: Weirdness, if you have a spacer element at the top of the view, it always fails to proceed?
                     return child.handleClick(player, y * child.width() + x, clickType);
                 }
 
@@ -74,7 +76,7 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         } else if (align == Align.TTB) {
             for (var child : children()) {
                 if (y < child.height()) {
-                    if (x >= child.width()) return CLICK_DENY;
+                    if (x >= child.width()) return null;
                     return child.handleClick(player, y * child.width() + x, clickType);
                 }
 
@@ -83,7 +85,7 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         } else {
             throw new IllegalStateException("Unsupported alignment: " + align);
         }
-        return CLICK_DENY;
+        return null;
     }
 
     @Override

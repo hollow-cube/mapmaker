@@ -11,6 +11,8 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.Future;
+
 public class SwitchElement extends ContainerElement implements Switch, SpriteHolder {
     private int state = 0;
 
@@ -53,8 +55,8 @@ public class SwitchElement extends ContainerElement implements Switch, SpriteHol
     }
 
     @Override
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (shouldIgnoreInput()) return CLICK_DENY;
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (shouldIgnoreInput()) return null;
 
         return children().get(state).handleClick(player, slot, clickType);
     }

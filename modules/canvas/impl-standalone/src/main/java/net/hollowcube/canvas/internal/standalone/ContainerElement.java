@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -75,8 +76,8 @@ public class ContainerElement extends BaseElement {
     }
 
     @Override
-    public boolean handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (shouldIgnoreInput()) return CLICK_DENY;
+    public @Nullable Future<Void> handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (shouldIgnoreInput()) return null;
 
         int cx = slot % width();
         int cy = slot / width();
@@ -96,7 +97,7 @@ public class ContainerElement extends BaseElement {
             nextY = Math.max(nextY, y + child.height());
         }
 
-        return CLICK_DENY;
+        return null;
     }
 
     @Override
