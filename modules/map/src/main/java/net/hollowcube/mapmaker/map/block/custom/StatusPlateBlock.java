@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.block.custom;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
@@ -15,15 +16,18 @@ import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.time.Cooldown;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
+public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug, PlayerCooldown {
     private static final Tag<StatusEffectData> DATA_TAG = DFU.View(StatusEffectData.CODEC);
-    private static final Tag<Long> APPLY_COOLDOWN_TAG = Tag.Transient("mapmaker:status_plate_cooldown");
-    private static final long COOLDOWN_TIME = 250L;
+    private static final Tag<Cooldown> APPLY_COOLDOWN_TAG = Tag.Transient("mapmaker:status_plate_cooldown");
+    private static final Duration COOLDOWN_TIME = Duration.of(250L, ChronoUnit.MILLIS);
 
     public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:status_plate")
             .requiredVariant(MapVariant.PARKOUR)
@@ -67,10 +71,11 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
-        if (isCoolingDown(player)) return;
-        var data = tick.getBlock().getTag(DATA_TAG);
-        var statusId = createObjectId(tick.getBlockPosition());
-        world.callEvent(new MapPlayerStatusChangeEvent(player, world, statusId, data));
+        tryUseCooldown(player, () -> {
+            var data = tick.getBlock().getTag(DATA_TAG);
+            var statusId = createObjectId(tick.getBlockPosition());
+            world.callEvent(new MapPlayerStatusChangeEvent(player, world, statusId, data));
+        });
     }
 
     @Override
@@ -78,12 +83,13 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
         block.getTag(DATA_TAG).sendDebugInfo(player);
     }
 
-    private boolean isCoolingDown(@NotNull Player player) {
-        if (!player.hasTag(APPLY_COOLDOWN_TAG)) {
-            return false;
-        }
-        long time = player.getTag(APPLY_COOLDOWN_TAG);
-        return time + COOLDOWN_TIME > System.currentTimeMillis();
+    @Override
+    public @NotNull Tag<Cooldown> cooldownTag() {
+        return APPLY_COOLDOWN_TAG;
     }
 
+    @Override
+    public @NotNull Duration cooldownDuration() {
+        return COOLDOWN_TIME;
+    }
 }
