@@ -24,14 +24,20 @@
     <box width="9" height="1" align="ltr">
         <spacer width="2"/>
 
-        <button id="tab_settings" translationKey="gui.checkpoint.tab_settings"
-                sprite="minecraft:book"/>
+        <switch id="tab_settings_state_switch">
+            <button id="tab_settings" translationKey="gui.checkpoint.tab.settings"
+                    sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_bg"/>
+            <button id="tab_settings_set" translationKey="gui.checkpoint.tab.settings"
+                    sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_selected_bg"/>
+        </switch>
 
-        <spacer width="3"/>
+        <spacer width="1"/>
 
-        <button id="tab_actions" translationKey="gui.checkpoint.tab_actions"
-                sprite="minecraft:detector_rail"/>
+        <button id="tab_actions" translationKey="gui.checkpoint.tab.actions"
+                sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
 
-        <spacer width="2"/>
+        <spacer width="1"/>
+
+        <label translationKey="gui.checkpoint.tab.coordinates"/>
     </box>
 </component>

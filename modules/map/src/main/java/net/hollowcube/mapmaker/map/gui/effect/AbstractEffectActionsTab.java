@@ -34,9 +34,17 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     private @Outlet("teleport_off") Label teleportOffLabel;
     private @Outlet("teleport_on") Label teleportOnLabel;
 
-    private @Outlet("settings") Label settingsLabel;
-    private @Outlet("add_item") Label addItemLabel;
-    private @Outlet("remove_item") Label removeItemLabel;
+    private @Outlet("settings_switch") Switch settingsSwitch;
+    private @Outlet("settings_off") Label settingsOffLabel;
+    private @Outlet("settings_on") Label settingsOnLabel;
+
+    private @Outlet("add_item_switch") Switch addItemSwitch;
+    private @Outlet("add_item_off") Label addItemOffLabel;
+    private @Outlet("add_item_on") Label addItemOnLabel;
+
+    private @Outlet("remove_item_switch") Switch removeItemSwitch;
+    private @Outlet("remove_item_off") Label removeItemOffLabel;
+    private @Outlet("remove_item_on") Label removeItemOnLabel;
 
     protected EffectData data;
     protected Runnable save;
@@ -87,7 +95,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
 
     @Action("teleport_off")
     public void handleTeleportInteractA(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             if (data.teleport().isEmpty()) {
                 // Default to the player's current position
                 data.setTeleport(player.getPosition());
@@ -98,7 +106,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
                 data.setTeleport(pos);
                 updateFromData();
             }, data.teleport().orElseThrow()));
-        } else if (clickType == ClickType.RIGHT_CLICK) {
+        } else if (clickType == ClickType.START_SHIFT_CLICK) {
             data.setTeleport(null);
             updateFromData();
         }
@@ -130,8 +138,8 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
             teleportOffLabel.setArgs(TELEPORT_NONE);
         }
 
-        //todo settings
-
-        //todo items
+        settingsSwitch.setOption(0);
+        addItemSwitch.setOption(0);
+        removeItemSwitch.setOption(0);
     }
 }

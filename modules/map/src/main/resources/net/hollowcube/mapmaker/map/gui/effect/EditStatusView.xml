@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.effect ?>
-<component width="9" height="10" align="ttb" sprite="effect/checkpoint/container">
+<component width="9" height="10" align="ttb" sprite="effect/status/container">
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
@@ -22,16 +22,14 @@
 
     <!-- Tab Buttons -->
     <box width="9" height="1" align="ltr">
-        <spacer width="2"/>
-
-        <button id="tab_settings" translationKey="gui.status.tab_settings"
-                sprite="minecraft:book"/>
-
         <spacer width="3"/>
 
-        <button id="tab_actions" translationKey="gui.status.tab_actions"
-                sprite="minecraft:detector_rail"/>
+        <button id="tab_settings" translationKey="gui.status.tab_settings"
+                sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_bg"/>
 
-        <spacer width="2"/>
+        <spacer/>
+
+        <button id="tab_actions" translationKey="gui.status.tab_actions"
+                sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
     </box>
 </component>

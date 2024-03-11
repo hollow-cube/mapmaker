@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.map.gui.effect ?>
-<component width="9" height="4" align="ttb" sprite="effect/checkpoint/actions">
+<component width="9" height="4" align="ttb">
 
     <box width="9" height="2" align="ltr">
         <switch id="potion_effects_switch" width="2" height="2">
@@ -30,15 +30,34 @@
                     translationKey="gui.effect.actions.teleport"
                     sprite="effect/actions/teleport_on"/>
         </switch>
-        <button id="settings" width="2" height="2"
-                translationKey="gui.effect.actions.settings"/>
+        <switch id="settings_switch" width="2" height="2">
+            <button id="settings_off" width="2" height="2"
+                    translationKey="gui.effect.actions.settings"
+                    sprite="effect/actions/toggle_map_settings_off"/>
+            <button id="settings_on" width="2" height="2"
+                    translationKey="gui.effect.actions.settings"
+                    sprite="effect/actions/toggle_map_settings_on"/>
+        </switch>
     </box>
 
     <box width="9" height="2" align="ltr">
-        <button id="add_item" width="2" height="2"
-                translationKey="gui.effect.actions.add_item"/>
-        <button id="remove_item" width="2" height="2"
-                translationKey="gui.effect.actions.remove_item"/>
+        <switch id="add_item_switch" width="2" height="2">
+            <button id="add_item_off" width="2" height="2"
+                    translationKey="gui.effect.actions.add_item"
+                    sprite="effect/actions/give_item_off"/>
+            <button id="add_item_on" width="2" height="2"
+                    translationKey="gui.effect.actions.add_item"
+                    sprite="effect/actions/give_item_on"/>
+        </switch>
+
+        <switch id="remove_item_switch" width="2" height="2">
+            <button id="remove_item_off" width="2" height="2"
+                    translationKey="gui.effect.actions.remove_item"
+                    sprite="effect/actions/remove_item_off"/>
+            <button id="remove_item_on" width="2" height="2"
+                    translationKey="gui.effect.actions.remove_item"
+                    sprite="effect/actions/remove_item_on"/>
+        </switch>
     </box>
 
 </component>
