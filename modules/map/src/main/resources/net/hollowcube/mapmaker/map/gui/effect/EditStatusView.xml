@@ -24,12 +24,12 @@
     <box width="9" height="1" align="ltr">
         <spacer width="3"/>
 
-        <button id="tab_settings" translationKey="gui.status.tab_settings"
+        <button id="tab_settings" translationKey="gui.status.tab.settings"
                 sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_bg"/>
 
         <spacer/>
 
-        <button id="tab_actions" translationKey="gui.status.tab_actions"
+        <button id="tab_actions" translationKey="gui.status.tab.actions"
                 sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
     </box>
 </component>

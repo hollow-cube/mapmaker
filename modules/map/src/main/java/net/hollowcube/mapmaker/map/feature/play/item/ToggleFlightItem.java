@@ -16,8 +16,8 @@ public class ToggleFlightItem extends ItemHandler {
     public static final ToggleFlightItem INSTANCE_ON = new ToggleFlightItem(true);
     public static final ToggleFlightItem INSTANCE_OFF = new ToggleFlightItem(false);
 
-    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/flight_off"));
-    private static final BadSprite SPRITE_ON = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/flight_on"));
+    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/flight_on"));
+    private static final BadSprite SPRITE_ON = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/flight_off"));
 
     private final boolean activeFlight;
 

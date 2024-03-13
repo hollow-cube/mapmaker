@@ -63,10 +63,10 @@
 
         <switch id="add_time_switch" width="2" height="2">
             <button id="add_time_off" width="2" height="2"
-                    translationKey="gui.status.actions.add_time"
+                    translationKey="gui.effect.actions.add_time"
                     sprite="effect/status/extra_time_off"/>
             <button id="add_time_on" width="2" height="2"
-                    translationKey="gui.status.actions.add_time"
+                    translationKey="gui.effect.actions.add_time"
                     sprite="effect/status/extra_time_on"/>
         </switch>
     </box>

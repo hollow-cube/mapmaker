@@ -56,7 +56,7 @@ public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData>
 
         if (data.extraTime() <= 0) {
             addTimeSwitch.setOption(0);
-            addTimeOffLabel.setArgs(Component.translatable("gui.status.add_time.none"));
+            addTimeOffLabel.setArgs(Component.translatable("gui.effects.actions.add_time.none"));
         } else {
             addTimeSwitch.setOption(1);
             addTimeOnLabel.setArgs(Component.text(NumberUtil.formatDuration(data.extraTime())));
