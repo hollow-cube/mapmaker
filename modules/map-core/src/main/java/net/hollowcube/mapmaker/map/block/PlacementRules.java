@@ -140,6 +140,9 @@ public final class PlacementRules {
         register(Block.SPAWNER, NoopPlacementRule::new);
         register(Block.END_PORTAL, NoopPlacementRule::new);
 
+        register(Block.CAMPFIRE, CampfirePlacementRule::new);
+        register(Block.SOUL_CAMPFIRE, CampfirePlacementRule::new);
+
         register(Block.CONDUIT, WaterloggedPlacementRule::new);
         register(BlockTags.CORAL, WaterloggedPlacementRule::new);
         register(BlockTags.CORAL_FAN, CoralFanPlacementRule::new);

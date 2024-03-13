@@ -1,8 +1,5 @@
 package net.hollowcube.test.snapshot.viewer;
 
-import com.mattworzala.debug.DebugMessage;
-import com.mattworzala.debug.Layer;
-import com.mattworzala.debug.shape.Shape;
 import io.helidon.media.common.ContentReaders;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
@@ -59,7 +56,7 @@ public class SnapshotViewerServer {
 
     private final WebServer webServer;
 
-    private DebugMessage debugPacket = null;
+//    private DebugMessage debugPacket = null;
 
     public SnapshotViewerServer() {
         server = MinecraftServer.init();
@@ -104,9 +101,9 @@ public class SnapshotViewerServer {
         player.setFlying(true);
 
         player.setTag(SHOW_DEBUG, true);
-        if (debugPacket != null) {
-            debugPacket.sendTo(player);
-        }
+//        if (debugPacket != null) {
+//            debugPacket.sendTo(player);
+//        }
     }
 
     private void handleReportRequest(@NotNull ServerRequest req, @NotNull ServerResponse res) {
@@ -156,22 +153,22 @@ public class SnapshotViewerServer {
                 var actualBlocks = new HashMap<Point, Block>();
                 actualSchem.apply(Rotation.NONE, actualBlocks::put);
 
-                var builder = DebugMessage.builder().clear("viewer");
+//                var builder = DebugMessage.builder().clear("viewer");
                 expectedSchem.apply(Rotation.NONE, (pos, block) -> {
                     var actualBlock = actualBlocks.get(pos);
                     if (block.equals(actualBlock)) return;
 
                     var relPos = pos.add(0, 0, expectedSchem.size().z() + 3);
                     var nsid = String.format("viewer:%d-%d-%d", pos.blockX(), pos.blockY(), pos.blockZ());
-                    builder.set(nsid, Shape.box()
-                            .start(relPos.sub(0.01))
-                            .end(relPos.add(1.01))
-                            .edgeColor(0xFFFF0000)
-                            .faceColor(0x66FF0000)
-                            .edgeLayer(Layer.TOP)
-                            .build());
+//                    builder.set(nsid, Shape.box()
+//                            .start(relPos.sub(0.01))
+//                            .end(relPos.add(1.01))
+//                            .edgeColor(0xFFFF0000)
+//                            .faceColor(0x66FF0000)
+//                            .edgeLayer(Layer.TOP)
+//                            .build());
                 });
-                updateDebugPacket(builder.build());
+//                updateDebugPacket(builder.build());
 
                 Audiences.players().sendMessage(Component.text("New failure"));
             } catch (Exception e) {
@@ -184,13 +181,13 @@ public class SnapshotViewerServer {
         res.status(200).send();
     }
 
-    private void updateDebugPacket(@NotNull DebugMessage message) {
-        this.debugPacket = message;
-        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            if (!player.getTag(SHOW_DEBUG)) continue;
-
-            message.sendTo(player);
-        }
-    }
+//    private void updateDebugPacket(@NotNull DebugMessage message) {
+//        this.debugPacket = message;
+//        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+//            if (!player.getTag(SHOW_DEBUG)) continue;
+//
+//            message.sendTo(player);
+//        }
+//    }
 
 }

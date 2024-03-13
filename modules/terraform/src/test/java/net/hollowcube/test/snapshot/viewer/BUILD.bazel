@@ -8,7 +8,7 @@ java_library(
         "//third_party:helidon",
         "//third_party:minestom",
         "@maven//:ch_qos_logback_logback_classic",
-        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
+        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_plain",
         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",

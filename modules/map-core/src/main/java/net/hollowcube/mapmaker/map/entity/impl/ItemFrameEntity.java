@@ -23,7 +23,7 @@ public class ItemFrameEntity extends MapEntity {
     protected SoundEvent rotateItemSound = SoundEvent.ENTITY_ITEM_FRAME_ROTATE_ITEM;
 
     public ItemFrameEntity(@NotNull UUID uuid) {
-        super(EntityType.ITEM_FRAME, uuid);
+        this(EntityType.ITEM_FRAME, uuid);
     }
 
     protected ItemFrameEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {

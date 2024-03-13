@@ -73,7 +73,7 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
         return direction != Direction.UP && direction != Direction.DOWN;
     }
 
-    private static float getDegreesForHorizontalDirection(@NotNull Direction direction) {
+    static float getDegreesForHorizontalDirection(@NotNull Direction direction) {
         // Minecraft horizontal directions go anticlockwise from south
         return switch (direction) {
             case SOUTH -> 0;

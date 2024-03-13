@@ -16,7 +16,7 @@ java_library(
         "//third_party:helidon",
         "//third_party:minestom",
         "@maven//:com_github_hollow_cube_datafixerupper",
-        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
+        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_github_jglrxavpok_hephaistos_common",

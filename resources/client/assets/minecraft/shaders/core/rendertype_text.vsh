@@ -26,9 +26,14 @@ out vec2 texCoord0;
 #define OTHER_SHADOW (0)
 
 void main() {
+    vec3 pos = Position;
+    //    if (Color == vec4(76/255., 90/255., 34/255., Color.a)) {
+    //        pos = vec3(pos.x - 50, pos.y + 50, pos.z);
+    //    }
+
     // vanilla behavior
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-    vertexDistance = fog_distance(ModelViewMat, IViewRotMat * Position, FogShape);
+    gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
+    vertexDistance = fog_distance(ModelViewMat, IViewRotMat * pos, FogShape);
     vertexColor = Color * texelFetch(Sampler2, UV2 / 16, 0);
     texCoord0 = UV0;
 

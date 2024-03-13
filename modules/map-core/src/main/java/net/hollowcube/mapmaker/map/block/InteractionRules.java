@@ -55,6 +55,7 @@ public class InteractionRules {
         item(ItemTags.HOES, HoeInteractionRule.INSTANCE);
         item(Material.ITEM_FRAME, new ItemFrameInteractionRule(false));
         item(Material.GLOW_ITEM_FRAME, new ItemFrameInteractionRule(true));
+        item(Material.PAINTING, new PaintingInteractionRule());
         item(Material.ENDER_EYE, new EnderEyeInteractionRule());
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
         item(Material.SCAFFOLDING, ScaffoldingInteractionRule.INSTANCE);

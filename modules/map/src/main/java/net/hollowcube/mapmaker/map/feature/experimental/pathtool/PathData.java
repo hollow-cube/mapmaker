@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.map.feature.experimental.pathtool;
 
-import com.mattworzala.debug.DebugMessage;
-import com.mattworzala.debug.shape.LineShape;
-import com.mattworzala.debug.shape.Shape;
 import net.minestom.server.Viewable;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -46,27 +43,27 @@ public class PathData implements Viewable { //todo maybe should be Viewable?
 
     public void updateRendering() {
         var namespace = "path_tool_" + id;
-        var builder = DebugMessage.builder()
-                .clear(namespace);
-
-        for (var point : points) {
-            point.draw(builder, namespace);
-//            lineBuilder.pos(pos.pos().add(0.5));
-        }
-
-        if (points.size() > 1) {
-            for (int i = 1; i < points.size(); i++) {
-                var start = points.get(i - 1).point().add(0.5);
-                var end = points.get(i).point().add(0.5);
-                builder.set(namespace + ":line_" + i, Shape.line()
-                        .type(LineShape.Type.SINGLE)
-                        .lineWidth(4f)
-                        .color(i == selectedLine ? 0xFF00FF00 : 0xFFFF0000)
-                        .point(start)
-                        .point(end)
-                        .build());
-            }
-        }
+//        var builder = DebugMessage.builder()
+//                .clear(namespace);
+//
+//        for (var point : points) {
+//            point.draw(builder, namespace);
+////            lineBuilder.pos(pos.pos().add(0.5));
+//        }
+//
+//        if (points.size() > 1) {
+//            for (int i = 1; i < points.size(); i++) {
+//                var start = points.get(i - 1).point().add(0.5);
+//                var end = points.get(i).point().add(0.5);
+//                builder.set(namespace + ":line_" + i, Shape.line()
+//                        .type(LineShape.Type.SINGLE)
+//                        .lineWidth(4f)
+//                        .color(i == selectedLine ? 0xFF00FF00 : 0xFFFF0000)
+//                        .point(start)
+//                        .point(end)
+//                        .build());
+//            }
+//        }
 
         //todo need to update debug renderer to 1.20.2
 //        sendPacketToViewers(builder.build().getPacket());

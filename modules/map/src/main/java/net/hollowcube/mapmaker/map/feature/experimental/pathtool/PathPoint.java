@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map.feature.experimental.pathtool;
 
-import com.mattworzala.debug.DebugMessage;
-import com.mattworzala.debug.shape.Shape;
 import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.common.physics.RayUtils;
 import net.hollowcube.common.physics.SweepResult;
@@ -55,14 +53,14 @@ public class PathPoint {
         return selected;
     }
 
-    public void draw(@NotNull DebugMessage.Builder builder, String namespace) {
-        builder.set(namespace + ":point_" + point.hashCode(), Shape.box()
-                .start(point.add(0.3))
-                .end(point.add(0.7))
-                .faceColor(selected ? 0x5500FF00 : 0x55FF0000)
-                .edgeColor(0xFFFF0000)
-                .build());
-    }
+//    public void draw(@NotNull DebugMessage.Builder builder, String namespace) {
+//        builder.set(namespace + ":point_" + point.hashCode(), Shape.box()
+//                .start(point.add(0.3))
+//                .end(point.add(0.7))
+//                .faceColor(selected ? 0x5500FF00 : 0x55FF0000)
+//                .edgeColor(0xFFFF0000)
+//                .build());
+//    }
 
     @Override
     public boolean equals(Object o) {

@@ -49,9 +49,9 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:a47dcb09ff",
+        "net.minestom:minestom-snapshots:dcbdad9a1b",
         "dev.hollowcube:polar:1.7.2",
-        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
+        #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
         "com.google.code.gson:gson:2.10.1",
@@ -115,6 +115,7 @@ maven_install(
     excluded_artifacts = [
         "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
     ],
+    fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
         "https://repo1.maven.org/maven2",
