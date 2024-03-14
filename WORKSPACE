@@ -72,10 +72,11 @@ maven_install(
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
 
         # Adventure
-        "net.kyori:adventure-api:4.12.0",
-        "net.kyori:adventure-key:4.12.0",
-        "net.kyori:adventure-text-minimessage:4.12.0",
-        "net.kyori:adventure-text-serializer-plain:4.12.0",
+        "net.kyori:adventure-api:4.16.0",
+        "net.kyori:adventure-key:4.16.0",
+        "net.kyori:adventure-text-minimessage:4.16.0",
+        "net.kyori:adventure-text-serializer-plain:4.16.0",
+        "net.kyori:adventure-nbt:4.16.0",
 
         # Helidon
         "io.helidon.health:helidon-health:3.0.2",

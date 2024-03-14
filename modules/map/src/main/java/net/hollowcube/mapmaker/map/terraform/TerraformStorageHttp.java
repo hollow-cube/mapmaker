@@ -2,15 +2,14 @@ package net.hollowcube.mapmaker.map.terraform;
 
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
+import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.schem.SchematicHeader;
-import net.hollowcube.terraform.schem.SchematicReader;
-import net.hollowcube.terraform.schem.SchematicWriter;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -98,7 +97,7 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
         return switch (res.statusCode()) {
-            case 200 -> SchematicReader.read(new ByteArrayInputStream(res.body()));
+            case 200 -> new SpongeSchematicReader().read(res.body());
             case 404 -> null;
             default ->
                     throw new RuntimeException("Failed to fetch schem data (" + res.statusCode() + "): " + new String(res.body()));
@@ -107,7 +106,7 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
 
     @Override
     public @NotNull SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite) {
-        var schemData = SchematicWriter.write(schematic);
+        var schemData = new SpongeSchematicWriter().write(schematic);
         var endpoint = String.format("%s/schem/%s/%s?dimx=%d&dimy=%d&dimz=%d&size=%d&overwrite=%b",
                 this.url, playerId, name,
                 schematic.size().blockX(), schematic.size().blockY(), schematic.size().blockZ(),

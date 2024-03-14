@@ -18,14 +18,18 @@ import net.hollowcube.terraform.tool.ToolHandler;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.ThreadUtil;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
 import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.block.BlockUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -214,6 +219,7 @@ public final class TerraformImpl implements Terraform {
                 final var sectionChangeCache = new LongArrayList();
                 final var paletteData = new int[4096]; // Reused buffer
                 final var indexCache = new AtomicInteger(0);
+                final var blockEntityUpdates = new ArrayList<SendablePacket>();
 
                 final var undoBufferBuilder = BlockBuffer.builder(null); //todo add compute buffer min + max here
 
@@ -227,6 +233,7 @@ public final class TerraformImpl implements Terraform {
                     final var chunkRef = chunk; // Final var for lambda
 
                     sectionChangeCache.clear();
+                    blockEntityUpdates.clear();
 
                     var section = chunk.getSection(chunkY);
                     synchronized (chunk) { // Synchronized is OK, we always run this on one of the dedicated threads.
@@ -241,13 +248,21 @@ public final class TerraformImpl implements Terraform {
                             if (newBlockState == null) {
                                 paletteData[paletteIndex] = stateId;
                             } else {
+                                var chunkOldBlock = chunkRef.getBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
                                 //todo bad bad very bad
                                 if (!task.isDryRun())
                                     chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
 
                                 paletteData[paletteIndex] = newBlockState.stateId();
                                 if (!task.isDryRun() && (newBlockState.handler() != null || newBlockState.hasNbt())) {
+                                    var blockPosition = new Vec(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
                                     chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
+
+                                    var registry = newBlockState.registry();
+                                    if (registry.isBlockEntity()) {
+                                        var clientData = BlockUtils.extractClientNbt(newBlockState);
+                                        blockEntityUpdates.add(new BlockEntityDataPacket(blockPosition, registry.blockEntityId(), clientData));
+                                    }
                                 }
 
                                 // Only send a client update if the block was actually modified (and for change counter)
@@ -265,7 +280,7 @@ public final class TerraformImpl implements Terraform {
                                         (chunkX << 4) + sx,
                                         (chunkY << 4) + sy,
                                         (chunkZ << 4) + sz,
-                                        stateId
+                                        chunkOldBlock
                                 );
                             }
                         });
@@ -280,6 +295,7 @@ public final class TerraformImpl implements Terraform {
                         var updateIndex = (((long) chunkX & 0x3FFFFF) << 42) | ((long) chunkY & 0xFFFFF) | (((long) chunkZ & 0x3FFFFF) << 20);
                         var packet = new MultiBlockChangePacket(updateIndex, sectionChangeCache.toLongArray());
                         chunk.sendPacketToViewers(packet); //todo these could be batched perhaps, maybe minestom does it on its own?
+                        chunk.sendPacketsToViewers(blockEntityUpdates);
                         ChunkHack.invalidateChunk(chunk);
                     }
 

@@ -1,8 +1,7 @@
 package net.hollowcube.mapmaker.hub.feature.motw;
 
-import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicReader;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
@@ -25,7 +24,7 @@ public class CountdownUtil {
     static {
         for (int i = 0; i < 10; i++) {
             try (var is = CountdownUtil.class.getResourceAsStream("/motw/motw_num_" + i + ".schem")) {
-                NUMBER_SCHEMATICS[i] = SchematicReader.read(Objects.requireNonNull(is));
+                NUMBER_SCHEMATICS[i] = new SpongeSchematicReader().read(Objects.requireNonNull(is).readAllBytes());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -35,6 +34,6 @@ public class CountdownUtil {
     public static void applySchematic(@NotNull Instance instance, int position, int number) {
         var schematic = NUMBER_SCHEMATICS[number];
         var offset = NUMBER_POSITIONS[position];
-        schematic.apply(Rotation.NONE, (pos, block) -> instance.setBlock(offset.add(pos), block));
+        schematic.forEachBlock((pos, block) -> instance.setBlock(offset.add(pos), block));
     }
 }

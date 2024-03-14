@@ -1,8 +1,7 @@
 package net.hollowcube.terraform.storage;
 
-import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicHeader;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +37,6 @@ public interface TerraformStorage {
     /**
      * Loads a local session data for a given player, player ID, and instance ID, if it exists.
      *
-     * @param player     The player for which to load the session (must be in an {@link Instance})
      * @param playerId   The ID of the player (not necessarily the player UUID).
      * @param instanceId The ID of the instance (not necessarily the instance UUID).
      * @return The loaded local session, or null if there is no saved data.
@@ -66,7 +64,8 @@ public interface TerraformStorage {
         ENTRY_LIMIT_EXCEEDED, // Player has too many schematics
     }
 
-    @NotNull SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite);
+    @NotNull
+    SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite);
 
     enum SchematicDeleteResult {
         SUCCESS,

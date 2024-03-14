@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.schem;
+package net.hollowcube.schem.old;
 
 import org.jetbrains.annotations.NotNull;
 

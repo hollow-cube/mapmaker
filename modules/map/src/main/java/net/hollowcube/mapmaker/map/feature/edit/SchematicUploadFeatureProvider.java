@@ -2,17 +2,17 @@ package net.hollowcube.mapmaker.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.util.MapMessages;
-import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.model.kafka.SchematicMgmt;
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicReadException;
-import net.hollowcube.terraform.schem.SchematicReader;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.reader.SchematicReadException;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
@@ -21,7 +21,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
@@ -81,7 +80,7 @@ public class SchematicUploadFeatureProvider implements FeatureProvider {
 
             Schematic schem;
             try {
-                schem = SchematicReader.read(new ByteArrayInputStream(msg.dataArray()));
+                schem = new SpongeSchematicReader().read(msg.dataArray());
             } catch (SchematicReadException e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to read schematic from message: {0}", msg);
                 respondAndForget(msg, e.getMessage().getBytes(StandardCharsets.UTF_8));

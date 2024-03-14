@@ -1,10 +1,11 @@
-package net.hollowcube.terraform.schem;
+package net.hollowcube.schem.old;
 
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-final class BlockUtil {
-    private BlockUtil() {}
+public final class BlockUtil {
+    private BlockUtil() {
+    }
 
     public static @NotNull String toStateString(@NotNull Block block) {
         if (block.properties().isEmpty())

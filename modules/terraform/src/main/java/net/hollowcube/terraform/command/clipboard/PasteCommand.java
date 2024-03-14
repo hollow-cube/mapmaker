@@ -6,7 +6,6 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.mask.Mask;
-import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
@@ -55,7 +54,7 @@ public class PasteCommand extends CommandDsl {
                     var buffer = BlockBuffer.builder(world);
                     var schem = source.getSchematicWithRotations();
                     var schemWorld = WorldView.empty(task);
-                    schem.apply(Rotation.NONE, (p, block) -> {
+                    schem.forEachBlock((p, block) -> {
                         // Test the mask against the schematic
                         if (!sourceMask.test(schemWorld, p, block)) return;
                         buffer.set(p.add(playerPosition), block);

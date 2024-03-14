@@ -1,10 +1,10 @@
 package net.hollowcube.terraform.buffer;
 
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.builder.SchematicBuilder;
+import net.hollowcube.schem.old.CoordinateUtil;
 import net.hollowcube.terraform.buffer.palette.Palette;
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicBuilder;
 import net.hollowcube.terraform.task.edit.WorldView;
-import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -48,16 +48,15 @@ public interface BlockBuffer {
     long sizeBytes();
 
     default @NotNull Schematic toSchematic(@NotNull Point offset) {
-        final var builder = new SchematicBuilder();
-        builder.setOffset(CoordinateUtil.floor(offset));
+        final var builder = SchematicBuilder.builder();
+        builder.offset(CoordinateUtil.floor(offset));
         forEachSection((cx, cy, cz, palette) -> {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     for (int x = 0; x < 16; x++) {
                         var blockState = palette.get(x, y, z);
                         if (blockState != null) {
-//                            var block = Block.fromStateId((short) stateId);
-                            builder.addBlock(cx * 16 + x, cy * 16 + y, cz * 16 + z, blockState);
+                            builder.block(cx * 16 + x, cy * 16 + y, cz * 16 + z, blockState);
                         }
                     }
                 }

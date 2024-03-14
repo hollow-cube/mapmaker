@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.storage;
 
-import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.schem.Schematic;
 import net.hollowcube.terraform.schem.SchematicHeader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

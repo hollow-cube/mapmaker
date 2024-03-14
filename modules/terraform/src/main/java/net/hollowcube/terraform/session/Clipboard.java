@@ -1,6 +1,9 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.terraform.schem.*;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.builder.SchematicBuilder;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
+import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.util.math.AffineTransform;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
@@ -11,7 +14,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +41,7 @@ public class Clipboard {
     public Clipboard(@NotNull NetworkBuffer buffer) {
         this.name = buffer.read(STRING);
 
-        this.schematic = buffer.readOptional(b -> SchematicReader.read(new ByteArrayInputStream(b.read(BYTE_ARRAY))));
+        this.schematic = buffer.readOptional(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY)));
         this.transforms = new ArrayList<>();
     }
 
@@ -68,15 +70,21 @@ public class Clipboard {
 
     @Deprecated
     public Schematic getSchematicWithRotations() {
-        var newSchem = new SchematicBuilder();
-        schematic.apply(Rotation.NONE, (p, block) -> {
+        var newSize = schematic.size();
+        for (var transform : transforms) {
+            newSize = transform.apply2(newSize);
+        }
+
+        var newSchem = SchematicBuilder.builder(newSize);
+        newSchem.offset(schematic.offset());
+        schematic.forEachBlock((p, block) -> {
             for (var transform : transforms) {
                 p = transform.apply2(p);
                 if (hasRotationProperty(block)) {
                     block = transform.applyToBlock(block);
                 }
             }
-            newSchem.addBlock(p, block);
+            newSchem.block(p, block);
         });
         return newSchem.build();
     }
@@ -85,20 +93,24 @@ public class Clipboard {
         Check.stateCondition(isEmpty(), "Clipboard is empty");
         //todo rewrite to use actions and add to history stack
 
-        var newSchem = new SchematicBuilder();
-        schematic.apply(Rotation.NONE, (p, block) -> {
+        var newSize = schematic.size();
+        for (var transform : transforms) {
+            newSize = transform.apply2(newSize);
+        }
+
+        var newSchem = SchematicBuilder.builder(newSize);
+        schematic.forEachBlock((p, block) -> {
             for (var transform : transforms) {
                 p = transform.apply2(p);
                 if (hasRotationProperty(block)) {
                     block = transform.applyToBlock(block);
                 }
             }
-            newSchem.addBlock(p, block);
+            newSchem.block(p, block);
         });
 
         var future = new CompletableFuture<Void>();
-        newSchem.build().build(Rotation.NONE, null)
-                .apply(session.instance(), pos, () -> future.complete(null));
+        newSchem.build().createBatch().apply(session.instance(), pos, () -> future.complete(null));
         return future;
     }
 
@@ -134,7 +146,7 @@ public class Clipboard {
         //todo writeoptional?? need network buffer type for schematic
         buffer.write(BOOLEAN, schematic != null);
         if (schematic != null) {
-            buffer.write(BYTE_ARRAY, SchematicWriter.write(schematic));
+            buffer.write(BYTE_ARRAY, new SpongeSchematicWriter().write(schematic));
         }
     }
 }

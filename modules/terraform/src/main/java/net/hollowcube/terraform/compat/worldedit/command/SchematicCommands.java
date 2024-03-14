@@ -9,7 +9,6 @@ import net.hollowcube.terraform.compat.worldedit.util.WEMessages;
 import net.hollowcube.terraform.compute.RegionFunctions;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
-import net.hollowcube.terraform.schem.Rotation;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.session.Clipboard;
@@ -378,7 +377,7 @@ public final class SchematicCommands {
                         var buffer = BlockBuffer.builder(world); //, min, max);
 
                         var schemWorld = WorldView.empty(task);
-                        schem.apply(Rotation.NONE, (p, block) -> {
+                        schem.forEachBlock((p, block) -> {
                             // Test the mask against the schematic
                             if (!sourceMask.test(schemWorld, p, block)) return;
                             buffer.set(origin.add(p), block);
