@@ -21,7 +21,8 @@ public final class Adventure2Hephaistos {
             case DoubleBinaryTag doubleTag -> NBT.Double(doubleTag.value());
             case ByteArrayBinaryTag byteArray -> NBT.ByteArray(byteArray.value());
             case StringBinaryTag string -> NBT.String(string.value());
-            case ListBinaryTag list -> NBT.List(NBTType.byIndex(list.type().id()), list.size(), i -> into(list.get(i)));
+            case ListBinaryTag list ->
+                    NBT.List(NBTType.byIndex(list.elementType().id()), list.size(), i -> into(list.get(i)));
             case CompoundBinaryTag compound -> compound(compound);
             case IntArrayBinaryTag intArray -> NBT.IntArray(intArray.value());
             case LongArrayBinaryTag longArray -> NBT.LongArray(longArray.value());
