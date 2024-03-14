@@ -64,6 +64,8 @@ public final class PlacementRules {
         register(Block.SMALL_DRIPLEAF, SmallDripleafPlacementRule::new);
         register(Block.KELP, KelpPlacementRule::new);
         register(Block.PINK_PETALS, PinkPetalPlacementRule::new);
+        register(Block.MELON_STEM, MelonStemPlacementRule::new);
+        register(Block.ATTACHED_MELON_STEM, MelonStemPlacementRule::new);
 
         register(Block.CHEST, ChestPlacementRule::new);
         register(Block.TRAPPED_CHEST, ChestPlacementRule::new);
