@@ -103,7 +103,7 @@ public class SpongeSchematicReader implements SchematicReader {
             blockData = getRequired(root, "BlockData", BinaryTagTypes.BYTE_ARRAY).value();
 
             // === Block entities ===
-            var tileEntities = root.getList("TileEntities", BinaryTagTypes.COMPOUND);
+            var tileEntities = root.getList(version == 1 ? "TileEntities" : "BlockEntities", BinaryTagTypes.COMPOUND);
             for (var tileEntity : tileEntities) {
                 var data = (CompoundBinaryTag) tileEntity;
                 var id = getRequired(data, "Id", BinaryTagTypes.STRING);
