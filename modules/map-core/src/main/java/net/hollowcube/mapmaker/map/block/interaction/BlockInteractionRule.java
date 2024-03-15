@@ -81,6 +81,12 @@ public interface BlockInteractionRule {
             var blockPosition = new Vec(x, y, z);
             // Never set a block outside the border.
             if (!instance.getWorldBorder().isInside(blockPosition)) return;
+            instance.setBlock(blockPosition, block);
+        }
+
+        public void placeBlock(@NotNull Point blockPosition, @NotNull Block block) {
+            // Never set a block outside the border.
+            if (!instance.getWorldBorder().isInside(blockPosition)) return;
 
             var cursorPosition = Objects.requireNonNullElse(cursorPosition(), Vec.ZERO);
             instance.placeBlock(new BlockHandler.PlayerPlacement(

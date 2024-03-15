@@ -4,10 +4,15 @@ import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 
 abstract class BaseBlockPlacementRule extends BlockPlacementRule {
+    protected static final BlockFace[] HORIZONTAL = new BlockFace[]{
+            BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+    };
+
     protected BaseBlockPlacementRule(@NotNull Block block) {
         super(block);
     }

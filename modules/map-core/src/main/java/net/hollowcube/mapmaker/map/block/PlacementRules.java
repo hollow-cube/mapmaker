@@ -159,6 +159,7 @@ public final class PlacementRules {
         register(Block.SCAFFOLDING, ScaffoldingPlacementRule::new);
         register(Block.JIGSAW, JigsawPlacementRule::new);
         register(Block.FIRE, FirePlacementRule::new);
+        register(Block.REDSTONE_WIRE, RedstoneWirePlacementRule::new);
 
         //
         // ==== WARNING ====

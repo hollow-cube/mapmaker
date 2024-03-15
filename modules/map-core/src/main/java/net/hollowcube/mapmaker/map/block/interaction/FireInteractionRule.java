@@ -28,7 +28,7 @@ public class FireInteractionRule implements BlockInteractionRule {
         var belowBlock = interaction.getBlock(blockPosition.add(0, -1, 0), Block.Getter.Condition.TYPE);
         var fireBlock = belowBlock.id() == Block.SOUL_SAND.id() || belowBlock.id() == Block.SOUL_SOIL.id()
                 ? Block.SOUL_FIRE : Block.FIRE;
-        interaction.setBlock(blockPosition, fireBlock);
+        interaction.placeBlock(blockPosition, fireBlock);
         return true;
     }
 
