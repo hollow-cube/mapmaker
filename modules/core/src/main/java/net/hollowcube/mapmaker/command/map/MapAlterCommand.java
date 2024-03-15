@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.command;
+package net.hollowcube.mapmaker.command.map;
 
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;

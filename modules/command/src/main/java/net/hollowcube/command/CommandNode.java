@@ -80,6 +80,7 @@ public class CommandNode {
         var mark = reader.mark();
         // the +1 here is to skip the space, but i think its kinda wrong
         var suggestion = new Suggestion(reader.pos(mark) + 1, reader.remaining());
+//        var suggestion = new Suggestion(reader.pos(mark) + 1, reader.remaining());
         for (var pair : children) {
             var node = pair.node();
             // If there is a condition on the child node we need to evaluate it
@@ -145,7 +146,9 @@ public class CommandNode {
                 if (node.condition != null) {
                     var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
                     if (result == CommandCondition.DENY) return CommandResult.denied(this);
-                    if (result == CommandCondition.HIDE) continue;
+                    if (result == CommandCondition.HIDE) {
+                        continue;
+                    }
                 }
 
                 // Try to parse the childs argument
@@ -170,8 +173,10 @@ public class CommandNode {
             }
 
             // If we reach here, we have no matching child, so return the pending error
-            Objects.requireNonNull(pendingError, "pendingError sanity check");
-            return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), this instanceof RootCommandNode);
+            if (pendingError != null) {
+                Objects.requireNonNull(pendingError, "pendingError sanity check");
+                return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), this instanceof RootCommandNode);
+            }
         }
 
         // At this point we reached a leaf node but we still have input left so its an error

@@ -15,11 +15,6 @@ public enum HubMessages implements MessagesBase {
 
     COMMAND_MAP_DELETE_SUCCESS("command.map.delete.success"),
 
-    COMMAND_MAP_LEGACY_IMPORT_NO_PERMISSION("command.map.legacy.import.not_owner"),
-    COMMAND_MAP_LEGACY_IMPORT_NOT_FOUND("command.map.legacy.import.invalid_id"),
-    COMMAND_MAP_LEGACY_IMPORT_UNKNOWN_ERROR("command.map.legacy.import.failure"),
-    COMMAND_MAP_LEGACY_IMPORT_SUCCESS("command.map.legacy.import.success"),
-
     ;
 
     private final String translationKey;

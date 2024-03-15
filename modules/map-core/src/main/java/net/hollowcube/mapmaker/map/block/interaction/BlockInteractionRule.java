@@ -8,11 +8,14 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+
+import java.util.Objects;
 
 /**
  * Represents a rule that handles interactions with a block.
@@ -75,10 +78,17 @@ public interface BlockInteractionRule {
 
         @Override
         public void setBlock(int x, int y, int z, @NotNull Block block) {
+            var blockPosition = new Vec(x, y, z);
             // Never set a block outside the border.
-            if (!instance.getWorldBorder().isInside(new Vec(x, y, z))) return;
+            if (!instance.getWorldBorder().isInside(blockPosition)) return;
 
-            instance.setBlock(x, y, z, block);
+            var cursorPosition = Objects.requireNonNullElse(cursorPosition(), Vec.ZERO);
+            instance.placeBlock(new BlockHandler.PlayerPlacement(
+                    block, instance, blockPosition,
+                    player, hand, blockFace,
+                    (float) cursorPosition.x(),
+                    (float) cursorPosition.y(),
+                    (float) cursorPosition.z()));
         }
 
         public void playSound(@NotNull Sound sound, @NotNull Point blockPosition) {

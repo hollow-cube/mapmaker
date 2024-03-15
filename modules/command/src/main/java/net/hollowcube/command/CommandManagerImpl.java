@@ -67,9 +67,10 @@ public class CommandManagerImpl implements CommandManager {
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
         var result = root.suggest(sender, reader);
-        if (parent != null) {
-            var parentResult = parent.suggest(sender, input);
-            result.addAll(parentResult);
+        if (result.isEmpty() && parent != null) {
+            return parent.suggest(sender, input);
+//            var parentResult = parent.suggest(sender, input);
+//            result.addAll(parentResult);
         }
         return result;
     }

@@ -1,13 +1,11 @@
-package net.hollowcube.mapmaker.command;
+package net.hollowcube.mapmaker.command.map;
 
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.map.MapDeleteCommand;
-import net.hollowcube.mapmaker.command.map.MapInfoCommand;
-import net.hollowcube.mapmaker.command.map.MapLeaderboardCommand;
-import net.hollowcube.mapmaker.command.map.MapListCommand;
+import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -41,6 +39,8 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
+
+        addSubcommand(new MapLegacyCommand(mapService, permManager));
 
         // Testing
 //        addSubcommand(new MapLookupCommand(mapService));
