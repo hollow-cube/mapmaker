@@ -18,7 +18,7 @@ public class MapLegacyImportCommand extends CommandDsl {
     private final Argument<String> playerArg = Argument.Word("player");
     private final Argument<String> mapIdArg = Argument.Word("id")
             .map((sender, raw) -> {
-                if (raw.length() > 5)
+                if (raw.length() > 7)
                     return new ParseResult.Failure<>(-1);
                 return new ParseResult.Success<>(raw);
             });
