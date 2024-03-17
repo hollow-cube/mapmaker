@@ -14,7 +14,7 @@ public final class BlockHandlers {
     public static final BlockHandler CHEST = new NoopBlockHandler("minecraft:chest");
     public static final BlockHandler TRAPPED_CHEST = new NoopBlockHandler("minecraft:trapped_chest");
     public static final BlockHandler SHULKER_BOX = new NoopBlockHandler("minecraft:shulker_box");
-    public static final BlockHandler MONSTER_SPAWNER = new NoopBlockHandler("minecraft:mob_spawner"); // TODO: Allow adding entities to the spawner probably.
+    public static final BlockHandler MONSTER_SPAWNER = new MobSpawnerBlockHandler();
     public static final BlockHandler END_PORTAL = new NoopBlockHandler("minecraft:end_portal");
     public static final BlockHandler ENDER_CHEST = new NoopBlockHandler("minecraft:ender_chest");
     public static final BlockHandler MOB_HEAD = new NoopBlockHandler("minecraft:skull");

@@ -20,6 +20,7 @@ public final class ItemTags {
     public static Collection<NamespaceID> LEAVES = builtin("minecraft:leaves");
     public static Collection<NamespaceID> SAPLINGS = builtin("minecraft:saplings");
     public static Collection<NamespaceID> BOOKSHELF_BOOKS = builtin("minecraft:bookshelf_books");
+    public static Collection<NamespaceID> SPAWN_EGGS = create("spawn_egg");
 
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {
@@ -32,6 +33,17 @@ public final class ItemTags {
         var set = new HashSet<NamespaceID>();
         for (var m : material) {
             set.add(m.namespace());
+        }
+        return Set.copyOf(set);
+    }
+
+    // Used to grab all materials with a certain suffix
+    private static @NotNull Collection<NamespaceID> create(@NotNull String suffix) {
+        var set = new HashSet<NamespaceID>();
+        for (var m : Material.values()) {
+            if (m.name().endsWith(suffix)) {
+                set.add(m.namespace());
+            }
         }
         return Set.copyOf(set);
     }
