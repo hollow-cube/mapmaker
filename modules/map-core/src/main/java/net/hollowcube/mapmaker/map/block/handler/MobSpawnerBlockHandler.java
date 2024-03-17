@@ -13,13 +13,11 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.collections.ImmutableIntArray;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 public class MobSpawnerBlockHandler implements BlockHandler {
 
@@ -32,7 +30,6 @@ public class MobSpawnerBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
-        System.out.println("MOB SPAWNER INTERACTIONS");
         ItemStack itemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
         EntityType entityType = itemStack.material().registry().spawnEntityType();
         if (entityType == null) return false;
@@ -44,7 +41,6 @@ public class MobSpawnerBlockHandler implements BlockHandler {
                 .withTag(REQUIRED_PLAYER_RANGE, (short) 16).withTag(SPAWN_COUNT, (short) 4);
 
         interaction.getInstance().setBlock(interaction.getBlockPosition(), newBlock);
-        System.out.println("SET ENTITY");
 
         return true;
     }
