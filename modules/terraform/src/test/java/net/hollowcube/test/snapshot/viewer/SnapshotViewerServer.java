@@ -5,8 +5,7 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import io.helidon.webserver.WebServer;
-import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.schem.SchematicReader;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,12 +128,12 @@ public class SnapshotViewerServer {
                 if (failures.isEmpty()) return;
 
                 var testId = failures.get(0).id();
-                var expectedSchem = SchematicReader.read(new ByteArrayInputStream(failures.get(0).expected()));
-                var actualSchem = SchematicReader.read(new ByteArrayInputStream(failures.get(0).actual()));
+                var expectedSchem = new SpongeSchematicReader().read(failures.get(0).expected());
+                var actualSchem = new SpongeSchematicReader().read(failures.get(0).actual());
 
-                expectedSchem.apply(Rotation.NONE, instance::setBlock);
+                expectedSchem.forEachBlock(instance::setBlock);
 
-                actualSchem.apply(Rotation.NONE, (pos, block) -> instance.setBlock(pos.add(0, 0, expectedSchem.size().z() + 3), block));
+                actualSchem.forEachBlock((pos, block) -> instance.setBlock(pos.add(0, 0, expectedSchem.size().z() + 3), block));
 
                 for (int x = -1; x <= actualSchem.size().x(); x++) {
                     for (int y = -1; y <= actualSchem.size().y(); y++) {
@@ -151,10 +149,10 @@ public class SnapshotViewerServer {
                 }
 
                 var actualBlocks = new HashMap<Point, Block>();
-                actualSchem.apply(Rotation.NONE, actualBlocks::put);
+                actualSchem.forEachBlock(actualBlocks::put);
 
 //                var builder = DebugMessage.builder().clear("viewer");
-                expectedSchem.apply(Rotation.NONE, (pos, block) -> {
+                expectedSchem.forEachBlock((pos, block) -> {
                     var actualBlock = actualBlocks.get(pos);
                     if (block.equals(actualBlock)) return;
 

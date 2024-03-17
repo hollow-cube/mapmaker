@@ -33,10 +33,7 @@ import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
-import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.config.GlobalConfig;
-import net.hollowcube.mapmaker.config.TracingConfig;
-import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
@@ -51,6 +48,9 @@ import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.DynamicInjector;
+import net.hollowcube.mapmaker.metrics.MetricWriter;
+import net.hollowcube.mapmaker.metrics.MetricWriterImpl;
+import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
@@ -94,6 +94,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
+    private final MetricWriter metrics;
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
@@ -123,6 +124,11 @@ public abstract class AbstractMapServer implements MapServer {
         this.globalConfig = config.get(GlobalConfig.class);
 
         var otel = initTracing(config);
+
+        var metricsConfig = config.get(MetricsConfig.class);
+        if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
+            this.metrics = new MetricWriterImpl(metricsConfig.password());
+        } else this.metrics = new MetricWriterNoop();
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) playerService = new PlayerServiceImpl(otel, playerServiceUrl);
@@ -225,6 +231,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
+    public @NotNull MetricWriter metrics() {
+        return metrics;
+    }
+
+    @Override
     public @NotNull SessionService sessionService() {
         return sessionService;
     }
@@ -289,6 +300,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(MapServer.class, this, "mapServer", "server");
         addBinding(ConfigLoaderV3.class, config);
 
+        addBinding(MetricWriter.class, metrics, "metrics");
         addBinding(SessionService.class, sessionService, "sessionService");
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");

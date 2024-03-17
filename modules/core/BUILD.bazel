@@ -41,6 +41,8 @@ java_library(
         "@maven//:org_slf4j_jul_to_slf4j",
         "@maven//:org_spongepowered_configurate_core",
         "@maven//:org_spongepowered_configurate_yaml",
+        "@maven//:org_apache_avro_avro",
+        "@maven//:io_confluent_kafka_schema_registry_client",
     ],
 )
 

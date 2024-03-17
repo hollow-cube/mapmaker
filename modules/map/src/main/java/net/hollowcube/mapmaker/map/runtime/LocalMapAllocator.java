@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
-import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.util.metrics.MapInstanceCreatedEvent;
+import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ public class LocalMapAllocator implements MapAllocator {
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
     private static final Logger logger = LoggerFactory.getLogger(LocalMapAllocator.class);
 
+    private final MetricWriter metrics;
     private final MapAllocator direct;
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -46,6 +48,7 @@ public class LocalMapAllocator implements MapAllocator {
     }
 
     public LocalMapAllocator(@NotNull MapServer server) {
+        this.metrics = server.metrics();
         this.direct = MapAllocator.direct(server);
     }
 
@@ -67,7 +70,6 @@ public class LocalMapAllocator implements MapAllocator {
                 // Return existing world if present.
                 future = (Future<T>) maps.get(key);
                 if (future == null) {
-
                     // No existing world, create a new one and keep track of it
                     future = VIRTUAL_EXECUTOR.submit(() -> allocateTracked(map, worldType));
                     maps.put(key, (Future<AbstractMapWorld>) future);
@@ -138,6 +140,7 @@ public class LocalMapAllocator implements MapAllocator {
 
     // Small wrapper around direct allocator to keep track of players in the instance
     private <T extends AbstractMapWorld> T allocateTracked(@NotNull MapData map, @NotNull Class<T> worldType) {
+        metrics.write(new MapInstanceCreatedEvent(map.id(), worldType.getSimpleName()));
         var createdWorld = direct.allocateDirect(map, worldType);
         createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
             // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)

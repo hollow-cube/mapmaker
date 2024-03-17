@@ -1,14 +1,12 @@
 package net.hollowcube.test.snapshot;
 
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicReader;
-import net.hollowcube.terraform.schem.SchematicWriter;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
+import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.test.assertions.Assertions;
 import net.hollowcube.test.subject.TestInstance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.ByteArrayInputStream;
 
 public class InstanceSnapshot implements Snapshot<TestInstance, Schematic> {
 
@@ -20,13 +18,13 @@ public class InstanceSnapshot implements Snapshot<TestInstance, Schematic> {
     @Override
     public byte @NotNull [] serializeSnapshot(@Nullable Schematic snapshot) {
         if (snapshot == null) return new byte[0];
-        return SchematicWriter.write(snapshot);
+        return new SpongeSchematicWriter().write(snapshot);
     }
 
     @Override
     public Schematic deserializeSnapshot(byte @NotNull [] serialized) {
         if (serialized.length == 0) return null;
-        return SchematicReader.read(new ByteArrayInputStream(serialized));
+        return new SpongeSchematicReader().read(serialized);
     }
 
     @Override

@@ -1,6 +1,8 @@
 http:
   host: 0.0.0.0
   port: 9124
+metrics:
+  password: ""
 
 minestom:
   host: 0.0.0.0

@@ -53,6 +53,12 @@
     "type": "sprite",
     "ref": "icon/exclamation"
   },
+  "MEGAPHONE": {
+    "type": "sprite",
+    "ref": "icon/megaphone",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
   "PLUS": {
     "type": "sprite",
     "ref": "icon/plus",

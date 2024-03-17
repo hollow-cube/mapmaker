@@ -70,6 +70,8 @@ maven_install(
         "com.velocitypowered:velocity-api:3.1.1",
         "com.google.inject:guice:7.0.0",
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
+        "org.apache.avro:avro:1.11.3",
+        "io.confluent:kafka-schema-registry-client:7.6.0",
 
         # Adventure
         "net.kyori:adventure-api:4.16.0",
@@ -122,5 +124,6 @@ maven_install(
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
+        "https://packages.confluent.io/maven/",  # For schema registry client
     ],
 )

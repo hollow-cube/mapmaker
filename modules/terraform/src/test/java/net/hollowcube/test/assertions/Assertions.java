@@ -1,7 +1,6 @@
 package net.hollowcube.test.assertions;
 
-import net.hollowcube.terraform.schem.Rotation;
-import net.hollowcube.terraform.schem.Schematic;
+import net.hollowcube.schem.Schematic;
 import net.hollowcube.test.snapshot.InstanceSnapshot;
 import net.hollowcube.test.subject.TestInstance;
 import net.minestom.server.coordinate.Point;
@@ -9,7 +8,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,12 +26,13 @@ public final class Assertions {
         assertEquals(expected.size(), actual.size());
 
         // If they are totally equal this will pass and be fast, otherwise we need to inspect every block
-        var equal = Arrays.equals(expected.palette(), actual.palette()) && Arrays.equals(expected.blocks(), actual.blocks());
-        if (equal) return;
+//        var equal = Arrays.equals(expected.palette(), actual.palette()) && Arrays.equals(expected.blocks(), actual.blocks());
+//        if (equal) return;
+        //todo reimplement this
 
         var expectedBlocks = new HashMap<Point, Block>();
-        expected.apply(Rotation.NONE, expectedBlocks::put);
-        actual.apply(Rotation.NONE, (pos, actualBlock) -> {
+        expected.forEachBlock(expectedBlocks::put);
+        actual.forEachBlock((pos, actualBlock) -> {
             var expectedBlock = expectedBlocks.get(pos);
             if (expectedBlock.equals(actualBlock)) return;
 

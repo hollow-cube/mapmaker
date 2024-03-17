@@ -1,7 +1,7 @@
 package net.hollowcube.test.subject;
 
-import net.hollowcube.terraform.schem.Schematic;
-import net.hollowcube.terraform.schem.SchematicBuilder;
+import net.hollowcube.schem.Schematic;
+import net.hollowcube.schem.builder.SchematicBuilder;
 import net.hollowcube.test.TestEnvImpl;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.InstanceContainer;
@@ -30,12 +30,12 @@ public class TestInstance extends InstanceContainer {
     }
 
     public @NotNull Schematic makeSnapshot() {
-        var builder = new SchematicBuilder();
+        var builder = SchematicBuilder.builder();
         for (int x = -16; x < 16; x++) {
             for (int y = -16; y < 16; y++) {
                 for (int z = -16; z < 16; z++) {
                     var block = getBlock(x, y, z);
-                    builder.addBlock(x, y, z, block);
+                    builder.block(x, y, z, block);
                 }
             }
         }

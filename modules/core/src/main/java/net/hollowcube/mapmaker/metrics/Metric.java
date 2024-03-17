@@ -1,36 +1,13 @@
 package net.hollowcube.mapmaker.metrics;
 
-import java.io.Serializable;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
-public class Metric implements Serializable {
-    private final MetricType metricType;
-    private final List<Object> values;
+import java.time.Instant;
 
-    public Metric(MetricType metricType, List<Object> values) {
-        if (metricType.getExpectedTypes().size() != values.size()) {
-            throw new IllegalArgumentException("Invalid number of values for this metric type.");
-        }
+public interface Metric {
 
-        for (int i = 0; i < metricType.getExpectedTypes().size(); i++) {
-            Class<?> expectedType = metricType.getExpectedTypes().get(i);
-            Object value = values.get(i);
-
-            if (!expectedType.isInstance(value)) {
-                throw new IllegalArgumentException(
-                        "Invalid type for metric. Expected: " + expectedType + ", Received: " + value.getClass());
-            }
-        }
-
-        this.metricType = metricType;
-        this.values = values;
-    }
-
-    public MetricType getMetricType() {
-        return metricType;
-    }
-
-    public List<Object> getValues() {
-        return values;
-    }
+    /**
+     * Exists just to force implementations to add a timestamp field, which should be present on every metric.
+     */
+    @NotNull Instant timestamp();
 }
