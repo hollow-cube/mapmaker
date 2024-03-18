@@ -48,7 +48,12 @@ public class LeaderboardDisplay {
     private final Function<String, Long> playerScoreSupplier;
     private final Function<String, Component> displayNameSupplier;
 
-    private final NpcTextModel entriesEntity = new NpcTextModel();
+    private final NpcTextModel entriesEntity = new NpcTextModel() {
+        @Override
+        public void updateOldViewer(@NotNull Player player) {
+
+        }
+    };
     private final NpcTextModel titleEntity = new NpcTextModel();
     private final NpcTextModel subtitleEntity = new NpcTextModel();
     private final NpcTextModel updatedEntity = new NpcTextModel();
@@ -85,6 +90,7 @@ public class LeaderboardDisplay {
         // sent to new viewers as soon as they view the entity first. However, all subsequent updates will be
         // sent per player so we do not want to notify them when we change the default.
         entriesEntity.getEntityMeta().setNotifyAboutChanges(false);
+        entriesEntity.getEntityMeta().setViewRange(100);
     }
 
     public @NotNull CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos pos) {
