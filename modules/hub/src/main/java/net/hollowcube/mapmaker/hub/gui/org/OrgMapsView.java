@@ -34,7 +34,7 @@ public class OrgMapsView extends View {
         super(context);
         this.orgId = orgId;
 
-        titleText.setText("Hollow Cube");
+        titleText.setText("Hollow Cube (or not)");
     }
 
     @Action(value = "paging", async = true)
