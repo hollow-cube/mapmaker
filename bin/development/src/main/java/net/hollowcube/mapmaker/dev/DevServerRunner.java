@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
-import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -16,6 +15,7 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -79,7 +79,7 @@ public class DevServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
+        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImpl(uuid, username, connection) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 var world = MapWorld.forPlayerOptional(this);

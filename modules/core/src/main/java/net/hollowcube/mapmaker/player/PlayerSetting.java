@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
+//todo these should probably be serialized using dfu codecs
 public sealed interface PlayerSetting<T> permits PlayerSettingImpl {
 
     static @NotNull PlayerSetting<String> String(@NotNull String key, @NotNull String defaultValue) {

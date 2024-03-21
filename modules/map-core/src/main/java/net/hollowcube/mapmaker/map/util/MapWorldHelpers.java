@@ -45,7 +45,7 @@ public final class MapWorldHelpers {
         player.setVelocity(Vec.ZERO);
         player.clearEffects();
         player.getInventory().clear();
-//        player.removeTag(SPECTATOR_CHECKPOINT);
+        player.updateViewableRule(null);
 
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);

@@ -18,7 +18,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
-import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
@@ -48,6 +47,7 @@ import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.DynamicInjector;
+import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.metrics.MetricWriterImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
@@ -172,7 +172,12 @@ public abstract class AbstractMapServer implements MapServer {
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
-        MinecraftServer.getConnectionManager().setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
+        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImpl(uuid, username, connection) {
+            @Override
+            public @NotNull CommandManager getCommandManager() {
+                return commandManager;
+            }
+        });
 
         // Dependent service init
 

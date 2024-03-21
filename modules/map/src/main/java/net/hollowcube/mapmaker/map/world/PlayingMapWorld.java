@@ -1,20 +1,20 @@
 package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.instance.MapInstance;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.feature.FeatureList;
+import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
-import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.instance.generation.MapGenerators;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -105,7 +105,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
-        player.setInvisible(true);
+//        player.setInvisible(true);
 
         callEvent(isFinishedMode
                 ? new MapPlayerStartFinishedEvent(this, player)

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -14,12 +15,15 @@ import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -35,6 +39,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
@@ -126,12 +132,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }
 
-        if (event.isFirstInit()) {
-            player.updateViewableRule(p -> {
-                if (p.isInvisible()) return true;
-                return player.getDistanceSquared(p) > 3.5 * 3.5;
-            });
-        }
+        var visibilityPredicate = new PlayerVisibilityPredicate(player);
+        player.updateViewerRule(visibilityPredicate);
+        if (player instanceof PlayerVisibilityExtension ve)
+            ve.setVisibilityFunc(visibilityPredicate);
     }
 
     public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
@@ -147,6 +151,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID_OFF, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
+        // Only visibility extension, no viewer rule (spectators can see anyone)
+        if (player instanceof PlayerVisibilityExtension ve)
+            ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
     }
 
     public void initFinishedPlayer(@NotNull MapPlayerStartFinishedEvent event) {
@@ -163,13 +170,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
+        // Only visibility extension, no viewer rule (spectators can see anyone)
+        if (player instanceof PlayerVisibilityExtension ve)
+            ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
     }
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var player = event.getPlayer();
         if (!event.getMapWorld().isPlaying(player)) return;
 
-        player.updateViewableRule((p) -> true);
+        
         player.removeTag(COUNTDOWN_END);
     }
 
@@ -468,7 +478,61 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private void updateViewership(@NotNull MapWorld world) {
         for (Player p : world.players()) {
-            p.updateViewableRule();
+            p.updateViewerRule(); // Only players have special viewable rules
+            if (p instanceof PlayerVisibilityExtension ve)
+                ve.updateVisibility();
+        }
+        for (Player p : world.spectators()) {
+            if (p instanceof PlayerVisibilityExtension ve)
+                ve.updateVisibility();
+        }
+    }
+
+    private static class PlayerVisibilityPredicate implements Predicate<Entity>, Function<Player, PlayerVisibilityExtension.Visibility> {
+        // This implements a viewER (not viewABLE) predicate for each player. This is used to determine if the player
+        // (the one in the field `player`) can see each other entity. If `#test` returns true, they will be visible.
+        // Otherwise, they will not.
+        // Additionally, this implements a visibility function to decide when to make another player a ghost.
+
+        private static final double PLAYER_HIDE_DISTANCE = 3.5;
+        private static final double SPECTATOR_HIDE_DISTANCE = PLAYER_HIDE_DISTANCE * 2;
+
+        private final Player player;
+        private final PlayerDataV2 playerData;
+        private final MapWorld world;
+
+        private PlayerVisibilityPredicate(@NotNull Player player) {
+            this.player = player;
+            this.playerData = PlayerDataV2.fromPlayer(player);
+            this.world = MapWorld.forPlayerOptional(player);
+        }
+
+        @Override
+        public boolean test(@NotNull Entity otherEntity) {
+            if (!(otherEntity instanceof Player other)) return true; // Always show non-players
+            if (world.isPlaying(other)) {
+                var rule = playerData.getSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY);
+                // If the ghost rule is used then we never hide the player (but they will become invisible)
+                if (rule == VisibilityRule.GHOST) return true;
+                // Otherwise, hide the player if they are too close
+                return player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE;
+            } else if (world.isSpectating(other)) {
+                // Always hide spectators if they are too close. Note that this does not execute for spectators
+                // so this will not stop them from seeing each other.
+                return player.getDistanceSquared(other) > SPECTATOR_HIDE_DISTANCE * SPECTATOR_HIDE_DISTANCE;
+            } else return false;
+        }
+
+        // Called for every other player, returns how we should be visible to them
+        @Override
+        public @NotNull PlayerVisibilityExtension.Visibility apply(Player other) {
+            if (world.isPlaying(player)) {
+                if (player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE)
+                    return PlayerVisibilityExtension.Visibility.VISIBLE;
+                return PlayerVisibilityExtension.Visibility.INVISIBLE;
+            } else if (world.isSpectating(player)) {
+                return PlayerVisibilityExtension.Visibility.SPECTATOR;
+            } else return PlayerVisibilityExtension.Visibility.VISIBLE;
         }
     }
 
