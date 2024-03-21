@@ -93,13 +93,13 @@ public class Clipboard {
     public @NotNull CompletableFuture<Void> apply(@NotNull LocalSession session, @NotNull Point pos) {
         Check.stateCondition(isEmpty(), "Clipboard is empty");
         //todo rewrite to use actions and add to history stack
+//
+//        var newSize = schematic.size();
+//        for (var transform : transforms) {
+//            newSize = transform.apply2(newSize);
+//        }
 
-        var newSize = schematic.size();
-        for (var transform : transforms) {
-            newSize = transform.apply2(newSize);
-        }
-
-        var newSchem = SchematicBuilder.builder(newSize);
+        var newSchem = SchematicBuilder.builder();
         schematic.forEachBlock((p, block) -> {
             for (var transform : transforms) {
                 p = transform.apply2(p);
