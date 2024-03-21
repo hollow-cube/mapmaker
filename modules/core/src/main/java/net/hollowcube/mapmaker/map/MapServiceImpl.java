@@ -55,7 +55,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId) {
         logger.log(System.Logger.Level.INFO, "creating new org map for " + orgId);
-        var reqBody = GSON.toJson(Map.of("owner", orgId, "isOrg", true));
+        var reqBody = GSON.toJson(Map.of("owner", orgId, "isOrg", true, "size", 2));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url))
