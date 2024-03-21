@@ -27,7 +27,7 @@ public class MapAlterCommand {
 
     private final Argument<MapData> mapArg;
     private final Argument<String> nameArg = Argument.GreedyString("name");
-    private final Argument<Material> displayItemArg = Argument.Material("displayItem");
+    private final Argument<Material> displayItemArg = Argument.Material("item");
     private final Argument<String> subvariantArg;
     private final Argument<MapSize> sizeArg = Argument.Enum("size", MapSize.class);
     private final Argument<MapTags.Tag> tagArg = Argument.Enum("tag", MapTags.Tag.class);

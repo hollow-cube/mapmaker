@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -16,9 +17,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class MsgCommand extends CommandDsl {
     private final Argument<String> targetArg;
-    private final Argument<String> messageArg = Argument.GreedyString("message");
+    private final Argument<String> messageArg = Argument.GreedyString("message")
+            .description("The message content to send");
 
     private final SessionManager sessionManager;
     private final MapService mapService;
@@ -31,7 +35,12 @@ public class MsgCommand extends CommandDsl {
         this.mapService = mapService;
         this.messageListener = messageListener;
 
-        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
+        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
+                .description("The player to send the message to");
+
+        this.description = "Send a direct message to a player";
+        this.category = CommandCategories.SOCIAL;
+        this.examples = List.of("/msg SethPRG Hello Seth!");
 
         addSyntax(playerOnly(this::handleSendDirectMessage), targetArg, messageArg);
     }

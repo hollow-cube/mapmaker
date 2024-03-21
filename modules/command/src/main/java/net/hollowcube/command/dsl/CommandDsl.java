@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.util.CommandCategory;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,7 @@ public class CommandDsl {
     private List<Syntax> syntaxes = null;
 
     // Documentation bits
-    protected String category = null;
+    protected CommandCategory category = CommandCategory.DEFAULT;
     protected String description = null;
     protected List<String> examples = null;
 
@@ -38,6 +39,10 @@ public class CommandDsl {
     }
 
     public void build(@NotNull CommandBuilder builder) {
+        builder.category(category);
+        builder.description(description);
+        builder.examples(examples);
+
         if (condition != null) {
             builder.condition(condition);
         }

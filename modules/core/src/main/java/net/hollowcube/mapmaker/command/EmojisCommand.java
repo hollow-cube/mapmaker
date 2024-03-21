@@ -18,7 +18,7 @@ public class EmojisCommand extends CommandDsl {
     public EmojisCommand() {
         super("emojis");
 
-        category = CommandCategory.SOCIAL;
+        category = CommandCategories.SOCIAL;
 
         addSyntax(playerOnly(this::showEmojiList));
     }

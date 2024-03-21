@@ -1,8 +1,11 @@
 package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.util.CommandCategory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class CommandBuilder {
@@ -53,6 +56,28 @@ public class CommandBuilder {
 
     public @NotNull CommandBuilder condition(@NotNull CommandCondition condition) {
         node.setCondition(condition);
+        return this;
+    }
+
+    // Metadata
+
+    public @NotNull CommandBuilder category(@Nullable CommandCategory category) {
+        node.category = category;
+        return this;
+    }
+
+    public @NotNull CommandBuilder description(@Nullable String description) {
+        node.description = description;
+        return this;
+    }
+
+    public @NotNull CommandBuilder examples(@NotNull String... examples) {
+        node.examples = List.of(examples);
+        return this;
+    }
+
+    public @NotNull CommandBuilder examples(@Nullable List<String> examples) {
+        node.examples = examples;
         return this;
     }
 

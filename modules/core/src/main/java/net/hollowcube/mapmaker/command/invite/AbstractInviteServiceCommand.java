@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -27,7 +27,7 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         this.sessionManager = sessionManager;
 
         this.targetArgument = CoreArgument.AnyOnlinePlayer("player", sessionManager);
-        this.category = CommandCategory.SOCIAL;
+        this.category = CommandCategories.SOCIAL;
 
         this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);
     }

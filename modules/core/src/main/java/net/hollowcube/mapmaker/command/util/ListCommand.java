@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.command.util;
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -22,7 +22,7 @@ public class ListCommand extends CommandDsl {
         this.sessionManager = sessionManager;
         this.playerService = playerService;
 
-        category = CommandCategory.SOCIAL;
+        category = CommandCategories.SOCIAL;
 
         addSyntax(playerOnly(this::handleListPlayers));
     }

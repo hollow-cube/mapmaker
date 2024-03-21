@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.command.utility;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.command.CommandCategory;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +16,7 @@ public class SpawnCommand extends CommandDsl {
         super("spawn", "tpstart");
         setCondition(mapFilter(true, true, true));
 
-        category = CommandCategory.GLOBAL;
+        category = CommandCategories.GLOBAL;
 
         addSyntax(playerOnly(this::handleTeleportToSpawn));
     }

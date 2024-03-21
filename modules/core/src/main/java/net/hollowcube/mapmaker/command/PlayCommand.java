@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -23,7 +23,7 @@ public class PlayCommand extends CommandDsl {
         super("play");
         this.bridge = bridge;
 
-        category = CommandCategory.SOCIAL;
+        category = CommandCategories.SOCIAL;
         description = "Play a map by ID or search for a map";
         mapArg = CoreArgument.PlayableMap("map", mapService);
 //                .errorHandler(this::mapArgErrorHandler)

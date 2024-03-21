@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -30,7 +30,7 @@ public class WhereCommand extends CommandDsl {
         this.playerService = playerService;
         this.mapService = mapService;
 
-        category = CommandCategory.SOCIAL;
+        category = CommandCategories.SOCIAL;
 
         targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
 

@@ -3,10 +3,12 @@ package net.hollowcube.command;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -27,8 +29,29 @@ public class CommandNode {
     protected List<ArgumentPair> children = null; // May not be used with redirect
     protected CommandCondition condition = null; // May not be used with redirect
 
+    // Metadata
+    protected CommandCategory category = CommandCategory.DEFAULT;
+    protected String description = null;
+    protected List<String> examples = null;
+
     public CommandNode() {
 
+    }
+
+    public @Nullable CommandNode redirect() {
+        return redirect;
+    }
+
+    public @Nullable CommandCategory category() {
+        return category;
+    }
+
+    public @Nullable String description() {
+        return description;
+    }
+
+    public @Nullable List<String> examples() {
+        return examples;
     }
 
     public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {

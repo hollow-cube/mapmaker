@@ -65,6 +65,8 @@ public abstract class Argument<T> {
 
     private final String id;
 
+    private String description = null;
+
     private Function<CommandSender, T> defaultProvider = null;
 
     protected Argument(@NotNull String id) {
@@ -93,6 +95,15 @@ public abstract class Argument<T> {
 
     public @Nullable T getDefaultValue(@NotNull CommandSender sender) {
         return defaultProvider == null ? null : defaultProvider.apply(sender);
+    }
+
+    public @Nullable String description() {
+        return description;
+    }
+
+    public @NotNull Argument<T> description(@NotNull String description) {
+        this.description = description;
+        return this;
     }
 
 

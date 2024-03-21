@@ -130,6 +130,11 @@ public class CommandManagerImpl implements CommandManager {
     private class ReflectionImpl implements CommandReflection {
 
         @Override
+        public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+            return root.xpath(path, followRedirects);
+        }
+
+        @Override
         public @NotNull Collection<Map.Entry<String, CommandNode>> commands(@NotNull CommandSender sender, boolean includeAliases) {
             var allCommands = new ArrayList<CommandNode.ArgumentPair>();
             if (root.children != null) allCommands.addAll(root.children);

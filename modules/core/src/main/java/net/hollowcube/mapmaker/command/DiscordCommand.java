@@ -10,7 +10,7 @@ public class DiscordCommand extends CommandDsl {
     public DiscordCommand() {
         super("discord");
 
-        category = CommandCategory.GLOBAL;
+        category = CommandCategories.GLOBAL;
 
         addSyntax(playerOnly(this::giveDiscordLink));
     }

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -29,7 +29,7 @@ public class MapCommand extends CommandDsl {
     ) {
         super("map");
 
-        category = CommandCategory.GLOBAL;
+        category = CommandCategories.GLOBAL;
 
         // Default commands
         addSubcommand(this.list = new MapListCommand(guiController, playerService, mapService));

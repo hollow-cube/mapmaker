@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub.command.util;
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.command.CommandCategory;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +16,7 @@ public class HubSpawnCommand extends CommandDsl {
         super("spawn", "hub");
         this.world = world;
 
-        category = CommandCategory.GLOBAL;
+        category = CommandCategories.GLOBAL;
 
         addSyntax(playerOnly(this::handleSpawn));
     }
