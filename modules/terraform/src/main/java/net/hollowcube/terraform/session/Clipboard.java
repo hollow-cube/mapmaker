@@ -5,6 +5,7 @@ import net.hollowcube.schem.builder.SchematicBuilder;
 import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.util.math.AffineTransform;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
@@ -75,7 +76,7 @@ public class Clipboard {
             newSize = transform.apply2(newSize);
         }
 
-        var newSchem = SchematicBuilder.builder(newSize);
+        var newSchem = SchematicBuilder.builder(CoordinateUtil.abs(newSize));
         newSchem.offset(schematic.offset());
         schematic.forEachBlock((p, block) -> {
             for (var transform : transforms) {

@@ -12,6 +12,10 @@ public final class CoordinateUtil {
     private CoordinateUtil() {
     }
 
+    public static @NotNull Point abs(@NotNull Point point) {
+        return new Vec(Math.abs(point.x()), Math.abs(point.y()), Math.abs(point.z()));
+    }
+
     public static @NotNull Point floor(@NotNull Point point) {
         return new Vec(point.blockX(), point.blockY(), point.blockZ());
     }
