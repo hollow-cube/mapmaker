@@ -23,8 +23,8 @@ import java.util.ArrayList;
 
 public class PlayMapsView extends View {
     private static final PlayerSetting<SortPreset> SORT_PRESET = PlayerSetting.Enum("play_maps.sort_preset", SortPreset.BEST);
-    private static final PlayerSetting<Boolean> PARKOUR = PlayerSetting.Bool("play_maps.parkour", true);
-    private static final PlayerSetting<Boolean> BUILDING = PlayerSetting.Bool("play_maps.building", true);
+    private static final PlayerSetting<Boolean> PARKOUR = PlayerSetting.Bool("play_maps.parkour", false);
+    private static final PlayerSetting<Boolean> BUILDING = PlayerSetting.Bool("play_maps.building", false);
 
     private enum SortPreset {
         APPROVED, BEST, BOOSTED, RECENT, TRENDING;
