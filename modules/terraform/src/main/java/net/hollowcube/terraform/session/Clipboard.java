@@ -76,7 +76,7 @@ public class Clipboard {
 //        }
 
         var newSchem = SchematicBuilder.builder();
-        newSchem.offset(schematic.offset());
+//        newSchem.offset(schematic.offset());
         schematic.forEachBlock((p, block) -> {
             for (var transform : transforms) {
                 p = transform.apply2(p);
