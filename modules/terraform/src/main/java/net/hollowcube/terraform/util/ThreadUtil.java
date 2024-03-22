@@ -21,6 +21,10 @@ public final class ThreadUtil {
         }
     }
 
+    public static void testInterrupt() throws InterruptedException {
+        if (Thread.interrupted()) throw new InterruptedException();
+    }
+
     private ThreadUtil() {
     }
 }

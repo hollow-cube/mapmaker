@@ -5,6 +5,7 @@ import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.PaletteUtil;
+import net.hollowcube.terraform.util.ThreadUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -37,12 +38,45 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
     }
 
     @Override
-    public void set(int x, int y, int z, int value) {
+    public void set(int x, int y, int z, int value) throws InterruptedException {
         set(new Vec(x, y, z), value);
     }
 
     @Override
-    public void set(@NotNull Point point, int value) {
+    public void set(@NotNull Point point, int value) throws InterruptedException {
+        Check.argCondition(!contains(point), "Point {0} is not within the bounds of this builder ({1} to {2})", point, min, max);
+        ThreadUtil.testInterrupt();
+
+        // Ensure the position is within the world border
+        if (world != null && !world.contains(point.blockX(), point.blockY(), point.blockZ())) {
+            if (!hasBorderTaint) {
+                hasBorderTaint = true;
+                world.task().addAttribute(Task.ATT_BORDER_TAINT);
+            }
+            return;
+        }
+
+        var section = toRelative(point);
+        var sectionIndex = (section.blockX() - smin.blockX())
+                + (section.blockY() - smin.blockY()) * (smax.blockX() - smin.blockX() + 1)
+                + (section.blockZ() - smin.blockZ()) * (smax.blockX() - smin.blockX() + 1) * (smax.blockY() - smin.blockY() + 1);
+
+        var palette = sectionData[sectionIndex];
+        if (palette == null) {
+            palette = Palette.blocks();
+            sectionData[sectionIndex] = palette;
+        }
+
+        palette.set(point.blockX() & 0xF, point.blockY() & 0xF, point.blockZ() & 0xF, value);
+    }
+
+    @Override
+    public void set(int x, int y, int z, @Nullable Block value) throws InterruptedException {
+        set(new Vec(x, y, z), value);
+    }
+
+    @Override
+    public void set(@NotNull Point point, @Nullable Block value) throws InterruptedException {
         Check.argCondition(!contains(point), "Point {0} is not within the bounds of this builder ({1} to {2})", point, min, max);
 
         // Ensure the position is within the world border
@@ -69,39 +103,8 @@ final class BoundedBlockBufferBuilder implements BlockBuffer.Builder {
     }
 
     @Override
-    public void set(int x, int y, int z, @Nullable Block value) {
-        set(new Vec(x, y, z), value);
-    }
-
-    @Override
-    public void set(@NotNull Point point, @Nullable Block value) {
-        Check.argCondition(!contains(point), "Point {0} is not within the bounds of this builder ({1} to {2})", point, min, max);
-
-        // Ensure the position is within the world border
-        if (world != null && !world.contains(point.blockX(), point.blockY(), point.blockZ())) {
-            if (!hasBorderTaint) {
-                hasBorderTaint = true;
-                world.task().addAttribute(Task.ATT_BORDER_TAINT);
-            }
-            return;
-        }
-
-        var section = toRelative(point);
-        var sectionIndex = (section.blockX() - smin.blockX())
-                + (section.blockY() - smin.blockY()) * (smax.blockX() - smin.blockX() + 1)
-                + (section.blockZ() - smin.blockZ()) * (smax.blockX() - smin.blockX() + 1) * (smax.blockY() - smin.blockY() + 1);
-
-        var palette = sectionData[sectionIndex];
-        if (palette == null) {
-            palette = Palette.blocks();
-            sectionData[sectionIndex] = palette;
-        }
-
-        palette.set(point.blockX() & 0xF, point.blockY() & 0xF, point.blockZ() & 0xF, value);
-    }
-
-    @Override
-    public @NotNull BlockBuffer build() {
+    public @NotNull BlockBuffer build() throws InterruptedException {
+        ThreadUtil.testInterrupt();
         var sectionMap = new Long2ObjectArrayMap<Palette>();
         for (int i = 0; i < sectionData.length; i++) {
             var palette = sectionData[i];

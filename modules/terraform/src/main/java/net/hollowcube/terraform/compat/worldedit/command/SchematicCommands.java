@@ -378,9 +378,13 @@ public final class SchematicCommands {
 
                         var schemWorld = WorldView.empty(task);
                         schem.forEachBlock((p, block) -> {
-                            // Test the mask against the schematic
-                            if (!sourceMask.test(schemWorld, p, block)) return;
-                            buffer.set(origin.add(p), block);
+                            try {
+                                // Test the mask against the schematic
+                                if (!sourceMask.test(schemWorld, p, block)) return;
+                                buffer.set(origin.add(p), block);
+                            } catch (InterruptedException interrupt) {
+                                Thread.currentThread().interrupt();
+                            }
                         });
 
                         return buffer.build();

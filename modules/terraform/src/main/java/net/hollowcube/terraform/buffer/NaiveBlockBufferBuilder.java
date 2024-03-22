@@ -6,6 +6,7 @@ import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.PaletteUtil;
+import net.hollowcube.terraform.util.ThreadUtil;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +23,8 @@ final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
     }
 
     @Override
-    public void set(int x, int y, int z, int value) {
+    public void set(int x, int y, int z, int value) throws InterruptedException {
+        ThreadUtil.testInterrupt();
         // Ensure the position is within the world border
         if (world != null && !world.contains(x, y, z)) {
             if (!hasBorderTaint) {
@@ -40,7 +42,8 @@ final class NaiveBlockBufferBuilder implements BlockBuffer.Builder {
     }
 
     @Override
-    public void set(int x, int y, int z, @Nullable Block value) {
+    public void set(int x, int y, int z, @Nullable Block value) throws InterruptedException {
+        ThreadUtil.testInterrupt();
         // Ensure the position is within the world border
         if (world != null && !world.contains(x, y, z)) {
             if (!hasBorderTaint) {

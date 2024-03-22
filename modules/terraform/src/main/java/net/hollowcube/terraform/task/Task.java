@@ -1,13 +1,14 @@
 package net.hollowcube.terraform.task;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.terraform.TerraformImpl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
+
+import java.time.Instant;
 
 /**
  * A task is a single action being executed by Terraform. It consists of two phases: compute and apply.
@@ -20,10 +21,21 @@ import org.jetbrains.annotations.UnknownNullability;
  */
 public interface Task {
 
-    @NotNull String ATT_BORDER_TAINT = "terraform:border_taint";
+    @NotNull
+    String ATT_BORDER_TAINT = "terraform:border_taint";
 
     enum State {
-        INIT, QUEUED, COMPUTE, APPLY, COMPLETE, FAILED
+        INIT,
+        QUEUED,
+        COMPUTE,
+        APPLY,
+        COMPLETE,
+        FAILED,
+        CANCELLED;
+
+        public boolean isTerminal() {
+            return this == COMPLETE || this == FAILED || this == CANCELLED;
+        }
     }
 
     /**
@@ -40,6 +52,8 @@ public interface Task {
      * Returns the tag of the task (eg set, replace, undo, redo)
      */
     @NotNull String tag();
+
+    @NotNull Instant created();
 
     boolean isDryRun();
 
@@ -110,10 +124,9 @@ public interface Task {
         public @NotNull Task submit() {
             Check.argCondition(computeFunc == null && buffer == null, "Must provide either a compute function or a buffer");
             Check.argCondition(computeFunc != null && buffer != null, "Cannot provide both a compute function and a buffer");
-            var terraform = (TerraformImpl) session.terraform();
 
             var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
-            terraform.submitTask(task);
+            session.submitTask(task);
             return task;
         }
     }

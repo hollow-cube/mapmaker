@@ -42,6 +42,6 @@ public interface ComputeFunc {
         };
     }
 
-    @NotNull BlockBuffer exec(@NotNull Task task, @NotNull WorldView world);
+    @NotNull BlockBuffer exec(@NotNull Task task, @NotNull WorldView world) throws InterruptedException;
 
 }

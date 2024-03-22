@@ -22,6 +22,9 @@ public final class RegionFunctions {
 
     public static @NotNull ComputeFunc replace(@NotNull Region region, @NotNull Mask mask, @NotNull Pattern pattern) {
         return (task, world) -> {
+
+            Thread.sleep(15000);
+
             var buffer = BlockBuffer.builder(world, region.min(), region.max());
             for (var pos : region) {
                 var block = world.getBlock(pos);
@@ -136,7 +139,7 @@ public final class RegionFunctions {
         };
     }
 
-    static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) {
+    static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) throws InterruptedException {
         target.set(pos, pattern.blockAt(source, pos));
     }
 

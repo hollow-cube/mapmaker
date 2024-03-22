@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.command.util;
+package net.hollowcube.terraform.command.terraform;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -6,30 +6,24 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public final class DebugCommand extends CommandDsl {
-    public DebugCommand() {
+public final class TerraformDebugCommand extends CommandDsl {
+    public TerraformDebugCommand() {
         super("debug");
 
-        addSyntax(this::showHelp);
         addSyntax(playerOnly(this::showSessionDebug), Argument.Literal("session"));
-    }
-
-    private void showHelp(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage("Available debug options:");
-        sender.sendMessage("- session");
+        addSyntax(playerOnly(this::showThreadsDebug), Argument.Literal("threads"));
     }
 
     private void showSessionDebug(@NotNull Player player, @NotNull CommandContext context) {
         // Print player session info
         var session = PlayerSession.forPlayer(player);
         player.sendMessage(Component.text("Session:"));
-//        player.sendMessage(Component.text("  Clipboard: " + (session.clipboard() != null ? "yes" : "no")));
+        player.sendMessage(Component.text("  Clipboards: " + String.join(",", session.clipboardNames())));
 
         // Print local session info
         var localSession = LocalSession.forPlayer(player);
@@ -45,6 +39,10 @@ public final class DebugCommand extends CommandDsl {
             player.sendMessage(Component.text("    Type: " + selection.type().name().toLowerCase(Locale.ROOT)));
             player.sendMessage(Component.text("    Region: " + (selection.region() != null ? "yes" : "no")));
         }
+    }
+
+    private void showThreadsDebug(@NotNull Player player, @NotNull CommandContext context) {
+        player.sendMessage("todo need to do fancy stuff and i dont want to right now");
     }
 
 }

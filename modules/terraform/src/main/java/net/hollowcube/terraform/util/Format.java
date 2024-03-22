@@ -1,6 +1,9 @@
 package net.hollowcube.terraform.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DecimalFormat;
+import java.time.Instant;
 
 public final class Format {
 
@@ -17,6 +20,17 @@ public final class Format {
 
     private static String formatSize(long size, long divider, String unitName) {
         return DEC_FORMAT.format((double) size / divider) + " " + unitName;
+    }
+
+    public static String formatTimeSince(@NotNull Instant time) {
+        long seconds = Instant.now().getEpochSecond() - time.getEpochSecond();
+        if (seconds < 60) return seconds + "s";
+        long minutes = seconds / 60;
+        if (minutes < 60) return minutes + "m";
+        long hours = minutes / 60;
+        if (hours < 24) return hours + "h";
+        long days = hours / 24;
+        return days + "d";
     }
 
 }

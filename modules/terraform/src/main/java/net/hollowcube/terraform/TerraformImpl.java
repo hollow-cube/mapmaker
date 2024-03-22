@@ -172,33 +172,35 @@ public final class TerraformImpl implements Terraform {
      * Queues a task to have its compute phase executed, then its apply phase.
      */
     public void submitTask(@NotNull TaskImpl task) {
-        logger.debug("{}: submitted", task);
-        task.setState(Task.State.QUEUED);
+        if (task.state() != Task.State.INIT) return;
 
-        if (task.computeFunc() != null) {
-            threadPoolCompute.submit(computeTask(task));
-        } else {
-            threadPoolApply.submit(applyTask(task));
-        }
+        logger.debug("{}: submitted", task);
+        task.setState(Task.State.QUEUED, task.computeFunc() != null
+                ? threadPoolCompute.submit(computeTask(task))
+                : threadPoolApply.submit(applyTask(task)));
     }
 
     private @NotNull Runnable computeTask(@NotNull TaskImpl task) {
         return () -> {
             try {
                 logger.debug("{}: compute started", task);
-                task.setState(Task.State.COMPUTE);
+                task.setState(Task.State.COMPUTE, null);
                 long start = System.nanoTime();
 
                 var world = WorldView.instance(task, task.session().instance());
                 var buffer = Objects.requireNonNull(task.computeFunc()).exec(task, world);
                 task.setBuffer(buffer);
+                ThreadUtil.testInterrupt(); // Stop before submitting the apply task
 
                 logger.debug("{}: compute complete in {}ms ({})", task, (System.nanoTime() - start) / 1_000_000d, Format.formatBytes(buffer.sizeBytes()));
-                threadPoolApply.submit(applyTask(task));
-                task.setState(Task.State.QUEUED);
+                task.setState(Task.State.QUEUED, threadPoolApply.submit(applyTask(task)));
+            } catch (InterruptedException interrupt) {
+                task.setState(Task.State.CANCELLED, null);
+                logger.debug("{}: compute cancelled", task);
+                Thread.currentThread().interrupt();
             } catch (Throwable t) {
                 logger.error("{}: compute failed", task, t);
-                task.setState(Task.State.FAILED);
+                task.setState(Task.State.FAILED, null);
             }
         };
     }
@@ -208,7 +210,7 @@ public final class TerraformImpl implements Terraform {
         return () -> {
             try {
                 logger.debug("{}: apply started", task);
-                task.setState(Task.State.APPLY);
+                task.setState(Task.State.APPLY, null);
                 long start = System.nanoTime();
 
                 var buffer = task.buffer();
@@ -242,46 +244,50 @@ public final class TerraformImpl implements Terraform {
 
                         indexCache.set(0);
                         section.blockPalette().getAll((sx, sy, sz, stateId) -> {
-                            var paletteIndex = indexCache.getAndIncrement();
-                            var newBlockState = palette.get(sx, sy, sz);
+                            try {
+                                var paletteIndex = indexCache.getAndIncrement();
+                                var newBlockState = palette.get(sx, sy, sz);
 
-                            if (newBlockState == null) {
-                                paletteData[paletteIndex] = stateId;
-                            } else {
-                                var chunkOldBlock = chunkRef.getBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
-                                //todo bad bad very bad
-                                if (!task.isDryRun())
-                                    chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
+                                if (newBlockState == null) {
+                                    paletteData[paletteIndex] = stateId;
+                                } else {
+                                    var chunkOldBlock = chunkRef.getBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
+                                    //todo bad bad very bad
+                                    if (!task.isDryRun())
+                                        chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
 
-                                paletteData[paletteIndex] = newBlockState.stateId();
-                                if (!task.isDryRun() && (newBlockState.handler() != null || newBlockState.hasNbt())) {
-                                    var blockPosition = new Vec(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
-                                    chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
+                                    paletteData[paletteIndex] = newBlockState.stateId();
+                                    if (!task.isDryRun() && (newBlockState.handler() != null || newBlockState.hasNbt())) {
+                                        var blockPosition = new Vec(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
+                                        chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
 
-                                    var registry = newBlockState.registry();
-                                    if (registry.isBlockEntity()) {
-                                        var clientData = BlockUtils.extractClientNbt(newBlockState);
-                                        blockEntityUpdates.add(new BlockEntityDataPacket(blockPosition, registry.blockEntityId(), clientData));
+                                        var registry = newBlockState.registry();
+                                        if (registry.isBlockEntity()) {
+                                            var clientData = BlockUtils.extractClientNbt(newBlockState);
+                                            blockEntityUpdates.add(new BlockEntityDataPacket(blockPosition, registry.blockEntityId(), clientData));
+                                        }
                                     }
-                                }
 
-                                // Only send a client update if the block was actually modified (and for change counter)
-                                if (stateId != newBlockState.stateId()) {
-                                    changeCount.incrementAndGet();
-                                    sectionChangeCache.add(((long) newBlockState.stateId() << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
-                                }
+                                    // Only send a client update if the block was actually modified (and for change counter)
+                                    if (stateId != newBlockState.stateId()) {
+                                        changeCount.incrementAndGet();
+                                        sectionChangeCache.add(((long) newBlockState.stateId() << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
+                                    }
 
-                                // Save old state for undo batch
-                                // Note that we save regardless of whether the block was actually modified,
-                                // this is because undo-ing should change it in case the block changed after
-                                // the apply.
-                                //todo we need to save block entities here too
-                                undoBufferBuilder.set(
-                                        (chunkX << 4) + sx,
-                                        (chunkY << 4) + sy,
-                                        (chunkZ << 4) + sz,
-                                        chunkOldBlock
-                                );
+                                    // Save old state for undo batch
+                                    // Note that we save regardless of whether the block was actually modified,
+                                    // this is because undo-ing should change it in case the block changed after
+                                    // the apply.
+                                    //todo we need to save block entities here too
+                                    undoBufferBuilder.set(
+                                            (chunkX << 4) + sx,
+                                            (chunkY << 4) + sy,
+                                            (chunkZ << 4) + sz,
+                                            chunkOldBlock
+                                    );
+                                }
+                            } catch (InterruptedException interrupt) {
+                                Thread.currentThread().interrupt();
                             }
                         });
 
@@ -308,7 +314,7 @@ public final class TerraformImpl implements Terraform {
                     task.session().remember(Change.of(undoBuffer, buffer));
                 }
 
-                task.setState(Task.State.COMPLETE);
+                task.setState(Task.State.COMPLETE, null);
                 logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - start) / 1_000_000d);
 
                 var result = new TaskResult(undoBuffer, buffer, changeCount.get(), task.attributes());
@@ -323,7 +329,7 @@ public final class TerraformImpl implements Terraform {
                 }
             } catch (Throwable t) {
                 logger.error("{}: apply failed", task, t);
-                task.setState(Task.State.FAILED);
+                task.setState(Task.State.FAILED, null);
             }
         };
     }

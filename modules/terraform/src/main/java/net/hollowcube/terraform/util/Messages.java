@@ -4,9 +4,23 @@ import org.jetbrains.annotations.NotNull;
 
 public enum Messages implements MessageSet {
     GENERIC_BLOCKS_CHANGED("terraform.generic.set"),
+    GENERIC_NO_LOCAL_SESSION("terraform.generic.no_local_session"),
+    GENERIC_NO_LOCAL_SESSION_OTHER("terraform.generic.no_local_session.other"),
     GENERIC_NO_SELECTION("terraform.generic.no_selection"),
     GENERIC_NO_CLIPBOARD("terraform.generic.no_clipboard"),
     REGION_NOT_CUBOID("terraform.selection.not_cuboid"),
+
+    // /tf command
+    TF_VERSION("terraform.version"),
+    TF_QUEUE_TARGET_NOT_FOUND("terraform.queue.target_not_found"),
+    TF_QUEUE_EMPTY("terraform.queue.empty"),
+    TF_QUEUE_HEADER("terraform.queue.header"),
+    TF_QUEUE_ENTRY("terraform.queue.entry"),
+    TF_CANCEL_NOT_FOUND("terraform.cancel.not_found"), //todo figure out how to use this in command syntax error
+    TF_CANCEL_INVALID("terraform.cancel.invalid"),
+    TF_CANCEL_SUCCESS("terraform.cancel.success"),
+    TF_CANCEL_ALL_NONE("terraform.cancel.all_none"),
+    TF_CANCEL_ALL_SUCCESS("terraform.cancel.all"),
 
     HISTORY_UNDO("terraform.history.undo"),
     HISTORY_REDO("terraform.history.redo"),

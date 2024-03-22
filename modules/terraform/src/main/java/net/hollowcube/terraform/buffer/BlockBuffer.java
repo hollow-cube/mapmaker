@@ -78,24 +78,24 @@ public interface BlockBuffer {
         /**
          * Set the block at the given (absolute) coordinate to the given value
          */
-        void set(int x, int y, int z, int value);
+        void set(int x, int y, int z, int value) throws InterruptedException;
 
         /**
          * Set the block at the given (absolute) coordinate to the given value
          */
-        default void set(@NotNull Point point, int value) {
+        default void set(@NotNull Point point, int value) throws InterruptedException {
             set(point.blockX(), point.blockY(), point.blockZ(), value);
         }
 
         /**
          * Set the block at the given (absolute) coordinate to the given value
          */
-        void set(int x, int y, int z, @NotNull Block value);
+        void set(int x, int y, int z, @NotNull Block value) throws InterruptedException;
 
         /**
          * Set the block at the given (absolute) coordinate to the given value
          */
-        default void set(@NotNull Point point, @NotNull Block value) {
+        default void set(@NotNull Point point, @NotNull Block value) throws InterruptedException {
             set(point.blockX(), point.blockY(), point.blockZ(), value);
         }
 
@@ -104,7 +104,7 @@ public interface BlockBuffer {
         //     an alternative is a consumer for all positions, eg: `setSection(int chunkX, int chunkY, int chunkZ, @NotNull Function<XYZ, short>)
         // void setSection(int chunkX, int chunkY, int chunkZ, @NotNull Palette palette);
 
-        @NotNull BlockBuffer build();
+        @NotNull BlockBuffer build() throws InterruptedException;
 
     }
 

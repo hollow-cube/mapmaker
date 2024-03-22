@@ -8,8 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 @ApiStatus.Internal
@@ -18,10 +20,12 @@ public class TaskImpl implements Task {
 
     private final String id = generateId();
     private final String tag;
+    private final Instant created = Instant.now();
     private final boolean dry;
     private final boolean ephemeral;
 
-    private State state = State.INIT;
+    private volatile State state = State.INIT;
+    private @Nullable Future<?> future;
 
     private ComputeFunc computeFunc;
     private BlockBuffer buffer; // Set after compute
@@ -65,6 +69,11 @@ public class TaskImpl implements Task {
     }
 
     @Override
+    public @NotNull Instant created() {
+        return created;
+    }
+
+    @Override
     public boolean isDryRun() {
         return dry;
     }
@@ -78,8 +87,20 @@ public class TaskImpl implements Task {
         return state;
     }
 
-    public void setState(@NotNull State state) {
+    public @Nullable Future<?> future() {
+        return future;
+    }
+
+    public void setState(@NotNull State state, @Nullable Future<?> future) {
+        if (state != State.COMPUTE && state != State.APPLY)
+            this.future = future;
+        if (state == State.QUEUED && (this.state == State.COMPUTE || this.state == State.APPLY))
+            return;
+
         this.state = state;
+        if (state.isTerminal()) {
+            session.removeTask(this);
+        }
     }
 
     @Override
