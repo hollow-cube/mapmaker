@@ -17,7 +17,7 @@ public class ExtraItemTags {
 
     public static final Tag<SkullOwner> SKULL_OWNER = Tag.Structure("SkullOwner", SkullOwner.SERIALIZER);
 
-    public record SkullOwner(@Nullable UUID uuid, @NotNull String name, @Nullable PlayerSkin skin) {
+    public record SkullOwner(@Nullable UUID uuid, @Nullable String name, @Nullable PlayerSkin skin) {
         public static final TagSerializer<SkullOwner> SERIALIZER = new TagSerializer<>() {
             private static final Tag<String> NAME_TAG = Tag.String("Name");
             private static final Tag<UUID> UUID_TAG = Tag.UUID("Id");
@@ -26,8 +26,6 @@ public class ExtraItemTags {
             @Override
             public @Nullable SkullOwner read(@NotNull TagReadable reader) {
                 String name = reader.getTag(NAME_TAG);
-                if (name == null) return null;
-
                 UUID uuid = reader.getTag(UUID_TAG);
                 PlayerSkin skin = null;
                 var props = (NBTCompound) reader.getTag(PROPERTIES_TAG);
@@ -39,14 +37,14 @@ public class ExtraItemTags {
                         var signature = texture.getString("Signature");
                         skin = new PlayerSkin(value, signature);
                     }
-                }
+                } else return null;
 
                 return new SkullOwner(uuid, name, skin);
             }
 
             @Override
             public void write(@NotNull TagWritable writer, @NotNull SkullOwner value) {
-                writer.setTag(NAME_TAG, value.name());
+                if (value.name() != null) writer.setTag(NAME_TAG, value.name());
                 if (value.uuid() != null) writer.setTag(UUID_TAG, value.uuid());
                 if (value.skin != null) writer.setTag(PROPERTIES_TAG, new NBTCompound(Map.of(
                         "textures", new NBTList<>(NBTType.TAG_Compound, List.of(

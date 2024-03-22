@@ -66,7 +66,8 @@ public class ContainerElement extends BaseElement {
                 y = nextY;
             }
 
-            patchItemArray(items, width(), height(),
+            patchItemArray(this,
+                    items, width(), height(),
                     child.getContents(), x, y,
                     child.width(), child.height());
             x += child.width();
@@ -177,19 +178,25 @@ public class ContainerElement extends BaseElement {
     }
 
     static void patchItemArray(
+            @NotNull Element self,
             @Nullable ItemStack @NotNull [] items,
             int itemsWidth, int itemsHeight,
             @Nullable ItemStack @NotNull [] patch,
             int patchX, int patchY,
             int patchWidth, int patchHeight
     ) {
-        for (int y = 0; y < patchHeight; y++) {
-            for (int x = 0; x < patchWidth; x++) {
-                var item = patch[y * patchWidth + x]; // NOSONAR - it doesnt understand nullable here
-                if (item != null) {
-                    items[(patchY + y) * itemsWidth + (patchX + x)] = item; // NOSONAR - see above
+        try {
+
+            for (int y = 0; y < patchHeight; y++) {
+                for (int x = 0; x < patchWidth; x++) {
+                    var item = patch[y * patchWidth + x]; // NOSONAR - it doesnt understand nullable here
+                    if (item != null) {
+                        items[(patchY + y) * itemsWidth + (patchX + x)] = item; // NOSONAR - see above
+                    }
                 }
             }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("Patch out of bounds for " + self.id(), e);
         }
     }
 }

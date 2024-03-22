@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.gui.play ?>
+<?import net.hollowcube.mapmaker.gui.play.details ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/details/container">
     <!-- This is a little cursed, but its acceptable to have zero size elements and they will not affect layout. -->
     <switch id="variant_icon_switch" width="0" height="0">
@@ -372,7 +373,7 @@
         <spacer width="9" height="5"/>
 
         <!-- TIMES TAB -->
-        <spacer width="9" height="5"/>
+        <DetailsTimesTabView id="times_view"/>
 
         <!-- REVIEWS TAB -->
         <spacer width="9" height="5"/>

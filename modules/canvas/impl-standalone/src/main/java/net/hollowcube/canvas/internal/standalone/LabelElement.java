@@ -77,7 +77,7 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
                 "Item position must be null or in range [0, " + (width() * height() - 1) + "], got " + itemPosition);
 
         this.itemSprite = itemStack == null ? BLANK_ITEM : itemStack;
-        this.itemPosition = itemPosition;
+        if (itemPosition != null) this.itemPosition = itemPosition;
         updateItem(List.of());
     }
 

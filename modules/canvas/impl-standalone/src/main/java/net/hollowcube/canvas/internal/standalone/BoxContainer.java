@@ -38,7 +38,8 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         if (align == Align.LTR) {
             int x = 0;
             for (var child : children()) {
-                patchItemArray(items, width(), height(),
+                patchItemArray(this,
+                        items, width(), height(),
                         child.getContents(), x, 0,
                         child.width(), child.height());
                 x += child.width();
@@ -46,7 +47,8 @@ public class BoxContainer extends ContainerElement implements SpriteHolder {
         } else if (align == Align.TTB) {
             int y = 0;
             for (var child : children()) {
-                patchItemArray(items, width(), height(),
+                patchItemArray(this,
+                        items, width(), height(),
                         child.getContents(), 0, y,
                         child.width(), child.height());
                 y += child.height();

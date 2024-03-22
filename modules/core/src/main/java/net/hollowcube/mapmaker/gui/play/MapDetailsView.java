@@ -11,6 +11,7 @@ import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -112,6 +113,8 @@ public class MapDetailsView extends View {
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
     private @Outlet("play_map") Label playMapButton;
+
+    private @Outlet("times_view") DetailsTimesTabView topTimesView;
 
     private final MapData map;
 
@@ -314,14 +317,14 @@ public class MapDetailsView extends View {
 
         titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
 
-        String username = authorName.getUsername();
-        if (username != null) {
-            authorText.setText(username);
-        } else {
-            // Fall back to uuid
-            authorText.setText(map.owner());
-        }
-        authorText.setArgs(authorName.build(DisplayName.Context.PLAIN));
+        var authorTextContent = authorName.getUsername();
+        if (authorTextContent == null) authorTextContent = map.owner();
+        var authorDisplayName = authorName.build(DisplayName.Context.DEFAULT);
+
+        authorText.setText(authorTextContent);
+        authorText.setArgs(authorDisplayName);
+
+        topTimesView.setMap(map, authorTextContent, authorDisplayName);
     }
 
     public void handleReportMap(@NotNull Player player) {
@@ -363,6 +366,7 @@ public class MapDetailsView extends View {
 
     @Action("tab_times")
     public void showTimesTab() {
+        topTimesView.show(); // Kick off loading the entries
         selectTab(2);
     }
 

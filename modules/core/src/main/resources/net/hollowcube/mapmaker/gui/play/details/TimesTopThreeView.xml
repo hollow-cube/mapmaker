@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<component width="9" height="3" align="ltr" sprite="play_maps/details/tab_times/top_three/container">
+
+    <text id="entry_1" width="3" height="3" translationKey="todo"
+          sprite="minecraft:player_head@1" spritePos="4"
+          font="line_3" centered="true"/>
+
+    <text id="entry_2" width="3" height="3" translationKey="todo"
+          sprite="minecraft:player_head@1" spritePos="4"
+          font="line_3" centered="true"/>
+
+    <text id="entry_2" width="3" height="3" translationKey="todo"
+          sprite="minecraft:player_head@1" spritePos="4"
+          font="line_3" centered="true"/>
+
+</component>

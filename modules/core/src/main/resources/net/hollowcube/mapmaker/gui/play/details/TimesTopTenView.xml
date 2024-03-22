@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<component width="9" height="3" align="ttb" sprite="play_maps/details/tab_times/top_ten/container">
+
+    <box width="9" height="1" align="ltr">
+        <text id="label_4" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_1" shift="22"/>
+        <spacer/>
+        <text id="label_5" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_1" shift="25"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text id="label_6" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_2" shift="22"/>
+        <spacer/>
+        <text id="label_7" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_2" shift="25"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <text id="label_8" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_3" shift="22"/>
+        <spacer/>
+        <text id="label_9" width="4" height="1" translationKey="todo"
+              sprite="minecraft:player_head@1" spritePos="3"
+              font="line_3" shift="25"/>
+    </box>
+
+</component>

@@ -75,7 +75,11 @@ public abstract class View implements Element {
     }
 
     public void pushView(@NotNull Function<Context, View> viewProvider) {
-        context.pushView(viewProvider.apply(context), false);
+        try {
+            context.pushView(viewProvider.apply(context), false);
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
     }
 
     public void pushView(@NotNull View view) {
@@ -122,8 +126,8 @@ public abstract class View implements Element {
     }
 
     @NonBlocking
-    protected void async(@Async.Schedule @NotNull AsyncRunnable func) {
-        VIRTUAL_EXECUTOR.submit(() -> {
+    protected Future<?> async(@Async.Schedule @NotNull AsyncRunnable func) {
+        return VIRTUAL_EXECUTOR.submit(() -> {
             try {
                 func.run();
             } catch (Exception e) {
