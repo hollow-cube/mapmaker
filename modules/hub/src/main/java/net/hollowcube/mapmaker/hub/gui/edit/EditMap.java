@@ -84,6 +84,8 @@ public class EditMap extends View {
     private @Outlet("map_settings_onlysprint_switch") Switch mapSettingsOnlySprint;
     private @Outlet("map_settings_nosneak_switch") Switch mapSettingsNoSneak;
     private @Outlet("map_settings_nospec_switch") Switch mapSettingsNoSpec;
+    private @Outlet("map_settings_time_of_day_switch") Switch mapSettingsTimeOfDay;
+    private @Outlet("map_settings_weather_type_switch") Switch mapSettingsWeatherType;
 
     private MapData map;
     private int slot;
@@ -179,17 +181,29 @@ public class EditMap extends View {
         for (var mapSetting : MapSettings.Setting.values()) {
             var name = mapSetting.name().toLowerCase(Locale.ROOT);
 
-            // Unset handler to set the setting on click
-            addActionHandler(
-                    String.format("map_settings_%s_unset", name),
-                    Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
-            );
-
-            // Set handler to unset the setting on click
-            addActionHandler(
-                    String.format("map_settings_%s_set", name),
-                    Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, false))
-            );
+            switch (mapSetting.getValueType()) {
+                case BOOLEAN -> {
+                    // Unset handler to set the setting on click
+                    addActionHandler(
+                            String.format("map_settings_%s_unset", name),
+                            Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
+                    );
+                    // Set handler to unset the setting on click
+                    addActionHandler(
+                            String.format("map_settings_%s_set", name),
+                            Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, false))
+                    );
+                }
+                case ENUM -> {
+                    var enumClass = Objects.requireNonNull(mapSetting.getValueClass(), "enum settings must have a value class");
+                    for (var value : enumClass.getEnumConstants()) {
+                        addActionHandler(
+                                String.format("map_settings_%s_%s", name, value.name().toLowerCase(Locale.ROOT)),
+                                Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -495,6 +509,10 @@ public class EditMap extends View {
                 map.settings().setNoSneak(true);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
                 map.setSetting(MapSettings.NO_SPECTATOR, true);
+            } else if (setting.equals(MapSettings.Setting.TIME_OF_DAY)) {
+                map.setSetting(MapSettings.TIME_OF_DAY, map.getSetting(MapSettings.TIME_OF_DAY).next());
+            } else if (setting.equals(MapSettings.Setting.WEATHER_TYPE)) {
+                map.setSetting(MapSettings.WEATHER_TYPE, map.getSetting(MapSettings.WEATHER_TYPE).next());
             }
         } else {
             if (setting.equals(MapSettings.Setting.NOSPRINT)) {
@@ -573,6 +591,8 @@ public class EditMap extends View {
         mapSettingsNoJump.setOption(map.settings().isNoJump() ? 1 : 0);
         mapSettingsNoSneak.setOption(map.settings().isNoSneak() ? 1 : 0);
         mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : 0);
+        mapSettingsTimeOfDay.setOption(map.getSetting(MapSettings.TIME_OF_DAY).ordinal());
+        mapSettingsWeatherType.setOption(map.getSetting(MapSettings.WEATHER_TYPE).ordinal());
 
         async(() -> {
             publishSwitch.setOption(getPublishState().ordinal());

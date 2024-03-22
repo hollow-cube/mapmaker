@@ -1,14 +1,12 @@
 package net.hollowcube.mapmaker.mod.packet.server;
 
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.ServerPacketIdentifier;
-import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
-public sealed interface HCServerPacket extends ServerPacket permits HCServerConfigPacket, HCServerPlayPacket {
+public sealed interface HCServerPacket extends ServerPacket.Play, ServerPacket.Configuration permits HCServerConfigPacket, HCServerPlayPacket {
 
     @NotNull String packetChannel();
 
@@ -20,13 +18,13 @@ public sealed interface HCServerPacket extends ServerPacket permits HCServerConf
 
     void write0(@NotNull NetworkBuffer buffer);
 
-    default int getId(@NotNull ConnectionState state) {
-        return switch (state) {
-            case CONFIGURATION -> ServerPacketIdentifier.CONFIGURATION_PLUGIN_MESSAGE;
-            case PLAY -> ServerPacketIdentifier.PLUGIN_MESSAGE;
-            default ->
-                    PacketUtils.invalidPacketState(this.getClass(), state, ConnectionState.CONFIGURATION, ConnectionState.PLAY);
-        };
+    @Override
+    default int playId() {
+        return ServerPacketIdentifier.PLUGIN_MESSAGE;
     }
 
+    @Override
+    default int configurationId() {
+        return ServerPacketIdentifier.CONFIGURATION_PLUGIN_MESSAGE;
+    }
 }

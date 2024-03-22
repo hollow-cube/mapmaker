@@ -2,6 +2,9 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.map.setting.MapSetting;
+import net.hollowcube.mapmaker.map.setting.TimeOfDay;
+import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
@@ -24,6 +27,9 @@ public class MapSettings {
 
     public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
 
+    public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
+    public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
+
     transient MapUpdateRequest updates = new MapUpdateRequest();
     transient ReentrantLock updateLock = new ReentrantLock();
 
@@ -43,6 +49,11 @@ public class MapSettings {
         VISUAL
     }
 
+    public enum SettingValueType {
+        BOOLEAN,
+        ENUM
+    }
+
     public enum Setting {
         // WARNING! Changing the variable names or order of these tags is dangerous.
         // This enum must match the order of the setting declarations in the GUI xml file.
@@ -51,19 +62,27 @@ public class MapSettings {
         // Visual
 
         // Gameplay
-        ONLYSPRINT(SettingType.GAMEPLAY, "Only Sprint"),
-        NOSPRINT(SettingType.GAMEPLAY, "No Sprint"),
-        NOJUMP(SettingType.GAMEPLAY, "No Jump"),
-        NOSNEAK(SettingType.GAMEPLAY, "No Sneak"),
-        NOSPEC(SettingType.GAMEPLAY, "No Spectator"),
+        ONLYSPRINT(SettingType.GAMEPLAY, "Only Sprint", SettingValueType.BOOLEAN, null),
+        NOSPRINT(SettingType.GAMEPLAY, "No Sprint", SettingValueType.BOOLEAN, null),
+        NOJUMP(SettingType.GAMEPLAY, "No Jump", SettingValueType.BOOLEAN, null),
+        NOSNEAK(SettingType.GAMEPLAY, "No Sneak", SettingValueType.BOOLEAN, null),
+
+        NOSPEC(SettingType.GAMEPLAY, "No Spectator", SettingValueType.BOOLEAN, null),
+
+        TIME_OF_DAY(SettingType.VISUAL, "Time of Day", SettingValueType.ENUM, TimeOfDay.class),
+        WEATHER_TYPE(SettingType.VISUAL, "Weather", SettingValueType.ENUM, WeatherType.class),
         ;
 
         SettingType type;
         String name;
+        SettingValueType valueType;
+        Class<? extends Enum<?>> valueClass;
 
-        Setting(SettingType type, String name) {
+        Setting(SettingType type, String name, SettingValueType valueType, Class<? extends Enum<?>> valueClass) {
             this.type = type;
             this.name = name;
+            this.valueType = valueType;
+            this.valueClass = valueClass;
         }
 
         public String displayName() {
@@ -72,6 +91,14 @@ public class MapSettings {
 
         public SettingType getType() {
             return this.type;
+        }
+
+        public SettingValueType getValueType() {
+            return this.valueType;
+        }
+
+        public Class<? extends Enum<?>> getValueClass() {
+            return this.valueClass;
         }
     }
 

@@ -1,6 +1,8 @@
-package net.hollowcube.mapmaker.map;
+package net.hollowcube.mapmaker.map.setting;
 
 import com.google.gson.JsonElement;
+import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.MapUpdateRequest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
