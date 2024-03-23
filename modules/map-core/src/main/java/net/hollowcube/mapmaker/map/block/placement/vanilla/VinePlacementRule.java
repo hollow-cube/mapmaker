@@ -1,5 +1,6 @@
-package net.hollowcube.mapmaker.map.block.placement;
+package net.hollowcube.mapmaker.map.block.placement.vanilla;
 
+import net.hollowcube.mapmaker.map.block.placement.BaseBlockPlacementRule;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
@@ -13,8 +14,15 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * This class is basically copied straight from vanilla. It should not be published,
- * we do not own this code in any way.
+ * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
+ *
+ * <p>This placement rule is a copy paste of the vanilla logic for vines. In this case the function
+ * {@link #getNearestLookingDirections(Pos, boolean, BlockFace)} is the problem. The client predicts
+ * this ordering, and I wasnt able to recreate it perfectly on my own.</p>
+ *
+ * <p>At some point I will work out the math and rewrite this on my own, but for now it is fine.</p>
+ *
+ * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class VinePlacementRule extends BaseBlockPlacementRule {

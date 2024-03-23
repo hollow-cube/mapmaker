@@ -1,37 +1,60 @@
-package net.hollowcube.mapmaker.map.block.placement;
+package net.hollowcube.mapmaker.map.block.placement.vanilla;
 
+import net.hollowcube.mapmaker.map.block.placement.BaseBlockPlacementRule;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
+ *
+ * <p>This placement rule is a copy paste of the vanilla logic for rails. It does not work like normal placement
+ * rules (it does updates with instance setters), and honestly I have no idea whats going on in it.</p>
+ *
+ * <p>I would like to rewrite this at some point. The client does NOT predict rail updates so it should be
+ * reasonable to create a fairly nice placement rule for rails. At the time of writing however, I am more
+ * interested in releasing something than spending 2 days figuring out functional rails.</p>
+ *
+ * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
+ */
+public class RailPlacementRule extends BaseBlockPlacementRule {
+    private final boolean isStraight;
 
-public class RailStuff {
+    public RailPlacementRule(@NotNull Block block, boolean isStraight) {
+        super(block);
+        this.isStraight = isStraight;
+    }
+
+    @Override
+    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+        var instance = placement.instance();
+        var blockPosition = placement.placePosition();
+
+        return new RailState(instance, blockPosition, this.block, this.isStraight)
+                .place(true, true, this.block.getProperty("shape"))
+                .getState();
+    }
+
     public static class RailState {
         private final Block.Getter level;
         private final Point pos;
-        //        private final Block block;
         private Block state;
         private final boolean isStraight;
         private final List<Point> connections = new ArrayList<>();
 
-        public RailState(Block.Getter instance, Point $$1, Block state) {
+        public RailState(Block.Getter instance, Point $$1, Block state, boolean isStraight) {
             this.level = instance;
             this.pos = $$1;
             this.state = state;
             String shape = state.getProperty("shape");
-            this.isStraight = state.id() == Block.POWERED_RAIL.id() || state.id() == Block.DETECTOR_RAIL.id() || state.id() == Block.ACTIVATOR_RAIL.id();
+            this.isStraight = isStraight;
             this.updateConnections(shape);
-        }
-
-        public List<Point> getConnections() {
-            return this.connections;
         }
 
         private void updateConnections(String shape) {
@@ -100,13 +123,8 @@ public class RailStuff {
             }
         }
 
-        private boolean hasRail(Point blockPosition) {
-            return isRail(this.level, blockPosition) || isRail(this.level, blockPosition.add(0, 1, 0)) || isRail(this.level, blockPosition.add(0, -1, 0));
-        }
-
         private static boolean isRail(@NotNull Block.Getter instance, @NotNull Point blockPosition) {
-            var block = instance.getBlock(blockPosition, Block.Getter.Condition.TYPE);
-            return isRail(block);
+            return isRail(instance.getBlock(blockPosition, Block.Getter.Condition.TYPE));
         }
 
         private static boolean isRail(@NotNull Block block) {
@@ -119,17 +137,17 @@ public class RailStuff {
             Point $$1 = blockPosition;
             Block $$2 = this.level.getBlock($$1);
             if (isRail($$2)) {
-                return new RailState(this.level, $$1, $$2);
+                return new RailState(this.level, $$1, $$2, $$2.id() == Block.DETECTOR_RAIL.id() || $$2.id() == Block.ACTIVATOR_RAIL.id() || $$2.id() == Block.POWERED_RAIL.id());
             }
             $$1 = blockPosition.add(0, 1, 0);
             $$2 = this.level.getBlock($$1);
             if (isRail($$2)) {
-                return new RailState(this.level, $$1, $$2);
+                return new RailState(this.level, $$1, $$2, $$2.id() == Block.DETECTOR_RAIL.id() || $$2.id() == Block.ACTIVATOR_RAIL.id() || $$2.id() == Block.POWERED_RAIL.id());
             }
             $$1 = blockPosition.add(0, -1, 0);
             $$2 = this.level.getBlock($$1);
             if (isRail($$2)) {
-                return new RailState(this.level, $$1, $$2);
+                return new RailState(this.level, $$1, $$2, $$2.id() == Block.DETECTOR_RAIL.id() || $$2.id() == Block.ACTIVATOR_RAIL.id() || $$2.id() == Block.POWERED_RAIL.id());
             }
             return null;
         }
@@ -145,15 +163,6 @@ public class RailStuff {
                 return true;
             }
             return false;
-        }
-
-        protected int countPotentialConnections() {
-            int $$0 = 0;
-            for (Direction $$1 : Direction.HORIZONTAL) {
-                if (!this.hasRail(this.pos.relative(BlockFace.fromDirection($$1)))) continue;
-                ++$$0;
-            }
-            return $$0;
         }
 
         private boolean canConnectTo(RailState $$0) {

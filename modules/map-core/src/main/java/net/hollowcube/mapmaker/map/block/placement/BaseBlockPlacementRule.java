@@ -8,7 +8,7 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 
-abstract class BaseBlockPlacementRule extends BlockPlacementRule {
+public abstract class BaseBlockPlacementRule extends BlockPlacementRule {
     protected static final BlockFace[] HORIZONTAL = new BlockFace[]{
             BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
     };

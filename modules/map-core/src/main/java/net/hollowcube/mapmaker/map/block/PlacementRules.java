@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map.block;
 
 import net.hollowcube.mapmaker.map.block.placement.*;
+import net.hollowcube.mapmaker.map.block.placement.vanilla.RailPlacementRule;
+import net.hollowcube.mapmaker.map.block.placement.vanilla.VinePlacementRule;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.TerraformRegistry;
 import net.minestom.server.MinecraftServer;
@@ -138,10 +140,10 @@ public final class PlacementRules {
 
         register(Block.TRIPWIRE_HOOK, TripwireHookPlacementRule::new);
         register(Block.TRIPWIRE, TripwirePlacementRule::new);
-        register(Block.RAIL, RailCurvedPlacementRule::new);
-        register(Block.ACTIVATOR_RAIL, RailStraightPlacementRule::new);
-        register(Block.DETECTOR_RAIL, RailStraightPlacementRule::new);
-        register(Block.POWERED_RAIL, RailStraightPlacementRule::new);
+        register(Block.RAIL, b -> new RailPlacementRule(b, false));
+        register(Block.ACTIVATOR_RAIL, b -> new RailPlacementRule(b, true));
+        register(Block.DETECTOR_RAIL, b -> new RailPlacementRule(b, true));
+        register(Block.POWERED_RAIL, b -> new RailPlacementRule(b, true));
 
         register(Block.DECORATED_POT, WaterloggedPlacementRule::new); //todo
         register(Block.SPAWNER, NoopPlacementRule::new);
