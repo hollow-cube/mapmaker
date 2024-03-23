@@ -138,6 +138,10 @@ public final class PlacementRules {
 
         register(Block.TRIPWIRE_HOOK, TripwireHookPlacementRule::new);
         register(Block.TRIPWIRE, TripwirePlacementRule::new);
+        register(Block.RAIL, RailCurvedPlacementRule::new);
+        register(Block.ACTIVATOR_RAIL, RailStraightPlacementRule::new);
+        register(Block.DETECTOR_RAIL, RailStraightPlacementRule::new);
+        register(Block.POWERED_RAIL, RailStraightPlacementRule::new);
 
         register(Block.DECORATED_POT, WaterloggedPlacementRule::new); //todo
         register(Block.SPAWNER, NoopPlacementRule::new);
