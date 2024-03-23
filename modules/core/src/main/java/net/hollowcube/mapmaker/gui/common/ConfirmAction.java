@@ -20,7 +20,7 @@ public class ConfirmAction extends View {
         yesButton.setArgs(confirmationText);
     }
 
-    @Action("yes")
+    @Action(value = "yes", async = true)
     private void handleYesClick() {
         confirmationCallback.run();
     }

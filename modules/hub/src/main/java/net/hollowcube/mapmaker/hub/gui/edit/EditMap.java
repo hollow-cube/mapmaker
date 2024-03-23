@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -257,30 +258,39 @@ public class EditMap extends View {
         }
     }
 
-    @Action(value = "publish", async = true)
-    private @Blocking void publishMap(@NotNull Player player) {
-        var playerData = PlayerDataV2.fromPlayer(player);
-        MapData publishedMap;
-        try {
-            publishButton.setState(State.LOADING);
-            publishedMap = mapService.publishMap(playerData.id(), map.id());
-        } catch (Exception e) {
-            //todo record this exception in sentry or something
-            logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
-            return;
-        } finally {
-            publishButton.setState(State.ACTIVE);
-        }
+    @Action(value = "publish")
+    private void publishMap(@NotNull Player player) {
+        pushView(context -> new ConfirmAction(context,
+                () -> popView("publish_sig", player),
+                Component.translatable("Publish your map " + map.name())));
+    }
 
-        // In case back is used, we need to reset the map details view
-        // We have to "predict" that the map will be removed by the async update sent over Kafka,
-        // which has most likely not arrived yet.
-        MapPlayerData.fromPlayer(player).mapSlots()[slot] = null;
-        performSignal(CreateMaps.SIG_RESET);
+    @Signal("publish_sig")
+    private void publishMapLogic(@NotNull Player player) {
+        FutureUtil.submitVirtual(() -> {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            MapData publishedMap;
+            try {
+                publishButton.setState(State.LOADING);
+                publishedMap = mapService.publishMap(playerData.id(), map.id());
+            } catch (Exception e) {
+                //todo record this exception in sentry or something
+                logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
+                return;
+            } finally {
+                publishButton.setState(State.ACTIVE);
+            }
 
-        // Open the map details view for the newly published map
-        var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-        pushView(c -> new MapDetailsView(c, map, authorName));
+            // In case back is used, we need to reset the map details view
+            // We have to "predict" that the map will be removed by the async update sent over Kafka,
+            // which has most likely not arrived yet.
+            MapPlayerData.fromPlayer(player).mapSlots()[slot] = null;
+            performSignal(CreateMaps.SIG_RESET);
+
+            // Open the map details view for the newly published map
+            var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
+            pushView(c -> new MapDetailsView(c, map, authorName));
+        });
     }
 
     private static final int MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment() ? 1 : 5 * 60 * 1000; // 5 minutes
