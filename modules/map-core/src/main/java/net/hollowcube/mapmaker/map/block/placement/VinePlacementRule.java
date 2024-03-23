@@ -1,15 +1,21 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Objects;
 
-import static net.minestom.server.instance.block.Block.Getter.Condition.TYPE;
-
+/**
+ * This class is basically copied straight from vanilla. It should not be published,
+ * we do not own this code in any way.
+ */
 @SuppressWarnings("UnstableApiUsage")
 public final class VinePlacementRule extends BaseBlockPlacementRule {
     private final boolean hasDown;
@@ -20,21 +26,26 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
-        return computeState(
-                placementState.instance(),
-                placementState.placePosition(),
-                placementState.block()
-        );
+    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+        var placeFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
+
+        var instance = placementState.instance();
+        var blockPosition = placementState.placePosition();
+        var existingBlock = instance.getBlock(blockPosition);
+
+        return Arrays.stream(getNearestLookingDirections(playerPosition, existingBlock.id() == this.block.id(), placeFace))
+                .filter(face -> face != BlockFace.TOP || this.hasDown)
+                .map(face -> this.getStateForPlacement(existingBlock, instance, blockPosition, face))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(existingBlock);
     }
 
     @Override
     public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        return computeState(
-                updateState.instance(),
-                updateState.blockPosition(),
-                updateState.currentBlock()
-        );
+        // Do not update the state. We disagree with vanilla here.
+        return updateState.currentBlock();
     }
 
     @Override
@@ -42,26 +53,106 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         return true;
     }
 
-    @Override
-    public int maxUpdateDistance() {
-        return 1;
+    private boolean isFaceSupported(BlockFace $$0) {
+        return true;
     }
 
-    private @NotNull Block computeState(@NotNull Block.Getter instance, @NotNull Point blockPosition, @NotNull Block current) {
-        var props = new HashMap<String, String>();
-        for (var face : BlockFace.values()) {
-            if (!hasDown && face == BlockFace.BOTTOM) continue;
 
-            var adjacentBlock = instance.getBlock(blockPosition.relative(face), TYPE);
-            var direction = switch (face) {
-                case BOTTOM -> "down";
-                case TOP -> "up";
-                default -> face.name().toLowerCase();
-            };
-            var value = adjacentBlock.isSolid() ? "true" : "false";
-            props.put(direction, value);
+    public static boolean hasFace(Block $$0, BlockFace $$1) {
+        return "true".equals($$0.getProperty(getPropertyName($$1)));
+    }
+
+    public static boolean canAttachTo(Block.Getter instance, BlockFace $$1, Point $$2, Block block) {
+        return !block.isAir() && block.id() != Block.GLOW_LICHEN.id() && block.id() != Block.VINE.id() && block.id() != Block.SCULK_VEIN.id();
+//        return Block.isFaceFull($$3.getBlockSupportShape($$0, $$2), $$1.getOppositeFace()) || Block.isFaceFull($$3.getCollisionShape($$0, $$2), $$1.getOpposite());
+    }
+
+    public boolean isValidStateForPlacement(Block.Getter $$0, Block $$1, Point $$2, BlockFace $$3) {
+        if (!this.isFaceSupported($$3) || $$1.id() == this.block.id() && hasFace($$1, $$3)) {
+            return false;
         }
-
-        return current.withProperties(props);
+        Point $$4 = $$2.relative($$3);
+        return canAttachTo($$0, $$3, $$4, $$0.getBlock($$4, Block.Getter.Condition.TYPE));
     }
+
+    @Nullable
+    public Block getStateForPlacement(Block $$0, Block.Getter $$1, Point $$2, BlockFace $$3) {
+        Block $$6;
+        if (!this.isValidStateForPlacement($$1, $$0, $$2, $$3)) {
+            return null;
+        }
+        if ($$0.id() == this.block.id()) {
+            $$6 = $$0;
+        } else if ($$0.id() == Block.WATER.id()) {
+            $$6 = this.block.withProperty("waterlogged", "true");
+        } else {
+            $$6 = this.block;
+        }
+        return $$6.withProperty(getPropertyName($$3), "true");
+    }
+
+    private static @NotNull String getPropertyName(@NotNull BlockFace blockFace) {
+        return switch (blockFace) {
+            case BOTTOM -> "down";
+            case TOP -> "up";
+            default -> blockFace.name().toLowerCase(Locale.ROOT);
+        };
+    }
+
+    public BlockFace[] getNearestLookingDirections(@NotNull Pos playerView, boolean replaceClicked, @NotNull BlockFace clickFace) {
+        int $$2;
+        BlockFace[] $$0 = orderedByNearest(playerView);
+        if (replaceClicked) {
+            return $$0;
+        }
+        BlockFace $$1 = clickFace;
+        for ($$2 = 0; $$2 < $$0.length && $$0[$$2] != $$1.getOppositeFace(); ++$$2) {
+        }
+        if ($$2 > 0) {
+            System.arraycopy($$0, 0, $$0, 1, $$2);
+            $$0[0] = $$1.getOppositeFace();
+        }
+        return $$0;
+    }
+
+    public static BlockFace[] orderedByNearest(Pos $$0) {
+        float $$1 = $$0.pitch() * ((float) Math.PI / 180);
+        float $$2 = -$$0.yaw() * ((float) Math.PI / 180);
+        float $$3 = (float) Math.sin($$1);
+        float $$4 = (float) Math.cos($$1);
+        float $$5 = (float) Math.sin($$2);
+        float $$6 = (float) Math.cos($$2);
+        boolean $$7 = $$5 > 0.0f;
+        boolean $$8 = $$3 < 0.0f;
+        boolean $$9 = $$6 > 0.0f;
+        float $$10 = $$7 ? $$5 : -$$5;
+        float $$11 = $$8 ? -$$3 : $$3;
+        float $$12 = $$9 ? $$6 : -$$6;
+        float $$13 = $$10 * $$4;
+        float $$14 = $$12 * $$4;
+        BlockFace $$15 = $$7 ? BlockFace.EAST : BlockFace.WEST;
+        BlockFace $$16 = $$8 ? BlockFace.TOP : BlockFace.BOTTOM;
+        BlockFace $$17 = $$9 ? BlockFace.SOUTH : BlockFace.NORTH;
+        if ($$10 > $$12) {
+            if ($$11 > $$13) {
+                return makeDirectionArray($$16, $$15, $$17);
+            }
+            if ($$14 > $$11) {
+                return makeDirectionArray($$15, $$17, $$16);
+            }
+            return makeDirectionArray($$15, $$16, $$17);
+        }
+        if ($$11 > $$14) {
+            return makeDirectionArray($$16, $$17, $$15);
+        }
+        if ($$13 > $$11) {
+            return makeDirectionArray($$17, $$15, $$16);
+        }
+        return makeDirectionArray($$17, $$16, $$15);
+    }
+
+    private static BlockFace[] makeDirectionArray(BlockFace $$0, BlockFace $$1, BlockFace $$2) {
+        return new BlockFace[]{$$0, $$1, $$2, $$2.getOppositeFace(), $$1.getOppositeFace(), $$0.getOppositeFace()};
+    }
+
 }
