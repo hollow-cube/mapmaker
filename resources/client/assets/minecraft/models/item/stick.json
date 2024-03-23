@@ -80,6 +80,13 @@
       },
       "model": "minecraft:item/island_5x",
       "axiom:hide": false
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "minecraft:item/flipper",
+      "axiom:hide": false
     }
   ]
 }

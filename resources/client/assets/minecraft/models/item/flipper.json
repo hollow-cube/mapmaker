@@ -1,0 +1,1513 @@
+{
+  "textures": {
+    "1awughfaiuwg": "block/bedrock",
+    "4": "block/lodestone_side",
+    "2": "block/stone_bricks",
+    "1": "block/polished_andesite",
+    "3": "block/lodestone_top"
+  },
+  "elements": [
+    {
+      "from": [
+        1.0,
+        -1.0,
+        -2.0
+      ],
+      "to": [
+        2.0,
+        -0.5,
+        -1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        -0.5,
+        -2.0
+      ],
+      "to": [
+        1.5,
+        0.0,
+        -1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            0.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.5,
+        -0.5,
+        -2.0
+      ],
+      "to": [
+        2.0,
+        0.0,
+        -1.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            8.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        -1.0,
+        -2.0
+      ],
+      "to": [
+        3.0,
+        -0.5,
+        -1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        -0.5,
+        -2.0
+      ],
+      "to": [
+        3.0,
+        0.0,
+        -1.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            16.0,
+            0.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.5,
+        -0.5,
+        -1.5
+      ],
+      "to": [
+        3.0,
+        0.0,
+        -1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            16.0,
+            16.0,
+            8.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_right, facing\u003d\u003enorth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -2.75,
+        -1.0,
+        -0.75
+      ],
+      "to": [
+        -2.25,
+        0.0,
+        -0.25
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            12.0,
+            12.0,
+            4.0,
+            4.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            12.0,
+            12.0,
+            4.0,
+            4.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#2",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            4.0,
+            0.0,
+            12.0,
+            16.0
+          ]
+        }
+      },
+      "__comment": "Center post",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003elow, north\u003d\u003elow, west\u003d\u003enone, up\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -2.6875,
+        -1.0,
+        -1.0
+      ],
+      "to": [
+        -2.3125,
+        -0.125,
+        -0.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            11.0,
+            8.0,
+            5.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            11.0,
+            8.0,
+            5.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "west": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003elow, north\u003d\u003elow, west\u003d\u003enone, up\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -2.5,
+        -1.0,
+        -0.6875
+      ],
+      "to": [
+        -2.0,
+        -0.125,
+        -0.3125
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003elow, north\u003d\u003elow, west\u003d\u003enone, up\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -2.6875,
+        -1.0,
+        -0.5
+      ],
+      "to": [
+        -2.3125,
+        -0.125,
+        0.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            8.0,
+            11.0,
+            16.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            8.0,
+            11.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "west": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003elow, north\u003d\u003elow, west\u003d\u003enone, up\u003d\u003etrue}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -1.5,
+        -1.0,
+        -0.6875
+      ],
+      "to": [
+        -1.0,
+        -0.125,
+        -0.3125
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003enone, north\u003d\u003enone, west\u003d\u003elow, up\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -2.0,
+        -1.0,
+        -0.6875
+      ],
+      "to": [
+        -1.5,
+        -0.125,
+        -0.3125
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            5.0,
+            0.0,
+            11.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            5.0,
+            0.0,
+            11.0
+          ]
+        },
+        "west": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003enone, north\u003d\u003enone, west\u003d\u003elow, up\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -0.5,
+        -1.0,
+        -0.6875
+      ],
+      "to": [
+        0.0,
+        -0.125,
+        -0.3125
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            11.0,
+            16.0,
+            5.0
+          ]
+        },
+        "east": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003enone, north\u003d\u003enone, west\u003d\u003elow, up\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        -1.0,
+        -1.0,
+        -0.6875
+      ],
+      "to": [
+        -0.5,
+        -0.125,
+        -0.3125
+      ],
+      "faces": {
+        "down": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            5.0,
+            0.0,
+            11.0
+          ]
+        },
+        "up": {
+          "texture": "#2",
+          "uv": [
+            8.0,
+            5.0,
+            0.0,
+            11.0
+          ]
+        },
+        "west": {
+          "texture": "#2",
+          "uv": [
+            5.0,
+            0.0,
+            11.0,
+            14.0
+          ]
+        },
+        "south": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        },
+        "north": {
+          "texture": "#2",
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            14.0
+          ]
+        }
+      },
+      "__comment": "wall",
+      "_block": "minecraft:stone_brick_wall{properties\u003d{east\u003d\u003elow, waterlogged\u003d\u003efalse, south\u003d\u003enone, north\u003d\u003enone, west\u003d\u003elow, up\u003d\u003efalse}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        0,
+        -1,
+        -1
+      ],
+      "to": [
+        1,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1awughfaiuwg"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        -1.0,
+        -1.0
+      ],
+      "to": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#3",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#3",
+          "uv": [
+            16.0,
+            16.0,
+            0.0,
+            0.0
+          ]
+        },
+        "north": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#4",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        }
+      },
+      "_block": "minecraft:lodestone{properties\u003d{}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        -1.0,
+        -1.0
+      ],
+      "to": [
+        3.0,
+        -0.5,
+        0.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.5,
+        -0.5,
+        -1.0
+      ],
+      "to": [
+        3.0,
+        0.0,
+        0.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003estraight, facing\u003d\u003eeast}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        -1.0,
+        0.0
+      ],
+      "to": [
+        2.0,
+        -0.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        -0.5,
+        0.5
+      ],
+      "to": [
+        2.0,
+        0.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            16.0,
+            8.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        1.0,
+        -0.5,
+        0.0
+      ],
+      "to": [
+        1.5,
+        0.0,
+        0.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            0.0,
+            0.0,
+            8.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003ewest}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        -1.0,
+        0.0
+      ],
+      "to": [
+        3.0,
+        -0.5,
+        1.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            8,
+            16,
+            16
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.5,
+        -0.5,
+        0.0
+      ],
+      "to": [
+        3.0,
+        0.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    },
+    {
+      "from": [
+        2.0,
+        -0.5,
+        0.5
+      ],
+      "to": [
+        2.5,
+        0.0,
+        1.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            8,
+            8,
+            16
+          ],
+          "texture": "#1"
+        },
+        "north": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            16,
+            8
+          ],
+          "texture": "#1"
+        }
+      },
+      "_block": "minecraft:polished_andesite_stairs{properties\u003d{half\u003d\u003ebottom, waterlogged\u003d\u003efalse, shape\u003d\u003einner_left, facing\u003d\u003esouth}, nbt\u003dnull, handler\u003dnull}"
+    }
+  ],
+  "display": {
+    "fixed": {
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        10.5,
+        8.5,
+        8.5
+      ]
+    }
+  }
+}
