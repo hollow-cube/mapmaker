@@ -60,6 +60,7 @@ public class InteractionRules {
         item(Material.ENDER_EYE, new EnderEyeInteractionRule());
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
         item(Material.SCAFFOLDING, ScaffoldingInteractionRule.INSTANCE);
+        item(Material.BONE_MEAL, new BonemealInteractionRule());
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {

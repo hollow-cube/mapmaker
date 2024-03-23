@@ -71,6 +71,12 @@ public interface BlockInteractionRule {
             return instance.getWorldBorder();
         }
 
+        public boolean worldContains(@NotNull Point point) {
+            return instance.getWorldBorder().isInside(point)
+                    && point.blockY() >= instance.getDimensionType().getMinY()
+                    && point.blockY() <= instance.getDimensionType().getMaxY();
+        }
+
         @Override
         public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Block.Getter.Condition condition) {
             return instance.getBlock(x, y, z, condition);
