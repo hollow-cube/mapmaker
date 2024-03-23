@@ -152,6 +152,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
         // Only visibility extension, no viewer rule (spectators can see anyone)
+        player.updateViewerRule(null);
         if (player instanceof PlayerVisibilityExtension ve)
             ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
     }
@@ -171,6 +172,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
         // Only visibility extension, no viewer rule (spectators can see anyone)
+        player.updateViewerRule(null);
         if (player instanceof PlayerVisibilityExtension ve)
             ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
     }
@@ -179,7 +181,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!event.getMapWorld().isPlaying(player)) return;
 
-        
+
         player.removeTag(COUNTDOWN_END);
     }
 
