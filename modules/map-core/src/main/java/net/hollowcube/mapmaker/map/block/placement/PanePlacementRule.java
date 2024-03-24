@@ -35,7 +35,7 @@ public class PanePlacementRule extends BaseBlockPlacementRule {
             if (faceFilter != null && blockFace != faceFilter) continue;
             var neighbor = instance.getBlock(blockPosition.relative(blockFace));
 
-            var neighborFaceIsSolid = neighbor.registry().collisionShape().isOccluded(block.registry().collisionShape(), blockFace.getOppositeFace());
+            var neighborFaceIsSolid = neighbor.registry().collisionShape().isFaceFull(blockFace.getOppositeFace());
             var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || BlockTags.GLASS_PANES.contains(neighbor.namespace()) || BlockTags.WALLS.contains(neighbor.namespace()) || neighbor.id() == Block.IRON_BARS.id());
             block = block.withProperty(blockFace.name().toLowerCase(), String.valueOf(canConnect));
         }
