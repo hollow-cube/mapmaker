@@ -7,6 +7,7 @@ import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -18,6 +19,7 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.data.BlockParticleData;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -75,6 +77,12 @@ public class LauncherFeature implements HubFeature {
 
         @Override
         public void update(long time) {
+            if (this.state == State.COOLDOWN) {
+                var sound = remaining % 2 == 0 ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
+                getViewersAsAudience().playSound(Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
+                        getPosition().x(), getPosition().y(), getPosition().z());
+            }
+
             if (remaining > 0) {
                 remaining--;
                 return;
@@ -97,7 +105,6 @@ public class LauncherFeature implements HubFeature {
                         }
                         player.sendPacket(makeExplosion(player.getPosition(), motion));
                         launched++;
-                        System.out.println(player.getUsername() + " is in box: " + isInBox);
                     }
 
                     if (launched > 0) setState(State.LAUNCHING);
