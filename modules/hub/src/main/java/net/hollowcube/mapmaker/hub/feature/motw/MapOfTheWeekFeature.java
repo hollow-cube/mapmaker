@@ -38,8 +38,7 @@ public class MapOfTheWeekFeature implements HubFeature {
 
         // Timer init (the big countdown above the map)
         var timer = new CountdownTimer(world.instance());
-        timer.setDigits(new int[]{0, 0, 0, 0, 0});
-//        scheduler.submitTask(timer, ExecutionType.SYNC);
+        scheduler.submitTask(timer, ExecutionType.SYNC);
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);

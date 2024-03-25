@@ -10,10 +10,12 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.gui.play.simple.*;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.hollowcube.mapmaker.util.StringComparison;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -64,6 +66,11 @@ public class PlayMapsView extends View {
         playerData = PlayerDataV2.fromPlayer(player);
 
         updateQuery(false);
+    }
+
+    @Action("close")
+    public void handleCloseClick(@NotNull Player player) {
+        player.closeInventory();
     }
 
     // Map type filter
@@ -155,9 +162,16 @@ public class PlayMapsView extends View {
             boolean parkour = playerData.getSetting(PARKOUR), building = playerData.getSetting(BUILDING);
             var queryResult = mapService.searchMapsV2(player.getUuid().toString(), sortPreset.getSortName(), request.page(), request.pageSize(), building, parkour, query);
 
+            // Sort the page of results using string similarity to the query
+            var results = queryResult.results();
+            if (this.query != null && !this.query.isEmpty()) {
+                results = new ArrayList<>(results);
+                results.sort(StringComparison.jaroWinkler(query, MapData::name));
+            }
+
             var mapIds = new ArrayList<String>();
             var maps = new ArrayList<MapEntry>();
-            for (var map : queryResult.results()) {
+            for (var map : results) {
                 if (map.isCompletable()) mapIds.add(map.id());
                 maps.add(new MapEntry(request.context(), map));
             }

@@ -5,7 +5,9 @@
 <component width="9" height="10" align="ttb" sprite="play_maps/search/container">
     <!-- Top bar -->
     <box width="9" align="ltr">
-        <BackButton/>
+        <button id="close" translationKey="gui.generic.close_menu"
+                backgroundSprite="generic/close_bg"
+                sprite="generic/close"/>
         <label translationKey="gui.play_maps.simple.information"/>
         <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"
               font="play_maps_page" centered="true"/>
