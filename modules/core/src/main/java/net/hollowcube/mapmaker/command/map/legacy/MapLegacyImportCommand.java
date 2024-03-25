@@ -7,6 +7,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -55,8 +56,12 @@ public class MapLegacyImportCommand extends CommandDsl {
         try {
             var mapData = mapService.importLegacyMap(authorizer, mapOwner, legacyMapId);
             player.sendMessage(GenericMessages.COMMAND_MAP_LEGACY_IMPORT_SUCCESS
-                    .with(mapData.settings().getNameComponent(), mapData.slot()));
+                    .with(mapData.settings().getNameComponent(), mapData.slot() + 1));
 
+            // We were successful in importing so we should update the players map list locally.
+            // It is likely we have not received the updated slot list yet.
+            var mapPlayerData = MapPlayerData.fromPlayer(player);
+            mapPlayerData.mapSlots()[mapData.slot()] = mapData.id();
         } catch (MapService.NotFoundError ignored) {
             player.sendMessage(GenericMessages.COMMAND_MAP_LEGACY_IMPORT_NOT_FOUND
                     .with(legacyMapId));

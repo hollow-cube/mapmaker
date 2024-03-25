@@ -44,6 +44,10 @@ public class MapPlayerData {
     }
 
     public String[] mapSlots() {
+        if (mapSlots == null)
+            mapSlots = new String[unlockedSlots];
+        if (mapSlots.length < unlockedSlots)
+            mapSlots = Arrays.copyOf(mapSlots, unlockedSlots);
         return mapSlots;
     }
 
