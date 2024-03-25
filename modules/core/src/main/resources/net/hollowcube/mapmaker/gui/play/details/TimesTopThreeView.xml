@@ -3,14 +3,14 @@
 
     <text id="entry_1" width="3" height="3" translationKey="todo"
           sprite="minecraft:player_head@1" spritePos="4"
-          font="line_3" centered="true"/>
+          font="line_3_1" centered="true"/>
 
     <text id="entry_2" width="3" height="3" translationKey="todo"
           sprite="minecraft:player_head@1" spritePos="4"
-          font="line_3" centered="true"/>
+          font="line_3_1" centered="true"/>
 
     <text id="entry_2" width="3" height="3" translationKey="todo"
           sprite="minecraft:player_head@1" spritePos="4"
-          font="line_3" centered="true"/>
+          font="line_3_1" centered="true"/>
 
 </component>

@@ -82,6 +82,7 @@ public final class FontUtil {
         result.put("line_1", defaultGlyphs);
         result.put("line_2", defaultGlyphs);
         result.put("line_3", defaultGlyphs);
+        result.put("line_3_1", defaultGlyphs);
         result.put("line_4", defaultGlyphs);
 
         var currencyGlyphs = new Int2IntArrayMap();
@@ -244,7 +245,9 @@ public final class FontUtil {
 
             var replacement = charmap.get(c);
             if (replacement == null) {
-                logger.warn("Unknown character: " + c + " in font: " + font);
+                if (!POSITIVE_SPACE.contains(String.valueOf(c)) && !NEGATIVE_SPACE.contains(String.valueOf(c))) {
+                    logger.warn("Unknown character: " + c + " in font: " + font);
+                }
                 replacement = c;
             }
             result.append(replacement);

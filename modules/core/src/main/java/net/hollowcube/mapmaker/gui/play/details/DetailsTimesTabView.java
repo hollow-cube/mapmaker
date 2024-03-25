@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -88,7 +89,7 @@ public class DetailsTimesTabView extends View {
         var playerId = PlayerDataV2.fromPlayer(player).id();
 
         viewerEntry.setItemSprite(getPlayerHead2d(playerId, MODEL_8X));
-        viewerEntry.setText(entry == null ? MISSING_TIME : NumberUtil.formatMapPlaytime(entry.score(), true));
+        viewerEntry.setText(FontUtil.computeOffset(2) + (entry == null ? MISSING_TIME : NumberUtil.formatMapPlaytime(entry.score(), true)));
     }
 
     static final String MISSING_TIME = "--:--:---";
