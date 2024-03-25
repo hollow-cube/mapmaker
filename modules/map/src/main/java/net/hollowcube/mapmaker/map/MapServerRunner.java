@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.utility.*;
+import net.hollowcube.mapmaker.map.command.utility.navigation.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
@@ -180,8 +181,14 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(server.createInstance(FlySpeedCommand.class));
         commandManager.register(server.createInstance(ClearInventoryCommand.class));
         commandManager.register(server.createInstance(SpawnCommand.class));
-        commandManager.register(server.createInstance(TeleportCommand.class));
         commandManager.register(server.createInstance(GiveCommand.class));
+
+        commandManager.register(server.createInstance(TeleportCommand.class));
+        commandManager.register(server.createInstance(AscendCommand.class));
+        commandManager.register(server.createInstance(DescendCommand.class));
+        commandManager.register(server.createInstance(JumpToCommand.class));
+        commandManager.register(server.createInstance(ThruCommand.class));
+        commandManager.register(server.createInstance(UpCommand.class));
 
         commandManager.register(server.createInstance(PHeadCommand.class));
 

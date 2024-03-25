@@ -57,7 +57,10 @@ public class DevServerRunner extends AbstractMapServer {
                 .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect))
+                /*.addListener(PlayerPluginMessageEvent.class, event -> {
+                    System.out.println("Received plugin message: " + event.getIdentifier() + ": " + event.getMessageString());
+                })*/;
     }
 
     @Override

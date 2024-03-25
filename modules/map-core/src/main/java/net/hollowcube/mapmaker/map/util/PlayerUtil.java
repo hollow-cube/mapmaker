@@ -1,7 +1,12 @@
 package net.hollowcube.mapmaker.map.util;
 
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,5 +32,29 @@ public final class PlayerUtil {
             if (includeSelf)
                 player.sendPacket(new EntityAnimationPacket(player.getEntityId(), EntityAnimationPacket.Animation.SWING_OFF_HAND));
         }
+    }
+
+    private static final BoundingBox PLAYER_STANDING_BB = EntityType.PLAYER.registry().boundingBox();
+
+    public static boolean canFit(@NotNull Player player, @NotNull Point position) {
+        var instance = player.getInstance();
+        var iter = PLAYER_STANDING_BB.getBlocks(position);
+        while (iter.hasNext()) {
+            var pos = iter.next();
+            var blockShape = instance.getBlock(pos, Block.Getter.Condition.TYPE).registry().collisionShape();
+            boolean hit = blockShape.intersectBox(position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), PLAYER_STANDING_BB);
+            if (hit) return false;
+        }
+        return true;
+    }
+
+    public static boolean canMoveTo(@NotNull Player player, @NotNull Point position) {
+        var result = CollisionUtils.handlePhysics(
+                player.getInstance(), player.getChunk(),
+                PLAYER_STANDING_BB, player.getPosition(),
+                Vec.fromPoint(position.sub(player.getPosition())),
+                null, true
+        );
+        return !result.collisionX() && !result.collisionY() && !result.collisionZ();
     }
 }

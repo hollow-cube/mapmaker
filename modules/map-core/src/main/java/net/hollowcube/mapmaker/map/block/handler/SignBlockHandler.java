@@ -28,7 +28,7 @@ import java.util.List;
 import static net.hollowcube.mapmaker.map.block.handler.BlockHandlerHelpers.applyStoredBlockData;
 
 public class SignBlockHandler implements BlockHandler {
-    private record SignData(
+    public record SignData(
             boolean hasGlowingText,
             String color,
             Component[] lines // Always 4 long
@@ -57,10 +57,10 @@ public class SignBlockHandler implements BlockHandler {
         };
     }
 
-    private static final Tag<Boolean> IS_WAXED = Tag.Boolean("is_waxed").defaultValue(false);
-    private static final Tag<SignData> FRONT_TEXT = Tag.Structure("front_text", SignData.SERIALIZER)
+    public static final Tag<Boolean> IS_WAXED = Tag.Boolean("is_waxed").defaultValue(false);
+    public static final Tag<SignData> FRONT_TEXT = Tag.Structure("front_text", SignData.SERIALIZER)
             .defaultValue(new SignData(false, "black", new Component[0]));
-    private static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER)
+    public static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER)
             .defaultValue(new SignData(false, "black", new Component[0]));
 
     private static final Int2ObjectMap<String> DYE_MAP = new Int2ObjectArrayMap<>();
@@ -150,6 +150,11 @@ public class SignBlockHandler implements BlockHandler {
             player.sendPacket(packet);
         }
         return true;
+    }
+
+    @Override
+    public byte getBlockEntityAction() {
+        return 3;
     }
 
     @Override
