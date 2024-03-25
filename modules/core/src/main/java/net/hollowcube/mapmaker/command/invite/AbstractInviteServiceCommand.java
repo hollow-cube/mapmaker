@@ -20,13 +20,15 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
     private final Argument<String> targetArgument;
 
     AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
-                                 @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
+                                 @NotNull PlayerService playerService, @NotNull SessionManager sessionManager,
+                                 @NotNull String playerArgDescription) {
         super(command);
         this.inviteService = inviteService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
 
-        this.targetArgument = CoreArgument.AnyOnlinePlayer("player", sessionManager);
+        this.targetArgument = CoreArgument.AnyOnlinePlayer("player", sessionManager)
+                .description(playerArgDescription);
         this.category = CommandCategories.SOCIAL;
 
         this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);

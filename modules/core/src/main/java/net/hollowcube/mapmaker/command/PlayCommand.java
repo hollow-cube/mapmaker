@@ -8,10 +8,10 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class PlayCommand extends CommandDsl {
     private final Argument<MapData> mapArg;
@@ -23,11 +23,12 @@ public class PlayCommand extends CommandDsl {
         super("play");
         this.bridge = bridge;
 
+        mapArg = CoreArgument.PlayableMap("map", mapService)
+                .description("The ID of the map to play");
+
         category = CommandCategories.SOCIAL;
-        description = "Play a map by ID or search for a map";
-        mapArg = CoreArgument.PlayableMap("map", mapService);
-//                .errorHandler(this::mapArgErrorHandler)
-//                .doc("The ID of the map to play");
+        description = "Teleport to a map, resuming your progress if you have any";
+        examples = List.of("/play 123-456-789");
 
         addSyntax(playerOnly(this::handleDefault));
         addSyntax(playerOnly(this::joinTargetMap), mapArg);
@@ -43,7 +44,4 @@ public class PlayCommand extends CommandDsl {
         bridge.joinMap(player, context.get(mapArg).id(), ServerBridge.JoinMapState.PLAYING);
     }
 
-    private void mapArgErrorHandler(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage(Component.translatable("command.play.invalid_id", Component.text(context.getRaw(mapArg))));
-    }
 }

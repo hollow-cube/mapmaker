@@ -30,9 +30,11 @@ public class WhereCommand extends CommandDsl {
         this.playerService = playerService;
         this.mapService = mapService;
 
-        category = CommandCategories.SOCIAL;
+        this.description = "Shows where someone is on the server";
+        this.category = CommandCategories.SOCIAL;
 
-        targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager);
+        targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
+                .description("The player you want to find");
 
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }

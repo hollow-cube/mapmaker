@@ -14,7 +14,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapLegacyListCommand extends CommandDsl {
-    private final Argument<String> playerArg = Argument.Word("player");
+    private final Argument<String> playerArg = Argument.Word("player")
+            .description("The UUID of the player to list the legacy maps of");
 
     private final MapService mapService;
     private final PermManager permManager;
@@ -27,6 +28,7 @@ public class MapLegacyListCommand extends CommandDsl {
 
     @Override
     public void build(@NotNull CommandBuilder builder) {
+        builder.description("List all of your importable legacy maps");
         builder.executes(playerOnly(this::listLegacyMaps));
 
         var listAnyPerm = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);

@@ -12,7 +12,9 @@ public class InviteCommand extends AbstractInviteServiceCommand {
     @Inject
     public InviteCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("invite", inviteService, playerService, sessionManager);
+        super("invite", inviteService, playerService, sessionManager, "The player to invite");
+
+        description = "Sends an invite to a player for them to build or play with you";
     }
 
     @Override

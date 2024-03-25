@@ -66,6 +66,10 @@ public class CommandDsl {
         }
     }
 
+    public void setDescription(@NotNull String description) {
+        this.description = description;
+    }
+
     public @Nullable CommandCondition getCondition() {
         return condition;
     }

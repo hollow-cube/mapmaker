@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +15,8 @@ public class BuildCommand extends CommandDsl {
     @Inject
     public BuildCommand() {
         super("build");
+
+        description = "Exit testing mode and return to building your map";
 
         setCondition(this::isInTestingMap);
         addSyntax(playerOnly(this::enterBuildMode));

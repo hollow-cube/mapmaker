@@ -4,8 +4,9 @@ import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
@@ -14,10 +15,15 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class TeleportCommand extends CommandDsl {
-    private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true);
+    private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true)
+            .description("The player to teleport to");
 
     public TeleportCommand() {
         super("tp");
+
+        category = CommandCategories.MAP;
+        description = "Teleports you to a player";
+
         setCondition(CommandCondition.or(
                 // Always allowed in editing maps for anyone
                 mapFilter(false, true, false),

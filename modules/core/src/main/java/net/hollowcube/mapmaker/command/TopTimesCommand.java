@@ -30,7 +30,11 @@ public class TopTimesCommand extends CommandDsl {
         this.playerService = playerService;
         this.sessionManager = sessionManager;
 
-        mapArg = CoreArgument.PlayableMap("map", mapService);
+        category = CommandCategories.MAP;
+        description = "Lists the top 10 fastest completion times of a map";
+
+        mapArg = CoreArgument.PlayableMap("map", mapService)
+                .description("The map to check the top times of");
 
         addSyntax(playerOnly(this::showTopTimes));
         addSyntax(playerOnly(this::showTopTimes), mapArg);

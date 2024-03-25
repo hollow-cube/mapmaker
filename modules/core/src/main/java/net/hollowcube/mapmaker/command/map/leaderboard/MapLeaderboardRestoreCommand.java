@@ -19,8 +19,11 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
     public MapLeaderboardRestoreCommand(@NotNull MapService mapService) {
         super("restore");
         this.mapService = mapService;
+        
+        description = "Syncs the leaderboard with internal source of truth. Do not use unless you know this is correct";
 
-        mapArg = CoreArgument.PlayableMap("map", mapService);
+        mapArg = CoreArgument.PlayableMap("map", mapService)
+                .description("The ID of the map to restore");
 
         addSyntax(playerOnly(this::handleRestoreLeaderboard), mapArg);
     }

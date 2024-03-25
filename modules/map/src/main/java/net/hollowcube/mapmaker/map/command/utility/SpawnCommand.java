@@ -16,7 +16,8 @@ public class SpawnCommand extends CommandDsl {
         super("spawn", "tpstart");
         setCondition(mapFilter(true, true, true));
 
-        category = CommandCategories.GLOBAL;
+        this.description = "Teleports you to the spawn location of the world you are in";
+        this.category = CommandCategories.GLOBAL;
 
         addSyntax(playerOnly(this::handleTeleportToSpawn));
     }

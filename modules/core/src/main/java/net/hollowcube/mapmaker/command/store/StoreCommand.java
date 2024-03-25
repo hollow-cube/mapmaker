@@ -5,6 +5,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +20,10 @@ public class StoreCommand extends CommandDsl {
         super("store", "buy");
         this.guiController = guiController;
 
-        setCondition(feature(CoreFeatureFlags.STORE));
+        category = CommandCategories.GLOBAL;
+        description = "Opens our in-game store";
 
+        setCondition(feature(CoreFeatureFlags.STORE));
         addSyntax(playerOnly(this::handleOpenStore));
     }
 

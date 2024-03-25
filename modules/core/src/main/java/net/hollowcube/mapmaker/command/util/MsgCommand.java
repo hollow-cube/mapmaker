@@ -17,8 +17,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class MsgCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<String> messageArg = Argument.GreedyString("message")
@@ -40,7 +38,6 @@ public class MsgCommand extends CommandDsl {
 
         this.description = "Send a direct message to a player";
         this.category = CommandCategories.SOCIAL;
-        this.examples = List.of("/msg SethPRG Hello Seth!");
 
         addSyntax(playerOnly(this::handleSendDirectMessage), targetArg, messageArg);
     }

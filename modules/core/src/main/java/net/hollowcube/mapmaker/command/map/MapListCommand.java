@@ -25,12 +25,13 @@ public class MapListCommand extends CommandDsl {
             @NotNull MapService mapService
     ) {
         super("list");
-        description = "Get info about your map slots";
         this.guiController = guiController;
         this.mapService = mapService;
 
-        this.targetArg = CoreArgument.AnyPlayerId("target", playerService);
-//                .doc("The player to list maps for", "you");
+        description = "Show all the maps published by a player";
+
+        this.targetArg = CoreArgument.AnyPlayerId("target", playerService)
+                .description("The player you want to see the maps of");
 
         addSyntax(playerOnly(this::execute));
         addSyntax(playerOnly(this::execute), targetArg);

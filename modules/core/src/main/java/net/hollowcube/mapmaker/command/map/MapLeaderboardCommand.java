@@ -14,6 +14,8 @@ public class MapLeaderboardCommand extends CommandDsl {
     public MapLeaderboardCommand(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull PermManager permManager) {
         super("lb");
 
+        description = "Remove or restore the times of a map";
+
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
 
         addSubcommand(new MapLeaderboardDeleteCommand(playerService, mapService));

@@ -13,7 +13,9 @@ public class AcceptCommand extends AbstractInviteServiceCommand {
     @Inject
     public AcceptCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("accept", inviteService, playerService, sessionManager);
+        super("accept", inviteService, playerService, sessionManager, "The player to accept the invite from");
+
+        description = "Accept any pending request or invite from a player";
 
         this.addSyntax(playerOnly(this::handleDefaultAccept));
     }

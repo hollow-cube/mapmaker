@@ -18,54 +18,55 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-
-/*
-
-IMPROVEMENTS
-- /help <command with args> but ONLY literal args should be traversed
- */
-
-
-
-    /*
-
-    DESCRIPTION HERE
-    usage: /tp <target|location>
-    arguments:
-     target: The player to teleport to
-     location: The location to teleport to
-    examples:
-     /tp notmattw
-     /tp ~ ~20 ~
-
-    usage: /team <add|remove|blah|blah>
-    subcommands:
-     add: Add a new team
-
-     */
+import java.util.function.Predicate;
 
 public class HelpCommand extends CommandDsl {
     private static final TextColor DARK_GRAY = TextColor.color(0x696969);
     private static final TextColor WHITE_GRAY = TextColor.color(0xF2F2F2);
 
-    private final Argument<ResolvedCommand> commandArg = new ArgumentCommand();
+    private final Argument<ResolvedCommand> commandArg = new ArgumentCommand()
+            .description("The command to show help for");
 
     private final CommandReflection reflect;
+    private final Predicate<Map.Entry<String, CommandNode>> filter;
 
-    public HelpCommand(@NotNull CommandManager commandManager) {
-        super("help", "h");
+    public HelpCommand(@NotNull CommandManager commandManager, @Nullable CommandCategory category) {
+        this("help", new String[]{"h"}, commandManager, category, $ -> true);
+    }
+
+    /**
+     * @param name
+     * @param aliases
+     * @param commandManager
+     * @param category
+     * @param filter         A filter to test top level commands (it will never run on subcommands)
+     */
+    public HelpCommand(
+            @NotNull String name, @NotNull String[] aliases,
+            @NotNull CommandManager commandManager,
+            @Nullable CommandCategory category,
+            @NotNull Predicate<Map.Entry<String, CommandNode>> filter
+    ) {
+        super(name, aliases);
         this.reflect = commandManager.reflect();
+        this.filter = filter;
+
+        this.description = "Shows a list of commands and detailed help for each";
+        this.category = category;
+        this.examples = List.of("/help", "/help tp");
 
         addSyntax(this::handleShowCommandList);
         addSyntax(this::handleShowCommandDetail, commandArg);
     }
 
     private void handleShowCommandList(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        var rootCommands = reflect.commands(sender, false);
+        var rootCommands = new ArrayList<>(reflect.commands(sender, false));
         if (rootCommands.isEmpty()) { // Sanity
             sender.sendMessage(Component.text("No commands available"));
             return;
         }
+        // Remove the commands that don't match the filter
+        rootCommands.removeIf(entry -> !filter.test(entry));
 
         // Compute the width of the biggest command, and group by category
         var byCategory = new TreeMap<CommandCategory, List<Map.Entry<String, CommandNode>>>(Comparator.comparingInt(CommandCategory::order));
@@ -104,7 +105,7 @@ public class HelpCommand extends CommandDsl {
                     var nextCommandName = "/" + nextCommandEntry.getKey();
                     message.append(Component.text(FontUtil.computeOffset(maxCommandLength - FontUtil.measureText(commandName) + 10))
                             .append(Component.text(nextCommandName)
-                                    .hoverEvent(HoverEvent.showText(createDetail(List.of(nextCommandEntry.getKey()), commandEntry.getValue(), sender)))));
+                                    .hoverEvent(HoverEvent.showText(createDetail(List.of(nextCommandEntry.getKey()), nextCommandEntry.getValue(), sender)))));
                 }
 
             }
@@ -256,6 +257,8 @@ public class HelpCommand extends CommandDsl {
             List<Object> path = new ArrayList<>();
             boolean maybePartial = false;
             for (var entry : reflect.commands(sender, true)) {
+                if (!filter.test(entry)) continue;
+
                 var commandName = entry.getKey();
                 if (commandName.equals(word)) {
                     target = entry.getValue();
@@ -304,8 +307,10 @@ public class HelpCommand extends CommandDsl {
 
             // If empty always suggest commands without aliases
             if (raw.isEmpty()) {
-                for (var entry : reflect.commands(sender, false))
+                for (var entry : reflect.commands(sender, false)) {
+                    if (!filter.test(entry)) continue;
                     suggestion.add(entry.getKey());
+                }
                 return;
             }
 
@@ -314,6 +319,8 @@ public class HelpCommand extends CommandDsl {
 
             CommandNode target = null;
             for (var entry : reflect.commands(sender, true)) {
+                if (!filter.test(entry)) continue;
+
                 var commandName = entry.getKey();
                 if (commandName.equals(word)) {
                     target = entry.getValue();

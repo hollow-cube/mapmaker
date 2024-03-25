@@ -13,6 +13,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class MapLeaderboardDeleteCommand extends CommandDsl {
     private final Argument<@NotNull MapData> mapArg;
     private final Argument<@Nullable String> playerArg;
@@ -23,8 +25,13 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
         super("delete");
         this.mapService = mapService;
 
-        mapArg = CoreArgument.PlayableMap("map", mapService);
-        playerArg = CoreArgument.AnyPlayerId("player", playerService);
+        description = "Removes a player's or all completion times on a map";
+        examples = List.of("/map lb delete 123-456-789", "/map lb delete 123-456-789 SethPRG");
+
+        mapArg = CoreArgument.PlayableMap("map", mapService)
+                .description("The ID of the map to delete entries from");
+        playerArg = CoreArgument.AnyPlayerId("player", playerService)
+                .description("The player (optional) to delete the entries of");
 
         addSyntax(playerOnly(this::handleDeleteLeaderboard), mapArg);
         addSyntax(playerOnly(this::handleDeleteLeaderboard), mapArg, playerArg);

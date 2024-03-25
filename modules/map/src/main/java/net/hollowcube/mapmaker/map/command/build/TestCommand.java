@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -18,6 +18,8 @@ public class TestCommand extends CommandDsl {
     @Inject
     public TestCommand() {
         super("test");
+
+        description = "Pause building and enter a playing state to test the gameplay of your map";
 
         setCondition(this::isInBuildOrTestMap);
         addSyntax(playerOnly(this::enterBuildMode));

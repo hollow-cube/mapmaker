@@ -4,8 +4,9 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -22,6 +23,9 @@ public class HubCommand extends CommandDsl {
     public HubCommand(@NotNull ServerBridge bridge) {
         super("hub", "leave", "l", "lobby");
         this.bridge = bridge;
+
+        category = CommandCategories.GLOBAL;
+        description = "Teleports you to the lobby server";
 
         addSyntax(playerOnly(this::returnToHub));
     }

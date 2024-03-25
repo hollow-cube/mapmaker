@@ -23,6 +23,7 @@ public class ListCommand extends CommandDsl {
         this.playerService = playerService;
 
         category = CommandCategories.SOCIAL;
+        description = "Lists all players on the server";
 
         addSyntax(playerOnly(this::handleListPlayers));
     }

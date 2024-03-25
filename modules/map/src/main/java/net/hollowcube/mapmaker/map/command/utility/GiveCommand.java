@@ -12,17 +12,24 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class GiveCommand extends CommandDsl {
-    private final Argument<ItemStack> itemArg = ItemRegistry.Argument("item");
+    private final Argument<ItemStack> itemArg = ItemRegistry.Argument("item")
+            .description("The item to give yourself");
     private final Argument<Integer> amountArg = Argument.Int("count")
-            .clamp(1, 64).defaultValue(1);
+            .clamp(1, 64).defaultValue(1)
+            .description("The amount of the item to give yourself");
 
     public GiveCommand() {
         super("give");
-        setCondition(mapFilter(false, true, false));
 
+        description = "Gives you any item or custom item in the game";
+        examples = List.of("/give mapmaker:checkpoint_plate", "/give minecraft:grass_block");
+
+        setCondition(mapFilter(false, true, false));
         addSyntax(playerOnly(this::handleGiveItem), itemArg);
         addSyntax(playerOnly(this::handleGiveItem), itemArg, amountArg);
     }

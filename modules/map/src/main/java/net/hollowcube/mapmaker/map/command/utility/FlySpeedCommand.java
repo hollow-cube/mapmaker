@@ -13,14 +13,17 @@ import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
 
-    private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f);
+    private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f)
+            .description("How fast to fly (from 0 to 10)");
 //            .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
 
     @Inject
     public FlySpeedCommand() {
         super("flyspeed");
-        setCondition(mapFilter(false, true, false));
 
+        description = "Changes how fast you fly when building";
+
+        setCondition(mapFilter(false, true, false));
         addSyntax(playerOnly(this::handleSetFlySpeed), speedArg);
     }
 

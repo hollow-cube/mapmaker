@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -53,7 +54,7 @@ public class DemoServer {
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
 
         var commandManager = new CommandManagerImpl();
-        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
         MinecraftServer.getConnectionManager().setPlayerProvider(CommandHandlingPlayer.createDefaultProvider(commandManager));
 
         var terraform = Terraform.builder()

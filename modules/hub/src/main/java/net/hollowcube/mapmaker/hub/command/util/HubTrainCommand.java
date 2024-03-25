@@ -7,6 +7,7 @@ import net.hollowcube.command.arg.ArgumentEntity;
 import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.math.Quaternion;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -35,8 +36,11 @@ public class HubTrainCommand extends CommandDsl {
     public HubTrainCommand(@NotNull PermManager permManager, @NotNull Scheduler scheduler) {
         super("train");
         this.scheduler = scheduler;
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
 
+        category = CommandCategories.STAFF;
+        description = "Hits a player with a train, optionally kicking them from the server";
+
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
         addSyntax(playerOnly(this::handleTrainAttack), type, players);
     }
 

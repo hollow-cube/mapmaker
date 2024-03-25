@@ -15,13 +15,16 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class PHeadCommand extends CommandDsl {
-    private final Argument<String> nameArg = Argument.Word("name");
+    private final Argument<String> nameArg = Argument.Word("name")
+            .description("The player to obtain a head of");
 
     @Inject
     public PHeadCommand() {
-        super("phead");
-        setCondition(mapFilter(false, true, false));
+        super("phead", "skull");
 
+        description = "Gives you the head of a player";
+
+        setCondition(mapFilter(false, true, false));
         addSyntax(playerOnly(this::handleGiveHead), nameArg);
     }
 

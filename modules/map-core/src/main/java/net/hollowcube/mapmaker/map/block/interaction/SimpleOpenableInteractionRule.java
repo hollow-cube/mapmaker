@@ -20,4 +20,9 @@ public class SimpleOpenableInteractionRule implements BlockInteractionRule {
         return true;
     }
 
+    @Override
+    public @NotNull SneakState sneakState() {
+        return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
+    }
+
 }

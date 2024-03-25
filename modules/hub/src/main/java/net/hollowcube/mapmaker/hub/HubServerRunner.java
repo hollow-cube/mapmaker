@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.spi.ClassServiceLoader;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
@@ -89,7 +90,7 @@ public class HubServerRunner extends AbstractMapServer {
 
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
-        commandManager.register(new HelpCommand(commandManager));
+        commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
 
         commandManager.register(server.createInstance(HubFlyCommand.class));
         commandManager.register(server.createInstance(HubSpawnCommand.class));

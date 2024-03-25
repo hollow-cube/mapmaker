@@ -11,8 +11,10 @@ import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 public class ClearInventoryCommand extends CommandDsl {
     public ClearInventoryCommand() {
         super("clear", "clearinventory", "clearinv");
-        setCondition(mapFilter(false, true, false));
 
+        description = "Clears all items in your inventory";
+
+        setCondition(mapFilter(false, true, false));
         addSyntax(playerOnly(this::handleClearInventory));
     }
 

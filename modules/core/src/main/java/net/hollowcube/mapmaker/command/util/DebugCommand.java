@@ -7,6 +7,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -37,32 +38,43 @@ import java.util.Date;
 public class DebugCommand extends CommandDsl {
 
     private final CommandCondition adminCondition;
+    private final CommandCondition localCondition;
 
     @Inject
     public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService) {
         super("debug");
 
+        description = "Debugging utilities for map maker";
+        category = CommandCategory.HIDDEN;
+
         adminCondition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
+        localCondition = ($, $$) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW : CommandCondition.DENY;
 
         addSubcommand(new SysCommand(permManager, mapService));
 
         // Mapmaker stuff
-        createPermissionlessSubcommand("rp", this::handleDebugResourcePack);
-        createPermissionlessSubcommand("self", this::handleDebugSelf);
+        createPermissionlessSubcommand("rp", this::handleDebugResourcePack,
+                "Show information about the current resource pack version");
+        createPermissionlessSubcommand("self", this::handleDebugSelf,
+                "Show information about yourself");
 
         // Minestom stuff
-        createPermissionlessSubcommand("commands", this::handleCommandsDebug);
-        createPermissionlessSubcommand("block", this::handleBlockDebug);
-
-//        addSyntax((sender, context) -> sender.sendMessage("Debug command :O"));
+        createPermissionlessSubcommand("commands", this::handleCommandsDebug,
+                "Reload the currently available commands");
+        createPermissionlessSubcommand("block", this::handleBlockDebug,
+                "Show debug information about the block you're looking at");
     }
 
-    public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler) {
-        return createSubcommand(name, handler, null);
+    public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        return createSubcommand(name, handler, null, description);
     }
 
-    public @NotNull CommandDsl createPermissionedSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler) {
-        return createSubcommand(name, handler, adminCondition);
+    public @NotNull CommandDsl createPermissionedSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        return createSubcommand(name, handler, adminCondition, description);
+    }
+
+    public @NotNull CommandDsl createLocalSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        return createSubcommand(name, handler, localCondition, description);
     }
 
     private void handleDebugResourcePack(@NotNull Player player, @NotNull CommandContext context) {
@@ -87,8 +99,9 @@ public class DebugCommand extends CommandDsl {
 
     }
 
-    private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition) {
+    private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition, @NotNull String description) {
         var cmd = new CommandDsl(name);
+        cmd.setDescription(description);
         cmd.setCondition(condition);
         cmd.addSyntax(playerOnly(handler));
         addSubcommand(cmd);
@@ -164,11 +177,13 @@ public class DebugCommand extends CommandDsl {
             super("sys");
             this.mapService = mapService;
 
-            var cond = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
-            setCondition(cond);
+            description = "System utilities for map maker";
 
-            subcommand("heapdump", this::createHeapDump, null);
-            var pcmd = subcommand("cpuprof", this::createProfile, null);
+            setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+            subcommand("heapdump", this::createHeapDump, null,
+                    "Create a heap dump and upload it to r2");
+            var pcmd = subcommand("cpuprof", this::createProfile, null,
+                    "Create a cpu profile and upload it to r2");
             pcmd.addSyntax(this::createProfile, profileTimeArg);
         }
 
@@ -243,9 +258,10 @@ public class DebugCommand extends CommandDsl {
             });
         }
 
-        private @NotNull CommandDsl subcommand(@NotNull String name, @NotNull CommandExecutor handler, @Nullable CommandCondition condition) {
+        private @NotNull CommandDsl subcommand(@NotNull String name, @NotNull CommandExecutor handler, @Nullable CommandCondition condition, @NotNull String description) {
             var cmd = new CommandDsl(name);
             cmd.setCondition(condition);
+            cmd.setDescription(description);
             cmd.addSyntax(handler);
             addSubcommand(cmd);
             return cmd;

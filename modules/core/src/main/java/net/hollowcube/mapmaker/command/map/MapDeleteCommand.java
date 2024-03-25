@@ -13,9 +13,12 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class MapDeleteCommand extends CommandDsl {
     private final Argument<@NotNull MapData> mapArg;
-    private final Argument<String> reasonArg = Argument.GreedyString("reason");
+    private final Argument<String> reasonArg = Argument.GreedyString("reason")
+            .description("The reason for deleting the map");
 
     private final MapService mapService;
 
@@ -23,7 +26,11 @@ public class MapDeleteCommand extends CommandDsl {
         super("delete");
         this.mapService = mapService;
 
-        mapArg = CoreArgument.PlayableMap("map", mapService);
+        description = "Deletes a published map";
+        examples = List.of("/map delete 123-456-789", "/map delete a12345bc-67de-8f91-ghij-2345k6l78912");
+
+        mapArg = CoreArgument.PlayableMap("map", mapService)
+                .description("The ID of the map to delete");
 
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
         addSyntax(playerOnly(this::handleDeleteMap), mapArg, reasonArg);

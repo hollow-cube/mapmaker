@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
@@ -16,15 +16,20 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class SetSpawnCommand extends CommandDsl {
-    private final Argument<Point> coordArgument = Argument.RelativeVec3("position");
-    private final Argument<Float> yawArgument = Argument.Float("yaw");
-    private final Argument<Float> pitchArgument = Argument.Float("pitch");
+    private final Argument<Point> coordArgument = Argument.RelativeVec3("position")
+            .description("The position to set the spawn point to");
+    private final Argument<Float> yawArgument = Argument.Float("yaw")
+            .description("The yaw to set the spawn point to");
+    private final Argument<Float> pitchArgument = Argument.Float("pitch")
+            .description("The pitch to set the spawn point to");
 
     @Inject
     public SetSpawnCommand() {
         super("setspawn");
-        setCondition(mapFilter(false, true, false));
 
+        description = "Sets the spawn point of your map to where you’re standing or to the specified coordinates";
+
+        setCondition(mapFilter(false, true, false));
         addSyntax(playerOnly(this::handleSetSpawnToPlayer));
         addSyntax(playerOnly(this::handleSetSpawnToCoords), coordArgument, yawArgument, pitchArgument);
     }

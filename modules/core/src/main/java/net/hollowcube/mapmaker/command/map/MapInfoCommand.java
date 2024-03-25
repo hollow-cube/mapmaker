@@ -7,12 +7,16 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class MapInfoCommand extends CommandDsl {
 //    private final Argument2<MapData> mapArg;
 
     public MapInfoCommand(@NotNull MapService mapService, @NotNull PermManager permManager) {
         super("info");
-        description = "Get info about a map";
+
+        description = "Shows information about a map";
+        examples = List.of("/map info 123-456-789");
 
 //        mapArg = CoreArgument.AnyMap("map", mapService, permManager);
 //                .errorHandler(((sender, context) -> sender.sendMessage("TODO: error message")));

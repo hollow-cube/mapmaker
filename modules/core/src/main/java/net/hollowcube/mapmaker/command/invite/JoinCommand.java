@@ -12,7 +12,9 @@ public class JoinCommand extends AbstractInviteServiceCommand {
     @Inject
     public JoinCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                        @NotNull SessionManager sessionManager) {
-        super("join", inviteService, playerService, sessionManager);
+        super("join", inviteService, playerService, sessionManager, "The player to join");
+
+        description = "Teleports you to the public map someone is playing, or if they are in a private world, prompts you to request to join them";
     }
 
     @Override

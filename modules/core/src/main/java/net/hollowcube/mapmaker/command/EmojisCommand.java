@@ -18,7 +18,8 @@ public class EmojisCommand extends CommandDsl {
     public EmojisCommand() {
         super("emojis");
 
-        category = CommandCategories.SOCIAL;
+        this.description = "Lists all of our emojis that you can use in chat";
+        this.category = CommandCategories.SOCIAL;
 
         addSyntax(playerOnly(this::showEmojiList));
     }

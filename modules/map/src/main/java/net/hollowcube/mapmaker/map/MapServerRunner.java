@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -154,7 +155,18 @@ public class MapServerRunner extends AbstractMapServer {
 
     // Static so it can be referenced from dev server runner
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
-        commandManager.register(new HelpCommand(commandManager));
+        // Register two help commands. One for terraform commands, and one for regular.
+        // We test terraform commands simply by checking if they start with / (eg // commands)
+        commandManager.register(new HelpCommand(
+                "help", new String[]{"h"},
+                commandManager, CommandCategories.GLOBAL,
+                entry -> !entry.getKey().startsWith("/")
+        ));
+        commandManager.register(new HelpCommand(
+                "/help", new String[]{"/h"},
+                commandManager, CommandCategories.GLOBAL,
+                entry -> entry.getKey().startsWith("/")
+        ));
 
         commandManager.register(server.createInstance(HubCommand.class));
 
@@ -238,7 +250,7 @@ public class MapServerRunner extends AbstractMapServer {
 
             player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
             player.sendMessage("Type: " + world.getClass().getSimpleName());
-        });
+        }, "Shows information about the world you are in");
 
         return cmd;
     }

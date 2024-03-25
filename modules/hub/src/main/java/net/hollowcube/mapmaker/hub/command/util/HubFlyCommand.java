@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.command.util;
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -15,8 +16,11 @@ public class HubFlyCommand extends CommandDsl {
     @Inject
     public HubFlyCommand(@NotNull PermManager permManager) {
         super("fly");
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
 
+        category = CommandCategories.STAFF;
+        description = "Toggles your flight on or off";
+
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
         addSyntax(playerOnly(this::handleToggleFly));
     }
 

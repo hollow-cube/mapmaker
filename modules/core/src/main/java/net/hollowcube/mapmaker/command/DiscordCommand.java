@@ -10,7 +10,8 @@ public class DiscordCommand extends CommandDsl {
     public DiscordCommand() {
         super("discord");
 
-        category = CommandCategories.GLOBAL;
+        this.description = "Gives you an invite link to join our Discord Server";
+        this.category = CommandCategories.GLOBAL;
 
         addSyntax(playerOnly(this::giveDiscordLink));
     }

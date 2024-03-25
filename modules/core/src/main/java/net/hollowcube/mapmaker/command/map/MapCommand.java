@@ -29,18 +29,19 @@ public class MapCommand extends CommandDsl {
     ) {
         super("map");
 
+        description = "A broad command that lets you see or edit properties of a map";
         category = CommandCategories.GLOBAL;
 
         // Default commands
         addSubcommand(this.list = new MapListCommand(guiController, playerService, mapService));
         addSubcommand(this.info = new MapInfoCommand(mapService, permManager));
 
+        addSubcommand(new MapLegacyCommand(mapService, permManager));
+
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
-
-        addSubcommand(new MapLegacyCommand(mapService, permManager));
 
         // Testing
 //        addSubcommand(new MapLookupCommand(mapService));

@@ -15,13 +15,15 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapLegacyImportCommand extends CommandDsl {
-    private final Argument<String> playerArg = Argument.Word("player");
+    private final Argument<String> playerArg = Argument.Word("player")
+            .description("The UUID of the player to list the legacy maps of");
     private final Argument<String> mapIdArg = Argument.Word("id")
             .map((sender, raw) -> {
                 if (raw.length() > 7)
                     return new ParseResult.Failure<>(-1);
                 return new ParseResult.Success<>(raw);
-            });
+            })
+            .description("The legacy map ID of the map to import");
 
     private final MapService mapService;
     private final CommandCondition importAnyPerm;
@@ -35,6 +37,8 @@ public class MapLegacyImportCommand extends CommandDsl {
 
     @Override
     public void build(@NotNull CommandBuilder builder) {
+        builder.description("Import a map from Omega Parkour or Tapple");
+        builder.examples("/map legacy import 12345");
         builder.child(mapIdArg, importSingle -> importSingle
                         .executes(playerOnly(this::importLegacyMap)))
                 .child(playerArg, importOther -> importOther
