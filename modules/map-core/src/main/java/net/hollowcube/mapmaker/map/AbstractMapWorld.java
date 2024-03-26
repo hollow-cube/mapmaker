@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
-import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
+import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.minestom.server.MinecraftServer;

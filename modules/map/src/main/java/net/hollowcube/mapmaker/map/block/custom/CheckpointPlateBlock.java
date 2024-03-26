@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
-import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;

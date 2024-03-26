@@ -43,6 +43,7 @@ import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.DynamicController;

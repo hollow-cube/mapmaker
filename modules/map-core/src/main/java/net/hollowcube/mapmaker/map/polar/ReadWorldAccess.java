@@ -5,6 +5,8 @@ import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerLoader;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.polar.PolarWorldAccess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Chunk;
@@ -82,6 +84,18 @@ public class ReadWorldAccess implements PolarWorldAccess {
         for (int i = 0; i < entityCount; i++) {
             readEntity(chunk, buffer); // Dont wait on this it doesnt matter.
         }
+    }
+
+    protected static final int WORLD_BOTTOM = 16;
+
+    @Override
+    public void loadHeightmaps(@NotNull Chunk rawChunk, int[][] heightmaps) {
+        if (!(rawChunk instanceof ChunkExt chunk)) return;
+
+        chunk.loadHeightmap(Heightmaps.WORLD_SURFACE, heightmaps[Heightmaps.WORLD_SURFACE]);
+        chunk.loadHeightmap(Heightmaps.MOTION_BLOCKING, heightmaps[Heightmaps.MOTION_BLOCKING]);
+        chunk.loadHeightmap(Heightmaps.WORLD_BOTTOM, heightmaps[WORLD_BOTTOM]);
+
     }
 
     @Override

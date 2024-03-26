@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.map.polar;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -45,6 +47,15 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
 
             entity.save(buffer);
         }
+    }
+
+    @Override
+    public void saveHeightmaps(@NotNull Chunk rawChunk, int[][] heightmaps) {
+        if (!(rawChunk instanceof ChunkExt chunk)) return;
+
+        heightmaps[Heightmaps.WORLD_SURFACE] = chunk.saveHeightmap(Heightmaps.WORLD_SURFACE);
+        heightmaps[Heightmaps.MOTION_BLOCKING] = chunk.saveHeightmap(Heightmaps.MOTION_BLOCKING);
+        heightmaps[WORLD_BOTTOM] = chunk.saveHeightmap(Heightmaps.WORLD_BOTTOM);
     }
 
     private @NotNull Set<MapEntity> getEntities(@NotNull Chunk chunk) {

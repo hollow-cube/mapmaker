@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
-import net.hollowcube.mapmaker.command.util.DebugCommand;
+import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;

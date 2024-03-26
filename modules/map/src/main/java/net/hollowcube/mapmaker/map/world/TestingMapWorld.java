@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.coordinate.Pos;

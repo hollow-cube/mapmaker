@@ -15,7 +15,7 @@ abstract class BaseBufferBuilderTest {
     abstract @NotNull BlockBuffer.Builder createBuilder();
 
     @Test
-    void testSingleSection() {
+    void testSingleSection() throws InterruptedException {
         var buffer = createBuilder();
         buffer.set(0, 0, 0, 1);
         var actual = collect(buffer.build());
@@ -25,7 +25,7 @@ abstract class BaseBufferBuilderTest {
     }
 
     @Test
-    void testMultiSection() {
+    void testMultiSection() throws InterruptedException {
         var buffer = createBuilder();
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {

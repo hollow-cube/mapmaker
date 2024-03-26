@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.command.util;
+package net.hollowcube.mapmaker.map.command;
 
 import com.google.inject.Inject;
 import com.sun.management.HotSpotDiagnosticMXBean;
@@ -11,6 +11,8 @@ import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -63,6 +65,8 @@ public class DebugCommand extends CommandDsl {
                 "Reload the currently available commands");
         createPermissionlessSubcommand("block", this::handleBlockDebug,
                 "Show debug information about the block you're looking at");
+        createPermissionlessSubcommand("heightmap", this::handleHeightmapDebug,
+                "Show debug information about the heightmaps at your location");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
@@ -131,6 +135,22 @@ public class DebugCommand extends CommandDsl {
         } else {
             player.sendMessage("Block: " + block);
         }
+    }
+
+    private void handleHeightmapDebug(@NotNull Player player, @NotNull CommandContext context) {
+        var rawChunk = player.getChunk();
+        if (!(rawChunk instanceof ChunkExt chunk)) {
+            player.sendMessage("No heightmaps.");
+            return;
+        }
+
+        int x = player.getPosition().blockX() & 0xF;
+        int z = player.getPosition().blockZ() & 0xF;
+
+        int sh = chunk.getHeight(Heightmaps.WORLD_SURFACE, x, z);
+        int sm = chunk.getHeight(Heightmaps.MOTION_BLOCKING, x, z);
+        int bh = chunk.getHeight(Heightmaps.WORLD_BOTTOM, x, z);
+        player.sendMessage("SH: " + sh + " SM: " + sm + " BH: " + bh);
     }
 
     public static class SysCommand extends CommandDsl {

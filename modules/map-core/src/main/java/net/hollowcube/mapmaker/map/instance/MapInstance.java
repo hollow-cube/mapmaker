@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.instance;
+package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
@@ -43,6 +43,7 @@ public class MapInstance extends InstanceContainer {
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
 //        setChunkSupplier(LightingChunk::new);
+        setChunkSupplier(UnlitChunk::new);
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);

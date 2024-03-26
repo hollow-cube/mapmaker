@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.world;
 
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.instance.MapInstance;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.instance.MapInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

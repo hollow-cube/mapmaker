@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.block.custom;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.command.util.DebugCommand;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.util.dfu.DFU;

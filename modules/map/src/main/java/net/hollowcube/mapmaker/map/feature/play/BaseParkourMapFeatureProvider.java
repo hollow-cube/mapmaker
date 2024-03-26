@@ -14,6 +14,8 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -31,6 +33,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
@@ -48,6 +51,9 @@ import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpoi
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class BaseParkourMapFeatureProvider implements FeatureProvider {
+    private static final int RESET_HEIGHT_OFFSET = 5;
+    private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
+
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
     public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
@@ -99,6 +105,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 .buildTask(() -> updateViewership(world))
                 .repeat(TaskSchedule.tick(5))
                 .schedule();
+
+        computeDefaultResetHeight(world.instance());
 
         return true;
     }
@@ -296,7 +304,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var resetHeight = saveState.playState().resetHeight().orElse(-64);
+            var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
                 return;
@@ -488,6 +496,30 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             if (p instanceof PlayerVisibilityExtension ve)
                 ve.updateVisibility();
         }
+    }
+
+    private void computeDefaultResetHeight(@NotNull Instance instance) {
+        int worldMinHeight = instance.getDimensionType().getMinY();
+        int minBlockY = instance.getDimensionType().getMaxY();
+
+        int worldRadius = (int) (instance.getWorldBorder().getDiameter() / 2) + 16;
+        for (int x = -worldRadius; x < worldRadius; x += 16) {
+            for (int z = -worldRadius; z < worldRadius; z += 16) {
+                var rawChunk = instance.getChunkAt(x, z);
+                if (!(rawChunk instanceof ChunkExt chunk)) continue;
+
+                for (int localX = 0; localX < 16; localX++) {
+                    for (int localZ = 0; localZ < 16; localZ++) {
+                        int lowestBlockY = chunk.getHeight(Heightmaps.WORLD_BOTTOM, localX, localZ);
+                        if (lowestBlockY >= worldMinHeight) minBlockY = Math.min(minBlockY, lowestBlockY);
+                    }
+                }
+            }
+        }
+        
+        // Sanity check in case there are literally no blocks in the world.
+        if (minBlockY == instance.getDimensionType().getMaxY()) minBlockY = worldMinHeight;
+        instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);
     }
 
     private static class PlayerVisibilityPredicate implements Predicate<Entity>, Function<Player, PlayerVisibilityExtension.Visibility> {

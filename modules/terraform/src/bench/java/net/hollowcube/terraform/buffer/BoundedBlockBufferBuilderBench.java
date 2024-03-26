@@ -23,7 +23,7 @@ public class BoundedBlockBufferBuilderBench {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 1, warmups = 0)
     @Warmup(iterations = 3)
-    public void bufferSmallRange(ExecutionPlan plan) {
+    public void bufferSmallRange(ExecutionPlan plan) throws InterruptedException {
         for (int x = 0; x < 55; x++) {
             for (int y = 0; y < 55; y++) {
                 for (int z = 0; z < 55; z++) {

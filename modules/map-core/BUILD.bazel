@@ -20,6 +20,8 @@ java_library(
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_nbt",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
 )

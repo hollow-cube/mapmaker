@@ -2,11 +2,11 @@ package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.instance.MapInstance;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
+import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.DebugStickItem;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
