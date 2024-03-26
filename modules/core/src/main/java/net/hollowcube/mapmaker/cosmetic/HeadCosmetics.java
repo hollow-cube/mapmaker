@@ -28,6 +28,6 @@ public final class HeadCosmetics {
 
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
-        return new Cosmetic.Builder(CosmeticType.HEAD, id);
+        return new Cosmetic.Builder(CosmeticType.HAT, id);
     }
 }

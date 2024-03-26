@@ -1,13 +1,13 @@
 {
   "trades": [
     {
-      "result": "head/hard_hat",
+      "result": "hat/hard_hat",
       "inputs": {
         "cubits": 50
       },
     },
     {
-      "result": "head/crown",
+      "result": "hat/crown",
       "inputs": {
         "coins": 60000,
         "nightmare_fuel": 2

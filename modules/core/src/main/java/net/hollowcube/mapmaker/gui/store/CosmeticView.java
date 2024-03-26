@@ -1,13 +1,7 @@
 package net.hollowcube.mapmaker.gui.store;
 
-import net.hollowcube.canvas.Element;
-import net.hollowcube.canvas.Pagination;
-import net.hollowcube.canvas.Switch;
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.ContextObject;
-import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.annotation.Signal;
+import net.hollowcube.canvas.*;
+import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -19,6 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class CosmeticView extends View {
     private static final PlayerSetting<Boolean> SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
@@ -26,16 +21,34 @@ public class CosmeticView extends View {
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
 
+    private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
+
     private @Outlet("show_locked_switch") Switch showLockedSwitch;
     private @Outlet("cosmetic_list") Pagination pagination;
 
     private final PlayerDataV2 playerData;
+    private CosmeticType selectedTab = CosmeticType.HAT;
 
     public CosmeticView(@NotNull Context context) {
         super(context);
         this.playerData = PlayerDataV2.fromPlayer(player);
 
         showLockedSwitch.setOption(playerData.getSetting(SHOW_LOCKED) ? 1 : 0);
+
+        tabSwitches[selectedTab.ordinal()].setOption(1);
+        for (var cosmeticType : CosmeticType.values()) {
+            var name = cosmeticType.name().toLowerCase(Locale.ROOT);
+            addActionHandler("tab_" + name + "_off", Label.ActionHandler.lmb($ -> selectTab(cosmeticType)));
+            addActionHandler("tab_" + name + "_on", Label.ActionHandler.lmb($ -> selectTab(cosmeticType)));
+        }
+    }
+
+    public void selectTab(@NotNull CosmeticType cosmeticType) {
+        if (selectedTab == cosmeticType) return;
+        tabSwitches[selectedTab.ordinal()].setOption(0);
+        tabSwitches[cosmeticType.ordinal()].setOption(1);
+        selectedTab = cosmeticType;
+        pagination.reset();
     }
 
     @Action("show_locked_off")
@@ -59,7 +72,7 @@ public class CosmeticView extends View {
         var unlockedCosmetics = playerService.getUnlockedCosmetics(playerData.id());
 
         boolean showLocked = playerData.getSetting(SHOW_LOCKED);
-        Cosmetic.values(CosmeticType.HEAD).stream()
+        Cosmetic.values(selectedTab).stream()
                 .sorted(Cosmetic.comparingRarity())
                 .forEach(cosmetic -> {
                     var isLocked = !unlockedCosmetics.contains(cosmetic.path());
