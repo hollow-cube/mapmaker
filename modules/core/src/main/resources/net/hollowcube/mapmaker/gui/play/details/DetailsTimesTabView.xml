@@ -6,12 +6,12 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
-        <button id="information" translationKey="gui.map_details.map_times_tab.information"/>
+        <button id="information" translationKey="gui.map_details.top_times_tab.information"/>
         <text id="map_author" width="5" translationKey="gui.map_details.creator_profile"
               font="map_details_author" centered="true"/>
-        <button id="toggle_top_ten_btn" translationKey="gui.map_details.map_times_tab.toggle_top_ten"
+        <button id="toggle_top_ten_btn" translationKey="gui.map_details.top_times_tab.other_top_times"
                 sprite="play_maps/details/tab_times/toggle_top_ten"/>
-        <button translationKey="gui.map_details.map_times_tab.toggle_first"
+        <button translationKey="gui.map_details.top_times_tab.toggle_first_completions"
                 sprite="play_maps/details/tab_times/toggle_first"/>
     </box>
 
@@ -24,7 +24,7 @@
     <!-- Viewer time -->
     <box width="9" height="1" align="ltr">
         <spacer width="2"/>
-        <text id="viewer_entry" width="5" translationKey="todo"
+        <text id="viewer_entry" width="5" translationKey="gui.map_details.top_times_tab.personal_best"
               sprite="minecraft:player_head@1" spritePos="0"
               font="line_4" centered="true"/>
     </box>

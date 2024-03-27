@@ -90,6 +90,7 @@ public class DetailsTimesTabView extends View {
 
         viewerEntry.setItemSprite(getPlayerHead2d(playerId, MODEL_8X));
         viewerEntry.setText(FontUtil.computeOffset(2) + (entry == null ? MISSING_TIME : NumberUtil.formatMapPlaytime(entry.score(), true)));
+        viewerEntry.setArgs(Component.text((entry == null ? MISSING_TIME : NumberUtil.formatMapPlaytime(entry.score(), true))));
     }
 
     static final String MISSING_TIME = "--:--:---";

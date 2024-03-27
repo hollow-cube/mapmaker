@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,9 +35,11 @@ public class TimesTopThreeView extends View {
                 var entry = entries.get(index);
                 timeTexts[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(entry.player(), DetailsTimesTabView.MODEL_8X));
                 timeTexts[i].setText(offset + NumberUtil.formatMapPlaytime(entry.score(), true));
+                timeTexts[i].setArgs(Component.text(player().getUsername()), Component.text(NumberUtil.formatMapPlaytime(entry.score(), true)));
             } else {
                 timeTexts[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(null, DetailsTimesTabView.MODEL_8X));
                 timeTexts[i].setText(offset + DetailsTimesTabView.MISSING_TIME);
+                timeTexts[i].setArgs(Component.text("N/A"), Component.text("--:--:--"));
             }
         }
     }

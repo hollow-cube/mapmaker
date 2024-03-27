@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,9 +31,11 @@ public class TimesTopTenView extends View {
                 var entry = entries.get(index);
                 labels[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(entry.player(), model));
                 labels[i].setText(NumberUtil.formatMapPlaytime(entry.score(), true));
+                labels[i].setArgs(Component.text(player().getUsername()), Component.text(NumberUtil.formatMapPlaytime(entry.score(), true)));
             } else {
                 labels[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(null, model));
                 labels[i].setText(DetailsTimesTabView.MISSING_TIME);
+                labels[i].setArgs(Component.text("N/A"), Component.text("--:--:--"));
             }
         }
     }
