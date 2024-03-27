@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.edit.item;
 
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.gui.buildermenu.BuilderMenuView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -30,7 +32,11 @@ public class BuilderMenuItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        click.player().sendMessage("this will open the builder menu once we have it :)");
+        var player = click.player();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
+
+        world.server().showView(player, BuilderMenuView::new);
     }
 
 }

@@ -87,6 +87,13 @@
       },
       "model": "minecraft:item/flipper",
       "axiom:hide": false
+    },
+    {
+      "predicate": {
+        "custom_model_data": 13
+      },
+      "model": "minecraft:item/shm",
+      "axiom:hide": false
     }
   ]
 }

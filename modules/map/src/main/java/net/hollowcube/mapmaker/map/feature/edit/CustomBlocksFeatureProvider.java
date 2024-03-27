@@ -8,6 +8,8 @@ import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.edit.item.BuilderMenuItem;
+import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
+import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +40,8 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
 
             //todo this shouldnt be registered from here
             world.itemRegistry().register(BuilderMenuItem.INSTANCE);
+            world.itemRegistry().register(EnterTestModeItem.INSTANCE);
+            world.itemRegistry().register(SpawnPointItem.INSTANCE);
             return true;
         }
 

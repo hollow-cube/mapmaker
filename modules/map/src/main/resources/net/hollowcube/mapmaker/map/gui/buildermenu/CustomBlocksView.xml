@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="5" height="2" align="ttb">
+    <box width="5" align="ltr">
+        <!--        <button id="give_finish_flag" translationKey="gui.builder_menu.custom_blocks.finish_flag"-->
+        <!--                sprite="builder_menu/custom_blocks/finish_flag"/>-->
+        <button id="give_finish_plate" translationKey="gui.builder_menu.custom_blocks.finish_plate"
+                sprite="builder_menu/custom_blocks/finish_plate"/>
+        <button id="give_checkpoint_plate" translationKey="gui.builder_menu.custom_blocks.checkpoint_plate"
+                sprite="builder_menu/custom_blocks/checkpoint_plate"/>
+        <button id="give_status_plate" translationKey="gui.builder_menu.custom_blocks.status_plate"
+                sprite="builder_menu/custom_blocks/status_plate"/>
+    </box>
+    <box width="5" align="ltr"/>
+</component>

@@ -1,0 +1,65 @@
+package net.hollowcube.mapmaker.map.gui.buildermenu;
+
+import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
+import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.OutletGroup;
+import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.terraform.util.PlayerUtil;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class BuilderMenuView extends View {
+    private static final String[] TAB_NAMES = new String[]{"Custom Blocks", "Build Tools", "Custom Items"};
+
+    private @Outlet("tab_name") Text tabNameText;
+    private @Outlet("tab_content") Switch tabContentSwitch;
+    private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
+
+    private int selectedTab = -1;
+
+    public BuilderMenuView(@NotNull Context context) {
+        super(context);
+
+        selectTab(0);
+    }
+
+    private void selectTab(int ordinal) {
+        if (selectedTab == ordinal) return;
+        if (selectedTab >= 0) tabSwitches[selectedTab].setOption(0);
+
+        tabNameText.setText(TAB_NAMES[ordinal]);
+        tabContentSwitch.setOption(ordinal);
+        tabSwitches[ordinal].setOption(1);
+        selectedTab = ordinal;
+    }
+
+    @Action("tab_custom_blocks_off")
+    private void selectCustomBlocks() {
+        selectTab(0);
+    }
+
+    @Action("tab_build_tools_off")
+    private void selectBuildTools() {
+        selectTab(1);
+    }
+
+    @Action("tab_custom_items_off")
+    private void selectCustomItems() {
+        selectTab(2);
+    }
+
+    static void giveCustomItem(@NotNull Player player, @NotNull ItemHandler item) {
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.canEdit(player)) return;
+
+        var itemStack = world.itemRegistry().getItemStack(item.id(), null);
+        PlayerUtil.smartAddItemStack(player, itemStack);
+        player.closeInventory();
+    }
+
+}

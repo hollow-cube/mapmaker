@@ -52,13 +52,7 @@ public class Heightmaps {
     }
 
     private boolean isMotionBlocking(@NotNull Block block) {
-        // The air check is just a fast exit for the most common case
-        if (block.isAir()) return false;
-        return hasCollisionShape(block) || block.isLiquid() || "true".equals(block.getProperty("waterlogged"));
-    }
-
-    private boolean hasCollisionShape(@NotNull Block block) {
-        var collisionShape = block.registry().collisionShape();
-        return !(collisionShape.relativeStart().isZero() && collisionShape.relativeEnd().isZero());
+        // This is from the client. nice one mojang!
+        return block.id() != Block.COBWEB.id() && block.id() != Block.BAMBOO_SAPLING.id() && block.isSolid();
     }
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.gui.buildermenu ?>
+<component width="9" height="10" align="ttb" sprite="builder_menu/container">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.builder_menu.information"/>
+        <text id="tab_name" width="5" translationKey="gui.builder_menu.tab"
+              font="map_details_author" centered="true"/>
+        <label translationKey="gui.builder_menu.idk"/>
+    </box>
+
+    <box width="9" height="4" align="ttb">
+        <spacer/>
+        <box width="9" height="2" align="ltr">
+            <spacer width="2"/>
+            <switch id="tab_content" width="5" height="2">
+                <CustomBlocksView id="custom_blocks"/>
+                <BuildToolsView id="build_tools"/>
+                <CustomItemsView id="custom_items"/>
+            </switch>
+        </box>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <spacer width="2"/>
+        <switch id="tab_custom_blocks_switch" width="1" height="1">
+            <button id="tab_custom_blocks_off" width="1" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
+                    backgroundSprite="builder_menu/custom_blocks/icon_unselected_bg"
+                    sprite="builder_menu/custom_blocks/icon"/>
+            <button id="tab_custom_blocks_on" width="1" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
+                    sprite="builder_menu/custom_blocks/icon_selected"/>
+        </switch>
+        <spacer/>
+        <switch id="tab_build_tools_switch" width="1" height="1">
+            <button id="tab_build_tools_off" width="1" height="1" translationKey="gui.builder_menu.tab_build_tools"
+                    backgroundSprite="builder_menu/build_tools/icon_unselected_bg"
+                    sprite="builder_menu/build_tools/icon"/>
+            <button id="tab_build_tools_on" width="1" height="1" translationKey="gui.builder_menu.tab_build_tools"
+                    sprite="builder_menu/build_tools/icon_selected"/>
+        </switch>
+        <spacer/>
+        <switch id="tab_custom_items_switch" width="1" height="1">
+            <button id="tab_custom_items_off" width="1" height="1" translationKey="gui.builder_menu.tab_custom_items"
+                    backgroundSprite="builder_menu/custom_items/icon_unselected_bg"
+                    sprite="builder_menu/custom_items/icon"/>
+            <button id="tab_custom_items_on" width="1" height="1" translationKey="gui.builder_menu.tab_custom_items"
+                    sprite="builder_menu/custom_items/icon_selected"/>
+        </switch>
+    </box>
+</component>
