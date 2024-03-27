@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +23,7 @@ public class CosmeticView extends View {
     private @ContextObject Player player;
 
     private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
+    private @Outlet("tab_name_text") Text tabNameText;
 
     private @Outlet("show_locked_switch") Switch showLockedSwitch;
     private @Outlet("cosmetic_list") Pagination pagination;
@@ -36,6 +38,8 @@ public class CosmeticView extends View {
         showLockedSwitch.setOption(playerData.getSetting(SHOW_LOCKED) ? 1 : 0);
 
         tabSwitches[selectedTab.ordinal()].setOption(1);
+        tabNameText.setText("Headwear");
+        tabNameText.setArgs(Component.text("Headwear"));
         for (var cosmeticType : CosmeticType.values()) {
             var name = cosmeticType.name().toLowerCase(Locale.ROOT);
             addActionHandler("tab_" + name + "_off", Label.ActionHandler.lmb($ -> selectTab(cosmeticType)));
@@ -45,6 +49,18 @@ public class CosmeticView extends View {
 
     public void selectTab(@NotNull CosmeticType cosmeticType) {
         if (selectedTab == cosmeticType) return;
+        String displayName = switch (cosmeticType) {
+            case HAT -> "Headwear";
+            case BACKWEAR -> "Backwear";
+            case ACCESSORY -> "Accessories";
+            case PET -> "Companions";
+            case EMOTE -> "Emotes";
+            case PARTICLE -> "Particles";
+            case VICTORY_EFFECT -> "Victory Effects";
+        };
+
+        tabNameText.setText(displayName);
+        tabNameText.setArgs(Component.text(displayName));
         tabSwitches[selectedTab.ordinal()].setOption(0);
         tabSwitches[cosmeticType.ordinal()].setOption(1);
         selectedTab = cosmeticType;
