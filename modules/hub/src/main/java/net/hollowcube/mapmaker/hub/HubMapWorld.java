@@ -149,9 +149,7 @@ public class HubMapWorld extends AbstractMapWorld {
             inventory.setItemStack(2, itemRegistry().getItemStack(OrgMapsItem.ID, null));
         }
 
-        if (CoreFeatureFlags.COSMETICS.test(player)) {
-            inventory.setItemStack(8, itemRegistry().getItemStack(OpenCosmeticsMenuItem.ID, null));
-        }
+        inventory.setItemStack(8, itemRegistry().getItemStack(OpenCosmeticsMenuItem.ID, null));
     }
 
     @Override

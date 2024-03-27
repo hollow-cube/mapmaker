@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.backpack;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.MinecraftServer;
@@ -62,8 +61,6 @@ public class PlayerBackpack {
      * Sends the backpack to the player
      */
     public void refresh() {
-        if (!CoreFeatureFlags.BACKPACK.test(player)) return;
-
         var declareRecipesPacket = new DeclareRecipesPacket(Arrays.stream(BackpackItem.values())
                 .map(cm -> cm.getRecipePlaceholder(getQuantity(cm))).toList());
         player.sendPacket(declareRecipesPacket);
@@ -82,14 +79,11 @@ public class PlayerBackpack {
     }
 
     private static void handleRecipeBookClick(@NotNull ClientCraftRecipeRequest packet, @NotNull Player player) {
-        if (!CoreFeatureFlags.BACKPACK.test(player)) return;
-
         // Remove the ghost recipe
         player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }
 
     private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
-        if (!CoreFeatureFlags.BACKPACK.test(player)) return;
         if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
 
         var playerData = PlayerDataV2.fromPlayer(player);

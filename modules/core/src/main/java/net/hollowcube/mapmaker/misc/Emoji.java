@@ -60,7 +60,8 @@ public record Emoji(@NotNull String name, char raw, @NotNull Component component
                         "smile", "icon/emoji/smile",
                         "smirk", "icon/emoji/smirk",
                         "clown", "icon/emoji/clown",
-                        "poop", "icon/emoji/poop"
+                        "poop", "icon/emoji/poop",
+                        "seal", "icon/emoji/seal"
                 ),
                 "misc", Map.of(
                         "crown", "icon/emoji/crown",
@@ -70,7 +71,7 @@ public record Emoji(@NotNull String name, char raw, @NotNull Component component
         );
         var categoryNames = Map.of("symbols", "ѕʏᴍʙᴏʟѕ", "faces", "ꜰᴀᴄᴇѕ", "misc", "ᴍɪѕᴄ");
 
-        EMOJI_MAP = categorySpriteMap.values().stream()
+        var entries = new HashMap<>(categorySpriteMap.values().stream()
                 .flatMap(map -> map.entrySet().stream())
                 .map(entry -> {
                     var name = entry.getKey().toLowerCase(Locale.ROOT);
@@ -79,7 +80,11 @@ public record Emoji(@NotNull String name, char raw, @NotNull Component component
                             .hoverEvent(HoverEvent.showText(Component.text(":" + name + ":", NamedTextColor.WHITE)));
                     return new Emoji(name, sprite.fontChar(), component);
                 })
-                .collect(Collectors.toUnmodifiableMap(Emoji::name, Function.identity()));
+                .collect(Collectors.toUnmodifiableMap(Emoji::name, Function.identity())));
+        var itmgFontChar = BadSprite.SPRITE_MAP.get("icon/emoji/seal").fontChar();
+        entries.put("itmg", new Emoji("itmg", itmgFontChar, Component.text(itmgFontChar, FontUtil.NO_SHADOW)
+                .hoverEvent(HoverEvent.showText(Component.text(":itmg:", NamedTextColor.WHITE)))));
+        EMOJI_MAP = entries;
 
         EMOJIS_BY_CATEGORY = categorySpriteMap.entrySet().stream()
                 .map(entry -> {
