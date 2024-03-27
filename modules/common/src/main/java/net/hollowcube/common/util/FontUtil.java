@@ -84,6 +84,7 @@ public final class FontUtil {
         result.put("line_3", defaultGlyphs);
         result.put("line_3_1", defaultGlyphs);
         result.put("line_4", defaultGlyphs);
+        result.put("line_4_1", defaultGlyphs);
 
         var currencyGlyphs = new Int2IntArrayMap();
         currencyGlyphs.putAll(Map.<Integer, Integer>ofEntries(

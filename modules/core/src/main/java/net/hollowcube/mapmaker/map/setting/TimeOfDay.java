@@ -4,9 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 public enum TimeOfDay {
     NOON,
-    SUNRISE,
     SUNSET,
-    NIGHT;
+    NIGHT,
+    SUNRISE;
 
     private static final TimeOfDay[] VALUES = values();
 
