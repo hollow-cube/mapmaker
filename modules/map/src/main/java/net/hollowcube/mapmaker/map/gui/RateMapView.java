@@ -1,16 +1,19 @@
 package net.hollowcube.mapmaker.map.gui;
 
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.feature.play.MapRatingFeatureProvider;
+import net.hollowcube.mapmaker.gui.play.ReportMapView;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapRating;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.feature.play.MapRatingFeatureProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -25,15 +28,18 @@ public class RateMapView extends View {
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
+    private @Outlet("map_id_text") Text mapIdText;
     private @Outlet("like_switch") Switch likeSwitch;
     private @Outlet("dislike_switch") Switch dislikeSwitch;
 
-    private final String mapId;
+    private final MapData map;
     private MapRating rating = new MapRating();
 
-    public RateMapView(@NotNull Context context, @NotNull String mapId) {
+    public RateMapView(@NotNull Context context, @NotNull MapData map) {
         super(context);
-        this.mapId = mapId;
+        this.map = map;
+
+        mapIdText.setText(MapData.formatPublishedId(map.publishedId()));
 
         // If the player has an existing rating, load it.
         async(() -> {
@@ -41,6 +47,11 @@ public class RateMapView extends View {
             if (lastRating == null) return;
             updateLocalRating(lastRating);
         });
+    }
+
+    @Action("report_map")
+    public void handleReportMap(@NotNull Player player) {
+        pushView(c -> new ReportMapView(c, map));
     }
 
     @Action("like_off")
@@ -73,7 +84,7 @@ public class RateMapView extends View {
     private void updateRemoteRating(@NotNull MapRating rating) {
         try {
             var playerData = MapPlayerData.fromPlayer(player);
-            mapService.setMapRating(mapId, playerData.id(), rating);
+            mapService.setMapRating(map.id(), playerData.id(), rating);
 
             // Update the cached rating on the player.
             player.setTag(MapRatingFeatureProvider.LAST_RATING_TAG, CompletableFuture.completedFuture(rating));

@@ -2,18 +2,14 @@ package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
+import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
+import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.util.FireworkUtil;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.MapRating;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -127,7 +123,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                 if (MapRatingFeatureProvider.isMapRatable(world)) {
                     var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
                     if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
-                        world.server().showView(player, c -> new RateMapView(c, world.map().id()));
+                        world.server().showView(player, c -> new RateMapView(c, world.map()));
                     }
                 }
             }

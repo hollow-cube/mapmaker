@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
-import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -36,7 +36,7 @@ public class RateMapItem extends ItemHandler {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return; // Sanity
 
-        world.server().showView(player, c -> new RateMapView(c, world.map().id()));
+        world.server().showView(player, c -> new RateMapView(c, world.map()));
     }
 
 }
