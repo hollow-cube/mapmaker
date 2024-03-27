@@ -6,7 +6,7 @@
         <box width="9" align="ltr">
             <BackButton/>
             <label translationKey="gui.report_map.information"/>
-            <text id="map_id_text" width="5" height="1" translationKey="gui.report_maps.map_id"
+            <text id="map_id_text" width="5" height="1" translationKey="gui.report_map.map_id"
                   font="play_maps_page" centered="true"/>
             <button width="2" id="add_comment" translationKey="gui.report_map.add_comment"/>
         </box>
@@ -41,11 +41,11 @@
                 <button id="reason_spam_on" translationKey="gui.report_map.category.spam.on"
                         sprite="report_map/spam_icon" backgroundSprite="report_map/spam_selected_bg"/>
             </switch>
-            <switch id="switch_dcma">
-                <button id="reason_dcma_off" translationKey="gui.report_map.category.dcma.off"
-                        sprite="report_map/dcma_icon" backgroundSprite="report_map/dcma_unselected_bg"/>
-                <button id="reason_dcma_on" translationKey="gui.report_map.category.dcma.on"
-                        sprite="report_map/dcma_icon" backgroundSprite="report_map/dcma_selected_bg"/>
+            <switch id="switch_dmca">
+                <button id="reason_dmca_off" translationKey="gui.report_map.category.dmca.off"
+                        sprite="report_map/dmca_icon" backgroundSprite="report_map/dmca_unselected_bg"/>
+                <button id="reason_dmca_on" translationKey="gui.report_map.category.dmca.on"
+                        sprite="report_map/dmca_icon" backgroundSprite="report_map/dmca_selected_bg"/>
             </switch>
         </box>
 

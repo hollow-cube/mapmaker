@@ -14,7 +14,7 @@ public class RateMapItem extends ItemHandler {
     public static final String ID = "mapmaker:rate_map";
     public static final RateMapItem INSTANCE = new RateMapItem();
 
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("play_maps/search/filter/best/icon"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/rate_map"));
 
     private RateMapItem() {
         super(ID, RIGHT_CLICK_ANY);

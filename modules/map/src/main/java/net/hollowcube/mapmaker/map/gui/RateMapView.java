@@ -39,7 +39,10 @@ public class RateMapView extends View {
         super(context);
         this.map = map;
 
-        mapIdText.setText(MapData.formatPublishedId(map.publishedId()));
+        String mapId = MapData.formatPublishedId(map.publishedId());
+
+        mapIdText.setText(mapId);
+        mapIdText.setArgs(Component.text(mapId));
 
         // If the player has an existing rating, load it.
         async(() -> {

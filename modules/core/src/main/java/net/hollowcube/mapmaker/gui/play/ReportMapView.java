@@ -44,7 +44,10 @@ public class ReportMapView extends View {
         super(context);
         this.mapId = map.id();
 
-        mapIdText.setText(MapData.formatPublishedId(map.publishedId()));
+        String mapId = MapData.formatPublishedId(map.publishedId());
+
+        mapIdText.setText(mapId);
+        mapIdText.setArgs(Component.text(mapId));
 
         initActions();
         updateCommentText("");
