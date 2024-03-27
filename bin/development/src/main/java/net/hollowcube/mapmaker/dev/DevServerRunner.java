@@ -58,6 +58,42 @@ public class DevServerRunner extends AbstractMapServer {
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect))
+//                .addListener(PlayerStartSneakingEvent.class, event -> {
+//                    event.getPlayer().scheduler().submitTask(new Supplier<TaskSchedule>() {
+//                        private final Component[] frames;
+//                        private int frame = 0;
+//
+//                        {
+//                            frames = new Component[16 + 8];
+//                            for (int i = 0; i < 16; i++) {
+//                                frames[i] = Component.text(BadSprite.SPRITE_MAP.get("map_completion/anim/frame" + i).fontChar(), FontUtil.NO_SHADOW);
+//                            }
+//                            for (int i = 0; i <= 7; i++) {
+//                                frames[16 + i] = Component.text(BadSprite.SPRITE_MAP.get("map_completion/anim/frame" + (7 - i)).fontChar(), FontUtil.NO_SHADOW);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public TaskSchedule get() {
+//
+//                            if (frame == frames.length) {
+//                                event.getPlayer().clearTitle();
+//                                return TaskSchedule.stop();
+//                            }
+//
+//                            event.getPlayer().showTitle(Title.title(
+//                                    frames[frame++], Component.empty(),
+//                                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO)
+//                            ));
+//
+//                            if (frame == 16) {
+//                                return TaskSchedule.tick(10);
+//                            }
+//
+//                            return TaskSchedule.tick(2);
+//                        }
+//                    });
+//                })
                 /*.addListener(PlayerPluginMessageEvent.class, event -> {
                     System.out.println("Received plugin message: " + event.getIdentifier() + ": " + event.getMessageString());
                 })*/;

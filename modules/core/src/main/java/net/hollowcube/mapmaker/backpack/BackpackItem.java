@@ -101,7 +101,10 @@ public enum BackpackItem {
     }
 
     public @NotNull Component displayName() {
-        return Component.translatable("item.mapmaker." + name().toLowerCase() + ".name");
+        var translationKey = "item.mapmaker." + name().toLowerCase() + ".name";
+        return Objects.requireNonNullElse(
+                LanguageProviderV2.translate(Component.translatable(translationKey)),
+                Component.text("item.mapmaker." + name().toLowerCase() + ".name"));
     }
 
     public @NotNull Component iconComponent() {
@@ -115,7 +118,6 @@ public enum BackpackItem {
         var translationKeyBase = "item.mapmaker." + name().toLowerCase();
         return ItemStack.builder(Material.DIAMOND)
                 .meta(meta -> meta.customModelData(sprite.cmd() + amount))
-                .displayName(Component.text(ordinal() + " -> " + recipeBookId))
                 .displayName(displayName())
                 .lore(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()))
                 .build();
