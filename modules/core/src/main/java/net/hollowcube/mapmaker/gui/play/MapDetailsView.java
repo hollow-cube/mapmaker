@@ -329,7 +329,7 @@ public class MapDetailsView extends View {
 
     public void handleReportMap(@NotNull Player player) {
         if (!CoreFeatureFlags.MAP_REPORTS.test(player)) return;
-        pushView(c -> new ReportMapView(c, map.id()));
+        pushView(c -> new ReportMapView(c, map));
     }
 
     @Action(value = "play_map", async = true)

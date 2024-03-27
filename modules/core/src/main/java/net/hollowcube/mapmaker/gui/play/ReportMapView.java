@@ -2,10 +2,12 @@ package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapReportRequest;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.ReportCategory;
@@ -25,6 +27,7 @@ public class ReportMapView extends View {
 
     private @ContextObject MapService mapService;
 
+    private @Outlet("map_id_text") Text mapIdText;
     private @OutletGroup("switch_.+") Switch[] categorySwitches;
     private @OutletGroup("reason_.+_off") Label[] reasonOffButtons;
     private @OutletGroup("reason_.+_on") Label[] reasonOnButtons;
@@ -37,9 +40,11 @@ public class ReportMapView extends View {
 
     //todo handle position and context (context should contain debugging things like current server, etc)
 
-    public ReportMapView(@NotNull Context context, @NotNull String mapId) {
+    public ReportMapView(@NotNull Context context, @NotNull MapData map) {
         super(context);
-        this.mapId = mapId;
+        this.mapId = map.id();
+
+        mapIdText.setText(MapData.formatPublishedId(map.publishedId()));
 
         initActions();
         updateCommentText("");
@@ -53,10 +58,10 @@ public class ReportMapView extends View {
     private void initActions() {
         for (var reason : ReportCategory.values()) {
             var offButtonId = Objects.requireNonNull(reasonOffButtons[reason.ordinal()].id());
-            addActionHandler(offButtonId, Label.ActionHandler.lmb(player -> selectCategory(reason)));
+            addActionHandler(offButtonId, Label.ActionHandler.lmb($ -> selectCategory(reason)));
 
             var onButtonId = Objects.requireNonNull(reasonOnButtons[reason.ordinal()].id());
-            addActionHandler(onButtonId, Label.ActionHandler.lmb(player -> deselectCategory(reason)));
+            addActionHandler(onButtonId, Label.ActionHandler.lmb($ -> deselectCategory(reason)));
         }
     }
 

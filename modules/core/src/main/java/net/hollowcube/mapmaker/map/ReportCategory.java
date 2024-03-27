@@ -5,5 +5,5 @@ public enum ReportCategory {
     DISCRIMINATION,
     EXPLICIT_CONTENT,
     SPAM,
-    TROLL
+    DCMA
 }
