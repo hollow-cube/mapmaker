@@ -451,6 +451,13 @@ public class EditMap extends View {
         fillTagsCounter(MapTags.TagType.GAMEPLAY);
     }
 
+    @Action(value="reset_tags")
+    private void resetTags() {
+        map.settings().removeGameplayTags();
+        map.settings().removeVisualTags();
+        updateElementsFromMap();
+    }
+
     private void fillTagsCounter(@NotNull MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         var currentTags = map.settings().getTags().stream()
