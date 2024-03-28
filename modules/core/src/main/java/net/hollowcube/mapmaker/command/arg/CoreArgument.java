@@ -54,7 +54,7 @@ public final class CoreArgument {
     public static @NotNull Argument<@Nullable String> AnyOnlinePlayer(@NotNull String id, @NotNull SessionManager sessionManager) {
         return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
-                    for (var session : sessionManager.sessions()) {
+                    for (var session : sessionManager.sessions(false)) {
                         if (session.username().equalsIgnoreCase(raw)) {
                             return session.playerId();
                         }
@@ -63,7 +63,7 @@ public final class CoreArgument {
                 }),
                 /* Suggester */ (sender, raw, suggestion) -> {
                     raw = raw.toLowerCase(Locale.ROOT);
-                    for (var session : sessionManager.sessions()) {
+                    for (var session : sessionManager.sessions(false)) {
                         if (session.username().toLowerCase(Locale.ROOT).startsWith(raw)) {
                             suggestion.add(session.username());
                         }

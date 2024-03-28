@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.player;
 
 import net.hollowcube.mapmaker.session.PlayerSession;
+import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,9 +19,11 @@ public interface SessionService {
 
     @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body);
 
-    @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req);
+    @NotNull TransferSessionResponse transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req);
 
     void deleteSessionV2(@NotNull String id);
+
+    @NotNull PlayerSession updateSessionState(@NotNull String playerId, @NotNull SessionStateUpdateRequest req);
 
     @NotNull List<PlayerSession> sync();
 

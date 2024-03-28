@@ -12,4 +12,9 @@ public final class PlayerSettings {
 
     public static PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
 
+
+    // Moderation
+
+    public static PlayerSetting<Boolean> IS_VANISHED = PlayerSetting.Bool("is_hidden", false);
+
 }

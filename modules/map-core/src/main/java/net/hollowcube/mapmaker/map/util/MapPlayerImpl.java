@@ -3,10 +3,7 @@ package net.hollowcube.mapmaker.map.util;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
-import net.minestom.server.entity.EntityMetadataStealer;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.*;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
@@ -15,12 +12,15 @@ import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Implements some interfaces.
+ * <p>
+ * Overrides the following behavior:
+ * - Always set listed to false on tab list entries. They will be managed by the session manager.
+ */
 public abstract class MapPlayerImpl extends CommandHandlingPlayer implements PlayerVisibilityExtension {
     private Function<Player, Visibility> visibilityFunc = null;
 
@@ -126,5 +126,17 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
                 null, null
         );
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, infoEntry));
+    }
+
+    @Override
+    protected @NotNull PlayerInfoUpdatePacket getAddPlayerToList() {
+        return new PlayerInfoUpdatePacket(EnumSet.of(PlayerInfoUpdatePacket.Action.ADD_PLAYER, PlayerInfoUpdatePacket.Action.UPDATE_LISTED), List.of(this.infoEntry()));
+    }
+
+    private PlayerInfoUpdatePacket.Entry infoEntry() {
+        PlayerSkin skin = getSkin();
+        List<PlayerInfoUpdatePacket.Property> prop = skin != null ? List.of(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature())) : List.of();
+        // Listed is always false. SessionManager manages the tab list for us.
+        return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null);
     }
 }

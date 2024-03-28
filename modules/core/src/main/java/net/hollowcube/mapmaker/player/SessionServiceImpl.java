@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.player;
 
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.session.PlayerSession;
+import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.NotNull;
 
@@ -81,7 +82,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerDataV2 transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest body) {
+    public @NotNull TransferSessionResponse transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest body) {
         logger.log(System.Logger.Level.INFO, "transferring session for {0}", id);
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
@@ -90,7 +91,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
+            case 201 -> GSON.fromJson(res.body(), TransferSessionResponse.class);
             case 401 -> throw new UnauthorizedError();
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
@@ -106,6 +107,20 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new InternalError("Failed to delete session(" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public @NotNull PlayerSession updateSessionState(@NotNull String playerId, @NotNull SessionStateUpdateRequest body) {
+        logger.log(System.Logger.Level.INFO, "updating session state for {0}", playerId);
+        var reqBody = GSON.toJson(body);
+        var req = HttpRequest.newBuilder()
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(urlV2 + "/" + playerId + "/state"))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 200)
+            throw new InternalError("Failed to update session state (" + res.statusCode() + "): " + res.body());
+        return GSON.fromJson(res.body(), PlayerSession.class);
     }
 
     @Override

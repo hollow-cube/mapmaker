@@ -1,8 +1,12 @@
 {
-    "type": "sprite",
-    "origin": [
-        0,
-        10
-    ]
-    //    "shift_y": -24,
+  "type": "sprite",
+  "size": [
+    24,
+    24
+  ],
+  "origin": [
+    0,
+    10
+  ]
+  //    "shift_y": -24,
 }

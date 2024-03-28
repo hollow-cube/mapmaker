@@ -31,7 +31,7 @@ public class ListCommand extends CommandDsl {
     private void handleListPlayers(@NotNull Player player, @NotNull CommandContext context) {
         var builder = Component.text();
 
-        var sessions = List.copyOf(sessionManager.sessions());
+        var sessions = List.copyOf(sessionManager.sessions(false));
 
         builder.append(Component.text("Players (" + sessions.size() + "): "));
 

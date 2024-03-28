@@ -30,6 +30,8 @@ import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
+import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
+import net.hollowcube.mapmaker.command.staff.VanishCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
@@ -60,6 +62,7 @@ import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -317,9 +320,9 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
 
+        commandManager.register(createInstance(MinestomCommand.class));
         commandManager.register(createInstance(EmojisCommand.class));
         commandManager.register(createDebugCommand());
-        commandManager.register(createInstance(PingCommand.class));
         commandManager.register(createInstance(StoreCommand.class));
         commandManager.register(createInstance(DiscordCommand.class));
 
@@ -336,6 +339,9 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(JoinCommand.class));
 
         commandManager.register(createInstance(MapCommand.class));
+
+        commandManager.register(createInstance(VanishCommand.class));
+        commandManager.register(createInstance(UnvanishCommand.class));
     }
 
     public @NotNull Collection<HealthCheck> readinessChecks() {
@@ -448,17 +454,25 @@ public abstract class AbstractMapServer implements MapServer {
                     presence.instanceId(), presence.type(),
                     presence.state(), presence.mapId()
             );
-            var playerDataFuture = scope.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
+            var sessionResponseFuture = scope.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
             var mapPlayerDataFuture = scope.fork(() -> mapService.getMapPlayerData(playerId));
             var backpackDataFuture = scope.fork(() -> playerService.getPlayerBackpack(playerId));
 
             scope.join();
 
-            player.setTag(PlayerDataV2.TAG, playerDataFuture.get());
+            var sessionResponse = sessionResponseFuture.get();
+            player.setTag(PlayerDataV2.TAG, sessionResponse.data());
+            sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
             var backpack = new PlayerBackpack(player);
             player.setTag(PlayerBackpack.TAG, backpack);
             backpack.update(backpackDataFuture.get());
+
+            // If the player is joining vanished, configure them that way.
+            if (sessionResponse.session().hidden()) {
+                logger.info("joining player {} is vanished", player.getUsername());
+                sessionManager.configureVanishedPlayer(player);
+            }
 
             return true;
         } catch (SessionService.UnauthorizedError ignored) {

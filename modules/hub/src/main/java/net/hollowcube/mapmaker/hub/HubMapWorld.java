@@ -133,7 +133,6 @@ public class HubMapWorld extends AbstractMapWorld {
         super.addPlayer(player);
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        player.updateViewableRule(null);
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(true);
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
