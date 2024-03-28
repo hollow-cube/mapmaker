@@ -49,11 +49,17 @@ public class NpcPlayerEntity extends BaseNpcEntity {
 
     public NpcPlayerEntity(@NotNull UUID uuid, @NotNull NBTCompound nbt) {
         super(EntityType.PLAYER, uuid);
+        // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.
+        setSynchronizationTicks(Integer.MAX_VALUE);
 
+        // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.
+        titleEntity.setSynchronizationTicks(Integer.MAX_VALUE);
         var titleMeta = titleEntity.getEntityMeta();
         titleMeta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
         titleMeta.setTranslation(new Vec(0, 0.3, 0));
 
+        // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.
+        subtitleEntity.setSynchronizationTicks(Integer.MAX_VALUE);
         var subtitleMeta = subtitleEntity.getEntityMeta();
         subtitleMeta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
         subtitleMeta.setTranslation(new Vec(0, 0.1, 0));

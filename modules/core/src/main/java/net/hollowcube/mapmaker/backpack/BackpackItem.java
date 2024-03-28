@@ -12,6 +12,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -116,10 +117,14 @@ public enum BackpackItem {
     public @NotNull ItemStack getItemStack(int amount) {
         Check.argCondition(amount < 0 || amount > maxStackSize(), "amount must be between 1 and " + maxStackSize() + ", inclusive");
         var translationKeyBase = "item.mapmaker." + name().toLowerCase();
+        var lore = new ArrayList<Component>();
+        lore.add(rarity.asComponent());
+        lore.add(Component.empty());
+        lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
         return ItemStack.builder(Material.DIAMOND)
                 .meta(meta -> meta.customModelData(sprite.cmd() + amount))
                 .displayName(displayName())
-                .lore(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()))
+                .lore(lore)
                 .build();
     }
 

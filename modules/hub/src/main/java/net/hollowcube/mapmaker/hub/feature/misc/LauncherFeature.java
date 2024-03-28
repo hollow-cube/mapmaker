@@ -103,6 +103,7 @@ public class LauncherFeature implements HubFeature {
                         } else {
                             motion = new Vec(-16, 3, getPosition().x() < 0 ? 2f : -1f); // Send to edge
                         }
+                        player.setVelocity(Vec.ZERO);
                         player.sendPacket(makeExplosion(player.getPosition(), motion));
                         launched++;
                     }

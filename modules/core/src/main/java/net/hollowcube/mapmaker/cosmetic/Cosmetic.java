@@ -63,10 +63,13 @@ public class Cosmetic {
         this.id = id;
         this.rarity = rarity;
 
+        var itemLore = new ArrayList<Component>();
+        itemLore.add(rarity.asComponent());
+        itemLore.add(Component.empty());
+        itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + ".lore", List.of()));
         this.icon = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
                 .displayName(LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name")))
-                .lore(LanguageProviderV2.translateMulti("cosmetic." + type.id() + ".lore",
-                        List.of(rarity().asComponent(), Component.translatable("cosmetic." + type.id() + "." + id + ".lore"))))
+                .lore(itemLore)
                 .meta(LeatherArmorMeta.class, meta -> {
                     var spritePath = "models/cosmetics/" + type.id() + "/" + id;
                     meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
