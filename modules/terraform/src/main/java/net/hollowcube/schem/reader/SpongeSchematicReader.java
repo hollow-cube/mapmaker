@@ -141,6 +141,9 @@ public class SpongeSchematicReader implements SchematicReader {
 
                 blockPalette[paletteId] = block;
             }
+            for (int i = 0; i < blockPalette.length; i++) {
+                if (blockPalette[i] == null) blockPalette[i] = Block.AIR;
+            }
             blockData = getRequired(blocksContainer, "Data", BinaryTagTypes.BYTE_ARRAY).value();
 
             // === Block entities ===
