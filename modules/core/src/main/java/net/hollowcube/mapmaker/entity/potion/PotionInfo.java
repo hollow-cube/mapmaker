@@ -60,6 +60,7 @@ public record PotionInfo(
     public static final PotionInfo BLINDNESS = builder("blindness").maxLevel(255).setVanillaEffect(PotionEffect.BLINDNESS).setIcon(Material.SPIDER_EYE).build();
     public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon(Material.BLACK_WOOL).build();
     public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon(Material.CHICKEN).build();
+    public static final PotionInfo DOLPHINS_GRACE = builder("dolphins_grace").setVanillaEffect(PotionEffect.DOLPHINS_GRACE).setIcon(Material.DOLPHIN_SPAWN_EGG).build();
 
     @Override
     public int compareTo(@NotNull PotionInfo o) {
