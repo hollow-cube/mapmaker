@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.hub.item;
 
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -53,7 +53,7 @@ public class CreateMapsItem extends ItemHandler {
 
         var player = click.player();
         var target = click.entity();
-        if (!(target instanceof Player)) return;
+        if (target.getEntityType() != EntityType.PLAYER) return;
 
         player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, ThreadLocalRandom.current().nextFloat(0.9f, 1.1f)), Sound.Emitter.self());
         spawnBonkEntity(click.instance(), target.getPosition(), player);
@@ -67,10 +67,11 @@ public class CreateMapsItem extends ItemHandler {
 
     private static void spawnBonkEntity(Instance instance, Point position, Player viewer) {
         var random = ThreadLocalRandom.current();
-        var bonkEntity = new Entity(EntityType.TEXT_DISPLAY);
+        var bonkEntity = new Entity(EntityType.TEXT_DISPLAY) {{
+            hasPhysics = false;
+        }};
         bonkEntity.setNoGravity(true);
         bonkEntity.setAutoViewable(false);
-        bonkEntity.addViewer(viewer);
         var meta = (TextDisplayMeta) bonkEntity.getEntityMeta();
         meta.setNotifyAboutChanges(false);
         meta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
@@ -79,6 +80,7 @@ public class CreateMapsItem extends ItemHandler {
         meta.setScale(new Vec(0.75, 0.75, 1));
         meta.setNotifyAboutChanges(true);
         bonkEntity.setInstance(instance, position.add(random.nextDouble(-1, 1), random.nextDouble(2, 2.5), random.nextDouble(-1, 1)));
+        bonkEntity.addViewer(viewer);
 
         bonkEntity.scheduler().buildTask(() -> doBonkAnimation(meta))
                 .delay(TaskSchedule.tick(3))
