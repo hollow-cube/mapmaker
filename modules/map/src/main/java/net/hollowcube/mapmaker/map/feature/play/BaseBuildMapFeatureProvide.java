@@ -1,15 +1,16 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.feature.play.item.ReturnToHubItem;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,8 @@ import org.jetbrains.annotations.NotNull;
 public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/building", EventFilter.INSTANCE)
-            .addListener(MapPlayerInitEvent.class, this::initPlayer);
+            .addListener(MapPlayerInitEvent.class, this::initPlayer)
+            .addListener(PlayerTickEvent.class, this::handlePlayerTick);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -44,6 +46,16 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
 
         player.setAllowFlying(true);
+    }
+
+    public void handlePlayerTick(@NotNull PlayerTickEvent event) {
+        var player = event.getPlayer();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
+
+        if (player.getPosition().y() < world.instance().getDimensionType().getMinY()) {
+            player.teleport(world.spawnPoint(player));
+        }
     }
 
 }

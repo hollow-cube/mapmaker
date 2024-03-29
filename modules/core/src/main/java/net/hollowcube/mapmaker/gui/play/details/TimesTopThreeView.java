@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
@@ -23,7 +24,7 @@ public class TimesTopThreeView extends View {
     }
 
     @Blocking
-    public void fillEntries(@NotNull List<LeaderboardData.Entry> entries) {
+    public void fillEntries(@NotNull List<LeaderboardData.Entry> entries, @NotNull List<DisplayName> displayNames) {
         for (int i = 0; i < 3; i++) {
             var index = indices[i];
             var offset = FontUtil.computeOffset(switch (index) {
@@ -33,9 +34,10 @@ public class TimesTopThreeView extends View {
             });
             if (index < entries.size()) {
                 var entry = entries.get(index);
+                var displayName = displayNames.get(index).build(DisplayName.Context.DEFAULT);
                 timeTexts[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(entry.player(), DetailsTimesTabView.MODEL_8X));
                 timeTexts[i].setText(offset + NumberUtil.formatMapPlaytime(entry.score(), true));
-                timeTexts[i].setArgs(Component.text(player().getUsername()), Component.text(NumberUtil.formatMapPlaytime(entry.score(), true)));
+                timeTexts[i].setArgs(displayName, Component.text(NumberUtil.formatMapPlaytime(entry.score(), true)));
             } else {
                 timeTexts[i].setItemSprite(DetailsTimesTabView.getPlayerHead2d(null, DetailsTimesTabView.MODEL_8X));
                 timeTexts[i].setText(offset + DetailsTimesTabView.MISSING_TIME);

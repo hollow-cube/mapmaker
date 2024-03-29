@@ -131,7 +131,7 @@ public class LocalMapAllocator implements MapAllocator {
         lock.lock();
         try {
             for (var future : List.copyOf(maps.values())) {
-                destroy(FutureUtil.getUnchecked(future).worldId(), Component.translatable("mapmaker.shutdown"));
+                FutureUtil.getUnchecked(destroy(FutureUtil.getUnchecked(future).worldId(), Component.translatable("mapmaker.shutdown")));
             }
         } finally {
             lock.unlock();

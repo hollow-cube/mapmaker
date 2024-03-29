@@ -51,8 +51,8 @@ final class DirectMapAllocator implements MapAllocator {
         var world = (AbstractMapWorld) mapWorld;
 
         // Send all players to the hub
-        removePlayerSet(world.players(), reason);
-        removePlayerSet(world.spectators(), reason);
+        removePlayerSet(world, world.players(), reason);
+        removePlayerSet(world, world.spectators(), reason);
 
         // Unload the world
         world.close();
@@ -78,10 +78,11 @@ final class DirectMapAllocator implements MapAllocator {
         // We have no worlds tracked, so cannot close any
     }
 
-    private void removePlayerSet(@NotNull Collection<Player> players, @NotNull Component reason) {
+    private void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @NotNull Component reason) {
         for (var player : Set.copyOf(players)) {
             try {
                 player.sendMessage(reason);
+                world.removePlayer(player);
                 server.bridge().joinHub(player);
             } catch (Exception e) {
                 logger.error("failed to move player to hub ({})", player.getUuid(), e);

@@ -13,7 +13,9 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -24,6 +26,7 @@ import net.minestom.server.item.metadata.PlayerHeadMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -31,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DetailsTimesTabView extends View {
 
+    private @ContextObject PlayerService playerService;
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
@@ -66,9 +70,13 @@ public class DetailsTimesTabView extends View {
                 var mapId = Objects.requireNonNull(map, "times tab view was not initialized").id();
                 var playerId = PlayerDataV2.fromPlayer(player).id();
                 var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerId);
+                var displayNames = new ArrayList<DisplayName>();
+                for (var entry : leaderboard.top()) {
+                    displayNames.add(playerService.getPlayerDisplayName2(entry.player()));
+                }
 
-                topThreeView.fillEntries(leaderboard.top());
-                topTenView.fillEntries(leaderboard.top());
+                topThreeView.fillEntries(leaderboard.top(), displayNames);
+                topTenView.fillEntries(leaderboard.top(), displayNames);
                 fillPlayerEntry(leaderboard.player());
                 this.leaderboard = leaderboard;
                 viewSwitch.setState(State.ACTIVE);
