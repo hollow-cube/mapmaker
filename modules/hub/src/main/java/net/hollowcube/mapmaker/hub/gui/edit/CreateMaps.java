@@ -5,10 +5,10 @@ import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
@@ -43,6 +43,11 @@ public class CreateMaps extends View {
 
     @Signal(CreateMap.SIG_MAP_CREATED)
     public void mapCreated(int slot, @NotNull MapData map) {
+        // Need to 'predict' that the map will now be in the slot since we likely haven't received an update from remote.
+        var pd = MapPlayerData.fromPlayer(player);
+        pd.mapSlots()[slot] = map.id();
+
+        // Also update GUI to reflect the change
         slots[slot].setToSelected(map);
         editor.showMap(map, slot);
         switcher.setOption(0);

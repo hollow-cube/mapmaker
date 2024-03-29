@@ -25,7 +25,7 @@ public class SetSpawnCommand extends CommandDsl {
 
     @Inject
     public SetSpawnCommand() {
-        super("setspawn");
+        super("setspawn", "setstart");
 
         description = "Sets the spawn point of your map to where you’re standing or to the specified coordinates";
 

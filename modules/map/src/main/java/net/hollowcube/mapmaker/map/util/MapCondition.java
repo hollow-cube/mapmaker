@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.command.CommandCondition;
+import net.hollowcube.mapmaker.feature.FeatureFlag;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -47,13 +47,12 @@ public final class MapCondition {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayerOptional(player);
-            if (world == null) return HIDE;
-
-            if (playing && !world.isPlaying(player)) return HIDE;
-            if (editing && !world.canEdit(player)) return HIDE;
-            if (testing && !(world instanceof TestingMapWorld || !world.isPlaying(player))) return HIDE;
-
-            return ALLOW;
+            return switch (world) {
+                case PlayingMapWorld _ -> playing && world.isPlaying(player) ? ALLOW : HIDE;
+                case EditingMapWorld _ -> editing && world.canEdit(player) ? ALLOW : HIDE;
+                case TestingMapWorld _ -> testing && world.isPlaying(player) ? ALLOW : HIDE;
+                case null, default -> HIDE;
+            };
         };
     }
 
