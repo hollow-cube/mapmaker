@@ -8,7 +8,8 @@
         <label translationKey="gui.builder_menu.information"/>
         <text id="tab_name" width="5" translationKey="gui.builder_menu.tab"
               font="map_details_author" centered="true"/>
-        <label translationKey="gui.builder_menu.idk"/>
+        <label translationKey="gui.builder_menu.invite_players"/>
+        <button id="save_and_exit" translationKey="gui.builder_menu.save_and_exit" sprite="hud/hotbar/return_to_hub"/>
     </box>
 
     <box width="9" height="4" align="ttb">

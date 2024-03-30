@@ -23,6 +23,12 @@
     "no_shadow": true,
     "trailing_space": 2
   },
+  "SHIFT_RMB_ITEM": {
+    "type": "sprite",
+    "ref": "icon/mouse_shift_right",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
   "CONFIRM": {
     "type": "sprite",
     "ref": "icon/confirm",

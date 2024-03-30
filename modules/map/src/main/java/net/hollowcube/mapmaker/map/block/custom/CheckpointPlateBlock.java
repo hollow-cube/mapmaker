@@ -87,7 +87,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
 //
 //        // If the NBT has settings, set the lore to the "with data" variant, otherwise leave the default.
 //        if (!isEmpty)
-//            builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args));
+//            builder.lore(LanguageProviderV2.translateMulti("item.mapmaker.checkpoint_plate.with_data.lore", args)); //todo this translation key is remove, don't use it
 //        builder.meta(m -> m.setTag(BlockItemHandler.BLOCK_DATA, tag.asCompound()));
     }
 

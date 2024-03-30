@@ -2,16 +2,11 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="5" height="2" align="ttb">
     <box width="5" align="ltr">
-        <button id="give_details_item" translationKey="gui.builder_menu.custom_items.details_item"
-                sprite="hud/hotbar/map_details"/>
-        <button id="give_test_mode_item" translationKey="gui.builder_menu.custom_items.finish_plate"
+        <button id="give_details_item" translationKey="gui.builder_menu.custom_items.edit_map_details"
+                sprite="hud/hotbar/edit_map_details"/>
+        <button id="give_test_mode_item" translationKey="gui.builder_menu.custom_items.enter_testing_mode"
                 sprite="hud/hotbar/enter_test_mode"/>
-        <button id="give_spawn_point_item" translationKey="gui.builder_menu.custom_items.checkpoint_plate"
+        <button id="give_spawn_point_item" translationKey="gui.builder_menu.custom_items.spawn_point"
                 sprite="hud/hotbar/spawn_point"/>
-    </box>
-    <box width="5" align="ltr">
-        <spacer width="4"/>
-        <button id="exit_map" translationKey="gui.builder_menu.custom_items.exit_map"
-                sprite="hud/hotbar/return_to_hub"/>
     </box>
 </component>

@@ -13,15 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class CustomItemsView extends View {
 
-    private @ContextObject("bridge") ServerBridge bridge;
-
     public CustomItemsView(@NotNull Context context) {
         super(context);
     }
 
     @Action("give_details_item")
     private void giveDetailsItem(@NotNull Player player) {
-        BuilderMenuView.giveCustomItem(player, MapDetailsItem.INSTANCE);
+        //BuilderMenuView.giveCustomItem(player, MapDetailsItem.INSTANCE);
+        //todo give an editing version of the map details item that lets them edit the name, display item, tags, etc.
+        //todo of their map. The bottom 2 3x3 buttons would be the closed blue doors, since you are already in your map
     }
 
     @Action("give_test_mode_item")
@@ -32,11 +32,5 @@ public class CustomItemsView extends View {
     @Action("give_spawn_point_item")
     private void giveSpawnPointItem(@NotNull Player player) {
         BuilderMenuView.giveCustomItem(player, SpawnPointItem.INSTANCE);
-    }
-
-    @Action("exit_map")
-    private void giveExitMapItem(@NotNull Player player) {
-        player.closeInventory();
-        bridge.joinHub(player);
     }
 }
