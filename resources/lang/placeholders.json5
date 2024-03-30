@@ -260,5 +260,10 @@
   "pink": {
     "type": "raw",
     "value": "#EE6EFF"
+  },
+  // #89A7AD - Titanium (Normal Rarity)
+  "titanium": {
+    "type": "raw",
+    "value": "#89A7AD"
   }
 }
