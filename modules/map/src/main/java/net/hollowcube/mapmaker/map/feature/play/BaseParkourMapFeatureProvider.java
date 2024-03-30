@@ -144,6 +144,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.updateViewerRule(visibilityPredicate);
         if (player instanceof PlayerVisibilityExtension ve)
             ve.setVisibilityFunc(visibilityPredicate);
+
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState != null) updatePlayerFromState(player, saveState.playState());
     }
 
     public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
@@ -189,6 +192,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!event.getMapWorld().isPlaying(player)) return;
 
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState != null) {
+            var countdownEnd = player.getTag(COUNTDOWN_END);
+            if (countdownEnd != -1) {
+                saveState.playState().setTimeLimit(countdownEnd - System.currentTimeMillis());
+            }
+        }
 
         player.removeTag(COUNTDOWN_END);
     }
@@ -472,6 +482,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Update the countdown timer (time may have been added
         if (state.timeLimit().isPresent()) {
             player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit().get());
+        } else {
+            player.removeTag(COUNTDOWN_END);
         }
 
         // Update the potions on the player
@@ -516,7 +528,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 }
             }
         }
-        
+
         // Sanity check in case there are literally no blocks in the world.
         if (minBlockY == instance.getDimensionType().getMaxY()) minBlockY = worldMinHeight;
         instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);

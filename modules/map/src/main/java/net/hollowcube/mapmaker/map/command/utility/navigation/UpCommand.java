@@ -32,7 +32,7 @@ public class UpCommand extends CommandDsl {
     private void handleJumpToTarget(@NotNull Player player, @NotNull CommandContext context) {
         var instance = player.getInstance();
 
-        var target = player.getPosition().add(context.get(distanceArg));
+        var target = player.getPosition().add(0, context.get(distanceArg), 0);
         if (target.blockY() > instance.getDimensionType().getMaxY()) {
             player.sendMessage(ERR_NO_SPACE);
             return;
