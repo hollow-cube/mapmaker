@@ -6,6 +6,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -143,6 +144,12 @@ public class PaginationElement<T extends View> extends BaseElement implements Pa
         if (super.shouldDelegateDraw() || page >= pageCache.size())
             return super.getContents();
         return pageCache.get(page).getContents();
+    }
+
+    @Override
+    public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
+        if (page >= pageCache.size()) return;
+        pageCache.get(page).buildTitle(sb, x, y);
     }
 
     @Override

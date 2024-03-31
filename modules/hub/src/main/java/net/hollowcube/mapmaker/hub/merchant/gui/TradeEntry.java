@@ -32,7 +32,7 @@ public class TradeEntry extends View {
         super(context);
         this.trade = trade;
 
-        var icon = trade.result().icon();
+        var icon = trade.result().iconItem();
         var lore = new ArrayList<>(icon.getLore());
         lore.add(Component.empty());
         trade.appendLore(PlayerDataV2.fromPlayer(player), PlayerBackpack.fromPlayer(player), lore);
@@ -61,7 +61,7 @@ public class TradeEntry extends View {
         var playerData = PlayerDataV2.fromPlayer(player);
         playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits, null);
 
-        var icon = trade.result().icon();
+        var icon = trade.result().iconItem();
         player.sendMessage(Component.translatable("merchant.trade.success", icon.getDisplayName().hoverEvent(icon.asHoverEvent())));
         player.closeInventory();
     }

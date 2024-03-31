@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,13 @@ import java.util.ArrayList;
 
 public class CosmeticEntry extends View {
     public static final String UPDATE_SELECTED = "cosmetic_entry.update_selected";
+    private static final BadSprite[] SELECTED_SPRITES = new BadSprite[]{
+            BadSprite.require("cosmetic/selector/selected_row_1"),
+            BadSprite.require("cosmetic/selector/selected_row_2"),
+            BadSprite.require("cosmetic/selector/selected_row_3"),
+            BadSprite.require("cosmetic/selector/selected_row_4"),
+            BadSprite.require("cosmetic/selector/selected_row_5"),
+    };
 
     private @Outlet("root") Switch rootSwitch;
     private @Outlet("off") Label offIcon;
@@ -25,16 +33,21 @@ public class CosmeticEntry extends View {
     private final PlayerDataV2 playerData;
     private final Cosmetic cosmetic;
     private final boolean isLocked;
+    private final int row;
 
-    public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull Cosmetic cosmetic, boolean isLocked) {
+    public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull Cosmetic cosmetic, boolean isLocked, int row) {
         super(context);
         this.playerData = playerData;
         this.cosmetic = cosmetic;
         this.isLocked = isLocked;
+        this.row = row;
 
-        var itemIcon = cosmetic.icon();
+        var itemIcon = isLocked ? cosmetic.iconLockedItem() : cosmetic.iconItem();
         offIcon.setItemSprite(itemIcon);
         onIcon.setItemSprite(itemIcon);
+
+        var sprite = SELECTED_SPRITES[row];
+        onIcon.setSprite(sprite.fontChar(), sprite.cmd(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
 
         {
             var lore = new ArrayList<>(itemIcon.getLore());
@@ -55,7 +68,7 @@ public class CosmeticEntry extends View {
 
     @Action("off")
     public void handleSelectCosmetic(@NotNull Player player) {
-        if (isLocked) return;
+//        if (isLocked) return;
 
         playerData.setCosmetic(cosmetic.type(), cosmetic);
         performSignal(UPDATE_SELECTED);

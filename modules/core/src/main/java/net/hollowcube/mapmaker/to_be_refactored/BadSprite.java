@@ -2,17 +2,23 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 //todo do not duplicate this :(
 public record BadSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
     private static final System.Logger logger = System.getLogger(BadSprite.class.getName());
 
     public static final Map<String, BadSprite> SPRITE_MAP;
+
+    public static @NotNull BadSprite require(@NotNull String path) {
+        return Objects.requireNonNull(SPRITE_MAP.get(path), path);
+    }
 
     static {
         var sprites = new HashMap<String, BadSprite>();
@@ -27,10 +33,13 @@ public record BadSprite(char fontChar, int cmd, int width, int offsetX, int righ
                     if (obj.has("fontChar"))
                         fontChar = obj.get("fontChar").getAsString().charAt(0);
                     else cmd = obj.get("cmd").getAsInt();
-                    var width = obj.get("width").getAsInt();
-                    var offsetX = obj.get("offsetX").getAsInt();
+                    var width = obj.get("width");
+                    var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
-                    sprites.put(key, new BadSprite(fontChar, cmd, width, offsetX, rightOffset == null ? 0 : rightOffset.getAsInt()));
+                    sprites.put(key, new BadSprite(fontChar, cmd,
+                            width == null ? 0 : width.getAsInt(),
+                            offsetX == null ? 0 : offsetX.getAsInt(),
+                            rightOffset == null ? 0 : rightOffset.getAsInt()));
                 }
             } else {
                 logger.log(System.Logger.Level.WARNING, "No sprites present in build");

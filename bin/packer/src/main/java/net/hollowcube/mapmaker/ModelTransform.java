@@ -50,7 +50,7 @@ public class ModelTransform {
 
                 JsonObject serverSpriteConf = new JsonObject();
                 String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "").replace("\\", "/");
-                System.out.println("processing " + fullName);
+//                System.out.println("processing " + fullName);
                 serverSpriteConf.addProperty("name", fullName);
                 serverSpriteConf.addProperty("cmd", cmd);
                 serverSpriteConf.addProperty("width", 0);

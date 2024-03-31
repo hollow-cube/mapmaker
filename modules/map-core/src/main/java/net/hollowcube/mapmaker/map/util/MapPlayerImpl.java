@@ -139,4 +139,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         // Listed is always false. SessionManager manages the tab list for us.
         return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null);
     }
+
+    @Override public void spawn() {
+        super.spawn();
+    }
 }

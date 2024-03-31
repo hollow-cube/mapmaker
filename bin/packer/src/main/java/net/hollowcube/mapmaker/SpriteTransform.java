@@ -47,7 +47,7 @@ public class SpriteTransform {
                 String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
-                System.out.println("processing " + name);
+//                System.out.println("processing " + name);
                 try {
                     Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 

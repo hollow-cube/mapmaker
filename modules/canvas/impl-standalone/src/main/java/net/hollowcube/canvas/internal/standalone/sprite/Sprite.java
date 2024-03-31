@@ -26,10 +26,13 @@ public record Sprite(char fontChar, int cmd, int width, int offsetX, int rightOf
                     if (obj.has("fontChar"))
                         fontChar = obj.get("fontChar").getAsString().charAt(0);
                     else cmd = obj.get("cmd").getAsInt();
-                    var width = obj.get("width").getAsInt();
-                    var offsetX = obj.get("offsetX").getAsInt();
+                    var width = obj.get("width");
+                    var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
-                    sprites.put(key, new Sprite(fontChar, cmd, width, offsetX, rightOffset == null ? 0 : rightOffset.getAsInt()));
+                    sprites.put(key, new Sprite(fontChar, cmd,
+                            width == null ? 0 : width.getAsInt(),
+                            offsetX == null ? 0 : offsetX.getAsInt(),
+                            rightOffset == null ? 0 : rightOffset.getAsInt()));
                 }
             } else {
                 logger.log(System.Logger.Level.WARNING, "No sprites present in build");

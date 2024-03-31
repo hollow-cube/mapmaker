@@ -55,6 +55,7 @@ import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.metrics.MetricWriterImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
 import net.hollowcube.mapmaker.misc.Emoji;
+import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -501,7 +502,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
-        actionBar.addProvider(MiscFunctionality::buildExperienceBar);
+        actionBar.addProvider(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into
         //todo need to support joining as a spectator

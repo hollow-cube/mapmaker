@@ -138,7 +138,7 @@ public final class MiscFunctionality {
 
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
         var head = Cosmetic.byId(CosmeticType.HAT, playerData.getCosmetic(CosmeticType.HAT));
-        player.getInventory().setHelmet(head == null ? ItemStack.AIR : head.icon());
+        player.getInventory().setHelmet(head == null ? ItemStack.AIR : head.modelItem());
 
 //        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
 //        newDisplayedSkinParts &= ~0x40;

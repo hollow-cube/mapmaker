@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -161,6 +162,10 @@ public class PackContext {
 
     public JsonArray getServerSprites() {
         return serverSprites;
+    }
+
+    public void addServerSprite(@NotNull ServerSprite sprite) {
+        serverSprites.add(sprite.toJson());
     }
 
     public void cleanup() throws IOException {

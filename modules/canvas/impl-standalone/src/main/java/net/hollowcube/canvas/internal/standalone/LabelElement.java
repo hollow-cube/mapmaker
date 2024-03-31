@@ -2,6 +2,7 @@ package net.hollowcube.canvas.internal.standalone;
 
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
+import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -79,6 +80,11 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         this.itemSprite = itemStack == null ? BLANK_ITEM : itemStack;
         if (itemPosition != null) this.itemPosition = itemPosition;
         updateItem(List.of());
+    }
+
+    @Override
+    public void setSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
+        setSprite(new Sprite(fontChar, cmd, width, offsetX, rightOffset));
     }
 
     private void updateItem(@NotNull List<Component> args) {

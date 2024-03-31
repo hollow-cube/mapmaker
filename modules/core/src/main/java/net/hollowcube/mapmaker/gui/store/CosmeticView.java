@@ -15,9 +15,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Set;
 
 public class CosmeticView extends View {
     private static final PlayerSetting<Boolean> SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
+
+    private static final Set<CosmeticType> DISABLED_TABS = Set.of(CosmeticType.BACKWEAR, CosmeticType.PET, CosmeticType.EMOTE);
 
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
@@ -49,6 +52,8 @@ public class CosmeticView extends View {
 
     public void selectTab(@NotNull CosmeticType cosmeticType) {
         if (selectedTab == cosmeticType) return;
+        if (DISABLED_TABS.contains(cosmeticType)) return;
+
         String displayName = switch (cosmeticType) {
             case HAT -> "Headwear";
             case BACKWEAR -> "Backwear";
@@ -83,20 +88,23 @@ public class CosmeticView extends View {
 
     @Action(value = "cosmetic_list", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<CosmeticEntry> request) {
-        var entries = new ArrayList<CosmeticEntry>();
-
         var unlockedCosmetics = playerService.getUnlockedCosmetics(playerData.id());
 
         boolean showLocked = playerData.getSetting(SHOW_LOCKED);
-        Cosmetic.values(selectedTab).stream()
+        var entries = Cosmetic.values(selectedTab).stream()
+                .sorted(Cosmetic.comparingName())
                 .sorted(Cosmetic.comparingRarity())
-                .forEach(cosmetic -> {
-                    var isLocked = !unlockedCosmetics.contains(cosmetic.path());
-                    if (!showLocked && isLocked) return;
-                    entries.add(new CosmeticEntry(request.context(), playerData, cosmetic, isLocked));
-                });
+                .filter(cosmetic -> showLocked || unlockedCosmetics.contains(cosmetic.path()))
+                .toList();
 
-        request.respond(entries, false);
+        var results = new ArrayList<CosmeticEntry>(entries.size());
+        for (int i = 0; i < entries.size(); i++) {
+            var cosmetic = entries.get(i);
+            var isLocked = !unlockedCosmetics.contains(cosmetic.path());
+            results.add(new CosmeticEntry(request.context(), playerData, cosmetic, isLocked, i / 7));
+        }
+
+        request.respond(results, false);
     }
 
     @Signal(Element.SIG_CLOSE)

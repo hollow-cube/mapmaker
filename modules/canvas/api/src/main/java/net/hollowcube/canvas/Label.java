@@ -21,6 +21,8 @@ public interface Label extends Element {
 
     void setItemSprite(@NotNull ItemStack itemStack, @Nullable Integer itemPosition);
 
+    void setSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset);
+
     default void setArgs(@NotNull List<Component> args) {
         setArgs(args.toArray(new Component[0]));
     }

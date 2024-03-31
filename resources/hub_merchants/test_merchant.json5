@@ -6,12 +6,12 @@
         "cubits": 50
       },
     },
-    {
-      "result": "hat/crown",
-      "inputs": {
-        "coins": 60000,
-        "nightmare_fuel": 2
-      },
-    }
+    //    {
+    //      "result": "hat/crown",
+    //      "inputs": {
+    //        "coins": 60000,
+    //        "nightmare_fuel": 2
+    //      },
+    //    }
   ]
 }

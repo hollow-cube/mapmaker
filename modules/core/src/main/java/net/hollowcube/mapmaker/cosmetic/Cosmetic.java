@@ -21,8 +21,17 @@ public class Cosmetic {
     public static final Codec<Cosmetic> CODEC = Codec.STRING.xmap(Cosmetic::byPathRequired, Cosmetic::path);
 
     static {
-        // Class init required
-        var ignored = HeadCosmetics.CROWN;
+        try {
+            Class.forName(Hats.class.getName());
+            // Backwear
+            Class.forName(Accessories.class.getName());
+            // Pets
+            // Emotes
+            Class.forName(Particles.class.getName());
+            Class.forName(VictoryEffects.class.getName());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // In the form type/id
@@ -48,6 +57,11 @@ public class Cosmetic {
         return COSMETICS.getOrDefault(type, Map.of()).values();
     }
 
+    public static @NotNull Comparator<Cosmetic> comparingName() {
+        // May need to switch this to translate the name first, but for now this will do.
+        return Comparator.comparing(c -> "cosmetic." + c.type.id() + "." + c.id + ".name");
+    }
+
     public static @NotNull Comparator<Cosmetic> comparingRarity() {
         return Comparator.comparingInt(c -> c.rarity.ordinal());
     }
@@ -56,27 +70,40 @@ public class Cosmetic {
     private final String id;
     private final Rarity rarity;
 
+    private final ItemStack model;
     private final ItemStack icon;
+    private final ItemStack iconLocked;
 
     private Cosmetic(CosmeticType type, String id, Rarity rarity) {
         this.type = type;
         this.id = id;
         this.rarity = rarity;
 
+        var displayName = LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name"));
         var itemLore = new ArrayList<Component>();
         itemLore.add(rarity.asComponent());
         itemLore.add(Component.empty());
-        itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + ".lore", List.of()));
-        this.icon = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
-                .displayName(LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name")))
-                .lore(itemLore)
-                .meta(LeatherArmorMeta.class, meta -> {
-                    var spritePath = "models/cosmetics/" + type.id() + "/" + id;
-                    meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
-                    meta.color(new Color(255, 255, 255));
-                    meta.hideFlag(ItemHideFlag.HIDE_DYE);
-                })
-                .build();
+        itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
+        this.model = type.hasModel() ? ItemStack.of(Material.LEATHER_HORSE_ARMOR).withMeta(LeatherArmorMeta.class, meta -> {
+            meta.displayName(displayName);
+            meta.lore(itemLore);
+            var spritePath = "cosmetic/" + type.id() + "/" + id;
+            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+            meta.color(new Color(255, 255, 255));
+            meta.hideFlag(ItemHideFlag.HIDE_DYE);
+        }) : null;
+        this.icon = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
+            meta.displayName(displayName);
+            meta.lore(itemLore);
+            var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon";
+            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+        });
+        this.iconLocked = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
+            meta.displayName(displayName);
+            meta.lore(itemLore);
+            var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon_locked";
+            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+        });
     }
 
     public @NotNull CosmeticType type() {
@@ -95,8 +122,16 @@ public class Cosmetic {
         return rarity;
     }
 
-    public @NotNull ItemStack icon() {
+    public @NotNull ItemStack modelItem() {
+        return model;
+    }
+
+    public @NotNull ItemStack iconItem() {
         return icon;
+    }
+
+    public @NotNull ItemStack iconLockedItem() {
+        return iconLocked;
     }
 
     public static class Builder {

@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.misc.noop;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.cosmetic.HeadCosmetics;
+import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public class NoopPlayerService implements PlayerService {
 
     @Override
     public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
-        return Set.of(HeadCosmetics.CROWN.path());
+        return Set.of(Hats.HARD_HAT.path());
     }
 
     @Override
