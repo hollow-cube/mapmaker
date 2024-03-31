@@ -68,7 +68,7 @@ public class CosmeticEntry extends View {
 
     @Action("off")
     public void handleSelectCosmetic(@NotNull Player player) {
-//        if (isLocked) return;
+        if (isLocked) return;
 
         playerData.setCosmetic(cosmetic.type(), cosmetic);
         performSignal(UPDATE_SELECTED);

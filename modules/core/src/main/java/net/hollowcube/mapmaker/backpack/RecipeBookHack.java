@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class RecipeBookHack {
     // THE FOLLOWING MUST BE KEPT UP TO DATE WITH THEIR RESPECTIVE ENUMS
-    private static final int TOTAL_CRAFTING_MATERIALS = 16;
+    private static final int TOTAL_CRAFTING_MATERIALS = 8;
     private static final int MAX_IDS = TOTAL_CRAFTING_MATERIALS;
     private static final List<String> orderedIds;
 
