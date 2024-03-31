@@ -52,7 +52,7 @@ public record AxiomClientModifyEntitiesPacket(
             var uuid = buffer.read(NetworkBuffer.UUID);
             byte flags = buffer.read(NetworkBuffer.BYTE);
             var pos = flags > 0 ? ProtocolUtil.readPos(buffer) : null;
-            var nbt = buffer.read(NetworkBuffer.NBT) instanceof NBTCompound nbtCompound ? nbtCompound : NBTCompound.EMPTY;
+            var nbt = buffer.read(NetworkBuffer.NBT) instanceof NBTCompound nbtCompound ? nbtCompound : new NBTCompound();
             var passengerChange = buffer.readEnum(PassengerChange.class);
             var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES) : null;
             return new Entry(uuid, flags, pos, nbt, passengerChange, passengers);

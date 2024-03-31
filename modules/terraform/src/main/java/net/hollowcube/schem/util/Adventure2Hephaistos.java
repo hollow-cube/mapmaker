@@ -31,7 +31,7 @@ public final class Adventure2Hephaistos {
     }
 
     public static @NotNull NBTCompound compound(@NotNull CompoundBinaryTag tag) {
-        if (tag.size() == 0) return NBTCompound.EMPTY;
+        if (tag.size() == 0) return new NBTCompound();
 
         var compound = new MutableNBTCompound();
         tag.forEach(entry -> compound.put(entry.getKey(), into(entry.getValue())));

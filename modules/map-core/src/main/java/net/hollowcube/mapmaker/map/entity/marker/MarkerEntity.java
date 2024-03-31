@@ -46,7 +46,7 @@ public class MarkerEntity extends MapEntity {
     // They are kept in a separate tag to avoid sending the root to axiom players which may have weird content by accident.
     // When we eventually have an anvil converter, the `marker_data` tag will replace the root tag.
     private static final Tag<NBTCompound> DATA_TAG = Tag.NBT("marker_data")
-            .map(n -> (NBTCompound) n, n -> n).defaultValue(NBTCompound.EMPTY);
+            .map(n -> (NBTCompound) n, n -> n).defaultValue(new NBTCompound());
     private static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("marker_data")
             .map(NamespaceID::from, NamespaceID::asString).defaultValue(UNKNOWN_TYPE);
     private static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("marker_data");

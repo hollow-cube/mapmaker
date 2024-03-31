@@ -14,7 +14,7 @@ public final class ItemUtils {
 
     public static @NotNull NBTCompound getEntityTag(@NotNull ItemStack itemStack) {
         var root = itemStack.meta().toNBT();
-        return Objects.requireNonNullElse(root.getCompound("EntityTag"), NBTCompound.EMPTY);
+        return Objects.requireNonNullElse(root.getCompound("EntityTag"), new NBTCompound());
     }
 
     public static @NotNull Component translation(@NotNull Material material) {

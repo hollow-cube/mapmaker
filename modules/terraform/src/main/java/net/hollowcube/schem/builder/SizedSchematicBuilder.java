@@ -64,7 +64,7 @@ final class SizedSchematicBuilder implements SchematicBuilder {
         var blockHandler = block.handler();
         if (blockHandler != null) {
             var blockEntityId = blockHandler.getNamespaceId().asString();
-            var blockEntityData = Hephaistos2Adventure.compound(Objects.requireNonNullElse(block.nbt(), NBTCompound.EMPTY));
+            var blockEntityData = Hephaistos2Adventure.compound(Objects.requireNonNullElse(block.nbt(), new NBTCompound()));
             blockEntities.put(blockIndex, new BlockEntityData(blockEntityId, relPos, blockEntityData));
         }
     }

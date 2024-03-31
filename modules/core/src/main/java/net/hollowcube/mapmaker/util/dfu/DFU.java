@@ -44,7 +44,7 @@ public final class DFU {
     }
 
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
-        return () -> unwrap(codec.decode(NbtOps.INSTANCE, NBTCompound.EMPTY).map(Pair::getFirst));
+        return () -> unwrap(codec.decode(NbtOps.INSTANCE, new NBTCompound()).map(Pair::getFirst));
     }
 
     public static <T, S extends JsonSerializer<T> & JsonDeserializer<T>> @NotNull S JsonSerializer(@NotNull Codec<T> codec) {
