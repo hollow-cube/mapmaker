@@ -47,18 +47,23 @@ definition mapmaker/platform {
     permission global_map_admin = mod + dev
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
 
-    permission prefix_hollowcube = admin
-    permission prefix_admin = admin
-    permission prefix_dev = dev
-    permission prefix_mod = mod
-    permission prefix_crt = crt
+    permission prefix_hollowcube = admin // Deprecated
+    permission prefix_admin = admin // Deprecated
+    permission prefix_dev = dev // Deprecated
+    permission prefix_mod = mod // Deprecated
+    permission prefix_crt = crt // Deprecated
 
-    // Platform map permissions
+    // === Platform map permissions ===
     permission map_admin = global_map_admin + global_map_superadmin
 
+    // === Punishments ===
     permission ip_ban_player = mod + admin
     permission ban_player = mod + admin
     permission mute_player = ban_player
+
+    // === Misc Moderation ===
+    permission vanish = mod + admin
+    permission see_vanished = admin
 
     // Hypercube
     permission has_hypercube = hypercube

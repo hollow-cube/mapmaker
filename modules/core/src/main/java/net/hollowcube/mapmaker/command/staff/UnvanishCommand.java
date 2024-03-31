@@ -32,7 +32,7 @@ public class UnvanishCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Show yourself to other players. Does nothing if you are not vanished";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.VANISH));
         addSyntax(playerOnly(this::handleVanish), silentArg);
         addSyntax(playerOnly(this::handleVanish));
     }

@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.session;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -25,6 +27,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
@@ -38,7 +41,15 @@ public class SessionManager {
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
 
-    public SessionManager(@NotNull SessionService sessionService, @NotNull PlayerService playerService, @NotNull KafkaConfig kafkaConfig, boolean noop) {
+    private final Predicate<Player> hasSeeVanishedPerm;
+
+    public SessionManager(
+            @NotNull SessionService sessionService,
+            @NotNull PlayerService playerService,
+            @NotNull PermManager permManager,
+            @NotNull KafkaConfig kafkaConfig,
+            boolean noop
+    ) {
         this.sessionService = sessionService;
         this.playerService = playerService;
 
@@ -48,6 +59,8 @@ public class SessionManager {
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
                 .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
+
+        this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
     }
 
     public void sync() {
@@ -185,11 +198,12 @@ public class SessionManager {
         Audiences.players().sendMessage(leaveMessage);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(p -> false);
-        player.updateViewableRule();
+        player.updateViewableRule(hasSeeVanishedPerm);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void configureVisiblePlayer(@NotNull Player player) {
         player.updateViewableRule(null);
     }

@@ -4,6 +4,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Predicate;
+
 @Blocking
 public interface PermManager {
 
@@ -16,5 +18,15 @@ public interface PermManager {
                 ? net.hollowcube.command.CommandCondition.ALLOW
                 : net.hollowcube.command.CommandCondition.HIDE;
     }
+
+    /**
+     * <p>Returns a predicate for the given permission where the result is always prefetched and will never block.</p>
+     *
+     * <p>The current implementation only refreshes on player join, though this is subject to change in the future.</p>
+     *
+     * @param perm The permission to test against
+     * @return A predicate that returns true if the player has the permission
+     */
+    @NotNull Predicate<Player> createPrefetchedCondition(@NotNull PlatformPerm perm);
 
 }

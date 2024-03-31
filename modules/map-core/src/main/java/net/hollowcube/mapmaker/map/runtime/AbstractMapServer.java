@@ -200,7 +200,7 @@ public abstract class AbstractMapServer implements MapServer {
         bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService, playerService, kafkaConfig, globalConfig.noop());
+        sessionManager = new SessionManager(sessionService, playerService, permManager, kafkaConfig, globalConfig.noop());
         shutdowner.queue(sessionManager::close);
         sessionManager().sync(); // Sync existing sessions with remote
 
