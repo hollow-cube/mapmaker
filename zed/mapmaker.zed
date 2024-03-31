@@ -65,6 +65,9 @@ definition mapmaker/platform {
     permission vanish = mod + admin
     permission see_vanished = admin
 
+    // === Generic ===
+    permission bypass_whitelist = admin + dev + mod + crt
+
     // Hypercube
     permission has_hypercube = hypercube
 }
