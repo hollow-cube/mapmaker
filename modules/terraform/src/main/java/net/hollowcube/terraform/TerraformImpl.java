@@ -237,6 +237,11 @@ public final class TerraformImpl implements Terraform {
                     sectionChangeCache.clear();
                     blockEntityUpdates.clear();
 
+                    int totalSections = chunk.getMaxSection() - chunk.getMinSection();
+                    if (chunkY > totalSections) {
+                        logger.warn("{}: reference to invalid section at {}, {}: {}", task, chunkX, chunkZ, chunkY);
+                        return;
+                    }
                     var section = chunk.getSection(chunkY);
                     synchronized (chunk) { // Synchronized is OK, we always run this on one of the dedicated threads.
                         //todo optimize palette apply, if the palette is a full chunk of the same block we can do a single fill.
