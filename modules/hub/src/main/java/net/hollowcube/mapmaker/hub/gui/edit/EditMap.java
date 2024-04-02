@@ -306,21 +306,21 @@ public class EditMap extends View {
         }
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             boolean found = false;
-            for (var object : map.objects()) {
-                if ("mapmaker:finish_plate".equals(object.type().id())) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return PublishStage.MISSING_FINISH_PLATE;
+//            for (var object : map.objects()) {
+//                if ("mapmaker:finish_plate".equals(object.type().id())) {
+//                    found = true;
+//                    break;
+//                }
+//            }
+//            if (!found) return PublishStage.MISSING_FINISH_PLATE;
         } else {
-            for (var object : map.objects()) {
-                var objectId = object.type().id();
-                if (objectId.equals("mapmaker:checkpoint_plate") || objectId.equals("mapmaker:finish_plate")) {
-                    //todo this should be done using the required_variant property on the ObjectType in the future, not sure how to handle messaging then.
-                    return PublishStage.BAD_STATUS_PLATE;
-                }
-            }
+//            for (var object : map.objects()) {
+//                var objectId = object.type().id();
+//                if (objectId.equals("mapmaker:checkpoint_plate") || objectId.equals("mapmaker:finish_plate")) {
+//                    //todo this should be done using the required_variant property on the ObjectType in the future, not sure how to handle messaging then.
+//                    return PublishStage.BAD_STATUS_PLATE;
+//                }
+//            }
         }
         if (!map.isVerified()) return PublishStage.VERIFY;
         if (map.settings().getName().isEmpty()) return PublishStage.ADD_NAME;
@@ -451,7 +451,7 @@ public class EditMap extends View {
         fillTagsCounter(MapTags.TagType.GAMEPLAY);
     }
 
-    @Action(value="reset_tags")
+    @Action(value = "reset_tags")
     private void resetTags() {
         map.settings().removeGameplayTags();
         map.settings().removeVisualTags();
