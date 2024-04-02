@@ -9,6 +9,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,7 +23,7 @@ public record Emoji(
     private static final List<PlayerInfoUpdatePacket.Entry> EMOJI_PACKET_ENTRIES = new ArrayList<>();
     private static final LinkedHashMap<String, Emoji> EMOJI_MAP = new LinkedHashMap<>();
 
-    public static @NotNull Emoji findByName(@NotNull String name) {
+    public static @Nullable Emoji findByName(@NotNull String name) {
         return EMOJI_MAP.get(name.toLowerCase());
     }
 

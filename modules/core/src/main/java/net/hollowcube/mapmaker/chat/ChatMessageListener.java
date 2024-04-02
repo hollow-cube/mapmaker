@@ -161,7 +161,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                         case EMOJI -> {
                             var emoji = Emoji.findByName(part.name());
                             if (emoji == null) {
-//                                builder.append(Component.text(":" + part.name() + ":"));
+                                builder.append(Component.text(":" + part.name() + ":"));
                             } else builder.append(emoji.supplier().get());
                         }
                         case MAP -> {
