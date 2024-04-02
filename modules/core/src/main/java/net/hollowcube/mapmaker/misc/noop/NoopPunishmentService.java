@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.misc.noop;
 
+import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
-import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,8 +13,13 @@ import java.util.UUID;
 public class NoopPunishmentService implements PunishmentService {
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable UUID playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
-        throw new UnsupportedOperationException("not implemented");
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
+        return List.of();
+    }
+
+    @Override
+    public @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type) {
+        return null;
     }
 
     @Override

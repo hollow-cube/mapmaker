@@ -25,11 +25,10 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable UUID playerId, @Nullable UUID executorId,
-                                                    @Nullable PunishmentType type) {
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
         var queryBuilder = urlQueryBuilder();
         if (playerId != null) {
-            queryBuilder.add("playerId", playerId.toString());
+            queryBuilder.add("playerId", playerId);
         }
         if (executorId != null) {
             queryBuilder.add("executorId", executorId.toString());
@@ -46,7 +45,24 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
             throw new InternalError("Failed to get punishments (" + response.statusCode() + "): " + response.body());
         }
 
-        return GSON.fromJson(response.body(), new TypeToken<List<Punishment>>() {}.getType());
+        return GSON.fromJson(response.body(), new TypeToken<List<Punishment>>() {
+        }.getType());
+    }
+
+    @Override
+    public @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/punishments/" + playerId + "/active?punishmentType=" + type.name().toLowerCase(Locale.ROOT)))
+                .GET()
+                .build();
+
+        var response = doRequest(request, HttpResponse.BodyHandlers.ofString());
+        return switch (response.statusCode()) {
+            case 200 -> GSON.fromJson(response.body(), Punishment.class);
+            case 404 -> null;
+            default ->
+                    throw new InternalError("Failed to revoke punishment (" + response.statusCode() + "): " + response.body());
+        };
     }
 
     @Override
@@ -56,7 +72,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
         var body = new HashMap<String, String>();
         body.put("playerId", playerId.toString());
         body.put("executorId", executorId.toString());
-        body.put("type", type.name().toLowerCase(Locale.ROOT));
+        body.put("punishmentType", type.name().toLowerCase(Locale.ROOT));
         body.put("comment", comment);
 
         if (ladderId != null) {
@@ -131,6 +147,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
             throw new InternalError("Failed to get punishment ladders (" + response.statusCode() + "): " + response.body());
         }
 
-        return GSON.fromJson(response.body(), new TypeToken<List<PunishmentLadder>>() {}.getType());
+        return GSON.fromJson(response.body(), new TypeToken<List<PunishmentLadder>>() {
+        }.getType());
     }
 }

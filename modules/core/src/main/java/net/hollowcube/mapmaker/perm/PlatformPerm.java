@@ -9,7 +9,10 @@ public enum PlatformPerm {
     MAP_ADMIN,
 
     // Punishments
-    //todo
+    VIEW_PUNISHMENTS,
+    KICK_PLAYER,
+    MUTE_PLAYER,
+    BAN_PLAYER,
 
     // Misc Moderation
     VANISH,

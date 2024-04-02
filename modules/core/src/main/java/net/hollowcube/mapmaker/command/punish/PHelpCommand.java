@@ -1,0 +1,92 @@
+package net.hollowcube.mapmaker.command.punish;
+
+import com.google.inject.Inject;
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.punishments.PunishmentService;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+
+public class PHelpCommand extends CommandDsl {
+    private final Argument<PunishmentType> typeArg = Argument.Enum("type", PunishmentType.class)
+            .description("Show only entries for the given type");
+
+    private final PunishmentService punishmentService;
+
+    @Inject
+    public PHelpCommand(@NotNull PunishmentService punishmentService, @NotNull PermManager permManager) {
+        super("phelp");
+        this.punishmentService = punishmentService;
+
+        category = CommandCategories.STAFF;
+        description = "Show information about the punishment ladders";
+
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.VIEW_PUNISHMENTS));
+        addSyntax(playerOnly(this::showLadderInfo));
+        addSyntax(playerOnly(this::showLadderInfo), typeArg);
+    }
+
+    private void showLadderInfo(@NotNull Player player, @NotNull CommandContext context) {
+        var typeFilter = context.get(typeArg);
+
+        var builder = Component.text();
+        builder.append(Component.translatable("punishment.help.header"));
+
+        var ladders = new ArrayList<>(punishmentService.getAllLadders());
+        ladders.sort(Comparator.comparing(PunishmentLadder::type));
+        for (var ladder : ladders) {
+            if (typeFilter != null && ladder.type() != typeFilter)
+                continue;
+
+            builder.appendNewline();
+            builder.append(Component.translatable("punishment.help.ladder.name", List.of(
+                    Component.text(FontUtil.rewrite("small", ladder.type().name().toLowerCase(Locale.ROOT))),
+                    Component.text(ladder.id()), Component.text(ladder.name())
+            )));
+
+            var track = Component.text();
+            for (int i = 0; i < ladder.entries().size(); i++) {
+                if (i > 0) track.append(Component.translatable("punishment.help.ladder.separator"));
+                track.append(Component.translatable("punishment.help.ladder.entry", Component.text(formatDuration(ladder.entries().get(i).duration()))));
+            }
+            builder.appendNewline();
+            builder.append(Component.translatable("punishment.help.ladder.entries", track));
+        }
+
+        player.sendMessage(builder);
+    }
+
+    private static final long HOUR = 60 * 60;
+    private static final long DAY = 24 * HOUR;
+    private static final long WEEK = 7 * DAY;
+    private static final long MONTH = 30 * DAY;
+
+    private static @NotNull String formatDuration(long duration) {
+        if (duration < 0) {
+            return "permanent";
+        } else if (duration >= MONTH) {
+            return (duration / MONTH) + "mo";
+        } else if (duration >= WEEK) {
+            return (duration / WEEK) + "w";
+        } else if (duration >= DAY) {
+            return (duration / DAY) + "d";
+        } else if (duration >= HOUR) {
+            return (duration / HOUR) + "h";
+        } else {
+            return "0h"; // default case if less than an hour
+        }
+    }
+}

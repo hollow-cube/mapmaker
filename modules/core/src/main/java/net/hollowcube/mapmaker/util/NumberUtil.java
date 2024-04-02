@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public final class NumberUtil {
@@ -96,6 +97,25 @@ public final class NumberUtil {
         }
 
         return result.toString();
+    }
+
+    public static String formatTimeSince(@NotNull Instant time) {
+        return formatDuration(Instant.now(), time);
+    }
+
+    public static String formatTimeUntil(@NotNull Instant time) {
+        return formatDuration(time, Instant.now());
+    }
+
+    public static String formatDuration(@NotNull Instant now, @NotNull Instant start) {
+        long seconds = now.getEpochSecond() - start.getEpochSecond();
+        if (seconds < 60) return seconds + "s";
+        long minutes = seconds / 60;
+        if (minutes < 60) return minutes + "m";
+        long hours = minutes / 60;
+        if (hours < 24) return hours + "h";
+        long days = hours / 24;
+        return days + "d";
     }
 
     private NumberUtil() {

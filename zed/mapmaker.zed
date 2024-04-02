@@ -57,12 +57,12 @@ definition mapmaker/platform {
     // === Platform map permissions ===
     permission map_admin = global_map_admin + global_map_superadmin
 
-    // === Punishments ===
-    permission ip_ban_player = mod + admin
-    permission ban_player = mod + admin
-    permission mute_player = ban_player
-
     // === Misc Moderation ===
+    permission view_punishments = mod + admin
+    permission kick_player = mod + admin
+    permission mute_player = mod + admin
+    permission ban_player = mod + admin
+
     permission vanish = mod + admin
     permission see_vanished = admin
 

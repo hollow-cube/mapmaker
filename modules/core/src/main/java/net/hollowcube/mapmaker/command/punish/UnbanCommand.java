@@ -5,6 +5,8 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -22,12 +24,17 @@ public class UnbanCommand extends CommandDsl {
     private final Argument<String> reasonArgument = Argument.GreedyString("reason");
 
     @Inject
-    public UnbanCommand(@NotNull PunishmentService punishmentService, @NotNull PlayerService playerService) {
+    public UnbanCommand(
+            @NotNull PunishmentService punishmentService,
+            @NotNull PlayerService playerService,
+            @NotNull PermManager permManager
+    ) {
         super("unban");
 
         this.punishmentService = punishmentService;
         this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
 
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.BAN_PLAYER));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);
     }
 

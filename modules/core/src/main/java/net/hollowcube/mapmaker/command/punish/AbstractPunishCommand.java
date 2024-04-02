@@ -5,11 +5,12 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
+import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
-import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
     AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull PlayerService playerService) {
+                          @NotNull PlayerService playerService, @NotNull PermManager permManager) {
         super(name);
 
         this.service = service;
@@ -48,6 +49,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
                 }
         );
 
+        setCondition(permManager.createPlatformCondition2(type == PunishmentType.BAN ? PlatformPerm.BAN_PLAYER : PlatformPerm.MUTE_PLAYER));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument, this.commentArgument);
     }
 

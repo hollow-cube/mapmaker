@@ -23,7 +23,15 @@ public final class Format {
     }
 
     public static String formatTimeSince(@NotNull Instant time) {
-        long seconds = Instant.now().getEpochSecond() - time.getEpochSecond();
+        return formatDuration(Instant.now(), time);
+    }
+
+    public static String formatTimeUntil(@NotNull Instant time) {
+        return formatDuration(time, Instant.now());
+    }
+
+    public static String formatDuration(@NotNull Instant now, @NotNull Instant start) {
+        long seconds = now.getEpochSecond() - start.getEpochSecond();
         if (seconds < 60) return seconds + "s";
         long minutes = seconds / 60;
         if (minutes < 60) return minutes + "m";

@@ -11,23 +11,19 @@ import java.util.UUID;
 
 public interface PunishmentService {
 
-    @NotNull List<Punishment> getPunishments(@Nullable UUID playerId, @Nullable UUID executorId,
-                                             @Nullable PunishmentType type);
+    @NotNull
+    List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type);
 
-    default boolean isPlayerBanned(@NotNull UUID playerId) {
-        return !this.getPunishments(playerId, null, PunishmentType.BAN).isEmpty();
-    }
+    @NotNull Punishment createPunishment(
+            @NotNull UUID playerId, @NotNull UUID executorId,
+            @NotNull PunishmentType type, @NotNull String comment,
+            @Nullable String ladderId);
 
-    default boolean isPlayerMuted(@NotNull UUID playerId) {
-        return !this.getPunishments(playerId, null, PunishmentType.MUTE).isEmpty();
-    }
+    @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type);
 
-    @NotNull Punishment createPunishment(@NotNull UUID playerId, @NotNull UUID executorId,
-                                         @NotNull PunishmentType type, @NotNull String comment,
-                                         @Nullable String ladderId);
-
-    void revokePunishment(@NotNull UUID playerId, @NotNull PunishmentType type, @NotNull UUID revokedBy,
-                          @NotNull String revokedReason);
+    void revokePunishment(
+            @NotNull UUID playerId, @NotNull PunishmentType type,
+            @NotNull UUID revokedBy, @NotNull String revokedReason);
 
     @NotNull List<PunishmentLadder> getAllLadders();
 

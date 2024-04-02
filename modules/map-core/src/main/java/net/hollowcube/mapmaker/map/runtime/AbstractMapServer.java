@@ -30,12 +30,9 @@ import net.hollowcube.mapmaker.command.EmojisCommand;
 import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
+import net.hollowcube.mapmaker.command.punish.*;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
-import net.hollowcube.mapmaker.command.punish.BanCommand;
-import net.hollowcube.mapmaker.command.punish.KickCommand;
-import net.hollowcube.mapmaker.command.punish.MuteCommand;
-import net.hollowcube.mapmaker.command.punish.UnbanCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
@@ -368,10 +365,16 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(createInstance(VanishCommand.class));
         commandManager.register(createInstance(UnvanishCommand.class));
+
+        commandManager.register(createInstance(PHelpCommand.class));
+        commandManager.register(createInstance(PStatusCommand.class));
+        commandManager.register(createInstance(PHistoryCommand.class));
+
         commandManager.register(createInstance(BanCommand.class));
-        commandManager.register(createInstance(MuteCommand.class));
-        commandManager.register(createInstance(KickCommand.class));
         commandManager.register(createInstance(UnbanCommand.class));
+        commandManager.register(createInstance(MuteCommand.class));
+//        commandManager.register(createInstance(UnmuteCommand.class));
+        commandManager.register(createInstance(KickCommand.class));
     }
 
     public @NotNull Collection<HealthCheck> readinessChecks() {

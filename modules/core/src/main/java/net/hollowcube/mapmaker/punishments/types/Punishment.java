@@ -7,6 +7,6 @@ import java.time.Instant;
 
 public record Punishment(@NotNull String playerId, @NotNull String executorId, @NotNull PunishmentType type,
                          @NotNull Instant createdAt, @Nullable String ladderId, @NotNull String comment,
-                         boolean superceded, @Nullable String revokedBy, @Nullable Instant revokedAt,
+                         @Nullable Instant expiresAt, @Nullable String revokedBy, @Nullable Instant revokedAt,
                          @Nullable String revokedReason) {
 }
