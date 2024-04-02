@@ -161,8 +161,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                         case EMOJI -> {
                             var emoji = Emoji.findByName(part.name());
                             if (emoji == null) {
-                                builder.append(Component.text(":" + part.name() + ":"));
-                            } else builder.append(emoji.component());
+//                                builder.append(Component.text(":" + part.name() + ":"));
+                            } else builder.append(emoji.supplier().get());
                         }
                         case MAP -> {
                             builder.append(Component.text("[map - todo]"));
@@ -206,7 +206,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                     var emoji = Emoji.findByName(part.name());
                     if (emoji == null) {
                         builder.append(Component.text(":" + part.name() + ":"));
-                    } else builder.append(emoji.component());
+                    } else builder.append(emoji.supplier().get());
                 }
                 case MAP -> {
                     builder.append(Component.text("[map - todo]"));

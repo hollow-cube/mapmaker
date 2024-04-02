@@ -39,6 +39,7 @@ definition mapmaker/platform {
     relation dev: mapmaker/player with audit_log_hack
     relation mod: mapmaker/player with audit_log_hack
     relation crt: mapmaker/player
+    relation friend: mapmaker/player
 
     relation hypercube: mapmaker/player with is_not_expired
 
@@ -66,7 +67,7 @@ definition mapmaker/platform {
     permission see_vanished = admin
 
     // === Generic ===
-    permission bypass_whitelist = admin + dev + mod + crt
+    permission bypass_whitelist = admin + dev + mod + crt + friend
 
     // Hypercube
     permission has_hypercube = hypercube
