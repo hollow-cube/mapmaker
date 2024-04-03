@@ -311,6 +311,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
+                System.out.println("RESETTING " + player.getUsername() + " FOR BEING BELOW RESET HEIGHT");
                 softReset(player, saveState);
                 return;
             }
@@ -526,6 +527,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Sanity check in case there are literally no blocks in the world.
         if (minBlockY == instance.getDimensionType().getMaxY()) minBlockY = worldMinHeight;
+        System.out.println("Computed reset height: " + (minBlockY - RESET_HEIGHT_OFFSET));
         instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);
     }
 
