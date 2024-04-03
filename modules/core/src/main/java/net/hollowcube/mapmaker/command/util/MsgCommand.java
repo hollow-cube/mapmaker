@@ -50,7 +50,6 @@ public class MsgCommand extends CommandDsl {
             player.sendMessage("Player not online");
             return;
         }
-
         var playerId = PlayerDataV2.fromPlayer(player).id();
         if (playerId.equals(target)) {
             player.sendMessage("You can't message yourself");
@@ -70,7 +69,7 @@ public class MsgCommand extends CommandDsl {
             currentMapId = currentMap.id();
         }
 
-        messageListener.sendChatMessage(new ClientChatMessageData(
+        messageListener.trySendChatMessage(player, new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerId, message, target, // Target is the channel id
                 currentMapId

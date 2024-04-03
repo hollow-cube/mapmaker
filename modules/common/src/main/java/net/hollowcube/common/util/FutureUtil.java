@@ -6,15 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
     private FutureUtil() {
     }
+
+    public static final Executor VIRTUAL = Executors.newVirtualThreadPerTaskExecutor();
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> @Nullable T handleException(@NotNull Throwable t) {

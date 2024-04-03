@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
+import net.hollowcube.mapmaker.punishments.types.PunishmentUpdateMessage;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -74,6 +75,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
             .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))
+            .registerTypeAdapter(PunishmentUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PunishmentUpdateMessage.Action.class))
             .disableJdkUnsafe()
             .create();
     public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {

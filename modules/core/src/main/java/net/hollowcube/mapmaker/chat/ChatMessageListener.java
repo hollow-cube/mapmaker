@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.chat;
 
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
@@ -11,6 +13,11 @@ import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.punishments.PunishmentService;
+import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
+import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
+import net.hollowcube.mapmaker.punishments.types.Punishment;
+import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -35,10 +42,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
@@ -59,14 +66,26 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private final SessionManager sessionManager;
     private final PlayerService playerService;
     private final MapService mapService;
+    private final PunishmentService punishmentService;
     private final FriendlyProducer producer;
 
-    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String kafkaBrokers) {
+    private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
+
+    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull PunishmentService punishmentService, @NotNull String kafkaBrokers) {
         super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
+        this.punishmentService = punishmentService;
         this.producer = new FriendlyProducer(kafkaBrokers);
+
+        this.playerMuteCache = Caffeine.newBuilder()
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .executor(FutureUtil.VIRTUAL)
+                .buildAsync(this::fetchActiveMute);
+        MinecraftServer.getGlobalEventHandler()
+                .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
+                .addListener(PunishmentRevokedEvent.class, this::handlePunishmentRevoked);
 
         setAutocommit(false);
     }
@@ -81,6 +100,20 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         this.producer.close();
     }
 
+    private @NotNull CompletableFuture<@NotNull Optional<Punishment>> fetchActiveMute(@NotNull String playerId, @NotNull Executor executor) {
+        return CompletableFuture.supplyAsync(() -> Optional.ofNullable(punishmentService.getActivePunishment(playerId, PunishmentType.MUTE)), executor);
+    }
+
+    private void handlePunishmentCreated(@NotNull PunishmentCreatedEvent event) {
+        if (event.punishment().type() != PunishmentType.MUTE) return;
+        this.playerMuteCache.put(event.punishment().playerId(), CompletableFuture.completedFuture(Optional.of(event.punishment())));
+    }
+
+    private void handlePunishmentRevoked(@NotNull PunishmentRevokedEvent event) {
+        if (event.punishment().type() != PunishmentType.MUTE) return;
+        this.playerMuteCache.put(event.punishment().playerId(), CompletableFuture.completedFuture(Optional.empty()));
+    }
+
     @Override
     public void accept(ClientChatMessagePacket packet, Player player) {
         final String message = packet.message();
@@ -89,26 +122,47 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-        String currentMapId = null;
-        if (message.contains("[map]")) {
-            var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
-            if (currentMap == null || !currentMap.isPublished()) {
-                player.sendMessage(Component.text("You are not in a published map.")); //todo message
-                return;
+        FutureUtil.submitVirtual(() -> {
+            String currentMapId = null;
+            if (message.contains("[map]")) {
+                var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+                if (currentMap == null || !currentMap.isPublished()) {
+                    player.sendMessage(Component.text("You are not in a published map.")); //todo message
+                    return;
+                }
+                currentMapId = currentMap.id();
             }
-            currentMapId = currentMap.id();
-        }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
-        var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                playerData.id(), message, ClientChatMessageData.CHANNEL_GLOBAL,
-                currentMapId);
-        logger.info("{}: {}", playerData.username(), messageData);
-        sendChatMessage(messageData);
+            var playerData = PlayerDataV2.fromPlayer(player);
+            var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
+                    playerData.id(), message, ClientChatMessageData.CHANNEL_GLOBAL,
+                    currentMapId);
+            trySendChatMessage(player, messageData);
+        });
     }
 
-    public void sendChatMessage(@NotNull ClientChatMessageData message) {
-        FutureUtil.submitVirtual(() -> this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(message)));
+    // True if muted but message has already been sent
+    @Blocking
+    private boolean testMuteState(@NotNull Player player) {
+        try {
+            var playerId = PlayerDataV2.fromPlayer(player).id();
+            var mute = playerMuteCache.get(playerId).get(3, TimeUnit.SECONDS);
+            if (mute.isPresent()) {
+                player.sendMessage(Component.translatable("punishment.muted"));
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void trySendChatMessage(@NotNull Player sender, @NotNull ClientChatMessageData message) {
+        // Do not do anything if the player is muted
+        if (testMuteState(sender)) return;
+
+        this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(message));
     }
 
     @Override

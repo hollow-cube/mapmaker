@@ -54,7 +54,7 @@ public class ReplyCommand extends CommandDsl {
         }
 
         var playerId = PlayerDataV2.fromPlayer(player).id();
-        messageListener.sendChatMessage(new ClientChatMessageData(
+        messageListener.trySendChatMessage(player, new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerId, message, ClientChatMessageData.CHANNEL_REPLY,
                 currentMapId
