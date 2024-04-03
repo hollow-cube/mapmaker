@@ -32,8 +32,7 @@ import java.util.Objects;
 public final class MiscFunctionality {
     public static void sendBetaHeader(@NotNull Player player) {
         var runtime = ServerRuntime.getRuntime();
-//        String watermarkString = String.format("hollowcube.net • Open Beta (%s)", runtime.shortCommit());
-        String watermarkString = String.format("hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
+        String watermarkString = String.format("hollowcube.net • Open Beta (%s)", runtime.shortCommit());
         player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
         player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
                 .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
@@ -75,8 +74,7 @@ public final class MiscFunctionality {
         var tabHeader = Component.text()
                 .appendNewline()
                 .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
-                .append(Component.text(cubeOffset + "ᴄʟᴏѕᴇᴅ ʙᴇᴛᴀ", darkGrayColor))
-//                .append(Component.text(cubeOffset + "ᴏᴘᴇɴ ʙᴇᴛᴀ", darkGrayColor))
+                .append(Component.text(cubeOffset + "ᴏᴘᴇɴ ʙᴇᴛᴀ", darkGrayColor))
                 .appendNewline()
                 .build();
         var tabFooter = Component.text()
