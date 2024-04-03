@@ -45,7 +45,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -128,9 +127,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            if (MapFeatureFlags.RATE_MAP.test(player(player)) && MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
-                inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
-            }
+            inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
 
             if (!event.getMap().getSetting(MapSettings.NO_SPECTATOR)) {
                 inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
@@ -175,9 +172,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        if (MapFeatureFlags.RATE_MAP.test(player(player)) && MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
-            inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
-        }
+        inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
 
         inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
         inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));

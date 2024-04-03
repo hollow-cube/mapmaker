@@ -10,6 +10,8 @@ import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.util.FireworkUtil;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.player.AppliedRewards;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -19,9 +21,9 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
-import static net.hollowcube.mapmaker.feature.FeatureFlag.player;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 @AutoService(FeatureProvider.class)
@@ -93,40 +95,37 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                         Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
             }
 
-//            player.showTitle(Title.title(Component.text("Map Completed", NamedTextColor.GOLD), Component.empty(), Title.Times.of(Duration.ZERO, Duration.of(80, TimeUnit.SERVER_TICK), Duration.ZERO)));
-//            player.sendPacket(new SetTickStatePacket(15, false));
-//            MinecraftServer.getSchedulerManager().submitTask(new Supplier<>() {
-//                private int state = 0;
-//
-//                @Override
-//                public TaskSchedule get() {
-//                    if (state < 10) {
-//                        var newRate = (float) CoordinateUtil.lerp(15.0, 4.0, (float) (state + 1) / 10f);
-//                        player.sendPacket(new SetTickStatePacket(newRate, false));
-//                        state++;
-//                        return TaskSchedule.tick(3);
-//                    }
-//                    if (state == 10) {
-//                        state++;
-//                        return TaskSchedule.tick(50);
-//                    }
-//
-//                    player.sendPacket(new SetTickStatePacket(20, false));
-//                    return TaskSchedule.stop();
-//                }
-//            });
-
-            FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
-
-            // Show the review GUI for the player if they have not submitted a rating yet
-            if (MapFeatureFlags.RATE_MAP.test(player(player))) {
+            // Will be called when the completion animation is finished
+            var lastRatingFuture = player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG);
+            Runnable tryShowRateGui = () -> {
                 if (MapRatingFeatureProvider.isMapRatable(world)) {
-                    var lastRating = FutureUtil.getUnchecked(player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG));
+                    var lastRating = FutureUtil.getUnchecked(lastRatingFuture);
                     if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
                         world.server().showView(player, c -> new RateMapView(c, world.map()));
                     }
                 }
-            }
+            };
+
+            var rewards = Optional.ofNullable(resp)
+                    .map(SaveStateUpdateResponse::rewards);
+
+            // Apply the rewards
+            rewards.map(AppliedRewards::newState).ifPresent(newState -> {
+                var playerData = PlayerDataV2.fromPlayer(player);
+                if (newState.hasCoins()) //noinspection DataFlowIssue
+                    playerData.setCoins(newState.coins());
+                if (newState.hasExp()) //noinspection DataFlowIssue
+                    playerData.setExperience(newState.exp());
+                if (newState.hasCubits()) //noinspection DataFlowIssue
+                    playerData.setCubits(newState.cubits());
+            });
+
+            // Show the completion animation
+            rewards.map(AppliedRewards::diff)
+                    .ifPresent(diff -> MapCompletionAnimation.schedule(player, diff, tryShowRateGui));
+
+            // Play the victory effect
+            FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
         });
     }
 

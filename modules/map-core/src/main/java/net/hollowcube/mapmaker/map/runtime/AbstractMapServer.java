@@ -487,9 +487,9 @@ public abstract class AbstractMapServer implements MapServer {
                     presence.instanceId(), presence.type(),
                     presence.state(), presence.mapId()
             );
-            var sessionResponseFuture = scope.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
-            var mapPlayerDataFuture = scope.fork(() -> mapService.getMapPlayerData(playerId));
-            var backpackDataFuture = scope.fork(() -> playerService.getPlayerBackpack(playerId));
+            var sessionResponseFuture = scope.fork(FutureUtil.wrap(() -> sessionService.transferSessionV2(playerId, transferReq)));
+            var mapPlayerDataFuture = scope.fork(FutureUtil.wrap(() -> mapService.getMapPlayerData(playerId)));
+            var backpackDataFuture = scope.fork(FutureUtil.wrap(() -> playerService.getPlayerBackpack(playerId)));
 
             scope.join();
 

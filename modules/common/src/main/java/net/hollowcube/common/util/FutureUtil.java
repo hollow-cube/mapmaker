@@ -36,6 +36,17 @@ public final class FutureUtil {
         };
     }
 
+    public static <T> @NotNull Callable<T> wrap(@NotNull Callable<T> callable) {
+        return () -> {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+                return null;
+            }
+        };
+    }
+
     public static @NotNull Runnable wrapVirtual(@NotNull Runnable runnable) {
         return () -> submitVirtual(runnable);
     }

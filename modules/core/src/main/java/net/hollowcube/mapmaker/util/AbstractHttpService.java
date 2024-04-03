@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.util;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.opentelemetry.api.OpenTelemetry;
@@ -13,7 +12,6 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
-import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
@@ -40,7 +38,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,8 +67,6 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(SaveState.PlayState.class, DFU.JsonSerializer(SaveState.PlayState.CODEC))
             .registerTypeAdapter(SaveState.BuildState.class, DFU.JsonSerializer(SaveState.BuildState.CODEC))
             .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
-            .registerTypeAdapter(AppliedRewards.class, new FieldSerializer<>(AppliedRewards::new, AppliedRewards::entries, new TypeToken<List<AppliedRewards.Entry>>() {
-            }.getType()))
             .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
             .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))

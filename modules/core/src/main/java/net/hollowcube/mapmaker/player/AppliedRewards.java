@@ -1,37 +1,32 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+public record AppliedRewards(
+        @NotNull Inventory diff,
+        @Nullable Inventory newState
+) {
 
-public class AppliedRewards {
-    private @NotNull List<Entry> entries = new ArrayList<>();
+    public record Inventory(
+            @Nullable Integer coins,
+            @Nullable Integer cubits,
+            @Nullable Integer exp,
+            @Nullable JsonElement backpack
+    ) {
 
-    public AppliedRewards() {
-        // GSON constructor
-    }
-
-    public AppliedRewards(@NotNull List<Entry> entries) {
-        this.entries = entries;
-    }
-
-    public @NotNull List<Entry> entries() {
-        return entries;
-    }
-
-    public record Entry(@NotNull RewardType type, @Nullable String id, int amount) {
-        @Override
-        public String id() {
-            return id == null || id.isEmpty() ? null : id;
+        public boolean hasCoins() {
+            return coins != null && coins > 0;
         }
-    }
 
-    @Override
-    public String toString() {
-        return "AppliedRewards{" +
-                "entries=" + entries +
-                '}';
+        public boolean hasCubits() {
+            return cubits != null && cubits > 0;
+        }
+
+        public boolean hasExp() {
+            return exp != null && exp > 0;
+        }
+
     }
 }

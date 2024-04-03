@@ -73,6 +73,7 @@ public record Emoji(
     public static final Emoji THUMBS_UP = builder("thumbs_up").parent("misc").build();
     public static final Emoji THUMBS_DOWN = builder("thumbs_down").parent("misc").build();
     public static final Emoji PRAY = builder("pray").parent("misc").build();
+    public static final Emoji OK = builder("ok").parent("misc").build();
     public static final Emoji CROWN = builder("crown").parent("misc").build();
     public static final Emoji L = builder("l").parent("misc").build();
     public static final Emoji GG = builder("gg").parent("misc").build();

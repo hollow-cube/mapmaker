@@ -20,6 +20,8 @@ import java.util.Map;
 public class PlayerDataV2 {
     public static final Tag<PlayerDataV2> TAG = Tag.Transient("mapmaker:player_data");
 
+    private static final long[] XP_FOR_LEVELS = new long[51];
+
     public static @NotNull PlayerDataV2 fromPlayer(@NotNull Player player) {
         return player.getTag(TAG);
     }
@@ -34,6 +36,7 @@ public class PlayerDataV2 {
     @Expose(serialize = false, deserialize = false)
     public final long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
     private long playtime; // in milliseconds since last save (when session was created)
+    private long experience;
 
     private int coins = 0;
     private int cubits = 0;
@@ -122,6 +125,29 @@ public class PlayerDataV2 {
         return storedPlaytime() + sessionPlaytime();
     }
 
+    public long experience() {
+        return experience;
+    }
+
+    public int level() {
+        for (int i = 0; i < XP_FOR_LEVELS.length; i++) {
+            if (experience < XP_FOR_LEVELS[i]) return i - 1;
+        }
+        return XP_FOR_LEVELS.length - 1;
+    }
+
+    public float levelProgress() {
+        var level = level();
+        if (level == 50) return 1;
+        var prev = XP_FOR_LEVELS[level];
+        var next = XP_FOR_LEVELS[level + 1];
+        return (float) (experience - prev) / (next - prev);
+    }
+
+    public void setExperience(long experience) {
+        this.experience = experience;
+    }
+
     public int coins() {
         return coins;
     }
@@ -146,6 +172,14 @@ public class PlayerDataV2 {
     public void setCosmetic(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
         if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
         setSetting(type.setting(), cosmetic == null ? "" : cosmetic.id());
+    }
+
+    static {
+        double BASE_XP = 100;
+        double GROWTH_FACTOR = 1.1;
+        for (int i = 0; i < XP_FOR_LEVELS.length; i++) {
+            XP_FOR_LEVELS[i] = (long) (i == 0 ? 0 : XP_FOR_LEVELS[i - 1] + ((BASE_XP * Math.pow(GROWTH_FACTOR, i - 1)) + 100));
+        }
     }
 
 }

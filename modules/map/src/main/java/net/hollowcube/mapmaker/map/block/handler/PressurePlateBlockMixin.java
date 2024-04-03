@@ -47,6 +47,9 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         if (world == null) return;
 
         var pos = tick.getBlockPosition();
+        //noinspection ConstantValue
+        if (pos == null)
+            return; // Intellij doesnt like this because it disagrees with annotation, but minestom seems to lie here sometimes.
         var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5);
 
         Set<Player> newPlayers = new HashSet<>(), currentPlayers = getPlayersOnPlate();
