@@ -7,6 +7,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ public class MapCommand extends CommandDsl {
     public final MapInfoCommand info;
 
     public final MapDeleteCommand delete;
+    public final MapEditCommand edit;
     public final MapLeaderboardCommand leaderboard;
     public final MapAlterCommand alter;
 
@@ -25,7 +27,8 @@ public class MapCommand extends CommandDsl {
             @NotNull Controller guiController,
             @NotNull PlayerService playerService,
             @NotNull MapService mapService,
-            @NotNull PermManager permManager
+            @NotNull PermManager permManager,
+            @NotNull ServerBridge bridge
     ) {
         super("map");
 
@@ -40,6 +43,7 @@ public class MapCommand extends CommandDsl {
 
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
+        addSubcommand(this.edit = new MapEditCommand(mapService, permManager, bridge));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
 

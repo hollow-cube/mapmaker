@@ -122,6 +122,12 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
+        if (sessionManager.isHidden(playerId)) {
+            player.sendMessage(Component.text("you cannot chat while vanished"));
+            return;
+        }
+
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
@@ -133,10 +139,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 currentMapId = currentMap.id();
             }
 
-            var playerData = PlayerDataV2.fromPlayer(player);
             var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                    playerData.id(), message, ClientChatMessageData.CHANNEL_GLOBAL,
-                    currentMapId);
+                    playerId, message, ClientChatMessageData.CHANNEL_GLOBAL, currentMapId);
             trySendChatMessage(player, messageData);
         });
     }

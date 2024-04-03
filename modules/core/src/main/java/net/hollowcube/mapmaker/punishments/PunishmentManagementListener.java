@@ -66,8 +66,6 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
         // Announce async to kick as quick as possible
         FutureUtil.submitVirtual(() -> announcePunishmentUpdate(true, punishment));
 
-        // TODO: Broadcast punishment message to all staff?
-
         var type = punishment.type();
         if (type != PunishmentType.BAN && type != PunishmentType.KICK) {
             // Only bans and kicks require the target to be kicked
