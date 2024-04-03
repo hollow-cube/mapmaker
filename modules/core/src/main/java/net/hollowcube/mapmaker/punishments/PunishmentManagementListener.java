@@ -3,6 +3,9 @@ package net.hollowcube.mapmaker.punishments;
 import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
@@ -17,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateMessage> {
@@ -25,8 +30,17 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
     private static final String PUNISHMENTS_TOPIC = "punishments";
     private static final Gson GSON = AbstractHttpService.GSON;
 
-    public PunishmentManagementListener(@NotNull String kafkaBrokers) {
+    private final PlayerService playerService;
+    private final PermManager permManager;
+
+    public PunishmentManagementListener(
+            @NotNull PlayerService playerService,
+            @NotNull PermManager permManager,
+            @NotNull String kafkaBrokers
+    ) {
         super(PUNISHMENTS_TOPIC, "punishments", PunishmentManagementListener::fromJson, kafkaBrokers);
+        this.playerService = playerService;
+        this.permManager = permManager;
     }
 
     private static @NotNull PunishmentUpdateMessage fromJson(@NotNull String json) {
@@ -49,6 +63,9 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
         MinecraftServer.getSchedulerManager().scheduleNextTick(
                 () -> EventDispatcher.call(new PunishmentCreatedEvent(punishment)));
 
+        // Announce async to kick as quick as possible
+        FutureUtil.submitVirtual(() -> announcePunishmentUpdate(true, punishment));
+
         // TODO: Broadcast punishment message to all staff?
 
         var type = punishment.type();
@@ -70,5 +87,27 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
     private void handlePunishmentRevoked(@NotNull Punishment punishment) {
         MinecraftServer.getSchedulerManager().scheduleNextTick(
                 () -> EventDispatcher.call(new PunishmentRevokedEvent(punishment)));
+
+        announcePunishmentUpdate(false, punishment);
+    }
+
+    private void announcePunishmentUpdate(boolean created, @NotNull Punishment punishment) {
+        var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
+        var announcement = Component.translatable(
+                created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
+                playerService.getPlayerDisplayName2(punishment.playerId()),
+                playerService.getPlayerDisplayName2(punishment.executorId()),
+                Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
+        );
+        var permission = switch (punishment.type()) {
+            case BAN -> PlatformPerm.BAN_PLAYER;
+            case MUTE -> PlatformPerm.MUTE_PLAYER;
+            case KICK -> PlatformPerm.KICK_PLAYER;
+        };
+        for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            if (!permManager.hasPlatformPermission(player, permission)) continue;
+
+            player.sendMessage(announcement);
+        }
     }
 }

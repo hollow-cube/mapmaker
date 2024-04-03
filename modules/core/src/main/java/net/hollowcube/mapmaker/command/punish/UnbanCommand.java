@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -17,11 +18,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class UnbanCommand extends CommandDsl {
+    private final Argument<String> targetArgument;
+    private final Argument<String> reasonArgument = Argument.GreedyString("reason")
+            .description("The reason for the unban");
 
     private final PunishmentService punishmentService;
-
-    private final Argument<String> targetArgument;
-    private final Argument<String> reasonArgument = Argument.GreedyString("reason");
 
     @Inject
     public UnbanCommand(
@@ -30,9 +31,12 @@ public class UnbanCommand extends CommandDsl {
             @NotNull PermManager permManager
     ) {
         super("unban");
-
         this.punishmentService = punishmentService;
-        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
+
+        category = CommandCategories.STAFF;
+        description = "Unban a player from the server";
+        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService)
+                .description("The player to unban");
 
         setCondition(permManager.createPlatformCondition2(PlatformPerm.BAN_PLAYER));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);

@@ -232,7 +232,7 @@ public abstract class AbstractMapServer implements MapServer {
             mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
             shutdowner.queue(mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(kafkaConfig.bootstrapServersStr());
+            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServersStr());
             shutdowner.queue(punishmentCreatedListener::close);
 
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr());
