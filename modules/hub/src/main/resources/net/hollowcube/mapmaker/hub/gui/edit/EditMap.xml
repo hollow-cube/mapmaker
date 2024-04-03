@@ -10,10 +10,7 @@
                 <text id="slot_id_info" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <!--        todo those last 2 buttons-->
-                <button translationKey="gui.create_maps.map_info_tab.manage_builders"
-                        sprite="create_maps/tab_info/manage_builders"/>
-                <button translationKey="gui.create_maps.map_info_tab.invite_players"
-                        sprite="create_maps/tab_info/invite_players"/>
+                <label width="2" translationKey="gui.create_maps.map_info_tab.invite_players"/>
             </box>
             <box width="9" height="1" align="ltr">
                 <!-- Shift by 19 to avoid the icon -->
@@ -182,7 +179,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_terrain_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_terrain_bg"/>
                                 <button id="map_tag_terrain_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.terrain"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.terrain.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_terrain_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_terrain_selected"/>
                             </switch>
@@ -192,7 +189,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_organics_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_organics_bg"/>
                                 <button id="map_tag_organics_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.organics"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.organics.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_organics_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_organics_selected"/>
                             </switch>
@@ -202,7 +199,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_structure_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_structure_bg"/>
                                 <button id="map_tag_structure_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.structure"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.structure.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_structure_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_structure_selected"/>
                             </switch>
@@ -212,7 +209,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_interior_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_interior_bg"/>
                                 <button id="map_tag_interior_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.interior"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.interior.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_interior_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_interior_selected"/>
                             </switch>
@@ -222,7 +219,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_music_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_music_bg"/>
                                 <button id="map_tag_music_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.music"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.music.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_music_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_music_selected"/>
                             </switch>
@@ -232,7 +229,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_bg"/>
                                 <button id="map_tag_twodimensional_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.2d"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.2d.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_2d_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_2d_selected"/>
                             </switch>
@@ -242,7 +239,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_recreation_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_recreation_bg"/>
                                 <button id="map_tag_recreation_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.recreation"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.recreation.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_recreation_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_recreation_selected"/>
                             </switch>
@@ -254,7 +251,7 @@
                                         sprite="create_maps/tab_tags/tab_visual/tag_story_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_story_bg"/>
                                 <button id="map_tag_story_set"
-                                        translationKey="gui.create_maps.map_tags_tab.visual.story"
+                                        translationKey="gui.create_maps.map_tags_tab.visual.story.selected"
                                         sprite="create_maps/tab_tags/tab_visual/tag_story_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_visual/tag_story_selected"/>
                             </switch>
@@ -274,7 +271,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_coop_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_coop_bg"/>
                                 <button id="map_tag_coop_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.coop"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.coop.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_coop_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_coop_selected"/>
                             </switch>
@@ -284,7 +281,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_bg"/>
                                 <button id="map_tag_puzzle_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.puzzle"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.puzzle.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_puzzle_selected"/>
                             </switch>
@@ -294,7 +291,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_minigame_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_minigame_bg"/>
                                 <button id="map_tag_minigame_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.minigame"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.minigame.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_minigame_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_minigame_selected"/>
                             </switch>
@@ -304,7 +301,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_exploration_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_exploration_bg"/>
                                 <button id="map_tag_exploration_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.exploration"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.exploration.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_exploration_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_exploration_selected"/>
                             </switch>
@@ -314,7 +311,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_bg"/>
                                 <button id="map_tag_bossbattle_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.bossbattle.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_bossbattle_selected"/>
                             </switch>
@@ -324,7 +321,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_bg"/>
                                 <button id="map_tag_autocomplete_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.autocomplete.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_autocomplete_selected"/>
                             </switch>
@@ -334,7 +331,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_escape_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_escape_bg"/>
                                 <button id="map_tag_escape_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.escape"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.escape.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_escape_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_escape_selected"/>
                             </switch>
@@ -347,7 +344,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_trivia_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_trivia_bg"/>
                                 <button id="map_tag_trivia_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.trivia"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.trivia.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_trivia_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_trivia_selected"/>
                             </switch>
@@ -357,7 +354,7 @@
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_strategy_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_strategy_bg"/>
                                 <button id="map_tag_strategy_set"
-                                        translationKey="gui.create_maps.map_tags_tab.gameplay.strategy"
+                                        translationKey="gui.create_maps.map_tags_tab.gameplay.strategy.selected"
                                         sprite="create_maps/tab_tags/tab_gameplay/tag_strategy_icon"
                                         backgroundSprite="create_maps/tab_tags/tab_gameplay/tag_strategy_selected"/>
                             </switch>
@@ -496,10 +493,7 @@
                 <text id="slot_id_actions" width="5" translationKey="gui.create_maps.map_slot" font="slot_title"
                       centered="true"/>
                 <!--        todo those last 2 buttons-->
-                <button translationKey="gui.create_maps.map_actions_tab.map_backups"
-                        sprite="create_maps/tab_actions/idk1"/>
-                <button translationKey="gui.create_maps.map_actions_tab.submit_maps"
-                        sprite="create_maps/tab_actions/idk2"/>
+                <label width="2" translationKey="gui.create_maps.map_actions_tab.map_backups"/>
             </box>
 
             <box width="9" height="4" align="ltr">
