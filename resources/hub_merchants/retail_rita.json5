@@ -1,0 +1,30 @@
+{
+    "trades": [
+        {
+            "result": "hat/top_hat",
+            "inputs": {
+                "coins": 5000,
+                "cloth": 6,
+                "string": 2
+            },
+        },
+        {
+            "result": "hat/clown_mask",
+            "inputs": {
+                "coins": 20000,
+                "cloth": 8,
+                "goo": 6,
+                "bone_fragment": 4
+            },
+        },
+        {
+            "result": "hat/evil_clown_mask",
+            "inputs": {
+                "coins": 50000,
+                "bone_fragment": 12,
+                "cloth": 8,
+                "nightmare_fuel": 2
+            },
+        }
+    ]
+}

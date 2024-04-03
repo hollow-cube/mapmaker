@@ -1,0 +1,20 @@
+{
+    "trades": [
+        {
+            "result": "hat/shark_hat",
+            "inputs": {
+                "coins": 50000,
+                "goo": 24,
+                "cloth": 16,
+                "bone_fragment": 12
+            },
+        },
+        {
+            "result": "particle/bubble_particles",
+            "inputs": {
+                "coins": 5000,
+                "goo": 6
+            },
+        }
+    ]
+}

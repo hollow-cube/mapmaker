@@ -1,0 +1,10 @@
+{
+    "trades": [
+        {
+            "result": "particle/note_particles",
+            "inputs": {
+                "coins": 6000
+            },
+        },
+    ]
+}

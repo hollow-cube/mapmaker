@@ -1,0 +1,21 @@
+{
+    "trades": [
+        {
+            "result": "hat/burger",
+            "inputs": {
+                "coins": 20000,
+                "goo": 12,
+                "flower_petal": 6,
+                "sugarcube": 4
+            },
+        },
+        {
+            "result": "hat/filled_mug",
+            "inputs": {
+                "coins": 20000,
+                "goo": 16,
+                "sugarcube": 4
+            },
+        }
+    ]
+}

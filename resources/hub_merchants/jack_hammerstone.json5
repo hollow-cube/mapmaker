@@ -1,0 +1,22 @@
+{
+    "trades": [
+        {
+            "result": "hat/hard_hat",
+            "inputs": {
+                "cubits": 5000,
+                "metal": 4,
+                "cloth": 2
+            },
+        },
+        {
+            "result": "victory_effect/train_victory_effect",
+            "inputs": {
+                "coins": 50000,
+                "metal": 24,
+                "gem": 16,
+                "gold_chunk": 6,
+                "infernal_flame": 4
+            },
+        }
+    ]
+}

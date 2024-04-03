@@ -1,0 +1,28 @@
+{
+    "trades": [
+        {
+            "result": "hat/apprentice_hat",
+            "inputs": {
+                "coins": 20000,
+                "cloth": 12,
+                "string": 6,
+                "gold_chunk": 1
+            },
+        },
+        {
+            "result": "hat/wizard_hat",
+            "inputs": {
+                "coins": 20000,
+                "cloth": 16,
+                "string": 8,
+                "gold_chunk": 2
+            },
+        },
+        {
+            "result": "particle/cloud_particles",
+            "inputs": {
+                "coins": 5000
+            },
+        }
+    ]
+}
