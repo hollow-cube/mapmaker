@@ -48,7 +48,8 @@ jobs:
           echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
           echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
           
-          mkdir -p out && cp squashed.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
+          mkdir -p out
+          cp squashed.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
