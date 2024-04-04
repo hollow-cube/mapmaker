@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarWorld;
@@ -31,26 +30,20 @@ import java.util.concurrent.CompletableFuture;
 public class MapInstance extends InstanceContainer {
     private static final InstanceManager INSTANCE_MANAGER = MinecraftServer.getInstanceManager();
 
-    private final String mapId;
-
     public MapInstance(@NotNull String dimensionName) {
         this(dimensionName, DimensionTypes.FULL_BRIGHT);
     }
 
     public MapInstance(@NotNull String dimensionName, @NotNull DimensionType dimensionType) {
-        this("", dimensionName, dimensionType);
-    }
-
-    public MapInstance(@NotNull String mapId, @NotNull String dimensionName, @NotNull DimensionType dimensionType) {
         super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
-        this.mapId = mapId;
 
         setTimeRate(0); //todo eventually this should be a map setting
         setTime(6000);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-        setChunkSupplier(mapId.equals(MapData.SPAWN_MAP_ID) ? LitChunk::new : UnlitChunk::new);
+//        setChunkSupplier(LightingChunk::new);
+        setChunkSupplier(UnlitChunk::new);
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);
@@ -62,8 +55,7 @@ public class MapInstance extends InstanceContainer {
         try {
             var loader = new PolarLoader(new ByteArrayInputStream(worldData));
             if (worldAccess != null) loader.setWorldAccess(worldAccess);
-            if (!mapId.equals(MapData.SPAWN_MAP_ID)) loader = loader.setLoadLighting(false);
-            setChunkLoader(loader);
+            setChunkLoader(loader.setLoadLighting(false));
 
             // Load the world data
             loader.loadInstance(this);
