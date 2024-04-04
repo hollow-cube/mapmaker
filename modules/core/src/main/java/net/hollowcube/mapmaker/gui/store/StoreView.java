@@ -24,26 +24,17 @@ public class StoreView extends View {
 
     public StoreView(@NotNull Context context) {
         super(context);
+
+        cubitsText.setText("Buy Cubits");
+        cubitsText.setText("Buy Hypercube");
+        cubitsText.setText("Buy Addons");
+
         for (int i = 0; i < tabButtons.length; i++) {
             var tabIndex = i;
             addActionHandler(
-                    Objects.requireNonNull(tabButtons[i].id()),
+                    Objects.requireNonNull(tabButtons[tabIndex].id()),
                     Label.ActionHandler.lmb(player -> tabSwitch.setOption(tabIndex))
             );
-//            switch (tabIndex) {
-//                case 0 -> {
-//                    nameSwitch.setOption(0);
-//                    cubitsText.setText("Buy Cubits");
-//                }
-//                case 1 -> {
-//                    nameSwitch.setOption(1);
-//                    hypercubeText.setText("Buy Hypercube");
-//                }
-//                case 2 -> {
-//                    nameSwitch.setOption(2);
-//                    addonsText.setText("Buy Add-Ons");
-//                }
-//            }
         }
     }
 }
