@@ -7,7 +7,8 @@
         <BackButton/>
         <label translationKey="gui.effect.potion.editor.information"/>
 
-        <label id="header" width="5" translationKey="this.will.be.replaced" sprite="minecraft:potion"/>
+        <text id="header" width="5" translationKey="todo"
+              font="line_0" centered="true"/>
 
         <spacer width="2"/>
     </box>
@@ -17,7 +18,21 @@
     <box width="9" height="1" align="ltr">
         <spacer width="2"/>
 
-        <pagination id="entries" width="5" height="1" child="PotionEffectLevelEntry"/>
+        <switch id="level_dec_switch">
+            <button id="level_dec_off" translationKey="gui.effect.potion.level.dec_off"
+                    sprite="effect/potion/modify_r1/disabled_minus"/>
+            <button id="level_dec_on" translationKey="gui.effect.potion.level.dec_on"
+                    sprite="effect/potion/modify_r1/one_minus"/>
+        </switch>
+        <text id="level" width="3" translationKey="gui.effect.potion.level.current"
+              font="line_2" centered="true"/>
+        <switch id="level_inc_switch">
+            <button id="level_inc_off" translationKey="gui.effect.potion.level.inc_off"
+                    sprite="effect/potion/modify_r1/disabled_plus"/>
+            <button id="level_inc_on" translationKey="gui.effect.potion.level.inc_on"
+                    sprite="effect/potion/modify_r1/one_plus"/>
+        </switch>
+
     </box>
 
     <spacer/>
@@ -25,14 +40,34 @@
     <box width="9" height="1" align="ltr">
         <spacer/>
 
-        <button id="time_rem_5" translationKey="gui.effect.potion.time.rem_5"/>
-        <button id="time_rem_1" translationKey="gui.effect.potion.time.rem_1"/>
+        <switch id="time_dec5_switch">
+            <button id="time_dec5_off" translationKey="gui.effect.potion.time.dec5_off"
+                    sprite="effect/potion/modify_r2/disabled_minus"/>
+            <button id="time_dec5_on" translationKey="gui.effect.potion.time.dec5_on"
+                    sprite="effect/potion/modify_r2/two_minus"/>
+        </switch>
+        <switch id="time_dec1_switch">
+            <button id="time_dec1_off" translationKey="gui.effect.potion.time.dec1_off"
+                    sprite="effect/potion/modify_r2/disabled_minus"/>
+            <button id="time_dec1_on" translationKey="gui.effect.potion.time.dec1_on"
+                    sprite="effect/potion/modify_r2/one_minus"/>
+        </switch>
 
-        <button id="time_edit" width="3" translationKey="gui.effect.potion.time.current"
-                sprite="minecraft:clock"/>
+        <text id="time" width="3" translationKey="gui.effect.potion.level.current"
+              font="line_4" centered="true"/>
 
-        <button id="time_add_1" translationKey="gui.effect.potion.time.add_1"/>
-        <button id="time_add_5" translationKey="gui.effect.potion.time.add_5"/>
+        <switch id="time_inc1_switch">
+            <button id="time_inc1_off" translationKey="gui.effect.potion.time.inc1_off"
+                    sprite="effect/potion/modify_r2/disabled_plus"/>
+            <button id="time_inc1_on" translationKey="gui.effect.potion.time.inc1_on"
+                    sprite="effect/potion/modify_r2/one_plus"/>
+        </switch>
+        <switch id="time_inc5_switch">
+            <button id="time_inc5_off" translationKey="gui.effect.potion.time.inc5_off"
+                    sprite="effect/potion/modify_r2/disabled_plus"/>
+            <button id="time_inc5_on" translationKey="gui.effect.potion.time.inc5_on"
+                    sprite="effect/potion/modify_r2/two_plus"/>
+        </switch>
     </box>
 
 </component>

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.entity.potion;
 
 import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -51,16 +52,16 @@ public record PotionInfo(
 
     public static final Codec<PotionInfo> CODEC = Codec.STRING.xmap(PotionInfo::getById, PotionInfo::id);
 
-    public static final PotionInfo SPEED = builder("speed").maxLevel(255).setVanillaEffect(PotionEffect.SPEED).setIcon(Material.SUGAR).setHandler(new SpeedPotionHandler()).build();
-    public static final PotionInfo JUMP_BOOST = builder("jump_boost").maxLevel(255).setVanillaEffect(PotionEffect.JUMP_BOOST).setIcon(Material.RABBIT_FOOT).build();
-    public static final PotionInfo DEPTH_STRIDER = builder("depth_strider").maxLevel(3).setVanillaEffect(PotionEffect.BAD_OMEN).setIcon(Material.PRISMARINE_SHARD).setHandler(new DepthStriderPotionHandler()).build();
-    public static final PotionInfo LEVITATION = builder("levitation").maxLevel(255).setVanillaEffect(PotionEffect.LEVITATION).setIcon(Material.CHAINMAIL_BOOTS).build();
-    public static final PotionInfo SLOW_FALL = builder("slow_fall").setVanillaEffect(PotionEffect.SLOW_FALLING).setIcon(Material.FEATHER).build();
-    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon(Material.ANVIL).setHandler(new SlownessPotionHandler()).build();
-    public static final PotionInfo BLINDNESS = builder("blindness").maxLevel(255).setVanillaEffect(PotionEffect.BLINDNESS).setIcon(Material.SPIDER_EYE).build();
-    public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon(Material.BLACK_WOOL).build();
-    public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon(Material.CHICKEN).build();
-    public static final PotionInfo DOLPHINS_GRACE = builder("dolphins_grace").setVanillaEffect(PotionEffect.DOLPHINS_GRACE).setIcon(Material.DOLPHIN_SPAWN_EGG).build();
+    public static final PotionInfo SPEED = builder("speed").maxLevel(255).setVanillaEffect(PotionEffect.SPEED).setIcon("effect/potion/icon/speed").setHandler(new SpeedPotionHandler()).build();
+    public static final PotionInfo JUMP_BOOST = builder("jump_boost").maxLevel(255).setVanillaEffect(PotionEffect.JUMP_BOOST).setIcon("effect/potion/icon/jump_boost").build();
+    public static final PotionInfo DEPTH_STRIDER = builder("depth_strider").maxLevel(3).setVanillaEffect(PotionEffect.BAD_OMEN).setIcon("effect/potion/icon/depth_strider").setHandler(new DepthStriderPotionHandler()).build();
+    public static final PotionInfo LEVITATION = builder("levitation").maxLevel(255).setVanillaEffect(PotionEffect.LEVITATION).setIcon("effect/potion/icon/levitation").build();
+    public static final PotionInfo SLOW_FALL = builder("slow_fall").setVanillaEffect(PotionEffect.SLOW_FALLING).setIcon("effect/potion/icon/slow_fall").build();
+    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon("effect/potion/icon/slowness").setHandler(new SlownessPotionHandler()).build();
+    public static final PotionInfo BLINDNESS = builder("blindness").maxLevel(255).setVanillaEffect(PotionEffect.BLINDNESS).setIcon("effect/potion/icon/blindness").build();
+    public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon("effect/potion/icon/darkness").build();
+    public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon("effect/potion/icon/nausea").build();
+    public static final PotionInfo DOLPHINS_GRACE = builder("dolphins_grace").setVanillaEffect(PotionEffect.DOLPHINS_GRACE).setIcon("effect/potion/icon/dolphins_grace").build();
 
     @Override
     public int compareTo(@NotNull PotionInfo o) {
@@ -94,7 +95,17 @@ public record PotionInfo(
         }
 
         public @NotNull Builder setIcon(@NotNull Material icon) {
-            this.icon = ItemStack.builder(icon)
+            return setIcon(ItemStack.builder(icon));
+        }
+
+        public @NotNull Builder setIcon(@NotNull String spritePath) {
+            var sprite = BadSprite.require(spritePath);
+            return setIcon(ItemStack.builder(Material.DIAMOND)
+                    .meta(meta -> meta.customModelData(sprite.cmd())));
+        }
+
+        public @NotNull Builder setIcon(@NotNull ItemStack.Builder icon) {
+            this.icon = icon
                     .displayName(Component.translatable("gui.effect.potion.type." + id + ".name"))
                     .lore(LanguageProviderV2.translateMulti("gui.effect.potion.type." + id + ".lore", List.of()))
                     .build();

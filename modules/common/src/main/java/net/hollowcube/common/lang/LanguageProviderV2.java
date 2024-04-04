@@ -22,6 +22,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import org.apache.kafka.common.cache.LRUCache;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class LanguageProviderV2 {
 
     private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
 
+    @Contract("!null -> !null")
     public static @Nullable Component translate(@Nullable Component component) {
         if (component == null) return null;
         if (!(component instanceof TranslatableComponent translatable)) {
