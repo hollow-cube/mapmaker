@@ -8,11 +8,13 @@ import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +64,8 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void close(@Nullable Component reason) {
+        super.close(reason);
 
         // Override left just to comment that the instance should not be unregistered here. It is owned
         // by the parent editing world and is managed by that.

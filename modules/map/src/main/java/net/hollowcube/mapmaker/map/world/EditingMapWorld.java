@@ -171,11 +171,11 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
-    public void close() {
+    public void close(@Nullable Component reason) {
         if (testWorld != null)
-            testWorld.close();
+            testWorld.close(reason);
 
-        super.close();
+        super.close(reason);
 
         if (autoSaveTask != null) autoSaveTask.cancel();
         save(false);

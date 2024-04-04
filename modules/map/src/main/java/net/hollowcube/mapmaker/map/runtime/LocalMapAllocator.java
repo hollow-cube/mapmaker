@@ -89,11 +89,12 @@ public class LocalMapAllocator implements MapAllocator {
         try {
             for (var map : List.copyOf(maps.entrySet())) {
                 var key = map.getKey();
-                if (!FutureUtil.getUnchecked(map.getValue()).worldId().equals(worldId)) continue;
+                var world = FutureUtil.getUnchecked(map.getValue());
+                if (!world.worldId().equals(worldId)) continue;
 
                 maps.remove(key);
                 return VIRTUAL_EXECUTOR.submit(() -> {
-                    direct.free(FutureUtil.getUnchecked(map.getValue()), reason);
+                    direct.free(world, reason);
                     return true;
                 });
             }

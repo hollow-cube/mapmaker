@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
@@ -32,6 +33,8 @@ import java.util.*;
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapWorld.class);
     static final Tag<MapWorld> SELF_TAG = Tag.Transient("mapworld");
+
+    public static final Component CLOSED_MESSAGE = Component.translatable("map.closed");
 
     private final String worldId = UUID.randomUUID().toString();
 
@@ -209,11 +212,25 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     }
 
     @Blocking
-    public void close() {
+    public void close(@Nullable Component reason) {
         logger.info("Closing world {}", this);
-        Set.copyOf(players).forEach(this::removePlayer);
-        Set.copyOf(spectators).forEach(this::removePlayer);
+        removePlayerSet(this, players, reason);
+        removePlayerSet(this, spectators, reason);
         players.clear();
         spectators.clear();
+    }
+
+    private static void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @Nullable Component reason) {
+        for (var player : Set.copyOf(players)) {
+            try {
+                if (reason != null) player.sendMessage(reason);
+                world.removePlayer(player);
+                world.server().bridge().joinHub(player);
+            } catch (Exception e) {
+                logger.error("failed to move player to hub ({})", player.getUuid(), e);
+                MinecraftServer.getExceptionManager().handleException(e);
+                player.kick(CLOSED_MESSAGE);
+            }
+        }
     }
 }

@@ -5,23 +5,19 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 final class DirectMapAllocator implements MapAllocator {
     private static final Logger logger = LoggerFactory.getLogger(DirectMapAllocator.class);
 
-    private static final Component CLOSED_MESSAGE = Component.translatable("map.closed");
+    public static final Component CLOSED_MESSAGE = Component.translatable("map.closed");
 
     private final MapServer server;
 
@@ -50,12 +46,8 @@ final class DirectMapAllocator implements MapAllocator {
         // is being used.
         var world = (AbstractMapWorld) mapWorld;
 
-        // Send all players to the hub
-        removePlayerSet(world, world.players(), reason);
-        removePlayerSet(world, world.spectators(), reason);
-
         // Unload the world
-        world.close();
+        world.close(reason);
     }
 
     @Override
@@ -76,19 +68,5 @@ final class DirectMapAllocator implements MapAllocator {
     @Override
     public void close() {
         // We have no worlds tracked, so cannot close any
-    }
-
-    private void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @NotNull Component reason) {
-        for (var player : Set.copyOf(players)) {
-            try {
-                player.sendMessage(reason);
-                world.removePlayer(player);
-                server.bridge().joinHub(player);
-            } catch (Exception e) {
-                logger.error("failed to move player to hub ({})", player.getUuid(), e);
-                MinecraftServer.getExceptionManager().handleException(e);
-                player.kick(CLOSED_MESSAGE);
-            }
-        }
     }
 }

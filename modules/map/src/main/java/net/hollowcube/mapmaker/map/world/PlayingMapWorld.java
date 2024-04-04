@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -69,8 +70,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
-    public void close() {
-        super.close(); // Remove players & spectators
+    public void close(@Nullable Component reason) {
+        super.close(reason); // Remove players & spectators
         instance.unload();
     }
 

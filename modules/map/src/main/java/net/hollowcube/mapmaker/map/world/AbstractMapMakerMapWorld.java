@@ -6,7 +6,9 @@ import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -39,10 +41,10 @@ public class AbstractMapMakerMapWorld extends AbstractMapWorld {
     }
 
     @Override
-    public void close() {
+    public void close(@Nullable Component reason) {
         this.enabledFeatures.forEach(fp -> fp.cleanupMap(this));
         this.enabledFeatures = null;
 
-        super.close();
+        super.close(reason);
     }
 }
