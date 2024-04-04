@@ -21,7 +21,7 @@ public class PackContext {
 
     private Path resources;
     private Path out;
-    private boolean minify = false;
+    private boolean minify = true;
     private int resourceId = 0;
 
     private Path rpMinecraftBase;
