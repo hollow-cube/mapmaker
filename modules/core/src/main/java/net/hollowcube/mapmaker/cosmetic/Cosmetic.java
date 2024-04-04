@@ -3,17 +3,16 @@ package net.hollowcube.mapmaker.cosmetic;
 import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.Rarity;
+import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.color.Color;
-import net.minestom.server.item.ItemHideFlag;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.LeatherArmorMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class Cosmetic {
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
@@ -70,40 +69,32 @@ public class Cosmetic {
     private final String id;
     private final Rarity rarity;
 
-    private final ItemStack model;
+    private final CosmeticImpl impl;
+
     private final ItemStack icon;
     private final ItemStack iconLocked;
 
-    private Cosmetic(CosmeticType type, String id, Rarity rarity) {
+    private Cosmetic(CosmeticType type, String id, Rarity rarity, Function<Cosmetic, CosmeticImpl> implFunc) {
         this.type = type;
         this.id = id;
         this.rarity = rarity;
 
-        var displayName = LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name"));
-        var itemLore = new ArrayList<Component>();
-        itemLore.add(rarity.asComponent());
-        itemLore.add(Component.empty());
-        itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
-        this.model = type.hasModel() ? ItemStack.of(Material.LEATHER_HORSE_ARMOR).withMeta(LeatherArmorMeta.class, meta -> {
-            meta.displayName(displayName);
-            meta.lore(itemLore);
-            var spritePath = "cosmetic/" + type.id() + "/" + id;
-            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
-            meta.color(new Color(255, 255, 255));
-            meta.hideFlag(ItemHideFlag.HIDE_DYE);
-        }) : null;
+        var displayName = displayName();
+        var lore = lore();
         this.icon = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
             meta.displayName(displayName);
-            meta.lore(itemLore);
+            meta.lore(lore);
             var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon";
             meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
         });
         this.iconLocked = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
             meta.displayName(displayName);
-            meta.lore(itemLore);
+            meta.lore(lore);
             var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon_locked";
             meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
         });
+
+        this.impl = implFunc.apply(this);
     }
 
     public @NotNull CosmeticType type() {
@@ -122,10 +113,6 @@ public class Cosmetic {
         return rarity;
     }
 
-    public @NotNull ItemStack modelItem() {
-        return model;
-    }
-
     public @NotNull ItemStack iconItem() {
         return icon;
     }
@@ -134,14 +121,37 @@ public class Cosmetic {
         return iconLocked;
     }
 
+    public @NotNull CosmeticImpl impl() {
+        return impl;
+    }
+
+    public @NotNull Component displayName() {
+        return Objects.requireNonNull(LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name")));
+    }
+
+    public @NotNull List<Component> lore() {
+        var itemLore = new ArrayList<Component>();
+        itemLore.add(rarity.asComponent());
+        itemLore.add(Component.empty());
+        itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
+        return itemLore;
+    }
+
     public static class Builder {
         private final CosmeticType type;
         private final String id;
+
+        private Function<Cosmetic, CosmeticImpl> implFunc = CosmeticImpl::new;
         private Rarity rarity = Rarity.COMMON;
 
         Builder(CosmeticType type, String id) {
             this.type = type;
             this.id = id;
+        }
+
+        public @NotNull Builder impl(@NotNull Function<Cosmetic, CosmeticImpl> implFunc) {
+            this.implFunc = implFunc;
+            return this;
         }
 
         public @NotNull Builder rarity(@NotNull Rarity rarity) {
@@ -150,7 +160,7 @@ public class Cosmetic {
         }
 
         public @NotNull Cosmetic build() {
-            var cosmetic = new Cosmetic(type, id, rarity);
+            var cosmetic = new Cosmetic(type, id, rarity, implFunc);
             COSMETICS.computeIfAbsent(type, k -> new HashMap<>()).put(id, cosmetic);
             return cosmetic;
         }

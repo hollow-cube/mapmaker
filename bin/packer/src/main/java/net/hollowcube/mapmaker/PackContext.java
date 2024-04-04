@@ -90,7 +90,7 @@ public class PackContext {
     /**
      * Writes a texture and returns a reference to it.
      */
-    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data) {
+    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data, byte @Nullable [] mcmeta) {
         try {
             if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
             name = minifyId(name);
@@ -101,10 +101,18 @@ public class PackContext {
             Files.createDirectories(path.getParent());
 
             Files.write(path, data);
+            if (mcmeta != null) Files.write(path.resolveSibling(name + ".png.mcmeta"), mcmeta);
             return mapmakerRefBase + (type == null ? "" : type + "/") + name + (type == null ? ".png" : "");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Writes a texture and returns a reference to it.
+     */
+    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data) {
+        return writeTexture(type, name, data, null);
     }
 
     public @NotNull String writeBasicModel(@NotNull String name, byte[] data) throws IOException {

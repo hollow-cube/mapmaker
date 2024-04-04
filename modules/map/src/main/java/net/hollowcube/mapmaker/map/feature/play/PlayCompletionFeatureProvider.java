@@ -2,13 +2,15 @@ package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
+import net.hollowcube.mapmaker.cosmetic.impl.AbstractVictoryEffectImpl;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.gui.RateMapView;
-import net.hollowcube.mapmaker.map.util.FireworkUtil;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -20,7 +22,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
@@ -125,7 +126,11 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                     .ifPresent(diff -> MapCompletionAnimation.schedule(player, diff, tryShowRateGui));
 
             // Play the victory effect
-            FireworkUtil.showFirework(event.getPlayer(), event.getInstance(), event.getPlayer().getPosition(), 15, List.of(FireworkUtil.randomColorEffect()));
+            var playerData = PlayerDataV2.fromPlayer(player);
+            var victoryEffect = Cosmetic.byId(CosmeticType.VICTORY_EFFECT, playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting()));
+            if (victoryEffect != null && victoryEffect.impl() instanceof AbstractVictoryEffectImpl impl) {
+                impl.trigger(player, player.getPosition());
+            }
         });
     }
 

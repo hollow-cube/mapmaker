@@ -21,7 +21,6 @@ import net.kyori.adventure.title.Title;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -135,9 +134,11 @@ public final class MiscFunctionality {
     }
 
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
-        var head = Cosmetic.byId(CosmeticType.HAT, playerData.getCosmetic(CosmeticType.HAT));
-        player.getInventory().setHelmet(head == null ? ItemStack.AIR : head.modelItem());
-
+        for (var cosmeticType : CosmeticType.VALUES) {
+            var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
+            player.getInventory().setItemStack(cosmeticType.iconSlot(), cosmetic == null
+                    ? cosmeticType.blankIcon() : cosmetic.impl().iconItem());
+        }
 //        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
 //        newDisplayedSkinParts &= ~0x40;
 //        player.getSettings().refresh(

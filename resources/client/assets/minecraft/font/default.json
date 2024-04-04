@@ -45,6 +45,15 @@
         "\uF832": 0,
         "\uF833": 0
       }
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:font/inventory_border.png",
+      "ascent": 29,
+      "height": 256,
+      "chars": [
+        "\uF839"
+      ]
     }
   ]
 }

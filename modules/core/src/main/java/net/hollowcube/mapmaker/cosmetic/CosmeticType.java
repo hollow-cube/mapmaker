@@ -1,42 +1,78 @@
 package net.hollowcube.mapmaker.cosmetic;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public enum CosmeticType {
     // Note: The order here is relevant to the cosmetic selector GUI.
     // Be careful when changing it.
 
-    HAT("hat", true),
-    BACKWEAR("backwear", false),
-    ACCESSORY("accessory", true),
-    PET("pet", false),
-    EMOTE("emote", false),
-    PARTICLE("particle", false),
-    VICTORY_EFFECT("victory_effect", false),
+    HAT("hat", PlayerInventoryUtils.HELMET_SLOT, "empty_helmet"),
+    BACKWEAR("backwear", PlayerInventoryUtils.CHESTPLATE_SLOT, "empty_chestplate"),
+    ACCESSORY("accessory", PlayerInventoryUtils.OFFHAND_SLOT, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
+    PET("pet", PlayerInventoryUtils.LEGGINGS_SLOT, "empty_leggings"),
+    EMOTE("emote", PlayerInventoryUtils.CRAFT_SLOT_1, "empty_emote"),
+    PARTICLE("particle", PlayerInventoryUtils.BOOTS_SLOT, "empty_boots"),
+    VICTORY_EFFECT("victory_effect", PlayerInventoryUtils.CRAFT_SLOT_2, "empty_victory_effect"),
     ;
 
     public static final CosmeticType[] VALUES = values();
 
-    private final String id;
-    private final boolean hasModel;
-    private final PlayerSetting<String> setting;
+    public static @Nullable CosmeticType byIconSlot(int slot) {
+        for (var type : VALUES) {
+            if (type.iconSlot == slot) {
+                return type;
+            }
+        }
+        return null;
+    }
 
-    CosmeticType(String id, boolean hasModel) {
+    private final String id;
+    private final PlayerSetting<String> setting;
+    private final Tag<CosmeticType> tag;
+    private final int iconSlot;
+    private final ItemStack blankIcon;
+
+    CosmeticType(String id, int iconSlot, String emptyIcon) {
         this.id = id;
-        this.hasModel = hasModel;
         this.setting = PlayerSetting.String("cosmetic." + id, "");
+        this.tag = Tag.Transient("cosmetic." + id);
+        this.iconSlot = iconSlot;
+        var baseTranslation = "cosmetic.type." + id + ".blank";
+        this.blankIcon = emptyIcon != null ? ItemStack.builder(Material.DIAMOND)
+                .meta(meta -> meta.customModelData(BadSprite.require("icon/inventory/" + emptyIcon).cmd()))
+                .displayName(Component.translatable(baseTranslation + ".name"))
+                .lore(LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of())).build()
+                : ItemStack.AIR;
     }
 
     public @NotNull String id() {
         return id;
     }
 
-    public boolean hasModel() {
-        return hasModel;
-    }
-
     public @NotNull PlayerSetting<String> setting() {
         return setting;
+    }
+
+    public @NotNull Tag<CosmeticType> tag() {
+        return tag;
+    }
+
+    public int iconSlot() {
+        return iconSlot;
+    }
+
+    public @NotNull ItemStack blankIcon() {
+        return blankIcon;
     }
 }

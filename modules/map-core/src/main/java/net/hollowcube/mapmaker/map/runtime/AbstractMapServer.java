@@ -37,9 +37,11 @@ import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
+import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -77,6 +79,7 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -324,6 +327,8 @@ public abstract class AbstractMapServer implements MapServer {
     protected void prepareStart() {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
+        globalEventHandler.addListener(InventoryPreClickEvent.class, this::handleInventoryCosmeticSelector);
+
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
         MapEntities.init(entityEvents);
@@ -556,6 +561,16 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected void handlePlayerDisconnect(@NotNull Player player) {
         logger.info("disconnect - {}", player.getUsername());
+    }
+
+    private void handleInventoryCosmeticSelector(@NotNull InventoryPreClickEvent event) {
+        if (event.getInventory() != null) return; // Not the player inventory
+
+        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
+        if (cosmeticType == null) return;
+        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
+
+        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
     }
 
 

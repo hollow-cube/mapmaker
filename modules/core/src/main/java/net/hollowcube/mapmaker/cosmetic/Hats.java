@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.mapmaker.backpack.Rarity;
+import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import org.jetbrains.annotations.NotNull;
 
 public final class Hats {
@@ -24,6 +25,7 @@ public final class Hats {
     public static Cosmetic SHARK_HAT = builder("shark_hat").rarity(Rarity.EPIC).build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
-        return new Cosmetic.Builder(CosmeticType.HAT, id);
+        return new Cosmetic.Builder(CosmeticType.HAT, id)
+                .impl(ModelCosmeticImpl::new);
     }
 }

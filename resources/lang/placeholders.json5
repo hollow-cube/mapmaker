@@ -160,7 +160,7 @@
   // #AC4BFF - Purple (Dev Rank)
   "purple": {
     "type": "raw",
-    "value": "#AC4BFF"
+    "value": "#cc39e9"
   },
   // #30FBFF - Light Blue (Mod Rank, “You” in Direct Messaging Commands, Info)
   "light_blue": {

@@ -1,5 +1,7 @@
-package net.hollowcube.mapmaker.map.util;
+package net.hollowcube.mapmaker.cosmetic.impl.victory;
 
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.impl.AbstractVictoryEffectImpl;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.color.Color;
@@ -18,14 +20,25 @@ import net.minestom.server.item.metadata.FireworkMeta;
 import net.minestom.server.network.packet.server.play.EntityStatusPacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FireworkUtil {
+public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
+    public FireworkVictoryEffectImpl(@NotNull Cosmetic cosmetic) {
+        super(cosmetic);
+    }
 
-    public static void showFirework(Player player, Instance instance, Point point, int ticks, List<FireworkEffect> effects) {
-        showFirework(PacketGroupingAudience.of(List.of(player)), instance, point, ticks, effects);
+    @Override
+    public void trigger(@NotNull Player player, @NotNull Point position) {
+        showFirework(
+                PacketGroupingAudience.of(List.of(player)),
+                player.getInstance(),
+                position,
+                15,
+                List.of(randomColorEffect())
+        );
     }
 
     public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkEffect> effects) {
@@ -66,5 +79,4 @@ public class FireworkUtil {
         var random = ThreadLocalRandom.current();
         return java.awt.Color.HSBtoRGB(random.nextFloat(), 1f, 1f);
     }
-
 }

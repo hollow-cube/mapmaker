@@ -65,32 +65,39 @@ public class CosmeticV2Transform {
                         }
                     }
 
-                    if (Files.exists(cosmeticDir.resolve("model.png"))) {   // Add resources for the 3d model
-                        byte[] texture = Files.readAllBytes(cosmeticDir.resolve("model.png"));
-                        String texId = ctx.writeTexture("item", name, texture);
+                    try {
+                        if (Files.exists(cosmeticDir.resolve("model.png"))) {   // Add resources for the 3d model
+                            byte[] texture = Files.readAllBytes(cosmeticDir.resolve("model.png"));
+                            byte[] textureMeta = null;
+                            if (Files.exists(cosmeticDir.resolve("model.png.mcmeta")))
+                                textureMeta = Files.readAllBytes(cosmeticDir.resolve("model.png.mcmeta"));
+                            String texId = ctx.writeTexture("item", name, texture, textureMeta);
 
-                        JsonObject modelObj = GSON.fromJson(Files.readString(cosmeticDir.resolve("model.json")), JsonObject.class);
-                        fixModelTextures(modelObj, texId);
-                        String model = ctx.writeModel(name, modelObj);
-                        int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
+                            JsonObject modelObj = GSON.fromJson(Files.readString(cosmeticDir.resolve("model.json")), JsonObject.class);
+                            fixModelTextures(modelObj, texId);
+                            String model = ctx.writeModel(name, modelObj);
+                            int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
-                        ctx.addServerSprite(new ServerSprite(path, cmd));
-                    }
+                            ctx.addServerSprite(new ServerSprite(path, cmd));
+                        }
 
-                    {   // Add icon item texture
-                        byte[] texture = Files.readAllBytes(cosmeticDir.resolve("icon.png"));
-                        int cmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon", texture);
-                        ctx.addServerSprite(new ServerSprite(path + "/icon", cmd));
+                        {   // Add icon item texture
+                            byte[] texture = Files.readAllBytes(cosmeticDir.resolve("icon.png"));
+                            int cmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon", texture);
+                            ctx.addServerSprite(new ServerSprite(path + "/icon", cmd));
 
-                        var tex = ImageIO.read(new ByteArrayInputStream(texture));
-                        var g = tex.createGraphics();
-                        g.drawImage(lockOverlay, 0, 0, null);
-                        g.dispose();
-                        var baos = new ByteArrayOutputStream();
-                        ImageIO.write(tex, "png", baos);
+                            var tex = ImageIO.read(new ByteArrayInputStream(texture));
+                            var g = tex.createGraphics();
+                            g.drawImage(lockOverlay, 0, 0, null);
+                            g.dispose();
+                            var baos = new ByteArrayOutputStream();
+                            ImageIO.write(tex, "png", baos);
 
-                        int lockedCmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon_locked", baos.toByteArray());
-                        ctx.addServerSprite(new ServerSprite(path + "/icon_locked", lockedCmd));
+                            int lockedCmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon_locked", baos.toByteArray());
+                            ctx.addServerSprite(new ServerSprite(path + "/icon_locked", lockedCmd));
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("failed processing " + name, e);
                     }
                 }
             }
@@ -117,9 +124,9 @@ public class CosmeticV2Transform {
     }
 
     private String findReplaceableTexture(@NotNull JsonObject textures) {
-        if (textures.size() != 2)
-            throw new IllegalArgumentException("textures must have exactly 2 entries");
-        if (!textures.has("particle"))
+        if (textures.size() > 2)
+            throw new IllegalArgumentException("textures must have exactly <=2 entries");
+        if (textures.size() > 1 && !textures.has("particle"))
             throw new IllegalArgumentException("textures must have a particle entry");
 
         for (String key : textures.keySet()) {

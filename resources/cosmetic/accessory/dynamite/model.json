@@ -1,0 +1,66 @@
+{
+	"credit": "Made By Fritz_angelos",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "mapmaker:item/dinamite",
+		"particle": "mapmaker:item/dinamite"
+	},
+	"elements": [
+		{
+			"from": [7.82322, 2, 6.82322],
+			"to": [9.82322, 10, 8.82322],
+			"rotation": {"angle": -45, "axis": "y", "origin": [8.82322, 5.5, 7.82322]},
+			"faces": {
+				"north": {"uv": [8, 1, 9, 5], "texture": "#1"},
+				"east": {"uv": [7, 1, 8, 5], "texture": "#1"},
+				"south": {"uv": [10, 1, 11, 5], "texture": "#1"},
+				"west": {"uv": [9, 1, 10, 5], "texture": "#1"},
+				"up": {"uv": [9, 1, 8, 0], "texture": "#1"},
+				"down": {"uv": [10, 0, 9, 1], "texture": "#1"}
+			}
+		},
+		{
+			"from": [8.82322, 10, 4.23744],
+			"to": [8.82322, 19, 11.23744],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8.82322, 14.5, 7.73744]},
+			"faces": {
+				"north": {"uv": [3.5, 3.5, 3.5, 8], "texture": "#1"},
+				"east": {"uv": [0, 3.5, 3.5, 8], "texture": "#1"},
+				"south": {"uv": [7, 3.5, 7, 8], "texture": "#1"},
+				"west": {"uv": [3.5, 3.5, 7, 8], "texture": "#1"},
+				"up": {"uv": [3.5, 3.5, 3.5, 0], "texture": "#1"},
+				"down": {"uv": [3.5, 0, 3.5, 3.5], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [-0.75, 0, 0]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0.75, 0, 0]
+		},
+		"firstperson_righthand": {
+			"rotation": [-6, 10, -18.45],
+			"translation": [0, 1, 0]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-6, 10, -18.45],
+			"translation": [0, 1, 0]
+		},
+		"gui": {
+			"rotation": [-146.01, 35.82, 130.98],
+			"translation": [1.25, -1.25, 0],
+			"scale": [1.1, 1.1, 1.1]
+		}
+	},
+	"groups": [
+		{
+			"name": "dinamite",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"nbt": "{}",
+			"children": [0, 1]
+		}
+	]
+}

@@ -20,7 +20,7 @@ import java.util.Set;
 public class CosmeticView extends View {
     private static final PlayerSetting<Boolean> SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
 
-    private static final Set<CosmeticType> DISABLED_TABS = Set.of(CosmeticType.BACKWEAR, CosmeticType.PET, CosmeticType.EMOTE);
+    public static final Set<CosmeticType> DISABLED_TABS = Set.of(CosmeticType.BACKWEAR, CosmeticType.PET, CosmeticType.EMOTE);
 
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
@@ -32,17 +32,25 @@ public class CosmeticView extends View {
     private @Outlet("cosmetic_list") Pagination pagination;
 
     private final PlayerDataV2 playerData;
-    private CosmeticType selectedTab = CosmeticType.HAT;
+    private CosmeticType selectedTab = null;
 
     public CosmeticView(@NotNull Context context) {
+        this(context, CosmeticType.HAT);
+    }
+
+    public CosmeticView(@NotNull Context context, @NotNull CosmeticType selectedTab) {
         super(context);
         this.playerData = PlayerDataV2.fromPlayer(player);
 
         showLockedSwitch.setOption(playerData.getSetting(SHOW_LOCKED) ? 1 : 0);
 
+        if (DISABLED_TABS.contains(selectedTab)) {
+            selectedTab = CosmeticType.HAT;
+        }
+        this.selectedTab = selectedTab;
         tabSwitches[selectedTab.ordinal()].setOption(1);
-        tabNameText.setText("Headwear");
-        tabNameText.setArgs(Component.text("Headwear"));
+        tabNameText.setText(tabName(selectedTab));
+        tabNameText.setArgs(Component.text(tabName(selectedTab)));
         for (var cosmeticType : CosmeticType.values()) {
             var name = cosmeticType.name().toLowerCase(Locale.ROOT);
             addActionHandler("tab_" + name + "_off", Label.ActionHandler.lmb($ -> selectTab(cosmeticType)));
@@ -54,18 +62,8 @@ public class CosmeticView extends View {
         if (selectedTab == cosmeticType) return;
         if (DISABLED_TABS.contains(cosmeticType)) return;
 
-        String displayName = switch (cosmeticType) {
-            case HAT -> "Headwear";
-            case BACKWEAR -> "Backwear";
-            case ACCESSORY -> "Accessories";
-            case PET -> "Companions";
-            case EMOTE -> "Emotes";
-            case PARTICLE -> "Particles";
-            case VICTORY_EFFECT -> "Victory Effects";
-        };
-
-        tabNameText.setText(displayName);
-        tabNameText.setArgs(Component.text(displayName));
+        tabNameText.setText(tabName(cosmeticType));
+        tabNameText.setArgs(Component.text(tabName(cosmeticType)));
         tabSwitches[selectedTab.ordinal()].setOption(0);
         tabSwitches[cosmeticType.ordinal()].setOption(1);
         selectedTab = cosmeticType;
@@ -111,6 +109,18 @@ public class CosmeticView extends View {
     private void onClose() {
         playerData.writeUpdatesUpstream(playerService);
         MiscFunctionality.applyCosmetics(player, playerData);
+    }
+
+    private static @NotNull String tabName(@NotNull CosmeticType type) {
+        return switch (type) {
+            case HAT -> "Headwear";
+            case BACKWEAR -> "Backwear";
+            case ACCESSORY -> "Accessories";
+            case PET -> "Companions";
+            case EMOTE -> "Emotes";
+            case PARTICLE -> "Particles";
+            case VICTORY_EFFECT -> "Victory Effects";
+        };
     }
 
 }
