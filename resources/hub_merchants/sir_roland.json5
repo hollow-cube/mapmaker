@@ -1,41 +1,41 @@
 {
-    "trades": [
-        {
-            "result": "hat/knight_helmet",
-            "inputs": {
-                "coins": 20000,
-                "metal": 20,
-                "cloth": 8
-            },
-        },
-/*        {
-            "result": "accessory/training_sword",
-            "inputs": {
-                "coins": 5000,
-                "bricks": 4,
-                "goo": 2,
-                "flower_petal": 2
-            },
-        },
-        {
-            "result": "accessory/knight_sword",
-            "inputs": {
-                "coins": 20000,
-                "metal": 12,
-                "gem": 6,
-                "gold_chunk": 2
-            },
-        },
-        {
-            "result": "accessory/excalibur",
-            "inputs": {
-                "coins": 150000,
-                "metal": 32,
-                "gem": 32,
-                "gold_chunk": 8,
-                "infernal_flame": 8,
-                "nightmare_fuel": 2
-            },
-        }*/
-    ]
+  "trades": [
+    {
+      "result": "hat/knight_helmet",
+      "inputs": {
+        "coins": 20000,
+        "metal": 20,
+        "cloth": 8
+      },
+    },
+    {
+      "result": "accessory/training_sword",
+      "inputs": {
+        "coins": 5000,
+        "bricks": 4,
+        "goo": 2,
+        "flower_petal": 2
+      },
+    },
+    {
+      "result": "accessory/knights_sword",
+      "inputs": {
+        "coins": 20000,
+        "metal": 12,
+        "gem": 6,
+        "gold_chunk": 2
+      },
+    },
+    {
+      "result": "accessory/excalibur",
+      "inputs": {
+        "coins": 150000,
+        "metal": 32,
+        "gem": 32,
+        "gold_chunk": 8,
+        "infernal_flame": 8,
+        "nightmare_fuel": 2
+      },
+    }
+  ]
 }

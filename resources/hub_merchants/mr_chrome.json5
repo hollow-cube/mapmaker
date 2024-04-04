@@ -1,14 +1,14 @@
 {
-    "trades": [
-/*        {
-            "result": "accessory/cyberfist",
-            "inputs": {
-                "coins": 150000,
-                "metal": 16,
-                "gem": 12,
-                "firework_dust": 4,
-                "stardust": 1
-            },
-        },*/
-    ]
+  "trades": [
+    {
+      "result": "accessory/cyberfist",
+      "inputs": {
+        "coins": 150000,
+        "metal": 16,
+        "gem": 12,
+        "firework_dust": 4,
+        "stardust": 1
+      },
+    },
+  ]
 }

@@ -1,10 +1,10 @@
 {
-    "trades": [
-/*        {
-            "result": "victory_effect/omega_jingle",
-            "inputs": {
-                "coins": 20000
-            },
-        }*/
-    ]
+  "trades": [
+    {
+      "result": "victory_effect/omega",
+      "inputs": {
+        "coins": 20000
+      },
+    }
+  ]
 }

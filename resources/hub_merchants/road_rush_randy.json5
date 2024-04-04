@@ -1,27 +1,27 @@
 {
-    "trades": [
-        {
-            "result": "hat/sunglasses",
-            "inputs": {
-                "coins": 5000,
-                "metal": 6,
-                "gem": 2
-            },
-        },
-        {
-            "result": "hat/bikers_helmet",
-            "inputs": {
-                "coins": 20000,
-                "metal": 12,
-                "gem": 8
-            },
-        },
-/*        {
-            "result": "accessory/wrench",
-            "inputs": {
-                "coins": 5000,
-                "metal": 8
-            },
-        }*/
-    ]
+  "trades": [
+    {
+      "result": "hat/sunglasses",
+      "inputs": {
+        "coins": 5000,
+        "metal": 6,
+        "gem": 2
+      },
+    },
+    {
+      "result": "hat/bikers_helmet",
+      "inputs": {
+        "coins": 20000,
+        "metal": 12,
+        "gem": 8
+      },
+    },
+    {
+      "result": "accessory/wrench",
+      "inputs": {
+        "coins": 5000,
+        "metal": 8
+      },
+    }
+  ]
 }

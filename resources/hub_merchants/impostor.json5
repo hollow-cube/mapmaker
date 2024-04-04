@@ -1,10 +1,10 @@
 {
-    "trades": [
-/*        {
-            "result": "victory_effect/sus_jingle",
-            "inputs": {
-                "coins": 20000
-            },
-        }*/
-    ]
+  "trades": [
+    //    {
+    //      "result": "victory_effect/sus_jingle",
+    //      "inputs": {
+    //        "coins": 20000
+    //      },
+    //    }
+  ]
 }

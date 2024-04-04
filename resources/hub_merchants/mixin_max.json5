@@ -1,21 +1,21 @@
 {
-    "trades": [
-/*        {
-            "result": "accessory/burger",
-            "inputs": {
-                "coins": 20000,
-                "goo": 12,
-                "flower_petal": 6,
-                "sugarcube": 4
-            },
-        },
-        {
-            "result": "accessory/filled_mug",
-            "inputs": {
-                "coins": 20000,
-                "goo": 16,
-                "sugarcube": 4
-            },
-        }*/
-    ]
+  "trades": [
+    {
+      "result": "accessory/burger",
+      "inputs": {
+        "coins": 20000,
+        "goo": 12,
+        "flower_petal": 6,
+        "sugarcube": 4
+      },
+    },
+    //    {
+    //      "result": "accessory/filled_mug",
+    //      "inputs": {
+    //        "coins": 20000,
+    //        "goo": 16,
+    //        "sugarcube": 4
+    //      },
+    //    }
+  ]
 }

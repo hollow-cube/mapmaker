@@ -1,23 +1,23 @@
 {
-    "trades": [
-/*        {
-            "result": "accessory/dynamite",
-            "inputs": {
-                "cubits": 20000,
-                "goo": 12,
-                "string": 6,
-                "firework_dust": 4
-            },
-        },
-        {
-            "result": "accessory/drill",
-            "inputs": {
-                "coins": 150000,
-                "metal": 24,
-                "gem": 18,
-                "gold_chunk": 8,
-                "infernal_flame": 4
-            },
-        }*/
-    ]
+  "trades": [
+    {
+      "result": "accessory/dynamite",
+      "inputs": {
+        "cubits": 20000,
+        "goo": 12,
+        "string": 6,
+        "firework_dust": 4
+      },
+    },
+    {
+      "result": "accessory/drill",
+      "inputs": {
+        "coins": 150000,
+        "metal": 24,
+        "gem": 18,
+        "gold_chunk": 8,
+        "infernal_flame": 4
+      },
+    }
+  ]
 }
