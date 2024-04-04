@@ -18,6 +18,8 @@ jobs:
           path: global/resourcepacks3
 
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Cache Bazel
         uses: actions/cache@v3
         with:
