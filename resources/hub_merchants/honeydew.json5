@@ -1,6 +1,6 @@
 {
     "trades": [
-        {
+/*        {
             "result": "accessory/dynamite",
             "inputs": {
                 "cubits": 20000,
@@ -18,6 +18,6 @@
                 "gold_chunk": 8,
                 "infernal_flame": 4
             },
-        }
+        }*/
     ]
 }

@@ -1,6 +1,6 @@
 {
     "trades": [
-        {
+/*        {
             "result": "accessory/cyberfist",
             "inputs": {
                 "coins": 150000,
@@ -9,6 +9,6 @@
                 "firework_dust": 4,
                 "stardust": 1
             },
-        },
+        },*/
     ]
 }

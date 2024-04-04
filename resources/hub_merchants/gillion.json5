@@ -10,7 +10,7 @@
             },
         },
         {
-            "result": "particle/bubble_particles",
+            "result": "particle/bubble",
             "inputs": {
                 "coins": 5000,
                 "goo": 6

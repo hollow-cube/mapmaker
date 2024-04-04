@@ -10,7 +10,7 @@
             },
         },
         {
-            "result": "hat/oni_helmet",
+            "result": "hat/oni_mask",
             "inputs": {
                 "coins": 50000,
                 "metal": 24,

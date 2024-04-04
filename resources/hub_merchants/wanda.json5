@@ -19,7 +19,7 @@
             },
         },
         {
-            "result": "particle/cloud_particles",
+            "result": "particle/cloud",
             "inputs": {
                 "coins": 5000
             },

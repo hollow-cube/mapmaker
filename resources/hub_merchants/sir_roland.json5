@@ -1,14 +1,14 @@
 {
     "trades": [
         {
-            "result": "hat/knights_helmet",
+            "result": "hat/knight_helmet",
             "inputs": {
                 "coins": 20000,
                 "metal": 20,
                 "cloth": 8
             },
         },
-        {
+/*        {
             "result": "accessory/training_sword",
             "inputs": {
                 "coins": 5000,
@@ -18,7 +18,7 @@
             },
         },
         {
-            "result": "accessory/knights_sword",
+            "result": "accessory/knight_sword",
             "inputs": {
                 "coins": 20000,
                 "metal": 12,
@@ -36,6 +36,6 @@
                 "infernal_flame": 8,
                 "nightmare_fuel": 2
             },
-        }
+        }*/
     ]
 }

@@ -8,7 +8,7 @@
                 "cloth": 2
             },
         },
-        {
+/*        {
             "result": "victory_effect/train_victory_effect",
             "inputs": {
                 "coins": 50000,
@@ -17,6 +17,6 @@
                 "gold_chunk": 6,
                 "infernal_flame": 4
             },
-        }
+        }*/
     ]
 }

@@ -1,12 +1,12 @@
 {
     "trades": [
-        {
+/*        {
             "result": "hat/flower_hat",
             "inputs": {
                 "coins": 5000,
                 "bricks": 4,
                 "flower_petal": 4
             },
-        },
+        },*/
     ]
 }

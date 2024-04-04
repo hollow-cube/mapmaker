@@ -1,7 +1,7 @@
 {
     "trades": [
-        {
-            "result": "hat/burger",
+/*        {
+            "result": "accessory/burger",
             "inputs": {
                 "coins": 20000,
                 "goo": 12,
@@ -10,12 +10,12 @@
             },
         },
         {
-            "result": "hat/filled_mug",
+            "result": "accessory/filled_mug",
             "inputs": {
                 "coins": 20000,
                 "goo": 16,
                 "sugarcube": 4
             },
-        }
+        }*/
     ]
 }
