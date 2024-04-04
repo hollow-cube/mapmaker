@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class AbstractMapMakerMapWorld extends AbstractMapWorld {
+public class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     private final FeatureList features;
     private List<FeatureProvider> enabledFeatures;

@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 /**
  * Implements local tracking of map allocations.
@@ -124,6 +125,17 @@ public class LocalMapAllocator implements MapAllocator {
                 FutureUtil.getUnchecked(future);
             return futures.size();
         });
+    }
+
+    public void forEachWorld(@NotNull Consumer<MapWorld> func) {
+        lock.lock();
+        try {
+            for (var map : List.copyOf(maps.values())) {
+                func.accept(FutureUtil.getUnchecked(map));
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

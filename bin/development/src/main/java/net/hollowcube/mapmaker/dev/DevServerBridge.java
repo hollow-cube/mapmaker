@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
@@ -7,6 +8,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +28,12 @@ public class DevServerBridge implements ServerBridge {
 
     @Override
     public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-        var playerId = PlayerDataV2.fromPlayer(player).id();
+        if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
+            player.sendMessage(Component.translatable("ff.maps_disabled"));
+            return;
+        }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
         var map = mapService.getMap(playerId, mapId);
         Class<? extends AbstractMapWorld> worldType = switch (joinMapState) {
             case PLAYING, SPECTATING -> PlayingMapWorld.class;

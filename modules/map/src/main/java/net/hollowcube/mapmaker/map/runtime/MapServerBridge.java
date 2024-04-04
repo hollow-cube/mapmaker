@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
@@ -26,6 +27,11 @@ public class MapServerBridge implements ServerBridge {
 
     @Override
     public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+        if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
+            player.sendMessage(Component.translatable("ff.maps_disabled"));
+            return;
+        }
+
         try {
             var playerId = player.getUuid().toString();
             logger.debug("trying to join map {} with state {} for {}", mapId, joinMapState, playerId);

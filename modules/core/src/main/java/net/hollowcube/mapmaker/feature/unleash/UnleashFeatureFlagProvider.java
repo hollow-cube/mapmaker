@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.feature.unleash;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.UnleashContext;
+import io.getunleash.event.UnleashReady;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.repository.FeatureToggleResponse;
 import net.hollowcube.common.ServerRuntime;
@@ -29,9 +30,18 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
                 .apiKey(config.token())
                 .synchronousFetchOnInitialisation(true)
                 .subscriber(new UnleashSubscriber() {
+                    private boolean isReady = false;
+
+                    @Override
+                    public void onReady(UnleashReady unleashReady) {
+                        isReady = true; // Used to skip the initial refresh
+                    }
+
                     @Override
                     public void togglesFetched(@NotNull FeatureToggleResponse response) {
-                        //todo it would be nice if the event held the old and new state so that you could check if a flag changed.
+                        if (!isReady || response.getStatus() != FeatureToggleResponse.Status.CHANGED)
+                            return;
+
                         FutureUtil.submitVirtual(() -> EventDispatcher.call(new FeatureFlagReloadEvent()));
                     }
                 })

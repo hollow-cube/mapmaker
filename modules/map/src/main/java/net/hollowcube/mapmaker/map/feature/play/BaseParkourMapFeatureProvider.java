@@ -527,7 +527,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Sanity check in case there are literally no blocks in the world.
         if (minBlockY == instance.getDimensionType().getMaxY()) minBlockY = worldMinHeight;
-        System.out.println("Computed reset height: " + (minBlockY - RESET_HEIGHT_OFFSET));
+//        System.out.println("Computed reset height: " + (minBlockY - RESET_HEIGHT_OFFSET));
         instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);
     }
 

@@ -4,9 +4,11 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
@@ -21,6 +23,7 @@ import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
+import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -117,6 +120,8 @@ public class MapServerRunner extends AbstractMapServer {
 
         registerCommands(this, commandManager());
 
+        initFeatureFlagMonitor(bridge(), allocator());
+
         //todo need to bring back mapMgmtConsumer to listen for map deletions and close them.
 
         this.features = FeatureList.load(config);
@@ -142,6 +147,8 @@ public class MapServerRunner extends AbstractMapServer {
                 .module(MapServerModule::new)
                 .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
                 .build();
+        //todo addListener for feature toggle refresh to disable terraform job execution
+//        globalEventHandler.addListener(terraform
 
         // Block/item rules
         BlockHandlers.init();
@@ -196,6 +203,18 @@ public class MapServerRunner extends AbstractMapServer {
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));
 
         commandManager.register(server.createInstance(AddMarkerCommand.class));
+    }
+
+    public static void initFeatureFlagMonitor(@NotNull ServerBridge bridge, @NotNull MapAllocator allocator) {
+        if (!(allocator instanceof LocalMapAllocator localAllocator)) return;
+        MinecraftServer.getGlobalEventHandler().addListener(FeatureFlagReloadEvent.class, $ -> {
+            if (!CoreFeatureFlags.MAP_DISABLE_ALL.test()) return;
+            localAllocator.forEachWorld(world -> {
+                if (!(world instanceof AbstractMapMakerMapWorld)) return;
+                for (var player : world.players()) bridge.joinHub(player);
+                for (var player : world.spectators()) bridge.joinHub(player);
+            });
+        });
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {

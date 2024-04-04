@@ -4,6 +4,8 @@ import net.hollowcube.mapmaker.feature.FeatureFlag;
 
 public final class CoreFeatureFlags {
 
+    public static FeatureFlag MAP_DISABLE_ALL = FeatureFlag.of("map.disable_all");
+
     public static FeatureFlag STORE = FeatureFlag.of("store");
     public static FeatureFlag MAP_REPORTS = FeatureFlag.of("map_reports");
 

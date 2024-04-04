@@ -95,7 +95,6 @@ public class ExpBarRenderer implements ActionBar.Provider {
 
             // Render the remaining part of the segment
             int remaining = pixel - current;
-            System.out.println(remaining);
             if (current < pixel) {
                 builder.drawInPlace(XP_BAR_SEGMENT_EDGE[1]);
                 current++;
