@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
@@ -38,7 +37,6 @@ import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
-import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +78,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             @NotNull MapServer server, @NotNull Terraform terraform,
             @NotNull FeatureList features, @NotNull MapData map
     ) {
-        super(server, map, features, new MapInstance(map.id(), map.createDimensionName('e'), map.id().equals(MapData.SPAWN_MAP_ID) ? DimensionType.OVERWORLD : DimensionTypes.FULL_BRIGHT));
+        super(server, map, features, new MapInstance(map.createDimensionName('e')));
         this.terraform = terraform;
 
         instance.setGenerator(MapGenerators.voidWorld());
