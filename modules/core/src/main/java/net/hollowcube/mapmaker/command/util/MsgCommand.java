@@ -47,12 +47,12 @@ public class MsgCommand extends CommandDsl {
         var message = context.get(messageArg);
 
         if (target == null) {
-            player.sendMessage("Player not online");
+            player.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
         var playerId = PlayerDataV2.fromPlayer(player).id();
         if (playerId.equals(target)) {
-            player.sendMessage("You can't message yourself");
+            player.sendMessage(Component.translatable("chat.msg.cant_message_yourself"));
             return;
         }
 
@@ -63,7 +63,7 @@ public class MsgCommand extends CommandDsl {
         if (message.contains("[map]")) {
             var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
             if (currentMap == null || !currentMap.isPublished()) {
-                player.sendMessage(Component.text("You are not in a published map.")); //todo message
+                player.sendMessage(Component.translatable("generic.map.chat.usage"));
                 return;
             }
             currentMapId = currentMap.id();
