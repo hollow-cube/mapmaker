@@ -108,6 +108,10 @@ public enum BackpackItem {
                 Component.text("item.mapmaker." + name().toLowerCase() + ".name"));
     }
 
+    public @NotNull BadSprite iconSprite() {
+        return BadSprite.require("icon/material/" + name().toLowerCase());
+    }
+
     public @NotNull Component iconComponent() {
         //todo the base sprite should also contain this sprite
         var iconSprite = "icon/material/" + name().toLowerCase();

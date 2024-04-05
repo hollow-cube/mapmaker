@@ -104,7 +104,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
     }
 
     private @NotNull Component buildSubtitle() {
-        if (!rewards.hasExp() && !rewards.hasCoins() && !rewards.hasCubits())
+        if (!rewards.hasExp() && !rewards.hasCoins() && !rewards.hasCubits() && !rewards.hasBackpack())
             return Component.empty();
 
         var builder = new FontUIBuilder();
@@ -116,15 +116,15 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
 
         // === BEGIN TEXT LENGTH CALC ===
         int totalWidth = 0;
-        String expText = null, coinsText = null, cubitsText = null;
-        int expTextLength = 0, coinsTextLength = 0, cubitsTextLength = 0;
+        String expText = null, coinsText = null, cubitsText = null, backpackText = null;
+        int expTextLength = 0, coinsTextLength = 0, cubitsTextLength = 0, backpackTextLength = 0;
 
         if (rewards.hasExp()) {
             expText = "+" + rewards.exp();
             expTextLength = FontUtil.measureText(expText);
             totalWidth += expTextLength + 2 + EXP_SPRITE.width() + 2;
 
-            if (rewards.hasCoins() || rewards.hasCubits())
+            if (rewards.hasCoins() || rewards.hasCubits() || rewards.hasBackpack())
                 totalWidth += 5;
         }
 
@@ -133,7 +133,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
             coinsTextLength = FontUtil.measureText(coinsText);
             totalWidth += coinsTextLength + 2 + COINS_SPRITE.width() + 2;
 
-            if (rewards.hasCubits())
+            if (rewards.hasCubits() || rewards.hasBackpack())
                 totalWidth += 5;
         }
 
@@ -141,6 +141,16 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
             cubitsText = "+" + rewards.cubits();
             cubitsTextLength = FontUtil.measureText(cubitsText);
             totalWidth += cubitsTextLength + 2 + CUBITS_SPRITE.width() + 2;
+
+            if (rewards.hasBackpack())
+                totalWidth += 5;
+        }
+
+        if (rewards.hasBackpack()) {
+            var item = rewards.getItem();
+            backpackText = "+1";
+            backpackTextLength = FontUtil.measureText(backpackText);
+            totalWidth += backpackTextLength + 2 + item.iconSprite().width() + 2;
         }
 
         // === BEGIN DRAWING ===
@@ -154,7 +164,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
             builder.offset(2);
             builder.drawInPlace(EXP_SPRITE);
 
-            if (rewards.hasCoins() || rewards.hasCubits())
+            if (rewards.hasCoins() || rewards.hasCubits() || rewards.hasBackpack())
                 builder.offset(5);
         }
 
@@ -163,7 +173,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
             builder.offset(2);
             builder.drawInPlace(COINS_SPRITE);
 
-            if (rewards.hasCubits())
+            if (rewards.hasCubits() || rewards.hasBackpack())
                 builder.offset(5);
         }
 
@@ -171,6 +181,16 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
             builder.append(cubitsText, cubitsTextLength);
             builder.offset(2);
             builder.drawInPlace(CUBITS_SPRITE);
+
+            if (rewards.hasBackpack())
+                builder.offset(5);
+        }
+
+        if (rewards.hasBackpack()) {
+            var item = rewards.getItem();
+            builder.append(backpackText, backpackTextLength);
+            builder.offset(2);
+            builder.drawInPlace(item.iconSprite());
         }
 
         builder.popColor();

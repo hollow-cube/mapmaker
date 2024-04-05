@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.AbstractVictoryEffectImpl;
@@ -119,6 +120,10 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                     playerData.setExperience(newState.exp());
                 if (newState.hasCubits()) //noinspection DataFlowIssue
                     playerData.setCubits(newState.cubits());
+                if (newState.backpack() != null && newState.backpack().isJsonObject()) {
+                    var backpack = PlayerBackpack.fromPlayer(player);
+                    backpack.update(newState.backpack().getAsJsonObject());
+                }
             });
 
             // Show the completion animation

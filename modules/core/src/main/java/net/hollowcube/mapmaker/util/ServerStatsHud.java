@@ -38,7 +38,7 @@ public class ServerStatsHud implements ActionBar.Provider {
             lastUpdate = now;
         }
 
-        builder.offset(100);
+        builder.offset(125);
         var text = String.format("%.2f", lastTickTime) + "ms // " + lastMemoryUsage + "MB";
         builder.append(FontUtil.rewrite("line_2", text), FontUtil.measureText(text));
     }

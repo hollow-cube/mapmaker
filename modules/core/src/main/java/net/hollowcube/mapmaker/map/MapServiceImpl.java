@@ -439,7 +439,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 else yield GSON.fromJson(res.body(), SaveStateUpdateResponse.class);
             }
             case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to update savestate: " + res.body());
+            default -> throw new InternalError("Failed to update savestate (" + res.statusCode() + "): " + res.body());
         };
     }
 
