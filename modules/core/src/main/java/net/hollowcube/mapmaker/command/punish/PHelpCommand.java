@@ -43,7 +43,36 @@ public class PHelpCommand extends CommandDsl {
         var typeFilter = context.get(typeArg);
 
         var builder = Component.text();
-        builder.append(Component.translatable("punishment.help.header"));
+        builder.append(Component.translatable("punishment.help.header.1"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.2"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.empty"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.3"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.4"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.empty"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.5"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.6"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.empty"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.7"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.8"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.empty"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.9"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.header.10"));
+        builder.appendNewline();
+        builder.append(Component.translatable("punishment.help.empty"));
+        // TODO lol
 
         var ladders = new ArrayList<>(punishmentService.getAllLadders());
         ladders.sort(Comparator.comparing(PunishmentLadder::type));

@@ -36,6 +36,7 @@ announcements:
     - key: "announcement.global.find"
     - key: "announcement.global.bugs_and_suggestions"
     - key: "announcement.global.cosmetics"
+    - key: "announcement.global.open_beta"
     - key: "announcement.play.leaderboards"
       filters:
         session_type: "mapmaker:map"
