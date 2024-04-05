@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -87,10 +88,13 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
-            logger.info("sending {} to limbo", event.getPlayer().getUsername());
-            event.setInitialServer(limboServer);
+        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
+            event.getPlayer().disconnect(Component.text("something went wrong"));
         }
+//        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
+//            logger.info("sending {} to limbo", event.getPlayer().getUsername());
+//            event.setInitialServer(limboServer);
+//        }
     }
 
     @Subscribe
@@ -234,8 +238,8 @@ public class ProxyPlugin {
         var reason = event.getServerKickReason().orElse(null);
         if (reason != null) {
             // TODO: This feels like a bad way to do this. What's the proper way?
-            var text = PlainTextComponentSerializer.plainText().serialize(reason);
-            if (text.contains("banned") || text.contains("kicked")) {
+            var text = PlainTextComponentSerializer.plainText().serialize(reason).toLowerCase(Locale.ROOT);
+            if (text.contains("banned") || text.contains("kicked") || text.contains("version")) {
                 event.setResult(KickedFromServerEvent.DisconnectPlayer.create(reason));
                 return;
             }

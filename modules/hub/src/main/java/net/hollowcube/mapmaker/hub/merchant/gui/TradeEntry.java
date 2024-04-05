@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.CostEntry;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -54,12 +55,13 @@ public class TradeEntry extends View {
                 cubits = entry.getValue();
             else if (type instanceof CostEntry.BackpackItem i) {
                 if (items == null) items = new HashMap<>();
-                items.put(i.entry().id(), entry.getValue());
+                items.put(i.entry().id(), -entry.getValue());
             }
         }
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits, null);
+        playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits,
+                AbstractHttpService.GSON.toJsonTree(items).getAsJsonObject());
 
         var icon = trade.result().iconItem();
         player.sendMessage(Component.translatable("merchant.trade.success", icon.getDisplayName().hoverEvent(icon.asHoverEvent())));
