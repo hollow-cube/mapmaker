@@ -209,7 +209,6 @@ public class MapServerRunner extends AbstractMapServer {
 
         commandManager.register(server.createInstance(BiomesCommand.class));
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));
-        commandManager.register(server.createInstance(RelightCommand.class));
 
         commandManager.register(server.createInstance(AddMarkerCommand.class));
     }
