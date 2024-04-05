@@ -373,7 +373,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // If they have a spectator checkpoint return to that always.
         var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
         if (checkpoint != null) {
-            player.teleport(checkpoint);
+            // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
+            // If they set the spawn below the world then its a joke map anyway and i don't care.
+            var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            if (checkpoint.y() < resetHeight) {
+                player.teleport(world.spawnPoint(player));
+            } else {
+                player.teleport(checkpoint);
+            }
             return;
         }
 
