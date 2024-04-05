@@ -16,7 +16,7 @@
                     sprite="effect/status/repeatable_off"/>
             <button id="repeatable_on" width="3" height="3"
                     translationKey="gui.status.repeatable"
-                    sprite="effect/status/repeatable_on"/>
+                    sprite="effect/status/repeatable_off"/>
         </switch>
         <button id="time_limit" width="3" height="3"
                 translationKey="gui.effect.time_limit"

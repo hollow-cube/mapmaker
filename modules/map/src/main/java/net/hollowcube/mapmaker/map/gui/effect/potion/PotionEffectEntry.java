@@ -46,7 +46,7 @@ public class PotionEffectEntry extends View {
         if (effect == null) return;
         if (clickType == ClickType.LEFT_CLICK) {
             pushView(c -> new PotionEffectEditorView(c, effect, save));
-        } else if (clickType == ClickType.RIGHT_CLICK) {
+        } else if (clickType == ClickType.START_SHIFT_CLICK) {
             performSignal(SIG_REMOVE, effect.type());
             save.run();
         }

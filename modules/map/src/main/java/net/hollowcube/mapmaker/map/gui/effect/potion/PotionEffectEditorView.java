@@ -37,7 +37,7 @@ public class PotionEffectEditorView extends View {
         this.effect = effect;
         this.save = save;
 
-        var effectName = Component.translatable("potion." + effect.type().id() + ".name");
+        var effectName = Component.translatable("gui.effect.potion.type." + effect.type().id() + ".name");
         headerText.setText(PlainTextComponentSerializer.plainText().serialize(LanguageProviderV2.translate(effectName)));
         headerText.setArgs(effectName);
 
@@ -108,6 +108,7 @@ public class PotionEffectEditorView extends View {
 
     private void updateFromEffect() {
         levelText.setText(String.valueOf(effect.level()));
+        levelText.setArgs(Component.text(String.valueOf(effect.level())));
         levelDecSwitch.setOption(effect.level() > 1);
         levelIncSwitch.setOption(effect.level() < effect.type().maxLevel());
 

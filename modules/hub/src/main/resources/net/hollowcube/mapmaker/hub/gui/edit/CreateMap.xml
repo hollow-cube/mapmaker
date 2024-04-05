@@ -6,8 +6,7 @@
         <label translationKey="gui.create_maps.new_map.information"/>
         <text id="slot_id_create" width="5" translationKey="gui.create_maps.new_map.title" font="slot_title"
               centered="true"/>
-        <button translationKey="gui.create_maps.new_map.reset_to_default"/>
-        <button translationKey="gui.create_maps.new_map.more_options"/>
+        <button width="2" translationKey="gui.create_maps.new_map.reset_to_default"/>
     </box>
 
     <spacer width="9" height="1"/>
@@ -18,7 +17,7 @@
         <button width="1" translationKey="gui.create_maps.new_map.generator.void"/>
         <button width="1" translationKey="gui.create_maps.new_map.generator.flat"/>
         <button width="1" translationKey="gui.create_maps.new_map.generator.ocean"/>
-        <button width="1" translationKey="gui.create_maps.new_map.generator.more"/>
+        <button width="1" translationKey="gui.create_maps.new_map.more_options"/>
     </box>
     <box width="9" align="ltr">
         <spacer width="2"/>
