@@ -3,24 +3,24 @@
     {
       "result": "hat/sunglasses",
       "inputs": {
-        "coins": 5000,
-        "metal": 6,
+        "coins": 2500,
+        "metal": 4,
         "gem": 2
       },
     },
     {
       "result": "hat/bikers_helmet",
       "inputs": {
-        "coins": 20000,
-        "metal": 12,
-        "gem": 8
+        "coins": 17500,
+        "metal": 6,
+        "gem": 6
       },
     },
     {
       "result": "accessory/wrench",
       "inputs": {
-        "coins": 5000,
-        "metal": 8
+        "coins": 4000,
+        "metal": 6
       },
     }
   ]

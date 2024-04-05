@@ -3,10 +3,9 @@
     {
       "result": "accessory/cyberfist",
       "inputs": {
-        "coins": 150000,
+        "coins": 110000,
         "metal": 16,
-        "gem": 12,
-        "firework_dust": 4,
+        "gem": 10,
         "stardust": 1
       },
     },

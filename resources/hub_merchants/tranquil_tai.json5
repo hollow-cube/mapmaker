@@ -4,19 +4,16 @@
             "result": "hat/samurai_helmet",
             "inputs": {
                 "coins": 20000,
-                "metal": 12,
-                "cloth": 6,
-                "gold_chunk": 2
+                "metal": 10
             },
         },
         {
             "result": "hat/oni_mask",
             "inputs": {
                 "coins": 50000,
-                "metal": 24,
-                "cloth": 12,
-                "infernal_flame": 4,
-                "gold_chunk": 4
+                "metal": 14,
+                "cloth": 4,
+                "infernal_flame": 2
             },
         }
     ]

@@ -3,19 +3,18 @@
     {
       "result": "accessory/dynamite",
       "inputs": {
-        "cubits": 20000,
-        "goo": 12,
-        "string": 6,
-        "firework_dust": 4
+        "coins": 15000,
+        "goo": 8,
+        "string": 4,
+        "infernal_flame": 1
       },
     },
     {
       "result": "accessory/drill",
       "inputs": {
-        "coins": 150000,
-        "metal": 24,
-        "gem": 18,
-        "gold_chunk": 8,
+        "coins": 100000,
+        "metal": 16,
+        "gem": 8,
         "infernal_flame": 4
       },
     }

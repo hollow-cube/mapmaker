@@ -4,16 +4,15 @@
             "result": "hat/shark_hat",
             "inputs": {
                 "coins": 50000,
-                "goo": 24,
-                "cloth": 16,
-                "bone_fragment": 12
+                "cloth": 8,
+                "bone_fragment": 2
             },
         },
         {
             "result": "particle/bubble",
             "inputs": {
-                "coins": 5000,
-                "goo": 6
+                "coins": 2500,
+                "goo": 4
             },
         }
     ]

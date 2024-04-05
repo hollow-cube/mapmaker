@@ -4,16 +4,16 @@
       "result": "accessory/burger",
       "inputs": {
         "coins": 20000,
-        "goo": 12,
-        "flower_petal": 6,
-        "sugarcube": 4
+        "goo": 8,
+        "flower_petal": 4,
+        "sugarcube": 2
       },
     },
     //    {
     //      "result": "accessory/filled_mug",
     //      "inputs": {
-    //        "coins": 20000,
-    //        "goo": 16,
+    //        "coins": 15000,
+    //        "goo": 10,
     //        "sugarcube": 4
     //      },
     //    }

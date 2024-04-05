@@ -3,19 +3,17 @@
         {
             "result": "hat/apprentice_hat",
             "inputs": {
-                "coins": 20000,
-                "cloth": 12,
-                "string": 6,
-                "gold_chunk": 1
+                "coins": 15000,
+                "cloth": 8,
+                "string": 4
             },
         },
         {
             "result": "hat/wizard_hat",
             "inputs": {
                 "coins": 20000,
-                "cloth": 16,
-                "string": 8,
-                "gold_chunk": 2
+                "cloth": 12,
+                "string": 6
             },
         },
         {
