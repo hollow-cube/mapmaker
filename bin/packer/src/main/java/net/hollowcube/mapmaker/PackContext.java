@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class PackContext {
@@ -116,6 +117,10 @@ public class PackContext {
     }
 
     public @NotNull String writeBasicModel(@NotNull String name, byte[] data) throws IOException {
+        return writeBasicModel(name, data, null);
+    }
+
+    public @NotNull String writeBasicModel(@NotNull String name, byte[] data, @Nullable Consumer<JsonObject> editor) throws IOException {
         name = minifyId(name);
 
         JsonObject obj = new JsonObject();
@@ -123,6 +128,8 @@ public class PackContext {
         JsonObject textures = new JsonObject();
         textures.addProperty("layer0", writeTexture("item", name, data));
         obj.add("textures", textures);
+
+        if (editor != null) editor.accept(obj);
 
         Path path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
         Files.createDirectories(path.getParent());
@@ -146,12 +153,16 @@ public class PackContext {
     }
 
     public int addBasicItemTexture(@NotNull ModelType modelType, @NotNull String name, byte[] texture) throws IOException {
+        return addBasicItemTexture(modelType, name, texture, null);
+    }
+
+    public int addBasicItemTexture(@NotNull ModelType modelType, @NotNull String name, byte[] texture, @Nullable Consumer<JsonObject> modelEditor) throws IOException {
         int cmd = modelType == ModelType.COLORED ? leatherArmorCMD++ : diamondCMD++;
         JsonObject override = new JsonObject();
         JsonObject predicate = new JsonObject();
         predicate.addProperty("custom_model_data", cmd);
         override.add("predicate", predicate);
-        override.addProperty("model", writeBasicModel(name, texture));
+        override.addProperty("model", writeBasicModel(name, texture, modelEditor));
         override.addProperty("axiom:hide", true);
         (modelType == ModelType.COLORED ? leatherArmorFile : diamondFile).getAsJsonArray("overrides").add(override);
         return cmd;

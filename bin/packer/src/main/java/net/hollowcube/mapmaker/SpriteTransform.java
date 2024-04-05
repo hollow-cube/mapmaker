@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class SpriteTransform {
@@ -76,11 +77,26 @@ public class SpriteTransform {
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         ImageIO.write(image, "png", baos);
 
+                        Consumer<JsonObject> modelEditor = null;
+                        if (config.get("no_head") != null) {
+                            modelEditor = obj -> {
+                                var display = new JsonObject();
+                                var head = new JsonObject();
+                                var scale = new JsonArray();
+                                scale.add(0);
+                                scale.add(0);
+                                scale.add(0);
+                                head.add("scale", scale);
+                                display.add("head", head);
+                                obj.add("display", display);
+                            };
+                        }
+
                         int cmd;
                         if (debug) {
-                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, baos.toByteArray());
+                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, baos.toByteArray(), modelEditor);
                         } else {
-                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, Files.readAllBytes(imageFile));
+                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, Files.readAllBytes(imageFile), modelEditor);
                         }
 
                         JsonObject serverSpriteConf = new JsonObject();
