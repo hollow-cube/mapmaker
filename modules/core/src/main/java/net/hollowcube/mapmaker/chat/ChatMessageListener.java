@@ -172,7 +172,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
         long now = System.currentTimeMillis();
         if (now - sender.getTag(LAST_CHAT_MESSAGE) < CHAT_COOLDOWN) {
-            sender.sendMessage("chat.cooldown");
+            sender.sendMessage(Component.translatable("chat.cooldown"));
             return;
         }
         sender.setTag(LAST_CHAT_MESSAGE, now);

@@ -224,7 +224,7 @@ public final class SelectionCommands {
             var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
 
             PlayerUtil.smartAddItemStack(player, itemStack);
-            player.sendMessage(Messages.TOOL_CREATED.with(Component.translatable("terraform.tool.wand")));
+            player.sendMessage(Messages.TOOL_CREATED.with(Component.text("wand")));
         }
     }
 

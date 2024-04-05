@@ -27,7 +27,7 @@ public class ToolCreateCommand extends CommandDsl {
         var toolType = context.get(builtinToolArg);
         var toolItem = toolHandler.createBuiltinTool(toolType);
         PlayerUtil.smartAddItemStack(player, toolItem);
-        player.sendMessage(Component.translatable("tool.create", Component.translatable(toolType)));
+        player.sendMessage(Component.translatable("terraform.tool.create", Component.translatable(toolType)));
     }
 
 
