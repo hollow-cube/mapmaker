@@ -36,6 +36,7 @@ import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +63,9 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             .source(Sound.Source.PLAYER)
             .volume(5)
             .build();
+
+    private static final Tag<Long> LAST_CHAT_MESSAGE = Tag.Long("last_chat_message").defaultValue(0L);
+    private static final long CHAT_COOLDOWN = 500L;
 
     private final SessionManager sessionManager;
     private final PlayerService playerService;
@@ -165,6 +169,13 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     public void trySendChatMessage(@NotNull Player sender, @NotNull ClientChatMessageData message) {
         // Do not do anything if the player is muted
         if (testMuteState(sender)) return;
+
+        long now = System.currentTimeMillis();
+        if (now - sender.getTag(LAST_CHAT_MESSAGE) < CHAT_COOLDOWN) {
+            sender.sendMessage("chat.cooldown");
+            return;
+        }
+        sender.setTag(LAST_CHAT_MESSAGE, now);
 
         this.producer.produceAndForget(CHAT_TOPIC, GSON.toJson(message));
     }

@@ -61,8 +61,20 @@ public class Cosmetic {
         return Comparator.comparing(c -> "cosmetic." + c.type.id() + "." + c.id + ".name");
     }
 
-    public static @NotNull Comparator<Cosmetic> comparingRarity() {
+    public static <T> @NotNull Comparator<T> comparingName(Function<T, Cosmetic> getter) {
+        // May need to switch this to translate the name first, but for now this will do.
+        return Comparator.comparing(t -> {
+            var c = getter.apply(t);
+            return "cosmetic." + c.type.id() + "." + c.id + ".name";
+        });
+    }
+
+    public static Comparator<Cosmetic> comparingRarity() {
         return Comparator.comparingInt(c -> c.rarity.ordinal());
+    }
+
+    public static <T> @NotNull Comparator<T> comparingRarity(@NotNull Function<T, Cosmetic> getter) {
+        return Comparator.comparingInt(t -> getter.apply(t).rarity.ordinal());
     }
 
     private final CosmeticType type;

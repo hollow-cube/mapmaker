@@ -4,10 +4,10 @@ import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.hub.merchant.MerchantData;
+import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class MerchantShopView extends View {
     private final MerchantData data;
@@ -19,11 +19,11 @@ public class MerchantShopView extends View {
 
     @Action("trade_list")
     public void createTradeList(Pagination.@NotNull PageRequest<TradeEntry> request) {
-        var entries = new ArrayList<TradeEntry>();
-        for (var trade : data.trades()) {
-            entries.add(new TradeEntry(request.context(), trade));
-        }
-
-        request.respond(entries, false);
+        var result = data.trades().stream()
+                .sorted(Cosmetic.comparingName(MerchantTrade::result))
+                .sorted(Cosmetic.comparingRarity(MerchantTrade::result))
+                .map(trade -> new TradeEntry(request.context(), trade))
+                .toList();
+        request.respond(result, false);
     }
 }

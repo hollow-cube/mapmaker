@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 @SuppressWarnings("UnstableApiUsage")
 public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
@@ -93,6 +95,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
 
         var startingPos = player.getPosition();
+        player.setTag(SPECTATOR_CHECKPOINT, startingPos);
         player.teleport(startingPos); //todo is this necessary it seems hella dumb?
 
         callEvent(new MapPlayerInitEvent(this, player, true));
