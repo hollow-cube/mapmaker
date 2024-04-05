@@ -58,6 +58,8 @@ public final class TerraformImpl implements Terraform {
 
     private final ToolHandler toolHandler;
 
+    private volatile boolean queueLock = false;
+
     // Tasks
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
@@ -112,6 +114,15 @@ public final class TerraformImpl implements Terraform {
         return toolHandler;
     }
 
+    @Override
+    public boolean queueLockState() {
+        return queueLock;
+    }
+
+    @Override
+    public void setQueueLockState(boolean state) {
+        queueLock = state;
+    }
 
     // Sessions
 
@@ -173,6 +184,13 @@ public final class TerraformImpl implements Terraform {
      */
     public void submitTask(@NotNull TaskImpl task) {
         if (task.state() != Task.State.INIT) return;
+
+        if (queueLock) {
+            logger.debug("{}: queue locked", task);
+            task.setState(Task.State.CANCELLED, null);
+            task.session().cui().sendMessage("terraform.error.queue_locked");
+            return;
+        }
 
         logger.debug("{}: submitted", task);
         task.setState(Task.State.QUEUED, task.computeFunc() != null

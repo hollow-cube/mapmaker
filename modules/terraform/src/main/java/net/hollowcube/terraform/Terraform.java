@@ -48,6 +48,13 @@ public sealed interface Terraform permits TerraformImpl {
     TerraformStorage storage();
 
 
+    // Debug state (should refactor to be a bit fancier)
+
+    // If true, terraform will not allow tasks to be queued.
+    boolean queueLockState();
+    void setQueueLockState(boolean state);
+
+
     // Sessions
     // todo: By default terraform should auto-init a player session when you join the game (pre login event)
     // todo: By default terraform should auto-init a local session when you enter an instance

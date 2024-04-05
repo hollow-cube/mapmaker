@@ -158,6 +158,13 @@ public class MapServerRunner extends AbstractMapServer {
         globalEventHandler.addChild(interactionEvents);
         InteractionRules.register(interactionEvents);
 
+        // Handle feature flag change to disable terraform if relevant
+        if (!ServerRuntime.getRuntime().isDevelopment()) {
+            terraform.setQueueLockState(MapFeatureFlags.TERRAFORM_DISABLE_TASKS.test());
+            globalEventHandler.addListener(FeatureFlagReloadEvent.class, $ ->
+                    terraform.setQueueLockState(MapFeatureFlags.TERRAFORM_DISABLE_TASKS.test()));
+        }
+
         return terraform;
     }
 
