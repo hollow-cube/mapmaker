@@ -49,7 +49,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:115f9c1355",
+        "net.minestom:minestom-snapshots:0c9527118a",
         "dev.hollowcube:polar:1.8.1",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
@@ -119,6 +119,7 @@ maven_install(
     excluded_artifacts = [
         "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
     ],
+    fail_on_missing_checksum = False,
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [

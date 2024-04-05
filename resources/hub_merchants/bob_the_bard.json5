@@ -1,10 +1,14 @@
 {
-    "trades": [
-        {
-            "result": "particle/note",
-            "inputs": {
-                "coins": 4000
-            },
-        },
-    ]
+  "skin": {
+    "texture": "ewogICJ0aW1lc3RhbXAiIDogMTcxMjI5Mjc2NDc4MiwKICAicHJvZmlsZUlkIiA6ICJkYmUyMTA1OTViMGI0MzEyYWExMjgzMGRjNTQwYWQwNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJTZXRoMjgiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDM4YTExYzEwZTc1YmQyYjc0ZWNmZGUzZjRlNTY5NDQzZDcxMDMzMGI0ZGUyYmY5NWFmOTk0OGViNWY0MWYxNSIKICAgIH0KICB9Cn0=",
+    "signature": "JtQGvW8fcHuq7D5kluRGnZVYw2IgLK9KeSpscP2kJZECSFKLE9ykZb1JG7n+S9aSbfyxyGWU6IMsQZs3OfdTaqQ0m+2xrV/qjBoFy0+Uw2fUeRKg8XZAE3FAwq56urCfUs8BoiNbIVVGBkrqZjir5BfBOqMwSQ58KfqRVm7vOWCM/x2o/aZmcZKA0EtnXKD5EvRfO7+a9wputkk3szDVYIX1puIu5LbsU/5mhMgL/SmCRFy6WXyMtSpIWpa3gFvg5OFceZKugftV4txkaq91d/OZ5QKiRSmZISAkTnYPy+fWry8gMt4tlHrKeW17hXmM1+vUGbN0IO/m9M8LNPqf5TKsU2cN6Ux6dQvliqsEs9eiS80Y5iGBCyf45MJzlZwsARMLbJuHLx4vVlOmWZeCkyaU/zbe5+b8fhFcy5grobg/lwjon6EmIq8JNUILa/00kh3T8wiV6wrVXzLPsv03zpHT7GE7YQy6DiZATx2PGQ9DOdaNkVS7cBTO3uqnXuIWUOux1e09cji16PgAd2DVS9bNt0vCQYyHktppu9JaT6E062GfqVOkfTm+SShEEKURfZPsCbmQLznSmKqJfLYTNdiKzuVEGzvyPAIYFhBNk9dSwCyWAJS9IELHe1MVsH08D3xdsH/DmaFSqPEh3VQYgP/AfrgDr+mf9/02uShD7OY="
+  },
+  "trades": [
+    {
+      "result": "particle/note",
+      "inputs": {
+        "coins": 4000
+      },
+    },
+  ]
 }

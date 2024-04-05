@@ -1,20 +1,24 @@
 {
-    "trades": [
-        {
-            "result": "hat/samurai_helmet",
-            "inputs": {
-                "coins": 20000,
-                "metal": 10
-            },
-        },
-        {
-            "result": "hat/oni_mask",
-            "inputs": {
-                "coins": 50000,
-                "metal": 14,
-                "cloth": 4,
-                "infernal_flame": 2
-            },
-        }
-    ]
+  "skin": {
+    "texture": "ewogICJ0aW1lc3RhbXAiIDogMTcxMjI5MjY4ODgwMCwKICAicHJvZmlsZUlkIiA6ICJkYmUyMTA1OTViMGI0MzEyYWExMjgzMGRjNTQwYWQwNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJTZXRoMjgiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTRkNTBmYTlhMzU0OWEwOWViYjE5ZGE4ZmQwYjVkZmJkZjgxYzZlNjZkMTY3N2QzODRmMTkwODVkMDlmNDJkZCIKICAgIH0KICB9Cn0=",
+    "signature": "o5+i4tZ2S+KpGpZgdbFPNFHPOkZ/hVsjCUa/dx7JCPw/T67fmOZHIiwc6ko9KhxPhX+IbRB+Njrv1U2+1JMQis0em3FdfrUouu5lATdZtCZNVjSe1oxfLm5AYQNDA+zb5uR5TAR+dgsPh6D82+dLxXu/5/ehObTZd6xo41r6jJDwMRZG129DnDyRi/7R2LCOGJRpOWCEwJJKCZFQRDBrmet9lLgssuRSdnHDLxaEwAmR/Fw5H5+AFbilpwXomvy+av3v6q3wonZeC1h9jaW/+km3EVbTjgOZyk1zZgqKSwJqmaJyqrp4p6Ty0T5l8nZy953zr3jtJXc8+3pnDHcE7GgH4bNUFEu45OXPGrpm6jkGl4i5yBDWj3GBPTCL8MoKnl5uC1UgVYo0GwjOri68rMnH7fyFLlzEYf8YF9qsF19ww2C8Ndvh/3OCU4FkcYtgv4SiQjCgKVE9yowalWVXscRxMhgFGWeQqdLTfZSRj7E34hIykGsz3wIn4KCaNWiAEXeuO2j1lnWy8Xf9Rj0X37OagksmwsFVvGvOAvTiPzfXARNz729+X2MyeThCUw7SZJzxbnBAZcMEDKojgWLO+kggnVX7ePd5Jmji6lhYuuhRLrcHVthMJqCGrTgW66U5HkFGT231yv1X4kP6il32PjDgEopH44496046nCzCxzE="
+  },
+  "trades": [
+    {
+      "result": "hat/samurai_helmet",
+      "inputs": {
+        "coins": 20000,
+        "metal": 10
+      },
+    },
+    {
+      "result": "hat/oni_mask",
+      "inputs": {
+        "coins": 50000,
+        "metal": 14,
+        "cloth": 4,
+        "infernal_flame": 2
+      },
+    }
+  ]
 }

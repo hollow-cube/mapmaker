@@ -7,8 +7,11 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapQuality;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -22,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class MapEntry extends View {
 
@@ -167,8 +169,7 @@ public class MapEntry extends View {
 
     private @NotNull Component getMapTypeComponent() {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
-            var subvariant = map.settings().getParkourSubVariant();
-            return switch (Objects.requireNonNullElse(subvariant, ParkourSubVariant.SPEEDRUN)) {
+            return switch (map.settings().getParkourSubVariant()) {
                 case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x15ADD3));
                 case SECTIONED -> Component.text("Sectioned Parkour", TextColor.color(0x15ADD3));
                 case RANKUP -> Component.text("Rankup Parkour", TextColor.color(0x15ADD3));
@@ -176,12 +177,13 @@ public class MapEntry extends View {
                 case DROPPER -> Component.text("Dropper Parkour", TextColor.color(0x15ADD3));
                 case ONE_JUMP -> Component.text("One Jump Parkour", TextColor.color(0x15ADD3));
                 case INFORMATIVE -> Component.text("Informative Parkour", TextColor.color(0x15ADD3));
+                case null -> Component.text("Generic Parkour", TextColor.color(0x15ADD3));
             };
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
-            var subvariant = map.settings().getBuildingSubVariant();
-            return switch (Objects.requireNonNullElse(subvariant, BuildingSubVariant.SHOWCASE)) {
+            return switch (map.settings().getBuildingSubVariant()) {
                 case SHOWCASE -> Component.text("Building Showcase", TextColor.color(0x0B9F0B));
                 case TUTORIAL -> Component.text("Building Tutorial", TextColor.color(0x0B9F0B));
+                case null -> Component.text("Generic Building", TextColor.color(0x0B9F0B));
             };
         } else {
             return Component.text("Adventure Map", TextColor.color(0x9F0B0B));

@@ -219,8 +219,6 @@ public class BiomeContainer {
                 .name(namespace)
                 .temperature(0.8F) // IDK what this affects
                 .downfall(0.4F) // IDK what this affects
-                .depth(0.125F) // IDK what this affects
-                .scale(0.05F) // IDK what this affects
                 .effects(effectBuilder.build())
                 .build();
     }

@@ -21,6 +21,7 @@ public class MerchantEntity extends NpcPlayerEntity {
         var merchantId = nbt.getString("merchant_id");
         this.data = MerchantData.getById(merchantId);
         if (this.data == null) logger.warn("Unknown merchant id: {}", merchantId);
+        else if (this.data.skin() != null) this.skin = this.data.skin().into();
 
         setHandler(this::handleInteract);
     }

@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)
 public class WorldEffectFeatureProvider implements FeatureProvider {
-    private static final Weather CLEAR = new Weather(false, 0, 0);
-    private static final Weather RAIN = new Weather(true, 1f, 0f);
-    private static final Weather THUNDER = new Weather(true, 1f, 1f);
+    private static final Weather CLEAR = new Weather(0, 0);
+    private static final Weather RAIN = new Weather(1f, 0f);
+    private static final Weather THUNDER = new Weather(1f, 1f);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {

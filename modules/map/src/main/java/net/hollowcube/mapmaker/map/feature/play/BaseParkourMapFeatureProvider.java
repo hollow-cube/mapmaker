@@ -452,7 +452,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         state.setTimeLimit(countdownEnd - now);
 
         for (var timedPotion : player.getActiveEffects()) {
-            var potion = timedPotion.getPotion();
+            var potion = timedPotion.potion();
             var effectType = PotionInfo.getByVanillaEffect(potion.effect());
             if (effectType == null) continue;
 
@@ -460,7 +460,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             if (entry == null) continue;
 
             // Potion is valid, update the time remaining
-            entry.setDuration(Math.max(0, (int) (potion.duration() - (now - timedPotion.getStartingTime()))));
+            //todo convert all to ticks
+            int remainingWallTime = (int) ((potion.duration() - (player.getInstance().getWorldAge() - timedPotion.startingTicks())) * 50);
+            entry.setDuration(Math.max(0, remainingWallTime));
         }
     }
 

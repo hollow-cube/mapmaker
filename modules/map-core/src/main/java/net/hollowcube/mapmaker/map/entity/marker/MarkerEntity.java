@@ -123,8 +123,8 @@ public class MarkerEntity extends MapEntity {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks) {
-        return super.teleport(position, chunks).thenRun(() -> {
+    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, int flags) {
+        return super.teleport(position, chunks, flags).thenRun(() -> {
 
             // Update position for axiom viewers
             Axiom.sendPacket(getViewers(), createAxiomAddPacket());

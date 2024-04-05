@@ -13,7 +13,6 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
@@ -34,14 +33,14 @@ public class NpcPlayerEntity extends BaseNpcEntity {
             .append(Component.text(RMB_SPRITE.fontChar() + FontUtil.computeOffset(3), NamedTextColor.WHITE))
             .append(Component.text("ᴛᴏ "));
 
-    private static final Tag<PlayerSkin> SKIN_TAG = Tag.Structure("skin", PlayerSkin.class);
-
     private static int nameCounter = 1;
 
     private final String fakeUsername = String.valueOf(nameCounter++);
 
     private final NpcTextModel titleEntity = new NpcTextModel();
     private final NpcTextModel subtitleEntity = new NpcTextModel();
+
+    protected PlayerSkin skin = null;
 
     public NpcPlayerEntity(@NotNull NBTCompound nbt) {
         this(UUID.randomUUID(), nbt);
@@ -99,10 +98,8 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     @Override
     public void updateNewViewer(@NotNull Player player) {
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
-        var skin = getTag(SKIN_TAG);
-        if (skin != null) {
+        if (skin != null)
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
-        }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), fakeUsername, properties, false, 0, GameMode.SURVIVAL, null, null);
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
