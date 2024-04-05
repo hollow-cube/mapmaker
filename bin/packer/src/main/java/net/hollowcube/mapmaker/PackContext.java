@@ -210,6 +210,10 @@ public class PackContext {
 
     }
 
+    public Path rpMinecraftBase() {
+        return rpMinecraftBase;
+    }
+
     private @NotNull String minifyId(@NotNull String id) {
         if (!minify) {
             // Need to flatten to avoid issues with atlases

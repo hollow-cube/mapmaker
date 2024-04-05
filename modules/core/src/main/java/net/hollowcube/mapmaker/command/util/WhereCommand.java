@@ -92,9 +92,9 @@ public class WhereCommand extends CommandDsl {
 
                 var map = mapService.getMap(senderId, presence.mapId());
                 if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
-                    player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(map.name())));
+                    player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(target), Component.text(map.name())));
                 } else {
-                    player.sendMessage(Component.translatable("command.where.playing", targetName, Component.text(map.name())));
+                    player.sendMessage(Component.translatable("command.where.playing", targetName, Component.text(target), Component.text(map.name())));
                 }
             }
             default -> player.sendMessage(Component.translatable("command.where.unknown", targetName));

@@ -55,7 +55,7 @@ public final class CoreArgument {
         return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                     for (var session : sessionManager.sessions(false)) {
-                        if (session.username().equalsIgnoreCase(raw)) {
+                        if (session.username().equalsIgnoreCase(raw) || session.playerId().equalsIgnoreCase(raw)) {
                             return session.playerId();
                         }
                     }

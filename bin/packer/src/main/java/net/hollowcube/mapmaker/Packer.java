@@ -62,6 +62,8 @@ public class Packer {
         DynamicDataTransform hubMerchantsTransform = new DynamicDataTransform("hub_merchants");
         hubMerchantsTransform.process(ctx);
 
+        new LangCloner().process(ctx);
+
         ctx.cleanup();
     }
 }
