@@ -34,6 +34,8 @@ announcements:
     - key: "announcement.global.omega_parkour"
     - key: "announcement.global.lobby"
     - key: "announcement.global.find"
+    - key: "announcement.global.bugs_and_suggestions"
+    - key: "announcement.global.cosmetics"
     - key: "announcement.play.leaderboards"
       filters:
         session_type: "mapmaker:map"
