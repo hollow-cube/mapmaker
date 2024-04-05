@@ -35,11 +35,12 @@ public class NpcPlayerEntity extends BaseNpcEntity {
 
     private static int nameCounter = 1;
 
-    private final String fakeUsername = String.valueOf(nameCounter++);
+    private final String fakeUsername = "z" + String.valueOf(nameCounter++);
 
     private final NpcTextModel titleEntity = new NpcTextModel();
     private final NpcTextModel subtitleEntity = new NpcTextModel();
 
+    private final NBTCompound nbt;
     protected PlayerSkin skin = null;
 
     public NpcPlayerEntity(@NotNull NBTCompound nbt) {
@@ -48,6 +49,7 @@ public class NpcPlayerEntity extends BaseNpcEntity {
 
     public NpcPlayerEntity(@NotNull UUID uuid, @NotNull NBTCompound nbt) {
         super(EntityType.PLAYER, uuid);
+        this.nbt = nbt;
         // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.
         setSynchronizationTicks(Integer.MAX_VALUE);
 
@@ -64,10 +66,13 @@ public class NpcPlayerEntity extends BaseNpcEntity {
         subtitleMeta.setTranslation(new Vec(0, 0.1, 0));
         subtitleMeta.setScale(new Vec(0.7));
 
-        var title = Objects.requireNonNullElseGet(nbt.getString("name"), () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown"));
-        titleEntity.getEntityMeta().setText(Component.text(title));
+        titleEntity.getEntityMeta().setText(Component.text(name()));
         var prompt = nbt.getString("prompt");
         if (prompt != null) subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
+    }
+
+    public @NotNull String name() {
+        return Objects.requireNonNullElseGet(nbt.getString("name"), () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown"));
     }
 
     @Override

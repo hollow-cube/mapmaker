@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.hub.merchant.gui;
 
 import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.hub.merchant.MerchantData;
@@ -10,11 +12,16 @@ import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import org.jetbrains.annotations.NotNull;
 
 public class MerchantShopView extends View {
+
+    private @Outlet("name") Text nameText;
+
     private final MerchantData data;
 
-    public MerchantShopView(@NotNull Context context, @NotNull MerchantData data) {
+    public MerchantShopView(@NotNull Context context, @NotNull String name, @NotNull MerchantData data) {
         super(context);
         this.data = data;
+
+        nameText.setText(name);
     }
 
     @Action("trade_list")

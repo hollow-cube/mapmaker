@@ -31,7 +31,8 @@ public class MerchantEntity extends NpcPlayerEntity {
 
         var world = MapWorld.unsafeFromInstance(getInstance());
         if (world == null) return; // Sanity
+        if (!(npc instanceof NpcPlayerEntity merchant)) return;
 
-        world.server().guiController().show(player, c -> new MerchantShopView(c, data));
+        world.server().guiController().show(player, c -> new MerchantShopView(c, merchant.name(), data));
     }
 }
