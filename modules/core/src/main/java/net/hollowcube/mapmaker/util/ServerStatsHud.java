@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.MinecraftServer;
@@ -26,7 +27,6 @@ public class ServerStatsHud implements ActionBar.Provider {
     private double lastTickTime;
     private int lastMemoryUsage;
 
-
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
         long now = System.currentTimeMillis();
@@ -38,9 +38,9 @@ public class ServerStatsHud implements ActionBar.Provider {
             lastUpdate = now;
         }
 
-        builder.append(String.format("%.2f", lastTickTime) + "ms");
-        builder.append(" // ");
-        builder.append(lastMemoryUsage + "MB");
+        builder.offset(100);
+        var text = String.format("%.2f", lastTickTime) + "ms // " + lastMemoryUsage + "MB";
+        builder.append(FontUtil.rewrite("line_2", text), FontUtil.measureText(text));
     }
 
     @Override

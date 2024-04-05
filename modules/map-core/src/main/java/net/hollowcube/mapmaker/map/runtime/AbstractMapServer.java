@@ -32,6 +32,7 @@ import net.hollowcube.mapmaker.command.PlayCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
+import net.hollowcube.mapmaker.command.staff.SFindCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
@@ -225,10 +226,10 @@ public abstract class AbstractMapServer implements MapServer {
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
-            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, playerService, mapService, sessionManager, bridge);
+            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, playerService, mapService, sessionManager, bridge, permManager);
         else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
         else
-            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
+            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
 
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
@@ -371,6 +372,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(createInstance(MapCommand.class));
 
+        commandManager.register(createInstance(SFindCommand.class));
         commandManager.register(createInstance(VanishCommand.class));
         commandManager.register(createInstance(UnvanishCommand.class));
 

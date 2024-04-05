@@ -6,6 +6,8 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
@@ -30,19 +32,22 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
+    private final PermManager permManager;
 
     public PlayerInviteServiceImpl(
             @NotNull String url,
             @NotNull PlayerService playerService,
             @NotNull MapService mapService,
             @NotNull SessionManager sessionManager,
-            @NotNull ServerBridge bridge
+            @NotNull ServerBridge bridge,
+            @NotNull PermManager permManager
     ) {
         this.url = String.format("%s/v2/internal/invites", url);
         this.playerService = playerService;
         this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
+        this.permManager = permManager;
     }
 
     @Override
@@ -74,7 +79,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
         var targetMap = mapService.getMap(targetId, targetPresence.mapId());
         // TODO: When trusted members exist for maps, check if the player is a trusted member
-        if (!targetMap.isPublished()) {
+        if (!targetMap.isPublished() && !permManager.hasPlatformPermission(sender, PlatformPerm.MAP_ADMIN)) {
             sender.sendMessage(Component.translatable("map.join.no_permission", targetDisplayName));
             return;
         }

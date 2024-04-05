@@ -114,6 +114,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         if (!event.getMapWorld().isPlaying(player)) return;
 
+        MapCompletionAnimation.cancel(player); // In case the player resets themselves
+
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();

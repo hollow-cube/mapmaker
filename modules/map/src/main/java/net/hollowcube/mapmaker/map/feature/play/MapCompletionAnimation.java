@@ -20,12 +20,16 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
     private static final Tag<MapCompletionAnimation> TAG = Tag.Transient("map_completion_animation");
 
     public static void schedule(@NotNull Player target, @NotNull AppliedRewards.Inventory rewards, @Nullable Runnable onComplete) {
-        var existing = target.getTag(TAG);
-        if (existing != null) existing.cancel();
+        cancel(target);
 
         var animation = new MapCompletionAnimation(target, rewards, onComplete);
         target.scheduler().submitTask(animation);
         target.setTag(TAG, animation);
+    }
+
+    public static void cancel(@NotNull Player target) {
+        var existing = target.getTag(TAG);
+        if (existing != null) existing.cancel();
     }
 
     private static final BadSprite COINS_SPRITE = BadSprite.require("icon/store/oo_coins");
@@ -100,6 +104,9 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
     }
 
     private @NotNull Component buildSubtitle() {
+        if (!rewards.hasExp() && !rewards.hasCoins() && !rewards.hasCubits())
+            return Component.empty();
+
         var builder = new FontUIBuilder();
         var mark = builder.mark();
         builder.pushColor(FontUtil.NO_SHADOW);
