@@ -25,7 +25,7 @@ public class DevServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
 //        if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
 //            player.sendMessage(Component.translatable("ff.maps_disabled"));
 //            return;

@@ -25,7 +25,7 @@ public class HubServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
         if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
             player.sendMessage(Component.translatable("ff.maps_disabled"));
             return;
@@ -39,7 +39,7 @@ public class HubServerBridge implements ServerBridge {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
-            }));
+            }, source));
             logger.info("join map result: {}", res);
             player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {

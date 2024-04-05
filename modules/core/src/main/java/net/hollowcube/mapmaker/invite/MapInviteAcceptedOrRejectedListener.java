@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.invite;
 
 import com.google.gson.Gson;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -90,18 +90,18 @@ public final class MapInviteAcceptedOrRejectedListener extends BaseConsumer<MapI
 
         if (type == InviteType.INVITE) {
             // For invites, we move the recipient to the sender's map
-            this.joinMap(UUID.fromString(message.recipientId()), message.senderId(), message.mapId());
+            this.joinMap(UUID.fromString(message.recipientId()), message.senderId(), message.mapId(), "invite");
         } else {
             // For requests, we move the sender to the recipient's map
-            this.joinMap(UUID.fromString(message.senderId()), message.recipientId(), message.mapId());
+            this.joinMap(UUID.fromString(message.senderId()), message.recipientId(), message.mapId(), "request");
         }
     }
 
-    private void joinMap(@NotNull UUID playerId, @NotNull String targetPlayerId, @NotNull String mapId) {
+    private void joinMap(@NotNull UUID playerId, @NotNull String targetPlayerId, @NotNull String mapId, @NotNull String source) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(playerId);
         if (player == null) return;
 
         var map = this.mapService.getMap(targetPlayerId, mapId);
-        this.serverBridge.joinMap(player, mapId, map.isPublished() ? JoinMapState.PLAYING : JoinMapState.EDITING);
+        this.serverBridge.joinMap(player, mapId, map.isPublished() ? JoinMapState.PLAYING : JoinMapState.EDITING, source);
     }
 }

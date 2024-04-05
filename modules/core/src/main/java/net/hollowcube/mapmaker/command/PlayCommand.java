@@ -41,7 +41,7 @@ public class PlayCommand extends CommandDsl {
     }
 
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
-        bridge.joinMap(player, context.get(mapArg).id(), ServerBridge.JoinMapState.PLAYING);
+        bridge.joinMap(player, context.get(mapArg).id(), ServerBridge.JoinMapState.PLAYING, "play_command");
     }
 
 }

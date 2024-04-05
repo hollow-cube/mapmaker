@@ -19,4 +19,5 @@ public class MapInstanceCreatedEvent implements Metric {
     public @NotNull Instant timestamp() {
         return timestamp;
     }
+
 }

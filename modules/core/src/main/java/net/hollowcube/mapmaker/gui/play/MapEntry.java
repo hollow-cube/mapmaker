@@ -64,7 +64,8 @@ public class MapEntry extends View {
     @Action("btn")
     private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case START_SHIFT_CLICK -> bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING);
+            case START_SHIFT_CLICK ->
+                    bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
             case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
         }
     }

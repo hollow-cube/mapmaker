@@ -37,6 +37,6 @@ public class MapEditCommand extends CommandDsl {
     private void handleForceEditMap(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
 
-        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING);
+        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "staff_edit_map");
     }
 }

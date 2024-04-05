@@ -344,7 +344,7 @@ public class MapDetailsView extends View {
 
         try {
             player.closeInventory();
-            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING);
+            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
         } catch (Exception e) {
             // If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
             logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());

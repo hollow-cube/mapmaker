@@ -85,7 +85,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var joinState = targetMap.isPublished() ? ServerBridge.JoinMapState.PLAYING : ServerBridge.JoinMapState.EDITING;
-        bridge.joinMap(sender, targetMap.id(), joinState);
+        bridge.joinMap(sender, targetMap.id(), joinState, "join_command");
     }
 
     @Override

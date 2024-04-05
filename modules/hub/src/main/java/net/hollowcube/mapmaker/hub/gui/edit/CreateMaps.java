@@ -116,7 +116,7 @@ public class CreateMaps extends View {
             return;
 
         try {
-            bridge.joinMap(player, spawnMapId, ServerBridge.JoinMapState.EDITING);
+            bridge.joinMap(player, spawnMapId, ServerBridge.JoinMapState.EDITING, "hardcoded_spawn_world");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("generic.map.edit.fail"));
             MinecraftServer.getExceptionManager().handleException(e);

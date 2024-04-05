@@ -21,7 +21,7 @@ public interface ServerBridge {
      * system, or an external allocator/matchmaker.
      */
     @Blocking
-    void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState);
+    void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source);
 
     void joinHub(@NotNull Player player);
 
