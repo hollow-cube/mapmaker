@@ -48,6 +48,7 @@ public class WorldEditModule implements TerraformModule {
 //                RegionCommands.Smooth.class, //todo
                 RegionCommands.Move.class,
                 RegionCommands.Stack.class,
+                RegionCommands.Smear.class,
 //                RegionCommands.Hollow.class, //todo
 
                 // Generation

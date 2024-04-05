@@ -304,7 +304,8 @@ public final class SchematicCommands {
                         var offset = new Vec(-origin.blockX(), -origin.blockY(), -origin.blockZ());
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
-                    });
+                    })
+                    .submit();
         }
     }
 

@@ -2,6 +2,7 @@ package net.hollowcube.terraform.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compute.RegionFunctions;
@@ -13,13 +14,17 @@ import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
 import net.hollowcube.terraform.util.Messages;
+import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
+import java.util.Objects;
 
 public final class RegionCommands {
     private RegionCommands() {
@@ -400,6 +405,63 @@ public final class RegionCommands {
                             }
                         }
                         player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged()));
+                    })
+                    .submit();
+        }
+    }
+
+    //todo this does NOT come from worldedit!!!
+    public static class Smear extends WECommand {
+        private final Argument<Integer> countArg = Argument.Int("count").min(1).defaultValue(1);
+        private final Argument<Direction> directionArg = WEArgument.Direction("direction");
+
+        public Smear() {
+            super("/smear");
+
+            addSyntax(playerOnly(this::execute));
+            addSyntax(playerOnly(this::execute), countArg);
+            addSyntax(playerOnly(this::execute), countArg, directionArg);
+        }
+
+        private void execute(@NotNull Player player, @NotNull CommandContext context) {
+            var count = context.get(countArg);
+            var direction = context.get(directionArg);
+
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
+            var region = selection.region();
+            if (region == null) {
+                player.sendMessage(Messages.GENERIC_NO_SELECTION);
+                return;
+            }
+
+            var dir = Objects.requireNonNullElseGet(direction, () -> DirectionUtil.fromView(player.getPosition()));
+            var offset = new Vec(dir.normalX(), dir.normalY(), dir.normalZ());
+
+            // Execute the change
+            session.buildTask("we-smear")
+                    .metadata() //todo
+                    .compute((task, world) -> {
+                        //todo we can compute the known block buffer size here (which is more efficient)
+                        var buffer = BlockBuffer.builder(world);
+                        for (var pos : region) {
+                            var block = world.getBlock(pos);
+                            if (block.isAir()) continue;
+
+                            for (int i = 0; i < count; i++) {
+                                var blockOffset = pos.add(offset.mul(i + 1));
+                                var otherBlock = world.getBlock(blockOffset, Block.Getter.Condition.TYPE);
+                                // If we reach a non-air block, stop smearing
+                                if (!otherBlock.isAir()) break;
+
+                                buffer.set(blockOffset, block);
+                            }
+                        }
+                        return buffer.build();
+                    })
+                    .post(result -> {
+                        player.sendMessage(Component.translatable("terraform.selection.smear",
+                                Component.translatable(String.valueOf(result.blocksChanged()))));
                     })
                     .submit();
         }

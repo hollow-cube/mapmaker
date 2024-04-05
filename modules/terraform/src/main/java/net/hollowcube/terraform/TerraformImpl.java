@@ -93,8 +93,8 @@ public final class TerraformImpl implements Terraform {
                 "No matching storage implementation: " + storage);
         this.storage = injector.getInstance(storageFactory);
 
-        this.threadPoolCompute = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-compute"));
-        this.threadPoolApply = Executors.newFixedThreadPool(1, new ThreadUtil.NamedThreadFactory("tf-apply"));
+        this.threadPoolCompute = Executors.newFixedThreadPool(2, new ThreadUtil.NamedThreadFactory("tf-compute"));
+        this.threadPoolApply = Executors.newFixedThreadPool(2, new ThreadUtil.NamedThreadFactory("tf-apply"));
     }
 
     @Override

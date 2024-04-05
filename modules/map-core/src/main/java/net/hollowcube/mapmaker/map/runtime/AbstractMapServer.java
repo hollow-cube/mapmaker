@@ -22,6 +22,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Injectors;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -71,6 +72,7 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -553,6 +555,10 @@ public abstract class AbstractMapServer implements MapServer {
             world.addPlayer(player);
             player.setAutoViewEntities(true); // See comment in AbstractMapWorld#configurePlayer
         });
+
+        if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {
+            actionBar.addProvider(new ServerStatsHud());
+        }
 
         // Garbage below
 

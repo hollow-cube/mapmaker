@@ -24,10 +24,8 @@ import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
-import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 @AutoService(HubFeature.class)
@@ -49,7 +47,6 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     @Inject
     public CyberpunkStatDisplayFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
         EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
-        BENCHMARK_MANAGER.enable(Duration.of(2, TimeUnit.SECOND));
 
         // Nice positions for toying locally
 //        var staticTextPos = new Pos(-3 + 0.001, 41.15, 0.53, -90, 0);
