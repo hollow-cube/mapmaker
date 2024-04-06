@@ -134,7 +134,6 @@ public record AxiomClientSetBufferPacket(
         @SuppressWarnings("UnstableApiUsage")
         static @NotNull Palette readAxiomPalette(@NotNull NetworkBuffer buffer) {
             var bitsPerEntry = buffer.read(NetworkBuffer.BYTE);
-            System.out.println("section bpe: " + bitsPerEntry);
             return switch (bitsPerEntry) {
                 case 0 -> { // Vanilla: fixed palette
                     var blockId = buffer.read(NetworkBuffer.VAR_INT);

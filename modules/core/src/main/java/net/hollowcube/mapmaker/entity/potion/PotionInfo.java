@@ -99,7 +99,11 @@ public record PotionInfo(
         }
 
         public @NotNull Builder setIcon(@NotNull String spritePath) {
-            var sprite = BadSprite.require(spritePath);
+            var sprite = BadSprite.SPRITE_MAP.get(spritePath);
+            if (sprite == null) {
+                setIcon(ItemStack.builder(Material.DIAMOND));
+                return this;
+            }
             return setIcon(ItemStack.builder(Material.DIAMOND)
                     .meta(meta -> meta.customModelData(sprite.cmd())));
         }

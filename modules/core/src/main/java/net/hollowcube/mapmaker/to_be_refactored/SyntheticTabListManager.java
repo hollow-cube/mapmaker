@@ -41,10 +41,10 @@ public class SyntheticTabListManager {
     public void addSession(@NotNull PlayerSession session) {
         List<PlayerInfoUpdatePacket.Property> properties = session.skin().texture() == null ? List.of()
                 : List.of(new PlayerInfoUpdatePacket.Property("textures", session.skin().texture(), session.skin().signature()));
-        var displayName = playerService.getPlayerDisplayName2(session.playerId()).build();
+        var displayName = playerService.getPlayerDisplayName2(session.playerId());
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
-                getListUuid(session.playerId()), session.username(), properties,
-                true, 0, null, displayName, null
+                getListUuid(session.playerId()), displayName.getUsernameForTabList(), properties,
+                true, 0, null, displayName.build(), null
         );
 
         listedPlayers.put(session.playerId(), playerListEntry);
