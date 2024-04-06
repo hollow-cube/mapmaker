@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -250,6 +252,23 @@ public class MapData {
         return Long.parseLong(publishedId.replace("-", ""));
     }
 
+    public boolean isCompletable() {
+        return settings().getVariant() == MapVariant.PARKOUR;
+    }
+
+    public @NotNull String createDimensionName(char classifier) {
+        return String.format("mapmaker:map/%s/%s", id().substring(0, 8), classifier);
+    }
+
+    public static class WithSlot extends MapData {
+        private int slot;
+
+        public int slot() {
+            return slot;
+        }
+    }
+
+
     /**
      * Returns a component with the map name and a hover text that shows the map details GUI basically.
      * <p>
@@ -257,7 +276,84 @@ public class MapData {
      *
      * @return
      */
-    public static @NotNull Component createMapHoverText(@NotNull MapData map) {
+    public static @NotNull Component createHeadlessComponent(@NotNull MapData map, @NotNull PlayerService playerService) {
+        var lore = new ArrayList<Component>();
+        var authorName = playerService.getPlayerDisplayName2(map.owner());
+        lore.add(Component.translatable("gui.play_maps.map_display.author", authorName.build()));
+        lore.add(Component.empty());
+        lore.add(Component.translatable("gui.play_maps.map_display.type", getMapTypeComponent(map)));
+        if (map.settings().getVariant() == MapVariant.PARKOUR)
+            lore.add(Component.translatable("gui.play_maps.map_display.difficulty", map.getDifficultyComponent()));
+        if (map.quality() == MapQuality.GOOD) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.good"));
+        } else if (map.quality() == MapQuality.GREAT) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.great"));
+        } else if (map.quality() == MapQuality.EXCELLENT) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.excellent"));
+        } else if (map.quality() == MapQuality.OUTSTANDING) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.outstanding"));
+        } else if (map.quality() == MapQuality.MASTERPIECE) {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.masterpiece"));
+        } else {
+            lore.add(Component.translatable("gui.play_maps.map_display.rating.unrated"));
+        }
+
+        lore.add(Component.translatable("gui.play_maps.map_display.id", Component.text(map.publishedIdString())));
+        var tags = map.settings().getTags();
+        if (!tags.isEmpty()) {
+            lore.add(Component.empty());
+            lore.add(Component.translatable("gui.play_maps.map_display.tags_header"));
+            for (var tag : tags) {
+                lore.add(Component.translatable("gui.play_maps.map_display.tags_single", Component.text(tag.displayName())));
+            }
+        }
+
+        if (map.settings().isOnlySprint() || map.settings().isNoSprint() || map.settings().isNoJump()
+                || map.settings().isNoSneak() || map.settings().isBoat()) {
+            lore.add(Component.empty());
+            lore.add(Component.translatable("gui.play_maps.map_display.settings_header"));
+
+            int settingsCount = 0;
+            int extraSettingsCount = 0;
+
+            if (map.settings().isOnlySprint()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Only Sprint")));
+                settingsCount++;
+            }
+            if (map.settings().isNoSprint()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sprint")));
+                settingsCount++;
+            }
+            if (map.settings().isNoJump()) {
+                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Jump")));
+                settingsCount++;
+            }
+            if (map.settings().isNoSneak()) {
+                if (settingsCount < 3) {
+                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sneak")));
+                } else {
+                    extraSettingsCount++;
+                }
+                settingsCount++;
+            }
+            if (map.settings().isBoat()) {
+                if (settingsCount < 3) {
+                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Boats")));
+                } else {
+                    extraSettingsCount++;
+                }
+                settingsCount++;
+            }
+
+            if (settingsCount > 3) {
+                lore.add(Component.translatable("gui.play_maps.map_display.setting_more", Component.text(extraSettingsCount)));
+            }
+        }
+
+        lore.add(Component.empty());
+        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
+
+
         var comp = Component.text(map.name(), TextColor.color(0x15ADD3));
         if (map.isPublished()) {
             var hoverText = Component.text("Click to join!")
@@ -273,22 +369,36 @@ public class MapData {
                     .clickEvent(ClickEvent.runCommand("/map details " + map.id()));
         }
 
-        return comp;
+        var builder = Component.text();
+        for (int i = 0; i < lore.size(); i++) {
+            builder = builder.append(lore.get(i));
+            if (i < lore.size() - 1) {
+                builder = builder.appendNewline();
+            }
+        }
+        return builder.build();
     }
 
-    public boolean isCompletable() {
-        return settings().getVariant() == MapVariant.PARKOUR;
-    }
-
-    public @NotNull String createDimensionName(char classifier) {
-        return String.format("mapmaker:map/%s/%s", id().substring(0, 8), classifier);
-    }
-
-    public static class WithSlot extends MapData {
-        private int slot;
-
-        public int slot() {
-            return slot;
+    private static @NotNull Component getMapTypeComponent(@NotNull MapData map) {
+        if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            return switch (map.settings().getParkourSubVariant()) {
+                case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x15ADD3));
+                case SECTIONED -> Component.text("Sectioned Parkour", TextColor.color(0x15ADD3));
+                case RANKUP -> Component.text("Rankup Parkour", TextColor.color(0x15ADD3));
+                case GAUNTLET -> Component.text("Gauntlet Parkour", TextColor.color(0x15ADD3));
+                case DROPPER -> Component.text("Dropper Parkour", TextColor.color(0x15ADD3));
+                case ONE_JUMP -> Component.text("One Jump Parkour", TextColor.color(0x15ADD3));
+                case INFORMATIVE -> Component.text("Informative Parkour", TextColor.color(0x15ADD3));
+                case null -> Component.text("Generic Parkour", TextColor.color(0x15ADD3));
+            };
+        } else if (map.settings().getVariant() == MapVariant.BUILDING) {
+            return switch (map.settings().getBuildingSubVariant()) {
+                case SHOWCASE -> Component.text("Building Showcase", TextColor.color(0x0B9F0B));
+                case TUTORIAL -> Component.text("Building Tutorial", TextColor.color(0x0B9F0B));
+                case null -> Component.text("Generic Building", TextColor.color(0x0B9F0B));
+            };
+        } else {
+            return Component.text("Adventure Map", TextColor.color(0x9F0B0B));
         }
     }
 }

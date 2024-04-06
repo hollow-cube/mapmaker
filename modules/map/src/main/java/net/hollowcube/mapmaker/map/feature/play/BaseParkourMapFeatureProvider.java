@@ -129,7 +129,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+            if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
+                inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+            }
 
             if (!event.getMap().getSetting(MapSettings.NO_SPECTATOR)) {
                 inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));

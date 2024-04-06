@@ -263,6 +263,7 @@ public class DebugCommand extends CommandDsl {
                     // Wait for the command to complete
                     int exitCode = process.waitFor();
                     if (exitCode != 0) {
+                        logger.error("Failed to create cpu profile ({}, {}): {}", exitCode, process.info(), new String(process.getErrorStream().readAllBytes()));
                         sender.sendMessage(Component.text("failed to create cpu profile", NamedTextColor.RED));
                         return;
                     }

@@ -357,6 +357,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(StoreCommand.class));
         commandManager.register(createInstance(DiscordCommand.class));
         commandManager.register(createInstance(NoobCommand.class));
+        commandManager.register(createInstance(HideCommand.class));
 
         commandManager.register(createInstance(PlayCommand.class));
         commandManager.register(createInstance(WhereCommand.class));

@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -137,7 +136,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             if (message.contains("[map]")) {
                 var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
                 if (currentMap == null || !currentMap.isPublished()) {
-                    player.sendMessage(Component.text("You are not in a published map.")); //todo message
+                    player.sendMessage(Component.translatable("chat.map.invalid"));
                     return;
                 }
                 currentMapId = currentMap.id();
@@ -203,7 +202,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
             var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
 
-            var maps = new HashMap<String, MapData>();
+            var maps = new HashMap<String, Component>();
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 var builder = Component.text();
@@ -235,8 +234,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                         }
                         case MAP -> {
                             builder.append(Component.text("[map - todo]"));
-//                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
-//                                builder.append(MapData.createMapHoverText(map));
+//                            builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
+//                                var m = mapService.getMap(message.sender(), mapId);
+//                                return MapData.createHeadlessComponent(m, playerService);
+//                            }));
                         }
                         case URL -> {
                             builder.append(Component.text(part.text(), NamedTextColor.GRAY)
