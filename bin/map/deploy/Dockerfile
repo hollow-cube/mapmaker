@@ -10,4 +10,4 @@ RUN chmod +x async-profiler/profiler.sh
 COPY ./map_deploy.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-XX:+EnableDynamicAgentLoading", "-jar", "server.jar"]

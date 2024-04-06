@@ -9,4 +9,4 @@ RUN tar -xzf async-profiler.tar.gz && rm async-profiler.tar.gz && mv async-profi
 RUN chmod +x async-profiler/profiler.sh
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "--add-modules", "jdk.incubator.concurrent", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "--add-modules", "jdk.incubator.concurrent", "-Xmx3G", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-XX:+EnableDynamicAgentLoading", "-jar", "server.jar"]

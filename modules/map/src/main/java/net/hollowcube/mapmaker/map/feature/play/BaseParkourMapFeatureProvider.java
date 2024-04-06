@@ -565,7 +565,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         @Override
         public boolean test(@NotNull Entity otherEntity) {
             if (!(otherEntity instanceof Player other)) return true; // Always show non-players
-            if (world.isPlaying(other)) {
+            if (world.isPlaying(other) || (world instanceof TestingMapWorld testWorld && testWorld.buildWorld().isPlaying(other))) {
                 var rule = playerData.getSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY);
                 // If the ghost rule is used then we never hide the player (but they will become invisible)
                 if (rule == VisibilityRule.GHOST) return true;
@@ -575,13 +575,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 // Always hide spectators if they are too close. Note that this does not execute for spectators
                 // so this will not stop them from seeing each other.
                 return player.getDistanceSquared(other) > SPECTATOR_HIDE_DISTANCE * SPECTATOR_HIDE_DISTANCE;
-            } else return false;
+            } else return true;
         }
 
         // Called for every other player, returns how we should be visible to them
         @Override
         public @NotNull PlayerVisibilityExtension.Visibility apply(Player other) {
-            if (world.isPlaying(player)) {
+            if (world.isPlaying(other) || (world instanceof TestingMapWorld testWorld && testWorld.buildWorld().isPlaying(other))) {
                 if (player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE)
                     return PlayerVisibilityExtension.Visibility.VISIBLE;
                 return PlayerVisibilityExtension.Visibility.INVISIBLE;

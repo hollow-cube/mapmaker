@@ -18,21 +18,6 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip) {
-        return new PlayerDataV2(
-                id, username,
-                new DisplayName(List.of(new DisplayName.Part("username", username, null))),
-                new JsonObject(),
-                0, 0, 0
-        );
-    }
-
-    @Override
-    public void deleteSession(@NotNull String id) {
-
-    }
-
-    @Override
     public @NotNull List<PlayerSession> sync() {
         return List.of();
     }

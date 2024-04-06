@@ -45,6 +45,7 @@ public final class MapWorldHelpers {
         player.setVelocity(Vec.ZERO);
         player.clearEffects();
         player.getInventory().clear();
+        player.updateViewerRule(null);
 
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);

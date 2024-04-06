@@ -3,11 +3,9 @@ package net.hollowcube.mapmaker.dev;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
@@ -16,14 +14,13 @@ import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
-import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.hollowcube.mapmaker.player.PlayerSkin;
+import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
+import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -35,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class DevServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServerRunner.class);
@@ -115,33 +113,15 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
-        // Note: The DevServer is still using sessions v1 because it is not running behind a proxy, meaning
-        // transferSession in not a valid operation.
-        // We explicitly do not call super.transferPlayerSession and basically reimplement it using v1 here.
+        // DevServer is not running behind a proxy, so we need to handle the proxy side of the session interaction
+        // on our own here.
+        // Note that we dont transfer here, its deferred to config phase (and reconfig)
 
-        var player = event.getPlayer();
-        try {
-            var playerData = sessionService().createSession(
-                    event.getPlayerUuid().toString(),
-                    event.getUsername(),
-                    "todo"
-            );
-            player.setTag(PlayerDataV2.TAG, playerData);
-
-            var mapPlayerData = mapService().getMapPlayerData(playerData.id());
-            player.setTag(MapPlayerData.TAG, mapPlayerData);
-
-            var backpack = new PlayerBackpack(player);
-            player.setTag(PlayerBackpack.TAG, backpack);
-            backpack.update(playerService().getPlayerBackpack(playerData.id()));
-        } catch (SessionService.UnauthorizedError ignored) {
-            player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
-                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
-                    .append(Component.text(" for more information.")));
-        } catch (Exception e) {
-            logger.error("failed to create session", e);
-            player.kick(Component.text("Failed to login. Please try again later."));
-        }
+        var playerId = event.getPlayerUuid().toString();
+        sessionService().createSessionV2(playerId, new SessionCreateRequestV2(
+                "devserver-integrated", event.getUsername(), "127.0.0.1",
+                new PlayerSkin(Optional.empty(), Optional.empty())
+        ));
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
@@ -150,12 +130,20 @@ public class DevServerRunner extends AbstractMapServer {
 
             var targetWorld = player.getTag(DevServerBridge.TARGET_WORLD);
             if (targetWorld == null) {
-                hubWorld.configurePlayer(event); // Spawn into hub
+                // Move the session to the hub and spawn the player
+                var hubPresence = new Presence(Presence.TYPE_MAPMAKER_HUB, "__hub_unused__", "devserver", "hub");
+                super.transferPlayerSession(player, hubPresence);
+
+                hubWorld.configurePlayer(event);
                 return;
             }
 
-            // Spawn the player into the targeted map
+            // Move session and spawn the player into the targeted map
             var world = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+            var joinType = world instanceof EditingMapWorld ? "editing" : "playing";
+            var presence = new Presence(Presence.TYPE_MAPMAKER_MAP, joinType, "devserver", world.map().id());
+            super.transferPlayerSession(player, presence);
+
             world.configurePlayer(event);
         } catch (Exception e) {
             logger.error("Error during config phase", e);
@@ -169,30 +157,10 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
-        // Logic required to delete session when using session v1 api.
+        var player = event.getPlayer();
+        super.handlePlayerDisconnect(player);
 
-        logger.info("disconnect - {}", event.getPlayer().getUsername());
-        Runnable task = () -> {
-            var player = event.getPlayer();
-            var playerData = PlayerDataV2.fromPlayer(player);
-
-            // There is just no need to do any of this if we arent shutting down.
-            if (!shutdowner().isShuttingDown()) {
-                Audiences.all().sendMessage(Component.translatable("chat.player.leave", playerData.displayName()));
-                MiscFunctionality.broadcastTabList(Audiences.all());
-            }
-
-            try {
-                sessionService().deleteSession(playerData.id());
-            } catch (Exception e) {
-                logger.error("Failed to close session for " + playerData.id(), e);
-            }
-        };
-
-        if (shutdowner().isShuttingDown()) {
-            task.run();
-        } else {
-            FutureUtil.submitVirtual(task);
-        }
+        // Again, need to implement the proxy part of the delete session flow
+        sessionService().deleteSessionV2(player.getUuid().toString());
     }
 }

@@ -14,10 +14,6 @@ public interface SessionService {
     @Blocking
     boolean ready();
 
-    @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String username, @NotNull String ip);
-
-    void deleteSession(@NotNull String id);
-
     @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body);
 
     @NotNull TransferSessionResponse transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req);

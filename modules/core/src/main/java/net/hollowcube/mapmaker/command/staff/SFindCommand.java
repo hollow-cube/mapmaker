@@ -44,7 +44,7 @@ public class SFindCommand extends CommandDsl {
                 .description("The player you want to find");
 
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
-        addSyntax(playerOnly(this::handleFindPlayer));
+        addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 
     private void handleFindPlayer(@NotNull Player player, @NotNull CommandContext context) {
