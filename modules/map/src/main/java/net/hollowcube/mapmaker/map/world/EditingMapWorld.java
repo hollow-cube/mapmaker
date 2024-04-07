@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -370,6 +371,16 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         ItemStack itemStack = event.getItemStack();
         if (itemStack.material() == Material.SUSPICIOUS_STEW) {
             event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void appendDebugInfo(TextComponent.@NotNull Builder builder) {
+        super.appendDebugInfo(builder);
+
+        builder.appendNewline().append(Component.text("  ʜᴀѕ_ᴛᴇѕᴛ: " + (testWorld != null)));
+        if (testWorld != null) {
+            testWorld.appendDebugInfo(builder);
         }
     }
 }

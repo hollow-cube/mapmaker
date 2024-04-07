@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapData;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NonBlocking;
@@ -32,8 +33,7 @@ public interface MapAllocator {
      * @param <T>       The type of world to create
      * @return The created world
      */
-    @Blocking
-    <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType);
+    @Blocking <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType);
 
     /**
      * Closes the given world immediately, attempting to send all players to the hub and kicking them if unable.
@@ -84,5 +84,7 @@ public interface MapAllocator {
      * Immediately removes all maps.
      */
     void close();
+
+    void showDebugInfo(@NotNull Audience audience);
 
 }

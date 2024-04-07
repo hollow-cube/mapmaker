@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,5 +69,10 @@ final class DirectMapAllocator implements MapAllocator {
     @Override
     public void close() {
         // We have no worlds tracked, so cannot close any
+    }
+
+    @Override
+    public void showDebugInfo(@NotNull Audience audience) {
+        audience.sendMessage(Component.text("Direct allocator does not track maps."));
     }
 }

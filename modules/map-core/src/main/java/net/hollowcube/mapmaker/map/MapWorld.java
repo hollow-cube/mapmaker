@@ -2,6 +2,9 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -111,5 +114,11 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
     @Override
     default void removeTag(@NotNull Tag<?> tag) {
         throw new UnsupportedOperationException("World is read-only");
+    }
+
+    default void appendDebugInfo(TextComponent.@NotNull Builder builder) {
+        builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
+        builder.appendNewline().append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
+                .append(Component.text(" ꜱᴘᴇᴄᴛᴀᴛᴏʀѕ: " + spectators().size()));
     }
 }

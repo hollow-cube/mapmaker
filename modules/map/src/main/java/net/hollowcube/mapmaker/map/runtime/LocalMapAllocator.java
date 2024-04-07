@@ -9,6 +9,8 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.metrics.MapInstanceCreatedEvent;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.util.ComponentUtil;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -185,5 +187,34 @@ public class LocalMapAllocator implements MapAllocator {
     @Override
     public void free(@NotNull MapWorld world, @Nullable Component reason) {
         direct.free(world, reason);
+    }
+
+    @Override
+    public void showDebugInfo(@NotNull Audience audience) {
+        lock.lock();
+        try {
+            var builder = Component.text();
+            builder.append(Component.text("Local allocator (" + this.maps.size() + " active maps)"));
+            for (var entry : maps.entrySet()) {
+                builder.appendNewline().append(Component.text("»"));
+                var key = entry.getKey();
+                var mapIdShort = key.mapId().substring(0, Math.min(8, key.mapId().length()));
+
+                builder.append(ComponentUtil.createBasicCopy(mapIdShort, key.mapId()));
+                builder.append(Component.text(" (" + key.worldType().getSimpleName() + ")"));
+
+                if (entry.getValue().isDone()) {
+                    var world = FutureUtil.getUnchecked(entry.getValue());
+                    var shortWorldId = world.worldId().substring(0, Math.min(8, world.worldId().length()));
+                    builder.append(Component.text(": ").append(ComponentUtil.createBasicCopy(shortWorldId, world.worldId())));
+                    world.appendDebugInfo(builder);
+                } else {
+                    builder.append(Component.text(": (loading)"));
+                }
+            }
+            audience.sendMessage(builder);
+        } finally {
+            lock.unlock();
+        }
     }
 }

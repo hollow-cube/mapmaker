@@ -10,7 +10,7 @@
         "coins": 20000,
         "goo": 8,
         "flower_petal": 4,
-        "sugarcube": 2
+        "sugar_cube": 2
       },
     },
     //    {
@@ -18,7 +18,7 @@
     //      "inputs": {
     //        "coins": 15000,
     //        "goo": 10,
-    //        "sugarcube": 4
+    //        "sugar_cube": 4
     //      },
     //    }
   ]

@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -39,12 +40,15 @@ import java.util.Date;
 
 public class DebugCommand extends CommandDsl {
 
+    private final MapAllocator allocator;
+
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
     @Inject
-    public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService) {
+    public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService, @NotNull MapAllocator allocator) {
         super("debug");
+        this.allocator = allocator;
 
         description = "Debugging utilities for map maker";
         category = CommandCategory.HIDDEN;
@@ -67,6 +71,9 @@ public class DebugCommand extends CommandDsl {
                 "Show debug information about the block you're looking at");
         createPermissionlessSubcommand("heightmap", this::handleHeightmapDebug,
                 "Show debug information about the heightmaps at your location");
+
+        createPermissionedSubcommand("map_alloc", this::showMapAllocatorDebug,
+                "Show map allocator debug info");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
@@ -151,6 +158,10 @@ public class DebugCommand extends CommandDsl {
         int sm = chunk.getHeight(Heightmaps.MOTION_BLOCKING, x, z);
         int bh = chunk.getHeight(Heightmaps.WORLD_BOTTOM, x, z);
         player.sendMessage("SH: " + sh + " SM: " + sm + " BH: " + bh);
+    }
+
+    private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {
+        allocator.showDebugInfo(player);
     }
 
     public static class SysCommand extends CommandDsl {
