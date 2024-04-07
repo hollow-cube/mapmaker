@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.block.custom;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
@@ -67,7 +67,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
-        world.callEvent(new MapPlayerCheckpointChangeEvent(player, world, checkpointId, data));
+        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
     }
 
     @Override

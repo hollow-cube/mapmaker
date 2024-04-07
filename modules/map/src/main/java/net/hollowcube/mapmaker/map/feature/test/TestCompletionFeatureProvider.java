@@ -2,12 +2,14 @@ package net.hollowcube.mapmaker.map.feature.test;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapVerification;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -25,6 +27,7 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
 
         var eventNode = EventNode.type("map-completion/test", EventFilter.INSTANCE);
         eventNode.addListener(MapPlayerCompleteMapEvent.class, FutureUtil.virtual(this::handleMapCompletion));
+        eventNode.addListener(MapPlayerCheckpointChangeEvent.class, this::handleOverrideSpecCheckpoint);
         world.eventNode().addChild(eventNode);
 
         return true;
@@ -48,6 +51,11 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
             player.sendMessage(Component.translatable("testing_mode.finish"));
             world.exitTestMode(player);
         }
+    }
+
+    private void handleOverrideSpecCheckpoint(@NotNull MapPlayerCheckpointChangeEvent event) {
+        // Remove the spectator checkpoint when they get a new one so that they reset there.
+        event.getPlayer().removeTag(SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT);
     }
 
 }

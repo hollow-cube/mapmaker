@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
@@ -68,7 +69,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::deinitPlayer)
             .addListener(MapPlayerStartFinishedEvent.class, this::initFinishedPlayer)
 
-            .addListener(MapPlayerCheckpointChangeEvent.class, this::handleCheckpointChange)
+            .addListener(MapPlayerCheckpointPreChangeEvent.class, this::handleCheckpointChange)
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
             .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
@@ -204,7 +205,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
     }
 
-    public void handleCheckpointChange(@NotNull MapPlayerCheckpointChangeEvent event) {
+    public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
         var player = event.getPlayer();
         var state = SaveState.fromPlayer(player).playState();
         var data = event.effectData();
@@ -248,6 +249,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Update the player based on the new state
         updatePlayerFromState(player, state);
+
+        event.getMapWorld().callEvent(new MapPlayerCheckpointChangeEvent(player, event.getMapWorld(), event.checkpointId(), data));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
     }
 

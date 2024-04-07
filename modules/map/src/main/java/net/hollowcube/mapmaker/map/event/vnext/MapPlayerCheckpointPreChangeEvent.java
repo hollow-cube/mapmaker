@@ -1,13 +1,13 @@
 package net.hollowcube.mapmaker.map.event.vnext;
 
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.trait.MapWorldEvent;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public record MapPlayerCheckpointChangeEvent(
+public record MapPlayerCheckpointPreChangeEvent(
         @NotNull Player player,
         @NotNull MapWorld mapWorld,
         @NotNull String checkpointId,
