@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.ClickType;
@@ -26,9 +27,11 @@ public abstract class BaseElement implements Element, Loadable {
     public static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
+            .displayName(Component.text(""))
             .meta(meta -> meta.customModelData(2))
             .build();
     public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.builder(Material.STICK)
+            .displayName(Component.text(""))
             .meta(meta -> meta.customModelData(3))
             .build();
 

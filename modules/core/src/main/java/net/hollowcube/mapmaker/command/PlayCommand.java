@@ -8,6 +8,9 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.session.SessionManager;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,11 +19,15 @@ import java.util.List;
 public class PlayCommand extends CommandDsl {
     private final Argument<MapData> mapArg;
 
+    private final MapService mapService;
+    private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
     @Inject
-    public PlayCommand(@NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public PlayCommand(@NotNull MapService mapService, @NotNull SessionManager sessionManager, @NotNull ServerBridge bridge) {
         super("play");
+        this.mapService = mapService;
+        this.sessionManager = sessionManager;
         this.bridge = bridge;
 
         mapArg = CoreArgument.PlayableMap("map", mapService)
@@ -41,7 +48,15 @@ public class PlayCommand extends CommandDsl {
     }
 
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
-        bridge.joinMap(player, context.get(mapArg).id(), ServerBridge.JoinMapState.PLAYING, "play_command");
+        var mapId = context.get(mapArg).id();
+
+        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+        if (currentMap != null && currentMap.id().equals(mapId)) {
+            player.sendMessage(Component.translatable("command.play.already_playing", currentMap.settings().getNameComponent()));
+            return;
+        }
+
+        bridge.joinMap(player, mapId, ServerBridge.JoinMapState.PLAYING, "play_command");
     }
 
 }
