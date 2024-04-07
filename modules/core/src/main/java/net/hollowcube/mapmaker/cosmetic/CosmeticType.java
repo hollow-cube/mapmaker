@@ -49,10 +49,13 @@ public enum CosmeticType {
         this.tag = Tag.Transient("cosmetic." + id);
         this.iconSlot = iconSlot;
         var baseTranslation = "cosmetic.type." + id + ".blank";
+
+        Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
         this.blankIcon = emptyIcon != null ? ItemStack.builder(Material.DIAMOND)
                 .meta(meta -> meta.customModelData(BadSprite.require("icon/inventory/" + emptyIcon).cmd()))
                 .displayName(Component.translatable(baseTranslation + ".name"))
-                .lore(LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of())).build()
+                .lore(LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()))
+                .build().withTag(COSMETIC_TAG, true)
                 : ItemStack.AIR;
     }
 

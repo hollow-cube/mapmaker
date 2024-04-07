@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.cosmetic.Cosmetic.COSMETIC_TAG;
+
 public class ModelCosmeticImpl extends CosmeticImpl {
     private final ItemStack model;
 
@@ -24,6 +26,7 @@ public class ModelCosmeticImpl extends CosmeticImpl {
                     meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
                     meta.color(new Color(255, 255, 255));
                     meta.hideFlag(ItemHideFlag.HIDE_DYE);
+                    meta.setTag(COSMETIC_TAG, true);
                 });
     }
 

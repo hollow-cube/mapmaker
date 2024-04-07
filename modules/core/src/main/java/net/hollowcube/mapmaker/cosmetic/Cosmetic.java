@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +19,7 @@ public class Cosmetic {
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
     public static final Codec<Cosmetic> CODEC = Codec.STRING.xmap(Cosmetic::byPathRequired, Cosmetic::path);
+    public static final Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
 
     static {
         try {
@@ -98,12 +100,14 @@ public class Cosmetic {
             meta.lore(lore);
             var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon";
             meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+            meta.setTag(COSMETIC_TAG, true);
         });
         this.iconLocked = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
             meta.displayName(displayName);
             meta.lore(lore);
             var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon_locked";
             meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
+            meta.setTag(COSMETIC_TAG, true);
         });
 
         this.impl = implFunc.apply(this);

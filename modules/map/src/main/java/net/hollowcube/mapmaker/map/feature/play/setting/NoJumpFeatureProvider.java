@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -22,7 +23,8 @@ public class NoJumpFeatureProvider implements FeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nojump", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer)
-            .addListener(MapSpectatorToggleFlightEvent.class, this::handleSpectatorFlightToggle);
+            .addListener(MapSpectatorToggleFlightEvent.class, this::handleSpectatorFlightToggle)
+            .addListener(MapPlayerCheckpointChangeEvent.class, this::handleCheckpointChange);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -57,6 +59,10 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         } else {
             removeEffect(player);
         }
+    }
+
+    public void handleCheckpointChange(@NotNull MapPlayerCheckpointChangeEvent event) {
+        addEffect(event.getPlayer());
     }
 
     private void addEffect(@NotNull Player player) {
