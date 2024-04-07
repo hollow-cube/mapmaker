@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.merchant.gui;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -59,9 +60,13 @@ public class TradeEntry extends View {
             }
         }
 
+        JsonObject itemsObject = null;
+        if (items != null && !items.isEmpty()) {
+            itemsObject = AbstractHttpService.GSON.toJsonTree(items).getAsJsonObject();
+        }
+
         var playerData = PlayerDataV2.fromPlayer(player);
-        playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits,
-                AbstractHttpService.GSON.toJsonTree(items).getAsJsonObject());
+        playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits, itemsObject);
 
         var icon = trade.result().iconItem();
         player.sendMessage(Component.translatable("merchant.trade.success", icon.getDisplayName().hoverEvent(icon.asHoverEvent())));

@@ -189,6 +189,7 @@ public class DebugCommand extends CommandDsl {
             logger.info("async profiler: {} (pid={})", ASYNC_PROFILER_BIN, ProcessHandle.current().pid());
         }
 
+        private final Argument<Boolean> heapDumpCollectArg = Argument.Bool("gc").defaultValue(false);
         private final Argument<Integer> profileTimeArg = Argument.Int("profile-time").min(1).max(60);
 
         private final MapService mapService;
@@ -200,8 +201,9 @@ public class DebugCommand extends CommandDsl {
             description = "System utilities for map maker";
 
             setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
-            subcommand("heapdump", this::createHeapDump, null,
+            var hcmd = subcommand("heapdump", this::createHeapDump, null,
                     "Create a heap dump and upload it to r2");
+            hcmd.addSyntax(this::createHeapDump, heapDumpCollectArg);
             var pcmd = subcommand("cpuprof", this::createProfile, null,
                     "Create a cpu profile and upload it to r2");
             pcmd.addSyntax(this::createProfile, profileTimeArg);
@@ -209,13 +211,14 @@ public class DebugCommand extends CommandDsl {
 
         private void createHeapDump(@NotNull CommandSender sender, @NotNull CommandContext context) {
             try {
+                var doGarbageCollection = context.get(heapDumpCollectArg);
                 var filename = "heap-" + DATE_FORMAT.format(new Date()) + ".hprof";
 
                 // Create the heap dump
                 MBeanServer server = ManagementFactory.getPlatformMBeanServer();
                 HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
                         server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
-                mxBean.dumpHeap(PERF_DUMP_PATH.resolve(filename).toString(), true);
+                mxBean.dumpHeap(PERF_DUMP_PATH.resolve(filename).toString(), doGarbageCollection);
 
                 sender.sendMessage("heap dump created, uploading...");
 
@@ -251,8 +254,8 @@ public class DebugCommand extends CommandDsl {
                     var filePath = PERF_DUMP_PATH.resolve(filename).toAbsolutePath();
                     ProcessBuilder processBuilder = new ProcessBuilder(
                             ASYNC_PROFILER_BIN,
+                            "-e", "itimer",
                             "-o", "jfr",
-                            "-e", "cpu",
                             "-d", String.valueOf(profileTime),
                             "-f", filePath.toString(),
                             String.valueOf(ProcessHandle.current().pid())

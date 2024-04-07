@@ -17,7 +17,7 @@ public class SpawnCommand extends CommandDsl {
 
     public SpawnCommand() {
         super("spawn", "tpstart");
-        setCondition(mapFilter(true, true, true));
+        setCondition(mapFilter(true, true, true, true));
 
         this.description = "Teleports you to the spawn location of the world you are in";
         this.category = CommandCategories.GLOBAL;

@@ -97,8 +97,13 @@ public class CommandManagerImpl implements CommandManager {
 
         var rootNodes = new IntArrayList();
         for (var entry : reflect().commands(player, true)) {
-            if (entry.getValue().condition != null) {
-                var result = entry.getValue().condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+            var node = entry.getValue();
+            if (node.condition != null) {
+                var result = node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+                if (result == CommandCondition.HIDE) continue;
+            }
+            if (node.redirect != null && node.redirect.condition != null) {
+                var result = node.redirect.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
                 if (result == CommandCondition.HIDE) continue;
             }
 
@@ -110,12 +115,12 @@ public class CommandManagerImpl implements CommandManager {
             args.suggestionsType = "minecraft:ask_server";
             nodes.add(args);
 
-            var node = new DeclareCommandsPacket.Node();
-            node.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
-            node.name = entry.getKey().toLowerCase(Locale.ROOT);
-            node.children = new int[]{nodes.size() - 1};
+            var packetNode = new DeclareCommandsPacket.Node();
+            packetNode.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
+            packetNode.name = entry.getKey().toLowerCase(Locale.ROOT);
+            packetNode.children = new int[]{nodes.size() - 1};
             rootNodes.add(nodes.size());
-            nodes.add(node);
+            nodes.add(packetNode);
         }
         root.children = rootNodes.toIntArray();
 

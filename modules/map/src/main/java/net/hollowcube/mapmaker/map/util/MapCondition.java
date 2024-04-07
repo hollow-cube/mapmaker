@@ -43,14 +43,23 @@ public final class MapCondition {
         };
     }
 
+    /**
+     * Never matches spectators to maintain previous behavior.
+     */
     public static @NotNull CommandCondition mapFilter(boolean playing, boolean editing, boolean testing) {
+        return mapFilter(playing, editing, testing, false);
+    }
+
+    public static @NotNull CommandCondition mapFilter(boolean playing, boolean editing, boolean testing, boolean allowSpectators) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayerOptional(player);
             return switch (world) {
-                case PlayingMapWorld _ -> playing && world.isPlaying(player) ? ALLOW : HIDE;
+                case PlayingMapWorld _ ->
+                        playing && (world.isPlaying(player) || (allowSpectators && world.isSpectating(player))) ? ALLOW : HIDE;
                 case EditingMapWorld _ -> editing && world.canEdit(player) ? ALLOW : HIDE;
-                case TestingMapWorld _ -> testing && world.isPlaying(player) ? ALLOW : HIDE;
+                case TestingMapWorld _ ->
+                        testing && (world.isPlaying(player) || (allowSpectators && world.isSpectating(player))) ? ALLOW : HIDE;
                 case null, default -> HIDE;
             };
         };

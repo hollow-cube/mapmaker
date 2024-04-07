@@ -315,7 +315,8 @@ public class MapDetailsView extends View {
 
         // GENERIC
 
-        titleText.setText(Objects.requireNonNullElse(map.settings().getName(), MapData.DEFAULT_NAME));
+        var mapNameString = map.settings().getName();
+        titleText.setText(mapNameString.isEmpty() ? MapData.DEFAULT_NAME : mapNameString);
 
         var authorTextContent = authorName.getUsername();
         if (authorTextContent == null) authorTextContent = map.owner();
@@ -382,7 +383,7 @@ public class MapDetailsView extends View {
         var authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
         player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
                 Component.text(map.id()),
-                Component.text(map.publishedIdString()),
+                Component.text(Objects.requireNonNullElse(map.publishedIdString(), "None/Not Published")),
                 Component.text(map.name()),
                 authorName
         )));
