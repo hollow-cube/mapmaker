@@ -30,7 +30,7 @@ public class Axiom {
     /**
      * The maximum number of sections which can be updated in a single (correlated) change.
      */
-    public static final int MAX_SECTIONS_PER_UPDATE = Integer.getInteger("terraform.axiom.max_sections_per_update", 1024);
+    public static final int MAX_SECTIONS_PER_UPDATE = Integer.getInteger("terraform.axiom.max_sections_per_update", 1024 * 1024);
 
     /**
      * The block state sent in block buffers to indicate no change to the world.

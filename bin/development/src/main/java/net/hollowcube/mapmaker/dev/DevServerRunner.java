@@ -135,6 +135,16 @@ public class DevServerRunner extends AbstractMapServer {
                 super.transferPlayerSession(player, hubPresence);
 
                 hubWorld.configurePlayer(event);
+
+                Thread.startVirtualThread(() -> {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    bridge().joinMap(player, "", ServerBridge.JoinMapState.EDITING, "");
+                });
+
                 return;
             }
 
@@ -145,6 +155,16 @@ public class DevServerRunner extends AbstractMapServer {
             super.transferPlayerSession(player, presence);
 
             world.configurePlayer(event);
+
+
+            Thread.startVirtualThread(() -> {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                bridge().joinHub(player);
+            });
         } catch (Exception e) {
             logger.error("Error during config phase", e);
             event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));

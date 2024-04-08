@@ -27,6 +27,8 @@ import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,6 +48,15 @@ public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final ChannelIdentifier JOIN_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "first_join");
+
+    public static final TextColor RED = TextColor.color(0xFA4141);
+    public static final Component CLOSED_BETA = Component.text()
+            .append(Component.text("The server is currently in closed beta!", RED))
+            .appendNewline().appendNewline()
+            .append(Component.text("Join the discord for updates!"))
+            .appendNewline()
+            .append(Component.text("discord.hollowcube.net").clickEvent(ClickEvent.openUrl("https://discord.hollowcube.net")))
+            .build();
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -126,8 +137,7 @@ public class ProxyPlugin {
                 return;
             }
 
-            // this is ok, they will be sent to the limbo
-            logger.info("player {} is not in the beta", player.getUsername());
+            event.setResult(ResultedEvent.ComponentResult.denied(CLOSED_BETA));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
