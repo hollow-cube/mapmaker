@@ -6,6 +6,10 @@ import com.miguelfonseca.completely.text.analyze.transform.LowerCaseTransformer;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.Autocompletors;
+import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.item.metadata.PlayerHeadMeta;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -17,6 +21,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class HeadDatabase {
@@ -33,8 +38,29 @@ public class HeadDatabase {
             .setAnalyzers(new LowerCaseTransformer(), new WordTokenizer())
             .build();
 
+    private final Map<String, ItemStack> categoryIcons = Map.ofEntries(
+                    Map.entry("alphabet", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTY3ZDgxM2FlN2ZmZTViZTk1MWE0ZjQxZjJhYTYxOWE1ZTM4OTRlODVlYTVkNDk4NmY4NDk0OWM2M2Q3NjcyZSJ9fX0="),
+                    Map.entry("animals", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWQ2YzZlZGE5NDJmN2Y1ZjcxYzMxNjFjNzMwNmY0YWVkMzA3ZDgyODk1ZjlkMmIwN2FiNDUyNTcxOGVkYzUifX19"),
+                    Map.entry("blocks", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTFlZDlhYmY1MWZlNGVhODRjZmNiMjcyOTdmMWJjNTRjZDM4MmVkZjg1ZTdiZDZlNzVlY2NhMmI4MDY2MTEifX19"),
+                    Map.entry("decoration", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2UyMjM5MWUzNWEzZTViY2VlODlkYjMxMmU4NzRmZGM5ZDllN2E2MzUxMzE0YjgyYmRhOTdmYmQyYmU4N2ViOCJ9fX0="),
+                    Map.entry("food-drinks", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTE5OTdkYTY0MDQzYjI4NDgyMjExNTY0M2E2NTRmZGM0ZThhNzIyNjY2NGI0OGE0ZTFkYmI1NTdiNWMwZmUxNCJ9fX0="),
+                    Map.entry("humans", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWI3YWY5ZTQ0MTEyMTdjN2RlOWM2MGFjYmQzYzNmZDY1MTk3ODMzMzJhMWIzYmM1NmZiZmNlOTA3MjFlZjM1In19fQ=="),
+                    Map.entry("humanoid", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODIyZDhlNzUxYzhmMmZkNGM4OTQyYzQ0YmRiMmY1Y2E0ZDhhZThlNTc1ZWQzZWIzNGMxOGE4NmU5M2IifX19"),
+                    Map.entry("miscellaneous", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTJlOTgxNjVkZWVmNGVkNjIxOTUzOTIxYzFlZjgxN2RjNjM4YWY3MWMxOTM0YTQyODdiNjlkN2EzMWY2YjgifX19"),
+                    Map.entry("monsters", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTZmYzg1NGJiODRjZjRiNzY5NzI5Nzk3M2UwMmI3OWJjMTA2OTg0NjBiNTFhNjM5YzYwZTVlNDE3NzM0ZTExIn19fQ=="),
+                    Map.entry("plants", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2JiMzExZjNiYTFjMDdjM2QxMTQ3Y2QyMTBkODFmZTExZmQ4YWU5ZTNkYjIxMmEwZmE3NDg5NDZjMzYzMyJ9fX0=")
+            ).entrySet().stream()
+            .map(e -> Map.entry(e.getKey(), ItemStack.builder(Material.PLAYER_HEAD)
+                    .meta(PlayerHeadMeta.class, meta -> meta.playerSkin(new PlayerSkin(e.getValue(), null)))
+                    .build()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     public HeadDatabase() {
         FutureUtil.submitVirtual(this::loadHeadList);
+    }
+
+    public @NotNull List<HeadInfo> heads(@NotNull String category) {
+        return categories.getOrDefault(category, List.of());
     }
 
     public boolean isLoaded() {
@@ -45,8 +71,16 @@ public class HeadDatabase {
         return categories.keySet();
     }
 
+    public @NotNull ItemStack categoryIcon(@NotNull String category) {
+        return categoryIcons.getOrDefault(category, ItemStack.of(Material.BARRIER));
+    }
+
     public int size() {
         return heads.size();
+    }
+
+    public int size(@NotNull String category) {
+        return heads(category).size();
     }
 
     public @NotNull Stream<HeadInfo> random() {
@@ -70,7 +104,7 @@ public class HeadDatabase {
             if (res.statusCode() != 200) throw new RuntimeException("non-200 response: " + res.statusCode());
 
             var heads = new HashMap<String, HeadInfo>();
-            var categories = new HashMap<String, List<HeadInfo>>();
+            var categories = new LinkedHashMap<String, List<HeadInfo>>();
             res.body().map(HeadInfo::fromLine)
                     .filter(Objects::nonNull)
                     .forEach(info -> {
@@ -78,18 +112,16 @@ public class HeadDatabase {
                         categories.computeIfAbsent(info.category(), k -> new ArrayList<>()).add(info);
                     });
             this.heads = Map.copyOf(heads);
-            this.categories = Map.copyOf(categories);
+            this.categories = Collections.unmodifiableMap(categories);
         } catch (Exception e) {
             logger.error("Failed to load head list", e);
             this.heads = Map.of();
             this.categories = Map.of();
         }
 
-        logger.info("Loaded {} heads in {} categories", heads.size(), categories.size());
         headsArray = heads.values().toArray(new HeadInfo[0]);
-        logger.info("Loaded {} heads in {} categories PART 2", heads.size(), categories.size());
         autocompletor.addAll(heads.values());
-        logger.info("Loaded {} heads in {} categories PART 3", heads.size(), categories.size());
+        logger.info("Loaded {} heads in {} categories", heads.size(), categories.size());
     }
 
 }

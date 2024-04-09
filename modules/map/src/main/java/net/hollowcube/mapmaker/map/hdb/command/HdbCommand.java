@@ -3,8 +3,13 @@ package net.hollowcube.mapmaker.map.hdb.command;
 import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.command.util.StringReader;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
+import net.hollowcube.mapmaker.map.hdb.gui.HdbBrowserView;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +32,25 @@ public class HdbCommand extends CommandDsl {
     }
 
     private void handleOpenMainGui(@NotNull Player player, @NotNull CommandContext context) {
-//        this.guiController.show(player, );
+        this.guiController.show(player, c -> new HdbBrowserView(c));
+    }
+
+    static class ArgumentCategory extends Argument<String> {
+        private final HeadDatabase hdb;
+
+        public ArgumentCategory(@NotNull String id, @NotNull HeadDatabase hdb) {
+            super(id);
+            this.hdb = hdb;
+        }
+
+        @Override
+        public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+            if (!hdb.isLoaded()) return syntaxError();
+
+            //todo
+
+            return null;
+        }
     }
 
 }

@@ -32,6 +32,7 @@ public class HdbBase64Command extends CommandDsl {
         description = "Fetch the base64 texture value of a head";
 
         addSyntax(playerOnly(this::handleGetBase64));
+        addSyntax(playerOnly(this::handleGetBase64), targetArg);
     }
 
     private void handleGetBase64(@NotNull Player player, @NotNull CommandContext context) {

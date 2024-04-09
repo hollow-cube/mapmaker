@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.hdb.gui ?>
+<component width="9" height="10" align="ttb">
+    <box width="9" height="1" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.hdb.browser.information"/>
+        <label width="7" translationKey="todo"/>
+    </box>
+
+    <box width="9" height="5" align="ltr">
+        <button id="prev_page" width="1" height="5" translationKey="gui.hdb.browser.prev_page"/>
+
+        <pagination id="heads" width="7" height="5" child="HeadIconView"/>
+
+        <button id="next_page" width="1" height="5" translationKey="gui.hdb.browser.next_page"/>
+    </box>
+
+    <box width="9" height="2" align="ltr">
+        <spacer width="1" height="2"/>
+
+        <pagination id="categories" width="7" height="2" child="CategoryIconView"/>
+    </box>
+
+</component>

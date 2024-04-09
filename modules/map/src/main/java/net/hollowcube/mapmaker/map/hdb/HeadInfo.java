@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -29,8 +28,8 @@ public record HeadInfo(
         var texture = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/" + parts[3] + "\"}}}";
         texture = Base64.getEncoder().encodeToString(texture.getBytes(StandardCharsets.UTF_8));
 
-        List<String> tags = parts.length >= 5 ? List.of(parts[4].split("\\|")) : List.of();
-        return new HeadInfo(parts[1], parts[2], parts[0], texture, tags);
+        List<String> tags = parts.length > 5 ? List.of(parts[5].replace("\"", "").split("\\|")) : List.of();
+        return new HeadInfo(parts[1], parts[2].trim(), parts[0], texture, tags);
     }
 
     public @NotNull ItemStack createItemStack() {
@@ -51,10 +50,7 @@ public record HeadInfo(
      */
     @Override
     public List<String> getFields() {
-        var fields = new ArrayList<String>();
-        fields.add(id);
-        fields.add(name);
-        fields.addAll(tags);
-        return fields;
+        // I would prefer to include tags here, but its too slow to compute the index
+        return List.of(name);
     }
 }

@@ -17,10 +17,12 @@ public class HeadIconView extends View {
     private @Outlet("label") Label label;
 
     private final HeadInfo head;
+    private final String alphabetSubcategory;
 
     public HeadIconView(@NotNull Context context) {
         super(context);
         this.head = null;
+        this.alphabetSubcategory = null;
 
         label.setItemSprite(ItemStack.of(Material.BARRIER));
         label.setArgs(Component.text("No Results Found!"));
@@ -29,6 +31,7 @@ public class HeadIconView extends View {
     public HeadIconView(@NotNull Context context, @NotNull HeadInfo head) {
         super(context);
         this.head = head;
+        this.alphabetSubcategory = "__alphabet".equals(head.category()) ? head.name() : null;
 
         label.setItemDirect(head.createItemStack());
     }
@@ -36,6 +39,12 @@ public class HeadIconView extends View {
     @Action("label")
     private void handleSelect(@NotNull Player player) {
         if (head == null) return;
+
+        // Gross special case for alphabet subcategory
+        if (alphabetSubcategory != null) {
+            performSignal(CategoryIconView.SIG_SELECTED, "alphabet|" + alphabetSubcategory);
+            return;
+        }
 
         PlayerUtil.smartAddItemStack(player, head.createItemStack());
         player.closeInventory();
