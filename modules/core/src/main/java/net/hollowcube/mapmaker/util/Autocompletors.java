@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.hub.util;
+package net.hollowcube.mapmaker.util;
 
 import com.miguelfonseca.completely.AutocompleteEngine;
 import com.miguelfonseca.completely.IndexAdapter;
@@ -30,25 +30,7 @@ public final class Autocompletors {
     );
 
     private static final AutocompleteEngine<IndexableMaterial> materials = new AutocompleteEngine.Builder<IndexableMaterial>()
-            .setIndex(new IndexAdapter<>() {
-                private final FuzzyIndex<IndexableMaterial> index = new PatriciaTrie<>();
-
-                @Override
-                public Collection<ScoredObject<IndexableMaterial>> get(String token) {
-                    double threshold = Math.log(Math.max(token.length() - 1, 1));
-                    return index.getAny(new EditDistanceAutomaton(token, threshold));
-                }
-
-                @Override
-                public boolean put(String token, @Nullable IndexableMaterial value) {
-                    return index.put(token, value);
-                }
-
-                @Override
-                public boolean remove(IndexableMaterial value) {
-                    return index.remove(value);
-                }
-            })
+            .setIndex(createDefaultIndexAdapter())
             .setAnalyzers(new LowerCaseTransformer(), new WordTokenizer())
             .build();
 
@@ -70,6 +52,28 @@ public final class Autocompletors {
 
     public static @NotNull List<Material> mapIconMaterial(@NotNull String input, int limit) {
         return materials.search(input, limit).stream().map(IndexableMaterial::material).toList();
+    }
+
+    public static <T> @NotNull IndexAdapter<T> createDefaultIndexAdapter() {
+        return new IndexAdapter<>() {
+            private final FuzzyIndex<T> index = new PatriciaTrie<>();
+
+            @Override
+            public Collection<ScoredObject<T>> get(String token) {
+                double threshold = Math.log(Math.max(token.length() - 1, 1));
+                return index.getAny(new EditDistanceAutomaton(token, threshold));
+            }
+
+            @Override
+            public boolean put(String token, @Nullable T value) {
+                return index.put(token, value);
+            }
+
+            @Override
+            public boolean remove(T value) {
+                return index.remove(value);
+            }
+        };
     }
 
 }

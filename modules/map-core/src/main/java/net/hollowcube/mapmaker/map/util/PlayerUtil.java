@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +33,10 @@ public final class PlayerUtil {
             if (includeSelf)
                 player.sendPacket(new EntityAnimationPacket(player.getEntityId(), EntityAnimationPacket.Animation.SWING_OFF_HAND));
         }
+    }
+
+    public static void smartAddItemStack(@NotNull Player player, @NotNull ItemStack itemStack) {
+        net.hollowcube.terraform.util.PlayerUtil.smartAddItemStack(player, itemStack);
     }
 
     private static final BoundingBox PLAYER_STANDING_BB = EntityType.PLAYER.registry().boundingBox();

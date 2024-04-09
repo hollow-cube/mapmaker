@@ -65,7 +65,7 @@ public class DemoServer {
             }
         });
 
-        var controller = Controller.make(Map.of(
+        var controller = make(Map.of(
                 "myContext", "Hello, ContextObject!"
         ));
 
@@ -74,7 +74,7 @@ public class DemoServer {
             var name = context.<String>get("name");
             var player = (Player) sender;
 
-            controller.show(player, guis.get(name));
+            show(player, guis.get(name));
         }, ArgumentType.Word("name").from(guis.keySet().toArray(new String[0])));
         MinecraftServer.getCommandManager().register(command);
 

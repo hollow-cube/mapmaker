@@ -79,6 +79,7 @@ public abstract class AbstractHttpService {
     };
 
     public static final String hostname; //todo replace me with ServerRuntime call
+    public static final String userAgent = "github.com/hollow-cube/mapmaker@" + ServerRuntime.getRuntime().shortCommit();
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final OpenTelemetry otel;

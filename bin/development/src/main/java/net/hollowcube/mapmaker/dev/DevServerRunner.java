@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
+import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
@@ -103,6 +104,9 @@ public class DevServerRunner extends AbstractMapServer {
         this.terraform = MapServerRunner.initBuildLogic(mapService(), commandManager());
         addBinding(Terraform.class, terraform);
 
+        var hdb = new HeadDatabase();
+        addBinding(HeadDatabase.class, hdb, "hdb");
+
         MapServerRunner.registerCommands(this, mapCommandManager);
 
         MapServerRunner.initFeatureFlagMonitor(bridge(), allocator());
@@ -136,14 +140,14 @@ public class DevServerRunner extends AbstractMapServer {
 
                 hubWorld.configurePlayer(event);
 
-                Thread.startVirtualThread(() -> {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    bridge().joinMap(player, "", ServerBridge.JoinMapState.EDITING, "");
-                });
+//                Thread.startVirtualThread(() -> {
+//                    try {
+//                        Thread.sleep(3000);
+//                    } catch (InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                    bridge().joinMap(player, "", ServerBridge.JoinMapState.EDITING, "");
+//                });
 
                 return;
             }
@@ -157,14 +161,14 @@ public class DevServerRunner extends AbstractMapServer {
             world.configurePlayer(event);
 
 
-            Thread.startVirtualThread(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                bridge().joinHub(player);
-            });
+//            Thread.startVirtualThread(() -> {
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//                bridge().joinHub(player);
+//            });
         } catch (Exception e) {
             logger.error("Error during config phase", e);
             event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));

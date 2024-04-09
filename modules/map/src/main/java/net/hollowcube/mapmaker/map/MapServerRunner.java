@@ -20,6 +20,8 @@ import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.navigation.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
+import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
+import net.hollowcube.mapmaker.map.hdb.command.HdbCommand;
 import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
@@ -38,6 +40,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.timer.Scheduler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +112,8 @@ public class MapServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
+        addBinding(Scheduler.class, MinecraftServer.getSchedulerManager());
+
         var kafkaConfig = config.get(KafkaConfig.class);
         if (!globalConfig.noop()) {
             mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
@@ -117,6 +122,9 @@ public class MapServerRunner extends AbstractMapServer {
 
         this.terraform = initBuildLogic(mapService(), commandManager());
         addBinding(Terraform.class, terraform);
+
+        var hdb = new HeadDatabase();
+        addBinding(HeadDatabase.class, hdb, "hdb");
 
         registerCommands(this, commandManager());
 
@@ -206,6 +214,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(server.createInstance(UpCommand.class));
 
         commandManager.register(server.createInstance(PHeadCommand.class));
+        commandManager.register(server.createInstance(HdbCommand.class));
 
         commandManager.register(server.createInstance(BiomesCommand.class));
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));

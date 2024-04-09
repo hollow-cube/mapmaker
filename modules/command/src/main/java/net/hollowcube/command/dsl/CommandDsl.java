@@ -49,13 +49,17 @@ public class CommandDsl {
 
         if (subcommands != null) {
             for (var subcommand : subcommands) {
-                builder.child(subcommand.name(), child -> {
-                    subcommand.build(child);
+                try {
+                    builder.child(subcommand.name(), child -> {
+                        subcommand.build(child);
 
-                    for (var alias : subcommand.aliases()) {
-                        builder.child(alias, aliasBuilder -> aliasBuilder.redirect(child.node()));
-                    }
-                });
+                        for (var alias : subcommand.aliases()) {
+                            builder.child(alias, aliasBuilder -> aliasBuilder.redirect(child.node()));
+                        }
+                    });
+                } catch (Exception e) {
+                    throw new RuntimeException("failed to register subcommand " + subcommand.name(), e);
+                }
             }
         }
 

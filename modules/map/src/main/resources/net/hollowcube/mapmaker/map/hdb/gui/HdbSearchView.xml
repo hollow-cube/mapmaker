@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.map.hdb.gui ?>
+<component id="anvil" width="9" height="5" align="ttb">
+    <box width="3" height="1" align="ltr">
+        <button id="input" translationKey="forced.input"/>
+        <spacer/>
+        <label id="output" translationKey="gui.generic.empty"/>
+    </box>
+
+    <pagination id="page" width="9" height="3" child="HeadIconView"/>
+</component>

@@ -94,6 +94,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.StructuredTaskScope;
@@ -400,7 +401,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected <T> void addBinding(@Nullable Class<T> type, @NotNull T instance, @NotNull String... names) {
-        if (type != null) injector.bind(type, instance);
+        if (type != null) {
+            injector.bind(type, instance);
+            guiController.addBinding(type.getSimpleName().toLowerCase(Locale.ROOT), instance);
+        }
+        ;
         for (var name : names) {
             guiController.addBinding(name, instance);
         }
