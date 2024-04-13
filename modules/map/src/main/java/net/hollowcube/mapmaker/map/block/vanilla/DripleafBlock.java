@@ -7,7 +7,9 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.util.PositionUtil;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -24,6 +26,8 @@ import java.util.function.Supplier;
 
 public class DripleafBlock implements BlockHandler {
     private static final NamespaceID ID = NamespaceID.from("minecraft:dripleaf");
+
+    private static final BoundingBox BOUNDING_BOX = new BoundingBox(1, 2.0 / 16.0, 1);
 
     // This handler is a very weird singleton even though it does have some internal state.
     // It is safe because an entity id can only be in one place at once, but definitely weird.
@@ -44,8 +48,13 @@ public class DripleafBlock implements BlockHandler {
     }
 
     @Override
-    public void onTouch(@NotNull BlockHandler.Touch touch) {
-        var instance = touch.getInstance();
+    public boolean isTickable() {
+        return true;
+    }
+
+    @Override
+    public void tick(@NotNull BlockHandler.Tick tick) {
+        var instance = tick.getInstance();
         var world = MapWorld.unsafeFromInstance(instance);
         if (world instanceof EditingMapWorld editingWorld) {
             // This is a bit of a specific exception, probably this should be rewritten to use MapWorld.forPlayerOptional
@@ -54,25 +63,31 @@ public class DripleafBlock implements BlockHandler {
         }
         if (world == null) return;
 
-        var entity = touch.getTouching();
-        Player player;
-        if (entity instanceof Player p) {
-            player = p;
-        } else if (entity.hasTag(MapHooks.ASSOCIATED_PLAYER)) {
-            player = entity.getTag(MapHooks.ASSOCIATED_PLAYER);
-        } else return;
+        var pos = tick.getBlockPosition();
+        //noinspection ConstantValue
+        if (pos == null)
+            return; // Intellij doesnt like this because it disagrees with annotation, but minestom seems to lie here sometimes.
+        var centerPos = new Vec(pos.blockX() + 0.5, pos.blockY() + (15.0 / 16.0), pos.blockZ() + 0.5);
 
-        if (!world.isPlaying(player)) return;
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState == null || (saveState.getPlayStartTime() == 0)) return;
+        for (var entity : instance.getNearbyEntities(tick.getBlockPosition(), 2)) {
+            Player player;
+            if (entity instanceof Player p) {
+                player = p;
+            } else if (entity.hasTag(MapHooks.ASSOCIATED_PLAYER)) {
+                player = entity.getTag(MapHooks.ASSOCIATED_PLAYER);
+            } else continue;
 
-        // Ensure they are standing on top
-        var blockPosition = touch.getBlockPosition();
-        if (player.getPosition().y() < blockPosition.y() + 0.9375) return;
+            if (!world.isPlaying(player)) continue;
+            var saveState = SaveState.optionalFromPlayer(player);
+            if (saveState == null || (saveState.getPlayStartTime() == 0)) continue;
+            if (!BOUNDING_BOX.intersectBox(centerPos.sub(entity.getPosition()), entity.getBoundingBox()))
+                continue;
 
-        // Player just started standing on the dripleaf, so start the sequence
-        DripleafManager.forPlayer(player).handleTouch(blockPosition);
+            // Player just started standing on the dripleaf, so start the sequence
+            DripleafManager.forPlayer(player).handleTouch(pos);
+        }
     }
+
 
     private enum Tilt {
         NONE(0),
