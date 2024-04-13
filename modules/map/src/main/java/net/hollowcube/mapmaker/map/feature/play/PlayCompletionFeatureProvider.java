@@ -108,6 +108,10 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                 }
             };
 
+            if (resp != null) {
+                player.sendMessage("NEW SCORE is " + resp.newPlacement());
+            }
+
             var rewards = Optional.ofNullable(resp)
                     .map(SaveStateUpdateResponse::rewards);
 

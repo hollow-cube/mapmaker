@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record TransferSessionResponse(
         @NotNull PlayerDataV2 data,
-        @NotNull PlayerSession session
+        @NotNull PlayerSession session,
+        boolean isJoin
 ) {
 }

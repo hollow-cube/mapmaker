@@ -228,6 +228,8 @@ public class MapServerRunner extends AbstractMapServer {
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));
 
         commandManager.register(server.createInstance(AddMarkerCommand.class));
+
+        commandManager.register(server.createInstance(FixTheDripleafCommand.class));
     }
 
     public static void initFeatureFlagMonitor(@NotNull ServerBridge bridge, @NotNull MapAllocator allocator) {

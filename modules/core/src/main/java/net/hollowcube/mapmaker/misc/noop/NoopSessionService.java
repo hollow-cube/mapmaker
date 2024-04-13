@@ -42,7 +42,8 @@ public class NoopSessionService implements SessionService {
                         0, 0, 0
                 ),
                 new PlayerSession(id, Instant.now(), "noop-proxy-id", "noop-server-id", false, id, new PlayerSkin("", ""),
-                        new Presence(req.type(), req.state(), req.server(), req.map()))
+                        new Presence(req.type(), req.state(), req.server(), req.map())),
+                false
         );
     }
 

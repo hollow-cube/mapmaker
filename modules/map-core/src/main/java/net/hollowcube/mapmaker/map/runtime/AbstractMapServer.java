@@ -521,6 +521,12 @@ public abstract class AbstractMapServer implements MapServer {
                 sessionManager.configureVanishedPlayer(player);
             }
 
+//            if (sessionResponse.isJoin()) {
+//                player.scheduleNextTick(e -> {
+//                    player.sendMessage("first join");
+//                });
+//            }
+
             return true;
         } catch (SessionService.UnauthorizedError ignored) {
             player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
