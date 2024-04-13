@@ -87,20 +87,17 @@ public record DisplayName(
     }
 
     public @NotNull String getUsernameForTabList() {
-        var builder = new StringBuilder();
-        for (var part : parts) {
-            switch (part.type) {
-                case "username" -> builder.append(part.text);
-                case "badge" -> builder.append(Component.text(switch (part.text) {
-                    case "dev_3", "mod_3", "ct_3" -> '\uF830';
-                    case "dev_2", "mod_2", "ct_2" -> '\uF831';
-                    case "dev_1", "mod_1", "ct_1" -> '\uF832';
-                    case "media" -> '\uF833';
-                    default -> '\uF834';
-                }));
-            }
-        }
-        return builder.toString();
+        char sortPrefix = switch (getBadgeName()) {
+            case "dev_3", "mod_3", "ct_3" -> '\uF830';
+            case "dev_2", "mod_2", "ct_2" -> '\uF831';
+            case "dev_1", "mod_1", "ct_1" -> '\uF832';
+            case "media" -> '\uF833';
+            case null, default -> '\uF834';
+        };
+        // Need to cut off the end of their username to not hit the max length.
+        var username = Objects.requireNonNull(getUsername(), "unknown");
+        if (username.length() > 14) username = username.substring(0, 14);
+        return sortPrefix + username;
     }
 
 }
