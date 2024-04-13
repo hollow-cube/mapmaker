@@ -158,6 +158,10 @@ public class MapData {
         return Objects.requireNonNullElse(quality, MapQuality.UNRATED);
     }
 
+    public int objectLimit() {
+        return objectLimit;
+    }
+
     public int objectUsage() {
         if (objectUsage == -1) {
             objectUsage = objects().stream()

@@ -119,6 +119,7 @@ public final class FontUtil {
                 Map.entry((int) 'y', 6), Map.entry((int) 'z', 6)
         ));
         result.put("small_bossbar_line2", currencyGlyphs);
+        result.put("small", smallGlyphs);
 
         GLYPH_WIDTHS_V2 = Map.copyOf(result);
     }

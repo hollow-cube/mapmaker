@@ -4,16 +4,16 @@ import com.google.inject.Inject;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.DebugStickItem;
 import net.hollowcube.mapmaker.map.item.ItemTags;
-import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
+import net.hollowcube.mapmaker.map.ram.RamUsageOverlay;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.kyori.adventure.text.Component;
@@ -34,7 +34,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
@@ -87,25 +86,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         instance.eventNode().addChild(readOnlyNode); // Needs spectators, so register on instance.
 
         itemRegistry().register(DebugStickItem.INSTANCE);
-
-        //todo remove this/refactor objects to work with entities and make more sense
-        readWriteNode.addListener(BlockItemPlaceEvent.class, event -> {
-            var handler = event.getBlock().handler();
-            if (!(handler instanceof ObjectBlockHandler objectHandler)) return;
-
-            var object = objectHandler.createObjectData(event.getBlockPosition());
-            var added = map.addObject(object);
-            if (!added) {
-                event.setCancelled(true);
-
-                var packet = new EffectPacket(2001, event.getBlockPosition(),
-                        event.getBlock().stateId(), false);
-                instance.sendGroupedPacket(packet);
-
-                event.getPlayer().sendMessage("no place");
-            }
-
-        });
     }
 
     @Override
@@ -116,6 +96,18 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public boolean canEdit(@NotNull Player player) {
         return isPlaying(player);
+    }
+
+    public int memoryUsage() {
+        return map().objectUsage();
+    }
+
+    public int maxMemoryUsage() {
+        return map().objectLimit();
+    }
+
+    public void addRamObject() {
+
     }
 
     @Override
@@ -253,6 +245,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             return;
         }
 
+        ActionBar.forPlayer(player).addProvider(RamUsageOverlay.INSTANCE);
+
         var playerData = PlayerDataV2.fromPlayer(player);
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
         player.setTag(SaveState.TAG, saveState);
@@ -286,6 +280,10 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void removePlayer(@NotNull Player player) {
         if (map().verification() == MapVerification.PENDING) return;
+
+        // Removing isn't really necessary because it doesn't activate when not in an editing map world,
+        // but better safe than sorry.
+        ActionBar.forPlayer(player).removeProvider(RamUsageOverlay.INSTANCE);
 
         try {
             var saveState = SaveState.optionalFromPlayer(player);

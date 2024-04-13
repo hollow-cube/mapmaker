@@ -4,10 +4,14 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public interface ObjectBlockHandler extends BlockHandler {
 
@@ -25,6 +29,24 @@ public interface ObjectBlockHandler extends BlockHandler {
     @Override
     default @NotNull NamespaceID getNamespaceId() {
         return objectType().namespaceId();
+    }
+
+    @Override
+    default void onPlace(@NotNull BlockHandler.Placement placement) {
+        var world = MapWorld.unsafeFromInstance(placement.getInstance());
+        if (!(world instanceof EditingMapWorld)) return;
+
+        var map = world.map();
+        boolean added = map.addObject(createObjectData(placement.getBlockPosition()));
+        if (!added) {
+            world.instance().setBlock(placement.getBlockPosition(), Block.AIR);
+            if (placement instanceof PlayerPlacement pp) {
+                var chunk = world.instance().getChunkAt(pp.getBlockPosition());
+                pp.getPlayer().sendChunk(Objects.requireNonNull(chunk));
+                pp.getPlayer().sendMessage(Component.translatable("map.ram.usage_exceeded"));
+            }
+            return;
+        }
     }
 
     @Override
