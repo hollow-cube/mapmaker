@@ -14,7 +14,7 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.LocalMapAllocator;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
+import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
@@ -78,7 +78,7 @@ public class DevServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImpl(uuid, username, connection) {
+        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImplImpl(uuid, username, connection) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 var world = MapWorld.forPlayerOptional(this);
@@ -121,10 +121,13 @@ public class DevServerRunner extends AbstractMapServer {
         // on our own here.
         // Note that we dont transfer here, its deferred to config phase (and reconfig)
 
+        net.minestom.server.entity.PlayerSkin skin = net.minestom.server.entity.PlayerSkin.fromUuid(event.getPlayerUuid().toString());
+
         var playerId = event.getPlayerUuid().toString();
         sessionService().createSessionV2(playerId, new SessionCreateRequestV2(
                 "devserver-integrated", event.getUsername(), "127.0.0.1",
-                new PlayerSkin(Optional.empty(), Optional.empty())
+                new PlayerSkin(Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::textures),
+                        Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::signature))
         ));
     }
 

@@ -47,6 +47,12 @@ public class DripleafBlock implements BlockHandler {
         if (delete) player.removeTag(DripleafManager.TAG);
     }
 
+    public static @Nullable Block getDripleafState(@NotNull Player player, @NotNull Point blockPosition) {
+        var manager = DripleafManager.forPlayerOptional(player);
+        if (manager == null) return null;
+        return manager.getDripleafState(blockPosition);
+    }
+
     @Override
     public boolean isTickable() {
         return true;
@@ -160,6 +166,12 @@ public class DripleafBlock implements BlockHandler {
         public void clear() {
             tasks.values().forEach(Task::cancel);
             tasks.clear();
+        }
+
+        public @Nullable Block getDripleafState(@NotNull Point blockPosition) {
+            var task = tasks.get(PositionUtil.packPosition(blockPosition));
+            if (task == null) return null;
+            return task.block.withProperty("tilt", task.state.name().toLowerCase(Locale.ROOT));
         }
 
         @SuppressWarnings("UnstableApiUsage")

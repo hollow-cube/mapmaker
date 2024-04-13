@@ -25,6 +25,7 @@ import net.hollowcube.mapmaker.map.hdb.command.HdbCommand;
 import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
+import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -111,6 +112,13 @@ public class MapServerRunner extends AbstractMapServer {
     @Override
     protected void prepareStart() {
         super.prepareStart();
+
+        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImplImpl(uuid, username, connection) {
+            @Override
+            public @NotNull CommandManager getCommandManager() {
+                return commandManager();
+            }
+        });
 
         addBinding(Scheduler.class, MinecraftServer.getSchedulerManager());
 
