@@ -386,9 +386,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             // If they set the spawn below the world then its a joke map anyway and i don't care.
             var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
-                player.teleport(world.spawnPoint(player));
+                player.teleport(world.spawnPoint(player)).thenRun(() -> {
+                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                });
             } else {
-                player.teleport(checkpoint);
+                player.teleport(checkpoint).thenRun(() -> {
+                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                });
             }
             return;
         }

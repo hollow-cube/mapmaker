@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.block.vanilla;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.hollowcube.mapmaker.map.MapHooks;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.util.PositionUtil;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -13,9 +13,11 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.function.Supplier;
@@ -27,9 +29,6 @@ public class DripleafBlock implements BlockHandler {
     // It is safe because an entity id can only be in one place at once, but definitely weird.
     public static final DripleafBlock INSTANCE = new DripleafBlock();
 
-    // The players whose dripleaf is being tracked, mapped to the task that is tracking it.
-    private final Int2ObjectMap<DripleafTask> playerTasks = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
-
     private DripleafBlock() {
     }
 
@@ -38,9 +37,10 @@ public class DripleafBlock implements BlockHandler {
         return ID;
     }
 
-    public void clearPlayer(@NotNull Player player) {
-        var task = playerTasks.remove(player.getEntityId());
-        if (task != null) task.cancel();
+    public void clearPlayer(@NotNull Player player, boolean delete) {
+        var manager = DripleafManager.forPlayerOptional(player);
+        if (manager != null) manager.clear();
+        if (delete) player.removeTag(DripleafManager.TAG);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class DripleafBlock implements BlockHandler {
             player = entity.getTag(MapHooks.ASSOCIATED_PLAYER);
         } else return;
 
-        if (playerTasks.containsKey(player.getEntityId()) || !world.isPlaying(player)) return;
+        if (!world.isPlaying(player)) return;
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || (saveState.getPlayStartTime() == 0)) return;
 
@@ -71,9 +71,7 @@ public class DripleafBlock implements BlockHandler {
         if (player.getPosition().y() < blockPosition.y() + 0.9375) return;
 
         // Player just started standing on the dripleaf, so start the sequence
-        var task = new DripleafTask(player, instance, blockPosition);
-        playerTasks.put(player.getEntityId(), task);
-        player.scheduler().submitTask(task);
+        DripleafManager.forPlayer(player).handleTouch(blockPosition);
     }
 
     private enum Tilt {
@@ -98,44 +96,92 @@ public class DripleafBlock implements BlockHandler {
         }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private class DripleafTask implements Supplier<TaskSchedule> {
+    private static class DripleafManager {
+        private static final Tag<DripleafManager> TAG = Tag.Transient("dripleaf_manager");
+
+        public static @Nullable DripleafManager forPlayerOptional(@NotNull Player player) {
+            var existing = player.getTag(TAG);
+            if (existing != null) {
+                if (existing.instance.equals(player.getInstance())) {
+                    return existing;
+                }
+
+                // Sanity check but it was old, so remove it.
+                existing.clear();
+                player.removeTag(TAG);
+            }
+            return null;
+        }
+
+        public static @NotNull DripleafManager forPlayer(@NotNull Player player) {
+            var existing = forPlayerOptional(player);
+            if (existing != null) return existing;
+
+            var manager = new DripleafManager(player);
+            player.setTag(TAG, manager);
+            return manager;
+        }
+
         private final Player player;
         private final Instance instance;
-        private final Point blockPosition;
-        private final Block block;
 
-        private Tilt state = Tilt.NONE;
+        private final Long2ObjectMap<Task> tasks = new Long2ObjectArrayMap<>();
 
-        public DripleafTask(@NotNull Player player, @NotNull Instance instance, @NotNull Point blockPosition) {
+        public DripleafManager(@NotNull Player player) {
             this.player = player;
-            this.instance = instance;
-            this.blockPosition = blockPosition;
-            this.block = instance.getBlock(blockPosition);
+            this.instance = player.getInstance();
         }
 
-        public void cancel() {
-            setBlockTilt(Tilt.NONE);
-            state = Tilt.NONE;
+        public void handleTouch(@NotNull Point blockPosition) {
+            long index = PositionUtil.packPosition(blockPosition);
+            var task = tasks.get(index);
+            if (task != null) return; // Already falling
+
+            task = new Task(blockPosition);
+            tasks.put(index, task);
+            player.scheduler().submitTask(task);
         }
 
-        @Override
-        public TaskSchedule get() {
-            if (state == null || !player.getInstance().equals(instance))
-                return TaskSchedule.stop(); // Canceled or the player left the instance
+        public void clear() {
+            tasks.values().forEach(Task::cancel);
+            tasks.clear();
+        }
 
-            state = state.next();
-            setBlockTilt(state);
-            if (state == Tilt.NONE) {
-                playerTasks.remove(player.getEntityId());
-                return TaskSchedule.stop();
+        @SuppressWarnings("UnstableApiUsage")
+        private class Task implements Supplier<TaskSchedule> {
+            private final Point blockPosition;
+            private final Block block;
+
+            private Tilt state = Tilt.NONE;
+
+            public Task(@NotNull Point blockPosition) {
+                this.blockPosition = blockPosition;
+                this.block = instance.getBlock(blockPosition);
             }
-            return TaskSchedule.tick(state.delay());
-        }
 
-        private void setBlockTilt(@NotNull Tilt tilt) {
-            var blockState = block.withProperty("tilt", tilt.name().toLowerCase(Locale.ROOT)).stateId();
-            player.sendPacket(new BlockChangePacket(blockPosition, blockState));
+            public void cancel() {
+                setBlockTilt(Tilt.NONE);
+                state = null;
+            }
+
+            @Override
+            public TaskSchedule get() {
+                if (state == null || !player.getInstance().equals(instance))
+                    return TaskSchedule.stop(); // Canceled or the player left the instance
+
+                state = state.next();
+                setBlockTilt(state);
+                if (state == Tilt.NONE) {
+                    tasks.remove(PositionUtil.packPosition(blockPosition));
+                    return TaskSchedule.stop();
+                }
+                return TaskSchedule.tick(state.delay());
+            }
+
+            private void setBlockTilt(@NotNull Tilt tilt) {
+                var blockState = block.withProperty("tilt", tilt.name().toLowerCase(Locale.ROOT)).stateId();
+                player.sendPacket(new BlockChangePacket(blockPosition, blockState));
+            }
         }
     }
 }
