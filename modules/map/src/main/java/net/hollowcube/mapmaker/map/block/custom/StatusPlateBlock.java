@@ -57,7 +57,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
 
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
-        var maxResetHeight = interaction.getBlockPosition().blockY() - 1;
+        var maxResetHeight = interaction.getBlockPosition().blockY();
         world.server().showView(player, c -> new EditStatusView(c, data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();

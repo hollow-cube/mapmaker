@@ -4,15 +4,18 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class FixTheDripleafCommand extends CommandDsl {
 
     @Inject
-    public FixTheDripleafCommand() {
+    public FixTheDripleafCommand(@NotNull PermManager permManager) {
         super("fixthedripleaf");
 
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
         addSyntax(playerOnly(this::fixTheDripleaf));
     }
 
