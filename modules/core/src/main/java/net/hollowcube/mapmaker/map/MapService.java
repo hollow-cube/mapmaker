@@ -12,10 +12,13 @@ import java.util.concurrent.Executors;
 
 @Blocking
 public interface MapService {
-    @NotNull ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+    @NotNull
+    ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    @NotNull String LEADERBOARD_TOP_TIMES = "top_times";
-    @NotNull String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
+    @NotNull
+    String LEADERBOARD_TOP_TIMES = "top_times";
+    @NotNull
+    String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
     /**
      * Creates a new map in the map service with the given owner.
@@ -26,15 +29,18 @@ public interface MapService {
 
     @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId);
 
-    @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
+    @NotNull
+    MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request);
 
-    @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
+    @NotNull
+    MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
 
     @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
 
-    @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
+    @NotNull
+    MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 
@@ -67,19 +73,18 @@ public interface MapService {
     // Save states
     @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
 
-    default @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId) {
-        return getLatestSaveState(mapId, playerId, null);
-    }
-
-    @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type);
+    @NotNull
+    SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type);
 
     @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
 
-    @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+    @Nullable
+    SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
 
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 
-    @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
+    @Nullable
+    InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
 
     void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
@@ -93,7 +98,8 @@ public interface MapService {
 
     @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);
 
-    @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
+    @NotNull
+    MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
 
     // Ignore this stuff :|
 

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.util;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.attribute.Attribute;
@@ -21,13 +22,14 @@ public final class MapWorldHelpers {
     @Blocking
     public static @NotNull SaveState getOrCreateSaveState(
             @NotNull MapWorld world,
-            @NotNull String playerId
+            @NotNull String playerId,
+            @NotNull SaveStateType type
     ) {
         var mapService = world.server().mapService();
         var map = world.map();
 
         try {
-            return mapService.getLatestSaveState(map.id(), playerId);
+            return mapService.getLatestSaveState(map.id(), playerId, type);
         } catch (MapService.NotFoundError ignored) {
             return mapService.createSaveState(map.id(), playerId);
         }

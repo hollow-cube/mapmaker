@@ -139,36 +139,18 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, @NotNull String productId) {
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String username, @NotNull String product) {
         var reqBody = GSON.toJson(Map.of(
-                "type", "product",
-                "source", source,
-                "player", playerId,
-                "product", productId
+                "username", username,
+                "package", product
         ));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/payments/checkout"));
+                .uri(URI.create(url + "/tebex/checkout"));
         var res = doRequest("createCheckoutLink", req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 201)
+        if (res.statusCode() != 200)
             throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
     }
 
-    @Override
-    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, int cubits) {
-        var reqBody = GSON.toJson(Map.of(
-                "type", "cubits",
-                "source", source,
-                "player", playerId,
-                "cubits", cubits
-        ));
-        var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/payments/checkout"));
-        var res = doRequest("createCheckoutLink", req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 201)
-            throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
-        return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
-    }
 }

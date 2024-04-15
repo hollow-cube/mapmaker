@@ -26,15 +26,22 @@ public class StoreView extends View {
         super(context);
 
         cubitsText.setText("Buy Cubits");
-        cubitsText.setText("Buy Hypercube");
-        cubitsText.setText("Buy Addons");
+        hypercubeText.setText("Buy Hypercube");
+        addonsText.setText("Buy Addons");
 
         for (int i = 0; i < tabButtons.length; i++) {
             var tabIndex = i;
             addActionHandler(
                     Objects.requireNonNull(tabButtons[tabIndex].id()),
-                    Label.ActionHandler.lmb(player -> tabSwitch.setOption(tabIndex))
+                    Label.ActionHandler.lmb(player -> selectTab(tabIndex))
             );
         }
+    }
+
+    private void selectTab(int index) {
+        if (tabSwitch.getOption() == index) return;
+
+        tabSwitch.setOption(index);
+        nameSwitch.setOption(index);
     }
 }

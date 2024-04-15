@@ -81,7 +81,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         // todo in the future verification should be done in a VerificationMapWorld or PlayingMapWorld probably.
         SaveState saveState;
         if (map().verification() == MapVerification.PENDING) {
-            saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+            saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.VERIFYING);
         } else {
             // Create a fake save state, it is only used locally anyway.
             saveState = new SaveState(

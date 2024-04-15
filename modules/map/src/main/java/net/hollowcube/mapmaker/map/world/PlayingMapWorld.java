@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
@@ -79,7 +76,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public void addPlayer(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.PLAYING);
         player.setTag(SaveState.TAG, saveState);
 
         var pos = saveState.playState().pos().orElse(map().settings().getSpawnPoint());

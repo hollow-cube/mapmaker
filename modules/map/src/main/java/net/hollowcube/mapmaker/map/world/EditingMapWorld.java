@@ -248,7 +248,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         ActionBar.forPlayer(player).addProvider(RamUsageOverlay.INSTANCE);
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id());
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING);
         player.setTag(SaveState.TAG, saveState);
 
         super.addPlayer(player);

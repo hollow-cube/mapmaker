@@ -313,9 +313,12 @@ public class InventoryViewHost {
             if (element == null) return false;
 
             BaseElement.VIRTUAL_EXECUTOR.submit(() -> {
+                // Prevent click while processing is still happening
+                //todo this forces all into a virtual thread and i have no idea why? maybe should fix.
+                // i think basically the problem boils down to tryLock locking to this particular thread
+                // I probably just need a different lock implementation
                 if (!clickLock.tryLock()) {
-                    logger.log(System.Logger.Level.INFO, "CLICK LOCK IS HELD BY OTHER!!!!!!!! SKIPPING");
-                    return;
+                    return; // Already handling another click, do nothing.
                 }
 
                 Future<Void> result = null;
