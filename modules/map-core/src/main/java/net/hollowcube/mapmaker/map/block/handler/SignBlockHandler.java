@@ -143,11 +143,17 @@ public class SignBlockHandler implements BlockHandler {
             return false;
         }
 
+        // Skip sign editing if player is sneaking
+        if (interaction.getPlayer().isSneaking()) {
+            return true;
+        }
+
         // Handle editing the sign
         var packet = new OpenSignEditorPacket(blockPosition, isFront);
         var playerMap = MapWorld.forPlayerOptional(player);
         if (!(playerMap == null) && !playerMap.map().isPublished()) {
             player.sendPacket(packet);
+            return false; // Stop block placing if you are editing the sign
         }
         return true;
     }
