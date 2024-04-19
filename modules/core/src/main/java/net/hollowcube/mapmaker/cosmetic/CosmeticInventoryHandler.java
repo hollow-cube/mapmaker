@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.listener.CreativeInventoryActionListener;
 import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
@@ -24,14 +25,16 @@ public class CosmeticInventoryHandler {
     }
 
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
-//        todo
-//        if (event.getInventory() != null) return; // Not the player inventory
-//
-//        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
-//        if (cosmeticType == null) return;
-//        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
-//
-//        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
+        if (event.getInventory() != event.getPlayerInventory())
+            return; // Not the player inventory (e one, not just lower section)
+
+        if (!(event.getClickInfo() instanceof Click.Info.Left leftClick)) return;
+
+        var cosmeticType = CosmeticType.byIconSlot(leftClick.slot());
+        if (cosmeticType == null) return;
+        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
+
+        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
     }
 
     private static final Map<Short, CosmeticType> COSMETIC_SLOT_MAP = Map.ofEntries(
