@@ -17,6 +17,7 @@ java_library(
         "@maven//:org_junit_platform_junit_platform_suite_engine",
     ],
     deps = [
+        "@maven//:net_kyori_adventure_nbt",
         "//third_party:auto_service",
         "//third_party:minestom",
         #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
