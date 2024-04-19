@@ -395,8 +395,10 @@ public class InventoryViewHost {
         public DelegatingPlayerInventory(@NotNull Player player) {
             this.player = player;
 
+
             // Copy all contents of players current inventory to this one
             var old = player.getInventory();
+            viewers.addAll(old.getViewers());
             // PlayerInventory
             setCursorItem(old.getCursorItem());
             // AbstractInventory
