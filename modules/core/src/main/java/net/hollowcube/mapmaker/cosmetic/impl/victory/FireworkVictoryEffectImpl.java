@@ -12,11 +12,11 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.firework.FireworkEffect;
-import net.minestom.server.item.firework.FireworkEffectType;
-import net.minestom.server.item.metadata.FireworkMeta;
+import net.minestom.server.item.component.FireworkExplosion;
+import net.minestom.server.item.component.FireworkList;
 import net.minestom.server.network.packet.server.play.EntityStatusPacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
@@ -41,9 +41,11 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
         );
     }
 
-    public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkEffect> effects) {
-        var fireworkMeta = new FireworkMeta.Builder().effects(effects).build();
-        var fireworkItem = ItemStack.builder(Material.FIREWORK_ROCKET).meta(fireworkMeta).build();
+    public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkExplosion> effects) {
+        var fireworks = new FireworkList((byte) 0, effects);
+        var fireworkItem = ItemStack.builder(Material.FIREWORK_ROCKET)
+                .set(ItemComponent.FIREWORKS, fireworks)
+                .build();
         var fireworkEntity = new Entity(EntityType.FIREWORK_ROCKET);
         var meta = (FireworkRocketMeta) fireworkEntity.getEntityMeta();
 
@@ -71,8 +73,8 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
         });
     }
 
-    public static FireworkEffect randomColorEffect() {
-        return new FireworkEffect(false, true, FireworkEffectType.STAR_SHAPED, List.of(new Color(randomRGB())), List.of(new Color(randomRGB())));
+    public static FireworkExplosion randomColorEffect() {
+        return new FireworkExplosion(FireworkExplosion.Shape.STAR, List.of(new Color(randomRGB())), List.of(new Color(randomRGB())), true, false);
     }
 
     public static int randomRGB() {

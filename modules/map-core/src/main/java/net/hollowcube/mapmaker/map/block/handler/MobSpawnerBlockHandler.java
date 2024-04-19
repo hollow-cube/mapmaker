@@ -1,7 +1,8 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
-import net.hollowcube.schem.Structure;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.StringBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
@@ -13,11 +14,10 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class MobSpawnerBlockHandler implements BlockHandler {
 
@@ -50,9 +50,9 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         return List.of(DELAY, MAX_NEARBY_ENTITIES, MAX_SPAWN_DELAY, MIN_SPAWN_DELAY, REQUIRED_PLAYER_RANGE, SPAWN_COUNT, SPAWN_DATA, SPAWN_RANGE);
     }
 
-    private static final Tag<Short> DELAY = Tag.Short("Delay").defaultValue( (short) 500);
-    private static final Tag<Short> MAX_NEARBY_ENTITIES = Tag.Short("MaxNearbyEntities").defaultValue( (short) 6);
-    private static final Tag<Short> MAX_SPAWN_DELAY = Tag.Short("MaxSpawnDelay").defaultValue( (short) 800);
+    private static final Tag<Short> DELAY = Tag.Short("Delay").defaultValue((short) 500);
+    private static final Tag<Short> MAX_NEARBY_ENTITIES = Tag.Short("MaxNearbyEntities").defaultValue((short) 6);
+    private static final Tag<Short> MAX_SPAWN_DELAY = Tag.Short("MaxSpawnDelay").defaultValue((short) 800);
     private static final Tag<Short> MIN_SPAWN_DELAY = Tag.Short("MinSpawnDelay").defaultValue((short) 200);
     private static final Tag<Short> REQUIRED_PLAYER_RANGE = Tag.Short("RequiredPlayerRange").defaultValue((short) 16);
     private static final Tag<Short> SPAWN_COUNT = Tag.Short("SpawnCount").defaultValue((short) 4);
@@ -60,15 +60,16 @@ public class MobSpawnerBlockHandler implements BlockHandler {
     private static final Tag<List<EntitySpawnList>> SPAWN_POTENTIALS = Tag.Structure("SpawnPotentials", new EntitySpawnListSerializer()).list();
     private static final Tag<Short> SPAWN_RANGE = Tag.Short("SpawnRange").defaultValue((short) 4);
 
-    private record EntityData(String id) {}
+    private record EntityData(String id) {
+    }
 
     private static final class EntityDataSerializer implements TagSerializer<EntityData> {
-        private final Tag<NBT> PARENT = Tag.NBT("entity");
+        private final Tag<BinaryTag> PARENT = Tag.NBT("entity");
 
         @Override
         public @Nullable EntityData read(@NotNull TagReadable reader) {
-            NBT nbt = reader.getTag(PARENT);
-            if (nbt instanceof NBTCompound nbtCompound) {
+            BinaryTag nbt = reader.getTag(PARENT);
+            if (nbt instanceof CompoundBinaryTag nbtCompound) {
                 return new EntityData(nbtCompound.getString("id"));
             }
             return null;
@@ -78,13 +79,12 @@ public class MobSpawnerBlockHandler implements BlockHandler {
 
         @Override
         public void write(@NotNull TagWritable writer, @NotNull EntityData value) {
-            writer.setTag(PARENT, NBT.Compound(mutableNBTCompound -> {
-                mutableNBTCompound.set("id", NBT.String(value.id));
-            }));
+            writer.setTag(PARENT, CompoundBinaryTag.from(Map.of("id", StringBinaryTag.stringBinaryTag(value.id))));
         }
     }
 
-    private record CustomSpawnRules(int block_light_limit, int sky_light_limit) {}
+    private record CustomSpawnRules(int block_light_limit, int sky_light_limit) {
+    }
 
     private static final class SpawnRulesSerializer implements TagSerializer<CustomSpawnRules> {
         private final Tag<Integer> BLOCK_LIGHT_LIMIT = Tag.Integer("block_light_limit");
@@ -104,7 +104,8 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         }
     }
 
-    private record EntitySpawnData(@NotNull EntityData entity, @NotNull CustomSpawnRules custom_spawn_rules) {}
+    private record EntitySpawnData(@NotNull EntityData entity, @NotNull CustomSpawnRules custom_spawn_rules) {
+    }
 
     private static class SpawnDataSerializer implements TagSerializer<EntitySpawnData> {
         private final Tag<EntityData> ENTITY_DATA = Tag.Structure("entity", new EntityDataSerializer());
@@ -125,7 +126,8 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         }
     }
 
-    private record EntitySpawnList(int weight, @NotNull EntitySpawnData data) {}
+    private record EntitySpawnList(int weight, @NotNull EntitySpawnData data) {
+    }
 
     private static class EntitySpawnListSerializer implements TagSerializer<EntitySpawnList> {
         private final Tag<Integer> WEIGHT = Tag.Integer("weight");

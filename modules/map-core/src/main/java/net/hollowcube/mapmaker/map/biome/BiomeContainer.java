@@ -7,6 +7,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
@@ -17,9 +20,6 @@ import net.minestom.server.world.biomes.BiomeManager;
 import net.minestom.server.world.biomes.VanillaBiome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +63,8 @@ public class BiomeContainer {
             maxId = Math.max(maxId, biomeManager.getId(biome));
         FIRST_BIOME_ID = maxId + 1;
     }
+
+    private final CachedPacket registryDataPacket = new CachedPacket(this::createRegistryDataPacket);
 
     private final BiomeManager parent = MinecraftServer.getBiomeManager();
     private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
@@ -149,32 +151,6 @@ public class BiomeContainer {
         return allBiomes;
     }
 
-    public NBTCompound toNBT() {
-        var allBiomesNbt = new ArrayList<NBTCompound>();
-        //todo should probably cache this nbt
-
-        // Add parent biomes
-        for (var biome : parent.unmodifiableCollection()) {
-            allBiomesNbt.add(NBT.Compound(Map.of(
-                    "id", NBT.Int(getLoadedBiomeId(biome)),
-                    "name", NBT.String(biome.namespace().toString()),
-                    "element", biome.toNbt()
-            )));
-        }
-        // Add overwrite biomes
-        for (var biome : loadedBiomes.values()) {
-            allBiomesNbt.add(NBT.Compound(Map.of(
-                    "id", NBT.Int(getLoadedBiomeId(biome)),
-                    "name", NBT.String(biome.namespace().toString()),
-                    "element", biome.toNbt()
-            )));
-        }
-
-        return NBT.Compound(Map.of(
-                "type", NBT.String("minecraft:worldgen/biome"),
-                "value", NBT.List(NBTType.TAG_Compound, allBiomesNbt)));
-    }
-
     public void init(@NotNull TagReadable dataReader) {
         if (initialized) return;
         initialized = true;
@@ -195,6 +171,26 @@ public class BiomeContainer {
 
     public void write(@NotNull TagWritable dataWriter) {
         dataWriter.setTag(TAG, new TagWrapper(biomes));
+    }
+
+    public @NotNull SendablePacket registryDataPacket() {
+        return registryDataPacket;
+    }
+
+    private @NotNull RegistryDataPacket createRegistryDataPacket() {
+        List<RegistryDataPacket.Entry> entries = new ArrayList<>();
+
+        // Add parent biomes
+        for (var biome : parent.unmodifiableCollection()) {
+            entries.add(biome.toRegistryEntry());
+        }
+
+        // Add overwrite biomes
+        for (var biome : loadedBiomes.values()) {
+            entries.add(biome.toRegistryEntry());
+        }
+
+        return new RegistryDataPacket("minecraft:worldgen/biome", entries);
     }
 
     private @Nullable Biome createMinestomBiome(@NotNull BiomeInfo bi) {

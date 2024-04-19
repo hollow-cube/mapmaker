@@ -1,12 +1,11 @@
 package net.hollowcube.terraform.util.math;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public final class CoordinateUtil {
     private CoordinateUtil() {
@@ -44,23 +43,24 @@ public final class CoordinateUtil {
         );
     }
 
-    public static @NotNull NBTCompound toNBT(@NotNull Point pos) {
-        var nbt = new MutableNBTCompound();
-        nbt.setDouble("x", pos.x());
-        nbt.setDouble("y", pos.y());
-        nbt.setDouble("z", pos.z());
+    public static @NotNull CompoundBinaryTag toNBT(@NotNull Point pos) {
+        var builder = CompoundBinaryTag.builder();
+        builder.putDouble("x", pos.x());
+        builder.putDouble("y", pos.y());
+        builder.putDouble("z", pos.z());
         if (pos instanceof Pos p) {
-            nbt.setFloat("yaw", p.yaw());
-            nbt.setFloat("pitch", p.pitch());
+            builder.putFloat("yaw", p.yaw());
+            builder.putFloat("pitch", p.pitch());
         }
-        return nbt.toCompound();
+        return builder.build();
     }
 
-    public static @NotNull Point fromNBT(@NotNull NBTCompound nbt) {
+    public static @NotNull Point fromNBT(@NotNull CompoundBinaryTag nbt) {
         var x = nbt.getDouble("x");
         var y = nbt.getDouble("y");
         var z = nbt.getDouble("z");
-        if (nbt.contains("yaw") && nbt.contains("pitch")) {
+        var keys = nbt.keySet();
+        if (keys.contains("yaw") && keys.contains("pitch")) {
             var yaw = nbt.getFloat("yaw");
             var pitch = nbt.getFloat("pitch");
             return new Pos(x, y, z, yaw, pitch);

@@ -4,8 +4,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public final class CoordinateUtil {
     private CoordinateUtil() {
@@ -33,31 +31,6 @@ public final class CoordinateUtil {
                 Math.max(a.y(), b.y()),
                 Math.max(a.z(), b.z())
         );
-    }
-
-    public static @NotNull NBTCompound toNBT(@NotNull Point pos) {
-        var nbt = new MutableNBTCompound();
-        nbt.setDouble("x", pos.x());
-        nbt.setDouble("y", pos.y());
-        nbt.setDouble("z", pos.z());
-        if (pos instanceof Pos p) {
-            nbt.setFloat("yaw", p.yaw());
-            nbt.setFloat("pitch", p.pitch());
-        }
-        return nbt.toCompound();
-    }
-
-    public static @NotNull Point fromNBT(@NotNull NBTCompound nbt) {
-        var x = nbt.getDouble("x");
-        var y = nbt.getDouble("y");
-        var z = nbt.getDouble("z");
-        if (nbt.contains("yaw") && nbt.contains("pitch")) {
-            var yaw = nbt.getFloat("yaw");
-            var pitch = nbt.getFloat("pitch");
-            return new Pos(x, y, z, yaw, pitch);
-        } else {
-            return new Vec(x, y, z);
-        }
     }
 
     public static @NotNull Vec lerp(Point zero, Point one, float t) {

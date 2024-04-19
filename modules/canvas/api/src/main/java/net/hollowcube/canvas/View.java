@@ -19,7 +19,6 @@ public abstract class View implements Element {
 
     protected View(@NotNull Context context) {
         this.context = context;
-
         var viewProvider = context.viewProvider();
         delegate = viewProvider.viewFor(context, getClass(), this, this::mount, this::unmount);
     }

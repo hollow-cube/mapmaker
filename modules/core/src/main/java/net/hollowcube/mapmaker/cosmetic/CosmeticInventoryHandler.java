@@ -24,13 +24,14 @@ public class CosmeticInventoryHandler {
     }
 
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
-        if (event.getInventory() != null) return; // Not the player inventory
-
-        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
-        if (cosmeticType == null) return;
-        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
-
-        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
+//        todo
+//        if (event.getInventory() != null) return; // Not the player inventory
+//
+//        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
+//        if (cosmeticType == null) return;
+//        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
+//
+//        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
     }
 
     private static final Map<Short, CosmeticType> COSMETIC_SLOT_MAP = Map.ofEntries(

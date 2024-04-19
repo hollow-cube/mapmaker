@@ -1,31 +1,31 @@
 package net.hollowcube.mapmaker.map.util;
 
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.DoubleBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTDouble;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.List;
 
 public final class NbtUtil {
 
-    public static @NotNull NBT into(@NotNull Vec vec) {
-        return new NBTList<>(NBTType.TAG_Double, List.of(
-                new NBTDouble(vec.x()),
-                new NBTDouble(vec.y()),
-                new NBTDouble(vec.z())
+    public static @NotNull BinaryTag into(@NotNull Vec vec) {
+        return ListBinaryTag.listBinaryTag(BinaryTagTypes.DOUBLE, List.of(
+                DoubleBinaryTag.doubleBinaryTag(vec.x()),
+                DoubleBinaryTag.doubleBinaryTag(vec.y()),
+                DoubleBinaryTag.doubleBinaryTag(vec.z())
         ));
     }
 
-    public static @Nullable Vec from(@Nullable NBT nbt) {
-        if (!(nbt instanceof NBTList<?> list)) return null;
+    public static @Nullable Vec from(@Nullable BinaryTag nbt) {
+        if (!(nbt instanceof ListBinaryTag list)) return null;
         double x = 0, y = 0, z = 0;
-        if (list.getSize() >= 1) x = ((NBTDouble) list.get(0)).getValue();
-        if (list.getSize() >= 2) y = ((NBTDouble) list.get(1)).getValue();
-        if (list.getSize() >= 3) z = ((NBTDouble) list.get(2)).getValue();
+        if (list.size() >= 1) x = ((DoubleBinaryTag) list.get(0)).value();
+        if (list.size() >= 2) y = ((DoubleBinaryTag) list.get(1)).value();
+        if (list.size() >= 3) z = ((DoubleBinaryTag) list.get(2)).value();
         return new Vec(x, y, z);
     }
 

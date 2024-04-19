@@ -3,21 +3,22 @@ package net.hollowcube.mapmaker.hub.entity.marker;
 import net.hollowcube.mapmaker.hub.merchant.MerchantEntity;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerLoader;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.FloatBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public class HubMarkerLoader implements MarkerLoader {
 
     @Override
-    public boolean loadMarker(@NotNull MapWorld world, @NotNull String type, @NotNull NBTCompound data, @NotNull Pos pos) {
+    public boolean loadMarker(@NotNull MapWorld world, @NotNull String type, @NotNull CompoundBinaryTag data, @NotNull Pos pos) {
         if ("mapmaker:merchant".equals(type)) {
             var entity = new MerchantEntity(data);
 
-            var yawOverride = data.getFloat("yaw");
-            if (yawOverride != null) pos = pos.withYaw(yawOverride);
-            var pitchOverride = data.getFloat("pitch");
-            if (pitchOverride != null) pos = pos.withPitch(pitchOverride);
+            if (data.get("yaw") instanceof FloatBinaryTag yaw)
+                pos = pos.withYaw(yaw.floatValue());
+            if (data.get("pitch") instanceof FloatBinaryTag pitch)
+                pos = pos.withPitch(pitch.floatValue());
             entity.setInstance(world.instance(), pos);
         }
 

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.gui.play;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -17,7 +18,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -64,8 +64,7 @@ public class MapEntry extends View {
     @Action("btn")
     private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case START_SHIFT_CLICK ->
-                    bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
+            case SHIFT_CLICK -> bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
             case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
         }
     }

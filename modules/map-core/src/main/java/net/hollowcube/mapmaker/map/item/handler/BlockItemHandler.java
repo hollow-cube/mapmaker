@@ -4,20 +4,18 @@ import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.Tag;
+import net.minestom.server.item.component.CustomData;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class BlockItemHandler extends ItemHandler {
-    public static final Tag<NBT> BLOCK_DATA = Tag.NBT("block_data").defaultValue(new NBTCompound());
 
     private final Block block;
     private final Material material;
@@ -54,8 +52,8 @@ public class BlockItemHandler extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var instance = click.instance();
 
-        var blockData = (NBTCompound) click.itemStack().meta().getTag(BLOCK_DATA);
-        var block = this.block.withNbt(blockData);
+        var blockData = click.itemStack().get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+        var block = this.block.withNbt(blockData.nbt());
         var event = new BlockItemPlaceEvent(click.player(), click.placePosition(), block);
         EventDispatcher.callCancellable(event, () -> {
 

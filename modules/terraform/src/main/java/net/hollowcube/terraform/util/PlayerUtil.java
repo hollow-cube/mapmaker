@@ -37,9 +37,9 @@ public final class PlayerUtil {
 
     public static void smartAddItemStack(@NotNull Player player, @NotNull ItemStack itemStack) {
         // If their current item is empty, just set it
-        var current = player.getInventory().getItemInMainHand();
+        var current = player.getItemInMainHand();
         if (current.isAir()) {
-            player.getInventory().setItemInMainHand(itemStack);
+            player.setItemInMainHand(itemStack);
             return;
         }
 
@@ -57,7 +57,7 @@ public final class PlayerUtil {
         if (added) return;
 
         // Finally, just replace their main hand item
-        player.getInventory().setItemInMainHand(itemStack);
+        player.setItemInMainHand(itemStack);
     }
 
     private PlayerUtil() {

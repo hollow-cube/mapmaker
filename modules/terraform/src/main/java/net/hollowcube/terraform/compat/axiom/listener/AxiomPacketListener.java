@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.compat.axiom.listener;
 
+import com.google.gson.JsonElement;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
@@ -11,6 +12,7 @@ import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.coordinate.Pos;
@@ -31,7 +33,6 @@ import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePack
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -269,10 +270,10 @@ public final class AxiomPacketListener {
         return new AxiomMarkerDataPacket.Entry(entity.getUuid(), entity.getPosition(), null, null, null, 0, 0, 0);
     }
 
-    private void applyEntityMetadataFromNbt(@NotNull EntityMeta entityMeta, @NotNull NBTCompound nbt) {
+    private void applyEntityMetadataFromNbt(@NotNull EntityMeta entityMeta, @NotNull CompoundBinaryTag nbt) {
         //todo i would prefer to generate this. need to look into including entity metadata in minestom data.
         entityMeta.setNotifyAboutChanges(false);
-        for (var entry : nbt.getEntries()) {
+        for (var entry : nbt) {
             var key = entry.getKey();
             if ("id".equals(key)) continue;
 
@@ -290,11 +291,11 @@ public final class AxiomPacketListener {
         entityMeta.setNotifyAboutChanges(true);
     }
 
-    private boolean applyEntityMetaField(@NotNull EntityMeta meta, @NotNull String key, @NotNull NBT value) {
+    private boolean applyEntityMetaField(@NotNull EntityMeta meta, @NotNull String key, @NotNull BinaryTag value) {
         return false; //todo
     }
 
-    private boolean applyDisplayMetaField(@NotNull AbstractDisplayMeta meta, @NotNull String key, @NotNull NBT value) {
+    private boolean applyDisplayMetaField(@NotNull AbstractDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
         if (applyEntityMetaField(meta, key, value)) return true;
 
         switch (key) {
@@ -324,7 +325,7 @@ public final class AxiomPacketListener {
         return false;
     }
 
-    private boolean applyBlockDisplayMetaField(@NotNull BlockDisplayMeta meta, @NotNull String key, @NotNull NBT value) {
+    private boolean applyBlockDisplayMetaField(@NotNull BlockDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
         if (applyDisplayMetaField(meta, key, value)) return true;
 
         if ("block_state".equals(key)) {
@@ -335,9 +336,10 @@ public final class AxiomPacketListener {
             Check.notNull(block, "unknown block: " + name);
 
             var propertyMap = compound.getCompound("Properties");
-            if (propertyMap != null) {
+            if (propertyMap.size() > 0) {
                 var props = new HashMap<String, String>();
-                propertyMap.forEach((k, v) -> props.put(k, assertString(v)));
+                for (var entry : propertyMap)
+                    props.put(entry.getKey(), assertString(entry.getValue()));
                 block = block.withProperties(props);
             }
 
@@ -347,7 +349,7 @@ public final class AxiomPacketListener {
         return true;
     }
 
-    private boolean applyItemDisplayMetaField(@NotNull ItemDisplayMeta meta, @NotNull String key, @NotNull NBT value) {
+    private boolean applyItemDisplayMetaField(@NotNull ItemDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
         if (applyDisplayMetaField(meta, key, value)) return true;
 
         switch (key) {
@@ -359,11 +361,14 @@ public final class AxiomPacketListener {
         return true;
     }
 
-    private boolean applyTextDisplayMetaField(@NotNull TextDisplayMeta meta, @NotNull String key, @NotNull NBT value) {
+    private boolean applyTextDisplayMetaField(@NotNull TextDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
         if (applyDisplayMetaField(meta, key, value)) return true;
 
         switch (key) {
-            case "text" -> meta.setText(GsonComponentSerializer.gson().deserialize(assertString(value)));
+            case "text" -> {
+                var elem = GsonComponentSerializer.gson().serializer().fromJson(assertString(value), JsonElement.class);
+                meta.setText(GsonComponentSerializer.gson().deserializeFromTree(elem));
+            }
             case "line_width" -> meta.setLineWidth(assertInt(value));
             case "background" -> meta.setBackgroundColor(assertInt(value));
             case "text_opacity" -> meta.setTextOpacity(assertByte(value));
@@ -380,47 +385,47 @@ public final class AxiomPacketListener {
         return false;
     }
 
-    private int assertInt(@Nullable NBT nbt) {
-        if (nbt instanceof NBTInt i) return i.getValue();
+    private int assertInt(@Nullable BinaryTag nbt) {
+        if (nbt instanceof IntBinaryTag i) return i.value();
         throw new IllegalArgumentException("expected int, got " + nbt.getClass().getName());
     }
 
-    private float assertFloat(@Nullable NBT nbt) {
-        if (nbt instanceof NBTFloat f) return f.getValue();
+    private float assertFloat(@Nullable BinaryTag nbt) {
+        if (nbt instanceof FloatBinaryTag f) return f.value();
         throw new IllegalArgumentException("expected float, got " + nbt.getClass().getName());
     }
 
-    private String assertString(@Nullable NBT nbt) {
-        if (nbt instanceof NBTString s) return s.getValue();
+    private String assertString(@Nullable BinaryTag nbt) {
+        if (nbt instanceof StringBinaryTag s) return s.value();
         throw new IllegalArgumentException("expected string, got " + nbt.getClass().getName());
     }
 
-    private byte assertByte(@Nullable NBT nbt) {
-        if (nbt instanceof NBTByte b) return b.getValue();
+    private byte assertByte(@Nullable BinaryTag nbt) {
+        if (nbt instanceof ByteBinaryTag b) return b.value();
         throw new IllegalArgumentException("expected byte, got " + nbt.getClass().getName());
     }
 
-    private boolean assertBool(@Nullable NBT nbt) {
-        if (nbt instanceof NBTByte b) return b.getValue() != 0;
+    private boolean assertBool(@Nullable BinaryTag nbt) {
+        if (nbt instanceof ByteBinaryTag b) return b.value() != 0;
         throw new IllegalArgumentException("expected bool, got " + nbt.getClass().getName());
     }
 
-    private NBTCompound assertCompound(@Nullable NBT nbt) {
-        if (nbt instanceof NBTCompound c) return c;
+    private CompoundBinaryTag assertCompound(@Nullable BinaryTag nbt) {
+        if (nbt instanceof CompoundBinaryTag c) return c;
         throw new IllegalArgumentException("expected compound, got " + nbt.getClass().getName());
     }
 
-    private float[] assertFloatArray(@Nullable NBT nbt, int length) {
-        if (!(nbt instanceof NBTList<?> l))
+    private float[] assertFloatArray(@Nullable BinaryTag nbt, int length) {
+        if (!(nbt instanceof ListBinaryTag l))
             throw new IllegalArgumentException("expected float array, got " + nbt.getClass().getName());
-        if (!l.getSubtagType().equals(NBTType.TAG_Float))
-            throw new IllegalArgumentException("expected float array, got " + l.getSubtagType());
-        if (l.getSize() != length)
-            throw new IllegalArgumentException("expected float array of length " + length + ", got " + l.getSize());
+        if (!l.elementType().equals(BinaryTagTypes.FLOAT))
+            throw new IllegalArgumentException("expected float array, got " + l.elementType());
+        if (l.size() != length)
+            throw new IllegalArgumentException("expected float array of length " + length + ", got " + l.size());
 
         var array = new float[length];
         for (int i = 0; i < length; i++)
-            array[i] = ((NBTFloat) l.get(i)).getValue();
+            array[i] = ((FloatBinaryTag) l.get(i)).value();
         return array;
 
     }

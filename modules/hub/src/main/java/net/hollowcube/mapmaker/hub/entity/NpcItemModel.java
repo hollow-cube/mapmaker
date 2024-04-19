@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class NpcItemModel extends BaseNpcEntity {
     public void setModel(@NotNull Material material, int customModelData) {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
-        meta.setItemStack(ItemStack.builder(material).meta(b -> b.customModelData(customModelData)).build());
+        meta.setItemStack(ItemStack.builder(material).set(ItemComponent.CUSTOM_MODEL_DATA, customModelData).build());
     }
 
     @Override

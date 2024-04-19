@@ -4,9 +4,9 @@ import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcPlayerEntity;
 import net.hollowcube.mapmaker.hub.merchant.gui.MerchantShopView;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ public class MerchantEntity extends NpcPlayerEntity {
 
     private final MerchantData data;
 
-    public MerchantEntity(@NotNull NBTCompound nbt) {
+    public MerchantEntity(@NotNull CompoundBinaryTag nbt) {
         super(nbt);
 
         var merchantId = nbt.getString("merchant_id");

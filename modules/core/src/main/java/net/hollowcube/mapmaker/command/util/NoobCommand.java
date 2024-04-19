@@ -11,20 +11,18 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class NoobCommand extends CommandDsl {
     private static final ItemStack NOOB_HELMET = ItemStack.builder(Material.PLAYER_HEAD)
-            .meta(PlayerHeadMeta.class, meta -> {
-                meta.playerSkin(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGEyODRkOTc4MDViZTUzMWNhZGYwNjI3YzVjMjllOTAzNWUxNzEyMTU4MWRjYWJjZjk1MTBmZmQ5ZDQ2MDdmZiJ9fX0=", null));
-                meta.skullOwner(intArrayToUuid(new int[]{67411088, -739686879, -1666252800, -1432128361}));
-            })
-            .displayName(Component.text("Roblox Noob", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
+            .set(ItemComponent.PROFILE, new HeadProfile(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGEyODRkOTc4MDViZTUzMWNhZGYwNjI3YzVjMjllOTAzNWUxNzEyMTU4MWRjYWJjZjk1MTBmZmQ5ZDQ2MDdmZiJ9fX0=", null)))
+            .set(ItemComponent.CUSTOM_NAME, Component.text("Roblox Noob", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
             .build();
 
     private static final ItemStack NOOB_CHESTPLATE = ItemStack.of(Material.LEATHER_CHESTPLATE);

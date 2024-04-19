@@ -23,7 +23,6 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +39,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("playing-events", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
-            .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true))
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true));
 

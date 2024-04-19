@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect;
 
-import net.hollowcube.canvas.Element;
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Switch;
-import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
@@ -13,7 +10,6 @@ import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectListView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectSelectorView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -106,7 +102,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
                 data.setTeleport(pos);
                 updateFromData();
             }, data.teleport().orElseThrow()));
-        } else if (clickType == ClickType.START_SHIFT_CLICK) {
+        } else if (clickType == ClickType.SHIFT_CLICK) {
             data.setTeleport(null);
             updateFromData();
         }

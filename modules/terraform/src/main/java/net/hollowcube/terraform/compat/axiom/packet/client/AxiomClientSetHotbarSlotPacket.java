@@ -11,7 +11,7 @@ public record AxiomClientSetHotbarSlotPacket(
 ) implements AxiomClientPacket {
 
     public AxiomClientSetHotbarSlotPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(NetworkBuffer.BYTE), buffer.read(NetworkBuffer.ITEM));
+        this(buffer.read(NetworkBuffer.BYTE), buffer.read(ItemStack.NETWORK_TYPE));
     }
 
 }

@@ -4,9 +4,10 @@ import com.miguelfonseca.completely.data.Indexable;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,9 +35,9 @@ public record HeadInfo(
 
     public @NotNull ItemStack createItemStack() {
         return ItemStack.builder(Material.PLAYER_HEAD)
-                .meta(PlayerHeadMeta.class, meta -> meta.playerSkin(new PlayerSkin(texture, null)))
-                .displayName(LanguageProviderV2.translate(HdbMessages.ITEM_HDB_HEAD_NAME.with(name)))
-                .lore(LanguageProviderV2.translateMulti("item.hdb.head.lore", List.of(
+                .set(ItemComponent.PROFILE, new HeadProfile(new PlayerSkin(texture, null)))
+                .set(ItemComponent.CUSTOM_NAME, LanguageProviderV2.translate(HdbMessages.ITEM_HDB_HEAD_NAME.with(name)))
+                .set(ItemComponent.LORE, LanguageProviderV2.translateMulti("item.hdb.head.lore", List.of(
                         Component.text(id), Component.translatable("hdb.category." + category + ".name"),
                         Component.text(String.join(", ", tags))
                 )))

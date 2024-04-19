@@ -6,6 +6,8 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "@maven//:net_kyori_adventure_nbt",
+        "@maven//:net_kyori_adventure_text_serializer_gson",
         "//modules/canvas:api",
         "//modules/command",
         "//modules/common",
@@ -19,7 +21,6 @@ java_library(
         #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",
-        "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
         "@maven//:com_miguelfonseca_completely_completely_core",

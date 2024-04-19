@@ -1,11 +1,11 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

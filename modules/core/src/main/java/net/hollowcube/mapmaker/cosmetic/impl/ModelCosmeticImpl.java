@@ -3,13 +3,11 @@ package net.hollowcube.mapmaker.cosmetic.impl;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.color.Color;
-import net.minestom.server.item.ItemHideFlag;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.LeatherArmorMeta;
+import net.minestom.server.item.component.DyedItemColor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 import static net.hollowcube.mapmaker.cosmetic.Cosmetic.COSMETIC_TAG;
 
@@ -18,16 +16,14 @@ public class ModelCosmeticImpl extends CosmeticImpl {
 
     public ModelCosmeticImpl(@NotNull Cosmetic cosmetic) {
         super(cosmetic);
-        this.model = ItemStack.of(Material.LEATHER_HORSE_ARMOR)
-                .withMeta(LeatherArmorMeta.class, meta -> {
-                    meta.displayName(cosmetic.displayName());
-                    meta.lore(cosmetic.lore());
-                    var spritePath = "cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id();
-                    meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
-                    meta.color(new Color(255, 255, 255));
-                    meta.hideFlag(ItemHideFlag.HIDE_DYE);
-                    meta.setTag(COSMETIC_TAG, true);
-                });
+        this.model = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
+                .set(ItemComponent.CUSTOM_NAME, cosmetic.displayName())
+                .set(ItemComponent.LORE, cosmetic.lore())
+                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id()).cmd())
+                .set(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(255, 255, 255), false))
+                .build()
+                // stupid, builder settag should return the builder...
+                .withTag(COSMETIC_TAG, true);
     }
 
     @Override

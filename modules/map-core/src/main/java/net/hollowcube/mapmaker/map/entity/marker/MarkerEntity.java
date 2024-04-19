@@ -7,6 +7,10 @@ import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomMarkerDataPacket;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
+import net.kyori.adventure.nbt.StringBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -18,11 +22,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTString;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.util.List;
 import java.util.Objects;
@@ -45,8 +44,8 @@ public class MarkerEntity extends MapEntity {
     // The persistent marker data is stored in `marker_data` where `type`, `name`, `min`, `max` are reserved.
     // They are kept in a separate tag to avoid sending the root to axiom players which may have weird content by accident.
     // When we eventually have an anvil converter, the `marker_data` tag will replace the root tag.
-    private static final Tag<NBTCompound> DATA_TAG = Tag.NBT("marker_data")
-            .map(n -> (NBTCompound) n, n -> n).defaultValue(new NBTCompound());
+    private static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("marker_data")
+            .map(n -> (CompoundBinaryTag) n, n -> n).defaultValue(CompoundBinaryTag.empty());
     private static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("marker_data")
             .map(NamespaceID::from, NamespaceID::asString).defaultValue(UNKNOWN_TYPE);
     private static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("marker_data");
@@ -54,11 +53,11 @@ public class MarkerEntity extends MapEntity {
     private static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("marker_data");
     private static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("marker_data");
 
-    private static final NBTList<NBTString> AXIOM_HIDE_LIST = new NBTList<>(NBTType.TAG_String, List.of(
-            new NBTString("name"), new NBTString("min"), new NBTString("max"),
-            new NBTString("line_argb"), new NBTString("line_thickness"), new NBTString("face_argb")
+    private static final ListBinaryTag AXIOM_HIDE_LIST = ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, List.of(
+            StringBinaryTag.stringBinaryTag("name"), StringBinaryTag.stringBinaryTag("min"), StringBinaryTag.stringBinaryTag("max"),
+            StringBinaryTag.stringBinaryTag("line_argb"), StringBinaryTag.stringBinaryTag("line_thickness"), StringBinaryTag.stringBinaryTag("face_argb")
     ));
-    private static final String[] AXIOM_RESERVED_KEYS = new String[]{"line_argb", "line_thickness", "face_argb", "axiom:hide", "axiom:modify"};
+    private static final List<String> AXIOM_RESERVED_KEYS = List.of("line_argb", "line_thickness", "face_argb", "axiom:hide", "axiom:modify");
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -84,7 +83,7 @@ public class MarkerEntity extends MapEntity {
         return getTag(TYPE_TAG).asString();
     }
 
-    public @NotNull NBTCompound getMarkerData() {
+    public @NotNull CompoundBinaryTag getMarkerData() {
         return getTag(DATA_TAG);
     }
 
@@ -135,21 +134,21 @@ public class MarkerEntity extends MapEntity {
         var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
         if (marker == null) return;
 
-        var data = new MutableNBTCompound(marker.getTag(DATA_TAG));
-        data.put("axiom:hide", AXIOM_HIDE_LIST);
-        data.put("type", new NBTString(marker.getType()));
-
-        event.setData(data.toCompound());
+        event.setData(marker.getTag(DATA_TAG)
+                .put("axiom:hide", AXIOM_HIDE_LIST)
+                .putString("type", marker.getType()));
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateMarkerDataEvent event) {
         var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
         if (marker == null) return;
 
-        var data = event.getData().getCompound("data");
-        if (data == null) return;
 
-        marker.setTag(DATA_TAG, data.withRemovedKeys(AXIOM_RESERVED_KEYS));
+        var builder = CompoundBinaryTag.builder();
+        builder.put(event.getData().getCompound("data"));
+        AXIOM_RESERVED_KEYS.forEach(builder::remove);
+
+        marker.setTag(DATA_TAG, builder.build());
         marker.updateForViewers(); // Send updated region to viewers
     }
 

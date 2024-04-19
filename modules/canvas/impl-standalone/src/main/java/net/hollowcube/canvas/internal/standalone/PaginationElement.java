@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.View;
@@ -8,7 +9,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

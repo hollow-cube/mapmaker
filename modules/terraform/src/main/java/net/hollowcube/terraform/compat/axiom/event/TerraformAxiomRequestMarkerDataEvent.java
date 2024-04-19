@@ -1,10 +1,10 @@
 package net.hollowcube.terraform.compat.axiom.event;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ import java.util.UUID;
 public class TerraformAxiomRequestMarkerDataEvent implements CancellableEvent {
     private final Player editor;
     private final UUID entityUuid;
-    private NBTCompound data = null;
+    private CompoundBinaryTag data = null;
     private boolean cancelled = false;
 
     public TerraformAxiomRequestMarkerDataEvent(@NotNull Player editor, @NotNull UUID entityUuid) {
@@ -33,11 +33,11 @@ public class TerraformAxiomRequestMarkerDataEvent implements CancellableEvent {
         return entityUuid;
     }
 
-    public @Nullable NBTCompound getData() {
+    public @Nullable CompoundBinaryTag getData() {
         return data;
     }
 
-    public void setData(@Nullable NBTCompound data) {
+    public void setData(@Nullable CompoundBinaryTag data) {
         this.data = data;
     }
 

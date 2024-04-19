@@ -28,7 +28,6 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -64,7 +63,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final EventNode<InstanceEvent> readOnlyNode = EventNode.event("editing-events-ro", EventFilter.INSTANCE, Predicate.not(this::canEventWrite))
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
-            .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true))
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true));
 
@@ -328,7 +326,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         buildState.setPos(player.getPosition());
         buildState.setFlying(player.isFlying());
         var inventory = new HashMap<Integer, ItemStack>();
-        for (int i = 0; i < player.getInventory().getInnerSize(); i++) {
+        for (int i = 0; i < player.getInventory().getSize(); i++) {
             var itemStack = player.getInventory().getItemStack(i);
             if (!itemStack.isAir()) inventory.put(i, itemStack);
         }

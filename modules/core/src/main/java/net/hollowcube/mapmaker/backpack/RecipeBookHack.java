@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.backpack;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -23,7 +24,7 @@ public class RecipeBookHack {
     private static final List<String> orderedIds;
 
     public static final ItemStack BLANK_ITEM_CRAFTABLE = ItemStack.builder(Material.STICK)
-            .meta(meta -> meta.customModelData(1))
+            .set(ItemComponent.CUSTOM_MODEL_DATA, 1)
             // If this has a name it no longer matches in recipes
 //            .displayName(Component.text(""))
             .build();

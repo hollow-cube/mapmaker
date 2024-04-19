@@ -63,7 +63,7 @@ public class PlayerBackpack {
     public void refresh() {
         var declareRecipesPacket = new DeclareRecipesPacket(Arrays.stream(BackpackItem.values())
                 .map(cm -> cm.getRecipePlaceholder(getQuantity(cm))).toList());
-        player.sendPacket(declareRecipesPacket);
+//        player.sendPacket(declareRecipesPacket);
 
         // Having an empty second list stops the weird expanding animation. it seems like wikivg is just wrong about this.
         var playerData = PlayerDataV2.fromPlayer(player);
@@ -73,7 +73,7 @@ public class PlayerBackpack {
                 false, false,
                 false, false,
                 Arrays.stream(BackpackItem.values()).map(BackpackItem::recipeBookId).toList(), List.of());
-        player.sendPacket(unlockRecipesPacket);
+//        player.sendPacket(unlockRecipesPacket);
 
         player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }

@@ -2,13 +2,16 @@ package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityMetadataStealer;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,15 +109,15 @@ public class MapEntity extends Entity {
         // Read the metadata
         var metadata = EntityMetadataStealer.steal(this);
         var loadedMetadata = ProtocolUtil.readMap(buffer, NetworkBuffer.VAR_INT, b1 -> {
-            int type = b1.read(NetworkBuffer.VAR_INT);
-            return Metadata.Entry.read(type, b1);
+            int type = MetadataIndexFixer.fix1_20_4to1_20_5(b1.read(NetworkBuffer.VAR_INT));
+            return MetadataIndexFixer.read1_20_4to1_20_5(type, b1);
         });
         for (var entry : loadedMetadata.entrySet()) {
             metadata.setIndex(entry.getKey(), entry.getValue());
         }
 
         // Read the nbt
-        tagHandler().updateContent((NBTCompound) buffer.read(NetworkBuffer.NBT));
+        tagHandler().updateContent((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
     }
 
     // Misc utilities

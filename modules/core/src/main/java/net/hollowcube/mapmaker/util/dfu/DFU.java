@@ -5,10 +5,10 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.lang.reflect.Type;
 import java.util.function.Supplier;
@@ -39,12 +39,12 @@ public final class DFU {
     private static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
         return TagSerializer.fromCompound(
                 compound -> unwrap(codec.decode(NbtOps.INSTANCE, compound).map(Pair::getFirst)),
-                value -> (NBTCompound) unwrap(codec.encode(value, NbtOps.INSTANCE, null))
+                value -> (CompoundBinaryTag) unwrap(codec.encode(value, NbtOps.INSTANCE, null))
         );
     }
 
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
-        return () -> unwrap(codec.decode(NbtOps.INSTANCE, new NBTCompound()).map(Pair::getFirst));
+        return () -> unwrap(codec.decode(NbtOps.INSTANCE, CompoundBinaryTag.empty()).map(Pair::getFirst));
     }
 
     public static <T, S extends JsonSerializer<T> & JsonDeserializer<T>> @NotNull S JsonSerializer(@NotNull Codec<T> codec) {

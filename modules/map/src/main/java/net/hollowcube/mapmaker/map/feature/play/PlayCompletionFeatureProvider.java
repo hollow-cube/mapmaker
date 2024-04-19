@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.util.thesneaky.TheSneaky;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -111,6 +112,8 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             if (resp != null) {
                 player.sendMessage("NEW SCORE is " + resp.newPlacement());
             }
+
+            TheSneaky.getTheSneaky().send(player);
 
             var rewards = Optional.ofNullable(resp)
                     .map(SaveStateUpdateResponse::rewards);

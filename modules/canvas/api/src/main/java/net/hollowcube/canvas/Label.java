@@ -3,7 +3,6 @@ package net.hollowcube.canvas;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

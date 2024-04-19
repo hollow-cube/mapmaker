@@ -31,7 +31,6 @@ java_binary(
         "@maven//:ch_qos_logback_logback_classic",
         #        "@maven//:com_google_code_gson_gson",
         #        "@maven//:io_getunleash_unleash_client_java",
-        "@maven//:io_github_jglrxavpok_hephaistos_common",
         #        "@maven//:io_helidon_webserver_helidon_webserver",
     ],
 )

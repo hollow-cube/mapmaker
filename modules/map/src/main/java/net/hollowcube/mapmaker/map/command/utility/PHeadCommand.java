@@ -5,11 +5,12 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.item.handler.ExtraItemTags;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
@@ -33,12 +34,9 @@ public class PHeadCommand extends CommandDsl {
 
         FutureUtil.submitVirtual(() -> {
             var skin = PlayerSkin.fromUsername(name); // Blocking call
-            var so = new ExtraItemTags.SkullOwner(null, name, skin);
-
-            var itemStack = ItemStack.builder(Material.PLAYER_HEAD)
-                    .meta(meta -> meta.set(ExtraItemTags.SKULL_OWNER, so))
-                    .build();
-            player.getInventory().addItemStack(itemStack);
+            var builder = ItemStack.builder(Material.PLAYER_HEAD);
+            if (skin != null) builder.set(ItemComponent.PROFILE, new HeadProfile(skin));
+            player.getInventory().addItemStack(builder.build());
         });
     }
 }

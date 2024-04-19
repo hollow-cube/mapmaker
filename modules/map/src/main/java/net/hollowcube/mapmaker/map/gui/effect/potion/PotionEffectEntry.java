@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect.potion;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
@@ -10,7 +11,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,10 +35,9 @@ public class PotionEffectEntry extends View {
 
         root.setOption(effect == null ? 1 : 0);
         if (effect != null) {
-            editLabel.setItemDirect(effect.type().icon().with(builder -> {
-                builder.lore(LanguageProviderV2.translateMulti("gui.effect.potion.edit.lore", List.of(
-                        Component.text(effect.level()), effect.durationComponent())));
-            }));
+            var newLore = LanguageProviderV2.translateMulti("gui.effect.potion.edit.lore", List.of(
+                    Component.text(effect.level()), effect.durationComponent()));
+            editLabel.setItemDirect(effect.type().icon().with(ItemComponent.LORE, newLore));
         }
     }
 
@@ -46,7 +46,7 @@ public class PotionEffectEntry extends View {
         if (effect == null) return;
         if (clickType == ClickType.LEFT_CLICK) {
             pushView(c -> new PotionEffectEditorView(c, effect, save));
-        } else if (clickType == ClickType.START_SHIFT_CLICK) {
+        } else if (clickType == ClickType.SHIFT_CLICK) {
             performSignal(SIG_REMOVE, effect.type());
             save.run();
         }

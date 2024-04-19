@@ -6,10 +6,10 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,7 @@ public final class MapWorldHelpers {
         player.setAllowFlying(false);
         player.setFlying(false);
         player.setFlyingSpeed(0.05f);
-        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20);
         player.setHealth(20);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);

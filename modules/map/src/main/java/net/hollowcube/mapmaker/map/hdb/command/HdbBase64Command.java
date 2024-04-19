@@ -7,13 +7,13 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Locale;
 
@@ -46,7 +46,7 @@ public class HdbBase64Command extends CommandDsl {
                 return;
             }
 
-            var skin = itemStack.meta(PlayerHeadMeta.class).getPlayerSkin();
+            var skin = itemStack.get(ItemComponent.PROFILE, HeadProfile.EMPTY).skin();
             if (skin == null || skin.textures() == null) {
                 player.sendMessage(HdbMessages.COMMAND_BASE64_NO_TEXTURE);
                 return;
@@ -67,7 +67,7 @@ public class HdbBase64Command extends CommandDsl {
             }
 
             base64 = extractBlockBase64(block);
-            if (base64 == null) {
+            if (base64.isEmpty()) {
                 player.sendMessage(HdbMessages.COMMAND_BASE64_NO_TEXTURE);
                 return;
             }
@@ -76,17 +76,14 @@ public class HdbBase64Command extends CommandDsl {
         player.sendMessage(HdbMessages.COMMAND_BASE64_RESULT.with(base64));
     }
 
-    private static @Nullable String extractBlockBase64(@NotNull Block block) {
+    private static @NotNull String extractBlockBase64(@NotNull Block block) {
         var blockData = block.nbt();
         if (blockData == null) return null;
         var skullOwner = blockData.getCompound("SkullOwner");
-        if (skullOwner == null) return null;
         var properties = skullOwner.getCompound("Properties");
-        if (properties == null) return null;
         var textures = properties.getList("textures");
-        if (textures == null || textures.getSize() < 1) return null;
-        var texture = (NBTCompound) textures.get(0);
-        if (texture == null) return null;
+        if (textures.size() < 1) return null;
+        var texture = (CompoundBinaryTag) textures.get(0);
         return texture.getString("Value");
     }
 }

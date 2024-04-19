@@ -21,7 +21,7 @@ public record AxiomClientSwitchActiveHotbarPacket(
     private static @NotNull List<ItemStack> readHotbarItems(@NotNull NetworkBuffer buffer, int apiVersion) {
         var items = new ArrayList<ItemStack>(9);
         for (int i = 0; i < 9; i++)
-            items.add(buffer.read(NetworkBuffer.ITEM));
+            items.add(buffer.read(ItemStack.NETWORK_TYPE));
         return List.copyOf(items);
     }
 

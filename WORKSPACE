@@ -49,8 +49,9 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:e8e22a2b15",
-        "dev.hollowcube:polar:1.8.1",
+        "net.minestom:minestom-snapshots:dev",
+        #        "net.minestom:minestom-snapshots:e8e22a2b15",
+        "dev.hollowcube:polar:dev",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
@@ -123,6 +124,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
+        "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",

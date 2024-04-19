@@ -7,7 +7,7 @@ import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemHideFlag;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -19,14 +19,8 @@ import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
-            .meta(meta -> meta.customModelData(System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1))
+            .set(ItemComponent.CUSTOM_MODEL_DATA, System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1)
             .build();
-
-    private static final ItemHideFlag[] ALL_HIDE_FLAGS = new ItemHideFlag[]{
-            ItemHideFlag.HIDE_ENCHANTS, ItemHideFlag.HIDE_ATTRIBUTES, ItemHideFlag.HIDE_UNBREAKABLE,
-            ItemHideFlag.HIDE_DESTROYS, ItemHideFlag.HIDE_PLACED_ON, ItemHideFlag.HIDE_POTION_EFFECTS,
-            ItemHideFlag.HIDE_DYE
-    };
 
     private final String translationKey;
 
@@ -89,14 +83,12 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
 
     private void updateItem(@NotNull List<Component> args) {
         itemSprite = this.itemSprite.with(builder -> {
-            builder.displayName(Component.translatable(translationKey + ".name", args));
-            builder.lore(LanguageProviderV2.translateMulti(translationKey + ".lore", args));
-            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+            builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
+            builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
         });
         itemBlank = BLANK_ITEM.with(builder -> {
-            builder.displayName(Component.translatable(translationKey + ".name", args));
-            builder.lore(LanguageProviderV2.translateMulti(translationKey + ".lore", args));
-            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+            builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
+            builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
         });
         context.markDirty();
     }
@@ -104,14 +96,12 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     @Override
     public void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore) {
         itemSprite = this.itemSprite.with(builder -> {
-            if (title != null) builder.displayName(title);
-            if (lore != null) builder.lore(lore);
-            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+            if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
+            if (lore != null) builder.set(ItemComponent.LORE, lore);
         });
         itemBlank = BLANK_ITEM.with(builder -> {
-            if (title != null) builder.displayName(title);
-            if (lore != null) builder.lore(lore);
-            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+            if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
+            if (lore != null) builder.set(ItemComponent.LORE, lore);
         });
         context.markDirty();
     }
@@ -120,9 +110,8 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     public void setItemDirect(@NotNull ItemStack itemStack) {
         itemSprite = itemStack;
         itemBlank = BLANK_ITEM.with(builder -> {
-            builder.displayName(itemStack.meta().getDisplayName());
-            builder.lore(itemStack.meta().getLore());
-            builder.meta(meta -> meta.hideFlag(ALL_HIDE_FLAGS));
+            builder.set(ItemComponent.CUSTOM_NAME, itemStack.get(ItemComponent.CUSTOM_NAME));
+            builder.set(ItemComponent.LORE, itemStack.get(ItemComponent.LORE, List.of()));
         });
         context.markDirty();
     }

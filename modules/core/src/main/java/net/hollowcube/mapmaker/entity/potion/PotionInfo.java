@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.potion.PotionEffect;
@@ -105,13 +106,13 @@ public record PotionInfo(
                 return this;
             }
             return setIcon(ItemStack.builder(Material.DIAMOND)
-                    .meta(meta -> meta.customModelData(sprite.cmd())));
+                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd()));
         }
 
         public @NotNull Builder setIcon(@NotNull ItemStack.Builder icon) {
             this.icon = icon
-                    .displayName(Component.translatable("gui.effect.potion.type." + id + ".name"))
-                    .lore(LanguageProviderV2.translateMulti("gui.effect.potion.type." + id + ".lore", List.of()))
+                    .set(ItemComponent.CUSTOM_NAME, Component.translatable("gui.effect.potion.type." + id + ".name"))
+                    .set(ItemComponent.LORE, LanguageProviderV2.translateMulti("gui.effect.potion.type." + id + ".lore", List.of()))
                     .build();
             return this;
         }

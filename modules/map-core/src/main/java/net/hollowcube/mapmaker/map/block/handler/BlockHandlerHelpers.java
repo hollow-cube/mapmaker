@@ -1,15 +1,14 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
+import net.minestom.server.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 final class BlockHandlerHelpers {
-    private static final Tag<NBT> BLOCK_ENTITY_TAG = Tag.NBT("BlockEntityTag");
 
     /**
      * @param placement
@@ -31,18 +30,24 @@ final class BlockHandlerHelpers {
      */
     public static void applyItemData(@NotNull BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
-        var blockData = itemStack.meta().toNBT();
-        if (blockData.isEmpty()) return;
+        var blockData = itemStack.get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
+        if (blockData.size() == 0) return;
         updateBlock(placement, blockData);
     }
 
-    public static @Nullable NBTCompound extractBlockData(@NotNull ItemStack itemStack) {
-        var nbt = itemStack.getTag(BLOCK_ENTITY_TAG);
-        if (!(nbt instanceof NBTCompound compound)) return null;
-        return compound.withRemovedKeys("id", "x", "y", "z");
+    public static @Nullable CompoundBinaryTag extractBlockData(@NotNull ItemStack itemStack) {
+        var blockData = itemStack.get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
+        if (blockData.size() == 0) return null;
+        var builder = CompoundBinaryTag.builder();
+        builder.put(blockData);
+        builder.remove("id");
+        builder.remove("x");
+        builder.remove("y");
+        builder.remove("z");
+        return builder.build();
     }
 
-    private static void updateBlock(@NotNull BlockHandler.PlayerPlacement placement, @NotNull NBTCompound blockData) {
+    private static void updateBlock(@NotNull BlockHandler.PlayerPlacement placement, @NotNull CompoundBinaryTag blockData) {
         // Note that we refetch the block from instance rather than use the one in `placement`. This is because the
         // one in `placement` was not updated after the placement rule changed it.
         // todo this is realistically a Minestom bug that should be fixed
