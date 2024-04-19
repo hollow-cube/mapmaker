@@ -1,15 +1,15 @@
 package net.hollowcube.terraform.compat.axiom.packet.server;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
 public record AxiomMarkerNbtResponsePacket(
         @NotNull UUID uuid,
-        @NotNull NBTCompound data
+        @NotNull CompoundBinaryTag data
 ) implements AxiomServerPacket {
 
     @Override

@@ -9,11 +9,11 @@ import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.util.PaletteUtil;
 import net.hollowcube.terraform.util.ProtocolUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public record AxiomClientSetBufferPacket(
         @NotNull String dimensionName,
         @NotNull String correlationId,
         boolean isContinuation,
-        @Nullable NBTCompound sourceInfo, // Only present if isContinuation is false
+        @Nullable CompoundBinaryTag sourceInfo, // Only present if isContinuation is false
         @NotNull BlockBuffer buffer
 ) implements AxiomClientPacket {
     private static final Logger logger = LoggerFactory.getLogger(AxiomClientSetBufferPacket.class);
@@ -44,7 +44,7 @@ public record AxiomClientSetBufferPacket(
         var correlationId = buffer.read(UUID).toString();
         var isContinuation = buffer.read(BOOLEAN);
         var rawSourceInfo = isContinuation ? null : buffer.read(NBT);
-        var sourceInfo = rawSourceInfo instanceof NBTCompound ? (NBTCompound) rawSourceInfo : null;
+        var sourceInfo = rawSourceInfo instanceof CompoundBinaryTag ? (CompoundBinaryTag) rawSourceInfo : null;
         var updateBuffer = switch (buffer.read(BYTE)) {
             case 0 -> new AxiomBlockBuffer(buffer, apiVersion);
             case 1 -> {

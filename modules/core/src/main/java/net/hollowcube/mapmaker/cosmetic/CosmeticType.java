@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
@@ -19,7 +20,7 @@ public enum CosmeticType {
 
     HAT("hat", PlayerInventoryUtils.HELMET_SLOT, "empty_helmet"),
     BACKWEAR("backwear", PlayerInventoryUtils.CHESTPLATE_SLOT, "empty_chestplate"),
-    ACCESSORY("accessory", PlayerInventoryUtils.OFFHAND_SLOT, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
+    ACCESSORY("accessory", PlayerInventoryUtils.OFF_HAND_SLOT, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
     PET("pet", PlayerInventoryUtils.LEGGINGS_SLOT, "empty_leggings"),
     EMOTE("emote", PlayerInventoryUtils.CRAFT_SLOT_1, "empty_emote"),
     PARTICLE("particle", PlayerInventoryUtils.BOOTS_SLOT, "empty_boots"),
@@ -52,9 +53,9 @@ public enum CosmeticType {
 
         Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
         this.blankIcon = emptyIcon != null ? ItemStack.builder(Material.DIAMOND)
-                .meta(meta -> meta.customModelData(BadSprite.require("icon/inventory/" + emptyIcon).cmd()))
-                .displayName(Component.translatable(baseTranslation + ".name"))
-                .lore(LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()))
+                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("icon/inventory/" + emptyIcon).cmd())
+                .set(ItemComponent.CUSTOM_NAME, Component.translatable(baseTranslation + ".name"))
+                .set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()))
                 .build().withTag(COSMETIC_TAG, true)
                 : ItemStack.AIR;
     }

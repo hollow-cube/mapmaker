@@ -2,12 +2,14 @@ package net.hollowcube.mapmaker.map.item.handler;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.TagHandler;
@@ -15,7 +17,6 @@ import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -62,13 +63,13 @@ public abstract class ItemHandler {
         return Material.STICK;
     }
 
-    public @NotNull ItemStack buildItemStack(@Nullable NBTCompound nbt) {
+    public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
         var builder = ItemStack.builder(material());
         var baseTranslationKey = String.format("item.%s.%s", id().namespace(), id().path());
-        builder.displayName(Component.translatable(baseTranslationKey + ".name"));
-        builder.lore(LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
+        builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(baseTranslationKey + ".name"));
+        builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
-        builder.meta(meta -> meta.customModelData(customModelData()));
+        builder.set(ItemComponent.CUSTOM_MODEL_DATA, customModelData());
         return builder.build();
     }
 
@@ -108,7 +109,7 @@ public abstract class ItemHandler {
         public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
             var updatedItemStack = itemStack.with(builder -> {
                 func.accept(builder);
-                builder.meta(meta -> meta.customModelData(handler.customModelData()));
+                builder.set(ItemComponent.CUSTOM_MODEL_DATA, handler.customModelData());
             });
             player.setItemInHand(hand, updatedItemStack);
         }

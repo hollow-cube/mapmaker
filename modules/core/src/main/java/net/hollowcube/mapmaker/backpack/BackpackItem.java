@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
@@ -126,9 +127,9 @@ public enum BackpackItem {
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
         return ItemStack.builder(Material.DIAMOND)
-                .meta(meta -> meta.customModelData(sprite.cmd() + amount))
-                .displayName(displayName())
-                .lore(lore)
+                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
+                .set(ItemComponent.CUSTOM_NAME, displayName())
+                .set(ItemComponent.LORE, lore)
                 .build();
     }
 

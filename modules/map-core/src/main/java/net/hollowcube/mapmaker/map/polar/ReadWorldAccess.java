@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerLoader;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.polar.PolarWorldAccess;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -16,7 +17,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.world.biomes.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +63,8 @@ public class ReadWorldAccess implements PolarWorldAccess {
         // I cannot get the compound, merge, and then #updateContent because it will still wipe any transient tags.
         // The result solution is to set each individual key on its own, which is really yikes. But it does work...
         var worldTag = mapWorld.instance().tagHandler();
-        if (buffer.read(NetworkBuffer.NBT) instanceof NBTCompound worldData) {
-            for (var entry : worldData.getEntries()) {
+        if (buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag worldData) {
+            for (var entry : worldData) {
                 worldTag.setTag(Tag.NBT(entry.getKey()), entry.getValue());
             }
         }

@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -13,11 +15,11 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTByte;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 
 public class CampfireBlockHandler implements BlockHandler {
     public static final NamespaceID ID = NamespaceID.from("minecraft:campfire");
@@ -80,7 +82,7 @@ public class CampfireBlockHandler implements BlockHandler {
 
     @SuppressWarnings("UnstableApiUsage")
     private static final class ItemListSerializer implements TagSerializer<List<ItemStack>> {
-        private final Tag<List<NBT>> RAW = Tag.NBT("Items").list();
+        private final Tag<List<BinaryTag>> RAW = Tag.NBT("Items").list();
 
         @Override
         public @Nullable List<ItemStack> read(@NotNull TagReadable tag) {
@@ -89,17 +91,16 @@ public class CampfireBlockHandler implements BlockHandler {
 
             var items = new ArrayList<ItemStack>();
             for (var nbt : raw) {
-                items.add(ItemStack.fromItemNBT((NBTCompound) nbt));
+                items.add(ItemStack.fromItemNBT((CompoundBinaryTag) nbt));
             }
             return items;
         }
 
         @Override
         public void write(@NotNull TagWritable tagWritable, @NotNull List<ItemStack> itemStacks) {
-            var raw = new ArrayList<NBT>();
+            var raw = new ArrayList<BinaryTag>();
             for (int i = 0; i < Math.min(itemStacks.size(), 4); i++) {
-                var entry = Map.<String, NBT>entry("Slot", new NBTByte((byte) i));
-                raw.add(itemStacks.get(i).toItemNBT().withEntries(entry));
+                raw.add(itemStacks.get(i).toItemNBT().putByte("Slot", (byte) i));
             }
             tagWritable.setTag(RAW, raw);
         }

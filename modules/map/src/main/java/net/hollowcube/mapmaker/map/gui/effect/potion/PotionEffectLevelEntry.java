@@ -11,6 +11,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class PotionEffectLevelEntry extends View {
         if (level != -1) {
             var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("effect/potion/level/" + level), "effect/potion/level/" + level);
             var item = ItemStack.builder(Material.DIAMOND)
-                    .meta(m -> m.customModelData(sprite.cmd()))
+                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
                     .build();
             selectLabel.setItemSprite(item);
             selectSelectedLabel.setItemSprite(item);

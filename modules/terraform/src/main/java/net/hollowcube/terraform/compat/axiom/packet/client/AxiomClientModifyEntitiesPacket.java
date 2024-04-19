@@ -1,12 +1,12 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
 import net.hollowcube.terraform.util.ProtocolUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +35,7 @@ public record AxiomClientModifyEntitiesPacket(
             @NotNull UUID uuid,
             byte flags,
             @Nullable Pos pos,
-            @NotNull NBTCompound nbt,
+            @NotNull CompoundBinaryTag nbt,
             @NotNull PassengerChange passengerChange,
             @UnknownNullability List<@NotNull UUID> passengers
     ) {
@@ -52,7 +52,7 @@ public record AxiomClientModifyEntitiesPacket(
             var uuid = buffer.read(NetworkBuffer.UUID);
             byte flags = buffer.read(NetworkBuffer.BYTE);
             var pos = flags > 0 ? ProtocolUtil.readPos(buffer) : null;
-            var nbt = buffer.read(NetworkBuffer.NBT) instanceof NBTCompound nbtCompound ? nbtCompound : new NBTCompound();
+            var nbt = buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag nbtCompound ? nbtCompound : CompoundBinaryTag.empty();
             var passengerChange = buffer.readEnum(PassengerChange.class);
             var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES) : null;
             return new Entry(uuid, flags, pos, nbt, passengerChange, passengers);

@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
@@ -95,20 +96,16 @@ public class Cosmetic {
 
         var displayName = displayName();
         var lore = lore();
-        this.icon = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
-            meta.displayName(displayName);
-            meta.lore(lore);
-            var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon";
-            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
-            meta.setTag(COSMETIC_TAG, true);
-        });
-        this.iconLocked = ItemStack.of(Material.DIAMOND).withMeta(meta -> {
-            meta.displayName(displayName);
-            meta.lore(lore);
-            var spritePath = "cosmetic/" + type.id() + "/" + id + "/icon_locked";
-            meta.customModelData(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spritePath), spritePath).cmd());
-            meta.setTag(COSMETIC_TAG, true);
-        });
+        this.icon = ItemStack.builder(Material.DIAMOND)
+                .set(ItemComponent.CUSTOM_NAME, displayName)
+                .set(ItemComponent.LORE, lore)
+                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + type.id() + "/" + id + "/icon").cmd())
+                .build().withTag(COSMETIC_TAG, true);
+        this.iconLocked = ItemStack.builder(Material.DIAMOND)
+                .set(ItemComponent.CUSTOM_NAME, displayName)
+                .set(ItemComponent.LORE, lore)
+                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + type.id() + "/" + id + "/icon_locked").cmd())
+                .build().withTag(COSMETIC_TAG, true);
 
         this.impl = implFunc.apply(this);
     }

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.entity;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -14,7 +15,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -40,14 +40,14 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     private final NpcTextModel titleEntity = new NpcTextModel();
     private final NpcTextModel subtitleEntity = new NpcTextModel();
 
-    private final NBTCompound nbt;
+    private final CompoundBinaryTag nbt;
     protected PlayerSkin skin = null;
 
-    public NpcPlayerEntity(@NotNull NBTCompound nbt) {
+    public NpcPlayerEntity(@NotNull CompoundBinaryTag nbt) {
         this(UUID.randomUUID(), nbt);
     }
 
-    public NpcPlayerEntity(@NotNull UUID uuid, @NotNull NBTCompound nbt) {
+    public NpcPlayerEntity(@NotNull UUID uuid, @NotNull CompoundBinaryTag nbt) {
         super(EntityType.PLAYER, uuid);
         this.nbt = nbt;
         // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.

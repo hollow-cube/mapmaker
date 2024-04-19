@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.kyori.adventure.text.Component;
@@ -12,7 +13,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.play.OpenSignEditorPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
@@ -66,8 +66,8 @@ public class SignBlockHandler implements BlockHandler {
     private static final Int2ObjectMap<String> DYE_MAP = new Int2ObjectArrayMap<>();
 
     static {
-        var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        packetListenerManager.setPlayListener(ClientUpdateSignPacket.class, SignBlockHandler::handleUpdateSignPacket);
+        MinecraftServer.getGlobalEventHandler()
+                .addListener(UpdateSignTextEvent.class, SignBlockHandler::handleUpdateSignPacket);
 
         DYE_MAP.put(Material.WHITE_DYE.id(), "white");
         DYE_MAP.put(Material.LIGHT_GRAY_DYE.id(), "light_gray");
@@ -162,18 +162,17 @@ public class SignBlockHandler implements BlockHandler {
         return List.of(IS_WAXED, FRONT_TEXT, BACK_TEXT);
     }
 
-    public static void handleUpdateSignPacket(@NotNull ClientUpdateSignPacket packet, @NotNull Player player) {
-        var instance = player.getInstance();
-        if (instance == null) return;
+    public static void handleUpdateSignPacket(@NotNull UpdateSignTextEvent event) {
+        var instance = event.getInstance();
 
-        var blockPosition = packet.blockPosition();
+        var blockPosition = event.blockPosition();
         var block = instance.getBlock(blockPosition);
         if (block.handler() != BlockHandlers.SIGN && block.handler() != BlockHandlers.HANGING_SIGN)
             return;
 
-        var tag = packet.isFrontText() ? FRONT_TEXT : BACK_TEXT;
+        var tag = event.isFrontText() ? FRONT_TEXT : BACK_TEXT;
         var signData = block.getTag(tag);
-        var lines = packet.lines().stream().map(Component::text).toArray(Component[]::new);
+        var lines = event.lines().stream().map(Component::text).toArray(Component[]::new);
         block = block.withTag(tag, new SignData(signData.hasGlowingText, signData.color, lines));
 
         instance.setBlock(blockPosition, block);

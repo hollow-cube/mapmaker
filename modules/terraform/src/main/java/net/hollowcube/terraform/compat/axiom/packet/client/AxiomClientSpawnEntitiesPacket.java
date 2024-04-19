@@ -1,11 +1,11 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
 import net.hollowcube.terraform.util.ProtocolUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,13 +28,13 @@ public record AxiomClientSpawnEntitiesPacket(
             @NotNull UUID uuid,
             @NotNull Pos pos,
             @Nullable UUID copyFrom,
-            @NotNull NBTCompound nbt
+            @NotNull CompoundBinaryTag nbt
     ) {
 
         public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
             this(buffer.read(NetworkBuffer.UUID), ProtocolUtil.readPos(buffer),
                     buffer.readOptional(NetworkBuffer.UUID),
-                    (NBTCompound) buffer.read(NetworkBuffer.NBT));
+                    (CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
         }
 
     }

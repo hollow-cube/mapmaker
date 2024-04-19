@@ -41,12 +41,12 @@ public class ToggleFlightItem extends ItemHandler {
             player.setFlying(true);
             player.setAllowFlying(true);
             // Replace clicked item
-            player.getInventory().setItemInMainHand(INSTANCE_OFF.buildItemStack(null));
+            player.setItemInMainHand(INSTANCE_OFF.buildItemStack(null));
         } else {
             player.setFlying(false);
             player.setAllowFlying(false);
             // Replace clicked item
-            player.getInventory().setItemInMainHand(INSTANCE_ON.buildItemStack(null));
+            player.setItemInMainHand(INSTANCE_ON.buildItemStack(null));
         }
         world.callEvent(new MapSpectatorToggleFlightEvent(world, player, !activeFlight));
     }

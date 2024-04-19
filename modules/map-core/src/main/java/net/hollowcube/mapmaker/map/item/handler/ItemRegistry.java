@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -13,6 +14,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
@@ -21,7 +23,6 @@ import net.minestom.server.utils.time.Cooldown;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -138,11 +139,11 @@ public class ItemRegistry implements PlayerCooldown {
         }
     }
 
-    public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable NBTCompound nbt) {
+    public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable CompoundBinaryTag nbt) {
         return getItemStack(id.asString(), nbt);
     }
 
-    public @UnknownNullability ItemStack getItemStack(@NotNull String id, @Nullable NBTCompound nbt) {
+    public @UnknownNullability ItemStack getItemStack(@NotNull String id, @Nullable CompoundBinaryTag nbt) {
         var namespace = id.toLowerCase(Locale.ROOT);
 
         var itemHandler = idToItemHandler.get(namespace);
@@ -307,7 +308,7 @@ public class ItemRegistry implements PlayerCooldown {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return customModelDataToItemHandler.get(itemStack.meta().getCustomModelData());
+        return customModelDataToItemHandler.get(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, -1));
     }
 
     private static final Tag<Cooldown> COOLDOWN_TAG = Tag.Transient("mapmaker:hotbar_cooldown");

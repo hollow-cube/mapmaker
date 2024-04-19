@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.entity.marker;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public interface MarkerLoader {
 
@@ -22,6 +22,6 @@ public interface MarkerLoader {
      * @param pos   the position of the marker
      * @return true to spawn the marker entity in the world, false otherwise
      */
-    boolean loadMarker(@NotNull MapWorld world, @NotNull String type, @NotNull NBTCompound data, @NotNull Pos pos);
+    boolean loadMarker(@NotNull MapWorld world, @NotNull String type, @NotNull CompoundBinaryTag data, @NotNull Pos pos);
 
 }

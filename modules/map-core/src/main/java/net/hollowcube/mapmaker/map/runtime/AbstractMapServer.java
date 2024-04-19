@@ -40,6 +40,7 @@ import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
+import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
@@ -84,6 +85,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -202,6 +204,9 @@ public abstract class AbstractMapServer implements MapServer {
             }
         });
 
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        packetListenerManager.setPlayListener(ClientUpdateSignPacket.class, UpdateSignTextEvent::packetListener);
+
         // Dependent service init
 
         var unleashConfig = config.get(UnleashConfig.class);
@@ -243,7 +248,6 @@ public abstract class AbstractMapServer implements MapServer {
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr());
             injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue(chatMessageListener::close);
-            var packetListenerManager = MinecraftServer.getPacketListenerManager();
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
             playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr());
@@ -520,12 +524,6 @@ public abstract class AbstractMapServer implements MapServer {
                 logger.info("joining player {} is vanished", player.getUsername());
                 sessionManager.configureVanishedPlayer(player);
             }
-
-//            if (sessionResponse.isJoin()) {
-//                player.scheduleNextTick(e -> {
-//                    player.sendMessage("first join");
-//                });
-//            }
 
             return true;
         } catch (SessionService.UnauthorizedError ignored) {

@@ -45,6 +45,7 @@ java_library(
     exports = [
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_key",
+        "@maven//:net_kyori_adventure_nbt",
         "@maven//:net_kyori_adventure_text_minimessage",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:net_kyori_adventure_text_serializer_plain",

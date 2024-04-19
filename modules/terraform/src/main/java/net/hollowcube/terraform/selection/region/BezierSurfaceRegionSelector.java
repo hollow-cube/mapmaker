@@ -2,14 +2,14 @@ package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -252,18 +252,20 @@ public class BezierSurfaceRegionSelector implements RegionSelector {
             computePoints();
         }
 
-        public @NotNull NBTList<NBTCompound> toNBT() {
-            var points = new ArrayList<NBTCompound>();
+        public @NotNull ListBinaryTag toNBT() {
+            var points = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
             for (var point : this.points) {
                 points.add(CoordinateUtil.toNBT(point));
             }
-            return new NBTList<>(NBTType.TAG_Compound, points);
+            return points.build();
         }
 
-        public static @NotNull Curve fromNBT(@NotNull NBTList<NBTCompound> nbt) {
+        public static @NotNull Curve fromNBT(@NotNull ListBinaryTag nbt) {
             var points = new ArrayList<Point>();
             for (var point : nbt) {
-                points.add(CoordinateUtil.fromNBT(point));
+                if (!(point instanceof CompoundBinaryTag compound))
+                    continue;
+                points.add(CoordinateUtil.fromNBT(compound));
             }
             return new Curve(points);
         }

@@ -1,19 +1,23 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemMeta;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.Objects;
 
 public class HeadPlacementRule extends BaseBlockPlacementRule {
+    private static final Tag<BinaryTag> SKULL_OWNER = Tag.NBT("SkullOwner");
 
     public HeadPlacementRule(@NotNull Block block) {
         super(block);
@@ -21,18 +25,18 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
 
     @Override
     public Block blockPlace(@NotNull PlacementState placementState) {
-        var usedItemMeta = placementState.usedItemMeta();
+        var usedItemStack = placementState.usedItemStack();
 
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
         if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) {
             var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
             int rotation = (int) (Math.round((playerPosition.yaw() + 360) / 22.5d) % 16);
 
-            return withSkin(usedItemMeta, block)
+            return withSkin(usedItemStack, block)
                     .withProperty("rotation", String.valueOf(rotation));
         }
 
-        return withSkin(usedItemMeta, toWallBlock(block))
+        return withSkin(usedItemStack, toWallBlock(block))
                 .withProperty("facing", blockFace.name().toLowerCase());
     }
 
@@ -58,19 +62,16 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
     /**
      * Include the head skin tags if present.
      *
-     * @param meta  the original head meta
-     * @param block the block
+     * @param itemStack the original head item stack
+     * @param block     the block
      * @return the block with the skin tags
      */
-    private @NotNull Block withSkin(@Nullable ItemMeta meta, @NotNull Block block) {
-        if (meta == null) return block;
+    private @NotNull Block withSkin(@Nullable ItemStack itemStack, @NotNull Block block) {
+        if (itemStack == null) return block;
 
-        var skullOwner = meta.getTag(PlayerHeadMeta.SKULL_OWNER);
-        if (skullOwner == null) return block;
-
-        var skin = meta.getTag(PlayerHeadMeta.SKIN);
-        if (skin == null) return block;
-
+        var profile = itemStack.get(ItemComponent.PROFILE);
+        if (profile == null) return block;
+        var skin = profile.skin();
         String textures = skin.textures();
         if (textures == null) return block;
 
@@ -82,13 +83,18 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
                         |_ Value (String)
             See https://minecraft.fandom.com/wiki/Head#Block_data
          */
-        return block
-                .withTag(Tag.NBT("SkullOwner"), NBT.Compound(tag -> {
-                    Tag.UUID("Id").write(tag, skullOwner);
-                    tag.set("Properties", NBT.Compound(propTag ->
-                            propTag.set("textures", NBT.List(NBTType.TAG_Compound,
-                                    NBT.Compound(txTag -> txTag.setString("Value", textures))))));
-                }));
+        var builder = CompoundBinaryTag.builder();
+        if (profile.uuid() != null)
+            builder.put("Id", UniqueIdUtils.toNbt(profile.uuid()));
+        builder.put("Properties", CompoundBinaryTag.builder()
+                .put("textures", ListBinaryTag.builder(BinaryTagTypes.COMPOUND)
+                        .add(CompoundBinaryTag.builder()
+                                .putString("Value", textures)
+                                .build())
+                        .build())
+                .build());
+
+        return block.withTag(SKULL_OWNER, builder.build());
     }
 
 }

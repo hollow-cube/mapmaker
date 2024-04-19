@@ -32,7 +32,6 @@ java_binary(
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_getunleash_unleash_client_java",
-        "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:io_helidon_webserver_helidon_webserver",
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",

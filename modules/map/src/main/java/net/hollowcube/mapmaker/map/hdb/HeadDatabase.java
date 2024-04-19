@@ -7,9 +7,10 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class HeadDatabase {
                     Map.entry("plants", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2JiMzExZjNiYTFjMDdjM2QxMTQ3Y2QyMTBkODFmZTExZmQ4YWU5ZTNkYjIxMmEwZmE3NDg5NDZjMzYzMyJ9fX0=")
             ).entrySet().stream()
             .map(e -> Map.entry(e.getKey(), ItemStack.builder(Material.PLAYER_HEAD)
-                    .meta(PlayerHeadMeta.class, meta -> meta.playerSkin(new PlayerSkin(e.getValue(), null)))
+                    .set(ItemComponent.PROFILE, new HeadProfile(new PlayerSkin(e.getValue(), null)))
                     .build()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

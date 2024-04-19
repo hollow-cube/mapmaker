@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.hollowcube.schem.old.CoordinateUtil;
 import net.hollowcube.schem.old.Rotation;
-import net.hollowcube.schem.util.Adventure2Hephaistos;
 import net.hollowcube.schem.util.BlockConsumer;
 import net.hollowcube.schem.util.VarIntReader;
 import net.kyori.adventure.nbt.*;
@@ -61,7 +60,7 @@ public record SpongeSchematic(
                     var blockEntity = blockEntitiesByPos.get(blockIndex(size, x, y, z));
                     if (blockEntity != null) {
                         block = block.withHandler(BLOCK_MANAGER.getHandlerOrDummy(blockEntity.id()))
-                                .withNbt(Adventure2Hephaistos.compound(blockEntity.data()));
+                                .withNbt(blockEntity.data());
                     }
 
                     consumer.accept(

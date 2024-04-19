@@ -10,6 +10,7 @@ import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.canvas.internal.standalone.util.Debugger;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -254,7 +255,7 @@ public class XmlElementReader {
                 } else {
                     if (elem instanceof ItemSpriteHolder trait) {
                         trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
-                                .meta(meta -> meta.customModelData(sprite.cmd()))
+                                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
                                 .build(), spritePos);
                     } else {
                         throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
@@ -271,7 +272,7 @@ public class XmlElementReader {
                 }
                 var builder = ItemStack.builder(material);
                 if (split.length > 1) {
-                    builder.meta(meta -> meta.customModelData(Integer.parseInt(split[1])));
+                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build(), spritePos);

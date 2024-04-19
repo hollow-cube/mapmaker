@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.LongArrayBinaryTag;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.util.function.Predicate;
 
@@ -42,13 +41,14 @@ public class Heightmaps {
         return heightmaps[heightmap].save();
     }
 
-    public @NotNull NBTCompound getProtocolData() {
-        var compound = new MutableNBTCompound();
+    public @NotNull CompoundBinaryTag getProtocolData() {
+        var compound = CompoundBinaryTag.builder();
         var worldSurface = heightmaps[WORLD_SURFACE].encode();
-        if (worldSurface != null) compound.set("WORLD_SURFACE", NBT.LongArray(worldSurface));
+        if (worldSurface != null) compound.put("WORLD_SURFACE", LongArrayBinaryTag.longArrayBinaryTag(worldSurface));
         var motionBlocking = heightmaps[MOTION_BLOCKING].encode();
-        if (motionBlocking != null) compound.set("MOTION_BLOCKING", NBT.LongArray(motionBlocking));
-        return compound.toCompound();
+        if (motionBlocking != null)
+            compound.put("MOTION_BLOCKING", LongArrayBinaryTag.longArrayBinaryTag(motionBlocking));
+        return compound.build();
     }
 
     private boolean isMotionBlocking(@NotNull Block block) {

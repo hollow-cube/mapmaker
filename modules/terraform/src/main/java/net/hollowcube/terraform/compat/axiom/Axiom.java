@@ -3,6 +3,7 @@ package net.hollowcube.terraform.compat.axiom;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomServerPacket;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.instance.Instance;
@@ -11,7 +12,6 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -38,7 +38,7 @@ public class Axiom {
     public static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
 
 
-    public record ClientInfo(int apiVersion, @NotNull NBTCompound extraData) {
+    public record ClientInfo(int apiVersion, @NotNull CompoundBinaryTag extraData) {
     }
 
     static final Tag<Boolean> ENABLED_TAG = Tag.Boolean("terraform:axiom/enabled");

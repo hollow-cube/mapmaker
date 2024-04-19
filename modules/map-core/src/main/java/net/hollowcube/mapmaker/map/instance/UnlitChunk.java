@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public class UnlitChunk extends DynamicChunk implements ChunkExt {
     private final Heightmaps heightmaps;
@@ -42,7 +42,7 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     }
 
     @Override
-    protected NBTCompound computeHeightmap() {
+    protected CompoundBinaryTag computeHeightmap() {
         return heightmaps.getProtocolData();
     }
 }

@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.gui.play;
 
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Switch;
-import net.hollowcube.canvas.Text;
-import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -15,7 +12,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -106,7 +102,7 @@ public class ReportMapView extends View {
     private void handleAddComment(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             pushView(c -> new SetReportCommentView(c, comment));
-        } else if (clickType == ClickType.START_SHIFT_CLICK) {
+        } else if (clickType == ClickType.SHIFT_CLICK) {
             updateCommentText("");
         }
     }

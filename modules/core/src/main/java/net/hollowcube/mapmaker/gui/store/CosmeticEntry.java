@@ -12,9 +12,11 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CosmeticEntry extends View {
     public static final String UPDATE_SELECTED = "cosmetic_entry.update_selected";
@@ -50,17 +52,17 @@ public class CosmeticEntry extends View {
         onIcon.setSprite(sprite.fontChar(), sprite.cmd(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
 
         {
-            var lore = new ArrayList<>(itemIcon.getLore());
+            var lore = new ArrayList<>(itemIcon.get(ItemComponent.LORE, List.of()));
             lore.add(Component.text(""));
             lore.add(Component.translatable("cosmetic.deselect"));
-            onIcon.setComponentsDirect(itemIcon.getDisplayName(), lore);
+            onIcon.setComponentsDirect(itemIcon.get(ItemComponent.CUSTOM_NAME), lore);
         }
 
         {
-            var lore = new ArrayList<>(itemIcon.getLore());
+            var lore = new ArrayList<>(itemIcon.get(ItemComponent.LORE, List.of()));
             lore.add(Component.empty());
             lore.add(Component.translatable(isLocked ? "cosmetic.locked" : "cosmetic.select"));
-            offIcon.setComponentsDirect(itemIcon.getDisplayName(), lore);
+            offIcon.setComponentsDirect(itemIcon.get(ItemComponent.CUSTOM_NAME), lore);
         }
 
         rootSwitch.setOption(isSelected() ? 1 : 0);

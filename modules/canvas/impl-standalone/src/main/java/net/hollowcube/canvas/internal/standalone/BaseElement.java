@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -7,10 +8,9 @@ import net.hollowcube.canvas.internal.standalone.context.ElementContext;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -27,12 +27,12 @@ public abstract class BaseElement implements Element, Loadable {
     public static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
-            .displayName(Component.text(""))
-            .meta(meta -> meta.customModelData(2))
+            .set(ItemComponent.HIDE_TOOLTIP, null)
+            .set(ItemComponent.CUSTOM_MODEL_DATA, 2)
             .build();
     public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.builder(Material.STICK)
-            .displayName(Component.text(""))
-            .meta(meta -> meta.customModelData(3))
+            .set(ItemComponent.HIDE_TOOLTIP, null)
+            .set(ItemComponent.CUSTOM_MODEL_DATA, 3)
             .build();
 
 

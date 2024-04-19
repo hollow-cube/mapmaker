@@ -24,10 +24,10 @@ import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -489,11 +489,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private void updatePlayerFromState(@NotNull Player player, @NotNull SaveState.PlayState state) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
         if (state.maxLives().isPresent() && state.lives().isPresent()) {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
             player.setHealth(2 * state.lives().get());
         } else {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
-            player.setHealth(Attribute.MAX_HEALTH.defaultValue());
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Attribute.GENERIC_MAX_HEALTH.defaultValue());
+            player.setHealth((float) Attribute.GENERIC_MAX_HEALTH.defaultValue());
         }
 
         // Update the countdown timer (time may have been added

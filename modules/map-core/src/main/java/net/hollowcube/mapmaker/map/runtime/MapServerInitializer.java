@@ -13,7 +13,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTEnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -37,7 +36,6 @@ public final class MapServerInitializer {
         long start = System.nanoTime();
 
         SYSTEM_PROPERTIES.forEach(System::setProperty);
-        fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin();
         // Convert JUL messages to SLF4J
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
@@ -83,13 +81,6 @@ public final class MapServerInitializer {
         server.shutdowner().queue(MinecraftServer::stopCleanly);
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
-    }
-
-    private static void fuckingStupidDumbAssAbsoluteIdiocyYesIAmVeryAngryLanguageKotlin() {
-        // Rant  : https://discord.com/channels/706185253441634317/706186227493109860/1198617307870670938
-        // Reason: https://discord.com/channels/706185253441634317/706186227493109860/1198620211243401257
-        var end = NBTEnd.INSTANCE;
-        System.out.println("NBTEnd=" + end);
     }
 
 }

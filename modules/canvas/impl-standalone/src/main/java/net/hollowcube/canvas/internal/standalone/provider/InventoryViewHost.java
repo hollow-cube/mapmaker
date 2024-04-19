@@ -1,5 +1,6 @@
 package net.hollowcube.canvas.internal.standalone.provider;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
@@ -9,12 +10,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.ContainerInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
-import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.inventory.condition.InventoryCondition;
-import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
@@ -82,14 +81,14 @@ public class InventoryViewHost {
 
     private void replaceInventory(@NotNull ViewContainer newElement) {
         // Unmount old component if relevant
-        Inventory oldInv = this.inventory;
+        ContainerInventory oldInv = this.inventory;
         if (this.element != null) {
             this.element.performSignal(Element.SIG_UNMOUNT);
-            // Remove inventory condition immediately, do not want ghost clicks or anything
-            this.inventory.getInventoryConditions().clear();
+            // Remove inventory, do not want to handle ghost clicks
+            this.inventory = null;
         }
 
-        var name = this.inventory == null ? Component.text("Chest") : this.inventory.getTitle();
+        var name = oldInv == null ? Component.text("Chest") : oldInv.getTitle();
         this.inventory = new InventoryWrapper(updateSize(newElement), name);
         this.element = newElement;
 
@@ -223,17 +222,14 @@ public class InventoryViewHost {
         return Math.max(type.getSize(), 9);
     }
 
-    private class InventoryWrapper extends Inventory {
+    private class InventoryWrapper extends ContainerInventory {
 
-        private final InventoryCondition playerCondition = this::playerInvClick;
         private final ItemStack[] playerInv = new ItemStack[9 * 4];
 
         public InventoryWrapper(@NotNull InventoryType inventoryType, @NotNull Component title) {
             super(inventoryType, title);
             Arrays.fill(playerInv, ItemStack.AIR);
             update();
-
-            addInventoryCondition(this::openedInvClick);
         }
 
         public @NotNull InventoryViewHost parent() {
@@ -248,7 +244,6 @@ public class InventoryViewHost {
         public boolean addViewer(@NotNull Player player) {
             var result = super.addViewer(player);
             if (result && ensureDelegatingPlayerInventory(player)) {
-                player.getInventory().addInventoryCondition(playerCondition);
                 updatePlayerInventory();
             }
             return result;
@@ -258,7 +253,6 @@ public class InventoryViewHost {
         public boolean removeViewer(@NotNull Player player) {
             var result = super.removeViewer(player);
             if (result) {
-                player.getInventory().getInventoryConditions().remove(playerCondition);
                 player.getInventory().update();
             }
 
@@ -267,8 +261,8 @@ public class InventoryViewHost {
                 // Unmount and close
                 element.performSignal(Element.SIG_UNMOUNT);
                 element.performSignal(Element.SIG_CLOSE);
-                // Remove inventory condition immediately, do not want ghost clicks or anything
-                getInventoryConditions().clear();
+                // Remove inventory to prevent any possible ghost clicks
+                InventoryViewHost.this.inventory = null;
             }
 
             return result;
@@ -293,21 +287,28 @@ public class InventoryViewHost {
             getViewers().forEach(player -> player.sendPacket(createWindowItemsPacket(player)));
         }
 
-        private void openedInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
-            var allow = tryHandleClick(slot, player, clickType);
-            result.setCancel(!allow);
-        }
-
-        private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
-            slot = convertPlayerSlotToChestSlot(slot);
-            if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
-            //todo hardcoded double chest or anvil, should generalize
-            var offset = getInventoryType() == InventoryType.ANVIL ? 9 : 9 * 6;
-            slot = offset + slot; // Offset to the bottom of the top inventory
-
-            var allow = tryHandleClick(slot, player, clickType);
-            result.setCancel(!allow);
-        }
+//        private void handleInvClick(@NotNull InventoryPreClickEvent event) {
+//            if (event.getInventory() == InventoryViewHost.this.inventory) {
+//                //todo open inv click
+//                return;
+//            }
+//        }
+//
+//        private void openedInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
+//            var allow = tryHandleClick(slot, player, clickType);
+//            result.setCancel(!allow);
+//        }
+//
+//        private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
+//            slot = convertPlayerSlotToChestSlot(slot);
+//            if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
+//            //todo hardcoded double chest or anvil, should generalize
+//            var offset = getInventoryType() == InventoryType.ANVIL ? 9 : 9 * 6;
+//            slot = offset + slot; // Offset to the bottom of the top inventory
+//
+//            var allow = tryHandleClick(slot, player, clickType);
+//            result.setCancel(!allow);
+//        }
 
         private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
             if (element == null) return false;
@@ -345,10 +346,10 @@ public class InventoryViewHost {
         }
 
         private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {
-            ItemStack[] convertedSlots = new ItemStack[PlayerInventory.INVENTORY_SIZE];
+            ItemStack[] convertedSlots = new ItemStack[PlayerInventoryUtils.INVENTORY_SIZE];
             Arrays.fill(convertedSlots, ItemStack.AIR);
             for (int i = 0; i < convertedSlots.length; i++) {
-                var packetSlot = PlayerInventoryUtils.convertToPacketSlot(i);
+                var packetSlot = PlayerInventoryUtils.minestomToProtocol(i);
                 var chestSlot = convertPlayerSlotToChestSlot(i);
                 if (i < 9 * 4 && chestSlot < 9 * playerInventoryRows) {
                     convertedSlots[packetSlot] = playerInv[chestSlot];
@@ -356,7 +357,7 @@ public class InventoryViewHost {
                     convertedSlots[packetSlot] = player.getInventory().getItemStack(i);
                 }
             }
-            return new WindowItemsPacket((byte) 0, 0, List.of(convertedSlots), getCursorItem(player));
+            return new WindowItemsPacket((byte) 0, 0, List.of(convertedSlots), ItemStack.AIR); //todo air was cursor item, does it matter?
         }
 
         private int convertPlayerSlotToChestSlot(int slot) {
@@ -389,17 +390,17 @@ public class InventoryViewHost {
     }
 
     private static class DelegatingPlayerInventory extends PlayerInventory {
+        private final Player player;
 
         public DelegatingPlayerInventory(@NotNull Player player) {
-            super(player);
+            this.player = player;
 
             // Copy all contents of players current inventory to this one
             var old = player.getInventory();
             // PlayerInventory
             setCursorItem(old.getCursorItem());
             // AbstractInventory
-            System.arraycopy(old.getItemStacks(), 0, itemStacks, 0, INVENTORY_SIZE);
-            getInventoryConditions().addAll(old.getInventoryConditions());
+            System.arraycopy(old.getItemStacks(), 0, itemStacks, 0, getSize());
             tagHandler().updateContent(old.tagHandler().asCompound());
         }
 

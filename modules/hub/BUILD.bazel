@@ -17,10 +17,10 @@ java_library(
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_miguelfonseca_completely_completely_core",
         "@maven//:dev_hollowcube_polar",
-        "@maven//:io_github_jglrxavpok_hephaistos_common",
         "@maven//:io_prometheus_simpleclient",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_key",
+        "@maven//:net_kyori_adventure_nbt",
         "@maven//:net_kyori_adventure_text_serializer_plain",
     ],
 )

@@ -7,7 +7,6 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.hollowcube.schem.BlockEntityData;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.SpongeSchematic;
-import net.hollowcube.schem.util.Hephaistos2Adventure;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.ByteArrayBinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -16,7 +15,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +62,7 @@ final class SizedSchematicBuilder implements SchematicBuilder {
         var blockHandler = block.handler();
         if (blockHandler != null) {
             var blockEntityId = blockHandler.getNamespaceId().asString();
-            var blockEntityData = Hephaistos2Adventure.compound(Objects.requireNonNullElse(block.nbt(), new NBTCompound()));
+            var blockEntityData = Objects.requireNonNullElse(block.nbt(), CompoundBinaryTag.empty());
             blockEntities.put(blockIndex, new BlockEntityData(blockEntityId, relPos, blockEntityData));
         }
     }

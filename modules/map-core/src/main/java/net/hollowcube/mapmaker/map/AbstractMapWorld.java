@@ -18,12 +18,10 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.server.common.TagsPacket;
-import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,13 +114,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         var player = event.getPlayer();
 
         try {
-            // Send registry data outself
-            var registry = new HashMap<String, NBT>();
-            registry.put("minecraft:chat_type", Messenger.chatRegistry());
-            registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
-            registry.put("minecraft:worldgen/biome", biomes().toNBT());
-            registry.put("minecraft:damage_type", DamageType.getNBT());
-            player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
+            // Send registry data ourself
+            player.sendPacket(Messenger.registryDataPacket());
+            player.sendPacket(MinecraftServer.getDimensionTypeManager().registryDataPacket());
+            player.sendPacket(biomes().registryDataPacket());
+            player.sendPacket(DamageType.registryDataPacket());
             player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
             event.setSendRegistryData(false);
 

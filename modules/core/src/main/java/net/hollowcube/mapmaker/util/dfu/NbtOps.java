@@ -2,9 +2,8 @@ package net.hollowcube.mapmaker.util.dfu;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
+import net.kyori.adventure.nbt.*;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.*;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -16,259 +15,255 @@ import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class NbtOps implements DynamicOps<NBT> {
+public class NbtOps implements DynamicOps<BinaryTag> {
     public static final NbtOps INSTANCE = new NbtOps();
 
     private NbtOps() {
     }
 
     @Override
-    public NBT empty() {
-        return NBTEnd.INSTANCE;
+    public BinaryTag empty() {
+        return EndBinaryTag.endBinaryTag();
     }
 
     @Override
-    public <U> U convertTo(DynamicOps<U> outOps, NBT input) {
+    public <U> U convertTo(DynamicOps<U> outOps, BinaryTag input) {
         return switch (input) {
-            case NBTEnd nbt -> outOps.empty();
-            case NBTByte nbt -> outOps.createByte(nbt.getValue());
-            case NBTShort nbt -> outOps.createShort(nbt.getValue());
-            case NBTInt nbt -> outOps.createInt(nbt.getValue());
-            case NBTLong nbt -> outOps.createLong(nbt.getValue());
-            case NBTFloat nbt -> outOps.createFloat(nbt.getValue());
-            case NBTDouble nbt -> outOps.createDouble(nbt.getValue());
-            case NBTByteArray nbt -> outOps.createByteList(ByteBuffer.wrap(nbt.getValue().copyArray()));
-            case NBTString nbt -> outOps.createString(nbt.getValue());
-            case NBTList<?> nbt -> convertList(outOps, nbt);
-            case NBTCompound nbt -> convertMap(outOps, nbt);
-            case NBTIntArray nbt ->
-                    outOps.createIntList(IntStream.of(nbt.getValue().copyArray())); //todo seems like there should be a better way
-            case NBTLongArray nbt ->
-                    outOps.createLongList(LongStream.of(nbt.getValue().copyArray())); //todo seems like there should be a better way
+            case EndBinaryTag nbt -> outOps.empty();
+            case ByteBinaryTag nbt -> outOps.createByte(nbt.value());
+            case ShortBinaryTag nbt -> outOps.createShort(nbt.value());
+            case IntBinaryTag nbt -> outOps.createInt(nbt.value());
+            case LongBinaryTag nbt -> outOps.createLong(nbt.value());
+            case FloatBinaryTag nbt -> outOps.createFloat(nbt.value());
+            case DoubleBinaryTag nbt -> outOps.createDouble(nbt.value());
+            case ByteArrayBinaryTag nbt -> outOps.createByteList(ByteBuffer.wrap(nbt.value()));
+            case StringBinaryTag nbt -> outOps.createString(nbt.value());
+            case ListBinaryTag nbt -> convertList(outOps, nbt);
+            case CompoundBinaryTag nbt -> convertMap(outOps, nbt);
+            case IntArrayBinaryTag nbt -> outOps.createIntList(IntStream.of(nbt.value()));
+            case LongArrayBinaryTag nbt -> outOps.createLongList(LongStream.of(nbt.value()));
             default -> throw new IllegalStateException("Unexpected value: " + input);
         };
     }
 
     @Override
-    public DataResult<Number> getNumberValue(NBT input) {
+    public DataResult<Number> getNumberValue(BinaryTag input) {
         return switch (input) {
-            case NBTEnd nbt -> DataResult.success(0);
-            case NBTByte nbt -> DataResult.success(nbt.getValue());
-            case NBTShort nbt -> DataResult.success(nbt.getValue());
-            case NBTInt nbt -> DataResult.success(nbt.getValue());
-            case NBTLong nbt -> DataResult.success(nbt.getValue());
-            case NBTFloat nbt -> DataResult.success(nbt.getValue());
-            case NBTDouble nbt -> DataResult.success(nbt.getValue());
+            case EndBinaryTag nbt -> DataResult.success(0);
+            case ByteBinaryTag nbt -> DataResult.success(nbt.value());
+            case ShortBinaryTag nbt -> DataResult.success(nbt.value());
+            case IntBinaryTag nbt -> DataResult.success(nbt.value());
+            case LongBinaryTag nbt -> DataResult.success(nbt.value());
+            case FloatBinaryTag nbt -> DataResult.success(nbt.value());
+            case DoubleBinaryTag nbt -> DataResult.success(nbt.value());
             default -> DataResult.error("Not a number: " + input);
         };
     }
 
     @Override
-    public NBT createNumeric(Number number) {
+    public BinaryTag createNumeric(Number number) {
         return switch (number) {
-            case Byte b -> new NBTByte(b);
-            case Short s -> new NBTShort(s);
-            case Integer i -> new NBTInt(i);
-            case Long l -> new NBTLong(l);
-            case Float f -> new NBTFloat(f);
-            case Double d -> new NBTDouble(d);
+            case Byte b -> ByteBinaryTag.byteBinaryTag(b);
+            case Short s -> ShortBinaryTag.shortBinaryTag(s);
+            case Integer i -> IntBinaryTag.intBinaryTag(i);
+            case Long l -> LongBinaryTag.longBinaryTag(l);
+            case Float f -> FloatBinaryTag.floatBinaryTag(f);
+            case Double d -> DoubleBinaryTag.doubleBinaryTag(d);
             default -> throw new IllegalStateException("Unexpected value: " + number);
         };
     }
 
     @Override
-    public DataResult<Boolean> getBooleanValue(NBT input) {
+    public DataResult<Boolean> getBooleanValue(BinaryTag input) {
         return switch (input) {
-            case NBTEnd nbt -> DataResult.success(false);
-            case NBTByte nbt -> DataResult.success(nbt.getValue() != 0);
-            case NBTShort nbt -> DataResult.success(nbt.getValue() != 0);
-            case NBTInt nbt -> DataResult.success(nbt.getValue() != 0);
-            case NBTLong nbt -> DataResult.success(nbt.getValue() != 0);
-            case NBTFloat nbt -> DataResult.success(nbt.getValue() != 0);
-            case NBTDouble nbt -> DataResult.success(nbt.getValue() != 0);
+            case EndBinaryTag nbt -> DataResult.success(false);
+            case ByteBinaryTag nbt -> DataResult.success(nbt.value() != 0);
+            case ShortBinaryTag nbt -> DataResult.success(nbt.value() != 0);
+            case IntBinaryTag nbt -> DataResult.success(nbt.value() != 0);
+            case LongBinaryTag nbt -> DataResult.success(nbt.value() != 0);
+            case FloatBinaryTag nbt -> DataResult.success(nbt.value() != 0);
+            case DoubleBinaryTag nbt -> DataResult.success(nbt.value() != 0);
             default -> DataResult.error("Not a boolean: " + input);
         };
     }
 
     @Override
-    public NBT createBoolean(boolean value) {
-        return new NBTByte((byte) (value ? 1 : 0));
+    public BinaryTag createBoolean(boolean value) {
+        return ByteBinaryTag.byteBinaryTag((byte) (value ? 1 : 0));
     }
 
     @Override
-    public DataResult<String> getStringValue(NBT input) {
+    public DataResult<String> getStringValue(BinaryTag input) {
         return switch (input) {
-            case NBTByte nbt -> DataResult.success(Byte.toString(nbt.getValue()));
-            case NBTShort nbt -> DataResult.success(Short.toString(nbt.getValue()));
-            case NBTInt nbt -> DataResult.success(Integer.toString(nbt.getValue()));
-            case NBTLong nbt -> DataResult.success(Long.toString(nbt.getValue()));
-            case NBTFloat nbt -> DataResult.success(Float.toString(nbt.getValue()));
-            case NBTDouble nbt -> DataResult.success(Double.toString(nbt.getValue()));
-            case NBTString nbt -> DataResult.success(nbt.getValue());
+            case ByteBinaryTag nbt -> DataResult.success(Byte.toString(nbt.value()));
+            case ShortBinaryTag nbt -> DataResult.success(Short.toString(nbt.value()));
+            case IntBinaryTag nbt -> DataResult.success(Integer.toString(nbt.value()));
+            case LongBinaryTag nbt -> DataResult.success(Long.toString(nbt.value()));
+            case FloatBinaryTag nbt -> DataResult.success(Float.toString(nbt.value()));
+            case DoubleBinaryTag nbt -> DataResult.success(Double.toString(nbt.value()));
+            case StringBinaryTag nbt -> DataResult.success(nbt.value());
             default -> DataResult.error("Not a string: " + input);
         };
     }
 
     @Override
-    public NBT createString(String value) {
-        return new NBTString(value);
+    public BinaryTag createString(String value) {
+        return StringBinaryTag.stringBinaryTag(value);
     }
 
     @Override
-    public DataResult<NBT> mergeToList(NBT nbt, NBT value) {
-        if (nbt instanceof NBTList<?> list) {
-            if (!list.getSubtagType().equals(value.getID())) {
-                return DataResult.error("Could not insert " + value.getID() + " into list of " + list.getSubtagType());
+    public DataResult<BinaryTag> mergeToList(BinaryTag nbt, BinaryTag value) {
+        if (nbt instanceof ListBinaryTag list) {
+            if (!list.elementType().equals(value.type())) {
+                return DataResult.error("Could not insert " + value.type() + " into list of " + list.elementType());
             }
 
-            var newList = new ArrayList<NBT>(list.getValue());
-            newList.add(value);
-            return DataResult.success(new NBTList<>(list.getSubtagType(), newList));
+            return DataResult.success(list.add(value));
         }
 
-        if (nbt == null || nbt instanceof NBTEnd) {
-            return DataResult.success(new NBTList<>(value.getID(), List.of(value)));
+        if (nbt == null || nbt instanceof EndBinaryTag) {
+            return DataResult.success(ListBinaryTag.listBinaryTag(value.type(), List.of(value)));
         }
 
-        return DataResult.error("Could not append " + value.getID() + " to " + nbt.getID());
+        return DataResult.error("Could not append " + value.type() + " to " + nbt.type());
     }
 
     @Override
-    public DataResult<NBT> mergeToList(NBT nbt, List<NBT> values) {
-        if (nbt instanceof NBTList<?> list) {
+    public DataResult<BinaryTag> mergeToList(BinaryTag nbt, List<BinaryTag> values) {
+        if (nbt instanceof ListBinaryTag list) {
             if (values.isEmpty()) {
                 return DataResult.success(nbt);
             }
-            if (!list.getSubtagType().equals(values.get(0).getID())) {
-                return DataResult.error("Could not insert " + values.get(0).getID() + " into list of " + list.getSubtagType());
+            if (!list.elementType().equals(values.get(0).type())) {
+                return DataResult.error("Could not insert " + values.get(0).type() + " into list of " + list.elementType());
             }
 
-            var newList = new ArrayList<NBT>(list.getValue());
-            newList.addAll(values);
-            return DataResult.success(new NBTList<>(list.getSubtagType(), newList));
+            return DataResult.success(list.add(values));
         }
 
-        if (nbt == null || nbt instanceof NBTEnd) {
+        if (nbt == null || nbt instanceof EndBinaryTag) {
             if (values.isEmpty())
-                return DataResult.success(NBTEnd.INSTANCE);
-            return DataResult.success(new NBTList<>(values.get(0).getID(), values));
+                return DataResult.success(EndBinaryTag.endBinaryTag());
+            return DataResult.success(ListBinaryTag.listBinaryTag(values.get(0).type(), values));
         }
 
-        return DataResult.error("Could not append to " + nbt.getID());
+        return DataResult.error("Could not append to " + nbt.type());
     }
 
     @Override
-    public DataResult<NBT> mergeToMap(NBT input, NBT key, NBT value) {
-        if (!(key instanceof NBTString keyString)) {
+    public DataResult<BinaryTag> mergeToMap(BinaryTag input, BinaryTag key, BinaryTag value) {
+        if (!(key instanceof StringBinaryTag keyString)) {
             return DataResult.error("Key is not a string: " + key);
         }
-        if (value instanceof NBTEnd) {
+        if (value instanceof EndBinaryTag) {
             return DataResult.success(input);
         }
-        if (input == null || input instanceof NBTEnd) {
-            return DataResult.success(new NBTCompound(Map.of(keyString.getValue(), value)));
+        if (input == null || input instanceof EndBinaryTag) {
+            return DataResult.success(CompoundBinaryTag.from(Map.of(keyString.value(), value)));
         }
-        if (!(input instanceof NBTCompound compound)) {
+        if (!(input instanceof CompoundBinaryTag compound)) {
             return DataResult.error("Not a map: " + input);
         }
         //noinspection unchecked
-        return DataResult.success(compound.withEntries(Map.entry(keyString.getValue(), value)));
+        return DataResult.success(compound.put(keyString.value(), value));
     }
 
     @Override
-    public DataResult<NBT> mergeToMap(NBT input, MapLike<NBT> values) {
-        if (input == null || input instanceof NBTEnd) {
-            var result = new MutableNBTCompound();
+    public DataResult<BinaryTag> mergeToMap(BinaryTag input, MapLike<BinaryTag> values) {
+        if (input == null || input instanceof EndBinaryTag) {
+            var result = CompoundBinaryTag.builder();
             values.entries().forEach(e -> {
-                if (e.getSecond() instanceof NBTEnd) return;
-                result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+                if (e.getSecond() instanceof EndBinaryTag) return;
+                result.put(((StringBinaryTag) e.getFirst()).value(), e.getSecond());
             });
-            return DataResult.success(result.toCompound());
+            return DataResult.success(result.build());
         }
-        if (!(input instanceof NBTCompound compound)) {
+        if (!(input instanceof CompoundBinaryTag compound)) {
             return DataResult.error("Not a map: " + input);
         }
-        var result = new MutableNBTCompound();
-        result.putAll(compound);
+        var result = CompoundBinaryTag.builder();
+        result.put(compound);
         values.entries().forEach(e -> {
-            if (e.getSecond() instanceof NBTEnd) return;
-            result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+            if (e.getSecond() instanceof EndBinaryTag) return;
+            result.put(((StringBinaryTag) e.getFirst()).value(), e.getSecond());
         });
-        return DataResult.success(result.toCompound());
+        return DataResult.success(result.build());
     }
 
     @Override
-    public DataResult<Stream<Pair<NBT, NBT>>> getMapValues(NBT input) {
-        if (!(input instanceof NBTCompound compound)) {
+    public DataResult<Stream<Pair<BinaryTag, BinaryTag>>> getMapValues(BinaryTag input) {
+        if (!(input instanceof CompoundBinaryTag compound)) {
             return DataResult.error("Not a map: " + input);
         }
-        return DataResult.success(compound.getEntries().stream().map(entry ->
-                Pair.of(createString(entry.getKey()), entry.getValue() instanceof NBTEnd ? null : entry.getValue())));
+        return DataResult.success(StreamSupport.stream(compound.spliterator(), false).map(entry ->
+                Pair.of(createString(entry.getKey()), entry.getValue() instanceof EndBinaryTag ? null : entry.getValue())));
     }
 
     @Override
-    public DataResult<Consumer<BiConsumer<NBT, NBT>>> getMapEntries(NBT input) {
-        if (!(input instanceof NBTCompound compound)) {
+    public DataResult<Consumer<BiConsumer<BinaryTag, BinaryTag>>> getMapEntries(BinaryTag input) {
+        if (!(input instanceof CompoundBinaryTag compound)) {
             return DataResult.error("Not a map: " + input);
         }
         return DataResult.success(c -> {
-            for (var entry : compound.getEntries()) {
-                c.accept(createString(entry.getKey()), entry.getValue() instanceof NBTEnd ? null : entry.getValue());
+            for (var entry : compound) {
+                c.accept(createString(entry.getKey()), entry.getValue() instanceof EndBinaryTag ? null : entry.getValue());
             }
         });
     }
 
     @Override
-    public DataResult<MapLike<NBT>> getMap(NBT input) {
-        if (!(input instanceof NBTCompound compound)) {
+    public DataResult<MapLike<BinaryTag>> getMap(BinaryTag input) {
+        if (!(input instanceof CompoundBinaryTag compound)) {
             return DataResult.error("Not a map: " + input);
         }
         return DataResult.success(new MapLike<>() {
             @Nullable
             @Override
-            public NBT get(NBT keyNbt) {
-                var entry = compound.get(((NBTString) keyNbt).getValue());
-                return entry instanceof NBTEnd ? null : entry;
+            public BinaryTag get(BinaryTag keyNbt) {
+                var entry = compound.get(((StringBinaryTag) keyNbt).value());
+                return entry instanceof EndBinaryTag ? null : entry;
             }
 
             @Nullable
             @Override
-            public NBT get(String key) {
+            public BinaryTag get(String key) {
                 var entry = compound.get(key);
-                return entry instanceof NBTEnd ? null : entry;
+                return entry instanceof EndBinaryTag ? null : entry;
             }
 
             @Override
-            public Stream<Pair<NBT, NBT>> entries() {
-                return compound.getEntries().stream().map(e -> Pair.of(new NBTString(e.getKey()), e.getValue()));
+            public Stream<Pair<BinaryTag, BinaryTag>> entries() {
+                return StreamSupport.stream(compound.spliterator(), false)
+                        .map(e -> Pair.of(StringBinaryTag.stringBinaryTag(e.getKey()), e.getValue()));
             }
         });
     }
 
     @Override
-    public NBT createMap(Stream<Pair<NBT, NBT>> map) {
-        var result = new MutableNBTCompound();
+    public BinaryTag createMap(Stream<Pair<BinaryTag, BinaryTag>> map) {
+        var result = CompoundBinaryTag.builder();
         map.forEach(e -> {
-            if (e.getSecond() instanceof NBTEnd) return;
-            result.set(((NBTString) e.getFirst()).getValue(), e.getSecond());
+            if (e.getSecond() instanceof EndBinaryTag) return;
+            result.put(((StringBinaryTag) e.getFirst()).value(), e.getSecond());
         });
-        return result.toCompound();
+        return result.build();
     }
 
     @Override
-    public DataResult<Stream<NBT>> getStream(NBT input) {
-        if (input instanceof NBTList<?> list) {
-            return DataResult.success(list.getValue().stream().map(e -> e instanceof NBTEnd ? null : e));
+    public DataResult<Stream<BinaryTag>> getStream(BinaryTag input) {
+        if (input instanceof ListBinaryTag list) {
+            return DataResult.success(list.stream().map(e -> e instanceof EndBinaryTag ? null : e));
         }
         return DataResult.error("not a list: " + input);
     }
 
     @Override
-    public DataResult<Consumer<Consumer<NBT>>> getList(NBT input) {
-        if (input instanceof NBTList<?> list) {
+    public DataResult<Consumer<Consumer<BinaryTag>>> getList(BinaryTag input) {
+        if (input instanceof ListBinaryTag list) {
             return DataResult.success(c -> {
-                for (var entry : list.getValue()) {
+                for (var entry : list) {
                     c.accept(entry);
                 }
             });
@@ -277,18 +272,18 @@ public class NbtOps implements DynamicOps<NBT> {
     }
 
     @Override
-    public NBT createList(Stream<NBT> input) {
+    public BinaryTag createList(Stream<BinaryTag> input) {
         var values = input.toList();
         if (values.isEmpty()) {
-            return NBTEnd.INSTANCE;
+            return EndBinaryTag.endBinaryTag();
         }
-        return new NBTList<>(values.get(0).getID(), values);
+        return ListBinaryTag.listBinaryTag(values.get(0).type(), values);
     }
 
     @Override
-    public NBT remove(NBT input, String key) {
-        if (input instanceof NBTCompound compound) {
-            return compound.withRemovedKeys(key);
+    public BinaryTag remove(BinaryTag input, String key) {
+        if (input instanceof CompoundBinaryTag compound) {
+            return compound.remove(key);
         }
         return null;
     }
@@ -299,20 +294,20 @@ public class NbtOps implements DynamicOps<NBT> {
     }
 
     @Override
-    public ListBuilder<NBT> listBuilder() {
+    public ListBuilder<BinaryTag> listBuilder() {
         return new ArrayBuilder();
     }
 
-    private static final class ArrayBuilder implements ListBuilder<NBT> {
-        private DataResult<List<NBT>> builder = DataResult.success(new ArrayList<>(), Lifecycle.stable());
+    private static final class ArrayBuilder implements ListBuilder<BinaryTag> {
+        private DataResult<List<BinaryTag>> builder = DataResult.success(new ArrayList<>(), Lifecycle.stable());
 
         @Override
-        public DynamicOps<NBT> ops() {
+        public DynamicOps<BinaryTag> ops() {
             return INSTANCE;
         }
 
         @Override
-        public ListBuilder<NBT> add(NBT value) {
+        public ListBuilder<BinaryTag> add(BinaryTag value) {
             builder = builder.map(b -> {
                 b.add(value);
                 return b;
@@ -321,7 +316,7 @@ public class NbtOps implements DynamicOps<NBT> {
         }
 
         @Override
-        public ListBuilder<NBT> add(DataResult<NBT> value) {
+        public ListBuilder<BinaryTag> add(DataResult<BinaryTag> value) {
             builder = builder.apply2stable((b, element) -> {
                 b.add(element);
                 return b;
@@ -330,57 +325,57 @@ public class NbtOps implements DynamicOps<NBT> {
         }
 
         @Override
-        public ListBuilder<NBT> withErrorsFrom(DataResult<?> result) {
+        public ListBuilder<BinaryTag> withErrorsFrom(DataResult<?> result) {
             builder = builder.flatMap(r -> result.map(v -> r));
             return this;
         }
 
         @Override
-        public ListBuilder<NBT> mapError(UnaryOperator<String> onError) {
+        public ListBuilder<BinaryTag> mapError(UnaryOperator<String> onError) {
             builder = builder.mapError(onError);
             return this;
         }
 
         @Override
-        public DataResult<NBT> build(NBT prefix) {
-            DataResult<NBT> result = builder.flatMap(b -> ops().mergeToList(prefix, b));
+        public DataResult<BinaryTag> build(BinaryTag prefix) {
+            DataResult<BinaryTag> result = builder.flatMap(b -> ops().mergeToList(prefix, b));
             builder = DataResult.success(new ArrayList<>(), Lifecycle.stable());
             return result;
         }
     }
 
     @Override
-    public RecordBuilder<NBT> mapBuilder() {
+    public RecordBuilder<BinaryTag> mapBuilder() {
         return new NbtRecordBuilder();
     }
 
-    private class NbtRecordBuilder extends RecordBuilder.AbstractStringBuilder<NBT, MutableNBTCompound> {
+    private class NbtRecordBuilder extends RecordBuilder.AbstractStringBuilder<BinaryTag, CompoundBinaryTag.Builder> {
         protected NbtRecordBuilder() {
             super(NbtOps.this);
         }
 
         @Override
-        protected MutableNBTCompound initBuilder() {
-            return new MutableNBTCompound();
+        protected CompoundBinaryTag.Builder initBuilder() {
+            return CompoundBinaryTag.builder();
         }
 
         @Override
-        protected MutableNBTCompound append(String key, NBT value, MutableNBTCompound builder) {
-            if (value instanceof NBTEnd) return builder;
-            builder.set(key, value);
+        protected CompoundBinaryTag.Builder append(String key, BinaryTag value, CompoundBinaryTag.Builder builder) {
+            if (value instanceof EndBinaryTag) return builder;
+            builder.put(key, value);
             return builder;
         }
 
         @Override
-        protected DataResult<NBT> build(MutableNBTCompound builder, NBT prefix) {
-            if (prefix == null || prefix instanceof NBTEnd) {
-                return DataResult.success(builder.toCompound());
+        protected DataResult<BinaryTag> build(CompoundBinaryTag.Builder builder, BinaryTag prefix) {
+            if (prefix == null || prefix instanceof EndBinaryTag) {
+                return DataResult.success(builder.build());
             }
-            if (prefix instanceof NBTCompound compound) {
-                var result = new MutableNBTCompound();
-                result.putAll(compound);
-                result.putAll(builder);
-                return DataResult.success(result.toCompound());
+            if (prefix instanceof CompoundBinaryTag compound) {
+                var result = CompoundBinaryTag.builder();
+                result.put(compound);
+                result.put(builder.build());
+                return DataResult.success(result.build());
             }
             return DataResult.error("mergeToMap called with not a map: " + prefix);
         }
