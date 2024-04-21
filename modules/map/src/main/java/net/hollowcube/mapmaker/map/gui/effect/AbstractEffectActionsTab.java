@@ -102,7 +102,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
                 data.setTeleport(pos);
                 updateFromData();
             }, data.teleport().orElseThrow()));
-        } else if (clickType == ClickType.SHIFT_CLICK) {
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setTeleport(null);
             updateFromData();
         }

@@ -102,7 +102,7 @@ public class ReportMapView extends View {
     private void handleAddComment(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             pushView(c -> new SetReportCommentView(c, comment));
-        } else if (clickType == ClickType.SHIFT_CLICK) {
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             updateCommentText("");
         }
     }
