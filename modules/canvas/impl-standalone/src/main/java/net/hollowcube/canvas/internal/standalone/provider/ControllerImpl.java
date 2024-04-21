@@ -49,7 +49,7 @@ public class ControllerImpl implements Controller {
                     }
                 }
 
-                inventory.runRedrawNow();
+                inventory.redrawImmediately();
                 player.openInventory(inventory.getHandle());
 
                 final long end = System.currentTimeMillis();

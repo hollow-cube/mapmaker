@@ -18,7 +18,9 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.server.common.TagsPacket;
+import net.minestom.server.network.packet.server.configuration.UpdateEnabledFeaturesPacket;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -121,6 +123,12 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(DamageType.registryDataPacket());
             player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
             event.setSendRegistryData(false);
+
+            // Enable the 1.21 features
+            player.sendPacket(new UpdateEnabledFeaturesPacket(Set.of(
+                    NamespaceID.from("minecraft:vanilla"),
+                    NamespaceID.from("minecraft:update_1_21")
+            )));
 
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());

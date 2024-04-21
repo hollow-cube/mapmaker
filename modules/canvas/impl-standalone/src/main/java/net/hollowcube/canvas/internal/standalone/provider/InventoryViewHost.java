@@ -10,10 +10,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.ContainerInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
@@ -34,6 +36,11 @@ import java.util.concurrent.locks.ReentrantLock;
 public class InventoryViewHost {
     private static final Scheduler SCHEDULER = MinecraftServer.getSchedulerManager();
     private static final System.Logger logger = System.getLogger(InventoryViewHost.class.getName());
+
+    static {
+        MinecraftServer.getGlobalEventHandler()
+                .addListener(InventoryPreClickEvent.class, InventoryWrapper::handleInventoryClick);
+    }
 
     private int width, height;
     private InventoryWrapper inventory = null;
@@ -81,23 +88,28 @@ public class InventoryViewHost {
 
     private void replaceInventory(@NotNull ViewContainer newElement) {
         // Unmount old component if relevant
-        ContainerInventory oldInv = this.inventory;
+        InventoryWrapper oldInv = this.inventory;
         if (this.element != null) {
             this.element.performSignal(Element.SIG_UNMOUNT);
             // Remove inventory, do not want to handle ghost clicks
             this.inventory = null;
         }
 
-        var name = oldInv == null ? Component.text("Chest") : oldInv.getTitle();
-        this.inventory = new InventoryWrapper(updateSize(newElement), name);
+        InventoryType type = updateSize(newElement);
+        if (oldInv != null && oldInv.getInventoryType() == type && false) {
+            this.inventory = oldInv; // Reuse inventory if same size, no need to send the extra packets
+        } else {
+            var name = oldInv == null ? Component.text("Chest") : oldInv.getTitle();
+            this.inventory = new InventoryWrapper(type, name);
+        }
         this.element = newElement;
 
         // Mount the contents in this inventory
         this.element.performSignal(Element.SIG_MOUNT);
 //        deferredDirty = false;
-        drawCurrentElement();
+        redrawImmediately();
 
-        if (oldInv != null) {
+        if (oldInv != null && oldInv != this.inventory) {
             // Migrate the viewers to the new inventory
             for (Player player : oldInv.getViewers()) {
                 player.openInventory(inventory);
@@ -156,13 +168,13 @@ public class InventoryViewHost {
         redrawTask = SCHEDULER.scheduleNextTick(this::drawCurrentElement);
     }
 
-    public void runRedrawNow() {
+    public void redrawImmediately() {
         if (redrawTask != null) redrawTask.cancel();
         drawCurrentElement();
     }
 
     private void drawCurrentElement() {
-        if (history.isEmpty()) return;
+        if (inventory == null || history.isEmpty()) return; // Inventory closed
         logger.log(System.Logger.Level.INFO, "redraw (view = {0})", history.getLast());
 //        List.of(Thread.currentThread().getStackTrace())
 //                .stream()
@@ -261,8 +273,6 @@ public class InventoryViewHost {
                 // Unmount and close
                 element.performSignal(Element.SIG_UNMOUNT);
                 element.performSignal(Element.SIG_CLOSE);
-                // Remove inventory to prevent any possible ghost clicks
-                InventoryViewHost.this.inventory = null;
             }
 
             return result;
@@ -287,28 +297,39 @@ public class InventoryViewHost {
             getViewers().forEach(player -> player.sendPacket(createWindowItemsPacket(player)));
         }
 
-//        private void handleInvClick(@NotNull InventoryPreClickEvent event) {
-//            if (event.getInventory() == InventoryViewHost.this.inventory) {
-//                //todo open inv click
-//                return;
-//            }
-//        }
-//
-//        private void openedInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
-//            var allow = tryHandleClick(slot, player, clickType);
-//            result.setCancel(!allow);
-//        }
-//
-//        private void playerInvClick(@NotNull Player player, int slot, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
-//            slot = convertPlayerSlotToChestSlot(slot);
-//            if (slot == -1) return; // Not a slot we care about (armor, crafting, off hand)
-//            //todo hardcoded double chest or anvil, should generalize
-//            var offset = getInventoryType() == InventoryType.ANVIL ? 9 : 9 * 6;
-//            slot = offset + slot; // Offset to the bottom of the top inventory
-//
-//            var allow = tryHandleClick(slot, player, clickType);
-//            result.setCancel(!allow);
-//        }
+        private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
+            if (!(event.getInventory() instanceof InventoryWrapper wrapper)) return;
+
+            int slot;
+            ClickType clickType;
+            switch (event.getClickInfo()) {
+                case Click.Info.Left leftClick -> {
+                    slot = leftClick.slot();
+                    clickType = ClickType.LEFT_CLICK;
+                }
+                case Click.Info.Right rightClick -> {
+                    slot = rightClick.slot();
+                    clickType = ClickType.RIGHT_CLICK;
+                }
+                case Click.Info.LeftShift leftShift -> {
+                    slot = leftShift.slot();
+                    clickType = ClickType.SHIFT_LEFT_CLICK;
+                }
+                default -> {
+                    return;
+                }
+            }
+
+            // If the click happened inside the player inventory we need to do our weird accounting of anvil being 9 internally
+            if (slot >= wrapper.getSize()) {
+                slot -= wrapper.getSize(); // Now represents the slot starting from the bottom inventory
+                var offset = wrapper.getInventoryType() == InventoryType.ANVIL ? 9 : wrapper.getInventoryType().getSize();
+                slot += offset; // Offset to the bottom of the top inventory (accounting for our weird anvil inventory)
+            }
+
+            var allow = wrapper.tryHandleClick(slot, event.getPlayer(), clickType);
+            event.setCancelled(!allow);
+        }
 
         private boolean tryHandleClick(int index, @NotNull Player player, @NotNull ClickType clickType) {
             if (element == null) return false;
@@ -416,6 +437,17 @@ public class InventoryViewHost {
             }
 
             super.update();
+        }
+
+        @Override
+        public void update(@NotNull Player player) {
+            // Same as above (but in case a single player update is called)
+            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
+                wrapper.updatePlayerInventory();
+                return;
+            }
+
+            super.update(player);
         }
     }
 }
