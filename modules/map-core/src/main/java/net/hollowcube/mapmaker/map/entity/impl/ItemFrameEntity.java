@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.entity.impl;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -15,6 +16,18 @@ import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ItemFrameEntity extends MapEntity {
+
+    public static class Glowing extends ItemFrameEntity {
+        public Glowing(@NotNull UUID uuid) {
+            super(EntityType.GLOW_ITEM_FRAME, uuid);
+
+            placeSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_PLACE;
+            breakSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_BREAK;
+            addItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM;
+            removeItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_REMOVE_ITEM;
+            rotateItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_ROTATE_ITEM;
+        }
+    }
 
     protected SoundEvent placeSound = SoundEvent.ENTITY_ITEM_FRAME_PLACE;
     protected SoundEvent breakSound = SoundEvent.ENTITY_ITEM_FRAME_BREAK;
@@ -95,30 +108,39 @@ public class ItemFrameEntity extends MapEntity {
     }
 
     @Override
-    public void save(@NotNull NetworkBuffer buffer) {
-        super.save(buffer);
+    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+        super.writeData(tag);
 
-        // Orientation is part of the entity object data, not the generic metadata entries
-        buffer.writeEnum(ItemFrameMeta.Orientation.class, getEntityMeta().getOrientation());
+        var meta = getEntityMeta();
+        tag.putByte("facing", (byte) meta.getOrientation().ordinal());
+        if (meta.isInvisible()) tag.putBoolean("Invisible", true);
+        if (!meta.getItem().isAir()) tag.put("Item", ItemStack.NBT_TYPE.write(meta.getItem()));
     }
 
     @Override
-    public void load(@NotNull NetworkBuffer buffer, int version) {
-        super.load(buffer, version);
+    public void readData(@NotNull CompoundBinaryTag tag) {
+        super.readData(tag);
+
+        var meta = getEntityMeta();
+        meta.setOrientation(readOrientation(tag));
+        meta.setInvisible(tag.getBoolean("Invisible", false));
+        if (tag.get("Item") instanceof CompoundBinaryTag itemTag)
+            meta.setItem(ItemStack.NBT_TYPE.read(itemTag));
+    }
+
+    @Override
+    public void legacyLoad(@NotNull NetworkBuffer buffer, int version) {
+        super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
         getEntityMeta().setOrientation(buffer.readEnum(ItemFrameMeta.Orientation.class));
     }
 
-    public static class Glowing extends ItemFrameEntity {
-        public Glowing(@NotNull UUID uuid) {
-            super(EntityType.GLOW_ITEM_FRAME, uuid);
-
-            placeSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_PLACE;
-            breakSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_BREAK;
-            addItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM;
-            removeItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_REMOVE_ITEM;
-            rotateItemSound = SoundEvent.ENTITY_GLOW_ITEM_FRAME_ROTATE_ITEM;
+    private @NotNull ItemFrameMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {
+        int id = tag.getByte("facing", (byte) 2);
+        for (var orientation : ItemFrameMeta.Orientation.values()) {
+            if (orientation.ordinal() == id) return orientation;
         }
+        return ItemFrameMeta.Orientation.NORTH;
     }
 }
