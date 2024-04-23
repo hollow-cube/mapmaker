@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
@@ -78,48 +79,6 @@ public class MapEntity extends Entity {
         // No interaction by default
     }
 
-    // Serialization
-
-    /**
-     * Called when writing the entity to the chunk data.
-     *
-     * <p>It is valid to override this, however it must call the super function first.</p>
-     *
-     * @param buffer The buffer to write the entity data
-     */
-    public void save(@NotNull NetworkBuffer buffer) {
-        var metadata = EntityMetadataStealer.steal(this);
-        ProtocolUtil.writeMap(buffer,
-                NetworkBuffer.VAR_INT,
-                NetworkBuffer.Writer::write,
-                metadata.getEntries());
-
-        buffer.write(NetworkBuffer.NBT, tagHandler().asCompound());
-    }
-
-    /**
-     * Called when reading the entity from the chunk data.
-     *
-     * <p>It is valid to override this, however it must call the super function first.</p>
-     *
-     * @param buffer  The buffer to read the entity data
-     * @param version The version of the chunk data
-     */
-    public void load(@NotNull NetworkBuffer buffer, int version) {
-        // Read the metadata
-        var metadata = EntityMetadataStealer.steal(this);
-        var loadedMetadata = ProtocolUtil.readMap(buffer, NetworkBuffer.VAR_INT, b1 -> {
-            int type = MetadataIndexFixer.fix1_20_4to1_20_5(b1.read(NetworkBuffer.VAR_INT));
-            return MetadataIndexFixer.read1_20_4to1_20_5(type, b1);
-        });
-        for (var entry : loadedMetadata.entrySet()) {
-            metadata.setIndex(entry.getKey(), entry.getValue());
-        }
-
-        // Read the nbt
-        tagHandler().updateContent((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
-    }
-
     // Misc utilities
 
     protected @NotNull Sound.Source soundSource() {
@@ -130,5 +89,31 @@ public class MapEntity extends Entity {
         var position = getPosition();
         getViewersAsAudience().playSound(Sound.sound(event, soundSource(), volume, pitch),
                 position.x(), position.y(), position.z());
+    }
+
+    // Serialization
+
+    public void readData(@NotNull CompoundBinaryTag tag) {
+        //todo read metadata fields
+    }
+
+    public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
+        //todo write metadata fields
+    }
+
+    @Deprecated // Should never be used, but cannot be removed for backwards compatibility.
+    public void legacyLoad(@NotNull NetworkBuffer buffer, int version) {
+        // Read the metadata
+        var metadata = EntityMetadataStealer.steal(this);
+        var loadedMetadata = ProtocolUtil.readMap(buffer, NetworkBuffer.VAR_INT, b1 -> {
+            int type = PreDataFixFixes.fixEntityMetaIndex1_20_4(b1.read(NetworkBuffer.VAR_INT));
+            return PreDataFixFixes.readEntityMeta1_20_4(type, b1);
+        });
+        for (var entry : loadedMetadata.entrySet()) {
+            metadata.setIndex(entry.getKey(), entry.getValue());
+        }
+
+        // Read the nbt
+        tagHandler().updateContent((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
     }
 }

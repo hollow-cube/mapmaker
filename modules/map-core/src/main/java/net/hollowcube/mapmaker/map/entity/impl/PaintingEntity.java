@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.object.ObjectData;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -13,8 +14,11 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.mapmaker.map.util.NbtUtil.readEnum;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PaintingEntity extends MapEntity {
@@ -67,18 +71,36 @@ public class PaintingEntity extends MapEntity {
     }
 
     @Override
-    public void save(@NotNull NetworkBuffer buffer) {
-        super.save(buffer);
+    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+        super.writeData(tag);
 
-        // Orientation is part of the entity object data, not the generic metadata entries
-        buffer.writeEnum(PaintingMeta.Orientation.class, getEntityMeta().getOrientation());
+        var meta = getEntityMeta();
+        tag.putString("variant", meta.getVariant().name().toLowerCase(Locale.ROOT));
+        tag.putByte("facing", (byte) meta.getOrientation().id());
     }
 
     @Override
-    public void load(@NotNull NetworkBuffer buffer, int version) {
-        super.load(buffer, version);
+    public void readData(@NotNull CompoundBinaryTag tag) {
+        super.readData(tag);
+
+        var meta = getEntityMeta();
+        meta.setVariant(readEnum(tag, "variant", PaintingMeta.Variant.KEBAB));
+        meta.setOrientation(readOrientation(tag));
+    }
+
+    @Override
+    public void legacyLoad(@NotNull NetworkBuffer buffer, int version) {
+        super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
         getEntityMeta().setOrientation(buffer.readEnum(PaintingMeta.Orientation.class));
+    }
+
+    private @NotNull PaintingMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {
+        int id = tag.getByte("facing", (byte) 2);
+        for (var orientation : PaintingMeta.Orientation.values()) {
+            if (orientation.id() == id) return orientation;
+        }
+        return PaintingMeta.Orientation.NORTH;
     }
 }

@@ -15,6 +15,7 @@ java_library(
         "//third_party:otel",
         "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:dev_hollowcube_dataconverter",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:it_unimi_dsi_fastutil",

@@ -52,6 +52,7 @@ maven_install(
         "net.minestom:minestom-snapshots:dev",
         #        "net.minestom:minestom-snapshots:e8e22a2b15",
         "dev.hollowcube:polar:dev",
+        "dev.hollowcube:dataconverter:dev",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
