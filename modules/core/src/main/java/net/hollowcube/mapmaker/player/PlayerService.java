@@ -27,6 +27,8 @@ public interface PlayerService {
 
     void buyCosmetic(@NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits, @Nullable JsonObject items);
 
+    void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta);
+
     @NotNull
     JsonObject getPlayerBackpack(@NotNull String id);
 

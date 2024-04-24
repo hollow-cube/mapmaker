@@ -116,7 +116,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         var player = event.getPlayer();
 
         try {
-            // Send registry data ourself
+            // Send registry data ourself to allow custom biomes per map
             player.sendPacket(Messenger.registryDataPacket());
             player.sendPacket(MinecraftServer.getDimensionTypeManager().registryDataPacket());
             player.sendPacket(biomes().registryDataPacket());

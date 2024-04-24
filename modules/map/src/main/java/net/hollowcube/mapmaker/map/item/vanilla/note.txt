@@ -1,0 +1,33 @@
+
+Any normal block (with can place on condition)
+- notably: slime, ice, tnt (breakable?)
+- can be placed on any block
+
+Water bucket
+- Place water source block (For your client, reset on reset)
+
+Firework
+- Spawn firework entity and attach to player if they are gliding (otherwise do nothing)
+- Set velocity and duration per firework
+
+Elytra
+- IDK what needs to be implemented for this
+
+Sword - NOT NOW
+- requires other entities to interact with/hit
+
+Crossbow - NOT NOW
+- other entities to interact with
+- target block interaction
+- dripleaf interaction
+
+Trident
+
+Mace - YES
+- Create explosion on hit when falling from a height
+
+Wind Charge - YES
+- Create explosion when hitting the ground or another non-player entity
+
+Ender Pearl
+- Teleport to the hit location
