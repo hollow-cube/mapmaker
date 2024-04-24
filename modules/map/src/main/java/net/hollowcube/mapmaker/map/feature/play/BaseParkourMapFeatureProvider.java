@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -22,6 +23,7 @@ import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
@@ -57,6 +59,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
     public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
+
+    // Holds the CheckpointEffectData applied to the player on first spawn.
+    public static final Tag<CheckpointEffectData> SPAWN_CHECKPOINT_EFFECTS = DFU.Tag(CheckpointEffectData.CODEC, "spawn_checkpoint_effects");
 
     private static final Sound ADD_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 1f);
     private static final Sound REMOVE_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 0.1f);
@@ -113,7 +118,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!event.getMapWorld().isPlaying(player)) return;
+        var world = event.getMapWorld();
+        if (!world.isPlaying(player)) return;
 
         MapCompletionAnimation.cancel(player); // In case the player resets themselves
 
@@ -148,7 +154,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             ve.setVisibilityFunc(visibilityPredicate);
 
         var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState != null) updatePlayerFromState(player, saveState.playState());
+        if (saveState != null) {
+            // If this is a fresh save state, attempt to add the base effect state
+            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && saveState.getPlayStartTime() == 0) {
+                updateCheckpointEffectState(player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), saveState.playState());
+            }
+
+            updatePlayerFromState(player, saveState.playState());
+        }
     }
 
     public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
@@ -226,11 +239,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         state.setTimeLimit(-1); // Time always reset on checkpoint
         player.removeTag(COUNTDOWN_END);
         updateStateFromPlayer(player, state);
-        updateBaseEffectState(player, data, state);
-        if (data.lives() > 0) {
-            state.setMaxLives(data.lives());
-            state.setLives(data.lives());
-        }
+        updateCheckpointEffectState(player, data, state);
 
         // Cache the last state so that we can reset back here.
         state.setLastState(new SaveState.PlayState(
@@ -430,6 +439,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
         });
+    }
+
+    private void updateCheckpointEffectState(@NotNull Player player, @NotNull CheckpointEffectData data, @NotNull SaveState.PlayState state) {
+        updateBaseEffectState(player, data, state);
+        if (data.lives() > 0) {
+            state.setMaxLives(data.lives());
+            state.setLives(data.lives());
+        }
     }
 
     private void updateBaseEffectState(@NotNull Player player, @NotNull BaseEffectData data, @NotNull SaveState.PlayState state) {
