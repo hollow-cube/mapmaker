@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
@@ -41,7 +42,7 @@ public class SessionManager {
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
 
-    private final Predicate<Player> hasSeeVanishedPerm;
+    private final Predicate<String> hasSeeVanishedPerm;
 
     public SessionManager(
             @NotNull SessionService sessionService,
@@ -200,7 +201,7 @@ public class SessionManager {
 
     @SuppressWarnings("UnstableApiUsage")
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(hasSeeVanishedPerm);
+        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
     }
 
     @SuppressWarnings("UnstableApiUsage")

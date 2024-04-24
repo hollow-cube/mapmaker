@@ -42,6 +42,13 @@ definition mapmaker/platform {
     relation friend: mapmaker/player
 
     relation hypercube: mapmaker/player with is_not_expired
+    relation u_build_tools: mapmaker/player
+    relation u_map_size_2: mapmaker/player
+    relation u_map_size_3: mapmaker/player
+    relation u_map_size_4: mapmaker/player
+    relation u_map_slot_3: mapmaker/player
+    relation u_map_slot_4: mapmaker/player
+    relation u_map_slot_5: mapmaker/player
 
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
     permission global_map_superadmin = admin
@@ -69,8 +76,17 @@ definition mapmaker/platform {
     // === Generic ===
     permission bypass_whitelist = admin + dev + mod + crt + friend
 
-    // Hypercube
+    // Hypercube + Upgrades
     permission has_hypercube = hypercube
+
+    permission upg_build_tools = u_build_tools + has_hypercube
+    permission upg_map_slot_3 = u_map_slot_3 + has_hypercube
+    permission upg_map_slot_4 = u_map_slot_4 + has_hypercube
+    permission upg_map_slot_5 = u_map_slot_5 + has_hypercube
+    permission upg_map_size_2 = u_map_size_2 + has_hypercube
+    permission upg_map_size_3 = u_map_size_3 + has_hypercube
+    permission upg_map_size_4 = u_map_size_4 + has_hypercube
+
 }
 
 // A player is any player on mapmaker (identified by their uuid)

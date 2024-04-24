@@ -635,7 +635,6 @@ public class EditMap extends View {
             newMapSlots[slot] = null;
             mapPlayerData.update(new MapPlayerData(
                     mapPlayerData.id(),
-                    mapPlayerData.unlockedSlots(),
                     newMapSlots,
                     mapPlayerData.lastPlayedMap(),
                     mapPlayerData.lastEditedMap()

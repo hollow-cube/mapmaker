@@ -9,11 +9,13 @@ import java.util.function.Predicate;
 @Blocking
 public interface PermManager {
 
-    boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPerm perm);
+    void invalidate(@NotNull PlatformPermLike perm, @NotNull String playerId);
+
+    boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPermLike perm);
 
     boolean hasMapPermission(@NotNull Player player, @NotNull String mapId, @NotNull MapPerm perm);
 
-    default @NotNull net.hollowcube.command.CommandCondition createPlatformCondition2(@NotNull PlatformPerm perm) {
+    default @NotNull net.hollowcube.command.CommandCondition createPlatformCondition2(@NotNull PlatformPermLike perm) {
         return (sender, context) -> sender instanceof Player p && hasPlatformPermission(p, perm)
                 ? net.hollowcube.command.CommandCondition.ALLOW
                 : net.hollowcube.command.CommandCondition.HIDE;
@@ -27,6 +29,6 @@ public interface PermManager {
      * @param perm The permission to test against
      * @return A predicate that returns true if the player has the permission
      */
-    @NotNull Predicate<Player> createPrefetchedCondition(@NotNull PlatformPerm perm);
+    @NotNull Predicate<String> createPrefetchedCondition(@NotNull PlatformPermLike perm);
 
 }

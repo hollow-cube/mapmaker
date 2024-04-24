@@ -1,59 +1,127 @@
 package net.hollowcube.mapmaker.gui.store;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
+import net.hollowcube.mapmaker.store.ShopUpgradeCache;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public class BuyAddonsView extends View {
 
-    private @Outlet("map_size_switch") Switch mapSizeSwitch;
-    private @Outlet("map_slots_switch") Switch mapSlotsSwitch;
+    private @ContextObject PlayerService playerService;
+    private @ContextObject PermManager permManager;
+    private @ContextObject Player player;
+
     private @Outlet("terraform_switch") Switch terraformSwitch;
-    private @Outlet("folder_switch") Switch folderSwitch;
+    private @Outlet("map_slots_switch") Switch mapSlotsSwitch;
+    // Boosts
+    // Folders
+    private @Outlet("map_size_switch") Switch mapSizeSwitch;
+    // Personal world
 
     public BuyAddonsView(@NotNull Context context) {
         super(context);
 
-        mapSizeSwitch.setOption(0);
-        mapSlotsSwitch.setOption(0);
-        terraformSwitch.setOption(0);
-        folderSwitch.setOption(0);
-        // TODO base the set option on what packages the user has purchased
-    }
+        terraformSwitch.setOption(ShopUpgradeCache.has(player, ShopUpgrade.BUILD_TOOLS, true));
 
-    // TODO switch on button click to see the other buttons
-    private void testMapSize() {
-        switch (mapSizeSwitch.getOption()) {
-            case 0 -> mapSizeSwitch.setOption(1);
-            case 1 -> mapSizeSwitch.setOption(2);
-            case 2 -> mapSizeSwitch.setOption(3);
-            case 3 -> mapSizeSwitch.setOption(0);
+        if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_3, true)) {
+            mapSlotsSwitch.setOption(0);
+        } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_4, true)) {
+            mapSlotsSwitch.setOption(1);
+        } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_5, true)) {
+            mapSlotsSwitch.setOption(2);
+        } else {
+            mapSlotsSwitch.setOption(3);
+        }
+
+        if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_2, true)) {
+            mapSizeSwitch.setOption(0);
+        } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_3, true)) {
+            mapSizeSwitch.setOption(1);
+        } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_4, true)) {
+            mapSizeSwitch.setOption(2);
+        } else {
+            mapSizeSwitch.setOption(3);
         }
     }
 
-    private void testMapSlot() {
-        switch (mapSlotsSwitch.getOption()) {
-            case 0 -> mapSlotsSwitch.setOption(1);
-            case 1 -> mapSlotsSwitch.setOption(2);
-            case 2 -> mapSlotsSwitch.setOption(3);
-            case 3 -> mapSlotsSwitch.setOption(0);
+    @Action(value = "terraform_advanced", async = true)
+    private void handleBuildTools() {
+        submitUpgradePurchase(ShopUpgrade.BUILD_TOOLS);
+    }
+
+    @Action(value = "map_slots_3", async = true)
+    private void handleMapSlot3() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SLOT_3);
+    }
+
+    @Action(value = "map_slots_4", async = true)
+    private void handleMapSlot4() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SLOT_4);
+    }
+
+    //todo boosts
+
+    //todo folders
+
+    @Action(value = "map_size_large", async = true)
+    private void handleMapSizeLarge() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SIZE_2);
+    }
+
+    @Action(value = "map_size_massive", async = true)
+    private void handleMapSizeMassive() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SIZE_3);
+    }
+
+    @Action(value = "map_size_colossal", async = true)
+    private void handleMapSizeColossal() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SIZE_4);
+    }
+
+    //todo personal worlds
+
+    private void submitUpgradePurchase(@NotNull ShopUpgrade upgrade) {
+        if (ShopUpgradeCache.has(player, upgrade, true))
+            return; // Sanity check
+
+        var playerData = PlayerDataV2.fromPlayer(player);
+        var backpack = PlayerBackpack.fromPlayer(player);
+        if (!upgrade.canAfford(playerData, backpack)) {
+            // Cannot afford, prompt to buy more cubits
+
+            //todo
+            player.closeInventory();
+            player.sendMessage("todo you are being prompted to buy more cubits!!!");
+            return;
+        }
+
+        //todo this should have a confirm gui, maybe with some extra details
+        try {
+            var meta = new JsonObject();
+            meta.addProperty("source", "ingame/store");
+            playerService.buyUpgrade(playerData.id(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
+
+            // Success! Preempt the update message and refresh cache
+            playerData.setCubits(playerData.cubits() - upgrade.cubits());
+            permManager.invalidate(upgrade.directPerm(), playerData.id());
+            permManager.invalidate(upgrade.indirectPerm(), playerData.id());
+        } catch (PlayerService.NotFoundError e) {
+            player.sendMessage("todo player not found");
+            return;
         }
     }
 
-    private void testTerraform() {
-        switch (terraformSwitch.getOption()) {
-            case 0 -> terraformSwitch.setOption(1);
-            case 1 -> terraformSwitch.setOption(2);
-            case 2 -> terraformSwitch.setOption(0);
-        }
-    }
-
-    private void testFolder() {
-        switch (folderSwitch.getOption()) {
-            case 0 -> folderSwitch.setOption(1);
-            case 1 -> folderSwitch.setOption(0);
-        }
-    }
 }

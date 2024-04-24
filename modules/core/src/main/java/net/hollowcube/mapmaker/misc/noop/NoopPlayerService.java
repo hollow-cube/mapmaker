@@ -51,6 +51,11 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
+    public void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
         return new JsonObject();
     }

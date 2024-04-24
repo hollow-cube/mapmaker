@@ -72,7 +72,22 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
                 .uri(URI.create(url + "/players/" + id + "/cosmetics"));
         var res = doRequest("buyCosmetic", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
-            throw new SessionService.InternalError("Failed to update session (" + res.statusCode() + "): " + res.body());
+            throw new SessionService.InternalError("Failed to buy cosmetic (" + res.statusCode() + "): " + res.body());
+    }
+
+    @Override
+    public void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta) {
+        logger.log(System.Logger.Level.INFO, "buy upgrade for {0}: {1}", playerId, upgradeId);
+        var reqBodyData = new JsonObject();
+        reqBodyData.addProperty("upgradeId", upgradeId);
+        reqBodyData.addProperty("cubits", cubits);
+        reqBodyData.add("meta", meta);
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(GSON.toJson(reqBodyData)))
+                .uri(URI.create(url + "/players/" + playerId + "/upgrades"));
+        var res = doRequest("buyUpgrade", req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 200)
+            throw new SessionService.InternalError("Failed to buy upgrade (" + res.statusCode() + "): " + res.body());
     }
 
     @Override

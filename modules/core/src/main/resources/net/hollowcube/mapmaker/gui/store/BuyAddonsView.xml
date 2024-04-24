@@ -1,60 +1,95 @@
 <?xml version="1.0" ?>
-<component width="9" height="5" align="ltr">
-    <spacer width="9" height="1">
-    </spacer>
-    <spacer/>
-    <switch id="map_size_switch" width="1" height="1">
-        <button id="map_size_large" width="1" height="1"
-                translationKey="gui.store.addons.map_size_large"
-                sprite="minecraft:map"/>
-        <button id="map_size_massive" width="1" height="1"
-                translationKey="gui.store.addons.map_size_massive"
-                sprite="minecraft:map"/>
-        <button id="map_size_colossal" width="1" height="1"
-                translationKey="gui.store.addons.map_size_colossal"
-                sprite="minecraft:map"/>
-        <button id="map_size_maxed" width="1" height="1"
-                translationKey="gui.store.addons.map_size_maxed"
-                sprite="minecraft:map"/>
-    </switch>
-    <switch id="map_slots_switch" width="1" height="1">
-        <button id="map_slots_3" width="1" height="1"
-                translationKey="gui.store.addons.map_slots_3"
-                sprite="minecraft:chain"/>
-        <button id="map_slots_4" width="1" height="1"
-                translationKey="gui.store.addons.map_slots_4"
-                sprite="minecraft:chain"/>
-        <button id="map_slots_5" width="1" height="1"
-                translationKey="gui.store.addons.map_slots_5"
-                sprite="minecraft:chain"/>
-        <button id="map_slots_maxed" width="1" height="1"
-                translationKey="gui.store.addons.map_slots_maxed"
-                sprite="minecraft:chain"/>
-    </switch>
-    <switch id="terraform_switch" width="1" height="1">
-        <button id="terraform_advanced" width="1" height="1"
-                translationKey="gui.store.addons.terraform_advanced"
-                sprite="minecraft:wooden_axe"/>
-        <button id="terraform_unlimited" width="1" height="1"
-                translationKey="gui.store.addons.terraform_unlimited"
-                sprite="minecraft:stone_axe"/>
-        <button id="terraform_maxed" width="1" height="1"
-                translationKey="gui.store.addons.terraform_maxed"
-                sprite="minecraft:iron_axe"/>
-    </switch>
-    <spacer/>
-    <switch id="folder_switch" width="1" height="1">
+<component width="9" height="5" align="ttb" sprite="store/addons/container">
+    <spacer width="9" height="1"/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <!-- Build Tools -->
+        <switch id="terraform_switch" width="1" height="1">
+            <button id="terraform_advanced" width="1" height="1"
+                    translationKey="gui.store.addons.terraform_advanced"
+                    sprite="store/addons/build_tools_icon"
+                    backgroundSprite="store/addons/build_tools_locked_bg"/>
+            <button id="terraform_maxed" width="1" height="1"
+                    translationKey="gui.store.addons.terraform_maxed"
+                    sprite="store/addons/build_tools_unlocked"/>
+        </switch>
+
+        <spacer/>
+
+        <!-- Map Slots -->
+        <switch id="map_slots_switch" width="1" height="1">
+            <button id="map_slots_3" width="1" height="1"
+                    translationKey="gui.store.addons.map_slots_3"
+                    sprite="store/addons/map_slot_icon"
+                    backgroundSprite="store/addons/map_slot_locked_bg"/>
+            <button id="map_slots_4" width="1" height="1"
+                    translationKey="gui.store.addons.map_slots_4"
+                    sprite="store/addons/map_slot_icon"
+                    backgroundSprite="store/addons/map_slot_locked_bg"/>
+            <button id="map_slots_5" width="1" height="1"
+                    translationKey="gui.store.addons.map_slots_5"
+                    sprite="store/addons/map_slot_icon"
+                    backgroundSprite="store/addons/map_slot_locked_bg"/>
+            <button id="map_slots_maxed" width="1" height="1"
+                    translationKey="gui.store.addons.map_slots_maxed"
+                    sprite="store/addons/map_slot_unlocked"/>
+        </switch>
+
+        <spacer/>
+
+        <!-- Boosts -->
+        <button id="boosts" width="1" height="1"
+                translationKey="gui.store.addons.boosts"
+                sprite="store/addons/map_boost_icon"
+                backgroundSprite="store/addons/map_boost_locked_bg"/>
+
+        <spacer/>
+
+        <!-- Folder -->
         <button id="folder" width="1" height="1"
                 translationKey="gui.store.addons.folder"
-                sprite="minecraft:book"/>
-        <button id="folder_maxed" width="1" height="1"
-                translationKey="gui.store.addons.folder_maxed"
-                sprite="minecraft:writable_book"/>
-    </switch>
-    <button id="trusted_members" width="1" height="1"
-            translationKey="gui.store.addons.trusted_member"
-            sprite="minecraft:totem_of_undying"/>
-    <button id="boosts" width="1" height="1"
-            translationKey="gui.store.addons.boosts"
-            sprite="minecraft:firework_rocket"/>
+                sprite="store/addons/folders_locked_bg"/>
+
+    </box>
+
+    <spacer width="9" height="1"/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <!-- Map Size -->
+        <switch id="map_size_switch" width="1" height="1">
+            <button id="map_size_large" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_large"
+                    sprite="store/addons/map_size_2_icon"
+                    backgroundSprite="store/addons/map_size_2_locked_bg"/>
+            <button id="map_size_massive" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_massive"
+                    sprite="store/addons/map_size_3_icon"
+                    backgroundSprite="store/addons/map_size_3_locked_bg"/>
+            <button id="map_size_colossal" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_colossal"
+                    sprite="store/addons/map_size_4_icon"
+                    backgroundSprite="store/addons/map_size_4_locked_bg"/>
+            <button id="map_size_maxed" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_maxed"
+                    sprite="store/addons/map_size_4_unlocked"/>
+        </switch>
+
+        <spacer/>
+
+        <!-- Personal world -->
+        <switch id="personal_world_switch" width="1" height="1">
+            <button id="personal_world_locked" width="1" height="1"
+                    translationKey="gui.store.addons.personal_world_locked"
+                    sprite="store/addons/personal_world_locked_bg"/>
+            <button id="personal_world_unlocked" width="1" height="1"
+                    translationKey="gui.store.addons.personal_world_unlocked"
+                    sprite="store/addons/personal_world_locked_bg"/>
+        </switch>
+
+    </box>
+
 </component>

@@ -72,6 +72,7 @@ import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
+import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.kyori.adventure.text.Component;
@@ -179,6 +180,8 @@ public abstract class AbstractMapServer implements MapServer {
             if (spicedbToken == null) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
         }
+
+        ShopUpgradeCache.init(permManager);
     }
 
     protected abstract @NotNull String name();

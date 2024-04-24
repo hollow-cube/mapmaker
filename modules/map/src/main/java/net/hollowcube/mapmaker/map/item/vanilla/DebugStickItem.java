@@ -1,9 +1,9 @@
-package net.hollowcube.mapmaker.map.item;
+package net.hollowcube.mapmaker.map.item.vanilla;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
