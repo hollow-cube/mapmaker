@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.vnext.MapChangeSpawnPointEvent;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,8 +49,10 @@ public class SetSpawnCommand extends CommandDsl {
             return;
         }
 
-        var map = MapWorld.forPlayer(player).map();
-        map.settings().setSpawnPoint(newSpawnPoint);
+        var world = MapWorld.forPlayer(player);
+        world.callEvent(new MapChangeSpawnPointEvent(world, newSpawnPoint));
+        world.map().settings().setSpawnPoint(newSpawnPoint);
+
         player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
                 Component.text(newSpawnPoint.blockX()).hoverEvent(Component.text(newSpawnPoint.x(), NamedTextColor.WHITE)),
                 Component.text(newSpawnPoint.blockY()).hoverEvent(Component.text(newSpawnPoint.y(), NamedTextColor.WHITE)),

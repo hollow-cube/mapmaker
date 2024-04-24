@@ -158,7 +158,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                     .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
                     .schedule();
         }
-        //todo add a property to Minestom to run async tasks in virtual threads
     }
 
     @Override
