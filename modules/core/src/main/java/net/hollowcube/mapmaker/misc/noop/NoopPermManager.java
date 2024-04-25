@@ -16,6 +16,11 @@ public class NoopPermManager implements PermManager {
     }
 
     @Override
+    public void overwrite(@NotNull PlatformPermLike perm, @NotNull String playerId, boolean value) {
+
+    }
+
+    @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPermLike perm) {
         return true;
     }

@@ -11,6 +11,11 @@ public interface PermManager {
 
     void invalidate(@NotNull PlatformPermLike perm, @NotNull String playerId);
 
+    /**
+     * Overwrites the permission value for the given player locally. An invalidate call will remove this value
+     */
+    void overwrite(@NotNull PlatformPermLike perm, @NotNull String playerId, boolean value);
+
     boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPermLike perm);
 
     boolean hasMapPermission(@NotNull Player player, @NotNull String mapId, @NotNull MapPerm perm);
