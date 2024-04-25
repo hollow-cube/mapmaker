@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,13 +115,18 @@ public class BuyAddonsView extends View {
             meta.addProperty("source", "ingame/store");
             playerService.buyUpgrade(playerData.id(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
 
-            // Success! Preempt the update message and refresh cache
+            // Success! Preempt the update message by updating locally
             playerData.setCubits(playerData.cubits() - upgrade.cubits());
-            permManager.invalidate(upgrade.directPerm(), playerData.id());
-            permManager.invalidate(upgrade.indirectPerm(), playerData.id());
+            permManager.overwrite(upgrade.directPerm(), playerData.id(), true);
+            permManager.overwrite(upgrade.indirectPerm(), playerData.id(), true);
+
+            player.closeInventory();
+            player.sendMessage("You unlocked " + upgrade.name() + "!");
         } catch (PlayerService.NotFoundError e) {
             player.sendMessage("todo player not found");
-            return;
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+            player.sendMessage("todo something went wrong");
         }
     }
 

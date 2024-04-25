@@ -70,6 +70,17 @@ public class PermManagerImpl implements PermManager {
     }
 
     @Override
+    public void overwrite(@NotNull PlatformPermLike perm, @NotNull String playerId, boolean value) {
+        var cache = platformPermissions.get(perm.permName());
+        if (cache != null) cache.put(playerId, value);
+
+        prefetchConditions.forEach(c -> {
+            if (!c.perm.permName().equals(perm.permName())) return;
+            c.allowedPlayers.add(playerId);
+        });
+    }
+
+    @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPermLike perm) {
         var cache = platformPermissions.computeIfAbsent(perm.permName(), k -> Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES)
