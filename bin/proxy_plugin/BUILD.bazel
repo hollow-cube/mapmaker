@@ -29,6 +29,7 @@ java_library(
     deps = [
         "velocity",
         "//modules/core",
+        "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_jetbrains_annotations",
     ],
 )
