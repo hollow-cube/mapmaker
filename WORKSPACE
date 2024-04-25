@@ -49,16 +49,15 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:dev",
-        #        "net.minestom:minestom-snapshots:e8e22a2b15",
-        "dev.hollowcube:polar:dev",
-        "dev.hollowcube:dataconverter:dev",
+        "net.minestom:minestom-snapshots:1_20_5-d51c6c75e2",
+        "dev.hollowcube:polar:1.9.0",
+        "dev.hollowcube:dataconverter:1.20.5-rv1",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 
         # Misc
         "com.google.code.gson:gson:2.10.1",
         "de.marhali:json5-java:2.0.0",
-        "it.unimi.dsi:fastutil:8.5.12",
+        "it.unimi.dsi:fastutil:8.5.13",
         "org.apache.kafka:kafka-clients:3.4.0",
         "org.spongepowered:configurate-core:4.1.2",
         "org.spongepowered:configurate-yaml:4.1.2",
@@ -125,7 +124,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-        "m2Local",
+        #        "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
