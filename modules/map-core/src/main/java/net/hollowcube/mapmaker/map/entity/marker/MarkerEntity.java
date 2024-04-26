@@ -100,6 +100,20 @@ public class MarkerEntity extends MapEntity {
     }
 
     @Override
+    public void readData(@NotNull CompoundBinaryTag tag) {
+        super.readData(tag);
+
+        tagHandler().updateContent(tag.getCompound("data"));
+    }
+
+    @Override
+    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+        super.writeData(tag);
+
+        tag.put("data", tagHandler().asCompound());
+    }
+
+    @Override
     public void updateNewViewer(@NotNull Player player) {
         // Do not call super because we do not need to spawn the entity on the client.
 
