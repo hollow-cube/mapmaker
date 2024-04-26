@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
@@ -116,10 +117,13 @@ public class HubMapWorld extends AbstractMapWorld {
             }
         }
 
-        var instance = (MapInstance) instance();
-        instance.setChunkLoader(new PolarLoader(PolarReader.read(mapWorldData))
+        var loader = new PolarLoader(PolarReader.read(mapWorldData, PolarDataFixer.INSTANCE))
                 .setWorldAccess(new ReadWorldAccess(this, new HubMarkerLoader()))
-                .setLoadLighting(false));
+                .setLoadLighting(false);
+        var instance = (MapInstance) instance();
+        instance.setChunkLoader(loader);
+
+        loader.loadInstance(instance); // Load world data
 
         var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
         ChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
