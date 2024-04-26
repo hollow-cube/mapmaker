@@ -14,6 +14,9 @@ public final class HCTypeRegistry {
     public static final MCDataType WORLD = new MCDataType("hc:world"); // Polar world user data
     public static final MCDataType CHUNK = new MCDataType("hc:chunk"); // Polar chunk user data
 
+    public static final MCDataType ENTITIY = MCTypeRegistry.ENTITY;
+    public static final MCDataType BLOCK_ENTITY = MCTypeRegistry.TILE_ENTITY;
+
     static {
         try {
             Class.forName(MCTypeRegistry.class.getName()); // Make sure MCTypeRegistry has definitely done static init

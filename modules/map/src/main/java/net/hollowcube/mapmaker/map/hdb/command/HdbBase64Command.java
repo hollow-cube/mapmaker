@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemComponent;
@@ -77,13 +77,10 @@ public class HdbBase64Command extends CommandDsl {
     }
 
     private static @NotNull String extractBlockBase64(@NotNull Block block) {
-        var blockData = block.nbt();
-        if (blockData == null) return null;
-        var skullOwner = blockData.getCompound("SkullOwner");
-        var properties = skullOwner.getCompound("Properties");
-        var textures = properties.getList("textures");
-        if (textures.size() < 1) return null;
-        var texture = (CompoundBinaryTag) textures.get(0);
-        return texture.getString("Value");
+        var profile = PlayerHeadBlockHandler.extractProfile(block);
+        if (profile == null) return "";
+        var skin = profile.skin();
+        if (skin == null) return "";
+        return skin.textures();
     }
 }

@@ -56,6 +56,7 @@ import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
+import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.metrics.MetricWriterImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
@@ -107,6 +108,10 @@ import java.util.function.Function;
 @SuppressWarnings("UnstableApiUsage")
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
+
+    static {
+        var a = HCTypeRegistry.class; // Force init
+    }
 
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;

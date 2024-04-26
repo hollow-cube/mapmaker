@@ -161,14 +161,17 @@ public class CommandNode {
 
         // Try to apply one of the children
         if (children != null && !children.isEmpty()) {
-            CommandResult.SyntaxError pendingError = null;
+            CommandResult pendingError = null;
             for (var pair : children) {
                 var node = pair.node();
                 var argument = pair.argument();
                 // If there is a condition on the child we need to evaluate it
                 if (node.condition != null) {
                     var result = node.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
-                    if (result == CommandCondition.DENY) return CommandResult.denied(this);
+                    if (result == CommandCondition.DENY) {
+                        if (pendingError == null) pendingError = CommandResult.denied(this);
+                        continue;
+                    }
                     if (result == CommandCondition.HIDE) {
                         continue;
                     }
@@ -198,7 +201,9 @@ public class CommandNode {
             // If we reach here, we have no matching child, so return the pending error
             if (pendingError != null) {
                 Objects.requireNonNull(pendingError, "pendingError sanity check");
-                return CommandResult.syntaxError(pendingError.start(), pendingError.arg(), this instanceof RootCommandNode);
+                if (pendingError instanceof CommandResult.SyntaxError syntaxError) {
+                    return CommandResult.syntaxError(syntaxError.start(), syntaxError.arg(), this instanceof RootCommandNode);
+                } else return pendingError;
             }
         }
 

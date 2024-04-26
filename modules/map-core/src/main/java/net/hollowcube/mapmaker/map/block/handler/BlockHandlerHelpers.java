@@ -47,7 +47,7 @@ final class BlockHandlerHelpers {
         return builder.build();
     }
 
-    private static void updateBlock(@NotNull BlockHandler.PlayerPlacement placement, @NotNull CompoundBinaryTag blockData) {
+    public static void updateBlock(@NotNull BlockHandler.PlayerPlacement placement, @NotNull CompoundBinaryTag blockData) {
         // Note that we refetch the block from instance rather than use the one in `placement`. This is because the
         // one in `placement` was not updated after the placement rule changed it.
         // todo this is realistically a Minestom bug that should be fixed

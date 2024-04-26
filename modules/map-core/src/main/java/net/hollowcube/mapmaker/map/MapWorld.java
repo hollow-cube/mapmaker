@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import ca.spottedleaf.dataconverter.minecraft.MCVersions;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
-import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = HCVersions.V1_20_4_HC1;
+    int DATA_VERSION = MCVersions.V1_20_5;
 
     @NonBlocking
     static @NotNull MapWorld forPlayer(@NotNull Player player) {

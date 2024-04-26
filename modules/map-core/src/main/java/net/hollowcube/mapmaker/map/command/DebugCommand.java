@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
+import net.kyori.adventure.nbt.TagStringIOExt;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -140,7 +141,8 @@ public class DebugCommand extends CommandDsl {
             player.sendMessage("Block: " + block.handler().getNamespaceId());
             bd.sendDebugInfo(player, block);
         } else {
-            player.sendMessage("Block: " + block);
+            player.sendMessage("Block: " + block.handler().getNamespaceId() + "@" + block.handler().getClass().getSimpleName());
+            player.sendMessage(block.nbt() == null ? "No block NBT" : TagStringIOExt.writeTag(block.nbt()));
         }
     }
 

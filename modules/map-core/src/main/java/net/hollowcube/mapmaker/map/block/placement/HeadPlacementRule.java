@@ -1,23 +1,18 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
-import net.kyori.adventure.nbt.BinaryTag;
-import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class HeadPlacementRule extends BaseBlockPlacementRule {
-    private static final Tag<BinaryTag> SKULL_OWNER = Tag.NBT("SkullOwner");
 
     public HeadPlacementRule(@NotNull Block block) {
         super(block);
@@ -71,30 +66,10 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
 
         var profile = itemStack.get(ItemComponent.PROFILE);
         if (profile == null) return block;
-        var skin = profile.skin();
-        String textures = skin.textures();
-        if (textures == null) return block;
 
-        /*
-            SkullOwner (Compound)
-                |_ Id (UUID)
-                |_ Properties (Compound)
-                    |_ textures (Compound List)
-                        |_ Value (String)
-            See https://minecraft.fandom.com/wiki/Head#Block_data
-         */
-        var builder = CompoundBinaryTag.builder();
-        if (profile.uuid() != null)
-            builder.put("Id", UniqueIdUtils.toNbt(profile.uuid()));
-        builder.put("Properties", CompoundBinaryTag.builder()
-                .put("textures", ListBinaryTag.builder(BinaryTagTypes.COMPOUND)
-                        .add(CompoundBinaryTag.builder()
-                                .putString("Value", textures)
-                                .build())
-                        .build())
+        return block.withTag(PlayerHeadBlockHandler.PROFILE, CompoundBinaryTag.builder()
+                .put("profile", ItemComponent.PROFILE.write(profile))
                 .build());
-
-        return block.withTag(SKULL_OWNER, builder.build());
     }
 
 }

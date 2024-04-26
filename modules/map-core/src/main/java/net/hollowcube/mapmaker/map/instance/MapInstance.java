@@ -2,11 +2,9 @@ package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
+import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
-import net.hollowcube.polar.PolarLoader;
-import net.hollowcube.polar.PolarWorld;
-import net.hollowcube.polar.PolarWorldAccess;
-import net.hollowcube.polar.PolarWriter;
+import net.hollowcube.polar.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -20,8 +18,6 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -52,24 +48,22 @@ public class MapInstance extends InstanceContainer {
     }
 
     public void load(byte @NotNull [] worldData, @Nullable PolarWorldAccess worldAccess) {
-        try {
-            var loader = new PolarLoader(new ByteArrayInputStream(worldData));
-            if (worldAccess != null) loader.setWorldAccess(worldAccess);
-            setChunkLoader(loader.setLoadLighting(false));
+        var world = PolarReader.read(worldData, PolarDataFixer.INSTANCE);
 
-            // Load the world data
-            loader.loadInstance(this);
+        var loader = new PolarLoader(world);
+        if (worldAccess != null) loader.setWorldAccess(worldAccess);
+        setChunkLoader(loader.setLoadLighting(false));
 
-            // Load all the chunks immediately
-            var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
-            loader.world().chunks().forEach(chunk -> loadingChunks.add(loadChunk(chunk.x(), chunk.z())));
-            CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
+        // Load the world data
+        loader.loadInstance(this);
 
-            // Delete the polar world to avoid the second copy of the world data
-            setChunkLoader(NoopChunkLoader.INSTANCE);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // Load all the chunks immediately
+        var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
+        loader.world().chunks().forEach(chunk -> loadingChunks.add(loadChunk(chunk.x(), chunk.z())));
+        CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
+
+        // Delete the polar world to avoid the second copy of the world data
+        setChunkLoader(NoopChunkLoader.INSTANCE);
     }
 
     @Blocking
