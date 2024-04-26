@@ -26,9 +26,9 @@ public final class MapEntities {
 
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
 
-        MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity::new);
-        MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity::new);
-        MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity::new);
+        MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity.Block::new);
+        MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity.Item::new);
+        MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity.Text::new);
 
         MapEntityType.override(EntityType.MARKER, MarkerEntity::new);
     }

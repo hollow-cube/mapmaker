@@ -1,43 +1,30 @@
 package net.hollowcube.terraform.compat.axiom.listener;
 
-import com.google.gson.JsonElement;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.*;
 import net.hollowcube.terraform.compat.axiom.world.property.WorldPropertiesRegistry;
+import net.hollowcube.terraform.entity.TerraformEntity;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
 import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
-import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
-import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
-import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
-import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Locale;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class AxiomPacketListener {
@@ -184,7 +171,8 @@ public final class AxiomPacketListener {
                 if (preEvent.isCancelled()) continue;
 
                 var entity = preEvent.getConstructor().apply(entityType, entry.uuid());
-                applyEntityMetadataFromNbt(entity.getEntityMeta(), nbt);
+                if (entity instanceof TerraformEntity tfEntity)
+                    entity.editEntityMeta(EntityMeta.class, $ -> tfEntity.readData(nbt));
 
                 var event = new TerraformSpawnEntityEvent(player, instance, entity, entry.pos());
                 EventDispatcher.callCancellable(event, () -> event.getEntity().setInstance(instance, event.getPosition()));
@@ -224,10 +212,12 @@ public final class AxiomPacketListener {
 
             if (entity.getEntityType().equals(EntityType.MARKER)) {
                 // Markers have special NBT handling for now.
+                //todo i think i can get rid of this special case now that we have TerraformEntity#readData
                 var event = new TerraformAxiomUpdateMarkerDataEvent(player, entry.uuid(), entry.nbt());
                 EventDispatcher.call(event);
             } else {
-                applyEntityMetadataFromNbt(entity.getEntityMeta(), entry.nbt());
+                if (entity instanceof TerraformEntity tfEntity)
+                    entity.editEntityMeta(EntityMeta.class, $ -> tfEntity.readData(entry.nbt()));
                 EventDispatcher.call(new TerraformModifyEntityEvent(entity));
             }
 
@@ -268,166 +258,6 @@ public final class AxiomPacketListener {
     private @Nullable AxiomMarkerDataPacket.Entry createAddMarkerEntry(@NotNull Entity entity) {
         if (!entity.getEntityType().equals(EntityType.MARKER)) return null;
         return new AxiomMarkerDataPacket.Entry(entity.getUuid(), entity.getPosition(), null, null, null, 0, 0, 0);
-    }
-
-    private void applyEntityMetadataFromNbt(@NotNull EntityMeta entityMeta, @NotNull CompoundBinaryTag nbt) {
-        //todo i would prefer to generate this. need to look into including entity metadata in minestom data.
-        entityMeta.setNotifyAboutChanges(false);
-        for (var entry : nbt) {
-            var key = entry.getKey();
-            if ("id".equals(key)) continue;
-
-            var value = entry.getValue();
-            var applied = switch (entityMeta) {
-                case BlockDisplayMeta blockDisplayMeta -> applyBlockDisplayMetaField(blockDisplayMeta, key, value);
-                case ItemDisplayMeta itemDisplayMeta -> applyItemDisplayMetaField(itemDisplayMeta, key, value);
-                case TextDisplayMeta textDisplayMeta -> applyTextDisplayMetaField(textDisplayMeta, key, value);
-                default -> applyEntityMetaField(entityMeta, key, value);
-            };
-            if (!applied) {
-                logger.warn("Unhandled entity metadata field: {} -> {}", key, value);
-            }
-        }
-        entityMeta.setNotifyAboutChanges(true);
-    }
-
-    private boolean applyEntityMetaField(@NotNull EntityMeta meta, @NotNull String key, @NotNull BinaryTag value) {
-        return false; //todo
-    }
-
-    private boolean applyDisplayMetaField(@NotNull AbstractDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
-        if (applyEntityMetaField(meta, key, value)) return true;
-
-        switch (key) {
-            case "start_interpolation" -> meta.setTransformationInterpolationStartDelta(assertInt(value));
-            case "interpolation_duration" -> meta.setTransformationInterpolationDuration(assertInt(value));
-            case "teleport_duration" -> meta.setPosRotInterpolationDuration(assertInt(value));
-            case "transformation" -> {
-                var transform = assertCompound(value);
-                var translation = assertFloatArray(transform.get("translation"), 3);
-                meta.setTranslation(new Vec(translation[0], translation[1], translation[2]));
-                var scale = assertFloatArray(transform.get("scale"), 3);
-                meta.setScale(new Vec(scale[0], scale[1], scale[2]));
-                meta.setLeftRotation(assertFloatArray(transform.get("left_rotation"), 4));
-                meta.setRightRotation(assertFloatArray(transform.get("right_rotation"), 4));
-            }
-            case "billboard" -> meta.setBillboardRenderConstraints(AbstractDisplayMeta.
-                    BillboardConstraints.valueOf(assertString(value).toUpperCase(Locale.ROOT)));
-            //todo brightness override
-            case "view_range" -> meta.setViewRange(assertFloat(value));
-            case "shadow_radius" -> meta.setShadowRadius(assertFloat(value));
-            case "shadow_strength" -> meta.setShadowStrength(assertFloat(value));
-            case "width" -> meta.setWidth(assertFloat(value));
-            case "height" -> meta.setHeight(assertFloat(value));
-            case "glow_color_override" -> meta.setGlowColorOverride(assertInt(value));
-        }
-
-        return false;
-    }
-
-    private boolean applyBlockDisplayMetaField(@NotNull BlockDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
-        if (applyDisplayMetaField(meta, key, value)) return true;
-
-        if ("block_state".equals(key)) {
-            var compound = assertCompound(value);
-
-            var name = assertString(compound.get("Name"));
-            var block = Block.fromNamespaceId(name);
-            Check.notNull(block, "unknown block: " + name);
-
-            var propertyMap = compound.getCompound("Properties");
-            if (propertyMap.size() > 0) {
-                var props = new HashMap<String, String>();
-                for (var entry : propertyMap)
-                    props.put(entry.getKey(), assertString(entry.getValue()));
-                block = block.withProperties(props);
-            }
-
-            meta.setBlockState(block.stateId());
-        }
-
-        return true;
-    }
-
-    private boolean applyItemDisplayMetaField(@NotNull ItemDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
-        if (applyDisplayMetaField(meta, key, value)) return true;
-
-        switch (key) {
-            case "item" -> meta.setItemStack(ItemStack.fromItemNBT(assertCompound(value)));
-            case "item_display" -> meta.setDisplayContext(ItemDisplayMeta.DisplayContext
-                    .valueOf(assertString(value).toUpperCase(Locale.ROOT)));
-        }
-
-        return true;
-    }
-
-    private boolean applyTextDisplayMetaField(@NotNull TextDisplayMeta meta, @NotNull String key, @NotNull BinaryTag value) {
-        if (applyDisplayMetaField(meta, key, value)) return true;
-
-        switch (key) {
-            case "text" -> {
-                var elem = GsonComponentSerializer.gson().serializer().fromJson(assertString(value), JsonElement.class);
-                meta.setText(GsonComponentSerializer.gson().deserializeFromTree(elem));
-            }
-            case "line_width" -> meta.setLineWidth(assertInt(value));
-            case "background" -> meta.setBackgroundColor(assertInt(value));
-            case "text_opacity" -> meta.setTextOpacity(assertByte(value));
-            case "shadow" -> meta.setShadow(assertBool(value));
-            case "see_through" -> meta.setSeeThrough(assertBool(value));
-            case "default_background" -> meta.setUseDefaultBackground(assertBool(value));
-            case "alignment" -> {
-                var alignment = assertString(value);
-                meta.setAlignLeft("left".equals(alignment) || "center".equals(alignment));
-                meta.setAlignRight("right".equals(alignment) || "center".equals(alignment));
-            }
-        }
-
-        return false;
-    }
-
-    private int assertInt(@Nullable BinaryTag nbt) {
-        if (nbt instanceof IntBinaryTag i) return i.value();
-        throw new IllegalArgumentException("expected int, got " + nbt.getClass().getName());
-    }
-
-    private float assertFloat(@Nullable BinaryTag nbt) {
-        if (nbt instanceof FloatBinaryTag f) return f.value();
-        throw new IllegalArgumentException("expected float, got " + nbt.getClass().getName());
-    }
-
-    private String assertString(@Nullable BinaryTag nbt) {
-        if (nbt instanceof StringBinaryTag s) return s.value();
-        throw new IllegalArgumentException("expected string, got " + nbt.getClass().getName());
-    }
-
-    private byte assertByte(@Nullable BinaryTag nbt) {
-        if (nbt instanceof ByteBinaryTag b) return b.value();
-        throw new IllegalArgumentException("expected byte, got " + nbt.getClass().getName());
-    }
-
-    private boolean assertBool(@Nullable BinaryTag nbt) {
-        if (nbt instanceof ByteBinaryTag b) return b.value() != 0;
-        throw new IllegalArgumentException("expected bool, got " + nbt.getClass().getName());
-    }
-
-    private CompoundBinaryTag assertCompound(@Nullable BinaryTag nbt) {
-        if (nbt instanceof CompoundBinaryTag c) return c;
-        throw new IllegalArgumentException("expected compound, got " + nbt.getClass().getName());
-    }
-
-    private float[] assertFloatArray(@Nullable BinaryTag nbt, int length) {
-        if (!(nbt instanceof ListBinaryTag l))
-            throw new IllegalArgumentException("expected float array, got " + nbt.getClass().getName());
-        if (!l.elementType().equals(BinaryTagTypes.FLOAT))
-            throw new IllegalArgumentException("expected float array, got " + l.elementType());
-        if (l.size() != length)
-            throw new IllegalArgumentException("expected float array of length " + length + ", got " + l.size());
-
-        var array = new float[length];
-        for (int i = 0; i < length; i++)
-            array[i] = ((FloatBinaryTag) l.get(i)).value();
-        return array;
-
     }
 
 }

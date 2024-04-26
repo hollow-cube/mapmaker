@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.entity;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
+import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MapEntity extends Entity {
+public class MapEntity extends Entity implements TerraformEntity {
     private static final Logger logger = LoggerFactory.getLogger(MapEntity.class);
 
     protected MapEntity(@NotNull EntityType entityType) {
@@ -93,10 +94,12 @@ public class MapEntity extends Entity {
 
     // Serialization
 
+    @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
         //todo read metadata fields
     }
 
+    @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
         //todo write metadata fields
     }

@@ -4,12 +4,48 @@ import net.kyori.adventure.nbt.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public final class NbtUtil {
+
+    public static final BinaryTagSerializer<Block> BLOCK_COMPOUND = new BinaryTagSerializer<>() {
+        @Override
+        public @NotNull BinaryTag write(@NotNull Block value) {
+            var defaultProps = Block.fromBlockId(value.id()).properties(); // Get the props of the default state to compare
+
+            var props = CompoundBinaryTag.builder();
+            for (var entry : value.properties().entrySet()) {
+                if (entry.getValue().equals(defaultProps.get(entry.getKey()))) continue; // Skip default values
+                props.put(entry.getKey(), StringBinaryTag.stringBinaryTag(entry.getValue()));
+            }
+            var propsCompound = props.build();
+            
+            var builder = CompoundBinaryTag.builder()
+                    .putString("Name", value.name());
+            if (propsCompound.size() > 0) builder.put("Properties", propsCompound);
+            return builder.build();
+        }
+
+        @Override
+        public @NotNull Block read(@NotNull BinaryTag tag) {
+            if (!(tag instanceof CompoundBinaryTag compound)) return Block.AIR;
+
+            var block = Block.fromNamespaceId(compound.getString("Name"));
+            if (block == null) return Block.AIR;
+
+            for (var entry : compound.getCompound("Properties")) {
+                if (!(entry.getValue() instanceof StringBinaryTag string)) continue;
+                block = block.withProperty(entry.getKey(), string.value());
+            }
+
+            return Block.AIR;
+        }
+    };
 
     public static @NotNull BinaryTag into(@NotNull Point vec) {
         return ListBinaryTag.listBinaryTag(BinaryTagTypes.DOUBLE, List.of(
