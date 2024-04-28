@@ -17,9 +17,21 @@ import java.util.function.Supplier;
  */
 public final class BlockTags {
     public static final Collection<NamespaceID> LOGS = builtin("minecraft:logs");
-    public static final Collection<NamespaceID> STAIRS = builtin("minecraft:stairs");
-    public static final Collection<NamespaceID> WALLS = builtin("minecraft:walls");
-    public static final Collection<NamespaceID> SLABS = builtin("minecraft:slabs");
+    public static final Collection<NamespaceID> STAIRS = extend(builtin("minecraft:stairs"),
+            Block.TUFF_STAIRS,
+            Block.POLISHED_TUFF_STAIRS,
+            Block.TUFF_BRICK_STAIRS
+    );
+    public static final Collection<NamespaceID> WALLS = extend(builtin("minecraft:walls"),
+            Block.TUFF_WALL,
+            Block.POLISHED_TUFF_WALL,
+            Block.TUFF_BRICK_WALL
+    );
+    public static final Collection<NamespaceID> SLABS = extend(builtin("minecraft:slabs"),
+            Block.TUFF_SLAB,
+            Block.POLISHED_TUFF_SLAB,
+            Block.TUFF_BRICK_SLAB
+    );
     public static final Collection<NamespaceID> BUTTONS = builtin("minecraft:buttons");
     public static final Collection<NamespaceID> WOODEN_BUTTONS = create(Block.BIRCH_BUTTON, Block.ACACIA_BUTTON, Block.DARK_OAK_BUTTON, Block.JUNGLE_BUTTON, Block.MANGROVE_BUTTON, Block.OAK_BUTTON, Block.SPRUCE_BUTTON);
     public static final Collection<NamespaceID> STONE_BUTTONS = create(Block.POLISHED_BLACKSTONE_BUTTON, Block.STONE_BUTTON);
@@ -34,11 +46,29 @@ public final class BlockTags {
     public static final Collection<NamespaceID> CEILING_HANGING_SIGNS = builtin("minecraft:ceiling_hanging_signs");
     public static final Collection<NamespaceID> WALL_HANGING_SIGNS = builtin("minecraft:wall_hanging_signs");
     public static final Collection<NamespaceID> ANVILS = builtin("minecraft:anvil");
-    public static final Collection<NamespaceID> TRAPDOORS = builtin("minecraft:trapdoors");
+    public static final Collection<NamespaceID> TRAPDOORS = extend(builtin("minecraft:trapdoors"),
+            Block.COPPER_TRAPDOOR,
+            Block.EXPOSED_COPPER_TRAPDOOR,
+            Block.WEATHERED_COPPER_TRAPDOOR,
+            Block.OXIDIZED_COPPER_TRAPDOOR,
+            Block.WAXED_COPPER_TRAPDOOR,
+            Block.WAXED_EXPOSED_COPPER_TRAPDOOR,
+            Block.WAXED_WEATHERED_COPPER_TRAPDOOR,
+            Block.WAXED_OXIDIZED_COPPER_TRAPDOOR
+    );
     public static final Collection<NamespaceID> CANDLES = builtin("minecraft:candles");
     public static final Collection<NamespaceID> CANDLE_CAKES = builtin("minecraft:candle_cakes");
     public static final Collection<NamespaceID> BANNERS = builtin("minecraft:banners");
-    public static final Collection<NamespaceID> DOORS = builtin("minecraft:doors");
+    public static final Collection<NamespaceID> DOORS = extend(builtin("minecraft:doors"),
+            Block.COPPER_DOOR,
+            Block.EXPOSED_COPPER_DOOR,
+            Block.WEATHERED_COPPER_DOOR,
+            Block.OXIDIZED_COPPER_DOOR,
+            Block.WAXED_COPPER_DOOR,
+            Block.WAXED_EXPOSED_COPPER_DOOR,
+            Block.WAXED_WEATHERED_COPPER_DOOR,
+            Block.WAXED_OXIDIZED_COPPER_DOOR
+    );
     public static final Collection<NamespaceID> TERRACOTTA = builtin("minecraft:terracotta");
     public static final Collection<NamespaceID> GLAZED_TERRACOTTA = create(
             Block.WHITE_GLAZED_TERRACOTTA,
@@ -133,6 +163,14 @@ public final class BlockTags {
             Block.WHEAT, Block.CARROTS, Block.NETHER_WART, Block.POTATOES,
             Block.PITCHER_CROP, Block.BEETROOTS, Block.COCOA
     );
+
+    private static @NotNull Collection<NamespaceID> extend(@NotNull Collection<NamespaceID> tag, @NotNull Block... block) {
+        var set = new HashSet<>(tag);
+        for (var b : block) {
+            set.add(b.namespace());
+        }
+        return Set.copyOf(set);
+    }
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {
         var tag = MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, name);
