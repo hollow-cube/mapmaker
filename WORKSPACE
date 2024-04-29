@@ -50,7 +50,7 @@ maven_install(
 
         # Minestom
         "net.minestom:minestom-snapshots:1_20_5-d18e06188f",
-        "dev.hollowcube:polar:1.9.1",
+        "dev.hollowcube:polar:1.9.2",
         "dev.hollowcube:dataconverter:1.20.5-rv2",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
 

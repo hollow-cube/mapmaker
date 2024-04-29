@@ -48,8 +48,10 @@ public class MapInstance extends InstanceContainer {
     }
 
     public void load(byte @NotNull [] worldData, @Nullable PolarWorldAccess worldAccess) {
-        var world = PolarReader.read(worldData, PolarDataFixer.INSTANCE);
+        load(PolarReader.read(worldData, PolarDataFixer.INSTANCE), worldAccess);
+    }
 
+    public void load(@NotNull PolarWorld world, @Nullable PolarWorldAccess worldAccess) {
         var loader = new PolarLoader(world);
         if (worldAccess != null) loader.setWorldAccess(worldAccess);
         setChunkLoader(loader.setLoadLighting(false));

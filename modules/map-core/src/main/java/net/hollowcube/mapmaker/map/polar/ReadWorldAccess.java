@@ -66,7 +66,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
             // Legacy support from before there was any user data at all.
             return;
         }
-        logger.debug("reading polar world data (version {})", version);
+        logger.debug("reading polar world data (user version {})", version);
 
         if (version <= VERSION_PRE_WORLD_NBT) {
             // Legacy support

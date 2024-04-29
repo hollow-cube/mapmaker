@@ -6,5 +6,5 @@ public class HCVersions {
     // Mojang always offsets by 100 when bumping the (release) protocol version, so we can fill in the versions between.
 
     public static final int V1_20_4_HC1 = MCVersions.V1_20_4 + 1; // 3701
-    public static final int V1_20_5_HC1 = MCVersions.V1_20_5 + 1; // 3839
+    public static final int V1_20_5_HC1 = MCVersions.V1_20_5 + 1; // 3838
 }

@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
 
 @AutoService(DataFix.class)
-public class V3839 implements DataFix {
+public class V3838 implements DataFix {
     private static final int VERSION = HCVersions.V1_20_5_HC1;
 
     @Override

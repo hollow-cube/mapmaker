@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -10,10 +11,13 @@ import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.polar.PolarReader;
+import net.hollowcube.polar.PolarWriter;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -58,6 +62,15 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         // Load the map itself (eg blocks, if present)
         var mapData = server().mapService().getMapWorld(map().id(), true);
         if (mapData != null) {
+            var world = PolarReader.read(mapData, PolarDataFixer.INSTANCE);
+            if (world.dataVersion() < MapWorld.DATA_VERSION) {
+                logger.warn("Map data version is out of date: {} < {} (updating remote)", world.dataVersion(), MapWorld.DATA_VERSION);
+                FutureUtil.submitVirtual(() -> {
+                    var updatedMapData = PolarWriter.write(world, PolarDataFixer.INSTANCE);
+                    server().mapService().updateMapWorld(map().id(), updatedMapData);
+                });
+            }
+
             instance.load(mapData, new ReadWorldAccess(this));
         }
 
