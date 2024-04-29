@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.punishments.types.PunishmentUpdateMessage;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
-import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -64,8 +63,6 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
             .registerTypeAdapter(Point.class, new PointTypeAdapter())
             .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
-            .registerTypeAdapter(SaveState.PlayState.class, DFU.JsonSerializer(SaveState.PlayState.CODEC))
-            .registerTypeAdapter(SaveState.BuildState.class, DFU.JsonSerializer(SaveState.BuildState.CODEC))
             .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
             .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))

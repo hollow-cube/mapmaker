@@ -126,7 +126,7 @@ public class MapDetailsView extends View {
         async(() -> {
             try {
                 var playerData = MapPlayerData.fromPlayer(context.player());
-                var saveState = mapService.getLatestSaveState(map.id(), playerData.id(), SaveStateType.PLAYING);
+                var saveState = mapService.getLatestSaveState(map.id(), playerData.id(), SaveStateType.PLAYING, null);
 
                 var name = Component.translatable("gui.map_details.play_map.name");
                 var lore = LanguageProviderV2.translateMulti("gui.map_details.continue_map.lore",

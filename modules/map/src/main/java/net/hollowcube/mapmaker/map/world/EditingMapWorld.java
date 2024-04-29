@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.ram.RamUsageOverlay;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.world.savestate.EditState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
@@ -245,7 +246,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         ActionBar.forPlayer(player).addProvider(RamUsageOverlay.INSTANCE);
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING, EditState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
 
         super.addPlayer(player);
@@ -262,7 +263,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         saveState.setPlayStartTime(System.currentTimeMillis());
 
         // Read from savestate
-        var buildState = saveState.buildState();
+        var buildState = saveState.state(EditState.class);
         buildState.inventory().ifPresentOrElse(
                 // Read the inventory items
                 items -> items.forEach(player.getInventory()::setItemStack),
@@ -321,7 +322,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
         saveState.updatePlaytime();
-        var buildState = saveState.buildState();
+        var buildState = saveState.state(EditState.class);
         buildState.setPos(player.getPosition());
         buildState.setFlying(player.isFlying());
         var inventory = new HashMap<Integer, ItemStack>();

@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.entity.Player;
@@ -24,7 +25,7 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null || !world.isPlaying(player)) return;
 
-        var sliced = slice(saveState.playState().toString(false));
+        var sliced = slice(saveState.state(PlayState.class).toString(false));
         builder.offset(-FontUtil.measureText(sliced) / 2).append("line_0", sliced);
     }
 

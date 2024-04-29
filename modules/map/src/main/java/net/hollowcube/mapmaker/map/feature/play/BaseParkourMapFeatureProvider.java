@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.sound.Sound;
@@ -155,12 +156,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
+            var playState = saveState.state(PlayState.class);
+
             // If this is a fresh save state, attempt to add the base effect state
             if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && saveState.getPlayStartTime() == 0) {
-                updateCheckpointEffectState(player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), saveState.playState());
+                updateCheckpointEffectState(player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
             }
 
-            updatePlayerFromState(player, saveState.playState());
+            updatePlayerFromState(player, playState);
         }
     }
 
@@ -211,7 +214,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (saveState != null) {
             var countdownEnd = player.getTag(COUNTDOWN_END);
             if (countdownEnd != -1) {
-                saveState.playState().setTimeLimit(countdownEnd - System.currentTimeMillis());
+                var playState = saveState.state(PlayState.class);
+                playState.setTimeLimit(countdownEnd - System.currentTimeMillis());
             }
         }
 
@@ -220,7 +224,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
         var player = event.getPlayer();
-        var state = SaveState.fromPlayer(player).playState();
+        var state = SaveState.fromPlayer(player).state(PlayState.class);
         var data = event.effectData();
 
         // Ensure the event should trigger a checkpoint change for the current players state
@@ -242,7 +246,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         updateCheckpointEffectState(player, data, state);
 
         // Cache the last state so that we can reset back here.
-        state.setLastState(new SaveState.PlayState(
+        state.setLastState(new PlayState(
                 Optional.empty(),
                 // Set the history to only contain the single checkpoint id so that you can go back to a previous
                 // checkpoint though of course this can be prevented by using progress indices
@@ -265,7 +269,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleStatusChange(@NotNull MapPlayerStatusChangeEvent event) {
         var player = event.getPlayer();
-        var state = SaveState.fromPlayer(player).playState();
+        var state = SaveState.fromPlayer(player).state(PlayState.class);
         var data = event.effectData();
 
         // Ensure the event should trigger a status change for the current players state
@@ -327,7 +331,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var playState = saveState.state(PlayState.class);
+            var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
                 return;
@@ -364,8 +369,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         saveState.setCompleted(false);
         saveState.setPlaytime(0);
         saveState.setPlayStartTime(0);
-        var newPlayState = new SaveState.PlayState();
-        saveState.setPlayState(newPlayState);
+        var newPlayState = new PlayState();
+        saveState.setState(newPlayState);
 
         player.removeTag(SPECTATOR_CHECKPOINT);
         player.removeTag(COUNTDOWN_END);
@@ -393,7 +398,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (checkpoint != null) {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.
-            var resetHeight = saveState.playState().resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var playState = saveState.state(PlayState.class);
+            var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
                 player.teleport(world.spawnPoint(player)).thenRun(() -> {
                     EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
@@ -406,7 +412,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return;
         }
 
-        var playState = saveState.playState();
+        var playState = saveState.state(PlayState.class);
         // If they don't have a checkpoint or are on their last life, do a hard reset.
         var isOutOfLives = playState.lives().orElse(0) == 1;
         if (playState.lastState().isEmpty() || isOutOfLives) {
@@ -427,7 +433,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             playState.setLives(playState.lives().get() - 1);
             player.playSound(PLAYER_HURT_SOUND);
         }
-        saveState.setPlayState(playState);
+        saveState.setState(playState);
         // Create a copy so that we can reset to the checkpoint again
         playState.setLastState(playState.copy());
 
@@ -441,7 +447,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         });
     }
 
-    private void updateCheckpointEffectState(@NotNull Player player, @NotNull CheckpointEffectData data, @NotNull SaveState.PlayState state) {
+    private void updateCheckpointEffectState(@NotNull Player player, @NotNull CheckpointEffectData data, @NotNull PlayState state) {
         updateBaseEffectState(player, data, state);
         if (data.lives() > 0) {
             state.setMaxLives(data.lives());
@@ -449,7 +455,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void updateBaseEffectState(@NotNull Player player, @NotNull BaseEffectData data, @NotNull SaveState.PlayState state) {
+    private void updateBaseEffectState(@NotNull Player player, @NotNull BaseEffectData data, @NotNull PlayState state) {
         if (data.progressIndex() != -1) {
             state.setProgressIndex(data.progressIndex());
         }
@@ -481,7 +487,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void updateStateFromPlayer(@NotNull Player player, @NotNull SaveState.PlayState state) {
+    private void updateStateFromPlayer(@NotNull Player player, @NotNull PlayState state) {
         long now = System.currentTimeMillis();
 
         var countdownEnd = player.getTag(COUNTDOWN_END);
@@ -503,7 +509,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void updatePlayerFromState(@NotNull Player player, @NotNull SaveState.PlayState state) {
+    private void updatePlayerFromState(@NotNull Player player, @NotNull PlayState state) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
         if (state.maxLives().isPresent() && state.lives().isPresent()) {
             player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(2 * state.maxLives().get());

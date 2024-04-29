@@ -570,8 +570,13 @@ public abstract class AbstractMapServer implements MapServer {
             return;
         }
         FutureUtil.submitVirtual(() -> {
-            world.addPlayer(player);
-            player.setAutoViewEntities(true); // See comment in AbstractMapWorld#configurePlayer
+            try {
+                world.addPlayer(player);
+                player.setAutoViewEntities(true); // See comment in AbstractMapWorld#configurePlayer
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+                player.kick(Component.text("Failed to join the world. Please try again later."));
+            }
         });
 
         if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {

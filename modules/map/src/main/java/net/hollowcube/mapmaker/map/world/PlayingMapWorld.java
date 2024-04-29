@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
@@ -74,10 +75,10 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public void addPlayer(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.PLAYING);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.PLAYING, PlayState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
 
-        var pos = saveState.playState().pos().orElse(map().settings().getSpawnPoint());
+        var pos = saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint());
         player.teleport(pos).join();
 
         super.addPlayer(player); // Add to player list & reset inventory.
@@ -147,7 +148,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return null; // Sanity check
         saveState.updatePlaytime();
-        saveState.playState().setPos(player.getPosition());
+        saveState.state(PlayState.class).setPos(player.getPosition());
         var update = saveState.createUpdateRequest();
 
         // Write the save state to the database

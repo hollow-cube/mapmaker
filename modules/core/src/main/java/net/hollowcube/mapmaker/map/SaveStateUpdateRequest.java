@@ -1,37 +1,30 @@
 package net.hollowcube.mapmaker.map;
 
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import net.hollowcube.mapmaker.util.dfu.DFU;
 import org.jetbrains.annotations.NotNull;
 
 public class SaveStateUpdateRequest {
-    private Boolean completed = null;
-    private Long playtime = null;
-
-    @SerializedName("editState")
-    private SaveState.BuildState buildState = null;
-    private SaveState.PlayState playState = null;
+    JsonObject updates = new JsonObject();
 
     public boolean hasChanges() {
-        return completed != null || playtime != null || buildState != null || playState != null;
+        return !updates.isEmpty();
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
-        this.completed = completed;
+        updates.addProperty("completed", completed);
         return this;
     }
 
     public @NotNull SaveStateUpdateRequest setPlaytime(long playtime) {
-        this.playtime = playtime;
+        updates.addProperty("playtime", playtime);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setBuildState(@NotNull SaveState.BuildState buildState) {
-        this.buildState = buildState;
-        return this;
-    }
-
-    public @NotNull SaveStateUpdateRequest setPlayState(@NotNull SaveState.PlayState playState) {
-        this.playState = playState;
+    public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
+        updates.add(serializer.name(), DFU.unwrap(((Codec<Object>) serializer.codec()).encodeStart(JsonOps.INSTANCE, state)));
         return this;
     }
 

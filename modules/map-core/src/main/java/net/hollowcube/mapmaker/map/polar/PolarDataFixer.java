@@ -31,7 +31,7 @@ public class PolarDataFixer implements PolarDataConverter {
     @Override
     public void convertBlockPalette(@NotNull String[] palette, int fromVersion, int toVersion) {
         for (int i = 0; i < palette.length; i++) {
-            palette[i] = (String) MCDataConverter.convert(MCTypeRegistry.FLAT_BLOCK_STATE, palette[0], fromVersion, toVersion);
+            palette[i] = (String) MCDataConverter.convert(MCTypeRegistry.FLAT_BLOCK_STATE, palette[i], fromVersion, toVersion);
         }
     }
 

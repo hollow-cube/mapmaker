@@ -12,6 +12,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 //import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
@@ -23,15 +24,16 @@ public final class MapWorldHelpers {
     public static @NotNull SaveState getOrCreateSaveState(
             @NotNull MapWorld world,
             @NotNull String playerId,
-            @NotNull SaveStateType type
+            @NotNull SaveStateType type,
+            @Nullable SaveStateType.Serializer<?> stateSerializer
     ) {
         var mapService = world.server().mapService();
         var map = world.map();
 
         try {
-            return mapService.getLatestSaveState(map.id(), playerId, type);
+            return mapService.getLatestSaveState(map.id(), playerId, type, stateSerializer);
         } catch (MapService.NotFoundError ignored) {
-            return mapService.createSaveState(map.id(), playerId);
+            return mapService.createSaveState(map.id(), playerId, stateSerializer);
         }
     }
 

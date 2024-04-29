@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.serialization.JsonOps;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -383,7 +386,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
+    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId))
@@ -391,20 +394,38 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 201 -> GSON.fromJson(res.body(), SaveState.class);
+            case 201 -> {
+                var obj = GSON.fromJson(res.body(), JsonObject.class);
+                var saveState = GSON.fromJson(obj, SaveState.class);
+                if (serializer != null) {
+                    var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
+                    saveState.serializer = serializer;
+                    saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
+                }
+                yield saveState;
+            }
             default -> throw new InternalError("Failed to create savestate: " + res.body());
         };
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
+    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), SaveState.class);
+            case 200 -> {
+                var obj = GSON.fromJson(res.body(), JsonObject.class);
+                var saveState = GSON.fromJson(obj, SaveState.class);
+                if (serializer != null) {
+                    var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
+                    saveState.serializer = serializer;
+                    saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
+                }
+                yield saveState;
+            }
             case 404 -> throw new NotFoundError("latest");
             default -> throw new InternalError("Failed to get latest savestate: " + res.body());
         };
@@ -426,7 +447,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
-        var reqBody = GSON.toJson(update);
+        var reqBody = GSON.toJson(update.updates);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))

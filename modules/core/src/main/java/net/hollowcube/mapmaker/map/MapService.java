@@ -71,10 +71,11 @@ public interface MapService {
     void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId);
 
     // Save states
-    @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId);
+    @NotNull
+    SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer);
 
     @NotNull
-    SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type);
+    SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
 
     @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
 

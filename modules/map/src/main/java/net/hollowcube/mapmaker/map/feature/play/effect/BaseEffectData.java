@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play.effect;
 
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
-import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public abstract class BaseEffectData {
-    public static final int NO_RESET_HEIGHT = SaveState.PlayState.NO_RESET_HEIGHT;
+    public static final int NO_RESET_HEIGHT = PlayState.NO_RESET_HEIGHT;
     public static final int NO_TIME_LIMIT = 0;
 
     private String name;

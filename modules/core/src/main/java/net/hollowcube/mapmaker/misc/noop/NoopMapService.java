@@ -145,12 +145,12 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId) {
+    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type) {
+    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         return new SaveState(UUID.randomUUID().toString(), playerId, mapId, type == null ? SaveStateType.EDITING : type);
     }
 

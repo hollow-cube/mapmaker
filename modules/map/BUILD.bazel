@@ -6,6 +6,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "@maven//:dev_hollowcube_dataconverter",
         "@maven//:net_kyori_adventure_nbt",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "//modules/canvas:api",
