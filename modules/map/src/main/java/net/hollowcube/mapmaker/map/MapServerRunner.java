@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.utility.*;
+import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
 import net.hollowcube.mapmaker.map.command.utility.navigation.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
@@ -228,6 +229,7 @@ public class MapServerRunner extends AbstractMapServer {
 //        commandManager.register(server.createInstance(SetBiomeCommand.class));
 
         commandManager.register(server.createInstance(AddMarkerCommand.class));
+        commandManager.register(server.createInstance(EntitiesCommand.class));
 
         commandManager.register(server.createInstance(FixTheDripleafCommand.class));
     }

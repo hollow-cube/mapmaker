@@ -25,5 +25,10 @@ public class V3701 implements DataFix {
 
             return null;
         });
+
+        // mapmaker:checkpoint_plate is a simple block entity
+        // mapmaker:status_plate is a simple block entity
+        // mapmaker:finish_plate is a simple block entity
+        // mapmaker:bounce_pad is a simple block entity
     }
 }

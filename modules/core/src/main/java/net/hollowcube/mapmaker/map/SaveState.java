@@ -12,14 +12,10 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class SaveState {
-    private static final Logger logger = LoggerFactory.getLogger(SaveState.class);
-
     public static final Tag<SaveState> TAG = Tag.Transient("mapmaker:map/save_state");
 
     public static @NotNull SaveState fromPlayer(@NotNull Player player) {
@@ -37,6 +33,8 @@ public class SaveState {
     private boolean completed;
     private long playtime;
     private transient long playStartTime;
+
+    // Field name, codec
 
     @SerializedName("editState")
     private BuildState buildState = null;

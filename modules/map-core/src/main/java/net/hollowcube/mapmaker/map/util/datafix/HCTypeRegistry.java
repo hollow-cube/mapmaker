@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.util.datafix;
 
+import ca.spottedleaf.dataconverter.minecraft.datatypes.IDDataType;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import net.hollowcube.mapmaker.map.util.datafix.versions.DataFix;
@@ -11,11 +12,11 @@ public final class HCTypeRegistry {
     // Entities are stored as NBT using the vanilla Entity format with a handful of extensions for extra data.
     // Extensions are registered on the original MCTypeRegistry.ENTITY (and entities should be converted as such)
 
-    public static final MCDataType WORLD = new MCDataType("hc:world"); // Polar world user data
-    public static final MCDataType CHUNK = new MCDataType("hc:chunk"); // Polar chunk user data
+    public static final MCDataType WORLD = new MCDataType("HC/World"); // Polar world user data
+    public static final MCDataType CHUNK = new MCDataType("HC/Chunk"); // Polar chunk user data
 
-    public static final MCDataType ENTITIY = MCTypeRegistry.ENTITY;
-    public static final MCDataType BLOCK_ENTITY = MCTypeRegistry.TILE_ENTITY;
+    public static final IDDataType ENTITIY = MCTypeRegistry.ENTITY;
+    public static final IDDataType BLOCK_ENTITY = MCTypeRegistry.TILE_ENTITY;
 
     static {
         try {

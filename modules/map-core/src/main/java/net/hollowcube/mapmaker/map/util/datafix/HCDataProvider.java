@@ -21,7 +21,8 @@ public class HCDataProvider implements ExternalDataProvider {
     @Override
     public @NotNull List<Integer> extraConverterVersions() {
         return List.of(
-                HCVersions.V1_20_4_HC1
+                HCVersions.V1_20_4_HC1,
+                HCVersions.V1_20_5_HC1
         );
     }
 

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.polar;
 
 import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import ca.spottedleaf.dataconverter.minecraft.MCVersions;
+import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.polar.PolarDataConverter;
@@ -29,7 +30,9 @@ public class PolarDataFixer implements PolarDataConverter {
 
     @Override
     public void convertBlockPalette(@NotNull String[] palette, int fromVersion, int toVersion) {
-        //todo need to figure this out, dataconverter wants an object for flat_block_state
+        for (int i = 0; i < palette.length; i++) {
+            palette[i] = (String) MCDataConverter.convert(MCTypeRegistry.FLAT_BLOCK_STATE, palette[0], fromVersion, toVersion);
+        }
     }
 
     @Override
