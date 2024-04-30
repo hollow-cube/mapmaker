@@ -161,7 +161,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return null; // Sanity check
         saveState.updatePlaytime();
-        saveState.state(PlayState.class).setPos(player.getPosition());
+        var playState = saveState.state(PlayState.class);
+        playState.setPos(player.getPosition());
         var update = saveState.createUpdateRequest();
 
         // Write the save state to the database

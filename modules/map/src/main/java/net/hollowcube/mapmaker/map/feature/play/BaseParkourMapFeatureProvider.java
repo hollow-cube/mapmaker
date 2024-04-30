@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
@@ -45,6 +46,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -80,6 +82,33 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
             .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
             .addListener(PlayerTickEvent.class, this::handlePlayerTick);
+
+//            .addListener(PlayerBlockInteractEvent.class, event -> {
+//                var block = event.getBlock();
+//                if (BlockTags.TRAPDOORS.contains(block.namespace())) {
+//                    var ghostBlocks = GhostBlockHolder.forPlayer(event.getPlayer());
+//                    block = ghostBlocks.getBlock(event.getBlockPosition());
+//                    var newOpen = String.valueOf("false".equals(block.getProperty("open")));
+////                    event.getInstance().setBlock(event.getBlockPosition(), block.withProperty("open", newOpen));
+//                    ghostBlocks.setBlock(event.getBlockPosition(), block.withProperty("open", newOpen));
+//
+//                    event.setCancelled(true);
+//                    event.setBlockingItemUse(true);
+//                    return;
+//                }
+//
+//                var itemStack = event.getPlayer().getItemInHand(event.getHand());
+//                if (!itemStack.material().isBlock()) return;
+//
+//                var placedBlock = itemStack.material().block();
+//                var placePosition = event.getBlockPosition().relative(event.getBlockFace());
+//
+//                var ghostBlocks = GhostBlockHolder.forPlayer(event.getPlayer());
+//                ghostBlocks.setBlock(placePosition, placedBlock);
+//
+//                event.setCancelled(true); // Prevent processing block entity
+//                event.setBlockingItemUse(true); // Send ack (we have already sent block so the client will interpret as successful place)
+//            });
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -257,8 +286,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 state.potionEffects().copy(),
                 Optional.of(checkpointPos),
                 state.maxLives(),
-                state.lives()
+                state.lives(),
+                Map.copyOf(state.ghostBlocks())
         ));
+
+        System.out.println("save at cp: " + state.ghostBlocks() + " last: " + state.lastState().get().ghostBlocks());
 
         // Update the player based on the new state
         updatePlayerFromState(player, state);
@@ -491,8 +523,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         long now = System.currentTimeMillis();
 
         var countdownEnd = player.getTag(COUNTDOWN_END);
-        if (countdownEnd == -1) return;
-        state.setTimeLimit(countdownEnd - now);
+        if (countdownEnd != -1) {
+            state.setTimeLimit(countdownEnd - now);
+        }
 
         for (var timedPotion : player.getActiveEffects()) {
             var potion = timedPotion.potion();
@@ -507,6 +540,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             int remainingWallTime = (int) ((potion.duration() - (player.getInstance().getWorldAge() - timedPotion.startingTicks())) * 50);
             entry.setDuration(Math.max(0, remainingWallTime));
         }
+
+        var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
+        state.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
     }
 
     private void updatePlayerFromState(@NotNull Player player, @NotNull PlayState state) {
@@ -535,6 +571,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                     entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration() / MinecraftServer.TICK_MS, // Convert from milliseconds to ticks
                     Potion.ICON_FLAG
             ));
+        }
+
+        if (!state.ghostBlocks().isEmpty()) {
+            var ghostBlocks = GhostBlockHolder.forPlayer(player);
+            ghostBlocks.load(state.ghostBlocks());
         }
     }
 

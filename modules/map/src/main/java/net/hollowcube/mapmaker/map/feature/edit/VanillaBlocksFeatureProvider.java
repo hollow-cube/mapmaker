@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.feature.edit;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
@@ -37,13 +38,11 @@ public class VanillaBlocksFeatureProvider implements FeatureProvider {
     // This handles resetting on join (or any other potential weird state) because this event is
     // triggered when resetting a map.
     private void handlePlayerInit(MapPlayerInitEvent event) {
-        DripleafBlock.INSTANCE.clearPlayer(event.getPlayer(), false);
-
-        //todo i think the dripleaf list is ever expanding
+        GhostBlockHolder.clear(event.getPlayer(), false);
     }
 
     private void handlePlayerDeinit(@NotNull MapWorldPlayerStopPlayingEvent event) {
-        DripleafBlock.INSTANCE.clearPlayer(event.getPlayer(), true);
+        GhostBlockHolder.clear(event.getPlayer(), true);
     }
 
 }

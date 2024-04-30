@@ -1,7 +1,8 @@
 
 Any normal block (with can place on condition)
 - notably: slime, ice, tnt (breakable?)
-- can be placed on any block
+- can be placed on any block? (ignore for now)
+todo need to generalize handling of ghost blocks per player
 
 Water bucket
 - Place water source block (For your client, reset on reset)

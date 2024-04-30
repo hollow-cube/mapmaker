@@ -32,11 +32,14 @@ public class SaveState {
     public SaveState() {
     }
 
-    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type) {
+    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type, @NotNull SaveStateType.Serializer<?> serializer, @NotNull Object state) {
         this.id = id;
         this.playerId = playerId;
         this.mapId = mapId;
         this.type = type;
+
+        this.serializer = serializer;
+        this.state = state;
     }
 
     public @NotNull String id() {

@@ -151,7 +151,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
-        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, type == null ? SaveStateType.EDITING : type);
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

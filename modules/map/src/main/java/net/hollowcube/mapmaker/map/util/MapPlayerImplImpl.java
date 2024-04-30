@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.util;
 
-import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.instance.block.Block;
@@ -63,8 +63,9 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl {
             var pos = iter.next();
             var block = instance.getBlock(pos, Block.Getter.Condition.TYPE);
             if (block.id() == Block.BIG_DRIPLEAF.id()) {
-                var newBlock = DripleafBlock.getDripleafState(this, pos);
-                if (newBlock != null) block = newBlock;
+                // Fetch dripleaf state from the ghost block holder to make sure we get the right value for this player
+                var ghostBlocks = GhostBlockHolder.forPlayerOptional(this);
+                if (ghostBlocks != null) block = ghostBlocks.getBlock(pos);
             }
 
             // For now just ignore scaffolding. It seems to have a dynamic bounding box, or is just parsed

@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -86,7 +87,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
             // Create a fake save state, it is only used locally anyway.
             saveState = new SaveState(
                     UUID.randomUUID().toString(), playerData.id(), map().id(),
-                    SaveStateType.PLAYING
+                    SaveStateType.PLAYING, PlayState.SERIALIZER, new PlayState()
             );
         }
         player.setTag(SaveState.TAG, saveState);
