@@ -25,6 +25,7 @@ public class SaveState {
     private boolean completed;
     private long playtime;
     private transient long playStartTime;
+    int dataVersion;
 
     SaveStateType.Serializer<?> serializer;
     Object state;

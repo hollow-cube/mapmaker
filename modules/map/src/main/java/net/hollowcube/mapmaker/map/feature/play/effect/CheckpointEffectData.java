@@ -22,6 +22,7 @@ public class CheckpointEffectData extends BaseEffectData {
             Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(CheckpointEffectData::clearPotionEffects),
             PotionEffectList.NULL_MAPPED_CODEC.forGetter(CheckpointEffectData::potionEffects),
             ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(CheckpointEffectData::teleport),
+            HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(CheckpointEffectData::items),
             // CheckpointEffectData
             Codec.INT.optionalFieldOf("lives", NO_LIVES).forGetter(CheckpointEffectData::lives)
     ).apply(i, CheckpointEffectData::new));
@@ -32,9 +33,11 @@ public class CheckpointEffectData extends BaseEffectData {
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
             PotionEffectList potionEffects,
-            Optional<Pos> teleport, int lives
+            Optional<Pos> teleport,
+            HotbarItems items,
+            int lives
     ) {
-        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport);
+        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport, items);
         this.lives = lives;
     }
 

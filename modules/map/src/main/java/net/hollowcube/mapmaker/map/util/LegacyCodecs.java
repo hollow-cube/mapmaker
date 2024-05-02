@@ -3,22 +3,28 @@ package net.hollowcube.mapmaker.map.util;
 import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
+import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EvenMoreCodecs {
-
+/**
+ * <p>This will be kept for backwards compat for the forseeable future, but no new usages or content should be added here.</p>
+ *
+ * <p>Data upgrades on play and build states is done when reading the save state (see {@link HCTypeRegistry#EDIT_STATE} and {@link HCTypeRegistry#PLAY_STATE}).</p>
+ *
+ * <p>Also, future usages of {@link ItemStack} should use {@link ExtraCodecs#ITEM_STACK}, which supports transparent DFU conversion.</p>
+ */
+@Deprecated
+public class LegacyCodecs {
 
     /**
      * Admittedly this is kinda disgusting, but it writes the item map as a base64
@@ -51,35 +57,5 @@ public class EvenMoreCodecs {
                         (item, b) -> b.write(NetworkBuffer.NBT, item.toItemNBT()), items);
             }))
     );
-
-    private record VersionedPosBlockMap(int dataVersion, Map<Long, String> map) {
-
-        private static final Codec<VersionedPosBlockMap> CODEC = RecordCodecBuilder.create(i -> i.group(
-                Codec.INT.fieldOf("dataVersion").forGetter(VersionedPosBlockMap::dataVersion),
-                Codec.unboundedMap(Codec.STRING.xmap(Long::parseLong, String::valueOf), Codec.STRING).fieldOf("map").forGetter(VersionedPosBlockMap::map)
-        ).apply(i, VersionedPosBlockMap::new));
-
-        public static VersionedPosBlockMap forLatest(@NotNull Map<Long, Block> blockMap) {
-            var stringMap = new HashMap<Long, String>(blockMap.size());
-            for (var entry : blockMap.entrySet())
-                stringMap.put(entry.getKey(), BlockUtil.toString(entry.getValue()));
-            return new VersionedPosBlockMap(MapWorld.DATA_VERSION, stringMap);
-        }
-
-        public @NotNull Map<Long, Block> toBlockMap() {
-            var blockMap = new HashMap<Long, Block>(map.size());
-            for (var entry : map.entrySet()) {
-                String blockState = entry.getValue();
-                if (dataVersion < MapWorld.DATA_VERSION) {
-                    blockState = (String) MCDataConverter.convert(MCTypeRegistry.FLAT_BLOCK_STATE, blockState, dataVersion, MapWorld.DATA_VERSION);
-                }
-                blockMap.put(entry.getKey(), BlockUtil.fromString(blockState));
-            }
-            return blockMap;
-        }
-    }
-
-    public static final Codec<Map<Long, Block>> VERSIONED_POS_BLOCK_MAP = VersionedPosBlockMap.CODEC
-            .xmap(VersionedPosBlockMap::toBlockMap, VersionedPosBlockMap::forLatest);
 
 }

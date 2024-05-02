@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.runtime;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.mapmaker.map.MapWorld;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(ServerRuntime.class)
@@ -40,6 +41,11 @@ public class HubRuntime implements ServerRuntime {
 
     public @NotNull String resourcePackSha1() {
         return resourcePackHash;
+    }
+
+    @Override
+    public int dataVersion() {
+        return MapWorld.DATA_VERSION;
     }
 
 }

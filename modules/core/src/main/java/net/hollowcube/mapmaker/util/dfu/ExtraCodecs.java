@@ -1,13 +1,18 @@
 package net.hollowcube.mapmaker.util.dfu;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.mapmaker.map.util.BlockUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.utils.validate.Check;
@@ -17,6 +22,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class ExtraCodecs {
+
+    public static final Codec<Integer> INT_STRING = Codec.STRING.xmap(Integer::parseInt, String::valueOf);
+    public static final Codec<Long> LONG_STRING = Codec.STRING.xmap(Long::parseLong, String::valueOf);
 
     public static final Codec<PotionEffect> POTION_EFFECT = Codec.STRING.xmap(PotionEffect::fromNamespaceId, PotionEffect::name);
 
@@ -35,6 +43,22 @@ public final class ExtraCodecs {
 
     public static final Codec<Material> MATERIAL = Codec.STRING
             .xmap(Material::fromNamespaceId, Material::name);
+
+    public static final Codec<ItemStack> ITEM_STACK = new Codec<>() {
+        @Override
+        public <T> DataResult<Pair<ItemStack, T>> decode(DynamicOps<T> ops, T input) {
+            CompoundBinaryTag tag = (CompoundBinaryTag) ops.convertTo(NbtOps.INSTANCE, input);
+            return DataResult.success(Pair.of(ItemStack.fromItemNBT(tag), ops.empty()));
+        }
+
+        @Override
+        public <T> DataResult<T> encode(ItemStack input, DynamicOps<T> ops, T prefix) {
+            return DataResult.success(NbtOps.INSTANCE.convertTo(ops, input.toItemNBT()));
+        }
+    };
+
+    public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
+            .xmap(BlockUtil::fromString, BlockUtil::toString);
 
     // Enum as ordinal integer
     public static <T extends Enum<T>> @NotNull Codec<T> EnumI(@NotNull Class<T> enumClass) {
@@ -58,5 +82,19 @@ public final class ExtraCodecs {
                 return codec.encode(input, ops, prefix);
             }
         };
+    }
+
+    /**
+     * <p>Attempts to decode the input with the primary codec, and if that fails tries the secondary codec.</p>
+     *
+     * <p>Always encoded using the primary codec.</p>
+     *
+     * @param primary   The first codec to try, always used for encoding
+     * @param secondary The second codec to try if the first fails
+     * @param <T>       The type of the codec
+     * @return A codec that tries the primary codec first, then the secondary
+     */
+    public static <T> @NotNull Codec<T> withAlternative(@NotNull Codec<T> primary, @NotNull Codec<T> secondary) {
+        return Codec.either(primary, secondary).xmap(either -> either.map(t -> t, t -> t), Either::left);
     }
 }

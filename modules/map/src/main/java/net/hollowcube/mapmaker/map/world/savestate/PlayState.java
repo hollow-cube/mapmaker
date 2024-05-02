@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.map.world.savestate;
 
+import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.SaveStateType;
-import net.hollowcube.mapmaker.map.util.EvenMoreCodecs;
+import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
@@ -16,6 +18,8 @@ import java.util.*;
 public final class PlayState {
     public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
+    private static final MapCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = Codec.unboundedMap(ExtraCodecs.LONG_STRING, ExtraCodecs.BLOCK_STATE_STRING)
+            .optionalFieldOf("ghostBlocks", Map.of());
     public static Codec<PlayState> CODEC;
 
     static {
@@ -30,7 +34,7 @@ public final class PlayState {
                 ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
                 Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
                 Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives),
-                EvenMoreCodecs.VERSIONED_POS_BLOCK_MAP.optionalFieldOf("ghostBlocks", Map.of()).forGetter(PlayState::ghostBlocks)
+                GHOST_BLOCKS_CODEC.forGetter(PlayState::ghostBlocks)
         ).apply(i, PlayState::new));
     }
 
@@ -43,6 +47,11 @@ public final class PlayState {
         @Override
         public @NotNull Codec<PlayState> codec() {
             return CODEC;
+        }
+
+        @Override
+        public @NotNull MCDataType dataType() {
+            return HCTypeRegistry.PLAY_STATE;
         }
     };
 

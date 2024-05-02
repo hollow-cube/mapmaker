@@ -18,6 +18,9 @@ public final class HCTypeRegistry {
     public static final IDDataType ENTITIY = MCTypeRegistry.ENTITY;
     public static final IDDataType BLOCK_ENTITY = MCTypeRegistry.TILE_ENTITY;
 
+    public static final MCDataType EDIT_STATE = new MCDataType("HC/EditState"); // Save state for an editing world
+    public static final MCDataType PLAY_STATE = new MCDataType("HC/PlayState"); // Save state for a playing world
+
     static {
         try {
             Class.forName(MCTypeRegistry.class.getName()); // Make sure MCTypeRegistry has definitely done static init

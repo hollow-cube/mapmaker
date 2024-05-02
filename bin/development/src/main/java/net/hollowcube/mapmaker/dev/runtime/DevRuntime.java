@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev.runtime;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.mapmaker.map.MapWorld;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,4 +47,8 @@ public class DevRuntime implements ServerRuntime {
         return resourcePackHash;
     }
 
+    @Override
+    public int dataVersion() {
+        return MapWorld.DATA_VERSION;
+    }
 }

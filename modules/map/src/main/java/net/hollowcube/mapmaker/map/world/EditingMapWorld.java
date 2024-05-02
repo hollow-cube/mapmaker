@@ -263,16 +263,16 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         saveState.setPlayStartTime(System.currentTimeMillis());
 
         // Read from savestate
-        var buildState = saveState.state(EditState.class);
-        buildState.inventory().ifPresentOrElse(
-                // Read the inventory items
-                items -> items.forEach(player.getInventory()::setItemStack),
-                // Add the builder mode item
-                () -> player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null))
-        );
-        player.setHeldItemSlot((byte) buildState.selectedSlot());
-        player.setFlying(buildState.isFlying());
-        player.teleport(buildState.pos().orElse(map().settings().getSpawnPoint())).join();
+        var editState = saveState.state(EditState.class);
+        editState.inventory().forEach(player.getInventory()::setItemStack);
+        player.setHeldItemSlot((byte) editState.selectedSlot());
+        player.setFlying(editState.isFlying());
+        var storedPos = editState.pos();
+        if (storedPos.isEmpty()) {
+            // If there is no position stored then this is a fresh edit state so add the builder menu
+            player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
+        }
+        player.teleport(editState.pos().orElse(map().settings().getSpawnPoint())).join();
     }
 
     @Override

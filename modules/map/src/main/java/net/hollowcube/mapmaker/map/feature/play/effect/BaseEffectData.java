@@ -22,14 +22,14 @@ public abstract class BaseEffectData {
     private PotionEffectList potionEffects;
     private Optional<Pos> teleport;
     //todo settings
-    //todo items
-
+    private HotbarItems items;
 
     public BaseEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
             PotionEffectList potionEffects,
-            Optional<Pos> teleport
+            Optional<Pos> teleport,
+            HotbarItems items
     ) {
         this.name = name;
         this.progressIndex = progressIndex;
@@ -38,6 +38,7 @@ public abstract class BaseEffectData {
         this.clearPotionEffects = clearPotionEffects;
         this.potionEffects = potionEffects;
         this.teleport = teleport;
+        this.items = items;
     }
 
     public @NotNull String displayName() {
@@ -81,6 +82,10 @@ public abstract class BaseEffectData {
         return teleport;
     }
 
+    public @NotNull HotbarItems items() {
+        return items;
+    }
+
     public void setName(@Nullable String name) {
         this.name = name == null ? "" : name;
     }
@@ -105,6 +110,10 @@ public abstract class BaseEffectData {
         this.teleport = Optional.ofNullable(teleport);
     }
 
+    public void setItems(@NotNull HotbarItems items) {
+        this.items = items;
+    }
+
     public void sendDebugInfo(@NotNull Player player) {
         player.sendMessage("Name: " + displayName());
         player.sendMessage("Progress index: " + (progressIndex() == -1 ? "none" : progressIndex()));
@@ -113,5 +122,6 @@ public abstract class BaseEffectData {
         player.sendMessage("Clear potion effects: " + clearPotionEffects());
         player.sendMessage("Potion effects: " + (potionEffects().isEmpty() ? "none" : potionEffects().toString()));
         player.sendMessage("Teleport: " + teleport().map(Point::toString).orElse("none"));
+        player.sendMessage("Items: " + items());
     }
 }

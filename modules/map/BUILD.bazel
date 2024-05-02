@@ -1,4 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_proto_library")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library")
 
 java_library(
     name = "map",
@@ -26,5 +27,28 @@ java_library(
         "@maven//:net_kyori_adventure_api",
         "@maven//:com_miguelfonseca_completely_completely_core",
         "@maven//:net_kyori_adventure_text_serializer_plain",
+    ],
+)
+
+java_junit5_test(
+    name = "map_test",
+    srcs = glob(include = ["src/test/java/**/*.java"]),
+    resources = glob(include = ["src/test/resources/**/*"]),
+    test_class = "net.hollowcube.mapmaker.map.MapTestSuite",
+    deps = [
+        ":map",
+        "@maven//:com_github_hollow_cube_datafixerupper",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_minestom_minestom_snapshots",
+        "//modules/core",
+        #        "//modules/command",
+        #        "//modules/common",
+        "//modules/test",
+        #        "//third_party:minestom",
+        #        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
+        #        "@maven//:it_unimi_dsi_fastutil",
+        #        "@maven//:net_kyori_adventure_api",
+        #        "@maven//:net_kyori_adventure_text_serializer_plain",
     ],
 )

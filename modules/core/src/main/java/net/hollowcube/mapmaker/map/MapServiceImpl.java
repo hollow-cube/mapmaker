@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
+import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.serialization.JsonOps;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.utils.validate.Check;
@@ -26,6 +28,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final String WORLD_SESSION_HEADER = "x-hc-map-session";
 
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
+
+    private final int latestDataVersion = ServerRuntime.getRuntime().dataVersion();
 
     private final String url;
     private final String urlV2;
@@ -394,16 +398,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 201 -> {
-                var obj = GSON.fromJson(res.body(), JsonObject.class);
-                var saveState = GSON.fromJson(obj, SaveState.class);
-                if (serializer != null) {
-                    var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
-                    saveState.serializer = serializer;
-                    saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
-                }
-                yield saveState;
-            }
+            case 201 -> readTypedSaveState(GSON.fromJson(res.body(), JsonObject.class), serializer);
             default -> throw new InternalError("Failed to create savestate: " + res.body());
         };
     }
@@ -416,19 +411,30 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> {
-                var obj = GSON.fromJson(res.body(), JsonObject.class);
-                var saveState = GSON.fromJson(obj, SaveState.class);
-                if (serializer != null) {
-                    var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
-                    saveState.serializer = serializer;
-                    saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
-                }
-                yield saveState;
-            }
+            case 200 -> readTypedSaveState(GSON.fromJson(res.body(), JsonObject.class), serializer);
             case 404 -> throw new NotFoundError("latest");
             default -> throw new InternalError("Failed to get latest savestate: " + res.body());
         };
+    }
+
+    private @NotNull SaveState readTypedSaveState(@NotNull JsonObject obj, @Nullable SaveStateType.Serializer<?> serializer) {
+        var saveState = GSON.fromJson(obj, SaveState.class);
+        if (serializer != null) {
+            var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
+
+            // Upgrade the save state if relevant
+            // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
+            // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
+            // the state and finding a compatible server (server data version > state data version).
+            if (!stateObj.isEmpty() && saveState.dataVersion > 0 && saveState.dataVersion < latestDataVersion) {
+                stateObj = MCDataConverter.convertJson(serializer.dataType(), stateObj, false, saveState.dataVersion, latestDataVersion);
+                saveState.dataVersion = latestDataVersion;
+            }
+
+            saveState.serializer = serializer;
+            saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
+        }
+        return saveState;
     }
 
     @Override

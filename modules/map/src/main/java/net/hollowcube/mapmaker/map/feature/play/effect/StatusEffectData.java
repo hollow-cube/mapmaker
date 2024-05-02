@@ -20,6 +20,7 @@ public class StatusEffectData extends BaseEffectData {
             Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(StatusEffectData::clearPotionEffects),
             PotionEffectList.NULL_MAPPED_CODEC.forGetter(StatusEffectData::potionEffects),
             ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(StatusEffectData::teleport),
+            HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(StatusEffectData::items),
             // StatusEffectData
             Codec.BOOL.optionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
             Codec.INT.optionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime)
@@ -32,10 +33,12 @@ public class StatusEffectData extends BaseEffectData {
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
             PotionEffectList potionEffects,
-            Optional<Pos> teleport, boolean repeatable,
+            Optional<Pos> teleport,
+            HotbarItems items,
+            boolean repeatable,
             int extraTime
     ) {
-        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport);
+        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport, items);
         this.repeatable = repeatable;
         this.extraTime = extraTime;
     }

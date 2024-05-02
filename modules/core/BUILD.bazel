@@ -44,6 +44,7 @@ java_library(
         "@maven//:org_spongepowered_configurate_yaml",
         "@maven//:org_apache_avro_avro",
         "@maven//:io_confluent_kafka_schema_registry_client",
+        "@maven//:dev_hollowcube_dataconverter",
         "@maven//:info_debatty_java_string_similarity",
     ],
 )

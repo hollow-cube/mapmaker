@@ -1,5 +1,6 @@
 package net.hollowcube.common;
 
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
@@ -55,6 +56,10 @@ public interface ServerRuntime {
 
     default @NotNull String resourcePackSha1() {
         return "dev";
+    }
+
+    default int dataVersion() {
+        return MinecraftServer.DATA_VERSION;
     }
 
     // Dependency info
