@@ -73,18 +73,17 @@ public class SpongeSchematicWriter implements SchematicWriter {
         container.put("Palette", paletteTag.build());
         container.put("Data", schematic.blockData());
 
-        if (!schematic.blockEntities().isEmpty()) {
-            var blockEntityList = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
-            for (var blockEntity : schematic.blockEntities()) {
-                var pos = blockEntity.position();
-                blockEntityList.add(CompoundBinaryTag.builder()
-                        .putString("Id", blockEntity.id())
-                        .putIntArray("Pos", new int[]{pos.blockX(), pos.blockY(), pos.blockZ()})
-                        .put("Data", blockEntity.data())
-                        .build());
-            }
-            container.put("BlockEntities", blockEntityList.build());
+        var blockEntityList = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
+        for (var blockEntity : schematic.blockEntities()) {
+            var pos = blockEntity.position();
+            blockEntityList.add(CompoundBinaryTag.builder()
+                    .putString("Id", blockEntity.id())
+                    .putIntArray("Pos", new int[]{pos.blockX(), pos.blockY(), pos.blockZ()})
+                    .put("Data", blockEntity.data())
+                    .build());
         }
+        // Note: we must include block entities or WorldEdit fails to read the schematic. Thank you worldedit!
+        container.put("BlockEntities", blockEntityList.build());
 
         return container.build();
     }
