@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.util;
+package net.hollowcube.common.util;
 
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
@@ -26,4 +26,5 @@ public final class BlockUtil {
 
         return builder.toString();
     }
+
 }

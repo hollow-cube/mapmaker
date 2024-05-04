@@ -6,7 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.map.util.BlockUtil;
+import net.hollowcube.common.util.BlockUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;

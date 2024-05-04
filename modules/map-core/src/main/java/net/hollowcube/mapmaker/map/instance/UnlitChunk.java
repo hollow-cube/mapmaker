@@ -41,8 +41,12 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
         heightmaps.update(x, y, z, block);
     }
 
+    public Heightmaps heightmaps() {
+        return heightmaps;
+    }
+
     @Override
-    protected CompoundBinaryTag computeHeightmap() {
+    protected CompoundBinaryTag getHeightmapNBT() {
         return heightmaps.getProtocolData();
     }
 }
