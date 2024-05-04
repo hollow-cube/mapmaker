@@ -28,13 +28,17 @@
             <button id="tab_settings" translationKey="gui.checkpoint.tab.settings"
                     sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_bg"/>
             <button id="tab_settings_set" translationKey="gui.checkpoint.tab.settings"
-                    sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_selected_bg"/>
+                    sprite="effect/tab_settings_selected"/>
         </switch>
 
         <spacer width="1"/>
 
-        <button id="tab_actions" translationKey="gui.checkpoint.tab.actions"
-                sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
+        <switch id="tab_actions_state_switch">
+            <button id="tab_actions" translationKey="gui.checkpoint.tab.actions"
+                    sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
+            <button id="tab_actions_set" translationKey="gui.checkpoint.tab.actions"
+                    sprite="effect/tab_actions_selected"/>
+        </switch>
 
         <spacer width="1"/>
 

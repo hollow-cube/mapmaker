@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public class EditCheckpointView extends View {
 
     private @Outlet("tab_switch") Switch tabSwitch;
+    private @Outlet("tab_settings_state_switch") Switch tabSettingsStateSwitch;
+    private @Outlet("tab_actions_state_switch") Switch tabActionsStateSwitch;
 
     private @Outlet("settings") CheckpointSettingsTab settingsTab;
     private @Outlet("actions") CheckpointActionsTab actionsTab;
@@ -25,6 +27,7 @@ public class EditCheckpointView extends View {
         this.data = data;
         this.save = save;
 
+        tabSettingsStateSwitch.setOption(true);
         settingsTab.setData(data, maxResetHeight);
         actionsTab.setData(data, save);
     }
@@ -32,11 +35,15 @@ public class EditCheckpointView extends View {
     @Action("tab_settings")
     public void handleSelectSettingsTab() {
         tabSwitch.setOption(0);
+        tabSettingsStateSwitch.setOption(true);
+        tabActionsStateSwitch.setOption(false);
     }
 
     @Action("tab_actions")
     public void handleSelectActionsTab() {
         tabSwitch.setOption(1);
+        tabSettingsStateSwitch.setOption(false);
+        tabActionsStateSwitch.setOption(true);
     }
 
     @Signal(Element.SIG_CLOSE)

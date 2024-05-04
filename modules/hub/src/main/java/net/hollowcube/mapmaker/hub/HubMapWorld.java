@@ -63,7 +63,7 @@ public class HubMapWorld extends AbstractMapWorld {
     );
 
     private static final Vec HUB_BB_MIN = new Vec(-250, -30, -100);
-    private static final Vec HUB_BB_MAX = new Vec(60, 130, 100);
+    private static final Vec HUB_BB_MAX = new Vec(60, 130, 120);
 
     private static HubMapWorld instance; // Currently just ensures there is only ever one hub per runtime.
 
