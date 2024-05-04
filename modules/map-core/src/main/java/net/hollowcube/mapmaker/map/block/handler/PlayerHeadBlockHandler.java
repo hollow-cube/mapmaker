@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
 import net.kyori.adventure.nbt.BinaryTag;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemComponent;
@@ -13,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-
-import static net.hollowcube.mapmaker.map.block.handler.BlockHandlerHelpers.updateBlock;
 
 public class PlayerHeadBlockHandler implements BlockHandler {
     public static final Tag<BinaryTag> PROFILE = Tag.NBT("profile");
@@ -36,17 +33,8 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     }
 
     @Override
-    public void onPlace(@NotNull BlockHandler.Placement placement) {
-        if (!(placement instanceof PlayerPlacement p)) return;
-
-        var itemStack = p.getPlayer().getItemInHand(p.getHand());
-        var profile = itemStack.get(ItemComponent.PROFILE);
-        if (profile == null) return;
-
-        // Add the item NBT to the block
-        updateBlock(p, CompoundBinaryTag.builder()
-                .put("profile", ItemComponent.PROFILE.write(profile))
-                .build());
+    public byte getBlockEntityAction() {
+        return 15;
     }
 
     @Override

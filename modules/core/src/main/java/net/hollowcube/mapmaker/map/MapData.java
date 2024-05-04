@@ -282,6 +282,7 @@ public class MapData {
      */
     public static @NotNull Component createHeadlessComponent(@NotNull MapData map, @NotNull PlayerService playerService) {
         var lore = new ArrayList<Component>();
+        lore.add(Component.text(map.name()));
         var authorName = playerService.getPlayerDisplayName2(map.owner());
         lore.add(Component.translatable("gui.play_maps.map_display.author", authorName.build()));
         lore.add(Component.empty());
@@ -357,30 +358,29 @@ public class MapData {
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
 
+        var builder = Component.text();
+        for (int i = 0; i < lore.size(); i++) {
+            builder.append(LanguageProviderV2.translate(lore.get(i)));
+            if (i < lore.size() - 1) {
+                builder.appendNewline();
+            }
+        }
 
         var comp = Component.text(map.name(), TextColor.color(0x15ADD3));
         if (map.isPublished()) {
-            var hoverText = Component.text("Click to join!")
-                    .appendNewline()
-                    .append(Component.text("LINE 2"));
-            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
+            comp = comp.hoverEvent(HoverEvent.showText(builder.build()))
                     .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())));
-        } else {
-            var hoverText = Component.text("Click to view details!")
-                    .appendNewline()
-                    .append(Component.text("LINE 2"));
-            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
-                    .clickEvent(ClickEvent.runCommand("/map details " + map.id()));
         }
+//        else {
+//            var hoverText = Component.text("Click to view details!")
+//                    .appendNewline()
+//                    .append(Component.text("LINE 2"));
+//            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
+//                    .clickEvent(ClickEvent.runCommand("/map details " + map.id()));
+//        }
 
-        var builder = Component.text();
-        for (int i = 0; i < lore.size(); i++) {
-            builder = builder.append(lore.get(i));
-            if (i < lore.size() - 1) {
-                builder = builder.appendNewline();
-            }
-        }
-        return builder.build();
+        return comp;
+//        return builder.build();
     }
 
     private static @NotNull Component getMapTypeComponent(@NotNull MapData map) {

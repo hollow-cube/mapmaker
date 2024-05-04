@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -233,11 +234,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                             } else builder.append(emoji.supplier().get());
                         }
                         case MAP -> {
-                            builder.append(Component.text("[map - todo]"));
-//                            builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
-//                                var m = mapService.getMap(message.sender(), mapId);
-//                                return MapData.createHeadlessComponent(m, playerService);
-//                            }));
+                            builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
+                                var m = mapService.getMap(message.sender(), mapId);
+                                return MapData.createHeadlessComponent(m, playerService);
+                            }));
                         }
                         case URL -> {
                             builder.append(Component.text(part.text(), NamedTextColor.GRAY)

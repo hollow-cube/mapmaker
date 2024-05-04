@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -67,9 +66,7 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
         var profile = itemStack.get(ItemComponent.PROFILE);
         if (profile == null) return block;
 
-        return block.withTag(PlayerHeadBlockHandler.PROFILE, CompoundBinaryTag.builder()
-                .put("profile", ItemComponent.PROFILE.write(profile))
-                .build());
+        return block.withTag(PlayerHeadBlockHandler.PROFILE, ItemComponent.PROFILE.write(profile));
     }
 
 }
