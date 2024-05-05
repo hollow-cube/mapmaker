@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.util.TagUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
@@ -75,7 +76,13 @@ public class MapEntry extends View {
      */
     private @Blocking void updateIcon() {
         var icon = map.settings().getIcon();
-        label.setItemSprite(ItemStack.of(icon == null ? Material.PAPER : icon));
+        if (icon == null) {
+            label.setItemSprite(ItemStack.of(Material.PAPER));
+        } else {
+            var item = ItemStack.builder(icon);
+            TagUtil.removeTooltipExtras(item);
+            label.setItemSprite(item.build());
+        }
 
         // todo we could update the icon + title immediately and only update the lore once we have the player name perhaps
         if (authorName == null) {

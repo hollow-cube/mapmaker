@@ -110,7 +110,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             };
 
             if (resp != null) {
-                player.sendMessage("NEW SCORE is " + resp.newPlacement());
+//                player.sendMessage("NEW SCORE is " + resp.newPlacement());
             }
 
             TheSneaky.getTheSneaky().send(player);

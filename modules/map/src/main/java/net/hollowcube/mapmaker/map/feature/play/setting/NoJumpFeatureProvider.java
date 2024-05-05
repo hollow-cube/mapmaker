@@ -11,15 +11,15 @@ import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.potion.Potion;
-import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)
 public class NoJumpFeatureProvider implements FeatureProvider {
+
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nojump", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer)
@@ -66,10 +66,10 @@ public class NoJumpFeatureProvider implements FeatureProvider {
     }
 
     private void addEffect(@NotNull Player player) {
-        player.addEffect(new Potion(PotionEffect.JUMP_BOOST, (byte) -8, Potion.INFINITE_DURATION));
+        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(0);
     }
 
     private void removeEffect(@NotNull Player player) {
-        player.removeEffect(PotionEffect.JUMP_BOOST);
+        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(Attribute.GENERIC_JUMP_STRENGTH.defaultValue());
     }
 }

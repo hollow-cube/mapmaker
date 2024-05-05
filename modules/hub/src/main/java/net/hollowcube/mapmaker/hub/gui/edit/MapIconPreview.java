@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.util.TagUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -24,7 +25,9 @@ public class MapIconPreview extends View {
         this.material = material;
         this.isNoResultsButton = false;
 
-        label.setItemSprite(ItemStack.of(material));
+        var iconItem = ItemStack.builder(material);
+        TagUtil.removeTooltipExtras(iconItem);
+        label.setItemSprite(iconItem.build());
         label.setArgs(LanguageProviderV2.getVanillaTranslation(material));
     }
 

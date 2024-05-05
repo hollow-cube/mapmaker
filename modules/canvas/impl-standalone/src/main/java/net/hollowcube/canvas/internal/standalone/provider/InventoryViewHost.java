@@ -316,6 +316,7 @@ public class InventoryViewHost {
                     clickType = ClickType.SHIFT_LEFT_CLICK;
                 }
                 default -> {
+                    event.setCancelled(true);
                     return;
                 }
             }
