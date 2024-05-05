@@ -99,13 +99,13 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
-            event.getPlayer().disconnect(Component.text("something went wrong"));
-        }
-//        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
-//            logger.info("sending {} to limbo", event.getPlayer().getUsername());
-//            event.setInitialServer(limboServer);
+//        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
+//            event.getPlayer().disconnect(Component.text("something went wrong"));
 //        }
+        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
+            logger.info("sending {} to limbo", event.getPlayer().getUsername());
+            event.setInitialServer(limboServer);
+        }
     }
 
     @Subscribe
@@ -137,7 +137,9 @@ public class ProxyPlugin {
                 return;
             }
 
-            event.setResult(ResultedEvent.ComponentResult.denied(CLOSED_BETA));
+            // this is ok, they will be sent to the limbo
+            logger.info("player {} is not in the beta", player.getUsername());
+//            event.setResult(ResultedEvent.ComponentResult.denied(CLOSED_BETA));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
