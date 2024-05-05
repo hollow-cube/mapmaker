@@ -403,6 +403,16 @@ public abstract class AbstractMapServer implements MapServer {
         //todo this should be probing session service for hubs, and session + maps for maps
         return List.of(
                 () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
+                () -> {
+                    var future = new CompletableFuture<>();
+                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(null));
+                    try {
+                        future.join();
+                        return HealthCheckResponse.up("tick");
+                    } catch (Exception e) {
+                        return HealthCheckResponse.down("tick");
+                    }
+                },
                 () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub"),
                 shutdowner
         );
