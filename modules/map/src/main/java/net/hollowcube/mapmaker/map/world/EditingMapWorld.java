@@ -197,7 +197,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             });
 
             // Save the world data (if it is unverified only)
-            if (map().verification() == MapVerification.UNVERIFIED) {
+            if (map().verification() != MapVerification.PENDING) {
                 biomes().write(this);
 
                 var worldData = instance.save(new ReadWriteWorldAccess(this));

@@ -37,10 +37,11 @@ jobs:
         uses: ComunidadAylas/PackSquash-action@v4
         with:
           packsquash_version: latest
+          # Broken with java 22
+          #            zip_spec_conformance_level = 'disregard'
           options: |
             pack_directory = 'temp'
             output_file_path = 'squashed.zip'
-            zip_spec_conformance_level = 'disregard'
       - name: Round 2
         id: process
         run: |
