@@ -75,6 +75,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         //todo this is a bad solution. Basically we need to remove the player immediately, but the remove method runs in a virtual thread
         // which means it will have a tiny scheduling delay which means duplicates can trigger. To get around this we just remove these
         // two tags immediately which will stop them from triggering new events. Its a terrible solution and needs to be reworked.
+        world.callEvent(new MapWorldPlayerStopPlayingEvent(world, player));
         world.removePlayerImmediate(player);
 
         FutureUtil.submitVirtual(() -> {
@@ -83,6 +84,14 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             // Then re-add the player to the world as a spectator (in finished mode)
 
             var resp = world.removeActivePlayer(player);
+
+            // If this is a verification, immediately remove them from the world and send them back to the hub
+            if (event.getMap().verification() == MapVerification.PENDING) {
+                // In this case, they just finished verifying the map. congrats to them.
+                world.server().bridge().joinHub(player);
+                return;
+            }
+
             world.addSpectator(player, true);
 
             // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.

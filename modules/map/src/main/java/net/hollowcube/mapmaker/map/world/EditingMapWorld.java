@@ -238,11 +238,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void addPlayer(@NotNull Player player) {
-        if (map().verification() == MapVerification.PENDING) {
-            enterTestMode(player);
-            return;
-        }
-
         ActionBar.forPlayer(player).addProvider(RamUsageOverlay.INSTANCE);
 
         var playerData = PlayerDataV2.fromPlayer(player);
@@ -277,7 +272,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        if (map().verification() == MapVerification.PENDING) return;
 
         // Removing isn't really necessary because it doesn't activate when not in an editing map world,
         // but better safe than sorry.

@@ -88,7 +88,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public void addPlayer(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.PLAYING, PlayState.SERIALIZER);
+        var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
 
         var pos = saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint());
@@ -147,14 +148,15 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        if (isPlaying(player)) removeActivePlayer(player);
-        else if (isSpectating(player)) removeSpectatingPlayer(player);
+        if (isPlaying(player)) {
+            callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
+            removeActivePlayer(player);
+        } else if (isSpectating(player)) removeSpectatingPlayer(player);
     }
 
     public @Nullable SaveStateUpdateResponse removeActivePlayer(@NotNull Player player) {
 //        if (!isPlaying(player)) return null; //todo cannot enable this, see comment in PlayCompletionFeatureProvider where this is called.
 
-        EventDispatcher.call(new MapWorldPlayerStopPlayingEvent(this, player));
         super.removePlayer(player); // Remove from player list
 
         // Update the playtime and playing state to the current state

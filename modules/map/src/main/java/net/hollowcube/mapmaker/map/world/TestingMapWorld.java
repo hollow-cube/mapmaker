@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
-import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -78,18 +79,11 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     public void addPlayer(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
-        // The save state for verifications needs to be created remotely, but for local testing we can create it here.
-        // todo in the future verification should be done in a VerificationMapWorld or PlayingMapWorld probably.
-        SaveState saveState;
-        if (map().verification() == MapVerification.PENDING) {
-            saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.VERIFYING, null);
-        } else {
-            // Create a fake save state, it is only used locally anyway.
-            saveState = new SaveState(
-                    UUID.randomUUID().toString(), playerData.id(), map().id(),
-                    SaveStateType.PLAYING, PlayState.SERIALIZER, new PlayState()
-            );
-        }
+        // Create a fake save state, it is only used locally anyway.
+        var saveState = new SaveState(
+                UUID.randomUUID().toString(), playerData.id(), map().id(),
+                SaveStateType.PLAYING, PlayState.SERIALIZER, new PlayState()
+        );
         player.setTag(SaveState.TAG, saveState);
 
         super.addPlayer(player);
@@ -108,23 +102,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
         super.removePlayer(player);
 
-        // Save their save state if this is a pending verification
-        var saveState = SaveState.optionalFromPlayer(player);
-        if (saveState == null || map().verification() != MapVerification.PENDING) return;
-
-        saveState.updatePlaytime();
-
-        var update = new SaveStateUpdateRequest();
-        update.setPlaytime(saveState.getPlaytime());
-        update.setCompleted(saveState.isCompleted());
-
-        try {
-            var playerData = PlayerDataV2.fromPlayer(player);
-            parent.server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), update);
-            logger.error("Updated testing savestate for {}", player.getUuid());
-        } catch (Exception e) {
-            logger.error("Failed to save player state for {}", player.getUuid(), e);
-        }
+        // We never need to save their state because this is a test state and only managed locally.
 
         player.removeTag(SaveState.TAG);
     }

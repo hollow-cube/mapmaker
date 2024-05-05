@@ -2,9 +2,7 @@ package net.hollowcube.mapmaker.map.feature.test;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
@@ -37,20 +35,10 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var world = (TestingMapWorld) MapWorld.forPlayer(player);
 
-        var map = world.map();
-        if (map.verification() == MapVerification.PENDING) {
-            // In this case, they just finished verifying the map. congrats to them.
-            var saveState = SaveState.fromPlayer(player);
-            saveState.setCompleted(true);
-
-            world.server().bridge().joinHub(player);
-
-        } else {
-            // Not sure what should really happen here, for now just tell them
-            // they completed the map and send them back to editing mode
-            player.sendMessage(Component.translatable("testing_mode.finish"));
-            world.exitTestMode(player);
-        }
+        // Not sure what should really happen here, for now just tell them
+        // they completed the map and send them back to editing mode
+        player.sendMessage(Component.translatable("testing_mode.finish"));
+        world.exitTestMode(player);
     }
 
     private void handleOverrideSpecCheckpoint(@NotNull MapPlayerCheckpointChangeEvent event) {

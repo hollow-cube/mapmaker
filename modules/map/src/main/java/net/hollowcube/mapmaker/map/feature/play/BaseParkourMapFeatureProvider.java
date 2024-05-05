@@ -290,8 +290,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 Map.copyOf(state.ghostBlocks())
         ));
 
-        System.out.println("save at cp: " + state.ghostBlocks() + " last: " + state.lastState().get().ghostBlocks());
-
         // Update the player based on the new state
         updatePlayerFromState(player, state);
 
