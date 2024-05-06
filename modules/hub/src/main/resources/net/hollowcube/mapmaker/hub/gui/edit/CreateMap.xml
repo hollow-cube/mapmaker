@@ -6,7 +6,8 @@
         <label translationKey="gui.create_maps.new_map.information"/>
         <text id="slot_id_create" width="5" translationKey="gui.create_maps.new_map.title" font="slot_title"
               centered="true"/>
-        <button width="2" translationKey="gui.create_maps.new_map.reset_to_default"/>
+        <button id="create_box" width="1" translationKey="gui.create_maps.new_map.create_box"/>
+        <button width="1" translationKey="gui.create_maps.new_map.reset_to_default"/>
     </box>
 
     <spacer width="9" height="1"/>

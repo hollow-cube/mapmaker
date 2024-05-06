@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.BoxType;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.kyori.adventure.text.Component;
@@ -58,6 +59,24 @@ public class CreateMap extends View {
             submitButton.setState(State.ACTIVE);
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR, "Failed to create map", e);
+            MinecraftServer.getExceptionManager().handleException(e);
+            player.sendMessage(Component.translatable("generic.unknown_error"));
+            player.closeInventory();
+        }
+    }
+
+    @Action(value = "create_box", async = true)
+    private void handleCreateBox(@NotNull Player player) {
+        submitButton.setState(State.LOADING);
+
+        var playerData = MapPlayerData.fromPlayer(player);
+
+        // Dispatch request to create the box
+        try {
+            var createdBox = mapService.createBoxMap(playerData, slot, BoxType.STRAIGHT);
+            performSignal(SIG_MAP_CREATED, slot, createdBox);
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to create box", e);
             MinecraftServer.getExceptionManager().handleException(e);
             player.sendMessage(Component.translatable("generic.unknown_error"));
             player.closeInventory();

@@ -231,6 +231,8 @@ public class EditMap extends View {
                 mapService.deleteVerification(playerData.id(), map.id());
             }
 
+            logger.log(System.Logger.Level.ERROR, "AAAAAAAAAAAAAAAAAAAAAAAA editing map of type " + map.type());
+
             player.closeInventory();
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");
         } catch (Exception e) {

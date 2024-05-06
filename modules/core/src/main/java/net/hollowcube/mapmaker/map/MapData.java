@@ -38,6 +38,8 @@ public class MapData {
 
     private MapQuality quality;
 
+    private MapType type;
+
     private int objectLimit = 100;
     private List<ObjectData> objects = new ArrayList<>();
     private transient int objectUsage = -1;
@@ -156,6 +158,10 @@ public class MapData {
 
     public @NotNull MapQuality quality() {
         return Objects.requireNonNullElse(quality, MapQuality.UNRATED);
+    }
+
+    public @NotNull MapType type() {
+        return Objects.requireNonNullElse(type, MapType.DEFAULT);
     }
 
     public int objectLimit() {

@@ -76,6 +76,22 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull MapData createBoxMap(@NotNull MapPlayerData player, int slot, BoxType type) {
+        logger.log(System.Logger.Level.INFO, "creating new box map for " + player.id());
+        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot, "isBox", true));
+        var req = HttpRequest.newBuilder()
+                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
+                .uri(URI.create(url))
+                .header(AUTHORIZER_HEADER, player.id())
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 201)
+            throw new InternalError("Failed to create box: " + res.body());
+
+        return GSON.fromJson(res.body(), MapData.class);
+    }
+
+    @Override
     public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
         Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
@@ -171,6 +187,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        logger.log(System.Logger.Level.ERROR, "AAAAAAAAAAAAAAAAAAAAAAAAA got response body" + res.body());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), MapData.class);
             case 404 -> throw new NotFoundError(id);

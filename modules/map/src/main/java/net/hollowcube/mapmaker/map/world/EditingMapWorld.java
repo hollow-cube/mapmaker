@@ -80,7 +80,15 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         super(server, map, features, new MapInstance(map.createDimensionName('e')));
         this.terraform = terraform;
 
-        instance.setGenerator(MapGenerators.voidWorld());
+        if (map.type().equals(MapType.BOX)) {
+            // TODO add support for setting STRAIGHT vs CORNER
+            logger.error("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA you're editing a box world");
+            instance.setGenerator(MapGenerators.boxWorld(BoxType.STRAIGHT));
+        }
+        else {
+            logger.error("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA you're editing a void world");
+            instance.setGenerator(MapGenerators.voidWorld());
+        }
         instance.eventNode().addChild(readWriteNode); // Needs spectators, so register on instance.
         instance.eventNode().addChild(readOnlyNode); // Needs spectators, so register on instance.
 

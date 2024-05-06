@@ -50,6 +50,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
+            .registerTypeAdapter(MapType.class, new EnumTypeAdapter<>(MapType.class))
             .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumOrdinalTypeAdapter<>(PersonalizedMapData.Progress.class))
             .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
             .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))

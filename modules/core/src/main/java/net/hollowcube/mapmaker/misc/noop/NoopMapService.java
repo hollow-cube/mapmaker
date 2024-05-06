@@ -40,6 +40,11 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull MapData createBoxMap(@NotNull MapPlayerData player, int slot, BoxType type) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
     public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
         return new MapSearchResponse<>(1, false, staticMaps.values().stream()
                 .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
