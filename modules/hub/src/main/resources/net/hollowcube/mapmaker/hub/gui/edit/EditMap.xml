@@ -26,115 +26,148 @@
                 </switch>
             </box>
 
-            <box width="9" align="ltr">
-                <button id="map_type_tab_parkour" width="3"
-                        translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
-                <button id="map_type_tab_building" width="3"
-                        translationKey="gui.create_maps.map_info_tab.select_type.building"/>
-                <button width="3" translationKey="gui.create_maps.map_info_tab.select_type.adventure"/>
-            </box>
-            <switch id="map_type_tab_switch" width="9" height="2">
-                <!-- PARKOUR TAB -->
-                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_parkour/container">
-                    <!-- These names MUST be synced with the ParkourSubVariant enum -->
-                    <!-- todo this is super repetitive, might be worth looking into scripting it after all -->
-                    <spacer width="1"/>
-                    <switch id="parkour_subvariant_speedrun_switch">
-                        <button id="parkour_subvariant_speedrun_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"
-                                sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_bg"/>
-                        <button id="parkour_subvariant_speedrun_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_sectioned_switch">
-                        <button id="parkour_subvariant_sectioned_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"
-                                sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_bg"/>
-                        <button id="parkour_subvariant_sectioned_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_rankup_switch">
-                        <button id="parkour_subvariant_rankup_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"
-                                sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_bg"/>
-                        <button id="parkour_subvariant_rankup_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_gauntlet_switch">
-                        <button id="parkour_subvariant_gauntlet_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"
-                                sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_bg"/>
-                        <button id="parkour_subvariant_gauntlet_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_dropper_switch">
-                        <button id="parkour_subvariant_dropper_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"
-                                sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_bg"/>
-                        <button id="parkour_subvariant_dropper_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_one_jump_switch">
-                        <button id="parkour_subvariant_one_jump_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"
-                                sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_bg"/>
-                        <button id="parkour_subvariant_one_jump_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_selected"/>
-                    </switch>
-                    <switch id="parkour_subvariant_informative_switch">
-                        <button id="parkour_subvariant_informative_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"
-                                sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_bg"/>
-                        <button id="parkour_subvariant_informative_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative.already_selected"
-                                sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
-                                backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_selected"/>
+            <!-- The 4 rows between name and above build/publish -->
+            <switch id="map_type_options_menu" width="9" height="4">
+                <!-- DEFAULT TYPE MAP -->
+                <box width="9" height="4" align="ttb">
+                    <box width="9" align="ltr">
+                        <button id="map_type_tab_parkour" width="3"
+                                translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
+                        <button id="map_type_tab_building" width="3"
+                                translationKey="gui.create_maps.map_info_tab.select_type.building"/>
+                        <button width="3" translationKey="gui.create_maps.map_info_tab.select_type.adventure"/>
+                    </box>
+                    <switch id="map_type_tab_switch" width="9" height="2">
+                        <!-- PARKOUR TAB -->
+                        <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_parkour/container">
+                            <!-- These names MUST be synced with the ParkourSubVariant enum -->
+                            <!-- todo this is super repetitive, might be worth looking into scripting it after all -->
+                            <spacer width="1"/>
+                            <switch id="parkour_subvariant_speedrun_switch">
+                                <button id="parkour_subvariant_speedrun_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_bg"/>
+                                <button id="parkour_subvariant_speedrun_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.speedrun.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_speedrun_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_speedrun_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_sectioned_switch">
+                                <button id="parkour_subvariant_sectioned_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_bg"/>
+                                <button id="parkour_subvariant_sectioned_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.sectioned.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_sectioned_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_sectioned_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_rankup_switch">
+                                <button id="parkour_subvariant_rankup_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_bg"/>
+                                <button id="parkour_subvariant_rankup_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.rankup.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_rankup_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_rankup_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_gauntlet_switch">
+                                <button id="parkour_subvariant_gauntlet_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_bg"/>
+                                <button id="parkour_subvariant_gauntlet_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.gauntlet.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_gauntlet_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_gauntlet_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_dropper_switch">
+                                <button id="parkour_subvariant_dropper_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_bg"/>
+                                <button id="parkour_subvariant_dropper_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.dropper.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_dropper_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_dropper_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_one_jump_switch">
+                                <button id="parkour_subvariant_one_jump_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_bg"/>
+                                <button id="parkour_subvariant_one_jump_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.one_jump.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_one_jump_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_one_jump_selected"/>
+                            </switch>
+                            <switch id="parkour_subvariant_informative_switch">
+                                <button id="parkour_subvariant_informative_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_bg"/>
+                                <button id="parkour_subvariant_informative_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.parkour.informative.already_selected"
+                                        sprite="create_maps/tab_info/tab_parkour/sv_informative_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_parkour/sv_informative_selected"/>
+                            </switch>
+                        </box>
+
+                        <!-- BUILDING TAB -->
+                        <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_building/container">
+                            <spacer width="3"/>
+                            <switch id="building_subvariant_showcase_switch">
+                                <button id="building_subvariant_showcase_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"
+                                        sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_bg"/>
+                                <button id="building_subvariant_showcase_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.building.showcase.already_selected"
+                                        sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_selected"/>
+                            </switch>
+                            <spacer width="1"/>
+                            <switch id="building_subvariant_tutorial_switch">
+                                <button id="building_subvariant_tutorial_unset"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"
+                                        sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_bg"/>
+                                <button id="building_subvariant_tutorial_set"
+                                        translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial.already_selected"
+                                        sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
+                                        backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_selected"/>
+                            </switch>
+                        </box>
                     </switch>
                 </box>
-
-                <!-- BUILDING TAB -->
-                <box width="9" height="2" align="ltr" sprite="create_maps/tab_info/tab_building/container">
-                    <spacer width="3"/>
-                    <switch id="building_subvariant_showcase_switch">
-                        <button id="building_subvariant_showcase_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.building.showcase"
-                                sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
-                                backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_bg"/>
-                        <button id="building_subvariant_showcase_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.building.showcase.already_selected"
-                                sprite="create_maps/tab_info/tab_building/sv_showcase_icon"
-                                backgroundSprite="create_maps/tab_info/tab_building/sv_showcase_selected"/>
-                    </switch>
-                    <spacer width="1"/>
-                    <switch id="building_subvariant_tutorial_switch">
-                        <button id="building_subvariant_tutorial_unset"
-                                translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial"
-                                sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
-                                backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_bg"/>
-                        <button id="building_subvariant_tutorial_set"
-                                translationKey="gui.create_maps.map_info_tab.select_type.building.tutorial.already_selected"
-                                sprite="create_maps/tab_info/tab_building/sv_tutorial_icon"
-                                backgroundSprite="create_maps/tab_info/tab_building/sv_tutorial_selected"/>
-                    </switch>
+                <box width="9" height="4" align="ttb" sprite="create_maps/obungus/container">
+                    <spacer height="1"/>
+                    <box width="9" height="3" align="ltr">
+                        <spacer width="3"/>
+                        <switch id="obungus_box_straight_switch">
+                            <button id="obungus_box_straight_unset"
+                                    translationKey="gui.create_maps.obungus.select_type.straight"
+                                    sprite="create_maps/obungus/box_straight_icon"
+                                    backgroundSprite="create_maps/obungus/box_straight_bg"/>
+                            <button id="obungus_box_straight_set"
+                                    translationKey="gui.create_maps.obungus.select_type.straight.already_selected"
+                                    sprite="create_maps/obungus/box_straight_icon"
+                                    backgroundSprite="create_maps/obungus/box_straight_selected"/>
+                        </switch>
+                        <spacer width="1"/>
+                        <switch id="obungus_box_corner_switch">
+                            <button id="obungus_box_corner_unset"
+                                    translationKey="gui.create_maps.obungus.select_type.corner"
+                                    sprite="create_maps/obungus/box_corner_icon"
+                                    backgroundSprite="create_maps/obungus/box_corner_bg"/>
+                            <button id="obungus_box_corner_set"
+                                    translationKey="gui.create_maps.obungus.select_type.corner.already_selected"
+                                    sprite="create_maps/obungus/box_corner_icon"
+                                    backgroundSprite="create_maps/obungus/box_corner_selected"/>
+                        </switch>
+                    </box>
                 </box>
             </switch>
         </box>

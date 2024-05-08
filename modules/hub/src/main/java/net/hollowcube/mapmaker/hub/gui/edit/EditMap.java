@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.map.MapType.*;
+
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
@@ -56,6 +58,9 @@ public class EditMap extends View {
 
     private @Outlet("publish_switch") Switch publishSwitch;
     private @Outlet("publish") Label publishButton;
+
+    // MAP TYPE (DEFAULT VS OBUNGUS)
+    private @Outlet("map_type_options_menu") Switch mapTypeOptionsSwitch;
 
     // INFO TAB
     private @Outlet("map_name") Text mapNameText;
@@ -546,6 +551,7 @@ public class EditMap extends View {
                 map.setSetting(MapSettings.NO_SPECTATOR, false);
             }
         }
+
         updateElementsFromMap();
         updateRequest();
     }
@@ -575,6 +581,11 @@ public class EditMap extends View {
             setMapIconSwitch.setOption(1);
         } else {
             setMapIconSwitch.setOption(0);
+        }
+
+        switch (map.type()) {
+            case DEFAULT, LEGACY, ORG -> mapTypeOptionsSwitch.setOption(0);
+            case BOX -> mapTypeOptionsSwitch.setOption(1);
         }
 
         // Type
