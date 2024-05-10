@@ -4,6 +4,7 @@ metadata:
   name: {{ include "mapmaker.fullname" . }}
   labels:
     {{- include "mapmaker.labels" . | nindent 4 }}
+    mapmaker_role: {{ .Values.mapmaker.role }} # For ServiceMonitor
 spec:
   type: {{ .Values.service.type }}
   ports:

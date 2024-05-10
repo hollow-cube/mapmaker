@@ -10,6 +10,9 @@ image:
   pullSecrets:
     - name: dockerio
 
+serviceMonitor:
+  enabled: true
+
 env:
   MAPMAKER_COMMIT_SHA: "$COMMIT_SHA"
   MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
