@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.nbt.TagStringIOExt;
 import net.kyori.adventure.text.Component;
@@ -64,6 +65,8 @@ public class DebugCommand extends CommandDsl {
                 "Show information about the current resource pack version");
         createPermissionlessSubcommand("self", this::handleDebugSelf,
                 "Show information about yourself");
+        createPermissionlessSubcommand("server", this::handleDebugServer,
+                "Show information about the current server");
 
         // Minestom stuff
         createPermissionlessSubcommand("commands", this::handleCommandsDebug,
@@ -108,7 +111,10 @@ public class DebugCommand extends CommandDsl {
         var mapPlayerData = MapPlayerData.fromPlayer(player);
         player.sendMessage(Component.text("Last played: " + mapPlayerData.lastPlayedMap()));
         player.sendMessage(Component.text("Last edited: " + mapPlayerData.lastEditedMap()));
+    }
 
+    private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {
+        player.sendMessage("Host: " + AbstractHttpService.hostname);
     }
 
     private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition, @NotNull String description) {

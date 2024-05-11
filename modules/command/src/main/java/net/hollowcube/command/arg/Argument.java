@@ -60,6 +60,10 @@ public abstract class Argument<T> {
         return new ArgumentMaterial(id);
     }
 
+    public static @NotNull ArgumentItemStack ItemStack(@NotNull String id) {
+        return new ArgumentItemStack(id);
+    }
+
 
     // Impl
 

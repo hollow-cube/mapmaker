@@ -4,6 +4,8 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import io.helidon.webserver.Service;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.adventure.audience.Audiences;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +24,15 @@ import java.util.function.Supplier;
  */
 public class Shutdowner implements Service, HealthCheck {
     private static final Logger logger = LoggerFactory.getLogger(Shutdowner.class);
-    private static final long SHUTDOWN_MAX_WAIT_MILLIS = 5 * 1000; // 10 seconds
+    private static final long SHUTDOWN_MAX_WAIT_MILLIS;
+
+    static {
+        try {
+            SHUTDOWN_MAX_WAIT_MILLIS = Long.parseLong(System.getenv().getOrDefault("MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS", "5000"));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("SHUTDOWN_MAX_WAIT_MILLIS must be a valid number", e);
+        }
+    }
 
     private final List<Runnable> shutdownHooks = new ArrayList<>();
     private final Supplier<CompletableFuture<Void>> quiescenceFunction;
@@ -54,6 +64,7 @@ public class Shutdowner implements Service, HealthCheck {
      * Shuts down the server gracefully, immediately. Does not give any shutdown grace period.
      */
     public void shutdownImmediately() {
+        logger.info("HIT SHUTDOWN IMMEDIATE");
         if (gracefulShutdownFuture == null) shutdownGracefully();
         gracefulShutdownFuture.complete(null);
 
@@ -63,11 +74,14 @@ public class Shutdowner implements Service, HealthCheck {
     public void shutdownGracefully() {
         if (gracefulShutdownFuture != null) return;
 
-        gracefulShutdownFuture = new CompletableFuture<>();
+        Audiences.all().sendMessage(Component.text("Received shutdown request"));
+
         logger.info("Beginning graceful shutdown. The server will terminate in {} seconds.", SHUTDOWN_MAX_WAIT_MILLIS / 1000);
-        CompletableFuture.delayedExecutor(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS)
-                // Automatically complete the future after the timeout.
-                .execute(() -> gracefulShutdownFuture.complete(null));
+        gracefulShutdownFuture = CompletableFuture.runAsync(
+                () -> {
+                }, // Automatically complete the future after the timeout.
+                CompletableFuture.delayedExecutor(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+        );
 
         // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
         // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter

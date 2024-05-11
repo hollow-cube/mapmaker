@@ -7,7 +7,9 @@ image:
   prefix: ""
 
 env:
+  MAPMAKER_COMMIT_SHA: "ᴛɪʟᴛ"
   MAPMAKER_VELOCITY_SECRET: "abcdef"
+  MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "15000" # 15 seconds
 
   MAPMAKER_MAP_SERVICE_URL: "http://map-service:9124"
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service:9124"
@@ -16,6 +18,6 @@ env:
 
   MAPMAKER_SPICEDB_URL: "local:50051"
 
-  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka-kafka-bootstrap:9092"
+  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
 
 replicaCount: 1

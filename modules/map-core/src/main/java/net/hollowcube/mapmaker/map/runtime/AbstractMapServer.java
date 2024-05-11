@@ -84,6 +84,7 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -102,7 +103,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -468,9 +468,20 @@ public abstract class AbstractMapServer implements MapServer {
     private CompletableFuture<Void> awaitQuiescence() {
         Audiences.players().sendMessage(Component.text("Shutdown started (this message is temp)"));
 
-        //todo
-        return CompletableFuture.runAsync(() -> {
-        }, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
+        var connectionManager = MinecraftServer.getConnectionManager();
+        if (connectionManager.getOnlinePlayers().isEmpty()) return CompletableFuture.completedFuture(null);
+
+        // Wait for all players to disconnect
+        var future = new CompletableFuture<Void>();
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event -> {
+            if (connectionManager.getOnlinePlayers().size() == 1)
+                future.complete(null);
+        });
+        return future;
+//
+//        //todo
+//        return CompletableFuture.runAsync(() -> {
+//        }, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
     }
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {

@@ -20,7 +20,7 @@ global:
   noop: false
 
 kafka:
-  bootstrap_servers: localhost:9092
+  bootstrap_servers: localhost:9093
 
 unleash:
   enabled: false

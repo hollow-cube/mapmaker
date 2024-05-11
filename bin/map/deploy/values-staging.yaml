@@ -3,7 +3,7 @@ fullnameOverride: mapmaker-map
 mapmaker:
   role: map
 
-  terminationSeconds: 30
+  terminationSeconds: 22600
 
 image:
   prefix: "mworzala/mapmaker-"
@@ -16,6 +16,7 @@ serviceMonitor:
 env:
   MAPMAKER_COMMIT_SHA: "$COMMIT_SHA"
   MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
+  MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "21600000" # 6 hours
 
   MAPMAKER_METRICS_PASSWORD: "${METRICS_PASSWORD}"
   MAPMAKER_TRACING_OTLP_ENDPOINT: "http://grafana-k8s-monitoring-grafana-agent.mapmaker.svc.cluster.local:4318/v1/traces"

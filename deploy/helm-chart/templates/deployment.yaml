@@ -56,7 +56,7 @@ spec:
             preStop:
               httpGet:
                 port: http
-                path: /shutdown
+                path: shutdown
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
