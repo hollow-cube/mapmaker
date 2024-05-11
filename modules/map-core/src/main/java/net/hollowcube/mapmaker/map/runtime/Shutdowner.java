@@ -4,8 +4,6 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import io.helidon.webserver.Service;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.adventure.audience.Audiences;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +62,6 @@ public class Shutdowner implements Service, HealthCheck {
      * Shuts down the server gracefully, immediately. Does not give any shutdown grace period.
      */
     public void shutdownImmediately() {
-        logger.info("HIT SHUTDOWN IMMEDIATE");
         if (gracefulShutdownFuture == null) shutdownGracefully();
         gracefulShutdownFuture.complete(null);
 
@@ -73,8 +70,6 @@ public class Shutdowner implements Service, HealthCheck {
 
     public void shutdownGracefully() {
         if (gracefulShutdownFuture != null) return;
-
-        Audiences.all().sendMessage(Component.text("Received shutdown request"));
 
         logger.info("Beginning graceful shutdown. The server will terminate in {} seconds.", SHUTDOWN_MAX_WAIT_MILLIS / 1000);
         gracefulShutdownFuture = CompletableFuture.runAsync(

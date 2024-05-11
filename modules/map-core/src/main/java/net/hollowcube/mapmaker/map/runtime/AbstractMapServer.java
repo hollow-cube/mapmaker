@@ -427,7 +427,7 @@ public abstract class AbstractMapServer implements MapServer {
             injector.bind(type, instance);
             guiController.addBinding(type.getSimpleName().toLowerCase(Locale.ROOT), instance);
         }
-        ;
+
         for (var name : names) {
             guiController.addBinding(name, instance);
         }
@@ -474,14 +474,10 @@ public abstract class AbstractMapServer implements MapServer {
         // Wait for all players to disconnect
         var future = new CompletableFuture<Void>();
         MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event -> {
-            if (connectionManager.getOnlinePlayers().size() == 1)
+            if (connectionManager.getOnlinePlayers().isEmpty())
                 future.complete(null);
         });
         return future;
-//
-//        //todo
-//        return CompletableFuture.runAsync(() -> {
-//        }, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
     }
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
