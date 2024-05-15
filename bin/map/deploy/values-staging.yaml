@@ -12,10 +12,10 @@ image:
 
 resources:
   limits:
-    cpu: 3000m
+    cpu: 1500m
     memory: 3Gi
   requests:
-    cpu: 1000m
+    cpu: 500m
     memory: 3Gi
 
 serviceMonitor:
