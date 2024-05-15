@@ -10,4 +10,4 @@ RUN chmod +x async-profiler/profiler.sh
 COPY ./map_deploy.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "-XX:+UseG1GC", "-Xms2500M", "-Xmx2500M", "server.jar"]
+CMD ["java", "--enable-preview", "-XX:+UseG1GC", "-Xms2500M", "-Xmx2500M", "-jar", "server.jar"]
