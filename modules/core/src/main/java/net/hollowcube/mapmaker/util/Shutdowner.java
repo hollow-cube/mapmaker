@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.runtime;
+package net.hollowcube.mapmaker.util;
 
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
