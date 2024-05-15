@@ -49,6 +49,9 @@ public final class MapServerInitializer {
         var minecraftServer = MinecraftServer.init();
         var server = serverFactory.apply(config);
 
+        MinecraftServer.setBrandName("minestom");
+        MinecraftServer.setCompressionThreshold(-1);
+
         MinecraftServer.getExceptionManager().setExceptionHandler(server::handleUncaughtException);
 
         var httpConfig = config.get(HttpConfig.class);

@@ -2,18 +2,75 @@ package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.collision.PhysicsResult;
+import net.minestom.server.collision.PhysicsUtils;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.utils.chunk.ChunkCache;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.UUID;
 
 // I(matt)DK what to name this class lol
-public abstract class MapPlayerImplImpl extends MapPlayerImpl {
+public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension {
+
+    private int riptideTicks = 0;
+
+    // Only present sometimes (eg during riptide)
+    private PhysicsResult nextPhysicsResult = null;
 
     public MapPlayerImplImpl(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
         super(uuid, username, playerConnection);
+    }
+
+    @Override
+    public void beginRiptideAttack(int durationTicks) {
+        this.riptideTicks = durationTicks;
+    }
+
+    @Override
+    public void cancelRiptideAttack() {
+        if (this.riptideTicks <= 0) return;
+
+        this.riptideTicks = 0;
+        getPlayerMeta().setInRiptideSpinAttack(false);
+    }
+
+    private boolean needsPhysicsPrediction() {
+        return riptideTicks > 0;
+    }
+
+    @Override
+    public void tick(long time) {
+        super.tick(time);
+
+        if (needsPhysicsPrediction()) {
+            var velocity = Vec.fromPoint(position.sub(previousPosition));
+
+            final Block.Getter chunkCache = new ChunkCache(instance, currentChunk, Block.STONE);
+            nextPhysicsResult = PhysicsUtils.simulateMovement(position, velocity, boundingBox,
+                    instance.getWorldBorder(), chunkCache, getAerodynamics(), hasNoGravity(), hasPhysics,
+                    onGround, false, getLastPhysicsResult());
+        } else {
+            nextPhysicsResult = null;
+        }
+
+        if (riptideTicks > 0) {
+            riptideTicks--;
+
+            // Stop if we hit a wall
+            if (nextPhysicsResult.collisionX() || nextPhysicsResult.collisionZ()) {
+                riptideTicks = 0;
+            }
+
+            if (riptideTicks <= 0) {
+                getPlayerMeta().setInRiptideSpinAttack(false);
+            }
+        }
     }
 
     // We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player dripleaf states.
@@ -78,5 +135,22 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl {
         }
 
         return true;
+    }
+
+    private @NotNull PhysicsResult getLastPhysicsResult() {
+        class Holder {
+            static Field lastPhysicsResult = null;
+        }
+
+        try {
+            if (Holder.lastPhysicsResult == null) {
+                Holder.lastPhysicsResult = Entity.class.getDeclaredField("previousPhysicsResult");
+                Holder.lastPhysicsResult.setAccessible(true);
+            }
+
+            return (PhysicsResult) Holder.lastPhysicsResult.get(this);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

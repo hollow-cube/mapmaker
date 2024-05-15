@@ -47,7 +47,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
-    private static final ChannelIdentifier JOIN_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "first_join");
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component CLOSED_BETA = Component.text()
@@ -209,8 +208,6 @@ public class ProxyPlugin {
         if (!playersJustJoined.contains(playerId)) return;
 
         playersJustJoined.remove(playerId);
-        event.getPlayer().getCurrentServer().ifPresent(ignored ->
-                event.getPlayer().sendPluginMessage(JOIN_MESSAGE_ID, new byte[0]));
     }
 
     @Subscribe

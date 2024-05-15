@@ -140,7 +140,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null);
     }
 
-    @Override public void spawn() {
+    @Override
+    public void spawn() {
         super.spawn();
     }
 }
