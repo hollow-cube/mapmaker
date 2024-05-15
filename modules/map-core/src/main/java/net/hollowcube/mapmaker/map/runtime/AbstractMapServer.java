@@ -220,7 +220,7 @@ public abstract class AbstractMapServer implements MapServer {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.enabled()) {
             logger.info("Unleash is enabled, loading feature flag provider");
-            var provider = new UnleashFeatureFlagProvider(unleashConfig);
+            var provider = new UnleashFeatureFlagProvider(unleashConfig, shutdowner);
             FeatureFlagProvider.replaceGlobals(provider);
         } else {
             FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());

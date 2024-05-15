@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.FlagContext;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.runtime.Shutdowner;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -21,7 +22,7 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
     private final Unleash client;
     private final boolean defaultAction;
 
-    public UnleashFeatureFlagProvider(@NotNull UnleashConfig config) {
+    public UnleashFeatureFlagProvider(@NotNull UnleashConfig config, @NotNull Shutdowner shutdowner) {
         var runtime = ServerRuntime.getRuntime();
         var unleashConfig = io.getunleash.util.UnleashConfig.builder()
                 .appName("mapmaker")
@@ -48,6 +49,7 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
                 .build();
         var mapIds = new MapIdStrategy();
         this.client = new DefaultUnleash(unleashConfig, mapIds);
+        shutdowner.queue(client::shutdown);
         this.defaultAction = config.defaultAction();
     }
 

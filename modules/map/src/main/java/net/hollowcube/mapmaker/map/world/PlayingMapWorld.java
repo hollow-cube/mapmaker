@@ -65,10 +65,12 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             var world = PolarReader.read(mapData, PolarDataFixer.INSTANCE);
             if (world.dataVersion() < MapWorld.DATA_VERSION) {
                 logger.warn("Map data version is out of date: {} < {} (updating remote)", world.dataVersion(), MapWorld.DATA_VERSION);
-                FutureUtil.submitVirtual(() -> {
-                    var updatedMapData = PolarWriter.write(world, PolarDataFixer.INSTANCE);
-                    server().mapService().updateMapWorld(map().id(), updatedMapData);
-                });
+                if (!MapFeatureFlags.MAP_NO_REMOTE_UPGRADE.test()) {
+                    FutureUtil.submitVirtual(() -> {
+                        var updatedMapData = PolarWriter.write(world, PolarDataFixer.INSTANCE);
+                        server().mapService().updateMapWorld(map().id(), updatedMapData);
+                    });
+                }
             }
 
             instance.load(mapData, new ReadWorldAccess(this));
