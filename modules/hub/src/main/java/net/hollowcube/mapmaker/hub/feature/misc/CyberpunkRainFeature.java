@@ -58,9 +58,13 @@ public class CyberpunkRainFeature implements HubFeature {
 
     private @NotNull TaskSchedule lightningTask() {
         var point = LIGHTNING_POINTS.get(ThreadLocalRandom.current().nextInt(LIGHTNING_POINTS.size()));
-        
+
         if (lightningEntity != null) lightningEntity.remove();
-        lightningEntity = new Entity(EntityType.LIGHTNING_BOLT);
+        lightningEntity = new Entity(EntityType.LIGHTNING_BOLT) {
+            @Override protected void movementTick() {
+                // Intentionally do nothing
+            }
+        };
         lightningEntity.setAutoViewable(false);
         lightningEntity.setInstance(instance, point);
         rainyPlayers.forEach(lightningEntity::addViewer);

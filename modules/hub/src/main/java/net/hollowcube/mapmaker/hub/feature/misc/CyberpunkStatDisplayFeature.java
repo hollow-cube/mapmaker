@@ -124,10 +124,16 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     }
 
     private @NotNull TextDisplayMeta createTextEntity(@NotNull Instance instance, @NotNull Pos pos) {
-        var entity = new Entity(EntityType.TEXT_DISPLAY) {{
-            hasPhysics = false;
-            setNoGravity(true);
-        }};
+        var entity = new Entity(EntityType.TEXT_DISPLAY) {
+            {
+                hasPhysics = false;
+                setNoGravity(true);
+            }
+
+            @Override protected void movementTick() {
+                // Intentionally do nothing
+            }
+        };
 
         var meta = (TextDisplayMeta) entity.getEntityMeta();
         meta.setBackgroundColor(0);
@@ -138,10 +144,16 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     }
 
     private @NotNull BlockDisplayMeta createBarEntity(@NotNull Instance instance, @NotNull Pos pos) {
-        var entity = new Entity(EntityType.BLOCK_DISPLAY) {{
-            hasPhysics = false;
-            setNoGravity(true);
-        }};
+        var entity = new Entity(EntityType.BLOCK_DISPLAY) {
+            {
+                hasPhysics = false;
+                setNoGravity(true);
+            }
+
+            @Override protected void movementTick() {
+                // Intentionally do nothing
+            }
+        };
 
         var meta = (BlockDisplayMeta) entity.getEntityMeta();
         meta.setBlockState(Block.GRAY_CONCRETE.stateId());

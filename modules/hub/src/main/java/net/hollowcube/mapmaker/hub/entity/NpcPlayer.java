@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.hub.entity;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.*;
 import net.minestom.server.network.packet.server.play.*;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +22,11 @@ public class NpcPlayer extends BaseNpcEntity {
         super(EntityType.PLAYER, uuid);
         this.username = username;
         this.skin = skin;
+    }
+
+    @Override
+    protected void movementTick() {
+        // Intentionally do nothing
     }
 
     @Override

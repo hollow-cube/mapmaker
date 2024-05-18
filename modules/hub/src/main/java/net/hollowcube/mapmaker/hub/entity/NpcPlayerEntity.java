@@ -71,6 +71,11 @@ public class NpcPlayerEntity extends BaseNpcEntity {
         if (prompt != null) subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
     }
 
+    @Override
+    protected void movementTick() {
+        // Intentionally do nothing
+    }
+
     public @NotNull String name() {
         return Objects.requireNonNullElseGet(nbt.getString("name"), () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown"));
     }

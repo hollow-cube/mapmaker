@@ -7,6 +7,7 @@ import io.helidon.webserver.WebServer;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
+import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
@@ -47,6 +48,7 @@ public final class MapServerInitializer {
         var config = ConfigLoaderV3.loadDefault(args);
 
         var minecraftServer = MinecraftServer.init();
+        MinestomPrometheus.init();
         var server = serverFactory.apply(config);
 
         MinecraftServer.setBrandName("minestom");

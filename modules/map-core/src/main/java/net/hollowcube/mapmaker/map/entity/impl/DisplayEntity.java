@@ -29,6 +29,10 @@ public class DisplayEntity extends MapEntity {
         hasPhysics = false;
     }
 
+    @Override protected void movementTick() {
+        // Intentionally do nothing
+    }
+
     @Override
     public @NotNull AbstractDisplayMeta getEntityMeta() {
         return (AbstractDisplayMeta) super.getEntityMeta();

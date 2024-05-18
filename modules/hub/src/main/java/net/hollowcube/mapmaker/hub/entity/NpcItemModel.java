@@ -29,6 +29,11 @@ public class NpcItemModel extends BaseNpcEntity {
         setNoGravity(true);
     }
 
+    @Override
+    protected void movementTick() {
+        // Intentionally do nothing
+    }
+
     /**
      * If true the entity will have its client view range increased significantly and never have its viewers removed.
      */

@@ -27,7 +27,11 @@ public class BaseNpcEntity extends Entity {
     public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height, @NotNull Pos offset) { //todo move along with the npc
         if (this.interactionEntity != null) this.interactionEntity.remove();
 
-        this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID());
+        this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
+            @Override protected void movementTick() {
+                // Intentionally do nothing
+            }
+        };
         this.interactionEntity.setNoGravity(true);
         var interactionMeta = (InteractionMeta) interactionEntity.getEntityMeta();
         interactionMeta.setWidth(width);

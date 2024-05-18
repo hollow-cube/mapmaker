@@ -64,7 +64,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
             closeFuture.complete(null);
             return;
         }
-        
+
         try {
             var records = consumer.poll(Duration.ofMillis(50));
             for (var kafkaRecord : records) {
@@ -74,7 +74,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
                 }
             }
 
-            if (autocommit) {
+            if (!records.isEmpty() && autocommit) {
                 consumer.commitSync();
             }
         } catch (Exception e) {

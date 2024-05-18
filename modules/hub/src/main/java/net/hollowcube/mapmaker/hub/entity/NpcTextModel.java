@@ -20,6 +20,11 @@ public class NpcTextModel extends BaseNpcEntity {
     }
 
     @Override
+    protected void movementTick() {
+        // Intentionally do nothing
+    }
+
+    @Override
     public @NotNull TextDisplayMeta getEntityMeta() {
         return (TextDisplayMeta) super.getEntityMeta();
     }
