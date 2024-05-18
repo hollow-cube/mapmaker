@@ -1,5 +1,8 @@
 fullnameOverride: mapmaker-map
 
+nodeSelector:
+  nodepool: "main-sm"
+
 mapmaker:
   role: map
 

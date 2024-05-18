@@ -1,5 +1,8 @@
 fullnameOverride: mapmaker-hub
 
+nodeSelector:
+  nodepool: "main-sm"
+
 mapmaker:
   role: hub
 
