@@ -20,6 +20,10 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.trait.CancellableEvent;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,19 +101,37 @@ public final class AxiomPacketListener {
 
     public void handleSetBlock(@NotNull Player player, @NotNull AxiomClientSetBlockPacket packet) {
         if (!Axiom.isEnabled(player)) return;
-        logger.info("Received axiom:set_block from {}", player.getUuid());
 
         try {
-            var instance = player.getInstance();
-
             //todo use the other stuff here to do whatever fancy things.
+            var instance = player.getInstance();
+            var blockFace = packet.blockHit().blockFace();
 
+            var itemInHand = player.getItemInHand(packet.hand());
             for (var entry : packet.blocks().entrySet()) {
                 var blockPosition = entry.getKey();
                 var block = entry.getValue();
-                instance.setBlock(blockPosition, block, packet.updateNeighbors());
-            }
+                var existingBlock = instance.getBlock(blockPosition);
 
+                CancellableEvent event = null;
+                if (block.isAir()) {
+                    // Air needs to trigger break event to handle cancellation (e.g. for worldedit wand)
+                    event = new PlayerBlockBreakEvent(player, existingBlock, block, blockPosition, blockFace);
+                } else if (itemInHand.has(ItemComponent.CUSTOM_MODEL_DATA)) {
+                    // Items with custom model data need to trigger interact event
+                    // We need to offset as if we are placing on the block next to it, which is not what axiom sends.
+                    var relBlockPosition = blockPosition.relative(blockFace.getOppositeFace());
+                    event = new PlayerBlockInteractEvent(player, packet.hand(), existingBlock, relBlockPosition,
+                            packet.blockHit().cursorPosition(), blockFace);
+                }
+
+                // Update the block if the event isnt cancelled
+                if (event != null) EventDispatcher.call(event);
+                if (event == null || !event.isCancelled()) {
+                    if (!(event instanceof PlayerBlockInteractEvent interact) || !interact.isBlockingItemUse())
+                        instance.setBlock(blockPosition, block, packet.updateNeighbors());
+                }
+            }
         } finally {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
         }
