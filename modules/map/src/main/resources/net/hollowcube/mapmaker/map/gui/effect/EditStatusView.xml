@@ -7,11 +7,12 @@
         <BackButton/>
         <label translationKey="gui.status.information"/>
 
-        <spacer width="5"/>
+        <text id="tab_text" width="5" height="1" translationKey="gui.status.tab"
+              font="play_maps_page" centered="true"/>
 
         <button translationKey="gui.checkpoint.custom_blocks"
                 sprite="effect/executor_menu"/>
-        <button id="pick_up" translationKey="gui.checkpoint.pick_up"
+        <button id="pick_up" translationKey="gui.status.pick_up"
                 sprite="effect/pick_up"/>
     </box>
 

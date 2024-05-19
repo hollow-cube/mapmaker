@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.annotation.Action;
@@ -10,6 +11,8 @@ import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData> {
@@ -28,8 +31,13 @@ public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData>
     }
 
     @Action("add_time_on")
-    public void handleChangeAddTimeB() {
-        handleChangeAddTimeA();
+    public void handleChangeAddTimeB(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+            handleChangeAddTimeA();
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setExtraTime(BaseEffectData.NO_TIME_LIMIT);
+            updateFromData();
+        }
     }
 
     @Signal(BaseEffectTimeLimitAnvil.SIG_UPDATE_NAME)
@@ -59,7 +67,7 @@ public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData>
             addTimeOffLabel.setArgs(Component.translatable("gui.effects.actions.add_time.none"));
         } else {
             addTimeSwitch.setOption(1);
-            addTimeOnLabel.setArgs(Component.text(NumberUtil.formatDuration(data.extraTime())));
+            addTimeOnLabel.setArgs(Component.text(NumberUtil.formatDuration(data.extraTime()), TextColor.color(0x30FBFF)));
         }
     }
 }

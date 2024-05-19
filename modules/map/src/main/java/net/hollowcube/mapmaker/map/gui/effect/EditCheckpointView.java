@@ -2,12 +2,14 @@ package net.hollowcube.mapmaker.map.gui.effect;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class EditCheckpointView extends View {
@@ -15,6 +17,7 @@ public class EditCheckpointView extends View {
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_settings_state_switch") Switch tabSettingsStateSwitch;
     private @Outlet("tab_actions_state_switch") Switch tabActionsStateSwitch;
+    private @Outlet("tab_text") Text tabText;
 
     private @Outlet("settings") CheckpointSettingsTab settingsTab;
     private @Outlet("actions") CheckpointActionsTab actionsTab;
@@ -28,6 +31,8 @@ public class EditCheckpointView extends View {
         this.save = save;
 
         tabSettingsStateSwitch.setOption(true);
+        tabText.setText("CP Settings");
+        tabText.setArgs(Component.text("Checkpoint Settings"));
         settingsTab.setData(data, maxResetHeight);
         actionsTab.setData(data, save);
     }
@@ -35,6 +40,8 @@ public class EditCheckpointView extends View {
     @Action("tab_settings")
     public void handleSelectSettingsTab() {
         tabSwitch.setOption(0);
+        tabText.setText("CP Settings");
+        tabText.setArgs(Component.text("Checkpoint Settings"));
         tabSettingsStateSwitch.setOption(true);
         tabActionsStateSwitch.setOption(false);
     }
@@ -42,6 +49,8 @@ public class EditCheckpointView extends View {
     @Action("tab_actions")
     public void handleSelectActionsTab() {
         tabSwitch.setOption(1);
+        tabText.setText("CP Actions");
+        tabText.setArgs(Component.text("Checkpoint Actions"));
         tabSettingsStateSwitch.setOption(false);
         tabActionsStateSwitch.setOption(true);
     }

@@ -120,7 +120,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     protected void updateFromData() {
         if (data.hasName()) {
-            nameText.setArgs(Component.text(data.displayName()));
+            nameText.setArgs(Component.text(data.displayName(), TextColor.color(0x30FBFF)));
             nameText.setText(data.displayName());
         } else {
             nameText.setArgs(Component.translatable("gui.effect.name.none"));
@@ -129,16 +129,16 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
         if (data.progressIndex() == -1) {
             progressIndexText.setArgs(Component.translatable("gui.effect.progress_index.none"));
-            progressIndexText.setText("None");
+            progressIndexText.setText("PI: None");
         } else {
-            progressIndexText.setArgs(Component.text(data.progressIndex()));
-            progressIndexText.setText(String.valueOf(data.progressIndex()));
+            progressIndexText.setArgs(Component.text(data.progressIndex(), TextColor.color(0x30FBFF)));
+            progressIndexText.setText("PI: " + data.progressIndex());
         }
 
         resetHeightLabel.setArgs(data.resetHeight() == BaseEffectData.NO_RESET_HEIGHT ?
-                Component.translatable("gui.effect.reset_height.none") : Component.text(data.resetHeight()));
+                Component.translatable("gui.effect.reset_height.none") : Component.text(data.resetHeight(), TextColor.color(0x30FBFF)));
         timeLimitLabel.setArgs(data.timeLimit() == BaseEffectData.NO_TIME_LIMIT ?
-                Component.translatable("gui.effect.time_limit.none") : Component.text(NumberUtil.formatDuration(data.timeLimit())));
+                Component.translatable("gui.effect.time_limit.none") : Component.text(NumberUtil.formatDuration(data.timeLimit()), TextColor.color(0x30FBFF)));
     }
 
 }

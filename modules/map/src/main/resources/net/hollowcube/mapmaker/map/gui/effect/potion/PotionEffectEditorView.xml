@@ -8,7 +8,7 @@
         <label translationKey="gui.effect.potion.editor.information"/>
 
         <text id="header" width="5" translationKey="gui.effect.potion.editor.header"
-              font="line_0" centered="true"/>
+              font="play_maps_page" centered="true"/>
 
         <spacer width="2"/>
     </box>

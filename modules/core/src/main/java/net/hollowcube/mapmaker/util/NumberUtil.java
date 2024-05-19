@@ -54,13 +54,13 @@ public final class NumberUtil {
 
         var minutes = time / 60000;
         if (minutes > 0) {
-            result.append(minutes).append("m");
+            result.append(minutes).append("m ");
             time %= 60000;
         }
 
         if (result.isEmpty()) {
             // Less than 1m
-            return "0m";
+            return "0m ";
         }
 
         return result.toString();
@@ -82,18 +82,18 @@ public final class NumberUtil {
 
         var minutes = time / 60000;
         if (minutes > 0) {
-            result.append(minutes).append("m");
+            result.append(minutes).append("m ");
             time %= 60000;
         }
 
         var seconds = time / 1000.0;
         if (seconds > 0) {
-            result.append(String.format("%.2f", seconds)).append("s");
+            result.append(String.format("%.2f", seconds)).append("s ");
         }
 
         if (result.isEmpty()) {
             // Less than 1s
-            return "0s";
+            return "0s ";
         }
 
         return result.toString();
@@ -109,13 +109,13 @@ public final class NumberUtil {
 
     public static String formatDuration(@NotNull Instant now, @NotNull Instant start) {
         long seconds = now.getEpochSecond() - start.getEpochSecond();
-        if (seconds < 60) return seconds + "s";
+        if (seconds < 60) return seconds + "s ";
         long minutes = seconds / 60;
-        if (minutes < 60) return minutes + "m";
+        if (minutes < 60) return minutes + "m ";
         long hours = minutes / 60;
-        if (hours < 24) return hours + "h";
+        if (hours < 24) return hours + "h ";
         long days = hours / 24;
-        return days + "d";
+        return days + "d ";
     }
 
     private NumberUtil() {

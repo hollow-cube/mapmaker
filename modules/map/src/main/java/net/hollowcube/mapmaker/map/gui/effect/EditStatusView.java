@@ -2,17 +2,20 @@ package net.hollowcube.mapmaker.map.gui.effect;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class EditStatusView extends View {
 
     private @Outlet("tab_switch") Switch tabSwitch;
+    private @Outlet("tab_text") Text tabText;
     private @Outlet("tab_settings_state_switch") Switch tabSettingsStateSwitch;
     private @Outlet("tab_actions_state_switch") Switch tabActionsStateSwitch;
 
@@ -26,6 +29,8 @@ public class EditStatusView extends View {
         this.onClose = onClose;
 
         tabSettingsStateSwitch.setOption(true);
+        tabText.setText("SP Settings");
+        tabText.setArgs(Component.text("Status Plate Settings"));
         settingsTab.setData(data, maxResetHeight);
         actionsTab.setData(data, onClose);
     }
@@ -33,6 +38,8 @@ public class EditStatusView extends View {
     @Action("tab_settings")
     public void handleSelectSettingsTab() {
         tabSwitch.setOption(0);
+        tabText.setText("SP Settings");
+        tabText.setArgs(Component.text("Status Plate Settings"));
         tabSettingsStateSwitch.setOption(true);
         tabActionsStateSwitch.setOption(false);
     }
@@ -40,6 +47,8 @@ public class EditStatusView extends View {
     @Action("tab_actions")
     public void handleSelectActionsTab() {
         tabSwitch.setOption(1);
+        tabText.setText("SP Actions");
+        tabText.setArgs(Component.text("Status Plate Actions"));
         tabSettingsStateSwitch.setOption(false);
         tabActionsStateSwitch.setOption(true);
     }

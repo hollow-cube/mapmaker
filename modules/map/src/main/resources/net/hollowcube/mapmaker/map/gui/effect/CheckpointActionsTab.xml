@@ -27,7 +27,7 @@
                     translationKey="gui.effect.actions.teleport"
                     sprite="effect/actions/teleport_off"/>
             <button id="teleport_on" width="2" height="2"
-                    translationKey="gui.effect.actions.teleport"
+                    translationKey="gui.effect.actions.teleport.data"
                     sprite="effect/actions/teleport_on"/>
         </switch>
         <switch id="settings_switch" width="2" height="2">

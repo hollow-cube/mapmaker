@@ -7,7 +7,8 @@
         <BackButton/>
         <label translationKey="gui.checkpoint.information"/>
 
-        <spacer width="5"/>
+        <text id="tab_text" width="5" height="1" translationKey="gui.checkpoint.tab"
+              font="play_maps_page" centered="true"/>
 
         <button translationKey="gui.checkpoint.custom_blocks"
                 sprite="effect/executor_menu"/>

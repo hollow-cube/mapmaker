@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +47,6 @@ public class CheckpointSettingsTab extends AbstractEffectSettingsTab<CheckpointE
         super.updateFromData();
 
         livesLabel.setArgs(data.lives() == CheckpointEffectData.NO_LIVES
-                ? Component.translatable("gui.checkpoint.lives.none") : Component.text(data.lives()));
+                ? Component.translatable("gui.checkpoint.lives.none") : Component.text(data.lives(), TextColor.color(0x30FBFF)));
     }
 }
