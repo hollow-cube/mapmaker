@@ -13,6 +13,8 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
+
 public class HdbCommand extends CommandDsl {
 
     private final HeadDatabase hdb;
@@ -23,6 +25,8 @@ public class HdbCommand extends CommandDsl {
         super("headdb", "hdb");
         this.hdb = hdb;
         this.guiController = guiController;
+        
+        setCondition(mapFilter(false, true, false));
 
         addSubcommand(new HdbSearchCommand(hdb, guiController));
         addSubcommand(new HdbGiveCommand(hdb));

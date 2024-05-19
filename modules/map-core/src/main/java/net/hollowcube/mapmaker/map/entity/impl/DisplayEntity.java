@@ -208,6 +208,7 @@ public class DisplayEntity extends MapEntity {
     }
 
     public static class Text extends DisplayEntity {
+        private static final int DEFAULT_BACKGROUND = 1073741824;
 
         public Text(@NotNull UUID uuid) {
             super(EntityType.TEXT_DISPLAY, uuid);
@@ -226,7 +227,7 @@ public class DisplayEntity extends MapEntity {
             tag.putString("text", GsonComponentSerializer.gson().serialize(meta.getText()));
             if (meta.getLineWidth() != 0)
                 tag.putInt("line_width", meta.getLineWidth());
-            if (meta.getBackgroundColor() != 0)
+            if (meta.getBackgroundColor() != DEFAULT_BACKGROUND)
                 tag.putInt("background", meta.getBackgroundColor());
             if (meta.getTextOpacity() != 0)
                 tag.putByte("text_opacity", (byte) meta.getTextOpacity());
