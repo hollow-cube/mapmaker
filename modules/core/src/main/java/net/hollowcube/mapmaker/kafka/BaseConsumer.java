@@ -4,28 +4,21 @@ import net.hollowcube.common.ServerRuntime;
 import net.minestom.server.MinecraftServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
 import java.util.function.Function;
 
 public abstract class BaseConsumer<T> implements AutoCloseable {
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
     private final KafkaConsumer<String, String> consumer;
     private final Function<String, T> valueDeserializer;
 
-    private final ScheduledFuture<?> handle;
-
     private boolean autocommit = true;
-
-    // KafkaConsumer is not thread safe, so if this is set (from another thread), then the consumer thread
-    // will see it, close, and then complete it allowing shutdown to finalize.
-    private volatile CompletableFuture<Void> closeFuture = null;
 
     protected BaseConsumer(@NotNull String topic, @NotNull String groupId,
                            @NotNull Function<String, T> deserializer,
@@ -33,7 +26,6 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
         if (bootstrapServers.isEmpty()) {
             consumer = null;
             valueDeserializer = null;
-            handle = null;
             return;
         }
 
@@ -49,7 +41,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
         ), new StringDeserializer(), new StringDeserializer());
         consumer.subscribe(List.of(topic));
 
-        handle = executor.scheduleAtFixedRate(this::poll, 0, 50, TimeUnit.MILLISECONDS);
+        new Thread(this::pollLoop).start();
     }
 
     protected void setAutocommit(boolean autocommit) {
@@ -58,38 +50,35 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
 
     protected abstract void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull T message);
 
-    void poll() {
-        if (closeFuture != null) {
-            consumer.close();
-            closeFuture.complete(null);
-            return;
-        }
-
+    void pollLoop() {
         try {
-            var records = consumer.poll(Duration.ofMillis(50));
-            for (var kafkaRecord : records) {
-                var value = valueDeserializer.apply(kafkaRecord.value());
-                if (value != null) {
-                    onMessage(kafkaRecord, value);
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                var records = consumer.poll(Duration.ofMillis(50));
+                for (var kafkaRecord : records) {
+                    var value = valueDeserializer.apply(kafkaRecord.value());
+                    if (value != null) {
+                        onMessage(kafkaRecord, value);
+                    }
+                }
+
+                if (!records.isEmpty() && autocommit) {
+                    consumer.commitSync();
                 }
             }
-
-            if (!records.isEmpty() && autocommit) {
-                consumer.commitSync();
-            }
+        } catch (WakeupException e) {
+            // Intentionally do nothing, this is the exit condition.
         } catch (Exception e) {
             MinecraftServer.getExceptionManager().handleException(e);
+        } finally {
+            consumer.close();
         }
     }
 
     @Override
     public void close() {
-        if (closeFuture != null) return;
         if (consumer != null) {
-            closeFuture = new CompletableFuture<>();
-            closeFuture.join();
+            consumer.wakeup();
         }
-        if (handle != null) handle.cancel(false);
-        executor.shutdownNow();
     }
 }

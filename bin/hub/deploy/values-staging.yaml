@@ -15,10 +15,10 @@ image:
 
 resources:
   limits:
-    cpu: 500m
+    cpu: 1000m
     memory: 750Mi
   requests:
-    cpu: 200m
+    cpu: 500m
     memory: 750Mi
 
 serviceMonitor:
