@@ -46,28 +46,31 @@ public final class TheSneaky {
     }
 
     private static final List<TestEntry> TEST_ENTRIES = List.of(
-            new TestEntry("self_detection", "gui.recipebook.moreRecips", Severity.INFO, false),
+//            new TestEntry("self_detection", "gui.recipebook.moreRecips", Severity.INFO, false),
             new TestEntry("fabric_api", "fabric.gui.creativeTabPage", Severity.INFO, false), // Relevant to some other tests
-            new TestEntry("wurst", "item.bratwurst.name", Severity.CRITICAL, true), // Depends on self_detection
-            new TestEntry("meteor-client", "time.sunmeteor-clientbound.name", Severity.CRITICAL, true), // Depends on self_detection
-            new TestEntry("xaero_minimap", "gui.xaero_minimap_settings", Severity.INFO, false),
-            new TestEntry("vivecraft", "vivecraft.options.screen.main", Severity.CRITICAL, false),
-            new TestEntry("zergatul_freecam", "key.zergatul.freecam.toggle", Severity.CRITICAL, false),
-            new TestEntry("itemswapper", "key.itemswapper.moveright", Severity.INFO, false),
-            new TestEntry("jexclient", "jex.name", Severity.CRITICAL, false),
-            new TestEntry("x13_xray", "x13.mod.mode", Severity.CRITICAL, false),
-            new TestEntry("optifine", "of.key.zoom", Severity.INFO, false),
-            new TestEntry("antighost", "key.antighost.reveal", Severity.CRITICAL, false),
-            new TestEntry("invmove", "config.invmove.title", Severity.INFO, false),
-            new TestEntry("flymod", "key.flymod.toggle", Severity.CRITICAL, false),
-            new TestEntry("thunderclient", "descriptions.client.thundergui", Severity.CRITICAL, false),
-            new TestEntry("inventory_essentials", "key.categories.inventoryessentials", Severity.INFO, false),
-            new TestEntry("litematica", "litematica.error.area_selection.copy_failed", Severity.INFO, false),
-            new TestEntry("inventory_tabs", "inventorytabs.key.next_tab", Severity.INFO, false),
-            new TestEntry("flighthelper", "key.categories.flighthelper", Severity.CRITICAL, false),
-            new TestEntry("viafabric", "gui.hide_via_button.disable", Severity.KNOWN_INCOMPATIBILITY, false),
-            new TestEntry("sodium", "sodium.options.view_distance.tooltip", Severity.INFO, false),
-            new TestEntry("nvidium", "nvidium.options.pages.nvidium", Severity.LIKELY_INCOMPATIBILITY, false)
+            new TestEntry("axiom", "axiom.buildertool.erase", Severity.INFO, false), // Relevant to some other tests
+            new TestEntry("lb", "liquidbounce.command.bind.description", Severity.INFO, false), // Relevant to some other tests
+            new TestEntry("aaa", "gui.recipebook.moreRecipes", Severity.INFO, false) // Relevant to some other tests
+//            new TestEntry("wurst", "item.bratwurst.name", Severity.CRITICAL, true), // Depends on self_detection
+//            new TestEntry("meteor-client", "time.sunmeteor-clientbound.name", Severity.CRITICAL, true), // Depends on self_detection
+//            new TestEntry("xaero_minimap", "gui.xaero_minimap_settings", Severity.INFO, false),
+//            new TestEntry("vivecraft", "vivecraft.options.screen.main", Severity.CRITICAL, false),
+//            new TestEntry("zergatul_freecam", "key.zergatul.freecam.toggle", Severity.CRITICAL, false),
+//            new TestEntry("itemswapper", "key.itemswapper.moveright", Severity.INFO, false),
+//            new TestEntry("jexclient", "jex.name", Severity.CRITICAL, false),
+//            new TestEntry("x13_xray", "x13.mod.mode", Severity.CRITICAL, false),
+//            new TestEntry("optifine", "of.key.zoom", Severity.INFO, false),
+//            new TestEntry("antighost", "key.antighost.reveal", Severity.CRITICAL, false),
+//            new TestEntry("invmove", "config.invmove.title", Severity.INFO, false),
+//            new TestEntry("flymod", "key.flymod.toggle", Severity.CRITICAL, false),
+//            new TestEntry("thunderclient", "descriptions.client.thundergui", Severity.CRITICAL, false),
+//            new TestEntry("inventory_essentials", "key.categories.inventoryessentials", Severity.INFO, false),
+//            new TestEntry("litematica", "litematica.error.area_selection.copy_failed", Severity.INFO, false),
+//            new TestEntry("inventory_tabs", "inventorytabs.key.next_tab", Severity.INFO, false),
+//            new TestEntry("flighthelper", "key.categories.flighthelper", Severity.CRITICAL, false),
+//            new TestEntry("viafabric", "gui.hide_via_button.disable", Severity.KNOWN_INCOMPATIBILITY, false),
+//            new TestEntry("sodium", "sodium.options.view_distance.tooltip", Severity.INFO, false),
+//            new TestEntry("nvidium", "nvidium.options.pages.nvidium", Severity.LIKELY_INCOMPATIBILITY, false)
 
             // MISSING:
             // VulkanMod (could probably PR lang files if i wanted)
@@ -115,14 +118,15 @@ public final class TheSneaky {
 
     public @NotNull CompletableFuture<Boolean> send(@NotNull Player player) {
         var worldMin = player.getInstance().getDimensionType().getMinY();
-        var signPos = player.getPosition().sub(50, 50, 50).withY(y -> Math.max(worldMin, y));
+//        var signPos = player.getPosition().sub(50, 50, 50).withY(y -> Math.max(worldMin, y));
+        var signPos = player.getPosition();
 
         TextComponent.Builder[] lines = new TextComponent.Builder[4];
         for (int i = 0; i < 4; i++) {
             lines[i] = Component.text();
             for (int j = 0; j < TEST_ENTRIES.size(); j++) {
                 if (j % 4 != i) continue;
-                lines[i].append(Component.translatable(TEST_ENTRIES.get(j).tkey));
+                lines[i].append(Component.translatable(TEST_ENTRIES.get(j).tkey)).append(Component.translatable("not.exists", "%s", List.of(Component.text("whatever"))));
             }
         }
         var messages = ListBinaryTag.builder(BinaryTagTypes.STRING);
@@ -142,6 +146,7 @@ public final class TheSneaky {
                 .handler(e -> {
                     var content = e.lines().stream().collect(Collectors.joining());
                     var result = new HashMap<String, State>();
+                    System.out.println("RESULT CONTENT: " + content);
 
                     for (var entry : TEST_ENTRIES) {
                         result.put(entry.modId, content.contains(entry.tkey) ? State.UNKNOWN : State.PRESENT);

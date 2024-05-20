@@ -61,6 +61,8 @@ public class SpriteTransform {
                     } else if (config.get("type").getAsString().equals("item")) {
 
                         BufferedImage image = ImageIO.read(imageFile.toFile());
+                        if (image.getWidth() != 16 || image.getHeight() != 16)
+                            throw new RuntimeException("Item sprites must be 16x");
                         BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
                         Graphics graphics = newImage.getGraphics();
                         graphics.setColor(new Color(
@@ -110,7 +112,7 @@ public class SpriteTransform {
                         if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
                             throw new RuntimeException("Numbered sprites must be 16x");
 
-                        BufferedImage rescaledImage = new BufferedImage(18, 18, baseImage.getType());
+                        BufferedImage rescaledImage = new BufferedImage(32, 32, baseImage.getType());
                         Graphics2D g = rescaledImage.createGraphics();
                         g.drawImage(baseImage, 1, 1, 16, 16, null);
 
@@ -126,7 +128,7 @@ public class SpriteTransform {
                             modelObj.addProperty("parent", "item/numbered_recipe_base");
                             JsonObject textures = new JsonObject();
                             textures.addProperty("0", texId);
-                            textures.addProperty("1", "item/numbers_18x/" + i);
+                            textures.addProperty("1", "item/numbers_32x/" + i);
                             modelObj.add("textures", textures);
                             String modelId = context.writeModel(numberedName, modelObj);
 

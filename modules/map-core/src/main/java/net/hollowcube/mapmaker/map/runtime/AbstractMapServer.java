@@ -263,7 +263,7 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue(playerDataUpdateConsumer::close);
         }
 
-        ChatAnnouncer.setupAnnouncements(config, sessionManager());
+        ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
 
         injector.bind(Controller.class, guiController);
         prepareStart();

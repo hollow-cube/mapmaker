@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.chat.announcements;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.util.Shutdowner;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -26,8 +27,9 @@ public final class ChatAnnouncer {
     private final SessionManager sessionManager;
     private final AnnouncementsConfig config;
 
-    public static void setupAnnouncements(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager) {
-        new ChatAnnouncer(configLoader, sessionManager);
+    public static void setupAnnouncements(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager, Shutdowner shutdowner) {
+        var announcer = new ChatAnnouncer(configLoader, sessionManager);
+        shutdowner.queue(announcer::shutdown);
     }
 
     private ChatAnnouncer(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager) {
@@ -96,5 +98,9 @@ public final class ChatAnnouncer {
     private boolean isAnnouncementValidForSession(@NotNull Announcement announcement, @NotNull PlayerSession session) {
         var filters = announcement.filters();
         return filters == null || filters.matches(session);
+    }
+
+    private void shutdown() {
+        scheduler.shutdownNow();
     }
 }

@@ -84,10 +84,12 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
 
     @Override
     public void close() {
+        if (closeFuture != null) return;
         if (consumer != null) {
             closeFuture = new CompletableFuture<>();
             closeFuture.join();
         }
         if (handle != null) handle.cancel(false);
+        executor.shutdownNow();
     }
 }
