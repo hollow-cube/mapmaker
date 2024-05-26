@@ -50,7 +50,9 @@ public class CheckpointLivesAnvil extends View {
     public void handleAccept() {
         String trimmedInput = input.trim();
 
-        if (!trimmedInput.isEmpty()) {
+        if ("0".equals(trimmedInput)) {
+            popView(SIG_UPDATE_NAME, "");
+        } else if (!trimmedInput.isEmpty()) {
             popView(SIG_UPDATE_NAME, trimmedInput);
         } else {
             popView(SIG_UPDATE_NAME, "");
