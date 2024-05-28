@@ -119,12 +119,12 @@ public class CuboidRegionSelector implements RegionSelector {
             return point;
         }
         var border = world.getWorldBorder();
-        double maxLimitX = border.getCenterX() + border.getDiameter() / 2;
-        double minLimitX = border.getCenterX() - border.getDiameter() / 2;
+        double maxLimitX = border.centerX() + border.diameter() / 2;
+        double minLimitX = border.centerX() - border.diameter() / 2;
         double newX = Math.max(minLimitX, Math.min(maxLimitX, point.x()));
 
-        double maxLimitZ = border.getCenterZ() + border.getDiameter() / 2;
-        double minLimitZ = border.getCenterZ() - border.getDiameter() / 2;
+        double maxLimitZ = border.centerZ() + border.diameter() / 2;
+        double minLimitZ = border.centerZ() - border.diameter() / 2;
         double newZ = Math.max(minLimitZ, Math.min(maxLimitZ, point.z()));
 
         return point.withX(newX).withZ(newZ);

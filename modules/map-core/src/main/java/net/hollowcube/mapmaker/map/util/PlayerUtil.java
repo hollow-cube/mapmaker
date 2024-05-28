@@ -8,9 +8,15 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
 import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
+import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class PlayerUtil {
@@ -61,5 +67,21 @@ public final class PlayerUtil {
                 null, true
         );
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();
+    }
+
+    public static @NotNull CompletableFuture<List<SelectKnownPacksPacket.Entry>> stealKnownPacksFuture(@NotNull Player player) {
+        class Holder {
+            static Field knownPacksFuture;
+        }
+        try {
+            if (Holder.knownPacksFuture == null) {
+                Holder.knownPacksFuture = PlayerConnection.class.getDeclaredField("knownPacksFuture");
+                Holder.knownPacksFuture.setAccessible(true);
+            }
+
+            return (CompletableFuture<List<SelectKnownPacksPacket.Entry>>) Holder.knownPacksFuture.get(player.getPlayerConnection());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

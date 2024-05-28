@@ -5,19 +5,20 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.util.dfu.DFU;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.biomes.Biome;
-import net.minestom.server.world.biomes.BiomeEffects;
-import net.minestom.server.world.biomes.BiomeManager;
-import net.minestom.server.world.biomes.VanillaBiome;
+import net.minestom.server.utils.nbt.BinaryTagSerializer;
+import net.minestom.server.world.biome.Biome;
+import net.minestom.server.world.biome.BiomeEffects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -42,6 +43,25 @@ import java.util.*;
 public class BiomeContainer {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
 
+    // This is copied from BiomeImpl because Minestom does not expose this type. Probably Minestom should expose this.
+    private static final BinaryTagSerializer<Biome> REGISTRY_NBT_TYPE = BinaryTagSerializer.COMPOUND.map(
+            tag -> {
+                throw new UnsupportedOperationException("Biome is read-only");
+            },
+            biome -> {
+                CompoundBinaryTag.Builder builder = CompoundBinaryTag.builder()
+                        .putFloat("temperature", biome.temperature())
+                        .putFloat("downfall", biome.downfall())
+                        .putByte("has_precipitation", (byte) (biome.precipitation() == Biome.Precipitation.NONE ? 0 : 1))
+                        .putString("precipitation", biome.precipitation().name().toLowerCase(Locale.ROOT));
+                if (biome.temperatureModifier() != Biome.TemperatureModifier.NONE)
+                    builder.putString("temperature_modifier", biome.temperatureModifier().name().toLowerCase(Locale.ROOT));
+                return builder
+                        .put("effects", biome.effects().toNbt())
+                        .build();
+            }
+    );
+
     // Exists because DFU.Tag requires an object, not a list.
     private record TagWrapper(List<BiomeInfo> biomes) {
     }
@@ -49,24 +69,23 @@ public class BiomeContainer {
     private static final Tag<TagWrapper> TAG = DFU.Tag(RecordCodecBuilder.create(i -> i.group(
             Codec.list(BiomeInfo.CODEC).optionalFieldOf("biomes", List.of()).forGetter(TagWrapper::biomes)
     ).apply(i, TagWrapper::new)), "biomes");
-    private static final Biome DEFAULT_BIOME = VanillaBiome.PLAINS;
+    private static final DynamicRegistry.Key<Biome> DEFAULT_BIOME = Biome.PLAINS;
 
     private static final int FIRST_BIOME_ID;
 
     static {
         // This is the parent to all biome containers, so load vanilla biomes in it. Then compute the max id to start from.
-        var biomeManager = MinecraftServer.getBiomeManager();
-        biomeManager.loadVanillaBiomes();
+        var biomeManager = MinecraftServer.getBiomeRegistry();
 
         var maxId = 0;
-        for (var biome : biomeManager.unmodifiableCollection())
-            maxId = Math.max(maxId, biomeManager.getId(biome));
+        for (var biome : biomeManager.values())
+            maxId = Math.max(maxId, biomeManager.getId(biome.namespace()));
         FIRST_BIOME_ID = maxId + 1;
     }
 
-    private final CachedPacket registryDataPacket = new CachedPacket(this::createRegistryDataPacket);
+    private final CachedPacket registryDataPacket = new CachedPacket(() -> createRegistryDataPacket(true));
 
-    private final BiomeManager parent = MinecraftServer.getBiomeManager();
+    private final DynamicRegistry<Biome> parent = MinecraftServer.getBiomeRegistry();
     private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
     private final Int2ObjectMap<Biome> loadedBiomes = new Int2ObjectArrayMap<>(); // Custom biomes that are loaded (ie have a Minestom biome)
     private boolean initialized = false;
@@ -79,14 +98,17 @@ public class BiomeContainer {
      * @param name The name of the biome
      * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
      */
-    public @NotNull Biome getLoadedBiome(@NotNull String name) {
+    public @NotNull DynamicRegistry.Key<Biome> getLoadedBiome(@NotNull String name) {
         var namespace = NamespaceID.from(name);
 
         for (var biome : loadedBiomes.values()) {
-            if (biome.namespace().equals(namespace)) return biome;
+            if (biome.namespace().equals(namespace))
+                return DynamicRegistry.Key.<Biome>of(biome.namespace());
         }
 
-        return Objects.requireNonNullElse(parent.getByName(namespace), DEFAULT_BIOME);
+        if (parent.get(namespace) != null)
+            return DynamicRegistry.Key.of(namespace);
+        return DEFAULT_BIOME;
     }
 
     /**
@@ -98,17 +120,10 @@ public class BiomeContainer {
      * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
      */
     public @NotNull String getLoadedBiomeName(int id) {
-        return Objects.requireNonNullElseGet(
-                loadedBiomes.get(id), // Try from local biomes first, then from parent
-                () -> Objects.requireNonNullElse(parent.getById(id), DEFAULT_BIOME)
-        ).name();
-    }
-
-    public int getLoadedBiomeId(@NotNull Biome biome) {
-        for (var entry : loadedBiomes.int2ObjectEntrySet()) {
-            if (entry.getValue().equals(biome)) return entry.getIntKey();
-        }
-        return parent.getId(biome);
+        // Try from local biomes first, then from parent
+        var local = loadedBiomes.get(id);
+        if (local != null) return local.name();
+        return Objects.requireNonNullElse(parent.getKey(id), DEFAULT_BIOME).name();
     }
 
     /**
@@ -146,7 +161,7 @@ public class BiomeContainer {
     }
 
     public @NotNull List<Biome> loadedBiomes() {
-        var allBiomes = new ArrayList<>(parent.unmodifiableCollection());
+        var allBiomes = new ArrayList<>(parent.values());
         allBiomes.addAll(loadedBiomes.values());
         return allBiomes;
     }
@@ -173,21 +188,26 @@ public class BiomeContainer {
         dataWriter.setTag(TAG, new TagWrapper(biomes));
     }
 
-    public @NotNull SendablePacket registryDataPacket() {
-        return registryDataPacket;
+    public @NotNull SendablePacket registryDataPacket(boolean excludeVanilla) {
+        if (excludeVanilla) return registryDataPacket;
+        return createRegistryDataPacket(false);
     }
 
-    private @NotNull RegistryDataPacket createRegistryDataPacket() {
+    private @NotNull RegistryDataPacket createRegistryDataPacket(boolean excludeVanilla) {
         List<RegistryDataPacket.Entry> entries = new ArrayList<>();
 
         // Add parent biomes
-        for (var biome : parent.unmodifiableCollection()) {
-            entries.add(biome.toRegistryEntry());
+        for (var biome : parent.values()) {
+            if (excludeVanilla) {
+                entries.add(new RegistryDataPacket.Entry(biome.name(), null));
+            } else {
+                entries.add(new RegistryDataPacket.Entry(biome.name(), (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
+            }
         }
 
-        // Add overwrite biomes
+        // Add overwrite biomes (never vanilla ones so always write entire value)
         for (var biome : loadedBiomes.values()) {
-            entries.add(biome.toRegistryEntry());
+            entries.add(new RegistryDataPacket.Entry(biome.name(), (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
         }
 
         return new RegistryDataPacket("minecraft:worldgen/biome", entries);
@@ -211,8 +231,7 @@ public class BiomeContainer {
             if (color != null) effectBuilder.foliageColor(color.value());
         }
 
-        return Biome.builder()
-                .name(namespace)
+        return Biome.builder(namespace)
                 .temperature(0.8F) // IDK what this affects
                 .downfall(0.4F) // IDK what this affects
                 .effects(effectBuilder.build())

@@ -21,10 +21,11 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.UniqueIdUtils;
 import net.minestom.server.utils.validate.Check;
-import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
     }
 
     @Override
-    public @NotNull Biome getBiome(@NotNull String name) {
+    public @NotNull DynamicRegistry.Key<Biome> getBiome(@NotNull String name) {
         return mapWorld.biomes().getLoadedBiome(name);
     }
 

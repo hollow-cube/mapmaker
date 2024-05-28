@@ -33,7 +33,7 @@ public class UpCommand extends CommandDsl {
         var instance = player.getInstance();
 
         var target = player.getPosition().add(0, context.get(distanceArg), 0);
-        if (target.blockY() > instance.getDimensionType().getMaxY()) {
+        if (target.blockY() > instance.getCachedDimensionType().maxY()) {
             player.sendMessage(ERR_NO_SPACE);
             return;
         }

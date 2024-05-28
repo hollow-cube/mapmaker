@@ -120,11 +120,11 @@ public final class Selection {
         var instance = session.instance();
         var border = instance.getWorldBorder();
 
-        var radius = border.getDiameter() / 2;
+        var radius = border.diameter() / 2;
         return new Vec(
-                MathUtils.clamp(point.x(), border.getCenterX() - radius, border.getCenterX() + radius - 1),
-                MathUtils.clamp(point.y(), instance.getDimensionType().getMinY(), instance.getDimensionType().getMaxY() - 1),
-                MathUtils.clamp(point.z(), border.getCenterZ() - radius, border.getCenterZ() + radius - 1)
+                MathUtils.clamp(point.x(), border.centerX() - radius, border.centerX() + radius - 1),
+                MathUtils.clamp(point.y(), instance.getCachedDimensionType().minY(), instance.getCachedDimensionType().maxY() - 1),
+                MathUtils.clamp(point.z(), border.centerZ() - radius, border.centerZ() + radius - 1)
         );
     }
 }

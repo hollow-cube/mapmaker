@@ -336,7 +336,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     private void tick() {
-        var minHeight = instance.getDimensionType().getMinY() - 20;
+        var minHeight = instance.getCachedDimensionType().minY() - 20;
         for (var player : players()) {
             if (player.getPosition().y() < minHeight) {
                 player.teleport(spawnPoint(player));

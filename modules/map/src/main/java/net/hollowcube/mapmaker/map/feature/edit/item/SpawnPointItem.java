@@ -58,7 +58,7 @@ public class SpawnPointItem extends ItemHandler {
 
     private void updateSpawnPoint(@NotNull Player player, @NotNull MapData map) {
         var newSpawnPoint = player.getPosition();
-        if (!player.getInstance().getWorldBorder().isInside(newSpawnPoint)) {
+        if (!player.getInstance().getWorldBorder().inBounds(newSpawnPoint)) {
             player.sendMessage(Component.translatable("command.set_spawn.out_of_world"));
             return;
         }

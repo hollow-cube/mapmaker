@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.click.Click;
@@ -46,7 +47,7 @@ public class CosmeticInventoryHandler {
     );
 
     private static void creativeClickListener(@NotNull Controller guiController, ClientCreativeInventoryActionPacket packet, Player player) {
-        if (!player.isCreative()) return;
+        if (player.getGameMode() != GameMode.CREATIVE) return;
         var item = packet.item();
 
         // If trying to set any slot to a cosmetic item

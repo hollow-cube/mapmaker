@@ -21,7 +21,7 @@ public class FixTheDripleafCommand extends CommandDsl {
 
     private void fixTheDripleaf(@NotNull Player player, @NotNull CommandContext context) {
         var instance = player.getInstance();
-        var dimensionHeight = instance.getDimensionType().getHeight();
+        var dimensionHeight = instance.getCachedDimensionType().height();
         player.sendMessage("Fixing the dripleaf!!!");
         int fixed = 0;
         for (var chunk : instance.getChunks()) {

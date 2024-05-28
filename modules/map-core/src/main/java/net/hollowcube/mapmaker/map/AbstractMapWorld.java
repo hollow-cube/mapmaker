@@ -6,18 +6,18 @@ import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.server.common.TagsPacket;
+import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
 import net.minestom.server.network.packet.server.configuration.UpdateEnabledFeaturesPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
@@ -28,6 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @SuppressWarnings("UnstableApiUsage")
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
@@ -116,11 +119,33 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         var player = event.getPlayer();
 
         try {
+            List<SelectKnownPacksPacket.Entry> knownPacks;
+            try {
+                var knownPacksFuture = PlayerUtil.stealKnownPacksFuture(player);
+                if (knownPacksFuture == null) {
+                    // There is a race here which could result in the client responding too quickly. In that case we need to re request
+                    // the known packs. todo: find a better way around this, its really cursed.
+                    knownPacksFuture = player.getPlayerConnection().requestKnownPacks(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
+                }
+                knownPacks = knownPacksFuture.get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException("Client failed to respond to known packs request", e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Error receiving known packs", e);
+            }
+            boolean excludeVanilla = !knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
+
             // Send registry data ourself to allow custom biomes per map
-            player.sendPacket(Messenger.registryDataPacket());
-            player.sendPacket(MinecraftServer.getDimensionTypeManager().registryDataPacket());
-            player.sendPacket(biomes().registryDataPacket());
-            player.sendPacket(DamageType.registryDataPacket());
+            var serverProcess = MinecraftServer.process();
+            player.sendPacket(serverProcess.chatType().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.dimensionType().registryDataPacket(excludeVanilla));
+            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.damageType().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.trimMaterial().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.trimPattern().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.bannerPattern().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(excludeVanilla));
+
             player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
             event.setSendRegistryData(false);
 

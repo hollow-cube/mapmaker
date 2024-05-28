@@ -53,7 +53,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return; // Sanity
 
-        if (player.getPosition().y() < world.instance().getDimensionType().getMinY()) {
+        if (player.getPosition().y() < world.instance().getCachedDimensionType().minY()) {
             player.teleport(world.spawnPoint(player));
         }
     }

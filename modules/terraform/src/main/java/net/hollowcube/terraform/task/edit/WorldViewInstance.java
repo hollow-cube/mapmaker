@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.task.edit;
 
 import net.hollowcube.terraform.task.Task;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.block.Block;
@@ -14,7 +15,7 @@ public record WorldViewInstance(
 ) implements WorldView {
 
     public WorldViewInstance(@NotNull Task task, @NotNull Instance instance) {
-        this(task, instance, instance.getDimensionType().getMinY(), instance.getDimensionType().getMaxY());
+        this(task, instance, MinecraftServer.getDimensionTypeRegistry().get(instance.getDimensionType()).minY(), MinecraftServer.getDimensionTypeRegistry().get(instance.getDimensionType()).maxY());
     }
 
     @Override
@@ -28,10 +29,10 @@ public record WorldViewInstance(
     }
 
     static boolean fastBorderTest(@NotNull WorldBorder border, int worldMin, int worldMax, int x, int y, int z) {
-        final double radius = border.getDiameter() / 2d;
+        final double radius = border.diameter() / 2d;
         // Use < on the positive end because we have block positions and it would include one outside the actual border.
-        final boolean checkX = x < border.getCenterX() + radius && x >= border.getCenterX() - radius;
-        final boolean checkZ = z < border.getCenterZ() + radius && z >= border.getCenterZ() - radius;
+        final boolean checkX = x < border.centerX() + radius && x >= border.centerX() - radius;
+        final boolean checkZ = z < border.centerZ() + radius && z >= border.centerZ() - radius;
         final boolean checkY = y >= worldMin && y < worldMax;
         return checkX && checkZ && checkY;
     }

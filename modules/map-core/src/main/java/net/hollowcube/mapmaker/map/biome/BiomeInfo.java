@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

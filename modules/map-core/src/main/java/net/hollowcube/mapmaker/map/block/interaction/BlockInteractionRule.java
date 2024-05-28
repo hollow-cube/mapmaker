@@ -72,9 +72,9 @@ public interface BlockInteractionRule {
         }
 
         public boolean worldContains(@NotNull Point point) {
-            return instance.getWorldBorder().isInside(point)
-                    && point.blockY() >= instance.getDimensionType().getMinY()
-                    && point.blockY() <= instance.getDimensionType().getMaxY();
+            return instance.getWorldBorder().inBounds(point)
+                    && point.blockY() >= instance.getCachedDimensionType().minY()
+                    && point.blockY() <= instance.getCachedDimensionType().maxY();
         }
 
         @Override
@@ -86,13 +86,13 @@ public interface BlockInteractionRule {
         public void setBlock(int x, int y, int z, @NotNull Block block) {
             var blockPosition = new Vec(x, y, z);
             // Never set a block outside the border.
-            if (!instance.getWorldBorder().isInside(blockPosition)) return;
+            if (!instance.getWorldBorder().inBounds(blockPosition)) return;
             instance.setBlock(blockPosition, block);
         }
 
         public void placeBlock(@NotNull Point blockPosition, @NotNull Block block) {
             // Never set a block outside the border.
-            if (!instance.getWorldBorder().isInside(blockPosition)) return;
+            if (!instance.getWorldBorder().inBounds(blockPosition)) return;
 
             var cursorPosition = Objects.requireNonNullElse(cursorPosition(), Vec.ZERO);
             instance.placeBlock(new BlockHandler.PlayerPlacement(

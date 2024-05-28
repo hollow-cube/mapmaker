@@ -375,7 +375,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 return;
             }
         } else if (world.isSpectating(player)) {
-            if (player.getPosition().y() < world.instance().getDimensionType().getMinY()) {
+            if (player.getPosition().y() < world.instance().getCachedDimensionType().minY()) {
                 var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
                 player.teleport(checkpoint == null ? world.spawnPoint(player) : checkpoint);
             }
@@ -590,10 +590,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void computeDefaultResetHeight(@NotNull Instance instance) {
-        int worldMinHeight = instance.getDimensionType().getMinY();
-        int minBlockY = instance.getDimensionType().getMaxY();
+        int worldMinHeight = instance.getCachedDimensionType().minY();
+        int minBlockY = instance.getCachedDimensionType().maxY();
 
-        int worldRadius = (int) (instance.getWorldBorder().getDiameter() / 2) + 16;
+        int worldRadius = (int) (instance.getWorldBorder().diameter() / 2) + 16;
         worldRadius = Math.min(worldRadius, 4096); // Prevent infinite computation
         for (int x = -worldRadius; x < worldRadius; x += 16) {
             for (int z = -worldRadius; z < worldRadius; z += 16) {
@@ -610,7 +610,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Sanity check in case there are literally no blocks in the world.
-        if (minBlockY == instance.getDimensionType().getMaxY()) minBlockY = worldMinHeight;
+        if (minBlockY == instance.getCachedDimensionType().maxY()) minBlockY = worldMinHeight;
         instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);
     }
 

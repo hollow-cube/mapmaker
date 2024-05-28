@@ -117,7 +117,7 @@ public final class TheSneaky {
     }
 
     public @NotNull CompletableFuture<Boolean> send(@NotNull Player player) {
-        var worldMin = player.getInstance().getDimensionType().getMinY();
+        var worldMin = player.getInstance().getCachedDimensionType().minY();
 //        var signPos = player.getPosition().sub(50, 50, 50).withY(y -> Math.max(worldMin, y));
         var signPos = player.getPosition();
 

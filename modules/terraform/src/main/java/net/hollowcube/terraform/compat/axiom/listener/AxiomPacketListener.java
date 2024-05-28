@@ -13,6 +13,7 @@ import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -116,12 +117,12 @@ public final class AxiomPacketListener {
                 CancellableEvent event = null;
                 if (block.isAir()) {
                     // Air needs to trigger break event to handle cancellation (e.g. for worldedit wand)
-                    event = new PlayerBlockBreakEvent(player, existingBlock, block, blockPosition, blockFace);
+                    event = new PlayerBlockBreakEvent(player, existingBlock, block, new BlockVec(blockPosition), blockFace);
                 } else if (itemInHand.has(ItemComponent.CUSTOM_MODEL_DATA)) {
                     // Items with custom model data need to trigger interact event
                     // We need to offset as if we are placing on the block next to it, which is not what axiom sends.
                     var relBlockPosition = blockPosition.relative(blockFace.getOppositeFace());
-                    event = new PlayerBlockInteractEvent(player, packet.hand(), existingBlock, relBlockPosition,
+                    event = new PlayerBlockInteractEvent(player, packet.hand(), existingBlock, new BlockVec(relBlockPosition),
                             packet.blockHit().cursorPosition(), blockFace);
                 }
 

@@ -258,8 +258,8 @@ public final class SelectionCommands {
                 return;
             }
 
-            var dimensionType = session.instance().getDimensionType();
-            int dimensionMin = dimensionType.getMinY(), dimensionMax = dimensionType.getMaxY();
+            var dimensionType = session.instance().getCachedDimensionType();
+            int dimensionMin = dimensionType.minY(), dimensionMax = dimensionType.maxY();
 
             // Make the relevant adjustments based on the given args
             Point low, high;

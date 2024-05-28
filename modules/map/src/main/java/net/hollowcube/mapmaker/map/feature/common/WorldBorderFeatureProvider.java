@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.map.feature.common;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapSize;
+import net.minestom.server.ServerFlag;
+import net.minestom.server.instance.WorldBorder;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)
@@ -17,15 +19,11 @@ public class WorldBorderFeatureProvider implements FeatureProvider {
             mapSize = MapSize.NORMAL;
         }
 
-        var worldBorder = world.instance().getWorldBorder();
-        worldBorder.setCenter(0f, 0f);
-        worldBorder.setDiameter(mapSize.size());
-
         // Only add the red border if the map is an editing map
-        if (world instanceof EditingMapWorld) {
-            worldBorder.setWarningBlocks(5);
-            worldBorder.setWarningTime(5);
-        }
+        int warning = world instanceof EditingMapWorld ? 5 : 0;
+
+        var worldBorder = new WorldBorder(mapSize.size(), 0f, 0f, warning, warning, ServerFlag.WORLD_BORDER_SIZE);
+        world.instance().setWorldBorder(worldBorder);
 
         return true;
     }

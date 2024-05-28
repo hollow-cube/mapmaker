@@ -22,22 +22,6 @@ import net.minestom.server.world.DimensionType;
 
 public class DemoServer {
 
-    public static final DimensionType FULL_BRIGHT = DimensionType.builder(NamespaceID.from("mapmaker:bright_dim"))
-            .ultrawarm(false)
-            .natural(true)
-            .piglinSafe(false)
-            .respawnAnchorSafe(false)
-            .bedSafe(true)
-            .raidCapable(true)
-            .skylightEnabled(true)
-            .ceilingEnabled(false)
-            .fixedTime(null)
-            .ambientLight(2.0f)
-            .height(384)
-            .minY(-64)
-            .logicalHeight(384)
-            .infiniburn(NamespaceID.from("minecraft:infiniburn_overworld"))
-            .build();
 
     public static void main(String[] args) {
         System.setProperty("terraform.debug.markers", "true");
@@ -47,10 +31,10 @@ public class DemoServer {
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
-        var dimensionManager = MinecraftServer.getDimensionTypeManager();
-        dimensionManager.addDimension(FULL_BRIGHT);
+        var dimension = MinecraftServer.getDimensionTypeRegistry().register(DimensionType.builder(NamespaceID.from("mapmaker:bright_dim"))
+                .ambientLight(2.0f).build());
 
-        var instance = MinecraftServer.getInstanceManager().createInstanceContainer(FULL_BRIGHT);
+        var instance = MinecraftServer.getInstanceManager().createInstanceContainer(dimension);
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
 
         var commandManager = new CommandManagerImpl();

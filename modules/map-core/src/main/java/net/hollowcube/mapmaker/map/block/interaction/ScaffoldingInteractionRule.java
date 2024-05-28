@@ -43,7 +43,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
 
             var placeFace = BlockFace.fromYaw(interaction.player().getPosition().yaw());
             // Add 2 because this is triggering before the block, and the block position is exactly on so need to move in from the wb.
-            for (int i = 0; i < MAX_PLACE_DISTANCE && worldBorder.isInside(CoordinateUtil.abs(blockPosition).add(2)); i++) {
+            for (int i = 0; i < MAX_PLACE_DISTANCE && worldBorder.inBounds(CoordinateUtil.abs(blockPosition).add(2)); i++) {
                 blockPosition = blockPosition.relative(placeFace);
                 block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
                 if (block.id() == SCAFFOLDING_BLOCK) continue;
@@ -69,7 +69,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
             }
         } else {
             // Interacting with any other face adds to the top of the scaffolding stack.
-            var worldHeight = interaction.instance().getDimensionType().getMaxY();
+            var worldHeight = interaction.instance().getCachedDimensionType().maxY();
             while (blockPosition.y() < worldHeight) {
                 blockPosition = blockPosition.add(0, 1, 0);
                 block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);

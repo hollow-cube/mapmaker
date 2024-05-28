@@ -63,7 +63,7 @@ public final class UtilityCommands {
             var height = context.get(heightArg);
 
             var center = player.getPosition();
-            var dimensionMax = player.getInstance().getDimensionType().getMaxY();
+            var dimensionMax = player.getInstance().getCachedDimensionType().maxY();
             var max = Math.min(center.blockY() + height, dimensionMax);
 
             var region = new CuboidRegion(center.sub(size - 1).withY(center.blockY()), center.add(size).withY(max));
@@ -96,7 +96,7 @@ public final class UtilityCommands {
             var height = context.get(heightArg);
 
             var center = player.getPosition();
-            var dimensionMin = player.getInstance().getDimensionType().getMinY();
+            var dimensionMin = player.getInstance().getCachedDimensionType().minY();
             var min = Math.max(center.blockY() - height, dimensionMin);
 
             var region = new CuboidRegion(center.sub(size - 1).withY(min), center.add(size).withY(center.blockY()));

@@ -29,9 +29,9 @@ public class Heightmap {
     public Heightmap(@NotNull Chunk chunk, boolean type, @NotNull Predicate<Block> filter) {
         this.chunk = chunk;
         this.type = type;
-        var dimensionType = chunk.getInstance().getDimensionType();
-        this.worldMin = dimensionType.getMinY();
-        this.worldMax = dimensionType.getMinY() + dimensionType.getHeight();
+        var dimensionType = chunk.getInstance().getCachedDimensionType();
+        this.worldMin = dimensionType.minY();
+        this.worldMax = dimensionType.minY() + dimensionType.height();
         this.filter = filter;
     }
 

@@ -12,6 +12,7 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
@@ -30,7 +31,7 @@ public class MapInstance extends InstanceContainer {
         this(dimensionName, DimensionTypes.FULL_BRIGHT);
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull DimensionType dimensionType) {
+    public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
         super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
 
         setTimeRate(0); //todo eventually this should be a map setting

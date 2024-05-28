@@ -19,7 +19,6 @@ import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.session.Presence;
-import net.hollowcube.mapmaker.util.thesneaky.TheSneaky;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -183,10 +182,10 @@ public class DevServerRunner extends AbstractMapServer {
         if (!event.isFirstSpawn()) return;
         super.handleFirstSpawn(event.getPlayer());
 
-        var p = event.getPlayer();
-        p.scheduleNextTick($ -> {
-            TheSneaky.getTheSneaky().send(p);
-        });
+//        var p = event.getPlayer();
+//        p.scheduleNextTick($ -> {
+//            TheSneaky.getTheSneaky().send(p);
+//        });
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {

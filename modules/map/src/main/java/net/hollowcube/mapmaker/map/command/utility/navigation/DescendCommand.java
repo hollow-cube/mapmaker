@@ -39,7 +39,7 @@ public class DescendCommand extends CommandDsl {
             // On every iteration besides the first we are starting on top of a solid block so we need to walk through the floor to find the next opening
             if (i > 0) {
                 while (instance.getBlock(position = position.sub(0, 1, 0), Block.Getter.Condition.TYPE).isSolid()) {
-                    if (position.blockY() < instance.getDimensionType().getMinY()) {
+                    if (position.blockY() < instance.getCachedDimensionType().minY()) {
                         player.sendMessage(ERR_NO_SPACE);
                         return;
                     }
@@ -48,7 +48,7 @@ public class DescendCommand extends CommandDsl {
 
             // Step down until we find a solid block
             while (!(instance.getBlock(position = position.sub(0, 1, 0), Block.Getter.Condition.TYPE).isSolid())) {
-                if (position.blockY() < instance.getDimensionType().getMinY()) {
+                if (position.blockY() < instance.getCachedDimensionType().minY()) {
                     player.sendMessage(ERR_NO_SPACE);
                     return;
                 }
@@ -60,7 +60,7 @@ public class DescendCommand extends CommandDsl {
             // Step down while we can still fit
             while (PlayerUtil.canFit(player, position.sub(0, 1, 0))) {
                 position = position.sub(0, 1, 0);
-                if (position.blockY() < instance.getDimensionType().getMinY()) {
+                if (position.blockY() < instance.getCachedDimensionType().minY()) {
                     player.sendMessage(ERR_NO_SPACE);
                     return;
                 }

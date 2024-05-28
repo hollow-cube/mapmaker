@@ -39,7 +39,7 @@ public class AscendCommand extends CommandDsl {
         for (int i = 0; i < levels; i++) {
             // Step up until we find a solid block
             while (!(instance.getBlock(position = position.add(0, 1, 0), Block.Getter.Condition.TYPE).isSolid())) {
-                if (position.blockY() > instance.getDimensionType().getMaxY()) {
+                if (position.blockY() > instance.getCachedDimensionType().maxY()) {
                     player.sendMessage(ERR_NO_SPACE);
                     return;
                 }
@@ -47,7 +47,7 @@ public class AscendCommand extends CommandDsl {
 
             // Step up until we can fit
             while (!PlayerUtil.canFit(player, position = position.add(0, 1, 0))) {
-                if (position.blockY() > instance.getDimensionType().getMaxY()) {
+                if (position.blockY() > instance.getCachedDimensionType().maxY()) {
                     player.sendMessage(ERR_NO_SPACE);
                     return;
                 }

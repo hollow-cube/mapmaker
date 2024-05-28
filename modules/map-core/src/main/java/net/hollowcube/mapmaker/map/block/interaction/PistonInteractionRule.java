@@ -32,7 +32,7 @@ public class PistonInteractionRule implements BlockInteractionRule {
             case "east" -> BlockFace.EAST;
             default -> throw new IllegalStateException("unreachable");
         });
-        if (!interaction.worldBorder().isInside(otherPosition)) return false;
+        if (!interaction.worldBorder().inBounds(otherPosition)) return false;
         var otherBlock = interaction.getBlock(otherPosition);
 
         if (isExtended) {
