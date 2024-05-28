@@ -15,5 +15,6 @@ build --javacopt "--enable-preview"
 # Don't depend on a JAVA_HOME pointing at a system JDK
 # see https://github.com/bazelbuild/rules_jvm_external/issues/445
 build:windows --repo_env=JAVA_HOME=../bazel_tools/jdk
+build:linux --repo_env=JAVA_HOME=../bazel_tools/jdk
 
 build:macos --remote_download_toplevel
