@@ -5,18 +5,24 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 
 public class BuyCubitsView extends View {
@@ -27,6 +33,13 @@ public class BuyCubitsView extends View {
             "cubits_50", "cubits_105", "cubits_220",
             "cubits_400", "cubits_600"
     };
+    private static final BadSprite[] spriteMap = new BadSprite[productIdMap.length];
+
+    static {
+        for (int i = 0; i < productIdMap.length; i++) {
+            spriteMap[i] = BadSprite.require("store/checkout/" + productIdMap[i]);
+        }
+    }
 
     private @ContextObject PlayerService playerService;
 
@@ -46,26 +59,18 @@ public class BuyCubitsView extends View {
 
     @Blocking
     private void handleBuyCubitsGeneric(@NotNull Player player, int productIndex) {
-        // We cannot handle clicks in books serverside in addition to opening a website so we can do the following:
-        // 1. Instead give our own link with the checkout id such as https://api.hollowcube.net/v1/players/checkout/b18925t71892578912579157125897128951851
-        //    this link would then go to the player service, triggering a kafka message which the server reads and
-        //    uses to close the GUI.
-        // 2. This looks kinda yikes, so we can shorten the link with a little link shortener cf worker, so it would be more like
-        //    https://s.hollowcube.net/faw512b -> https://api.hollowcube.net/v1/players/checkout/b18925t71892578912579157125897128951851 -> https://checkout.tebex.io/checkout/...
-        //    and at the same time we can send the kafka update when stopping at the player service.
         buyCubitsButtons[productIndex].setState(State.LOADING);
         try {
             var playerData = PlayerDataV2.fromPlayer(player);
             var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.username(), productIdMap[productIndex]);
             log.info("Created checkout link for {} for product {}: {}", playerData.username(), productIdMap[productIndex], resp.url());
 
-            var book = Component.text();
-            book.append(Component.text("Checkout Button")
-                    .hoverEvent(HoverEvent.showText(Component.text("Go to checkout")))
-                    .clickEvent(ClickEvent.openUrl(resp.url())));
-            player.openBook(Book.builder()
-                    .addPage(book.build())
-                    .build());
+            var url = resp.url();
+            if (ServerRuntime.getRuntime().isDevelopment()) {
+                url = url.replace("https://hollowcube.net", "http://localhost:5173");
+            }
+            
+            player.openBook(buildCheckoutBook(productIndex, url));
         } catch (Exception e) {
             log.error("Failed to create checkout link", e);
             player.closeInventory();
@@ -73,5 +78,22 @@ public class BuyCubitsView extends View {
         } finally {
             buyCubitsButtons[productIndex].setState(State.ACTIVE);
         }
+    }
+
+    private @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
+        var component = Component.text();
+
+        component.append(Component.text(spriteMap[productIndex].fontChar(), TextColor.color(78, 92, 38)));
+
+        component.appendNewline().appendNewline().appendNewline().appendNewline();
+
+        var line = Component.text(FontUtil.computeOffset(10)).append(Component.text(FontUtil.computeOffset(94))
+                .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
+                .clickEvent(ClickEvent.openUrl(url)));
+        for (int i = 0; i < 9; i++) {
+            component.append(line).appendNewline();
+        }
+
+        return Book.builder().addPage(component.build()).build();
     }
 }

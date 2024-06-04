@@ -24,11 +24,25 @@ out vec2 texCoord0;
 #define OTHER_SHADOW (0)
 
 void main() {
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-    vertexDistance = fog_distance(Position, FogShape);
+    vec3 pos = vec3(Position.xyz);
+
+    // More book handling
+    if (Color == vec4(78/255., 92/255., 38/255., Color.a)) {
+        pos.x -= 9;
+    }
+
+    gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
+    vertexDistance = fog_distance(pos, FogShape);
     vertexColor = Color * texelFetch(Sampler2, UV2 / 16, 0);
     texCoord0 = UV0;
 
+    // More book handling
+    if (Color == vec4(78/255., 92/255., 38/255., Color.a)) {
+        vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);
+        return;
+    }
+
+    // Shadow handling
     if (Color == vec4(78/255., 92/255., 36/255., Color.a)) { //  && (Position.z == CHAT_TEXT || Position.z == OTHER_TEXT)
         vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);// remove color from no shadow marker
     } else if (Color == vec4(19/255., 23/255., 9/255., Color.a)) { //  && (Position.z == CHAT_SHADOW || Position.z == OTHER_SHADOW)
