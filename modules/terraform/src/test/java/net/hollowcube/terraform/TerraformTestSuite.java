@@ -4,6 +4,6 @@ import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
-@SelectPackages("net.hollowcube.terraform")
+@SelectPackages({"net.hollowcube.terraform", "net.hollowcube.shim"})
 public class TerraformTestSuite {
 }

@@ -10,6 +10,7 @@ java_library(
         "//modules/common",
         "//modules/core",
         "//modules/terraform",
+        "//modules/terraform:metabrushes",
         "//third_party:helidon",
         "//third_party:minestom",
         "@maven//:ch_qos_logback_logback_classic",

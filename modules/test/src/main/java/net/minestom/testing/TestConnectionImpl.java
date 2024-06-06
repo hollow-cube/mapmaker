@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.player.PlayerConnection;
@@ -34,18 +35,22 @@ final class TestConnectionImpl implements TestConnection {
 
     @Override
     public @NotNull CompletableFuture<Player> connect(@NotNull Instance instance, @NotNull Pos pos) {
-        Player player = new Player(UUID.randomUUID(), "RandName", playerConnection);
+        // Use player provider to disable queued chunk sending
+        process.connection().setPlayerProvider(TestPlayerImpl::new);
+
+        playerConnection.setConnectionState(ConnectionState.LOGIN);
+        var player = process.connection().createPlayer(playerConnection, UUID.randomUUID(), "RandName");
         player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(instance);
             event.getPlayer().setRespawnPoint(pos);
         });
 
-        throw new UnsupportedOperationException("TODO");
-//        return process.connection().transitionConfigToPlay(player, true)
-//                .thenApply(unused -> {
-//                    process.connection().updateWaitingPlayers();
-//                    return player;
-//                });
+        // Force the player through the entirety of the login process manually
+        player.setPendingOptions(instance, false);
+        process.connection().doConfiguration(player, true);
+        process.connection().transitionConfigToPlay(player);
+        process.connection().updateWaitingPlayers();
+        return CompletableFuture.completedFuture(player);
     }
 
     @Override

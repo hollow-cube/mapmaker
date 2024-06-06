@@ -4,10 +4,14 @@ load("//third_party/rules_jmh:defs.bzl", "jmh_java_benchmarks")
 
 java_library(
     name = "terraform",
-    srcs = glob(include = ["src/main/java/**/*.java"]),
+    srcs = glob(include = [
+        "src/main/java/**/*.java",
+        "src/shim/java/**/*.java",
+    ]),
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        ":metabrushes",
         "//modules/command",
         "//modules/common",
         "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
@@ -39,6 +43,14 @@ java_binary(
     ],
 )
 
+java_import(
+    name = "metabrushes",
+    jars = [
+        "MetaBrushes-3.0.1.jar",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 java_junit5_test(
     name = "terraform_test",
     srcs = glob(include = ["src/test/java/**/*.java"]),
@@ -46,6 +58,7 @@ java_junit5_test(
     test_class = "net.hollowcube.terraform.TerraformTestSuite",
     deps = [
         ":terraform",
+        ":metabrushes",
         "//modules/command",
         "//modules/common",
         "//modules/test",
