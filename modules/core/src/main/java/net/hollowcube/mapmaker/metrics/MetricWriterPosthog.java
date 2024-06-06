@@ -25,6 +25,8 @@ public class MetricWriterPosthog implements MetricWriter {
     private static final String POSTHOG_API_KEY = "phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA"; // Not a secret
     private static final String POSTHOG_HOST = "https://us.i.posthog.com";
 
+    private static final String NO_USER = "00000000-0000-0000-0000-000000000000";
+
     private final PostHog client;
 
     public MetricWriterPosthog() {
@@ -39,7 +41,7 @@ public class MetricWriterPosthog implements MetricWriter {
             // We use gson here because its simple, it probably is pretty yikes performance wise.
             Map<String, Object> properties = new HashMap<>(GSON.fromJson(GSON.toJsonTree(metric), MAP_TYPE));
 
-            String playerId = "";
+            String playerId = NO_USER;
             if (properties.containsKey("playerId")) {
                 playerId = properties.get("playerId").toString();
                 properties.remove("playerId");
