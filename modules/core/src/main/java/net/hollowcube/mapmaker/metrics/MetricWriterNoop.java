@@ -13,4 +13,9 @@ public class MetricWriterNoop implements MetricWriter {
     public void write(@NotNull Metric metric) {
         logger.info("new metric {}: {}", metric.getClass().getSimpleName(), metric);
     }
+
+    @Override
+    public void close() {
+
+    }
 }

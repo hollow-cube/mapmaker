@@ -46,6 +46,7 @@ java_library(
         "@maven//:io_confluent_kafka_schema_registry_client",
         "@maven//:dev_hollowcube_dataconverter",
         "@maven//:info_debatty_java_string_similarity",
+        "@maven//:com_posthog_java_posthog",
     ],
 )
 

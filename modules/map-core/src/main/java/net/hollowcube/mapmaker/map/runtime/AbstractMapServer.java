@@ -58,8 +58,8 @@ import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
-import net.hollowcube.mapmaker.metrics.MetricWriterImpl;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
+import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -151,8 +151,10 @@ public abstract class AbstractMapServer implements MapServer {
 
         var metricsConfig = config.get(MetricsConfig.class);
         if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
-            this.metrics = new MetricWriterImpl(metricsConfig.password());
+            this.metrics = new MetricWriterPosthog();
+//            this.metrics = new MetricWriterImpl(metricsConfig.password());
         } else this.metrics = new MetricWriterNoop();
+        shutdowner.queue(metrics::close);
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) {

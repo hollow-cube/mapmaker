@@ -62,6 +62,11 @@ public class MetricWriterImpl implements MetricWriter {
         });
     }
 
+    @Override
+    public void close() {
+        // nothing needed
+    }
+
     @Blocking
     private void writeInternal(@NotNull Metric metric) throws Exception {
         var wrappedSchema = schemas.computeIfAbsent(metric.getClass(), clazz -> new WrappedSchema(avroReflectData, clazz));
@@ -119,7 +124,11 @@ public class MetricWriterImpl implements MetricWriter {
     }
 
     private static @NotNull String computeTopicName(@NotNull String className) {
-        return "metric_" + className.replace("Event", "")
+        return "metric_" + computeMetricName(className);
+    }
+
+    static @NotNull String computeMetricName(@NotNull String className) {
+        return className.replace("Event", "")
                 .replaceAll("([a-z])([A-Z]+)", "$1_$2")
                 .toLowerCase(Locale.ROOT);
     }

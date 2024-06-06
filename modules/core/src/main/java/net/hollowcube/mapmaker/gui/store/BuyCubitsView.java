@@ -29,15 +29,15 @@ public class BuyCubitsView extends View {
     private static final Logger log = LoggerFactory.getLogger(BuyCubitsView.class);
 
     private static final String PURCHASE_SOURCE = "ingame/store";
-    private static final String[] productIdMap = new String[]{
+    private static final String[] PRODUCT_ID_MAP = new String[]{
             "cubits_50", "cubits_105", "cubits_220",
             "cubits_400", "cubits_600"
     };
-    private static final BadSprite[] spriteMap = new BadSprite[productIdMap.length];
+    private static final BadSprite[] SPRITE_MAP = new BadSprite[PRODUCT_ID_MAP.length];
 
     static {
-        for (int i = 0; i < productIdMap.length; i++) {
-            spriteMap[i] = BadSprite.require("store/checkout/" + productIdMap[i]);
+        for (int i = 0; i < PRODUCT_ID_MAP.length; i++) {
+            SPRITE_MAP[i] = BadSprite.require("store/checkout/" + PRODUCT_ID_MAP[i]);
         }
     }
 
@@ -62,14 +62,14 @@ public class BuyCubitsView extends View {
         buyCubitsButtons[productIndex].setState(State.LOADING);
         try {
             var playerData = PlayerDataV2.fromPlayer(player);
-            var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.username(), productIdMap[productIndex]);
-            log.info("Created checkout link for {} for product {}: {}", playerData.username(), productIdMap[productIndex], resp.url());
+            var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.username(), PRODUCT_ID_MAP[productIndex]);
+            log.info("Created checkout link for {} for product {}: {}", playerData.username(), PRODUCT_ID_MAP[productIndex], resp.url());
 
             var url = resp.url();
             if (ServerRuntime.getRuntime().isDevelopment()) {
                 url = url.replace("https://hollowcube.net", "http://localhost:5173");
             }
-            
+
             player.openBook(buildCheckoutBook(productIndex, url));
         } catch (Exception e) {
             log.error("Failed to create checkout link", e);
@@ -83,7 +83,7 @@ public class BuyCubitsView extends View {
     private @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
         var component = Component.text();
 
-        component.append(Component.text(spriteMap[productIndex].fontChar(), TextColor.color(78, 92, 38)));
+        component.append(Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38)));
 
         component.appendNewline().appendNewline().appendNewline().appendNewline();
 

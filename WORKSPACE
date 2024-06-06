@@ -74,6 +74,7 @@ maven_install(
         "com.github.hollow-cube:datafixerupper:cf58e926a6",
         "org.apache.avro:avro:1.11.3",
         "io.confluent:kafka-schema-registry-client:7.6.0",
+        "com.posthog.java:posthog:1.1.1",
 
         # Adventure
         "net.kyori:adventure-api:4.16.0",
