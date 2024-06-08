@@ -214,7 +214,7 @@ public final class AxiomPacketListener {
         //todo this does not handle fake entities, it probably should. That would be particularly useful for markers.
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
-            var entity = Entity.getEntity(entry.uuid());
+            var entity = instance.getEntityByUuid(entry.uuid());
             if (entity == null) {
                 logger.warn("Axiom tried to modify an unknown entity: {} player={}", entry.uuid(), player.getUuid());
                 continue;
@@ -253,7 +253,7 @@ public final class AxiomPacketListener {
 
         var instance = player.getInstance();
         for (var uuid : packet.uuids()) {
-            var entity = Entity.getEntity(uuid);
+            var entity = instance.getEntityByUuid(uuid);
             if (entity == null) {
                 logger.warn("Axiom tried to delete an unknown entity: {} player={}", uuid, player.getUuid());
                 continue;

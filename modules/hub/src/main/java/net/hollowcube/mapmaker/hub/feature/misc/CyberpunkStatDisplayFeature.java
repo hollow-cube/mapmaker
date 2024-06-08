@@ -113,13 +113,13 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         return TaskSchedule.tick(40);
     }
 
-    private int percentToColor(double value) {
+    private Block percentToColor(double value) {
         if (value < 0.6) {
-            return Block.LIME_CONCRETE.stateId();
+            return Block.LIME_CONCRETE;
         } else if (value < 0.8) {
-            return Block.YELLOW_CONCRETE.stateId();
+            return Block.YELLOW_CONCRETE;
         } else {
-            return Block.RED_CONCRETE.stateId();
+            return Block.RED_CONCRETE;
         }
     }
 
@@ -156,7 +156,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         };
 
         var meta = (BlockDisplayMeta) entity.getEntityMeta();
-        meta.setBlockState(Block.GRAY_CONCRETE.stateId());
+        meta.setBlockState(Block.GRAY_CONCRETE);
         meta.setScale(new Vec(MAX_WIDTH, 0.3, 0.001));
         entity.setInstance(instance, pos).join();
         return meta;

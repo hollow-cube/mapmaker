@@ -52,7 +52,7 @@ public final class PlayerUtil {
         var iter = PLAYER_STANDING_BB.getBlocks(position);
         while (iter.hasNext()) {
             var pos = iter.next();
-            var blockShape = instance.getBlock(pos, Block.Getter.Condition.TYPE).registry().collisionShape();
+            var blockShape = instance.getBlock(new Vec(pos.x(), pos.y(), pos.z()), Block.Getter.Condition.TYPE).registry().collisionShape();
             boolean hit = blockShape.intersectBox(position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), PLAYER_STANDING_BB);
             if (hit) return false;
         }

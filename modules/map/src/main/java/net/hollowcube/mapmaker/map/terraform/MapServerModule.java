@@ -34,8 +34,8 @@ public class MapServerModule implements TerraformModule {
     }
 
     @Override
-    public @NotNull Map<@NotNull Short, @NotNull Block> blockStateOverrides() {
-        var overrides = new HashMap<Short, Block>();
+    public @NotNull Map<@NotNull Integer, @NotNull Block> blockStateOverrides() {
+        var overrides = new HashMap<Integer, Block>();
 
         register(overrides, BlockTags.SIGNS, BlockHandlers.SIGN);
         register(overrides, BlockTags.ALL_HANGING_SIGNS, BlockHandlers.HANGING_SIGN);
@@ -61,13 +61,13 @@ public class MapServerModule implements TerraformModule {
         return overrides;
     }
 
-    private void register(Map<Short, Block> overrides, Block block, BlockHandler handler) {
+    private void register(Map<Integer, Block> overrides, Block block, BlockHandler handler) {
         for (var state : block.possibleStates()) {
             overrides.put(state.stateId(), state.withHandler(handler));
         }
     }
 
-    private void register(Map<Short, Block> overrides, Collection<NamespaceID> tag, BlockHandler handler) {
+    private void register(Map<Integer, Block> overrides, Collection<NamespaceID> tag, BlockHandler handler) {
         for (var blockId : tag) {
             var block = Objects.requireNonNull(Block.fromNamespaceId(blockId));
             register(overrides, block, handler);

@@ -48,7 +48,7 @@ public interface TerraformModule {
      *
      * @return A set of block state overrides to apply
      */
-    default @NotNull Map<@NotNull Short, @NotNull Block> blockStateOverrides() {
+    default @NotNull Map<@NotNull Integer, @NotNull Block> blockStateOverrides() {
         return Map.of();
     }
 

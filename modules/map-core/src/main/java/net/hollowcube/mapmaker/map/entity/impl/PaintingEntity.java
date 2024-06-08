@@ -60,7 +60,7 @@ public class PaintingEntity extends MapEntity {
         var world = MapWorld.unsafeFromInstance(instance);
 //        if (!(world instanceof EditingMapWorld editingWorld)) return CompletableFuture.completedFuture(null);
 
-        boolean added = world.map().addObject(new ObjectData(uuid.toString(), ObjectTypes.CHECKPOINT_PLATE, spawnPosition));
+        boolean added = world.map().addObject(new ObjectData(getUuid().toString(), ObjectTypes.CHECKPOINT_PLATE, spawnPosition));
         if (!added) {
             //todo it needs to be added by a player
 //            Audiences.all().sendMessage(Component.translatable("map.ram.usage_exceeded"));

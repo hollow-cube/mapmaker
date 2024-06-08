@@ -14,7 +14,6 @@ import net.kyori.adventure.nbt.StringBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -186,7 +185,7 @@ public class MarkerEntity extends MapEntity {
     }
 
     private static @Nullable MarkerEntity assertEditableMarker(@NotNull Player editor, @NotNull UUID entityUuid) {
-        var entity = Entity.getEntity(entityUuid);
+        var entity = editor.getInstance().getEntityByUuid(entityUuid);
         if (entity == null) return null;
 
         // Ensure they are in the same instance, and that the world is editable

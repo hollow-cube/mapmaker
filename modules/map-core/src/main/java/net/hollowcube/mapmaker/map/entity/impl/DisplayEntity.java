@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DisplayEntity extends MapEntity {
     private static final BinaryTagSerializer<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = BinaryTagSerializer.fromEnumStringable(AbstractDisplayMeta.BillboardConstraints.class);
 
@@ -29,7 +30,8 @@ public class DisplayEntity extends MapEntity {
         hasPhysics = false;
     }
 
-    @Override protected void movementTick() {
+    @Override
+    protected void movementTick() {
         // Intentionally do nothing
     }
 
@@ -150,8 +152,8 @@ public class DisplayEntity extends MapEntity {
             super.writeData(tag);
 
             final BlockDisplayMeta meta = getEntityMeta();
-            var block = net.minestom.server.instance.block.Block.fromStateId((short) meta.getBlockStateId());
-            if (block != null && !block.isAir())
+            final net.minestom.server.instance.block.Block block = meta.getBlockStateId();
+            if (!block.isAir())
                 tag.put("block_state", NbtUtil.BLOCK_COMPOUND.write(block));
 
         }
@@ -163,7 +165,7 @@ public class DisplayEntity extends MapEntity {
             final BlockDisplayMeta meta = getEntityMeta();
             if (tag.get("block_state") instanceof CompoundBinaryTag blockState) {
                 var block = NbtUtil.BLOCK_COMPOUND.read(blockState);
-                if (!block.isAir()) meta.setBlockState(block.stateId());
+                if (!block.isAir()) meta.setBlockState(block);
             }
         }
 

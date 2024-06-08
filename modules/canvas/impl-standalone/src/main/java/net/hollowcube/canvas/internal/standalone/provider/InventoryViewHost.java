@@ -11,11 +11,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
-import net.minestom.server.inventory.ContainerInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
-import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
@@ -234,7 +232,7 @@ public class InventoryViewHost {
         return Math.max(type.getSize(), 9);
     }
 
-    private class InventoryWrapper extends ContainerInventory {
+    private class InventoryWrapper extends Inventory {
 
         private final ItemStack[] playerInv = new ItemStack[9 * 4];
 
@@ -298,35 +296,46 @@ public class InventoryViewHost {
         }
 
         private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
-            if (!(event.getInventory() instanceof InventoryWrapper wrapper)) return;
-
-            int slot;
-            ClickType clickType;
-            switch (event.getClickInfo()) {
-                case Click.Info.Left leftClick -> {
-                    slot = leftClick.slot();
-                    clickType = ClickType.LEFT_CLICK;
-                }
-                case Click.Info.Right rightClick -> {
-                    slot = rightClick.slot();
-                    clickType = ClickType.RIGHT_CLICK;
-                }
-                case Click.Info.LeftShift leftShift -> {
-                    slot = leftShift.slot();
-                    clickType = ClickType.SHIFT_LEFT_CLICK;
-                }
-                default -> {
-                    event.setCancelled(true);
-                    return;
-                }
+            int slot = event.getSlot();
+            ClickType clickType = switch (event.getClickType()) {
+                case LEFT_CLICK -> ClickType.LEFT_CLICK;
+                case RIGHT_CLICK -> ClickType.RIGHT_CLICK;
+                case SHIFT_CLICK -> ClickType.SHIFT_LEFT_CLICK;
+                default -> null;
+            };
+            if (clickType == null) {
+                event.setCancelled(true);
+                return;
             }
 
+            // If the click happened inside the player inventory
+            InventoryWrapper wrapper;
+            if (event.getInventory() instanceof InventoryWrapper w) {
+                wrapper = w;
+            } else if (event.getInventory() == null && event.getPlayer().getOpenInventory() instanceof InventoryWrapper w) {
+                // This means we are in the player inventory with a custom inventory open
+                wrapper = w;
+                // Offset slot to be absolute from the top of the gui
+                var invSize = w.getInventoryType() == InventoryType.ANVIL ? 9 : w.getInventoryType().getSize();
+                if (slot < 9) {
+                    // hotbar
+                    slot += invSize + (9 * 3);
+                } else {
+                    // main inventory
+                    slot += invSize - 9;
+                }
+            } else {
+                event.setCancelled(true);
+                return;
+            }
+
+            // todo below will return post-inventory rework.
             // If the click happened inside the player inventory we need to do our weird accounting of anvil being 9 internally
-            if (slot >= wrapper.getSize()) {
-                slot -= wrapper.getSize(); // Now represents the slot starting from the bottom inventory
-                var offset = wrapper.getInventoryType() == InventoryType.ANVIL ? 9 : wrapper.getInventoryType().getSize();
-                slot += offset; // Offset to the bottom of the top inventory (accounting for our weird anvil inventory)
-            }
+//            if (slot >= wrapper.getSize()) {
+//                slot -= wrapper.getSize(); // Now represents the slot starting from the bottom inventory
+//                var offset = wrapper.getInventoryType() == InventoryType.ANVIL ? 9 : wrapper.getInventoryType().getSize();
+//                slot += offset; // Offset to the bottom of the top inventory (accounting for our weird anvil inventory)
+//            }
 
             var allow = wrapper.tryHandleClick(slot, event.getPlayer(), clickType);
             event.setCancelled(!allow);
@@ -368,10 +377,10 @@ public class InventoryViewHost {
         }
 
         private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {
-            ItemStack[] convertedSlots = new ItemStack[PlayerInventoryUtils.INVENTORY_SIZE];
+            ItemStack[] convertedSlots = new ItemStack[PlayerInventory.INVENTORY_SIZE];
             Arrays.fill(convertedSlots, ItemStack.AIR);
             for (int i = 0; i < convertedSlots.length; i++) {
-                var packetSlot = PlayerInventoryUtils.minestomToProtocol(i);
+                var packetSlot = PlayerInventoryUtils.convertToPacketSlot(i); //minestomToProtocol
                 var chestSlot = convertPlayerSlotToChestSlot(i);
                 if (i < 9 * 4 && chestSlot < 9 * playerInventoryRows) {
                     convertedSlots[packetSlot] = playerInv[chestSlot];
@@ -415,12 +424,13 @@ public class InventoryViewHost {
         private final Player player;
 
         public DelegatingPlayerInventory(@NotNull Player player) {
+            super(player);
             this.player = player;
 
 
             // Copy all contents of players current inventory to this one
             var old = player.getInventory();
-            viewers.addAll(old.getViewers());
+//            viewers.addAll(old.getViewers()); todo reenable when updating minestom
             // PlayerInventory
             setCursorItem(old.getCursorItem());
             // AbstractInventory
@@ -440,15 +450,15 @@ public class InventoryViewHost {
             super.update();
         }
 
-        @Override
-        public void update(@NotNull Player player) {
-            // Same as above (but in case a single player update is called)
-            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
-                wrapper.updatePlayerInventory();
-                return;
-            }
-
-            super.update(player);
-        }
+//        @Override
+//        public void update(@NotNull Player player) {
+//            // Same as above (but in case a single player update is called)
+//            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
+//                wrapper.updatePlayerInventory();
+//                return;
+//            }
+//
+//            super.update(player);
+//        }
     }
 }

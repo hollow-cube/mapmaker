@@ -18,17 +18,17 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
-import net.minestom.server.particle.data.BlockParticleData;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("UnstableApiUsage")
 @AutoService(HubFeature.class)
 public class LauncherFeature implements HubFeature {
     private static final SoundEvent EMPTY_SOUND = SoundEvent.of(NamespaceID.from("not.a.real.sound"), 0f);
-    private static final byte[] AIR_BLOCK_PARTICLE = NetworkBuffer.makeArray(new BlockParticleData(Block.AIR)::write);
+    private static final byte[] AIR_BLOCK_PARTICLE = NetworkBuffer.makeArray(buffer -> Particle.BLOCK.withBlock(Block.AIR).writeData(buffer));
 
     // From the perspective of the player when they spawn in the world.
     private final LauncherEntity left = new LauncherEntity();

@@ -117,7 +117,8 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         var position = getPosition();
         var iter = bb.getBlocks(getPosition());
         while (iter.hasNext()) {
-            var pos = iter.next();
+            var posMut = iter.next();
+            var pos = new Vec(posMut.x(), posMut.y(), posMut.z());
             var block = instance.getBlock(pos, Block.Getter.Condition.TYPE);
             if (block.id() == Block.BIG_DRIPLEAF.id()) {
                 // Fetch dripleaf state from the ghost block holder to make sure we get the right value for this player

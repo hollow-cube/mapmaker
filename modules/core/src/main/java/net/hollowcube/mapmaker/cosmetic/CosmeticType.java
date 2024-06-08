@@ -20,7 +20,7 @@ public enum CosmeticType {
 
     HAT("hat", PlayerInventoryUtils.HELMET_SLOT, "empty_helmet"),
     BACKWEAR("backwear", PlayerInventoryUtils.CHESTPLATE_SLOT, "empty_chestplate"),
-    ACCESSORY("accessory", PlayerInventoryUtils.OFF_HAND_SLOT, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
+    ACCESSORY("accessory", PlayerInventoryUtils.OFFHAND_SLOT, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
     PET("pet", PlayerInventoryUtils.LEGGINGS_SLOT, "empty_leggings"),
     EMOTE("emote", PlayerInventoryUtils.CRAFT_SLOT_1, "empty_emote"),
     PARTICLE("particle", PlayerInventoryUtils.BOOTS_SLOT, "empty_boots"),

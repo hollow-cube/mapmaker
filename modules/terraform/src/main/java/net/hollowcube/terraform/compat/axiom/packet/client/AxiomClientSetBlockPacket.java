@@ -38,7 +38,7 @@ public record AxiomClientSetBlockPacket(
         this(
                 ProtocolUtil.readMap(buffer,
                         b -> b.read(BLOCK_POSITION),
-                        b -> Block.fromStateId((short) b.read(BLOCK_STATE).intValue())),
+                        b -> b.read(Block.NETWORK_TYPE)),
                 buffer.read(BOOLEAN),
                 buffer.read(VAR_INT),
                 buffer.read(BOOLEAN),

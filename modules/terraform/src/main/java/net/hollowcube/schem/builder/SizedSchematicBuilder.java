@@ -2,8 +2,8 @@ package net.hollowcube.schem.builder;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.ShortArrayList;
-import it.unimi.dsi.fastutil.shorts.ShortList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.hollowcube.schem.BlockEntityData;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.SpongeSchematic;
@@ -26,7 +26,7 @@ import static net.hollowcube.schem.old.CoordinateUtil.blockIndex;
 final class SizedSchematicBuilder implements SchematicBuilder {
     private final CompoundBinaryTag.Builder metadata = CompoundBinaryTag.builder();
     private final Int2ObjectMap<BlockEntityData> blockEntities = new Int2ObjectOpenHashMap<>();
-    private final ShortList palette = new ShortArrayList(1);
+    private final IntList palette = new IntArrayList(1);
     private final short[] blocks;
     private final Point size;
 
