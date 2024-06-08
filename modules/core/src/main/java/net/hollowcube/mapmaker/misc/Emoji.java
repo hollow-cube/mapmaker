@@ -12,13 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public record Emoji(
         @NotNull String name,
         boolean showInHelp,
-        @NotNull Supplier<Component> supplier
+        @NotNull Function<Random, Component> supplier
 ) {
     private static final List<PlayerInfoUpdatePacket.Entry> EMOJI_PACKET_ENTRIES = new ArrayList<>();
     private static final LinkedHashMap<String, Emoji> EMOJI_MAP = new LinkedHashMap<>();
@@ -110,7 +109,7 @@ public record Emoji(
     public static final Emoji SUS = builder("sus").random(
             SUS_BLUE, SUS_BROWN, SUS_CYAN, SUS_GRAY, SUS_GREEN, SUS_LIME, SUS_ORANGE,
             SUS_PINK, SUS_PURPLE, SUS_RED, SUS_WHITE, SUS_YELLOW
-    ).hideInHelp().build();
+    ).build();
 
     // Construction logic
 
@@ -120,7 +119,7 @@ public record Emoji(
 
     private static class Builder {
         private final String id;
-        private Supplier<Component> supplier = null;
+        private Function<Random, Component> supplier = null;
         private boolean showInHelp = true;
 
         private Builder(@NotNull String id) {
@@ -135,12 +134,15 @@ public record Emoji(
             var sprite = BadSprite.require("icon/emoji/" + fullPath);
             var component = Component.text(sprite.fontChar(), FontUtil.NO_SHADOW)
                     .hoverEvent(HoverEvent.showText(Component.text(":" + id + ":", NamedTextColor.WHITE)));
-            supplier = () -> component;
+            supplier = $ -> component;
             return this;
         }
 
         public Builder random(@NotNull Emoji... choices) {
-            supplier = () -> choices[ThreadLocalRandom.current().nextInt(choices.length)].supplier.get();
+            supplier = random -> {
+                if (random == null) return SUS_RED.supplier.apply(null);
+                return choices[random.nextInt(choices.length)].supplier.apply(random);
+            };
             return this;
 
         }

@@ -12,10 +12,13 @@ public record ChatMessageData(
         @NotNull String sender,
         @NotNull String channel,
         @NotNull List<Part> parts,
+        long seed,
 
         @NotNull String target,
         @NotNull String key,
-        @Nullable List<String> args
+        @Nullable List<String> args,
+
+        @Nullable ChatMessageData extra
 ) {
 
     public record Part(

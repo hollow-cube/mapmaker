@@ -17,6 +17,8 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class MsgCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<String> messageArg = Argument.GreedyString("message")
@@ -69,10 +71,11 @@ public class MsgCommand extends CommandDsl {
             currentMapId = currentMap.id();
         }
 
+        long messageSeed = ThreadLocalRandom.current().nextLong();
         messageListener.trySendChatMessage(player, new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerId, message, target, // Target is the channel id
-                currentMapId
+                currentMapId, messageSeed
         ));
     }
 }

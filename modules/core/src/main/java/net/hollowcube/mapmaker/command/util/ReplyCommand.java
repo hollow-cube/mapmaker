@@ -16,6 +16,8 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class ReplyCommand extends CommandDsl {
     private final Argument<String> messageArg = Argument.GreedyString("message")
             .description("The message content to send in your reply");
@@ -54,10 +56,11 @@ public class ReplyCommand extends CommandDsl {
         }
 
         var playerId = PlayerDataV2.fromPlayer(player).id();
+        long messageSeed = ThreadLocalRandom.current().nextLong();
         messageListener.trySendChatMessage(player, new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,
                 playerId, message, ClientChatMessageData.CHANNEL_REPLY,
-                currentMapId
+                currentMapId, messageSeed
         ));
     }
 }

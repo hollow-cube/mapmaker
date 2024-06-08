@@ -10,7 +10,8 @@ public record ClientChatMessageData(
         @NotNull String sender,
         @NotNull String message,
         @NotNull String channel,
-        @Nullable String currentMap
+        @Nullable String currentMap,
+        long seed
 ) {
 
     public static final String CHANNEL_GLOBAL = "global";

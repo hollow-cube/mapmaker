@@ -28,7 +28,7 @@ public class EmojisCommand extends CommandDsl {
         var msg = Component.text();
         for (var emoji : Emoji.values()) {
             if (!emoji.showInHelp()) continue;
-            msg.append(emoji.supplier().get()).append(Component.text(SPACE_1PX));
+            msg.append(emoji.supplier().apply(null)).append(Component.text(SPACE_1PX));
         }
         player.sendMessage(msg.build());
     }

@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -132,6 +133,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
+        long messageSeed = ThreadLocalRandom.current().nextLong();
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
@@ -144,7 +146,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             }
 
             var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                    playerId, message, ClientChatMessageData.CHANNEL_GLOBAL, currentMapId);
+                    playerId, message, ClientChatMessageData.CHANNEL_GLOBAL, currentMapId, messageSeed);
             trySendChatMessage(player, messageData);
         });
     }
@@ -202,10 +204,12 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
             var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
             var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
+            Random random = message.seed() == 0 ? null : new Random();
 
             var maps = new HashMap<String, Component>();
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                if (random != null) random.setSeed(message.seed()); // reset seed for each player so its synchronized
                 var builder = Component.text();
 
                 boolean hasDing = false;
@@ -231,7 +235,9 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                             var emoji = Emoji.findByName(part.name());
                             if (emoji == null) {
                                 builder.append(Component.text(":" + part.name() + ":"));
-                            } else builder.append(emoji.supplier().get());
+                            } else {
+                                builder.append(emoji.supplier().apply(random));
+                            }
                         }
                         case MAP -> {
                             builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
@@ -249,6 +255,11 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
                 recipient.sendMessage(Component.translatable(key, sender, builder.build()));
             }
+
+            // If there is an extra message, handle it
+            if (message.extra() != null && message.extra().type() == ClientChatMessageData.Type.CHAT_SYSTEM) {
+                handleChatSystem(message.extra());
+            }
         } catch (Exception e) {
             MinecraftServer.getExceptionManager().handleException(e);
         }
@@ -265,6 +276,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
         var targetDisplayName = playerService.getPlayerDisplayName2(message.channel()).build();
         var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
+        Random random = message.seed() == 0 ? null : new Random(message.seed());
 
         var builder = Component.text();
         for (var part : message.parts()) {
@@ -276,7 +288,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                     var emoji = Emoji.findByName(part.name());
                     if (emoji == null) {
                         builder.append(Component.text(":" + part.name() + ":"));
-                    } else builder.append(emoji.supplier().get());
+                    } else builder.append(emoji.supplier().apply(random));
                 }
                 case MAP -> {
                     builder.append(Component.text("[map - todo]"));
