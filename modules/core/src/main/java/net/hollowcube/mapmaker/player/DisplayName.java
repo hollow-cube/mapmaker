@@ -62,7 +62,8 @@ public record DisplayName(
                         }));
                     }
 
-                    var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("icon/staff/" + part.text), "unknown badge sprite " + part.text);
+                    var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
+                    var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(icon), "unknown badge sprite " + part.text);
                     builder.append(Component.text(sprite.fontChar() + FontUtil.computeOffset(1), FontUtil.NO_SHADOW)
                             .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
                 }
