@@ -25,7 +25,7 @@ public interface MapService {
      *
      * @return The created map
      */
-    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot);
+    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size);
 
     @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId);
 

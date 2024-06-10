@@ -77,7 +77,7 @@ definition mapmaker/platform {
     permission bypass_whitelist = admin + dev + mod + crt + friend
 
     // Hypercube + Upgrades
-    permission has_hypercube = hypercube + admin + dev + mod
+    permission has_hypercube = hypercube + admin + dev + mod + crt
 
     permission upg_build_tools = u_build_tools + has_hypercube
     permission upg_map_slot_3 = u_map_slot_3 + has_hypercube

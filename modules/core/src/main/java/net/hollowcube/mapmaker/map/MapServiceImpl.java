@@ -47,9 +47,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot) {
+    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
         logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
-        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot));
+        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot, "size", size.id()));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
                 .uri(URI.create(url))

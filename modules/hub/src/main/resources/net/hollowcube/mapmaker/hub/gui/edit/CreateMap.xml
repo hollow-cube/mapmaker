@@ -13,19 +13,57 @@
 
     <box width="9" align="ltr">
         <spacer width="2"/>
-        <button width="1" translationKey="gui.create_maps.new_map.generator"/>
-        <button width="1" translationKey="gui.create_maps.new_map.generator.void"/>
-        <button width="1" translationKey="gui.create_maps.new_map.generator.flat"/>
-        <button width="1" translationKey="gui.create_maps.new_map.generator.ocean"/>
-        <button width="1" translationKey="gui.create_maps.new_map.more_options"/>
+        <label translationKey="gui.create_maps.new_map.generator"/>
+        <button translationKey="gui.create_maps.new_map.generator.void"
+                sprite="create_maps/create/generators/void_world_selected"/>
+        <button translationKey="gui.create_maps.new_map.generator.flat"
+                backgroundSprite="create_maps/create/generators/flat_world_bg"
+                sprite="create_maps/create/generators/flat_world_icon"/>
+        <button translationKey="gui.create_maps.new_map.generator.ocean"
+                backgroundSprite="create_maps/create/generators/ocean_world_bg"
+                sprite="create_maps/create/generators/ocean_world_icon"/>
+        <button translationKey="gui.create_maps.new_map.more_options"
+                backgroundSprite="create_maps/create/generators/and_more"/>
     </box>
     <box width="9" align="ltr">
         <spacer width="2"/>
-        <button width="1" translationKey="gui.create_maps.new_map.size"/>
-        <button width="1" translationKey="gui.create_maps.new_map.size.normal"/>
-        <button width="1" translationKey="gui.create_maps.new_map.size.large"/>
-        <button width="1" translationKey="gui.create_maps.new_map.size.massive"/>
-        <button width="1" translationKey="gui.create_maps.new_map.size.colossal"/>
+        <label width="1" translationKey="gui.create_maps.new_map.size"/>
+        <switch id="map_size_normal_switch">
+            <button id="map_size_normal_unset"
+                    translationKey="gui.create_maps.new_map.size.normal"
+                    backgroundSprite="create_maps/create/sizes/normal_size_bg"
+                    sprite="create_maps/create/sizes/normal_size_icon"/>
+            <button id="map_size_normal_set"
+                    translationKey="gui.create_maps.new_map.size.normal"
+                    sprite="create_maps/create/sizes/normal_size_selected"/>
+        </switch>
+        <switch id="map_size_large_switch">
+            <button id="map_size_large_unset"
+                    translationKey="gui.create_maps.new_map.size.large"
+                    backgroundSprite="create_maps/create/sizes/large_size_bg"
+                    sprite="create_maps/create/sizes/large_size_icon"/>
+            <button id="map_size_large_set"
+                    translationKey="gui.create_maps.new_map.size.large"
+                    sprite="create_maps/create/sizes/large_size_selected"/>
+            <button id="map_size_large_locked"
+                    translationKey="gui.create_maps.new_map.size.large.locked"
+                    sprite="create_maps/create/sizes/large_size_locked"/>
+        </switch>
+        <switch id="map_size_massive_switch">
+            <button id="map_size_massive_unset"
+                    translationKey="gui.create_maps.new_map.size.massive"
+                    backgroundSprite="create_maps/create/sizes/massive_size_bg"
+                    sprite="create_maps/create/sizes/massive_size_icon"/>
+            <button id="map_size_massive_set"
+                    translationKey="gui.create_maps.new_map.size.massive"
+                    sprite="create_maps/create/sizes/massive_size_selected"/>
+            <button id="map_size_massive_locked"
+                    translationKey="gui.create_maps.new_map.size.massive.locked"
+                    sprite="create_maps/create/sizes/massive_size_locked"/>
+        </switch>
+        <button id="map_size_colossal_ignored"
+                translationKey="gui.create_maps.new_map.size.colossal"
+                sprite="create_maps/create/sizes/colossal_size_locked"/>
     </box>
 
     <spacer width="9" height="1"/>
