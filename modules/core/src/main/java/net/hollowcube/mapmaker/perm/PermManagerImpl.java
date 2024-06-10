@@ -20,10 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -36,6 +34,14 @@ public class PermManagerImpl implements PermManager {
     private static final Logger logger = LoggerFactory.getLogger(PermManagerImpl.class);
 
     private static final ObjectReference PLATFORM_OBJECT = ObjectReference.newBuilder().setObjectType("mapmaker/platform").setObjectId("0").build();
+
+    private static final SimpleDateFormat TIME_FORMAT;
+
+    static {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+        TIME_FORMAT.setTimeZone(tz);
+    }
 
     private final PermissionsServiceBlockingStub svc;
     private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
@@ -109,7 +115,10 @@ public class PermManagerImpl implements PermManager {
                         .build())
                 .setPermission(perm.permName())
                 //todo my audit log hack is not working
-                .setContext(Struct.newBuilder().putFields("never_set", Value.newBuilder().setBoolValue(true).build()).build())
+                .setContext(Struct.newBuilder()
+                        .putFields("never_set", Value.newBuilder().setBoolValue(true).build())
+                        .putFields("current_time", Value.newBuilder().setStringValue(TIME_FORMAT.format(new Date())).build())
+                        .build())
                 .build();
         var res = svc.checkPermission(req);
         var state = res.getPermissionship() != CheckPermissionResponse.Permissionship.PERMISSIONSHIP_NO_PERMISSION;

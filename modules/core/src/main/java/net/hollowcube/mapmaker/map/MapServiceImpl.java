@@ -29,6 +29,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
 
+    record ErrorRes(String code) {
+    }
+
     private final int latestDataVersion = ServerRuntime.getRuntime().dataVersion();
 
     private final String url;
@@ -53,10 +56,18 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .header(AUTHORIZER_HEADER, player.id())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 201)
-            throw new InternalError("Failed to create map: " + res.body());
 
-        return GSON.fromJson(res.body(), MapData.class);
+        switch (res.statusCode()) {
+            case 201:
+                return GSON.fromJson(res.body(), MapData.class);
+            case 400:
+                var err = GSON.fromJson(res.body(), ErrorRes.class);
+                if ("slot_in_use".equals(err.code))
+                    throw new SlotInUseError();
+                throw new InternalError("Failed to create map: " + err);
+            default:
+                throw new InternalError("Failed to create map: " + res.body());
+        }
     }
 
     @Override
@@ -571,6 +582,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 200 -> GSON.fromJson(res.body(), MapData.WithSlot.class);
             case 404 -> throw new MapService.NotFoundError(legacyMapId);
             case 403 -> throw new MapService.NoPermissionError();
+            case 400 -> {
+                var err = GSON.fromJson(res.body(), ErrorRes.class);
+                if ("slot_in_use".equals(err.code))
+                    throw new SlotInUseError();
+                throw new InternalError("Failed to create map: " + err);
+            }
             default -> throw new InternalError("Failed to import legacy map: " + res.body());
         };
     }

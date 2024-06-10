@@ -112,6 +112,9 @@ public interface MapService {
         }
     }
 
+    class SlotInUseError extends RuntimeException {
+    }
+
     class NoPermissionError extends RuntimeException {
         public NoPermissionError() {
             super("No permission for map");

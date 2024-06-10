@@ -68,6 +68,8 @@ public class MapLegacyImportCommand extends CommandDsl {
         } catch (MapService.NoPermissionError ignored) {
             player.sendMessage(GenericMessages.COMMAND_MAP_LEGACY_IMPORT_NO_PERMISSION
                     .with(legacyMapId));
+        } catch (MapService.SlotInUseError ignored) {
+            player.sendMessage("no available slots");
         } catch (Exception e) {
             player.sendMessage(GenericMessages.COMMAND_MAP_LEGACY_IMPORT_UNKNOWN_ERROR
                     .with(legacyMapId));
