@@ -79,7 +79,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             @NotNull MapServer server, @NotNull Terraform terraform,
             @NotNull FeatureList features, @NotNull MapData map
     ) {
-        super(server, map, features, new MapInstance(map.createDimensionName('e'), map.id().equals(MapData.SPAWN_MAP_ID)));
+        super(server, map, features, new MapInstance(map.createDimensionName('e'), false)); // map.id().equals(MapData.SPAWN_MAP_ID)
         this.terraform = terraform;
 
         instance.setGenerator(MapGenerators.voidWorld());
