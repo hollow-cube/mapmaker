@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import net.minestom.server.utils.time.Cooldown;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +62,10 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
         world.server().showView(player, c -> new EditStatusView(c, data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
-            instance.setBlock(blockPosition, interaction.getBlock().withTag(DATA_TAG, data));
+
+            var newTag = TagHandler.newHandler();
+            newTag.setTag(DATA_TAG, data);
+            instance.setBlock(blockPosition, interaction.getBlock().withNbt(newTag.asCompound()));
         }));
 
         return false;
