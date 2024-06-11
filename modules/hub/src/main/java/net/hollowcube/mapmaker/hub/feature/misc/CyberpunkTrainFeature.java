@@ -10,7 +10,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -63,21 +62,17 @@ public class CyberpunkTrainFeature implements HubFeature {
 
     private @NotNull TaskSchedule trainUpdate() {
         if (moving) {
-            trainFront.sendPacketToViewers(new BundlePacket());
             setPosInterpolation(0);
             trainFront.teleport(new Pos(TRAIN_START).withView(trainFront.getPosition()));
             trainMiddle.teleport(new Pos(TRAIN_START).withView(trainMiddle.getPosition()));
             trainBack.teleport(new Pos(TRAIN_START).withView(trainBack.getPosition()));
-            trainFront.sendPacketToViewers(new BundlePacket());
             moving = false;
             return TaskSchedule.tick(60);
         } else {
-            trainFront.sendPacketToViewers(new BundlePacket());
             setPosInterpolation(30);
             trainFront.teleport(new Pos(TRAIN_END).withView(trainFront.getPosition()));
             trainMiddle.teleport(new Pos(TRAIN_END).withView(trainMiddle.getPosition()));
             trainBack.teleport(new Pos(TRAIN_END).withView(trainBack.getPosition()));
-            trainFront.sendPacketToViewers(new BundlePacket());
             moving = true;
             return TaskSchedule.tick(45);
         }
