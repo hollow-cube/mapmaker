@@ -74,7 +74,7 @@ public class CyberpunkTrainFeature implements HubFeature {
             trainMiddle.teleport(new Pos(TRAIN_END).withView(trainMiddle.getPosition()));
             trainBack.teleport(new Pos(TRAIN_END).withView(trainBack.getPosition()));
             moving = true;
-            return TaskSchedule.tick(30);
+            return TaskSchedule.tick(45);
         }
     }
 
