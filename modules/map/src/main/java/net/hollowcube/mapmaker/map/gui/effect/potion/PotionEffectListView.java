@@ -47,6 +47,7 @@ public class PotionEffectListView extends View {
     public void handleRemoveEffect(@NotNull PotionInfo type) {
         effectList.remove(type);
         pagination.reset();
+        save.run();
     }
 
 }

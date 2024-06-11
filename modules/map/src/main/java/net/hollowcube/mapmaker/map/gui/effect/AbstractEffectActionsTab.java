@@ -101,6 +101,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
             pushView(context -> new CoordinateEditorView(context, pos -> {
                 data.setTeleport(pos);
                 updateFromData();
+                save.run();
             }, data.teleport().orElseThrow()));
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setTeleport(null);

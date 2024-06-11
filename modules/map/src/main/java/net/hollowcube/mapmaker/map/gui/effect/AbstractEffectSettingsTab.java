@@ -81,7 +81,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Signal(BaseEffectTimeLimitAnvil.SIG_UPDATE_NAME)
     public void handleUpdateTimeLimit(@NotNull String index) {
-        if (index.isEmpty()) {
+        if (index.isEmpty() || "none".equals(index)) {
             data.setTimeLimit(BaseEffectData.NO_TIME_LIMIT);
             updateFromData();
             return;

@@ -55,7 +55,10 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         world.server().showView(player, c -> new EditCheckpointView(c, data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
-            instance.setBlock(blockPosition, interaction.getBlock().withTag(DATA_TAG, data));
+
+            var newTag = TagHandler.newHandler();
+            newTag.setTag(DATA_TAG, data);
+            instance.setBlock(blockPosition, interaction.getBlock().withNbt(newTag.asCompound()));
         }));
 
         return false;

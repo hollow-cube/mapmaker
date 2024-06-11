@@ -300,7 +300,7 @@ public class InventoryViewHost {
             ClickType clickType = switch (event.getClickType()) {
                 case LEFT_CLICK -> ClickType.LEFT_CLICK;
                 case RIGHT_CLICK -> ClickType.RIGHT_CLICK;
-                case SHIFT_CLICK -> ClickType.SHIFT_LEFT_CLICK;
+                case START_SHIFT_CLICK -> ClickType.SHIFT_LEFT_CLICK;
                 default -> null;
             };
             if (clickType == null) {
