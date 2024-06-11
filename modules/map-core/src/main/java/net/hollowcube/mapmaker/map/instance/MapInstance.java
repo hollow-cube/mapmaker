@@ -27,20 +27,22 @@ import java.util.concurrent.CompletableFuture;
 public class MapInstance extends InstanceContainer {
     private static final InstanceManager INSTANCE_MANAGER = MinecraftServer.getInstanceManager();
 
-    public MapInstance(@NotNull String dimensionName) {
-        this(dimensionName, DimensionTypes.FULL_BRIGHT);
+    private final boolean hasLighting;
+
+    public MapInstance(@NotNull String dimensionName, boolean hasLighting) {
+        this(dimensionName, hasLighting ? DimensionType.OVERWORLD : DimensionTypes.FULL_BRIGHT, hasLighting);
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
+    public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, boolean hasLighting) {
         super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
+        this.hasLighting = hasLighting;
 
         setTimeRate(0); //todo eventually this should be a map setting
         setTime(6000);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-//        setChunkSupplier(LightingChunk::new);
-        setChunkSupplier(UnlitChunk::new);
+        setChunkSupplier(hasLighting ? LitChunk::new : UnlitChunk::new);
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);
@@ -55,7 +57,8 @@ public class MapInstance extends InstanceContainer {
     public void load(@NotNull PolarWorld world, @Nullable PolarWorldAccess worldAccess) {
         var loader = new PolarLoader(world);
         if (worldAccess != null) loader.setWorldAccess(worldAccess);
-        setChunkLoader(loader.setLoadLighting(false));
+        if (!hasLighting) loader.setLoadLighting(false);
+        setChunkLoader(loader);
 
         // Load the world data
         loader.loadInstance(this);

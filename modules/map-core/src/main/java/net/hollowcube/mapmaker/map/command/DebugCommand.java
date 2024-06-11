@@ -9,6 +9,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -26,6 +27,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +80,8 @@ public class DebugCommand extends CommandDsl {
 
         createPermissionedSubcommand("map_alloc", this::showMapAllocatorDebug,
                 "Show map allocator debug info");
+        createPermissionedSubcommand("relight", this::relightWorld,
+                "Relight the world");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
@@ -170,6 +174,16 @@ public class DebugCommand extends CommandDsl {
 
     private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {
         allocator.showDebugInfo(player);
+    }
+
+    private void relightWorld(@NotNull Player player, @NotNull CommandContext context) {
+        FutureUtil.submitVirtual(() -> {
+            var instance = player.getInstance();
+            var chunks = instance.getChunks();
+            LightingChunk.relight(instance, chunks);
+            chunks.forEach(player::sendChunk);
+            player.sendMessage("done relighting.");
+        });
     }
 
     public static class SysCommand extends CommandDsl {

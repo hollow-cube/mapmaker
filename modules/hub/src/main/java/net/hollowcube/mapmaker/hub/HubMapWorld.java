@@ -77,7 +77,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     @Inject
     public HubMapWorld(@NotNull MapServer server) {
-        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id()));
+        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), false));
         Check.stateCondition(HubMapWorld.instance != null, "HubMapWorld already created");
         HubMapWorld.instance = this;
 

@@ -53,7 +53,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     @Inject
     public PlayingMapWorld(@NotNull MapServer server, @NotNull FeatureList features, @NotNull MapData map) {
-        super(server, map, features, new MapInstance(map.createDimensionName('p')));
+        super(server, map, features, new MapInstance(map.createDimensionName('p'), false));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.
