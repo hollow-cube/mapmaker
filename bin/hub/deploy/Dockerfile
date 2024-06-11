@@ -10,4 +10,4 @@ RUN chmod +x async-profiler/profiler.sh
 COPY ./hub_deploy.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "-XX:+UseSerialGC", "-Xms500M", "-Xmx500M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "-XX:+UseSerialGC", "-Xms500M", "-Xmx1500M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]
