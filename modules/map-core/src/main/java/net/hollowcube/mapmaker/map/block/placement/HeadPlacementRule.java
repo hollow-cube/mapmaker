@@ -6,6 +6,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +67,8 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
         var profile = itemStack.get(ItemComponent.PROFILE);
         if (profile == null) return block;
 
-        return block.withTag(PlayerHeadBlockHandler.PROFILE, ItemComponent.PROFILE.write(profile));
+        var context = BinaryTagSerializer.Context.EMPTY;
+        return block.withTag(PlayerHeadBlockHandler.PROFILE, ItemComponent.PROFILE.write(context, profile));
     }
 
 }

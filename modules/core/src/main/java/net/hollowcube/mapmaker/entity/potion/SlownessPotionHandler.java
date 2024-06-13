@@ -4,17 +4,15 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 class SlownessPotionHandler implements PotionHandler {
-    private static final UUID MODIFIER_ID = UUID.fromString("7107DE5E-7CE8-4030-940E-514C1F160890");
+    private static final NamespaceID MODIFIER_ID = NamespaceID.from("minecraft:effect.slowness");
 
     @Override
     public void apply(@NotNull Player player, int level) {
-        var modifier = new AttributeModifier(MODIFIER_ID, "slowness_potion",
-                -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL);
+        var modifier = new AttributeModifier(MODIFIER_ID, -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL);
         player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).addModifier(modifier);
     }
 

@@ -7,6 +7,7 @@ import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.component.HeadProfile;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     public static @Nullable HeadProfile extractProfile(@NotNull Block block) {
         var profile = block.getTag(PROFILE);
         if (profile == null) return null;
-        return ItemComponent.PROFILE.read(profile);
+        return ItemComponent.PROFILE.read(BinaryTagSerializer.Context.EMPTY, profile);
     }
 
     PlayerHeadBlockHandler() {
