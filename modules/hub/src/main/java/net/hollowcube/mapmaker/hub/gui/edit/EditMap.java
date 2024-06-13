@@ -78,6 +78,8 @@ public class EditMap extends View {
     private @Outlet("map_settings_locked_container_switch") Switch mapSettingsLockedContainerSwitch;
 
     // VISUAL
+    private @Outlet("map_settings_time_of_day_switch") Switch mapSettingsTimeOfDay;
+    private @Outlet("map_settings_weather_type_switch") Switch mapSettingsWeatherType;
 
     // GAMEPLAY
     private @Outlet("map_settings_nojump_switch") Switch mapSettingsNoJump;
@@ -85,8 +87,6 @@ public class EditMap extends View {
     private @Outlet("map_settings_onlysprint_switch") Switch mapSettingsOnlySprint;
     private @Outlet("map_settings_nosneak_switch") Switch mapSettingsNoSneak;
     private @Outlet("map_settings_nospec_switch") Switch mapSettingsNoSpec;
-    private @Outlet("map_settings_time_of_day_switch") Switch mapSettingsTimeOfDay;
-    private @Outlet("map_settings_weather_type_switch") Switch mapSettingsWeatherType;
 
     private MapData map;
     private int slot;
