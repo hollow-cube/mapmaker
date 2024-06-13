@@ -5,12 +5,14 @@ import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,10 +20,10 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static net.hollowcube.mapmaker.map.util.NbtUtil.readEnum;
-
 @SuppressWarnings("UnstableApiUsage")
 public class PaintingEntity extends MapEntity {
+    private static final DynamicRegistry<PaintingMeta.Variant> PAINTING_REGISTRY = MinecraftServer.getPaintingVariantRegistry();
+
     protected SoundEvent placeSound = SoundEvent.ENTITY_PAINTING_PLACE;
     protected SoundEvent breakSound = SoundEvent.ENTITY_PAINTING_BREAK;
 
@@ -84,7 +86,9 @@ public class PaintingEntity extends MapEntity {
         super.readData(tag);
 
         var meta = getEntityMeta();
-        meta.setVariant(readEnum(tag, "variant", PaintingMeta.Variant.KEBAB));
+        var variant = DynamicRegistry.Key.<PaintingMeta.Variant>of(tag.getString("variant", "minecraft:kebab"));
+        if (PAINTING_REGISTRY.get(variant) == null) variant = PaintingMeta.Variant.KEBAB;
+        meta.setVariant(variant);
         meta.setOrientation(readOrientation(tag));
     }
 

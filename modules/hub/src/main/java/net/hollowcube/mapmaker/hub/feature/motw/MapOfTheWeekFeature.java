@@ -38,7 +38,7 @@ public class MapOfTheWeekFeature implements HubFeature {
 
         // Timer init (the big countdown above the map)
         var timer = new CountdownTimer(world.instance());
-        scheduler.submitTask(timer, ExecutionType.SYNC);
+        scheduler.submitTask(timer, ExecutionType.TICK_START);
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
@@ -46,7 +46,7 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.getEntityMeta().setScale(new Vec(4));
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS).join();
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0)).join();
-        scheduler.submitTask(this::mapEntityUpdate, ExecutionType.SYNC);
+        scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {

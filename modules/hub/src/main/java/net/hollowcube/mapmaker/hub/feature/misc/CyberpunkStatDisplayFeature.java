@@ -81,7 +81,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         rightText.setAlignRight(true);
 
         // Start the task
-        scheduler.submitTask(this::handleDisplayUpdate, ExecutionType.SYNC);
+        scheduler.submitTask(this::handleDisplayUpdate, ExecutionType.TICK_START);
     }
 
     public TaskSchedule handleDisplayUpdate() {

@@ -145,6 +145,9 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.trimPattern().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.bannerPattern().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.wolfVariant().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.enchantment().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.paintingVariant().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(excludeVanilla));
 
             player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
             event.setSendRegistryData(false);

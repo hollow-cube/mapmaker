@@ -79,7 +79,7 @@ public class BiomeContainer {
 
         var maxId = 0;
         for (var biome : biomeManager.values())
-            maxId = Math.max(maxId, biomeManager.getId(biome.namespace()));
+            maxId = Math.max(maxId, biomeManager.getId(biomeManager.getKey(biome)));
         FIRST_BIOME_ID = maxId + 1;
     }
 
@@ -88,6 +88,7 @@ public class BiomeContainer {
     private final DynamicRegistry<Biome> parent = MinecraftServer.getBiomeRegistry();
     private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
     private final Int2ObjectMap<Biome> loadedBiomes = new Int2ObjectArrayMap<>(); // Custom biomes that are loaded (ie have a Minestom biome)
+    private final Int2ObjectMap<NamespaceID> loadedBiomeNames = new Int2ObjectArrayMap<>();
     private boolean initialized = false;
 
     /**
@@ -101,9 +102,10 @@ public class BiomeContainer {
     public @NotNull DynamicRegistry.Key<Biome> getLoadedBiome(@NotNull String name) {
         var namespace = NamespaceID.from(name);
 
-        for (var biome : loadedBiomes.values()) {
-            if (biome.namespace().equals(namespace))
-                return DynamicRegistry.Key.<Biome>of(biome.namespace());
+        for (var biomeName : loadedBiomeNames.values()) {
+
+            if (biomeName.equals(namespace))
+                return DynamicRegistry.Key.of(biomeName);
         }
 
         if (parent.get(namespace) != null)
@@ -121,8 +123,8 @@ public class BiomeContainer {
      */
     public @NotNull String getLoadedBiomeName(int id) {
         // Try from local biomes first, then from parent
-        var local = loadedBiomes.get(id);
-        if (local != null) return local.name();
+        var local = loadedBiomeNames.get(id);
+        if (local != null) return local.asString();
         return Objects.requireNonNullElse(parent.getKey(id), DEFAULT_BIOME).name();
     }
 
@@ -145,7 +147,7 @@ public class BiomeContainer {
     }
 
     public boolean isLoaded(@NotNull BiomeInfo info) {
-        return loadedBiomes.values().stream().anyMatch(b -> b.namespace().equals(info.namespace()));
+        return loadedBiomeNames.containsValue(info.namespace());
     }
 
     public int size() {
@@ -180,7 +182,8 @@ public class BiomeContainer {
 
             var protocolId = nextId++;
             loadedBiomes.put(protocolId, minestomBiome);
-            logger.info("Loaded custom biome {} (id #{})", minestomBiome.name(), protocolId);
+            loadedBiomeNames.put(protocolId, biome.namespace());
+            logger.info("Loaded custom biome {} (id #{})", biome.namespace().asString(), protocolId);
         }
     }
 
@@ -198,16 +201,18 @@ public class BiomeContainer {
 
         // Add parent biomes
         for (var biome : parent.values()) {
+            String name = parent.getKey(biome).name();
             if (excludeVanilla) {
-                entries.add(new RegistryDataPacket.Entry(biome.name(), null));
+                entries.add(new RegistryDataPacket.Entry(name, null));
             } else {
-                entries.add(new RegistryDataPacket.Entry(biome.name(), (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
+                entries.add(new RegistryDataPacket.Entry(name, (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
             }
         }
 
         // Add overwrite biomes (never vanilla ones so always write entire value)
-        for (var biome : loadedBiomes.values()) {
-            entries.add(new RegistryDataPacket.Entry(biome.name(), (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
+        for (var entry : loadedBiomes.int2ObjectEntrySet()) {
+            String name = loadedBiomeNames.get(entry.getIntKey()).asString();
+            entries.add(new RegistryDataPacket.Entry(name, (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(entry.getValue())));
         }
 
         return new RegistryDataPacket("minecraft:worldgen/biome", entries);
@@ -231,7 +236,7 @@ public class BiomeContainer {
             if (color != null) effectBuilder.foliageColor(color.value());
         }
 
-        return Biome.builder(namespace)
+        return Biome.builder()
                 .temperature(0.8F) // IDK what this affects
                 .downfall(0.4F) // IDK what this affects
                 .effects(effectBuilder.build())
