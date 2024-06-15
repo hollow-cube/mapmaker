@@ -70,7 +70,14 @@ public final class MapServerInitializer {
         webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
         server.shutdowner().queue(webServer::shutdown);
 
-        server.start();
+        try {
+            server.start();
+        } catch (Exception e) {
+            logger.error("server start failed, shutting down", e);
+            e.printStackTrace();
+            server.shutdowner().shutdownImmediately();
+            System.exit(1);
+        }
 
         var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());
