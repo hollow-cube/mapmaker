@@ -33,16 +33,16 @@ jobs:
         run: |
           bazel build //:packer_development_client
           mkdir -p temp && unzip bazel-bin/client.zip -d temp
-            - name: Squash resource pack
-              uses: ComunidadAylas/PackSquash-action@v4
-              with:
-                packsquash_version: latest
-                # Broken with java 22
-                #            zip_spec_conformance_level = 'disregard'
-                options: |
-                  pack_directory = 'temp'
-                  output_file_path = 'squashed.zip'
-                  downsize_if_single_color = true
+      - name: Squash resource pack
+        uses: ComunidadAylas/PackSquash-action@v4
+        with:
+          packsquash_version: latest
+          # Broken with java 22
+          #            zip_spec_conformance_level = 'disregard'
+          options: |
+            pack_directory = 'temp'
+            output_file_path = 'squashed.zip'
+            downsize_if_single_color = true
       - name: Round 2
         id: process
         run: |
