@@ -106,4 +106,9 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
         player.removeTag(SaveState.TAG);
     }
+
+    @Override
+    protected void sendBossBars(@NotNull Player player) {
+        // Intentionally do nothing so we preserve the editing boss bar
+    }
 }

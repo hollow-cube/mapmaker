@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
@@ -13,12 +14,16 @@ import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.ram.RamUsageOverlay;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.EditState;
+import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.Axiom;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -374,5 +379,18 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         if (testWorld != null) {
             testWorld.appendDebugInfo(builder);
         }
+    }
+
+    @Override
+    protected @Nullable BossBar buildBossBarLine1(@NotNull Player player) {
+        var builder = Component.text()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_1", "building") + " ", TextColor.color(0xff5555)))
+                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map().name()), NamedTextColor.WHITE));
+
+        final String permissionName = player.getUuid().toString().equals(map().owner()) ? "Owner" : "Builder";
+        builder.append(Component.text("  " + FontUtil.rewrite("bossbar_small_1", "permission") + " ", TextColor.color(0xffaa00)))
+                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", permissionName), NamedTextColor.WHITE));
+
+        return BossBars.createLine1(builder.build());
     }
 }

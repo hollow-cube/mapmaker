@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = HCVersions.V1_20_5_HC1;
+    int DATA_VERSION = HCVersions.V1_21_HC1;
 
     @NonBlocking
     static @NotNull MapWorld forPlayer(@NotNull Player player) {

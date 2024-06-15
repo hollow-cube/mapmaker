@@ -5,6 +5,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public final class FontUtil {
     private static final Logger logger = LoggerFactory.getLogger(FontUtil.class);
@@ -71,6 +72,7 @@ public final class FontUtil {
     );
 
     public static final Map<String, Int2IntMap> GLYPH_WIDTHS_V2;
+    private static final Int2IntMap ALL_GLYPH_WIDTHS_V2;
 
     static {
         var result = new HashMap<String, Int2IntMap>();
@@ -85,6 +87,7 @@ public final class FontUtil {
         result.put("line_3_1", defaultGlyphs);
         result.put("line_4", defaultGlyphs);
         result.put("line_4_1", defaultGlyphs);
+        result.put("bossbar_ascii_1", defaultGlyphs);
 
         var currencyGlyphs = new Int2IntArrayMap();
         currencyGlyphs.putAll(Map.<Integer, Integer>ofEntries(
@@ -118,8 +121,33 @@ public final class FontUtil {
                 Map.entry((int) 'w', 6), Map.entry((int) 'x', 6),
                 Map.entry((int) 'y', 6), Map.entry((int) 'z', 6)
         ));
+        var smallTallGlyphs = new Int2IntArrayMap();
+        smallTallGlyphs.putAll(Map.<Integer, Integer>ofEntries(
+                Map.entry((int) 'a', 6), Map.entry((int) 'b', 6),
+                Map.entry((int) 'c', 6), Map.entry((int) 'd', 6),
+                Map.entry((int) 'e', 6), Map.entry((int) 'f', 6),
+                Map.entry((int) 'g', 6), Map.entry((int) 'h', 6),
+                Map.entry((int) 'i', 4), Map.entry((int) 'j', 6),
+                Map.entry((int) 'k', 6), Map.entry((int) 'l', 6),
+                Map.entry((int) 'm', 6), Map.entry((int) 'n', 6),
+                Map.entry((int) 'o', 6), Map.entry((int) 'p', 6),
+                Map.entry((int) 'q', 6), Map.entry((int) 'r', 6),
+                Map.entry((int) 's', 6), Map.entry((int) 't', 6),
+                Map.entry((int) 'u', 6), Map.entry((int) 'v', 6),
+                Map.entry((int) 'w', 6), Map.entry((int) 'x', 6),
+                Map.entry((int) 'y', 6), Map.entry((int) 'z', 6),
+                Map.entry((int) '1', 4), Map.entry((int) '2', 5),
+                Map.entry((int) '3', 5), Map.entry((int) '4', 5),
+                Map.entry((int) '5', 5), Map.entry((int) '6', 5),
+                Map.entry((int) '7', 5), Map.entry((int) '8', 5),
+                Map.entry((int) '9', 5), Map.entry((int) '0', 5),
+                Map.entry((int) '/', 4), Map.entry((int) '-', 3),
+                Map.entry((int) '.', 2)
+        ));
         result.put("small_bossbar_line2", currencyGlyphs);
         result.put("small", smallGlyphs);
+        result.put("bossbar_small_1", smallTallGlyphs);
+        result.put("bossbar_small_2", smallTallGlyphs);
 
         GLYPH_WIDTHS_V2 = Map.copyOf(result);
     }
@@ -127,7 +155,13 @@ public final class FontUtil {
     public static final Map<String, Map<Character, Character>> fontmaps;
 
     static {
+        var asciiFontmap = new HashMap<Character, Character>();
+        for (int asciiChar : GLYPH_WIDTHS.keySet()) {
+            asciiFontmap.put((char) asciiChar, (char) asciiChar);
+        }
+
         var tempFontmaps = new HashMap<String, Map<Character, Character>>();
+        tempFontmaps.put("ascii", asciiFontmap);
         try (var is = FontUtil.class.getResourceAsStream("/fonts.json")) {
             if (is != null) {
                 var allFonts = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class);
@@ -190,6 +224,22 @@ public final class FontUtil {
             ALL_GLYPH_WIDTHS.put(NEGATIVE_SPACE.get(i).charAt(0), -(1 << i));
         }
 
+        ALL_GLYPH_WIDTHS.putAll(Map.ofEntries(
+                Map.entry((int) 'ᴀ', 6), Map.entry((int) 'ʙ', 6),
+                Map.entry((int) 'ᴄ', 6), Map.entry((int) 'ᴅ', 6),
+                Map.entry((int) 'ᴇ', 6), Map.entry((int) 'ꜰ', 6),
+                Map.entry((int) 'ɢ', 6), Map.entry((int) 'ʜ', 6),
+                Map.entry((int) 'ɪ', 4), Map.entry((int) 'ᴊ', 6),
+                Map.entry((int) 'ᴋ', 6), Map.entry((int) 'ʟ', 6),
+                Map.entry((int) 'ᴍ', 6), Map.entry((int) 'ɴ', 6),
+                Map.entry((int) 'ᴏ', 6), Map.entry((int) 'ᴘ', 6),
+                Map.entry((int) 'ǫ', 6), Map.entry((int) 'ʀ', 6),
+                Map.entry((int) 'ѕ', 6), Map.entry((int) 'ᴛ', 6),
+                Map.entry((int) 'ᴜ', 6), Map.entry((int) 'ᴠ', 6),
+                Map.entry((int) 'ᴡ', 6), Map.entry((int) 'х', 6),
+                Map.entry((int) 'ʏ', 6), Map.entry((int) 'ᴢ', 6)
+        ));
+
         try (var is = FontUtil.class.getResourceAsStream("/sprites.json")) {
             if (is != null) {
                 var allSprites = new Gson().fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonArray.class);
@@ -202,6 +252,38 @@ public final class FontUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
+        var allWidths = new Int2IntArrayMap();
+        allWidths.putAll(GLYPH_WIDTHS);
+        for (var entry : GLYPH_WIDTHS_V2.entrySet()) {
+            var fontmap = Objects.requireNonNull(fontmaps.get(entry.getKey()), entry.getKey());
+            for (var pair : entry.getValue().int2IntEntrySet()) {
+                char remapped = fontmap.getOrDefault((char) pair.getIntKey(), Character.MAX_VALUE);
+                if (remapped == Character.MAX_VALUE) {
+                    continue;
+//                    throw new RuntimeException("Unknown glyph: " + pair.getIntKey() + " in font: " + entry.getKey());
+                }
+                allWidths.put(remapped, pair.getIntValue());
+            }
+        }
+        allWidths.putAll(Map.ofEntries(
+                Map.entry((int) 'ᴀ', 6), Map.entry((int) 'ʙ', 6),
+                Map.entry((int) 'ᴄ', 6), Map.entry((int) 'ᴅ', 6),
+                Map.entry((int) 'ᴇ', 6), Map.entry((int) 'ꜰ', 6),
+                Map.entry((int) 'ɢ', 6), Map.entry((int) 'ʜ', 6),
+                Map.entry((int) 'ɪ', 4), Map.entry((int) 'ᴊ', 6),
+                Map.entry((int) 'ᴋ', 6), Map.entry((int) 'ʟ', 6),
+                Map.entry((int) 'ᴍ', 6), Map.entry((int) 'ɴ', 6),
+                Map.entry((int) 'ᴏ', 6), Map.entry((int) 'ᴘ', 6),
+                Map.entry((int) 'ǫ', 6), Map.entry((int) 'ʀ', 6),
+                Map.entry((int) 'ѕ', 6), Map.entry((int) 'ᴛ', 6),
+                Map.entry((int) 'ᴜ', 6), Map.entry((int) 'ᴠ', 6),
+                Map.entry((int) 'ᴡ', 6), Map.entry((int) 'х', 6),
+                Map.entry((int) 'ʏ', 6), Map.entry((int) 'ᴢ', 6)
+        ));
+        allWidths.put('\uF824', allWidths.get(' '));
+        ALL_GLYPH_WIDTHS_V2 = Int2IntMaps.unmodifiable(allWidths);
     }
 
     public static int measureText(@NotNull String text) {
@@ -214,6 +296,28 @@ public final class FontUtil {
             }
             width += glyphWidth;
         }
+        return width;
+    }
+
+    public static int measureTextV2(@NotNull Component comp) {
+        int width = 0;
+        if (comp instanceof TextComponent text) {
+            char[] content = text.content().toCharArray();
+            for (char c : content) {
+                int charWidth = ALL_GLYPH_WIDTHS_V2.getOrDefault(c, Integer.MAX_VALUE);
+                if (charWidth == Integer.MAX_VALUE) {
+                    throw new RuntimeException("unknown char: " + c + " in " + text.content());
+                }
+                width += charWidth;
+            }
+        } else if (comp instanceof TranslatableComponent translate) {
+            throw new RuntimeException("Cannot measure unresolved translation key: " + translate.key());
+        } else {
+            throw new UnsupportedOperationException("cannot measure unsupported component type: " + comp.getClass().getName());
+        }
+
+        for (Component child : comp.children())
+            width += measureTextV2(child);
         return width;
     }
 

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
@@ -15,10 +16,16 @@ import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
+import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.polar.PolarReader;
 import net.hollowcube.polar.PolarWriter;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -51,6 +58,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
+    private String ownerNamePlain = "Unknown";
+
     @Inject
     public PlayingMapWorld(@NotNull MapServer server, @NotNull FeatureList features, @NotNull MapData map) {
         super(server, map, features, new MapInstance(map.createDimensionName('p'), false));
@@ -80,6 +89,10 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         super.load();
         //todo load features
+
+        this.ownerNamePlain = PlainTextComponentSerializer.plainText().serialize(
+                server().playerService().getPlayerDisplayName2(map().owner())
+                        .build(DisplayName.Context.PLAIN));
     }
 
     @Override
@@ -204,4 +217,35 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 //        builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
 //    }
 
+
+    @Override
+    protected @Nullable BossBar buildBossBarLine1(@NotNull Player player) {
+
+        final String verb = map().verification() == MapVerification.PENDING ? "verifying" : "playing";
+        var builder = Component.text()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_1", verb) + " ", TextColor.color(0xff5555)))
+                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map().name()), NamedTextColor.WHITE));
+
+        if ("playing" .equals(verb)) {
+            builder.append(Component.text(" " + FontUtil.rewrite("bossbar_small_1", "by") + " ", TextColor.color(0xffaa00)))
+                    .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain), NamedTextColor.WHITE));
+        }
+
+        return BossBars.createLine1(builder.build());
+    }
+
+    @Override
+    protected @Nullable BossBar buildBossBarLine2(@NotNull Player player) {
+        if (!map().isPublished()) return super.buildBossBarLine2(player);
+
+        return BossBars.createLine2(Component.text()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_2", "/play"), NamedTextColor.WHITE))
+                .appendSpace()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_2", map().publishedIdString()), NamedTextColor.WHITE))
+                .appendSpace()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_2", "on"), NamedTextColor.WHITE))
+                .appendSpace()
+                .append(Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE))
+                .build());
+    }
 }

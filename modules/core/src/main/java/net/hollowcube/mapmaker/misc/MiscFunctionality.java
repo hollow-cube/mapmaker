@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.misc;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -14,11 +13,9 @@ import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
@@ -29,17 +26,6 @@ import java.time.Duration;
 import java.util.Objects;
 
 public final class MiscFunctionality {
-    public static void sendBetaHeader(@NotNull Player player) {
-        var runtime = ServerRuntime.getRuntime();
-        String watermarkString = String.format("hollowcube.net • Closed Beta (%s)", runtime.shortCommit());
-        player.showBossBar(BossBar.bossBar(Component.text(watermarkString).color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-        player.showBossBar(BossBar.bossBar(Component.text(FontUtil.rewrite("small_bossbar_line2", "not representative of final product"))
-                .color(FontUtil.NO_SHADOW), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
-    }
-
-    public static void broadcastTabList(@NotNull Audience audience) {
-        broadcastTabList(audience, MinecraftServer.getConnectionManager().getOnlinePlayerCount());
-    }
 
     private static final Component FADEOUT_TITLE = Component.text(BadSprite.SPRITE_MAP.get("hud/fadeout").fontChar());
     private static final Title.Times FADEOUT_TIMES = Title.Times.times(Duration.ofMillis(1000), Duration.ofMillis(15000), Duration.ofMillis(0));
