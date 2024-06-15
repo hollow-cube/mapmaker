@@ -19,6 +19,9 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.polar.PolarReader;
 import net.hollowcube.polar.PolarWriter;
 import net.kyori.adventure.bossbar.BossBar;
@@ -59,6 +62,12 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
     private String ownerNamePlain = "Unknown";
+
+    private static final BadSprite SPECTATOR_SPRITE = BadSprite.require("hud/spectator");
+    private final ActionBar.Provider spectatingActionBarProvider = this::buildSpectatorWidget;
+    private static final BadSprite FINISHED_SPRITE = BadSprite.require("hud/finished");
+    private final ActionBar.Provider finishedActionBarProvider = this::buildFinishedWidget;
+
 
     @Inject
     public PlayingMapWorld(@NotNull MapServer server, @NotNull FeatureList features, @NotNull MapData map) {
@@ -128,7 +137,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     public void addSpectator(@NotNull Player player, boolean isFinishedMode) {
-
         super.addSpectator(player); // Add to spectator list & reset inventory.
 
         player.setGameMode(GameMode.ADVENTURE);
@@ -139,7 +147,9 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
                 ? new MapPlayerStartFinishedEvent(this, player)
                 : new MapPlayerStartSpectatorEvent(this, player));
 
-//        ActionBar.forPlayer(player).addProvider(spectatingActionBarProvider);
+        ActionBar.forPlayer(player).addProvider(isFinishedMode
+                ? finishedActionBarProvider
+                : spectatingActionBarProvider);
 //        instance.eventNode().call(new MapPlayerStartSpectatorEvent(this, player));
 //        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
     }
@@ -203,20 +213,19 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         super.removePlayer(player); // Remove from player list & reset
 
-        // ActionBar.forPlayer(player).removeProvider(spectatingActionBarProvider);
-        // ActionBar.forPlayer(player).removeProvider(finishedActionBarProvider);
+        ActionBar.forPlayer(player).removeProvider(spectatingActionBarProvider);
+        ActionBar.forPlayer(player).removeProvider(finishedActionBarProvider);
     }
 
-//    private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
-//        builder.pushColor(FontUtil.NO_SHADOW);
-//        builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
-//    }
-//
-//    private void buildFinishedWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
-//        builder.pushColor(FontUtil.NO_SHADOW);
-//        builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
-//    }
+    private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
+    }
 
+    private void buildFinishedWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
+    }
 
     @Override
     protected @Nullable BossBar buildBossBarLine1(@NotNull Player player) {

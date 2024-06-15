@@ -17,7 +17,8 @@ public class BossBars {
             Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE));
 
     public static void clear(@NotNull Player player) {
-        MinecraftServer.getBossBarManager().removeAllBossBars(player);
+        var bars = MinecraftServer.getBossBarManager().getPlayerBossBars(player);
+        bars.forEach(b -> MinecraftServer.getBossBarManager().removeBossBar(player, b));
     }
 
     public static @NotNull BossBar createLine1(@NotNull Component text) {
