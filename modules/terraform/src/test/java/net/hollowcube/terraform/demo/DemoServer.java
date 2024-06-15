@@ -31,8 +31,10 @@ public class DemoServer {
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
-        var dimension = MinecraftServer.getDimensionTypeRegistry().register(DimensionType.builder(NamespaceID.from("mapmaker:bright_dim"))
-                .ambientLight(2.0f).build());
+        var dimension = MinecraftServer.getDimensionTypeRegistry().register(
+                NamespaceID.from("mapmaker:bright_dim"),
+                DimensionType.builder().ambientLight(2.0f).build()
+        );
 
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer(dimension);
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
