@@ -33,24 +33,25 @@ jobs:
         run: |
           bazel build //:packer_development_client
           mkdir -p temp && unzip bazel-bin/client.zip -d temp
-      #      - name: Squash resource pack
-      #        uses: ComunidadAylas/PackSquash-action@v4
-      #        with:
-      #          packsquash_version: latest
-      #          # Broken with java 22
-      #          #            zip_spec_conformance_level = 'disregard'
-      #          options: |
-      #            pack_directory = 'temp'
-      #            output_file_path = 'squashed.zip'
+            - name: Squash resource pack
+              uses: ComunidadAylas/PackSquash-action@v4
+              with:
+                packsquash_version: latest
+                # Broken with java 22
+                #            zip_spec_conformance_level = 'disregard'
+                options: |
+                  pack_directory = 'temp'
+                  output_file_path = 'squashed.zip'
+                  skip_alpha_optimizations = true
       - name: Round 2
         id: process
         run: |
-          export RESOURCE_PACK_SHA=$(sha1sum bazel-bin/client.zip | cut -d ' ' -f1)
+          export RESOURCE_PACK_SHA=$(sha1sum squashed.zip | cut -d ' ' -f1)
           echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
           echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
           
           mkdir -p out
-          cp bazel-bin/client.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
+          cp squashed.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
