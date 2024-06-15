@@ -42,7 +42,7 @@ jobs:
                 options: |
                   pack_directory = 'temp'
                   output_file_path = 'squashed.zip'
-                  skip_alpha_optimizations = true
+                  downsize_if_single_color = true
       - name: Round 2
         id: process
         run: |
