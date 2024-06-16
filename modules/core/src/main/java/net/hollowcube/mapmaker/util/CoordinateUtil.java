@@ -1,9 +1,13 @@
 package net.hollowcube.mapmaker.util;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class CoordinateUtil {
     private CoordinateUtil() {
@@ -53,5 +57,20 @@ public final class CoordinateUtil {
 
     private static float lerp(float zero, float one, float t) {
         return zero + (one - zero) * t;
+    }
+
+    public static @NotNull List<Component> asTranslationArgs(@NotNull Point point) {
+        return List.of(
+                Component.text(NumberUtil.format(point.x(), 2)),
+                Component.text(NumberUtil.format(point.y(), 2)),
+                Component.text(NumberUtil.format(point.z(), 2))
+        );
+    }
+
+    public static @NotNull List<Component> asTranslationArgs(@NotNull Pos pos) {
+        var pointArgs = new ArrayList<>(asTranslationArgs((Point) pos));
+        pointArgs.add(Component.text(NumberUtil.format(pos.yaw(), 2)));
+        pointArgs.add(Component.text(NumberUtil.format(pos.pitch(), 2)));
+        return pointArgs;
     }
 }

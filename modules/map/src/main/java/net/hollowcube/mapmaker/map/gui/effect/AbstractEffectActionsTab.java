@@ -8,12 +8,11 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectListView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectSelectorView;
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
-
-import java.util.List;
 
 public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData> extends View {
     private static final Component TELEPORT_NONE = Component.translatable("gui.effect.actions.teleport.none");
@@ -125,11 +124,8 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
 
         if (data.teleport().isPresent()) {
             teleportSwitch.setOption(1);
-            var teleTarget = data.teleport().get();
-            teleportOnLabel.setArgs(Component.translatable("gui.effect.actions.teleport.pos", List.of(
-                    Component.text(teleTarget.blockX()), Component.text(teleTarget.blockY()), Component.text(teleTarget.blockZ()),
-                    Component.text(teleTarget.yaw()), Component.text(teleTarget.pitch())
-            )));
+            teleportOnLabel.setArgs(Component.translatable("gui.effect.actions.teleport.pos",
+                    CoordinateUtil.asTranslationArgs(data.teleport().get())));
         } else {
             teleportSwitch.setOption(0);
             teleportOffLabel.setArgs(TELEPORT_NONE);

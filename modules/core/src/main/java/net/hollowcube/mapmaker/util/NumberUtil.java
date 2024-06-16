@@ -10,6 +10,13 @@ import java.util.concurrent.TimeUnit;
 
 public final class NumberUtil {
 
+    public static @NotNull String format(double number, int maxDecimalPlaces) {
+        BigDecimal bigDecimal = new BigDecimal(Double.toString(number));
+        bigDecimal = bigDecimal.setScale(maxDecimalPlaces, RoundingMode.DOWN);
+
+        return bigDecimal.stripTrailingZeros().toPlainString();
+    }
+
     /**
      * formatCurrency will take a number and format it as a currency string. The string is at most 5 characters long
      * with a max of 3 numbers, and an optional '.' and multiplier. The highest representable number is 999b, any number
