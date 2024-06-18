@@ -58,8 +58,10 @@ public final class MiscFunctionality {
         var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 50); //todo where is the missing 2 coming from
         var tabHeader = Component.text()
                 .appendNewline()
+                .appendNewline()
+                .appendNewline()
                 .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
-                .append(Component.text(cubeOffset + "ᴄʟᴏѕᴇᴅ ʙᴇᴛᴀ", darkGrayColor))
+                .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
                 .appendNewline()
                 .build();
         var tabFooter = Component.text()
