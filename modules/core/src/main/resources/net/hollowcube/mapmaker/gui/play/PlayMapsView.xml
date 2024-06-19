@@ -3,6 +3,8 @@
 <?import net.hollowcube.mapmaker.gui.play ?>
 <?import net.hollowcube.mapmaker.gui.play.simple ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/search/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <!-- Top bar -->
     <box width="9" align="ltr">
         <button id="close" translationKey="gui.generic.close_menu"

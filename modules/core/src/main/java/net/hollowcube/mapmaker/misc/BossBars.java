@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.misc;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ public class BossBars {
     private static final int BORDER_WIDTH = 4;
 
     public static final BossBar ADDRESS_LINE = BossBars.createLine2(
-            Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE));
+            Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), TextColor.color(0xF2F2F2)));
 
     public static void clear(@NotNull Player player) {
         var bars = MinecraftServer.getBossBarManager().getPlayerBossBars(player);
