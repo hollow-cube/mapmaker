@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -283,6 +284,14 @@ public final class FontUtil {
                 Map.entry((int) 'ʏ', 6), Map.entry((int) 'ᴢ', 6)
         ));
         allWidths.put('\uF824', allWidths.get(' '));
+        for (var sprite : BadSprite.SPRITE_MAP.values()) {
+            if (sprite.fontChar() == 0 || sprite.cmd() != 0) continue;
+            allWidths.put(sprite.fontChar(), sprite.width() + 1);
+        }
+        for (int i = 0; i < POSITIVE_SPACE.size(); i++)
+            allWidths.put(POSITIVE_SPACE.get(i).charAt(0), 1 << i);
+        for (int i = 0; i < NEGATIVE_SPACE.size(); i++)
+            allWidths.put(NEGATIVE_SPACE.get(i).charAt(0), -(1 << i));
         ALL_GLYPH_WIDTHS_V2 = Int2IntMaps.unmodifiable(allWidths);
     }
 

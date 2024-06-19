@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,9 @@ public record DisplayName(
         DEFAULT,
         PLAIN,
         // Like DEFAULT, but includes an ordering character before the badge
-        TAB_LIST
+        TAB_LIST,
+        // Like DEFAULT, but uses offset characters vertically
+        BOSS_BAR
     }
 
     public DisplayName {
@@ -48,7 +51,10 @@ public record DisplayName(
                     //todo get colors from placeholder file
                     var color = TextColor.color(0xB0B0B0);
                     if (part.color != null && !part.color.isEmpty()) color = TextColor.fromCSSHexString(part.color);
-                    builder.append(Component.text(part.text, color));
+
+                    var text = part.text;
+                    if (context == Context.BOSS_BAR) text = FontUtil.rewrite("bossbar_ascii_1", text);
+                    builder.append(Component.text(text, color));
                 }
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
@@ -62,9 +68,11 @@ public record DisplayName(
                         }));
                     }
 
+                    // FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain)
+
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
-                    var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(icon), "unknown badge sprite " + part.text);
-                    builder.append(Component.text(sprite.fontChar() + FontUtil.computeOffset(1), FontUtil.NO_SHADOW)
+                    if (context == Context.BOSS_BAR) icon += "_bb";
+                    builder.append(Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
                             .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
                 }
                 default -> throw new IllegalArgumentException("Unknown part type: " + part.type);

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -404,5 +405,24 @@ public class MapData {
         } else {
             return Component.text("Adventure Map", TextColor.color(0x9F0B0B));
         }
+    }
+
+    public static @NotNull Component rewriteWithQualityFont(@NotNull MapQuality quality, @NotNull String text) {
+        class Holder {
+            static final MiniMessage MM = MiniMessage.miniMessage();
+        }
+
+        //todo use values directly from placeholders/tx keys rather than duplicating here
+        return switch (quality) {
+            case UNRATED -> Component.text(text, TextColor.color(0xF04B3D)); // placeholders.json5 -> light_red
+            case GOOD -> Component.text(text, TextColor.color(0xF5DC3B)); // placeholders.json5 -> lemon
+            case GREAT -> Component.text(text, TextColor.color(0x8CDB46)); // placeholders.json5 -> toxic_green
+            case EXCELLENT ->
+                    Holder.MM.deserialize(String.format("<gradient:#81AFFF:#8EB7FF:#9CBFFF:#A9C7FF:#B6CFFF:#A9C7FF:#9CBFFF:#8EB7FF:#81AFFF>%s</gradient>", text)); // gui.map_details.map_info_tab.quality.excellent.name
+            case OUTSTANDING ->
+                    Holder.MM.deserialize(String.format("<gradient:#78FFDF:#88FFE4:#98FFE9:#A8FFEE:#B8FFF3:#C8FFF8:#B8FFF3:#A8FFEE:#98FFE9:#88FFE4:#78FFDF>%s</gradient>", text)); // gui.map_details.map_info_tab.quality.outstanding.name;
+            case MASTERPIECE ->
+                    Holder.MM.deserialize(String.format("<gradient:#EE6EFF:#F17CFE:#F58BFE:#F899FD:#FCA8FD:#FFB6FC:#FCA8FD:#F899FD:#F58BFE:#F17CFE:#EE6EFF>%s</gradient>", text)); // gui.map_details.map_info_tab.quality.masterpiece.name;
+        };
     }
 }

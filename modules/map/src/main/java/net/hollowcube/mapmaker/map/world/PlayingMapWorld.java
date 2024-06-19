@@ -28,7 +28,6 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -61,7 +60,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
-    private String ownerNamePlain = "Unknown";
+    private Component ownerBossBarName = Component.empty();
 
     private static final BadSprite SPECTATOR_SPRITE = BadSprite.require("hud/spectator");
     private final ActionBar.Provider spectatingActionBarProvider = this::buildSpectatorWidget;
@@ -99,9 +98,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         super.load();
         //todo load features
 
-        this.ownerNamePlain = PlainTextComponentSerializer.plainText().serialize(
-                server().playerService().getPlayerDisplayName2(map().owner())
-                        .build(DisplayName.Context.PLAIN));
+        this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
+                .build(DisplayName.Context.BOSS_BAR);
     }
 
     @Override
@@ -232,12 +230,12 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         final String verb = map().verification() == MapVerification.PENDING ? "verifying" : "playing";
         var builder = Component.text()
-                .append(Component.text(FontUtil.rewrite("bossbar_small_1", verb) + " ", TextColor.color(0xff5555)))
-                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map().name()), NamedTextColor.WHITE));
+                .append(Component.text(FontUtil.rewrite("bossbar_small_1", verb) + " ", NamedTextColor.WHITE))
+                .append(MapData.rewriteWithQualityFont(map().quality(), FontUtil.rewrite("bossbar_ascii_1", map().name())));
 
-        if ("playing" .equals(verb)) {
-            builder.append(Component.text(" " + FontUtil.rewrite("bossbar_small_1", "by") + " ", TextColor.color(0xffaa00)))
-                    .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain), NamedTextColor.WHITE));
+        if ("playing".equals(verb)) {
+            builder.append(Component.text(" " + FontUtil.rewrite("bossbar_small_1", "by") + " ", TextColor.color(0xB0B0B0)))
+                    .append(ownerBossBarName);
         }
 
         return BossBars.createLine1(builder.build());
@@ -252,7 +250,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
                 .appendSpace()
                 .append(Component.text(FontUtil.rewrite("bossbar_small_2", map().publishedIdString()), NamedTextColor.WHITE))
                 .appendSpace()
-                .append(Component.text(FontUtil.rewrite("bossbar_small_2", "on"), NamedTextColor.WHITE))
+                .append(Component.text(FontUtil.rewrite("bossbar_small_2", "on"), TextColor.color(0xB0B0B0)))
                 .appendSpace()
                 .append(Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE))
                 .build());

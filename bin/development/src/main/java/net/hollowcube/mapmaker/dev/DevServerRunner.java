@@ -186,6 +186,22 @@ public class DevServerRunner extends AbstractMapServer {
 //        p.scheduleNextTick($ -> {
 //            TheSneaky.getTheSneaky().send(p);
 //        });
+
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "hypercube/gold", null), new DisplayName.Part("username", "notmattw", "#ffb700"))).build());
+//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "media", null), new DisplayName.Part("username", "notmattw", "#cc39e9"))).build());
+
+//        for (var quality : MapQuality.values()) {
+//            event.getPlayer().sendMessage(MapData.rewriteWithQualityFont(quality, "Hello world!"));
+//        }
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
