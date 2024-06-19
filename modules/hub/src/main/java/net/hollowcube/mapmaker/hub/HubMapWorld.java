@@ -36,10 +36,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
-import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -83,6 +80,7 @@ public class HubMapWorld extends AbstractMapWorld {
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
+            .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot);
 

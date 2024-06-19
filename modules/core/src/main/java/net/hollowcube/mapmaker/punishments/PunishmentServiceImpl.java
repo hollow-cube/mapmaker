@@ -67,16 +67,16 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
 
     @Override
     public @NotNull Punishment createPunishment(@NotNull UUID playerId, @NotNull UUID executorId,
-                                                @NotNull PunishmentType type, @NotNull String comment,
-                                                @Nullable String ladderId) {
+                                                @NotNull PunishmentType type, @Nullable String comment,
+                                                @Nullable String reason) {
         var body = new HashMap<String, String>();
         body.put("playerId", playerId.toString());
         body.put("executorId", executorId.toString());
         body.put("punishmentType", type.name().toLowerCase(Locale.ROOT));
-        body.put("comment", comment);
+        if (comment != null) body.put("comment", comment);
 
-        if (ladderId != null) {
-            body.put("ladderId", ladderId);
+        if (reason != null) {
+            body.put("reason", reason);
         }
 
         var request = HttpRequest.newBuilder()

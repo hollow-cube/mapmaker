@@ -16,8 +16,8 @@ public interface PunishmentService {
 
     @NotNull Punishment createPunishment(
             @NotNull UUID playerId, @NotNull UUID executorId,
-            @NotNull PunishmentType type, @NotNull String comment,
-            @Nullable String ladderId);
+            @NotNull PunishmentType type, @Nullable String comment,
+            @Nullable String reason);
 
     @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type);
 

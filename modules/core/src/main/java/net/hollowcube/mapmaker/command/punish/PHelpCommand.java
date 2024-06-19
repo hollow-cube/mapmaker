@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -43,36 +44,7 @@ public class PHelpCommand extends CommandDsl {
         var typeFilter = context.get(typeArg);
 
         var builder = Component.text();
-        builder.append(Component.translatable("punishment.help.header.1"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.2"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.empty"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.3"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.4"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.empty"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.5"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.6"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.empty"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.7"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.8"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.empty"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.9"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.header.10"));
-        builder.appendNewline();
-        builder.append(Component.translatable("punishment.help.empty"));
-        // TODO lol
+        builder.append(LanguageProviderV2.translateMultiMerged("punishment.help.header", List.of()));
 
         var ladders = new ArrayList<>(punishmentService.getAllLadders());
         ladders.sort(Comparator.comparing(PunishmentLadder::type));
@@ -80,19 +52,38 @@ public class PHelpCommand extends CommandDsl {
             if (typeFilter != null && ladder.type() != typeFilter)
                 continue;
 
+            // Name of ladder
             builder.appendNewline();
             builder.append(Component.translatable("punishment.help.ladder.name", List.of(
                     Component.text(FontUtil.rewrite("small", ladder.type().name().toLowerCase(Locale.ROOT))),
-                    Component.text(ladder.id()), Component.text(ladder.name())
-            )));
+                    Component.translatable("punishment.ladder." + ladder.id()))
+            ));
 
+            // Duration track
             var track = Component.text();
             for (int i = 0; i < ladder.entries().size(); i++) {
                 if (i > 0) track.append(Component.translatable("punishment.help.ladder.separator"));
-                track.append(Component.translatable("punishment.help.ladder.entry", Component.text(formatDuration(ladder.entries().get(i).duration()))));
+                track.append(Component.translatable("punishment.help.ladder.entry",
+                        Component.text(formatDuration(ladder.entries().get(i).duration()))));
             }
-            builder.appendNewline();
+            builder.appendSpace();
             builder.append(Component.translatable("punishment.help.ladder.entries", track));
+
+            // Reasons
+            for (var reason : ladder.reasons()) {
+                var aliases = Component.text();
+                aliases.append(Component.text(reason.id()));
+                for (var alias : reason.aliases()) {
+                    aliases.append(Component.text(", " + alias));
+                }
+
+                builder.appendNewline();
+                builder.append(Component.text("- "));
+                builder.append(Component.translatable("punishment.reason." + reason.id()));
+                builder.append(Component.text(" (aka: "));
+                builder.append(aliases);
+                builder.append(Component.text(")"));
+            }
         }
 
         player.sendMessage(builder);
