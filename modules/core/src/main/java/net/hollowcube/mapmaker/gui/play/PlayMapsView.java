@@ -48,6 +48,7 @@ public class PlayMapsView extends View {
     private @ContextObject Player player;
     private @ContextObject String query;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("page_text") Text pageText;
     private @Outlet("paging") Pagination pagination;
 
@@ -74,6 +75,7 @@ public class PlayMapsView extends View {
             playerData.setSetting(SORT_PRESET, startingSort);
         }
 
+        titleText.setText("Play Maps");
         updateQuery(false);
     }
 

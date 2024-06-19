@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Element;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +16,12 @@ public class QueryMapsView extends View {
     private String query = null;
     private final Context context;
 
+    private @Outlet("title") Text titleText;
+
     public QueryMapsView(@NotNull Context context) {
         super(context);
         this.context = context;
+        titleText.setText("Search Maps");
     }
 
     @Action("input") public void handleBackButton() { popView(); }

@@ -1,12 +1,14 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ttb" sprite="rate_map/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.map_rating.information"/>
+        <label translationKey="gui.map_rating.information" sprite="generic/information"/>
         <text id="map_id_text" width="5" height="1" translationKey="gui.map_rating.map_id"
-              font="play_maps_page" centered="true"/>
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
         <button id="add_comment" translationKey="gui.map_rating.add_comment"
                 sprite="rate_map/add_comment"/>
         <button id="report_map" translationKey="gui.map_rating.report_map"

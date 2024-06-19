@@ -1,19 +1,35 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.hdb.gui ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="hdb/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <box width="9" height="1" align="ltr">
         <BackButton/>
-        <label translationKey="gui.hdb.browser.information"/>
-        <label width="7" translationKey="todo"/>
+        <label translationKey="gui.hdb.browser.information" sprite="generic/information"/>
+        <text id="hdb_browser_title" width="5" translationKey="gui.hdb.browser.title"
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
+        <button id="hdb_browser_search" width="2" translationKey="gui.hdb.browser.search"/>
     </box>
 
     <box width="9" height="5" align="ltr">
-        <button id="prev_page" width="1" height="5" translationKey="gui.hdb.browser.prev_page"/>
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="prev_page" height="3"
+                    translationKey="gui.generic.previous_page"
+                    sprite="generic/left_big" spritePos="1"/>
+            <spacer/>
+        </box>
 
         <pagination id="heads" width="7" height="5" child="HeadIconView"/>
 
-        <button id="next_page" width="1" height="5" translationKey="gui.hdb.browser.next_page"/>
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="next_page" height="3"
+                    translationKey="gui.generic.next_page"
+                    sprite="generic/right_big" spritePos="1"/>
+            <spacer/>
+        </box>
     </box>
 
     <box width="9" height="2" align="ltr">

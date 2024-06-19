@@ -1,19 +1,19 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.effect ?>
-<component width="9" height="10" align="ttb" sprite="effect/checkpoint/container">
+<component width="9" height="10" align="ttb" sprite="effect/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.checkpoint.information"/>
+        <label translationKey="gui.checkpoint.information" sprite="generic/information"/>
 
         <text id="tab_text" width="5" height="1" translationKey="gui.checkpoint.tab"
-              font="play_maps_page" centered="true"/>
+              sprite="generic/text_display_5" font="play_maps_page" centered="true"/>
 
-        <button translationKey="gui.checkpoint.custom_blocks"
-                sprite="effect/executor_menu"/>
-        <button id="pick_up" translationKey="gui.checkpoint.pick_up"
-                sprite="effect/pick_up"/>
+        <label translationKey="gui.checkpoint.custom_blocks"/>
+        <label translationKey="gui.checkpoint.pick_up"/>
     </box>
 
     <switch id="tab_switch" width="9" height="4">
@@ -22,7 +22,7 @@
     </switch>
 
     <!-- Tab Buttons -->
-    <box width="9" height="1" align="ltr">
+    <box width="9" height="1" align="ltr" sprite="effect/checkpoint/tab_container">
         <spacer width="2"/>
 
         <switch id="tab_settings_state_switch">

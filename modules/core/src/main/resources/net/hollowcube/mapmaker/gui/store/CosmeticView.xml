@@ -2,11 +2,14 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.gui.store ?>
 <component width="9" height="10" align="ttb" sprite="cosmetic/selector/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.cosmetics.information"/>
-        <text id="tab_name_text" width="5" translationKey="gui.cosmetics.tab_name" font="slot_title" centered="true"/>
+        <label translationKey="gui.cosmetics.information" sprite="generic/information"/>
+        <text id="tab_name_text" width="5" translationKey="gui.cosmetics.tab_name" font="slot_title"
+              centered="true" sprite="generic/text_display_5"/>
         <label translationKey="gui.cosmetics.wardrobe"/>
         <switch id="show_locked_switch">
             <button id="show_locked_off" translationKey="gui.cosmetics.show_locked.off"
