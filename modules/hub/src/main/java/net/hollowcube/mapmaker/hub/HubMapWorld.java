@@ -27,7 +27,7 @@ import net.hollowcube.polar.PolarLoader;
 import net.hollowcube.polar.PolarReader;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
@@ -66,7 +66,7 @@ public class HubMapWorld extends AbstractMapWorld {
     );
 
     private static final List<BossBar> BOSS_BARS = List.of(
-            BossBars.createLine1(Component.text(FontUtil.rewrite("bossbar_ascii_1", "Map Maker Lobby"), NamedTextColor.WHITE)),
+            BossBars.createLine1(Component.text(FontUtil.rewrite("bossbar_ascii_1", "Map Maker Early Access"), TextColor.color(0x3895FF))),
             BossBars.ADDRESS_LINE
     );
 

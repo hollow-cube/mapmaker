@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.hollowcube.mapmaker.map.entity.impl.PaintingEntity;
-import net.hollowcube.mapmaker.map.item.ItemUtils;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.component.CustomData;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,7 @@ public class PaintingInteractionRule implements BlockInteractionRule {
         var blockFace = interaction.blockFace();
         if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) return false;
 
-        var entityTag = ItemUtils.getEntityTag(interaction.item());
+        var entityTag = interaction.item().get(ItemComponent.ENTITY_DATA, CustomData.EMPTY).nbt();
         var variant = DynamicRegistry.Key.<PaintingMeta.Variant>of(entityTag.getString("variant"));
         if (PAINTING_REGISTRY.get(variant) == null) variant = PaintingMeta.Variant.KEBAB;
 
