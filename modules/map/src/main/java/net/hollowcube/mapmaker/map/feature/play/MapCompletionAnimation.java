@@ -87,7 +87,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
         }
 
         player.showTitle(Title.title(
-                TITLE_FRAMES[frame++], subtitle,
+                TITLE_FRAMES[frame++], Component.empty(), //subtitle, todo: reenable when adding materials back
                 Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO)
         ));
 
