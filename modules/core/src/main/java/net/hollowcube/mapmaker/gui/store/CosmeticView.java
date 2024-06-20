@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.gui.store;
 import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -99,7 +100,7 @@ public class CosmeticView extends View {
         for (int i = 0; i < entries.size(); i++) {
             var cosmetic = entries.get(i);
             var isLocked = !unlockedCosmetics.contains(cosmetic.path());
-            results.add(new CosmeticEntry(request.context(), playerData, cosmetic, isLocked, i / 7));
+            results.add(new CosmeticEntry(request.context(), playerData, PlayerBackpack.fromPlayer(player), cosmetic, isLocked, i / 7));
         }
 
         request.respond(results, false);

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+//TODO: Move me back to the hub module when no longer used in cosmetic view
 public record MerchantTrade(
         @NotNull Cosmetic result,
         @NotNull CostList inputs
