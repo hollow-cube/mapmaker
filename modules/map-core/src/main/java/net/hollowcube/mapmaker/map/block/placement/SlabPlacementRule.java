@@ -6,9 +6,10 @@ import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 
-public class SlabPlacementRule extends BaseBlockPlacementRule {
+public class SlabPlacementRule extends WaterloggedPlacementRule {
     private static final String PROP_TYPE = "type";
 
     public SlabPlacementRule(@NotNull Block block) {
@@ -29,7 +30,10 @@ public class SlabPlacementRule extends BaseBlockPlacementRule {
         if (blockFace == BlockFace.BOTTOM) return block.withProperty(PROP_TYPE, "top");
 
         var type = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y() > 0.5 ? "top" : "bottom";
-        return block.withProperty(PROP_TYPE, type);
+        return block.withProperties(Map.of(
+                PROP_TYPE, type,
+                "waterlogged", waterlogged(existingBlock)
+        ));
     }
 
     @Override

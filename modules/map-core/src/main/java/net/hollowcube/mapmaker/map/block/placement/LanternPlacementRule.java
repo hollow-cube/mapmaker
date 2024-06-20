@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class LanternPlacementRule extends BaseBlockPlacementRule {
+public class LanternPlacementRule extends WaterloggedPlacementRule {
     private static final String PROP_HANGING = "hanging";
 
     public LanternPlacementRule(@NotNull Block block) {
@@ -24,6 +24,6 @@ public class LanternPlacementRule extends BaseBlockPlacementRule {
         var blockAbove = instance.getBlock(placementState.placePosition().add(0, 1, 0), Block.Getter.Condition.TYPE);
         if (blockAbove.isSolid()) return block.withProperty(PROP_HANGING, "true");
 
-        return block;
+        return block.withProperty("waterlogged", waterlogged(placementState));
     }
 }

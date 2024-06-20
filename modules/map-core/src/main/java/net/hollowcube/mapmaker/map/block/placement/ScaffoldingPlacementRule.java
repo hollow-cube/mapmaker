@@ -8,14 +8,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class ScaffoldingPlacementRule extends BaseBlockPlacementRule {
+public class ScaffoldingPlacementRule extends WaterloggedPlacementRule {
     public ScaffoldingPlacementRule(@NotNull Block block) {
         super(block);
     }
 
     @Override
     public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placement) {
-        return getState(placement.instance(), placement.placePosition(), this.block);
+        return getState(placement.instance(), placement.placePosition(), this.block)
+                .withProperty("waterlogged", waterlogged(placement));
     }
 
     @Override

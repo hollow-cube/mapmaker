@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class StandingSignPlacementRule extends BaseBlockPlacementRule {
+public class StandingSignPlacementRule extends WaterloggedPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.WEST,
@@ -30,17 +30,17 @@ public class StandingSignPlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
-        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
-        return switch (blockFace) {
+    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+        var blockFace = Objects.requireNonNullElse(placement.blockFace(), BlockFace.TOP);
+        var playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
+        final Block signBlock = switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> wallBlock.withProperty(PROP_FACING, blockFace.name().toLowerCase());
             case BOTTOM -> {
-                var instance = placementState.instance();
+                var instance = placement.instance();
 
                 var facingFace = BlockFace.fromYaw(playerPosition.yaw());
                 for (var neighborFace : getFaceOrder(facingFace)) {
-                    var neighbor = instance.getBlock(placementState.placePosition().relative(neighborFace));
+                    var neighbor = instance.getBlock(placement.placePosition().relative(neighborFace));
                     if (neighbor.isSolid()) {
                         yield wallBlock.withProperty(PROP_FACING, neighborFace.getOppositeFace().name().toLowerCase());
                     }
@@ -54,6 +54,7 @@ public class StandingSignPlacementRule extends BaseBlockPlacementRule {
                 yield block.withProperty("rotation", String.valueOf(rotation));
             }
         };
+        return signBlock == null ? null : signBlock.withProperty("waterlogged", waterlogged(placement));
     }
 
     private @NotNull BlockFace[] getFaceOrder(@NotNull BlockFace facingFace) {

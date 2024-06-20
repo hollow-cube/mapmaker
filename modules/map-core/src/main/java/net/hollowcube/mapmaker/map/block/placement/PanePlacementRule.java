@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PanePlacementRule extends BaseBlockPlacementRule {
+public class PanePlacementRule extends WaterloggedPlacementRule {
     private static final BlockFace[] HORIZONTAL_FACES = new BlockFace[]{
             BlockFace.NORTH,
             BlockFace.SOUTH,
@@ -26,8 +26,9 @@ public class PanePlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        return genericUpdateState(placementState.instance(), block, placementState.placePosition(), null);
+    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+        final Block block = super.blockPlace(placement); // Waterlogged
+        return genericUpdateState(placement.instance(), block, placement.placePosition(), null);
     }
 
     private @NotNull Block genericUpdateState(@NotNull Block.Getter instance, @NotNull Block block, @NotNull Point blockPosition, @Nullable BlockFace faceFilter) {

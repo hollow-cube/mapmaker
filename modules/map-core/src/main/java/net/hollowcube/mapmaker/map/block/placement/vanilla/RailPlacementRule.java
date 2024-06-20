@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.placement.vanilla;
 
-import net.hollowcube.mapmaker.map.block.placement.BaseBlockPlacementRule;
+import net.hollowcube.mapmaker.map.block.placement.WaterloggedPlacementRule;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -23,7 +23,7 @@ import java.util.List;
  *
  * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
  */
-public class RailPlacementRule extends BaseBlockPlacementRule {
+public class RailPlacementRule extends WaterloggedPlacementRule {
     private final boolean isStraight;
 
     public RailPlacementRule(@NotNull Block block, boolean isStraight) {
@@ -38,7 +38,7 @@ public class RailPlacementRule extends BaseBlockPlacementRule {
 
         return new RailState(instance, blockPosition, this.block, this.isStraight)
                 .place(true, true, this.block.getProperty("shape"))
-                .getState();
+                .getState().withProperty("waterlogged", waterlogged(placement));
     }
 
     public static class RailState {

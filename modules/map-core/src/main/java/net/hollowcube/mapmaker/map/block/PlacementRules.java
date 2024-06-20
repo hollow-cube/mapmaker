@@ -10,6 +10,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -49,6 +50,8 @@ public final class PlacementRules {
         register(BlockTags.BANNERS, BannerPlacementRule::new);
         register(BlockTags.STANDING_SIGNS, StandingSignPlacementRule::new);
         register(BlockTags.CEILING_HANGING_SIGNS, HangingSignPlacementRule::new); // For some reason it never calls wall hanging signs, we just have to convert to them in the placement rule
+        register(BlockTags.WALL_SIGNS, WaterloggedPlacementRule::new); // These two are actually unplaceable, but are here for sanity
+        register(BlockTags.WALL_HANGING_SIGNS, WaterloggedPlacementRule::new); // These two are actually unplaceable, but are here for sanity
         register(BlockTags.BEDS, BedPlacementRule::new);
         register(BlockTags.ANVILS, AnvilPlacementRule::new);
 
@@ -95,7 +98,6 @@ public final class PlacementRules {
         register(Block.CARVED_PUMPKIN, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.BEEHIVE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.BEE_NEST, b -> new FacingHorizontalPlacementRule(b, true));
-        register(Block.FURNACE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.BLAST_FURNACE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.STONECUTTER, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.LOOM, b -> new FacingHorizontalPlacementRule(b, true));
@@ -157,6 +159,35 @@ public final class PlacementRules {
         register(BlockTags.CORAL, WaterloggedPlacementRule::new);
         register(BlockTags.CORAL_FAN, CoralFanPlacementRule::new);
 
+        // Misc waterlogged
+        register(Block.HANGING_ROOTS, WaterloggedPlacementRule::new);
+        register(Block.HEAVY_CORE, WaterloggedPlacementRule::new);
+        register(Block.SCULK_SENSOR, WaterloggedPlacementRule::new);
+        register(Block.SCULK_SHRIEKER, WaterloggedPlacementRule::new);
+        register(Block.MANGROVE_ROOTS, WaterloggedPlacementRule::new);
+        register(Block.COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.EXPOSED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.WEATHERED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.OXIDIZED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.WAXED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.WAXED_EXPOSED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.WAXED_WEATHERED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.WAXED_OXIDIZED_COPPER_GRATE, WaterloggedPlacementRule::new);
+        register(Block.BIG_DRIPLEAF_STEM, WaterloggedPlacementRule::new);
+        register(Block.BARRIER, WaterloggedPlacementRule::new);
+        register(Block.LIGHT, WaterloggedPlacementRule::new);
+        register(BlockTags.LEAVES, WaterloggedPlacementRule::new);
+        register(Block.DEAD_BRAIN_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.DEAD_BUBBLE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.DEAD_FIRE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.DEAD_HORN_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.DEAD_TUBE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.BRAIN_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.BUBBLE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.FIRE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.HORN_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+        register(Block.TUBE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+
         // Annoying single use wall of shame >:(
 
         register(Block.BELL, BellPlacementRule::new);
@@ -185,6 +216,7 @@ public final class PlacementRules {
 
     private static void register(@NotNull Block block, Function<Block, BlockPlacementRule> constructor) {
         var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(block.namespace())));
+        Check.argCondition(BLOCK_MANAGER.getBlockPlacementRule(ruleInstance.getBlock()) != null, "double registration for: " + ruleInstance.getBlock().name());
         BLOCK_MANAGER.registerBlockPlacementRule(ruleInstance);
     }
 

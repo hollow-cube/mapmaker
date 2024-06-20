@@ -7,22 +7,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class ClickFacingPlacementRule extends BaseBlockPlacementRule {
+public class ClickFacingPlacementRule extends WaterloggedPlacementRule {
     private static final String PROP_FACING = "facing";
 
     private final boolean allowUp;
     private final boolean invert;
+    private final boolean canBeWaterlogged;
 
     public ClickFacingPlacementRule(@NotNull Block block, boolean allowUp, boolean invert) {
         super(block);
         this.allowUp = allowUp;
         this.invert = invert;
+        this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), invert ? BlockFace.TOP : BlockFace.BOTTOM);
-        return block.withProperty(PROP_FACING, directionFromBlockFace(blockFace));
+        final Block result = block.withProperty(PROP_FACING, directionFromBlockFace(blockFace));
+        return canBeWaterlogged ? result.withProperty("waterlogged", waterlogged(placementState)) : result;
     }
 
     private @NotNull String directionFromBlockFace(@NotNull BlockFace blockFace) {

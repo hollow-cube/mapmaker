@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
-public class ChestPlacementRule extends BaseBlockPlacementRule {
+public class ChestPlacementRule extends WaterloggedPlacementRule {
 
     private static final BlockFace[][] CONNECTION_FACES = new BlockFace[][]{
             // Indices are BlockFace#ordinal() - 2
@@ -53,7 +53,8 @@ public class ChestPlacementRule extends BaseBlockPlacementRule {
 
         return block.withProperties(Map.of(
                 "type", type,
-                "facing", facing.toString().toLowerCase(Locale.ROOT)
+                "facing", facing.toString().toLowerCase(Locale.ROOT),
+                "waterlogged", waterlogged(placement)
         ));
     }
 

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class HangingSignPlacementRule extends BaseBlockPlacementRule {
+public class HangingSignPlacementRule extends WaterloggedPlacementRule {
 
     private final Set<BlockFace> horizontalFaces = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
 
@@ -23,7 +23,7 @@ public class HangingSignPlacementRule extends BaseBlockPlacementRule {
     public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placementState) {
         if (placementState.blockFace() == null) return null;
 
-        return switch (placementState.blockFace()) {
+        final Block signBlock = switch (placementState.blockFace()) {
             case BOTTOM -> {
                 // Attach to top, determine rotation
                 float yaw = placementState.playerPosition().yaw() + 180;
@@ -108,6 +108,7 @@ public class HangingSignPlacementRule extends BaseBlockPlacementRule {
                 yield wallHangingSign.withProperty("facing", "north");
             }
         };
+        return signBlock == null ? null : signBlock.withProperty("waterlogged", waterlogged(placementState));
     }
 
     private boolean isBlockNarrowEnough(@NotNull Block block) {

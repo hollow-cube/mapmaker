@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
+public class FacingClickHorizontalPlacementRule extends WaterloggedPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.WEST,
@@ -20,10 +20,12 @@ public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_FACING = "facing";
 
     private final boolean invert;
+    private final boolean canBeWaterlogged;
 
     public FacingClickHorizontalPlacementRule(@NotNull Block block, boolean invert) {
         super(block);
         this.invert = invert;
+        this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
@@ -34,7 +36,8 @@ public class FacingClickHorizontalPlacementRule extends BaseBlockPlacementRule {
             case TOP, BOTTOM -> getImplicitFace(placementState);
         };
         if (targetFace == null) return null;
-        return block.withProperty(PROP_FACING, (invert ? targetFace.getOppositeFace() : targetFace).name().toLowerCase());
+        final Block result = block.withProperty(PROP_FACING, (invert ? targetFace.getOppositeFace() : targetFace).name().toLowerCase());
+        return canBeWaterlogged ? result.withProperty("waterlogged", waterlogged(placementState)) : result;
     }
 
     // Computes the horizontal face "closest" to the player in case they clicked the top or bottom face.

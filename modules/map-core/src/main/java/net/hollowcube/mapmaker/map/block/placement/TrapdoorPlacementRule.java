@@ -7,9 +7,10 @@ import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 
-public class TrapdoorPlacementRule extends BaseBlockPlacementRule {
+public class TrapdoorPlacementRule extends WaterloggedPlacementRule {
     private static final String PROP_HALF = "half";
     private static final String PROP_FACING = "facing";
 
@@ -25,14 +26,22 @@ public class TrapdoorPlacementRule extends BaseBlockPlacementRule {
                 var cursorPosition = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO);
                 var half = cursorPosition.y() > 0.5 ? "top" : "bottom";
                 var facing = placeFace.name().toLowerCase();
-                yield block.withProperty(PROP_HALF, half).withProperty(PROP_FACING, facing);
+                yield block.withProperties(Map.of(
+                        PROP_HALF, half,
+                        PROP_FACING, facing,
+                        "waterlogged", waterlogged(placementState)
+                ));
             }
             case TOP, BOTTOM -> {
                 var half = placeFace.getOppositeFace().name().toLowerCase();
                 var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
                 var facing = BlockFace.fromYaw(playerPosition.yaw())
                         .getOppositeFace().name().toLowerCase();
-                yield block.withProperty(PROP_HALF, half).withProperty(PROP_FACING, facing);
+                yield block.withProperties(Map.of(
+                        PROP_HALF, half,
+                        PROP_FACING, facing,
+                        "waterlogged", waterlogged(placementState)
+                ));
             }
         };
     }

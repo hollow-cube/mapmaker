@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class FencePlacementRule extends BaseBlockPlacementRule {
+public class FencePlacementRule extends WaterloggedPlacementRule {
     private static final List<BlockFace> HORIZONTAL_FACES = List.of(
             BlockFace.NORTH,
             BlockFace.EAST,
@@ -29,6 +29,7 @@ public class FencePlacementRule extends BaseBlockPlacementRule {
 
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        final Block block = super.blockPlace(placementState); // Waterlogged
         return genericUpdateState(placementState.instance(), block, placementState.placePosition(), null);
     }
 

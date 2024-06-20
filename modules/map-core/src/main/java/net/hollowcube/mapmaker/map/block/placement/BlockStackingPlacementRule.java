@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Also usable for sea pickles
  */
-public class BlockStackingPlacementRule extends BaseBlockPlacementRule {
+public class BlockStackingPlacementRule extends WaterloggedPlacementRule {
     private static final int MAX_AMOUNT = 4;
 
     //todo sea pickles should be waterlogged by default if placed in water, otherwise not. I think this is the case for all waterlogg-able blocks.
@@ -36,8 +36,7 @@ public class BlockStackingPlacementRule extends BaseBlockPlacementRule {
         }
 
         if (canBeWaterlogged) {
-            var waterlogged = String.valueOf(existingBlock.id() == Block.WATER.id());
-            return block.withProperty("waterlogged", waterlogged);
+            return block.withProperty("waterlogged", waterlogged(existingBlock));
         }
 
         return block;

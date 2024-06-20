@@ -8,12 +8,14 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
-public class FacingHorizontalPlacementRule extends BaseBlockPlacementRule {
+public class FacingHorizontalPlacementRule extends WaterloggedPlacementRule {
     private final boolean invert;
+    private final boolean canBeWaterlogged;
 
     public FacingHorizontalPlacementRule(@NotNull Block block, boolean invert) {
         super(block);
         this.invert = invert;
+        this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
@@ -21,6 +23,7 @@ public class FacingHorizontalPlacementRule extends BaseBlockPlacementRule {
         var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         var facing = BlockFace.fromYaw(playerPosition.yaw());
         if (invert) facing = facing.getOppositeFace();
-        return block.withProperty("facing", facing.name().toLowerCase());
+        final Block result = block.withProperty("facing", facing.name().toLowerCase());
+        return canBeWaterlogged ? result.withProperty("waterlogged", waterlogged(placementState)) : result;
     }
 }

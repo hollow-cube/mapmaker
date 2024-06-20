@@ -115,7 +115,7 @@ public class InteractionRules {
 
     private static void handleBlockBreak(@NotNull PlayerBlockBreakEvent event) {
         var block = event.getBlock();
-        if ("true".equals(block.getProperty("waterlogged")))
+        if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.namespace()))
             event.setResultBlock(Block.WATER);
     }
 

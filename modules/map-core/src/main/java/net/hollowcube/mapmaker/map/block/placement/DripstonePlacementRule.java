@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-public class DripstonePlacementRule extends BaseBlockPlacementRule {
+public class DripstonePlacementRule extends WaterloggedPlacementRule {
     private static final String PROP_VERTICAL_DIRECTION = "vertical_direction"; // Tip, frustum, middle(0 or more), base
     private static final String PROP_THICKNESS = "thickness";
 
@@ -30,7 +30,8 @@ public class DripstonePlacementRule extends BaseBlockPlacementRule {
         var thickness = getThickness(placementState.instance(), placementState.placePosition(), direction.equals("up"));
         return block.withProperties(Map.of(
                 PROP_VERTICAL_DIRECTION, direction,
-                PROP_THICKNESS, thickness
+                PROP_THICKNESS, thickness,
+                "waterlogged", waterlogged(placementState)
         ));
     }
 

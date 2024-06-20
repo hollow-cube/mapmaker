@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
-public class WallPlacementRule extends BaseBlockPlacementRule {
+public class WallPlacementRule extends WaterloggedPlacementRule {
     private static final BlockFace[] HORIZONTAL_FACES = new BlockFace[]{
             BlockFace.NORTH,
             BlockFace.SOUTH,
@@ -89,7 +89,8 @@ public class WallPlacementRule extends BaseBlockPlacementRule {
                 "north", north,
                 "south", south,
                 "west", west,
-                "up", up
+                "up", up,
+                "waterlogged", waterlogged(placementState)
         ));
     }
 

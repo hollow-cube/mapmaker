@@ -163,6 +163,9 @@ public final class BlockTags {
             Block.WHEAT, Block.CARROTS, Block.NETHER_WART, Block.POTATOES,
             Block.PITCHER_CROP, Block.BEETROOTS, Block.COCOA
     );
+    public static final Collection<NamespaceID> PRE_WATERLOGGED_BLOCKS = create(
+            Block.KELP, Block.KELP_PLANT
+    );
 
     private static @NotNull Collection<NamespaceID> extend(@NotNull Collection<NamespaceID> tag, @NotNull Block... block) {
         var set = new HashSet<>(tag);

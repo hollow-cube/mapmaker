@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
-public class StairPlacementRule extends BaseBlockPlacementRule {
+public class StairPlacementRule extends WaterloggedPlacementRule {
     private static final BlockFace[][] HORIZONTAL_FACING = new BlockFace[][]{
             // indices here are blockface.ordinal - 2
             /* NORTH */{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST},
@@ -36,20 +36,21 @@ public class StairPlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        var placeFace = placementState.blockFace();
-        var placeY = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y();
+    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+        var placeFace = placement.blockFace();
+        var placeY = Objects.requireNonNullElse(placement.cursorPosition(), Vec.ZERO).y();
         var half = placeFace == BlockFace.TOP || (placeFace != BlockFace.BOTTOM && placeY < 0.5) ? "bottom" : "top";
 
         // Facing is always the player facing direction, and is never updated
-        var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
+        var playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
         var facing = BlockFace.fromYaw(playerPosition.yaw());
 
         var block = this.block.withProperties(Map.of(
                 PROP_HALF, half,
-                PROP_FACING, facing.name().toLowerCase()
+                PROP_FACING, facing.name().toLowerCase(),
+                "waterlogged", super.waterlogged(placement)
         ));
-        return genericUpdateShape(placementState.instance(), block, placementState.placePosition());
+        return genericUpdateShape(placement.instance(), block, placement.placePosition());
     }
 
     private @NotNull Block genericUpdateShape(@NotNull Block.Getter instance, @NotNull Block block, @NotNull Point blockPos) {

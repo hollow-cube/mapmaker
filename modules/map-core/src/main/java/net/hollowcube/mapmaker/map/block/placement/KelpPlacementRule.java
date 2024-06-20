@@ -5,10 +5,10 @@ import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
-public class KelpPlacementRule extends FacingHorizontalPlacementRule {
+public class KelpPlacementRule extends BaseBlockPlacementRule {
 
     public KelpPlacementRule(@NotNull Block block) {
-        super(block, true);
+        super(block);
     }
 
     @Override
@@ -30,17 +30,14 @@ public class KelpPlacementRule extends FacingHorizontalPlacementRule {
         var posBelow = placementState.placePosition().add(0, -1, 0);
         var blockBelow = placementState.instance().getBlock(posBelow, Block.Getter.Condition.TYPE);
         if (blockBelow.id() == Block.KELP.id() || blockBelow.id() == Block.KELP_PLANT.id())
-            // If below has facing, use that.
             return this.block;
 
         var posAbove = placementState.placePosition().add(0, 1, 0);
         var blockAbove = placementState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);
         if (blockAbove.id() == Block.KELP.id() || blockAbove.id() == Block.KELP_PLANT.id())
-            // If above has facing, use that.
-            return this.block;
+            return Block.KELP_PLANT;
 
-        // Otherwise, use the inverted player facing handled by the superclass.
-        return super.blockPlace(placementState);
+        return this.block;
     }
 
     @Override

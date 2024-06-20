@@ -6,9 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class SmallFlowerPlacementRule extends BaseBlockPlacementRule {
+public class SmallFlowerPlacementRule extends WaterloggedPlacementRule {
+    private final boolean canBeWaterlogged;
+
     public SmallFlowerPlacementRule(@NotNull Block block) {
         super(block);
+        this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
@@ -18,8 +21,8 @@ public class SmallFlowerPlacementRule extends BaseBlockPlacementRule {
             if (BlockTags.POTTABLE_FLOWERS.contains(block.namespace()))
                 return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
             return null;
-        } else {
-            return block;
         }
+
+        return canBeWaterlogged ? block.withProperty("waterlogged", waterlogged(placementState)) : block;
     }
 }
