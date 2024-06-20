@@ -72,6 +72,7 @@ public class InteractionRules {
     // Handler functions
 
     private static void handleBlockInteract(@NotNull PlayerBlockInteractEvent event) {
+        if (event.isCancelled() || event.isBlockingItemUse()) return;
         //todo how to block the other hand from interacting when we get this event _if_ we handled it in the main hand
         // for now just disable all interactions in off hand
         if (event.getHand() != Player.Hand.MAIN) return;
@@ -119,6 +120,7 @@ public class InteractionRules {
     }
 
     private static void handleItemUse(@NotNull PlayerUseItemEvent event) {
+        if (event.isCancelled()) return;
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var player = event.getPlayer();

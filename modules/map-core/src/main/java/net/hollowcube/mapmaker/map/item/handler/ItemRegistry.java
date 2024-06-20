@@ -174,6 +174,7 @@ public class ItemRegistry implements PlayerCooldown {
     }
 
     private void handleUseItem(@NotNull PlayerUseItemEvent event) {
+        if (event.isCancelled()) return;
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var itemHandler = getHandlerFromItemStack(event.getItemStack());
@@ -199,6 +200,7 @@ public class ItemRegistry implements PlayerCooldown {
     }
 
     private void handleUseItemOnBlock(@NotNull PlayerBlockInteractEvent event) {
+        if (event.isCancelled() || event.isBlockingItemUse()) return;
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var player = event.getPlayer();
@@ -246,6 +248,7 @@ public class ItemRegistry implements PlayerCooldown {
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         if (event.getHand() != Player.Hand.MAIN) return;
 
         var itemStack = event.getPlayer().getItemInHand(event.getHand());
@@ -269,6 +272,7 @@ public class ItemRegistry implements PlayerCooldown {
     }
 
     private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {
+        if (event.isCancelled()) return;
         var itemStack = event.getPlayer().getItemInHand(Player.Hand.MAIN);
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_BLOCK)) return;

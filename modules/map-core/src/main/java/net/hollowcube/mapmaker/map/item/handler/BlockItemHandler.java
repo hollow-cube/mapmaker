@@ -45,11 +45,6 @@ public class BlockItemHandler extends ItemHandler {
     }
 
     @Override
-    public int customModelData() {
-        return 123; // Must be some value to not be registered to the default block.
-    }
-
-    @Override
     protected void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler data) {
         if (updateFunc != null) updateFunc.updateItemStack(builder, data);
     }
