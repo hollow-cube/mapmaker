@@ -21,7 +21,7 @@ public class ModelCosmeticImpl extends CosmeticImpl {
                 .set(ItemComponent.LORE, cosmetic.lore())
                 .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id()).cmd())
                 .set(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(255, 255, 255), false))
-                .remove(ItemComponent.ATTRIBUTE_MODIFIERS)
+                .hideExtraTooltip()
                 .build()
                 // stupid, builder settag should return the builder...
                 .withTag(COSMETIC_TAG, true);

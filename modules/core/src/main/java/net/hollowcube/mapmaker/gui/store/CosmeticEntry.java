@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.gui.store;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
@@ -11,6 +12,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -20,6 +22,7 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -105,6 +108,9 @@ public class CosmeticEntry extends View {
     private final boolean isLocked;
     private final int row;
 
+    private ItemStack offItemStack = null;
+    private boolean isPreviewing = false;
+
     public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack, @NotNull Cosmetic cosmetic, boolean isLocked, int row) {
         super(context);
         this.playerData = playerData;
@@ -135,21 +141,46 @@ public class CosmeticEntry extends View {
             } else {
                 lore.add(Component.translatable(isLocked ? "cosmetic.locked" : "cosmetic.select"));
             }
-            offIcon.setComponentsDirect(itemIcon.get(ItemComponent.CUSTOM_NAME), lore);
+            if (isLocked && cosmetic.impl() instanceof ModelCosmeticImpl) {
+                lore.add(Component.empty());
+                lore.add(Component.translatable("cosmetic.preview"));
+            }
+            offItemStack = itemIcon.withLore(lore);
+            offIcon.setItemDirect(offItemStack);
+
         }
 
         rootSwitch.setOption(isSelected() ? 1 : 0);
     }
 
     @Action("off")
-    public void handleSelectCosmetic(@NotNull Player player) {
-        if (isLocked) {
-            tryBuyCosmetic();
-            return;
-        }
+    public void handleSelectCosmetic(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        switch (clickType) {
+            case LEFT_CLICK -> {
+                if (isLocked) {
+                    tryBuyCosmetic();
+                    return;
+                }
 
-        playerData.setCosmetic(cosmetic.type(), cosmetic);
-        performSignal(UPDATE_SELECTED);
+                playerData.setCosmetic(cosmetic.type(), cosmetic);
+                performSignal(UPDATE_SELECTED);
+            }
+            case RIGHT_CLICK -> {
+                // Preview the 3d cosmetic
+                if (isPreviewing) {
+                    isPreviewing = false;
+                    offIcon.setItemDirect(offItemStack);
+                } else if (isLocked && cosmetic.impl() instanceof ModelCosmeticImpl model) {
+                    isPreviewing = true;
+                    var previewItem = model.iconItem().builder()
+                            .customName(offItemStack.get(ItemComponent.CUSTOM_NAME))
+                            .lore(offItemStack.get(ItemComponent.LORE))
+                            .build();
+                    offIcon.setItemDirect(previewItem);
+                }
+
+            }
+        }
     }
 
     @Action("on")
