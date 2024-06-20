@@ -1,4 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_proto_library")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library")
 
 java_library(
     name = "map-core",
@@ -23,5 +24,18 @@ java_library(
         "@maven//:net_kyori_adventure_nbt",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:org_slf4j_jul_to_slf4j",
+    ],
+)
+
+java_junit5_test(
+    name = "map-core_test",
+    srcs = glob(include = ["src/test/java/**/*.java"]),
+    resources = glob(include = ["src/test/resources/**/*"]),
+    test_class = "net.hollowcube.mapmaker.map.MapCoreTestSuite",
+    deps = [
+        ":map-core",
+        "//modules/terraform",
+        "//modules/test",
+        "@maven//:net_minestom_minestom_snapshots",
     ],
 )

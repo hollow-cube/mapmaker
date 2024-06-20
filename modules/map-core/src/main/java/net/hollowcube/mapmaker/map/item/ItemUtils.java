@@ -18,7 +18,8 @@ public final class ItemUtils {
 
     public static @NotNull Component translation(@NotNull Material material) {
         var namespace = material.namespace();
-        var translationKey = String.format("item.%s.%s", namespace.namespace(), namespace.path());
+        String prefix = material.isBlock() ? "block" : "item";
+        var translationKey = String.format("%s.%s.%s", prefix, namespace.namespace(), namespace.path());
         return Component.translatable(translationKey);
     }
 }

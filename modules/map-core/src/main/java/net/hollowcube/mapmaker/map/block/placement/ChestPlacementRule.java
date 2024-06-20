@@ -1,194 +1,98 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.block.BlockUtils;
+import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+
+@SuppressWarnings("UnstableApiUsage")
 public class ChestPlacementRule extends BaseBlockPlacementRule {
+
+    private static final BlockFace[][] CONNECTION_FACES = new BlockFace[][]{
+            // Indices are BlockFace#ordinal() - 2
+            /*North*/{BlockFace.EAST, BlockFace.WEST},
+            /*South*/{BlockFace.WEST, BlockFace.EAST},
+            /*West*/{BlockFace.NORTH, BlockFace.SOUTH},
+            /*East*/{BlockFace.SOUTH, BlockFace.NORTH}
+    };
 
     public ChestPlacementRule(@NotNull Block block) {
         super(block);
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
-        Block currBlock = updateState.currentBlock();
-        String facingDirection = currBlock.getProperty("facing");
-        BlockUtils blockUtils = new BlockUtils(updateState.instance(), updateState.blockPosition());
-        if (currBlock.getProperty("type").equals("single")) {
-            // Check for connected chests
-            switch (facingDirection) {
-                case "north" -> {
-                    Block westBlock = blockUtils.west().getBlock();
-                    Block eastBlock = blockUtils.east().getBlock();
-                    if (westBlock.compare(currBlock) && westBlock.getProperty("facing").equals(facingDirection) && westBlock.getProperty("type").equals("left")) {
-                        return currBlock.withProperty("type", "right");
-                    }
-                    if (eastBlock.compare(currBlock) && eastBlock.getProperty("facing").equals(facingDirection) && eastBlock.getProperty("type").equals("right")) {
-                        return currBlock.withProperty("type", "left");
-                    }
-                }
-                case "south" -> {
-                    Block westBlock = blockUtils.west().getBlock();
-                    Block eastBlock = blockUtils.east().getBlock();
-                    if (westBlock.compare(currBlock) && westBlock.getProperty("facing").equals(facingDirection) && westBlock.getProperty("type").equals("right")) {
-                        return currBlock.withProperty("type", "left");
-                    }
-                    if (eastBlock.compare(currBlock) && eastBlock.getProperty("facing").equals(facingDirection) && eastBlock.getProperty("type").equals("left")) {
-                        return currBlock.withProperty("type", "right");
-                    }
-                }
-                case "east" -> {
-                    Block northBlock = blockUtils.north().getBlock();
-                    Block southBlock = blockUtils.south().getBlock();
-                    if (northBlock.compare(currBlock) && northBlock.getProperty("facing").equals(facingDirection) && northBlock.getProperty("type").equals("left")) {
-                        return currBlock.withProperty("type", "right");
-                    }
-                    if (southBlock.compare(currBlock) && southBlock.getProperty("facing").equals(facingDirection) && southBlock.getProperty("type").equals("right")) {
-                        return currBlock.withProperty("type", "left");
-                    }
-                }
-                case "west" -> {
-                    Block northBlock = blockUtils.north().getBlock();
-                    Block southBlock = blockUtils.south().getBlock();
-                    if (northBlock.compare(currBlock) && northBlock.getProperty("facing").equals(facingDirection) && northBlock.getProperty("type").equals("right")) {
-                        return currBlock.withProperty("type", "left");
-                    }
-                    if (southBlock.compare(currBlock) && southBlock.getProperty("facing").equals(facingDirection) && southBlock.getProperty("type").equals("left")) {
-                        return currBlock.withProperty("type", "right");
-                    }
-                }
-            }
-        } else {
-            switch (facingDirection) {
-                case "north" -> {
-                    if (currBlock.getProperty("type").equals("left")) {
-                        if (!blockUtils.east().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    } else if (currBlock.getProperty("type").equals("right")) {
-                        if (!blockUtils.west().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    }
-                }
-                case "south" -> {
-                    if (currBlock.getProperty("type").equals("left")) {
-                        if (!blockUtils.west().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    } else if (currBlock.getProperty("type").equals("right")) {
-                        if (!blockUtils.east().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    }
-                }
-                case "east" -> {
-                    if (currBlock.getProperty("type").equals("left")) {
-                        if (!blockUtils.south().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    } else if (currBlock.getProperty("type").equals("right")) {
-                        if (!blockUtils.north().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    }
-                }
-                case "west" -> {
-                    if (currBlock.getProperty("type").equals("left")) {
-                        if (!blockUtils.north().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    } else if (currBlock.getProperty("type").equals("right")) {
-                        if (!blockUtils.south().getBlock().compare(currBlock)) {
-                            return currBlock.withProperty("type", "single");
-                        }
-                    }
-                }
+    public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placement) {
+        final Point blockPosition = placement.placePosition();
+        final Pos playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
+        final BlockFace facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace();
+
+        String type = "single";
+        if (!placement.isPlayerShifting()) {
+            for (int i = 0; i < 2; i++) {
+                final BlockFace connection = CONNECTION_FACES[facing.ordinal() - 2][i];
+                final Block neighbor = placement.instance().getBlock(blockPosition.relative(connection), Block.Getter.Condition.TYPE);
+
+                // Must be the same type chest (ie chest or trapped chest)
+                if (neighbor.id() != this.block.id()) continue;
+                // Must be facing the same way
+                if (!neighbor.getProperty("facing").equals(facing.toString().toLowerCase(Locale.ROOT))) continue;
+                // Must be a single chest
+                if (!neighbor.getProperty("type").equals("single")) continue;
+
+                type = i == 0 ? "left" : "right";
+                break;
             }
         }
-        return currBlock;
+
+        return block.withProperties(Map.of(
+                "type", type,
+                "facing", facing.toString().toLowerCase(Locale.ROOT)
+        ));
     }
 
-    //       North: -Z
-    // West: -X      East: +X
-    //       South: +Z
-
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
-        Block currBlock = super.block;
-        switch (placementState.blockFace()) {
-            case TOP, BOTTOM -> {
-                float yaw = placementState.playerPosition().yaw();
-                if (yaw >= 135 || yaw <= -135) {
-                    currBlock = currBlock.withProperty("facing", "south");
-                } else if (yaw >= 45) {
-                    currBlock = currBlock.withProperty("facing", "east");
-                } else if (yaw >= -45) {
-                    currBlock = currBlock.withProperty("facing", "north");
-                } else {
-                    currBlock = currBlock.withProperty("facing", "west");
-                }
-            }
-            case EAST -> currBlock = currBlock.withProperty("facing", "west");
-            case SOUTH -> currBlock = currBlock.withProperty("facing", "north");
-            case NORTH -> currBlock = currBlock.withProperty("facing", "south");
-            case WEST -> currBlock = currBlock.withProperty("facing", "east");
+    public @NotNull Block blockUpdate(@NotNull BlockPlacementRule.UpdateState update) {
+        final Block currentBlock = update.currentBlock();
+        final Point blockPosition = update.blockPosition();
+
+        final Block fromBlock = update.instance().getBlock(blockPosition.relative(update.fromFace()), Block.Getter.Condition.TYPE);
+        if (fromBlock.isAir()) {
+            // Block was destroyed, so we may want to revert to a single chest
+            final BlockFace facing = BlockFace.valueOf(currentBlock.getProperty("facing").toUpperCase(Locale.ROOT));
+            final String type = currentBlock.getProperty("type");
+            // Single chests never need break updates
+            if ("single".equals(type)) return super.blockUpdate(update);
+
+            BlockFace expectedFace = CONNECTION_FACES[facing.ordinal() - 2][type.equals("left") ? 0 : 1];
+            if (expectedFace != update.fromFace()) return super.blockUpdate(update);
+
+            return currentBlock.withProperty("type", "single");
         }
-        if (!placementState.isPlayerShifting()) {
-            String facingDirection = currBlock.getProperty("facing");
-            BlockUtils blockUtils = new BlockUtils(placementState.instance(), placementState.placePosition());
-            // Check and try to make double chests
-            // To combine into a double chest, it must be facing the same way on the left or right sides of the chest and must be the same type of chest
-            switch (facingDirection) {
-                case "south", "north" -> {
-                    // Check blocks +/- X direction
-                    Block east = blockUtils.east().getBlock();
-                    Block west = blockUtils.west().getBlock();
-                    if (east.compare(block) && east.getProperty("facing").equals(facingDirection) && east.getProperty("type").equals("single")) {
-                        // Valid chest, update self, neighbor update resolved in blockUpdate()
-                        if (facingDirection.equals("south")) {
-                            return currBlock.withProperty("type", "right");
-                        } else {
-                            return currBlock.withProperty("type", "left");
-                        }
-                    }
-                    if (west.compare(block) && west.getProperty("facing").equals(facingDirection) && west.getProperty("type").equals("single")) {
-                        // Valid chest, update self, neighbor update resolved in blockUpdate()
-                        if (facingDirection.equals("south")) {
-                            return currBlock.withProperty("type", "left");
-                        } else {
-                            return currBlock.withProperty("type", "right");
-                        }
-                    }
-                }
-                case "east", "west" -> {
-                    // Check blocks +/- Z direction
-                    Block south = blockUtils.south().getBlock();
-                    Block north = blockUtils.north().getBlock();
-                    if (south.compare(block) && south.getProperty("facing").equals(facingDirection) && south.getProperty("type").equals("single")) {
-                        // Valid chest, update self, neighbor update resolved in blockUpdate()
-                        if (facingDirection.equals("west")) {
-                            return currBlock.withProperty("type", "right");
-                        } else {
-                            return currBlock.withProperty("type", "left");
-                        }
-                    }
-                    if (north.compare(block) && north.getProperty("facing").equals(facingDirection) && north.getProperty("type").equals("single")) {
-                        // Valid chest, update self, neighbor update resolved in blockUpdate()
-                        if (facingDirection.equals("west")) {
-                            return currBlock.withProperty("type", "left");
-                        } else {
-                            return currBlock.withProperty("type", "right");
-                        }
-                    }
-                }
-            }
-        } else {
-            return currBlock.withProperty("type", "single");
-        }
-        return currBlock;
+
+        // We only care about updates from chests.
+        if (fromBlock.id() != this.block.id()) return super.blockUpdate(update);
+
+        // The updating chest must be facing our direction
+        final BlockFace fromFacing = BlockFace.valueOf(fromBlock.getProperty("facing").toUpperCase(Locale.ROOT));
+        if (!fromBlock.getProperty("facing").equals(update.currentBlock().getProperty("facing")))
+            return super.blockUpdate(update);
+
+        // The updating chest must be type=towards us.
+        String fromType = fromBlock.getProperty("type");
+        if ("single".equals(fromType)) return super.blockUpdate(update);
+        int targetIndex = "right".equals(fromType) ? 0 : 1;
+        BlockFace targetFace = CONNECTION_FACES[fromFacing.ordinal() - 2][targetIndex];
+        if (targetFace != update.fromFace()) return super.blockUpdate(update);
+
+        // Yay we can connect to it
+        return update.currentBlock().withProperty("type", targetIndex == 0 ? "left" : "right");
     }
 
     @Override
