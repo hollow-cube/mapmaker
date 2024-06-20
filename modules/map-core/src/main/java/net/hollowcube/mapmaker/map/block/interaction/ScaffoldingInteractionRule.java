@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
-import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -43,8 +42,10 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
 
             var placeFace = BlockFace.fromYaw(interaction.player().getPosition().yaw());
             // Add 2 because this is triggering before the block, and the block position is exactly on so need to move in from the wb.
-            for (int i = 0; i < MAX_PLACE_DISTANCE && worldBorder.inBounds(CoordinateUtil.abs(blockPosition).add(2)); i++) {
+            for (int i = 0; i < MAX_PLACE_DISTANCE; i++) {
                 blockPosition = blockPosition.relative(placeFace);
+                if (!worldBorder.inBounds(blockPosition)) break;
+
                 block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
                 if (block.id() == SCAFFOLDING_BLOCK) continue;
                 if (!block.isAir()) break;
