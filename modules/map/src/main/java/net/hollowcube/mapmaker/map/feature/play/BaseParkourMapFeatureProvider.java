@@ -641,7 +641,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 // If the ghost rule is used then we never hide the player (but they will become invisible)
                 if (rule == VisibilityRule.GHOST) return true;
                 // Otherwise, hide the player if they are too close
-                return player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE;
+//                return player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE;
+                return false; // Always hide all others
             } else if (world.isSpectating(other)) {
                 // Always hide spectators if they are too close. Note that this does not execute for spectators
                 // so this will not stop them from seeing each other.

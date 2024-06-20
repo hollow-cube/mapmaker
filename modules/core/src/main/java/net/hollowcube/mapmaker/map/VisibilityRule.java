@@ -8,6 +8,6 @@ package net.hollowcube.mapmaker.map;
 public enum VisibilityRule {
     // Nearby players are turned into spectator ghosts
     GHOST,
-    // Nearby players are hidden completely
+    // All players are hidden completely
     HIDDEN
 }
