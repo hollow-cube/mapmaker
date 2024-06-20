@@ -23,7 +23,7 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
         var usedItemStack = placementState.usedItemStack();
 
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
-        if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) {
+        if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM || placementState.instance().getBlock(placementState.placePosition().relative(blockFace.getOppositeFace()), Block.Getter.Condition.TYPE).isAir()) {
             var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
             int rotation = (int) (Math.round((playerPosition.yaw() + 360) / 22.5d) % 16);
 
