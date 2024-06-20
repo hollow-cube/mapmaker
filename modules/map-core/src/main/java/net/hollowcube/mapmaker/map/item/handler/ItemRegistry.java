@@ -109,7 +109,7 @@ public class ItemRegistry implements PlayerCooldown {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() >= 0) {
+            if (itemHandler.customModelData() != -1) {
                 customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
             } else {
                 materialToItemHandler.put(itemHandler.material().id(), itemHandler);
@@ -129,7 +129,7 @@ public class ItemRegistry implements PlayerCooldown {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() >= 0) {
+            if (itemHandler.customModelData() != -1) {
                 customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
             } else {
                 materialToItemHandler.put(itemHandler.material().id(), itemHandler);
