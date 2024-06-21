@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
-import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -14,7 +13,7 @@ import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class CyberpunkTrainFeature implements HubFeature {
 
     private static final Point TRAIN_START = new Vec(-67.5, 75, -55.6);

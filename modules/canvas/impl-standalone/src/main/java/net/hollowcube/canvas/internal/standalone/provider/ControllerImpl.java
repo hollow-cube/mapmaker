@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.canvas.internal.ViewProvider;
 import net.hollowcube.canvas.internal.standalone.context.RenderableContext;
 import net.hollowcube.canvas.internal.standalone.context.RootContext;
+import net.hollowcube.common.util.FutureUtil;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +38,7 @@ public class ControllerImpl implements Controller {
         inventory.pushView(viewProvider.apply(context), false);
         if (inventory.getElement().isAnyLoading()) {
             final long end1 = System.currentTimeMillis();
-            Thread.startVirtualThread(() -> {
+            FutureUtil.submitVirtual(() -> {
                 //todo this is a bit of a hack, should be revisited to make it event based (eg inventory notifies when its done loading)
 
                 var now = System.currentTimeMillis();

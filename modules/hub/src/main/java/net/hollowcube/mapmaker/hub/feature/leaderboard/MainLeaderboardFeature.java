@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.feature.leaderboard;
 import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapService;
@@ -60,8 +61,10 @@ public class MainLeaderboardFeature implements HubFeature {
 
     // Called once every minute to update the leaderboards (tick up the time since update then update if necessary)
     public void update() {
-        parkourLeaderboard.update();
-        buildingLeaderboard.update();
+        FutureUtil.submitVirtual(() -> {
+            parkourLeaderboard.update();
+            buildingLeaderboard.update();
+        });
     }
 
 }

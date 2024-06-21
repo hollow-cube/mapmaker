@@ -52,6 +52,7 @@ public class MapOfTheWeekFeature implements HubFeature {
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {
         player.sendMessage(Component.translatable("motw.coming_soon"));
 //        try {
+        //todo in vthread
 //            player.sendMessage(Component.translatable("motw.joining"));
 //            bridge.joinMap(player, "14b8a361-7cba-49ec-933c-14faad11f385", ServerBridge.JoinMapState.PLAYING);
 //        } catch (Exception e) {
