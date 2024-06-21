@@ -26,10 +26,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
-import net.hollowcube.mapmaker.command.DiscordCommand;
-import net.hollowcube.mapmaker.command.EmojisCommand;
-import net.hollowcube.mapmaker.command.LinkCommand;
-import net.hollowcube.mapmaker.command.PlayCommand;
+import net.hollowcube.mapmaker.command.*;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
@@ -367,6 +364,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(createInstance(MinestomCommand.class));
         commandManager.register(createInstance(EmojisCommand.class));
+        commandManager.register(createInstance(CosmeticsCommand.class));
         commandManager.register(createDebugCommand());
         commandManager.register(createInstance(StoreCommand.class));
         commandManager.register(createInstance(DiscordCommand.class));

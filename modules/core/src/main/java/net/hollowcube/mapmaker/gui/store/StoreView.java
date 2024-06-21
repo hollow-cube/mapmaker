@@ -13,6 +13,8 @@ import java.util.Objects;
 
 public class StoreView extends View {
 
+    public static final int TAB_HYPERCUBE = 1;
+
     private @Outlet("cubits_text") Text cubitsText;
     private @Outlet("hypercube_text") Text hypercubeText;
     private @Outlet("addons_text") Text addonsText;
@@ -23,6 +25,10 @@ public class StoreView extends View {
     private @OutletGroup("tab_id_.*") Label[] tabButtons;
 
     public StoreView(@NotNull Context context) {
+        this(context, 0);
+    }
+
+    public StoreView(@NotNull Context context, int tab) {
         super(context);
 
         cubitsText.setText("Buy Cubits");
@@ -36,6 +42,8 @@ public class StoreView extends View {
                     Label.ActionHandler.lmb(player -> selectTab(tabIndex))
             );
         }
+
+        selectTab(tab);
     }
 
     private void selectTab(int index) {

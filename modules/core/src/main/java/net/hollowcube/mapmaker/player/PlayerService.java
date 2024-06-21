@@ -48,6 +48,8 @@ public interface PlayerService {
     @NotNull
     CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String username, @NotNull String product);
 
+    @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId);
+
     enum LinkResult {
         SUCCESS,
         INVALID_SECRET,

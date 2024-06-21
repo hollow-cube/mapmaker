@@ -170,6 +170,20 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
+    public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(url + "/players/" + playerId + "/hypercube"));
+        var res = doRequest("getHypercubeStatus", req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), HypercubeStatus.class);
+            case 404 -> null;
+            default ->
+                    throw new InternalError("Failed to get hypercube status url (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    @Override
     public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
         var body = GSON.toJson(Map.of(
                 "verificationType", "discord",

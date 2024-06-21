@@ -10,7 +10,8 @@ public enum GenericMessages implements MessagesBase {
     COMMAND_MAP_LEGACY_IMPORT_NOT_FOUND("command.map.legacy.import.invalid_id"),
     COMMAND_MAP_LEGACY_IMPORT_UNKNOWN_ERROR("command.map.legacy.import.failure"),
     COMMAND_MAP_LEGACY_IMPORT_SUCCESS("command.map.legacy.import.success"),
-    ;
+
+    COMMAND_HYPERCUBE_SUBSCRIPTION_INFO("command.hypercube.subscription_info");
 
     private final String translationKey;
 

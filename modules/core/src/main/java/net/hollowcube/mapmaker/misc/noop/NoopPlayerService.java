@@ -73,6 +73,11 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
+    public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
+        return null;
+    }
+
+    @Override
     public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
         throw new UnsupportedOperationException("");
     }

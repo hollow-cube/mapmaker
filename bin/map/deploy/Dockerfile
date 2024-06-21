@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-ubi9-minimal
+FROM azul/zulu-openjdk-alpine:21-jre-headless
 
 WORKDIR /app
 
