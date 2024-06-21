@@ -70,6 +70,8 @@ public final class PlayState {
     private Optional<Integer> lives; // Number of lives remaining for the current state
     private Map<Long, Block> ghostBlocks;
 
+    private boolean tempReset = false;
+
     public PlayState() {
         this(Optional.empty(), List.of(), Optional.empty(),
                 Optional.empty(), Optional.empty(), new PotionEffectList(),
@@ -95,6 +97,8 @@ public final class PlayState {
         this.maxLives = maxLives;
         this.lives = lives;
         this.ghostBlocks = new HashMap<>(ghostBlocks);
+
+        this.tempReset = true;
     }
 
     public Optional<PlayState> lastState() {
@@ -179,6 +183,14 @@ public final class PlayState {
 
     public void setLives(int lives) {
         this.lives = lives <= 0 ? Optional.empty() : Optional.of(lives);
+    }
+
+    public boolean tempReset() {
+        return tempReset;
+    }
+
+    public void setTempReset(boolean tempReset) {
+        this.tempReset = tempReset;
     }
 
     public @NotNull PlayState copy() {

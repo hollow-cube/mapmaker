@@ -49,6 +49,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -110,6 +111,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 //                event.setCancelled(true); // Prevent processing block entity
 //                event.setBlockingItemUse(true); // Send ack (we have already sent block so the client will interpret as successful place)
 //            });
+
+    private static final Tag<Boolean> RESET_TAG = Tag.Boolean("mapmaker:play/reset").defaultValue(false);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -196,10 +199,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             updatePlayerFromState(player, playState);
 
             // If this is OS, reset the player as they are added
-            if (world.map().settings().isOnlySprint() && playState.pos().isPresent()) {
+            if (world.map().settings().isOnlySprint() && !player.getTag(RESET_TAG)) {
+                player.setTag(RESET_TAG, true);
+                player.scheduleNextTick(_ -> player.removeTag(RESET_TAG));
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
                 softReset(player, saveState);
             }
+
         }
     }
 
@@ -592,12 +598,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updateViewership(@NotNull MapWorld world) {
-        for (Player p : world.players()) {
+        for (Player p : Set.copyOf(world.players())) {
             p.updateViewerRule(); // Only players have special viewable rules
             if (p instanceof PlayerVisibilityExtension ve)
                 ve.updateVisibility();
         }
-        for (Player p : world.spectators()) {
+        for (Player p : Set.copyOf(world.spectators())) {
             if (p instanceof PlayerVisibilityExtension ve)
                 ve.updateVisibility();
         }
