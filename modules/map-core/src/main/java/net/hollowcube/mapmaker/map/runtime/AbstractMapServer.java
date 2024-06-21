@@ -258,7 +258,7 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue(chatMessageListener::close);
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
-            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr());
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr(), playerService);
             shutdowner.queue(playerDataUpdateConsumer::close);
         }
 
