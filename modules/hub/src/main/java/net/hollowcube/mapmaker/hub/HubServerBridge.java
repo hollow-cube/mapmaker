@@ -44,7 +44,7 @@ public class HubServerBridge implements ServerBridge {
             player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             MinecraftServer.getExceptionManager().handleException(e);
-            player.sendMessage(Component.text("An error occurred while trying to join the map. Please try again later."));
+            player.sendMessage(Component.translatable("map.join.fail"));
             player.clearTitle();
         }
     }

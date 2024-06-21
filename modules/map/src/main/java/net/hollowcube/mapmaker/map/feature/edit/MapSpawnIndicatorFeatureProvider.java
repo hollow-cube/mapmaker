@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.util.CoreTeams;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
@@ -77,7 +78,7 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
         if (world == null || !world.canEdit(player)) return;
 
         if (world.map().settings().getVariant() != MapVariant.PARKOUR) {
-            player.sendMessage("can only edit spawn settings on parkour maps.");
+            player.sendMessage(Component.translatable("map.spawn_point.not_parkour"));
             return;
         }
 

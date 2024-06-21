@@ -42,7 +42,7 @@ public class RemoveCommand extends CommandDsl {
             return;
         }
         if (playerName.length() > 16 || playerName.length() < 3) {
-            player.sendMessage(Component.text("generic.player_name_length"));
+            player.sendMessage(Component.translatable("generic.player_name_length"));
             return;
         }
 

@@ -27,6 +27,7 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -370,7 +371,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             var countdownEnd = player.getTag(COUNTDOWN_END);
             if (countdownEnd != -1 && countdownEnd < System.currentTimeMillis()) {
-                player.sendMessage("you ran out of time, todo add a sound effect or something");
+                player.sendMessage(Component.translatable("playing.timer.run_out"));
                 softReset(player, saveState);
                 return;
             }

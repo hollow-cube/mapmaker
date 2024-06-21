@@ -253,7 +253,7 @@ public class EditMap extends View {
             player.closeInventory();
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "edit_maps_gui_verify");
         } catch (Exception e) {
-            player.sendMessage(Component.text("Failed to verify map")); //todo use translation key
+            player.sendMessage(Component.translatable("map.verify.fail"));
             MinecraftServer.getExceptionManager().handleException(e);
         }
     }

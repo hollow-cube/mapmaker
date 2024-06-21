@@ -11,14 +11,12 @@ public class MinestomCommand extends CommandDsl {
 
     @Inject
     public MinestomCommand() {
-        super("minestom", "plugins", "pl");
+        super("minestom", "plugins", "pl", "server");
 
         addSyntax(this::sendMinestomInfo);
     }
 
     private void sendMinestomInfo(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage(Component.text()
-                .append(Component.text("todo format me better + add link + etc")).appendNewline()
-                .append(Component.text("We are using Minestom!")));
+        sender.sendMessage(Component.translatable("minestom.info"));
     }
 }
