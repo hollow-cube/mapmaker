@@ -11,8 +11,14 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.Locale;
+
 public class HypercubeCommand extends CommandDsl {
-    
+
 
     private final PlayerService playerService;
     private final Controller guiController;
@@ -37,10 +43,37 @@ public class HypercubeCommand extends CommandDsl {
             }
 
             player.sendMessage(GenericMessages.COMMAND_HYPERCUBE_SUBSCRIPTION_INFO.with(
-
+                    formatInstant(status.since()), formatInstant(status.until())
             ));
         } catch (Exception e) {
             player.sendMessage(GenericMessages.COMMAND_UNKNOWN_ERROR);
+        }
+    }
+
+    public static String formatInstant(Instant instant) {
+        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+
+        String month = zonedDateTime.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        int day = zonedDateTime.getDayOfMonth();
+        String daySuffix = getDayOfMonthSuffix(day);
+        int year = zonedDateTime.getYear();
+
+        return String.format("%s %d%s, %d", month, day, daySuffix, year);
+    }
+
+    private static String getDayOfMonthSuffix(int day) {
+        if (day >= 11 && day <= 13) {
+            return "th";
+        }
+        switch (day % 10) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
         }
     }
 

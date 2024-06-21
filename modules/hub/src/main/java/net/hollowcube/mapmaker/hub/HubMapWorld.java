@@ -7,10 +7,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
-import net.hollowcube.mapmaker.hub.item.CreateMapsItem;
-import net.hollowcube.mapmaker.hub.item.OpenCosmeticsMenuItem;
-import net.hollowcube.mapmaker.hub.item.OrgMapsItem;
-import net.hollowcube.mapmaker.hub.item.PlayMapsItem;
+import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -98,6 +95,7 @@ public class HubMapWorld extends AbstractMapWorld {
         itemRegistry().register(server().createInstance(CreateMapsItem.class));
         itemRegistry().register(server().createInstance(OrgMapsItem.class));
         itemRegistry().register(server().createInstance(OpenCosmeticsMenuItem.class));
+        itemRegistry().register(server().createInstance(OpenStoreItem.class));
     }
 
     @Override
@@ -162,6 +160,8 @@ public class HubMapWorld extends AbstractMapWorld {
         if (CoreFeatureFlags.ORGANIZATIONS.test(player)) {
             inventory.setItemStack(2, itemRegistry().getItemStack(OrgMapsItem.ID, null));
         }
+
+        inventory.setItemStack(4, itemRegistry().getItemStack(OpenStoreItem.ID, null));
 
         inventory.setItemStack(8, itemRegistry().getItemStack(OpenCosmeticsMenuItem.ID, null));
 

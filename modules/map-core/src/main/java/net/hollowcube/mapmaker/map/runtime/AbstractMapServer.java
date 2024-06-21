@@ -33,6 +33,7 @@ import net.hollowcube.mapmaker.command.punish.*;
 import net.hollowcube.mapmaker.command.staff.SFindCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
+import net.hollowcube.mapmaker.command.store.HypercubeCommand;
 import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
@@ -367,6 +368,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(createInstance(CosmeticsCommand.class));
         commandManager.register(createDebugCommand());
         commandManager.register(createInstance(StoreCommand.class));
+        commandManager.register(createInstance(HypercubeCommand.class));
         commandManager.register(createInstance(DiscordCommand.class));
         commandManager.register(createInstance(LinkCommand.class));
         commandManager.register(createInstance(NoobCommand.class));
