@@ -161,7 +161,7 @@ public class HubMapWorld extends AbstractMapWorld {
             inventory.setItemStack(2, itemRegistry().getItemStack(OrgMapsItem.ID, null));
         }
 
-        inventory.setItemStack(4, itemRegistry().getItemStack(OpenStoreItem.ID, null));
+        inventory.setItemStack(7, itemRegistry().getItemStack(OpenStoreItem.ID, null));
 
         inventory.setItemStack(8, itemRegistry().getItemStack(OpenCosmeticsMenuItem.ID, null));
 

@@ -119,6 +119,10 @@
     "type": "sprite",
     "ref": "icon/staff/dev_3"
   },
+  "HYPERCUBE": {
+    "type": "sprite",
+    "ref": "icon/hypercube/gold"
+  },
   "COINS": {
     "type": "sprite",
     "ref": "icon/store/coins",
