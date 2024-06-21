@@ -34,7 +34,7 @@ public class StoreView extends View {
 
         cubitsText.setText("Buy Cubits");
         hypercubeText.setText("Buy Hypercube");
-        addonsText.setText("Buy Addons");
+        addonsText.setText("Buy Add-Ons");
 
         for (int i = 0; i < tabButtons.length; i++) {
             var tabIndex = i;
