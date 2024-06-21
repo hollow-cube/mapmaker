@@ -1,7 +1,7 @@
 fullnameOverride: mapmaker-map
 
 nodeSelector:
-  nodepool: "main-sm"
+  nodepool: "release-temp"
 
 mapmaker:
   role: map
