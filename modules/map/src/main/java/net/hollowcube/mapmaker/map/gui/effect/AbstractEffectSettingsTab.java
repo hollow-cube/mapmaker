@@ -67,7 +67,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
         try {
             var newIndex = Integer.parseInt(index);
-            if (newIndex < 0 || newIndex > 99) return;
+            if (newIndex > 99) return;
+            if (newIndex < 1) newIndex = -1;
             data.setProgressIndex(newIndex);
             updateFromData();
         } catch (NumberFormatException ignored) {

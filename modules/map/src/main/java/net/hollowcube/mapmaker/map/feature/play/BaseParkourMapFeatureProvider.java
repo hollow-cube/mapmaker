@@ -259,8 +259,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Ensure the event should trigger a checkpoint change for the current players state
         int currentIndex = state.progressIndex().orElse(0);
-        if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1))
+        if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1)) {
+            player.sendMessage(Component.translatable("checkpoint.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
             return; // Player has already passed this progress index.
+        }
         if (state.lastState().isPresent() && state.lastState().get().hasStatus(event.checkpointId()))
             return; // Player already has this checkpoint in their history (they are backtracking)
 
