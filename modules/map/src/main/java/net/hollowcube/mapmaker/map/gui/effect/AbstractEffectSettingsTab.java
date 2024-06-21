@@ -54,7 +54,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Action("progress_index_text")
     public void handleChangeIndex() {
-        pushView(context -> new BaseEffectIndexAnvil(context, data.progressIndex() == -1 ? "" : String.valueOf(data.progressIndex())));
+        pushView(context -> new BaseEffectIndexAnvil(context, data.progressIndex() < 1 ? "" : String.valueOf(data.progressIndex())));
     }
 
     @Signal(BaseEffectIndexAnvil.SIG_UPDATE_NAME)
