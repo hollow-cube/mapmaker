@@ -80,7 +80,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -485,8 +484,6 @@ public abstract class AbstractMapServer implements MapServer {
      * <p>The future is not guaranteed to complete before other shutdown tasks are triggered (ie in the timeout case).</p>
      */
     private CompletableFuture<Void> awaitQuiescence() {
-        Audiences.players().sendMessage(Component.text("Shutdown started (this message is temp)"));
-
         var connectionManager = MinecraftServer.getConnectionManager();
         if (connectionManager.getOnlinePlayers().isEmpty()) return CompletableFuture.completedFuture(null);
 

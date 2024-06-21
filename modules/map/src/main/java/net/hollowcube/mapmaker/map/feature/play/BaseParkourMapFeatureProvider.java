@@ -194,6 +194,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
 
             updatePlayerFromState(player, playState);
+
+            // If this is OS, reset the player as they are added
+            if (world.map().settings().isOnlySprint() && playState.pos().isPresent()) {
+                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
+                softReset(player, saveState);
+            }
         }
     }
 
