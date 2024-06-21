@@ -47,44 +47,44 @@ public class CosmeticEntry extends View {
         var costs = new HashMap<String, Integer>();
 
         // Hats
-        costs.put("hat/top_hat", 999);
-        costs.put("hat/sunglasses", 999);
-        costs.put("hat/hard_hat", 999);
-        costs.put("hat/crown", 999);
-        costs.put("hat/clown_mask", 999);
-        costs.put("hat/bikers_helmet", 999);
-        costs.put("hat/samurai_helmet", 999);
-        costs.put("hat/kitsune_mask", 999);
-        costs.put("hat/apprentice_hat", 999);
-        costs.put("hat/wizard_hat", 999);
-        costs.put("hat/knight_helmet", 999);
-        costs.put("hat/evil_clown_mask", 999);
-        costs.put("hat/oni_mask", 999);
-        costs.put("hat/shark_hat", 999);
+        costs.put("hat/top_hat", 8);
+        costs.put("hat/sunglasses", 5);
+        costs.put("hat/hard_hat", 12);
+        costs.put("hat/crown", 10);
+        costs.put("hat/clown_mask", 28);
+        costs.put("hat/bikers_helmet", 20);
+        costs.put("hat/samurai_helmet", 25);
+        costs.put("hat/kitsune_mask", 32);
+        costs.put("hat/apprentice_hat", 25);
+        costs.put("hat/wizard_hat", 30);
+        costs.put("hat/knight_helmet", 35);
+        costs.put("hat/evil_clown_mask", 40);
+        costs.put("hat/oni_mask", 40);
+        costs.put("hat/shark_hat", 40);
 
         // Accessories
-        costs.put("accessory/donut", 999);
-        costs.put("accessory/wrench", 999);
-        costs.put("accessory/training_sword", 999);
-        costs.put("accessory/burger", 999);
-        costs.put("accessory/dynamite", 999);
-        costs.put("accessory/knights_sword", 999);
-        costs.put("accessory/cyberfist", 999);
-        costs.put("accessory/coffee_cup", 999);
-        costs.put("accessory/drill", 999);
-        costs.put("accessory/excalibur", 999);
-        costs.put("accessory/shrinking_device", 999);
+        costs.put("accessory/donut", 8);
+        costs.put("accessory/wrench", 15);
+        costs.put("accessory/training_sword", 12);
+        costs.put("accessory/burger", 25);
+        costs.put("accessory/dynamite", 18);
+        costs.put("accessory/knights_sword", 22);
+        costs.put("accessory/cyberfist", 35);
+        costs.put("accessory/coffee_cup", 32);
+        costs.put("accessory/drill", 45);
+        costs.put("accessory/excalibur", 50);
+        costs.put("accessory/shrinking_device", 40);
 
         // Particles
-        costs.put("particle/cloud", 999);
-        costs.put("particle/bubble", 999);
-        costs.put("particle/note", 999);
+//        costs.put("particle/cloud", 5);
+//        costs.put("particle/bubble", 5);
+//        costs.put("particle/note", 5);
 
         // Victory Effects
-//        costs.put("victory_effect/explosion", 999); // Intentionally not present, it does not work so should not be buyable
-//        costs.put("victory_effect/lightning", 999); // Intentionally not present, it does not work so should not be buyable
-        costs.put("victory_effect/firework", 999);
-//        costs.put("victory_effect/omega", 999); // Intentionally not present, it does not work so should not be buyable
+//        costs.put("victory_effect/explosion", 5); // Intentionally not present, it does not work so should not be buyable
+//        costs.put("victory_effect/lightning", 5); // Intentionally not present, it does not work so should not be buyable
+        costs.put("victory_effect/firework", 3);
+//        costs.put("victory_effect/omega", 15); // Intentionally not present, it does not work so should not be buyable
 
         var tempTrades = new HashMap<String, MerchantTrade>();
         for (var entry : costs.entrySet()) {

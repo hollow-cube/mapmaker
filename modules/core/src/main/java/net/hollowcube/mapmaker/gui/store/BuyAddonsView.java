@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +61,7 @@ public class BuyAddonsView extends View {
 
     @Action(value = "terraform_advanced", async = true)
     private void handleBuildTools() {
-        submitUpgradePurchase(ShopUpgrade.BUILD_TOOLS);
+        //submitUpgradePurchase(ShopUpgrade.BUILD_TOOLS);
     }
 
     @Action(value = "map_slots_3", async = true)
@@ -105,7 +106,7 @@ public class BuyAddonsView extends View {
 
             //todo
             player.closeInventory();
-            player.sendMessage("todo you are being prompted to buy more cubits!!!");
+            player.sendMessage(Component.translatable("currency.missing"));
             return;
         }
 

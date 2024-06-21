@@ -5,19 +5,6 @@
     <box width="9" height="1" align="ltr">
         <spacer/>
 
-        <!-- Build Tools -->
-        <switch id="terraform_switch" width="1" height="1">
-            <button id="terraform_advanced" width="1" height="1"
-                    translationKey="gui.store.addons.terraform_advanced"
-                    sprite="store/addons/build_tools_icon"
-                    backgroundSprite="store/addons/build_tools_locked_bg"/>
-            <button id="terraform_maxed" width="1" height="1"
-                    translationKey="gui.store.addons.terraform_maxed"
-                    sprite="store/addons/build_tools_unlocked"/>
-        </switch>
-
-        <spacer/>
-
         <!-- Map Slots -->
         <switch id="map_slots_switch" width="1" height="1">
             <button id="map_slots_3" width="1" height="1"
@@ -35,6 +22,27 @@
             <button id="map_slots_maxed" width="1" height="1"
                     translationKey="gui.store.addons.map_slots_maxed"
                     sprite="store/addons/map_slot_unlocked"/>
+        </switch>
+
+        <spacer/>
+
+        <!-- Map Size -->
+        <switch id="map_size_switch" width="1" height="1">
+            <button id="map_size_large" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_large"
+                    sprite="store/addons/map_size_2_icon"
+                    backgroundSprite="store/addons/map_size_2_locked_bg"/>
+            <button id="map_size_massive" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_massive"
+                    sprite="store/addons/map_size_3_icon"
+                    backgroundSprite="store/addons/map_size_3_locked_bg"/>
+            <button id="map_size_colossal" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_colossal"
+                    sprite="store/addons/map_size_4_icon"
+                    backgroundSprite="store/addons/map_size_4_locked_bg"/>
+            <button id="map_size_maxed" width="1" height="1"
+                    translationKey="gui.store.addons.map_size_maxed"
+                    sprite="store/addons/map_size_4_unlocked"/>
         </switch>
 
         <spacer/>
@@ -59,23 +67,15 @@
     <box width="9" height="1" align="ltr">
         <spacer/>
 
-        <!-- Map Size -->
-        <switch id="map_size_switch" width="1" height="1">
-            <button id="map_size_large" width="1" height="1"
-                    translationKey="gui.store.addons.map_size_large"
-                    sprite="store/addons/map_size_2_icon"
-                    backgroundSprite="store/addons/map_size_2_locked_bg"/>
-            <button id="map_size_massive" width="1" height="1"
-                    translationKey="gui.store.addons.map_size_massive"
-                    sprite="store/addons/map_size_3_icon"
-                    backgroundSprite="store/addons/map_size_3_locked_bg"/>
-            <button id="map_size_colossal" width="1" height="1"
-                    translationKey="gui.store.addons.map_size_colossal"
-                    sprite="store/addons/map_size_4_icon"
-                    backgroundSprite="store/addons/map_size_4_locked_bg"/>
-            <button id="map_size_maxed" width="1" height="1"
-                    translationKey="gui.store.addons.map_size_maxed"
-                    sprite="store/addons/map_size_4_unlocked"/>
+        <!-- Build Tools -->
+        <switch id="terraform_switch" width="1" height="1">
+            <button id="terraform_advanced" width="1" height="1"
+                    translationKey="gui.store.addons.terraform_advanced"
+                    sprite="store/addons/build_tools_icon"
+                    backgroundSprite="store/addons/build_tools_locked_bg"/>
+            <button id="terraform_maxed" width="1" height="1"
+                    translationKey="gui.store.addons.terraform_maxed"
+                    sprite="store/addons/build_tools_unlocked"/>
         </switch>
 
         <spacer/>

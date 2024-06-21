@@ -384,11 +384,11 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     protected @Nullable BossBar buildBossBarLine1(@NotNull Player player) {
         var builder = Component.text()
-                .append(Component.text(FontUtil.rewrite("bossbar_small_1", "building") + " ", TextColor.color(0xff5555)))
-                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map().name()), NamedTextColor.WHITE));
+                .append(Component.text(FontUtil.rewrite("bossbar_small_1", "building") + " ", NamedTextColor.WHITE))
+                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map().name()), TextColor.color(0x30FBFF)));
 
         final String permissionName = player.getUuid().toString().equals(map().owner()) ? "Owner" : "Builder";
-        builder.append(Component.text("  " + FontUtil.rewrite("bossbar_small_1", "permission") + " ", TextColor.color(0xffaa00)))
+        builder.append(Component.text("  " + FontUtil.rewrite("bossbar_small_1", "permission") + " ", TextColor.color(0xB0B0B0)))
                 .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", permissionName), NamedTextColor.WHITE));
 
         return BossBars.createLine1(builder.build());
