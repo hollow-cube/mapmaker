@@ -197,7 +197,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             // If this is OS, reset the player as they are added
             if (world.map().settings().isOnlySprint() && playState.pos().isPresent()) {
-                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
+//                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
                 softReset(player, saveState);
             }
         }
@@ -316,7 +316,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return; // Player already has the status plate in this checkpoint.
         int currentIndex = state.progressIndex().orElse(0);
         if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1)) {
-            player.sendMessage(Component.translatable("status.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
+//            player.sendMessage(Component.translatable("status.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
             return; // Player has already passed this progress index.
         }
 
