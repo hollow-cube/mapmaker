@@ -308,9 +308,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Ensure the event should trigger a status change for the current players state
         if (!data.repeatable() && state.hasStatus(event.statusId()))
             return; // Player already has the status plate in this checkpoint.
-        if (data.progressIndex() > 0 && state.progressIndex().orElse(-1) >= data.progressIndex())
-            // todo check this logic not sure its sound. Pretty sure we should allow the same progress index if its repeatable
+        int currentIndex = state.progressIndex().orElse(0);
+        if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1)) {
+            player.sendMessage(Component.translatable("status.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
             return; // Player has already passed this progress index.
+        }
 
         // Apply the status changes
         updateStateFromPlayer(player, state);
@@ -485,6 +487,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (data.lives() > 0) {
             state.setMaxLives(data.lives());
             state.setLives(data.lives());
+        } else {
+            state.setMaxLives(-1);
+            state.setLives(-1);
         }
     }
 
