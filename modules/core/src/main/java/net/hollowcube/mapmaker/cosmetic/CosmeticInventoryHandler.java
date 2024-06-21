@@ -20,8 +20,8 @@ public class CosmeticInventoryHandler {
     public static void init(@NotNull Controller guiController) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
         globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, event));
-        var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, (packet, player) -> creativeClickListener(guiController, packet, player));
+//        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+//        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, (packet, player) -> creativeClickListener(guiController, packet, player));
     }
 
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {

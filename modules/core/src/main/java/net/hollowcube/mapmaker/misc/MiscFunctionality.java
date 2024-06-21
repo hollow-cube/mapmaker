@@ -55,12 +55,12 @@ public final class MiscFunctionality {
         var lightGrayColor = TextColor.color(0xB0B0B0); // or cccccc
 
         var tabLogoSprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/tab/logo_outline"));
-        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 50); //todo where is the missing 2 coming from
+        var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 60); //todo where is the missing 2 coming from
         var tabHeader = Component.text()
                 .appendNewline()
                 .appendNewline()
                 .appendNewline()
-                .append(Component.text(tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
+                .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
                 .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
                 .appendNewline()
                 .build();

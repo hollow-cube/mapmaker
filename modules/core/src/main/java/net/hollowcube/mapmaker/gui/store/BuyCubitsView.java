@@ -31,7 +31,8 @@ public class BuyCubitsView extends View {
     private static final String PURCHASE_SOURCE = "ingame/store";
     private static final String[] PRODUCT_ID_MAP = new String[]{
             "cubits_50", "cubits_105", "cubits_220",
-            "cubits_400", "cubits_600"
+            "cubits_400", "cubits_600", "hypercube_1mo",
+            "hypercube_1y"
     };
     private static final BadSprite[] SPRITE_MAP = new BadSprite[PRODUCT_ID_MAP.length];
 
@@ -52,14 +53,15 @@ public class BuyCubitsView extends View {
             var productIndex = i;
             addAsyncActionHandler(
                     Objects.requireNonNull(buyCubitsButtons[i].id()),
-                    Label.ActionHandler.lmb(player -> handleBuyCubitsGeneric(player, productIndex))
+                    Label.ActionHandler.lmb(player -> handleBuyCubitsGeneric(
+                            playerService, player, productIndex, buyCubitsButtons[productIndex]))
             );
         }
     }
 
     @Blocking
-    private void handleBuyCubitsGeneric(@NotNull Player player, int productIndex) {
-        buyCubitsButtons[productIndex].setState(State.LOADING);
+    static void handleBuyCubitsGeneric(@NotNull PlayerService playerService, @NotNull Player player, int productIndex, @NotNull Label label) {
+        label.setState(State.LOADING);
         try {
             var playerData = PlayerDataV2.fromPlayer(player);
             var resp = playerService.createCheckoutLink(PURCHASE_SOURCE, playerData.username(), PRODUCT_ID_MAP[productIndex]);
@@ -76,11 +78,11 @@ public class BuyCubitsView extends View {
             player.closeInventory();
             player.sendMessage(Component.text("An unknown error has occurred"));
         } finally {
-            buyCubitsButtons[productIndex].setState(State.ACTIVE);
+            label.setState(State.ACTIVE);
         }
     }
 
-    private @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
+    private static @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
         var component = Component.text();
 
         component.append(Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38)));

@@ -14,6 +14,7 @@ import java.util.Objects;
 public class StoreView extends View {
 
     public static final int TAB_HYPERCUBE = 1;
+    public static final int TAB_ADDONS = 2;
 
     private @Outlet("cubits_text") Text cubitsText;
     private @Outlet("hypercube_text") Text hypercubeText;
@@ -39,7 +40,7 @@ public class StoreView extends View {
             var tabIndex = i;
             addActionHandler(
                     Objects.requireNonNull(tabButtons[tabIndex].id()),
-                    Label.ActionHandler.lmb(player -> selectTab(tabIndex))
+                    Label.ActionHandler.lmb(_ -> selectTab(tabIndex))
             );
         }
 
@@ -47,7 +48,7 @@ public class StoreView extends View {
     }
 
     private void selectTab(int index) {
-        if (tabSwitch.getOption() == index) return;
+        if (tabSwitch.getOption() == index || index == TAB_ADDONS) return;
 
         tabSwitch.setOption(index);
         nameSwitch.setOption(index);

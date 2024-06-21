@@ -3,11 +3,14 @@ package net.hollowcube.mapmaker.consumer;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,8 +29,12 @@ public class PlayerDataUpdateConsumer extends BaseConsumer<PlayerDataUpdateMessa
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
-    public PlayerDataUpdateConsumer(@NotNull String bootstrapServers) {
+    private final PlayerService playerService;
+
+    public PlayerDataUpdateConsumer(@NotNull String bootstrapServers, @NotNull PlayerService playerService) {
         super(TOPIC_NAME, GROUP_ID, s -> AbstractHttpService.GSON.fromJson(s, PlayerDataUpdateMessage.class), bootstrapServers);
+
+        this.playerService = playerService;
     }
 
     @Override
@@ -63,11 +70,18 @@ public class PlayerDataUpdateConsumer extends BaseConsumer<PlayerDataUpdateMessa
 
     private void sendPlayerUpdateReasonMessage(@NotNull Player player, @NotNull PlayerDataUpdateMessage.Reason reason) {
         switch (reason.type()) {
-            case CUBITS -> player.sendMessage(Component.translatable(
-                    "store.confirmation.cubits", Component.text(reason.quantity())));
+            case CUBITS -> {
+                player.sendMessage(Component.translatable("store.confirmation.cubits", Component.text(reason.quantity())));
+
+                var displayName = playerService.getPlayerDisplayName2(player.getUuid().toString()).build(DisplayName.Context.DEFAULT);
+                Audiences.all().sendMessage(Component.translatable("store.broadcast.cubits", displayName));
+            }
             case HYPERCUBE -> {
                 var months = Component.text(reason.quantity() / MINUTES_TO_MONTHS);
                 player.sendMessage(Component.translatable("store.confirmation.hypercube", months));
+
+                var displayName = playerService.getPlayerDisplayName2(player.getUuid().toString()).build(DisplayName.Context.DEFAULT);
+                Audiences.all().sendMessage(Component.translatable("store.broadcast.hypercube", displayName));
 
                 //todo need to refresh the players display name everywhere, it probably changed.
             }
