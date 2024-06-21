@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
+import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,22 +13,31 @@ import java.util.List;
 public class EmojisCommand extends CommandDsl {
     private static final String SPACE_1PX = FontUtil.computeOffset(1);
 
+    private final Component emojiList;
+
     public EmojisCommand() {
         super("emojis");
 
         this.description = "Lists all of our emojis that you can use in chat";
         this.category = CommandCategories.SOCIAL;
 
-        addSyntax(playerOnly(this::showEmojiList));
+        this.emojiList = buildMessage();
+
+        addSyntax((sender, _) -> sender.sendMessage(emojiList));
     }
 
-    public void showEmojiList(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage(LanguageProviderV2.translateMultiMerged("command.emojis.header", List.of()));
-        var msg = Component.text();
+    private static @NotNull Component buildMessage() {
+        TextComponent.Builder publicMsg = Component.text(), hypercubeMsg = Component.text();
+        publicMsg.append(LanguageProviderV2.translateMultiMerged("command.emojis.header.public", List.of())).appendNewline();
+        hypercubeMsg.append(LanguageProviderV2.translateMultiMerged("command.emojis.header.hypercube", List.of())).appendNewline();
+
         for (var emoji : Emoji.values()) {
             if (!emoji.showInHelp()) continue;
-            msg.append(emoji.supplier().apply(null)).append(Component.text(SPACE_1PX));
+            (Emoji.isPublic(emoji) ? publicMsg : hypercubeMsg)
+                    .append(emoji.supplier().apply(null))
+                    .append(Component.text(SPACE_1PX));
         }
-        player.sendMessage(msg.build());
+
+        return publicMsg.appendNewline().appendNewline().append(hypercubeMsg).build();
     }
 }

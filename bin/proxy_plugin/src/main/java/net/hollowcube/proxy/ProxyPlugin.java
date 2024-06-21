@@ -27,7 +27,6 @@ import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -49,12 +48,12 @@ public class ProxyPlugin {
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
 
     public static final TextColor RED = TextColor.color(0xFA4141);
-    public static final Component CLOSED_BETA = Component.text()
-            .append(Component.text("The server is currently in closed beta!", RED))
+    public static final Component MAINTENANCE = Component.text()
+            .append(Component.text("The server is currently in maintenance!", RED))
             .appendNewline().appendNewline()
             .append(Component.text("Join the discord for updates!"))
             .appendNewline()
-            .append(Component.text("discord.hollowcube.net").clickEvent(ClickEvent.openUrl("https://discord.hollowcube.net")))
+            .append(Component.text("discord.hollowcube.net"))
             .build();
 
     private final Logger logger;
@@ -62,7 +61,6 @@ public class ProxyPlugin {
 
     private SessionService sessionService;
 
-    private final RegisteredServer limboServer;
     private final RegisteredServer anyhubServer;
 
     // Map of player uuid to the resource pack hash they currently have applied
@@ -83,7 +81,6 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
 
-        limboServer = proxy.getServer("limbo").orElse(null);
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
         Translations.init();
@@ -101,10 +98,6 @@ public class ProxyPlugin {
 //        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
 //            event.getPlayer().disconnect(Component.text("something went wrong"));
 //        }
-        if (limboServer != null && !playersWithSession.contains(event.getPlayer().getUniqueId())) {
-            logger.info("sending {} to limbo", event.getPlayer().getUsername());
-            event.setInitialServer(limboServer);
-        }
     }
 
     @Subscribe
@@ -138,7 +131,7 @@ public class ProxyPlugin {
 
             // this is ok, they will be sent to the limbo
             logger.info("player {} is not in the beta", player.getUsername());
-//            event.setResult(ResultedEvent.ComponentResult.denied(CLOSED_BETA));
+            event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
@@ -239,10 +232,6 @@ public class ProxyPlugin {
 
         // If they were leaving the limbo, they should be disconnected completely no redirect.
         var serverName = event.getServer().getServerInfo().getName();
-        if ("limbo".equals(serverName)) {
-            event.setResult(KickedFromServerEvent.DisconnectPlayer.create(event.getServerKickReason().orElse(Component.empty())));
-            return;
-        }
 
         var reason = event.getServerKickReason().orElse(null);
         if (reason != null) {

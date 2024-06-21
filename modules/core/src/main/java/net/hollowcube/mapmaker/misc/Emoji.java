@@ -21,9 +21,22 @@ public record Emoji(
 ) {
     private static final List<PlayerInfoUpdatePacket.Entry> EMOJI_PACKET_ENTRIES = new ArrayList<>();
     private static final LinkedHashMap<String, Emoji> EMOJI_MAP = new LinkedHashMap<>();
+    private static final Set<String> PUBLIC_EMOJIS = Set.of(new String[]{
+            // MUST BE KEPT IN SYNC WITH SESSION SERVICE
+            "smile", "joy", "raised_eyebrow", "salute", "pleading",
+            "flushed", "thinking", "confused", "sleeping", "sob",
+            "scream", "clown", "angry", "poop", "devil", "thumbs_up",
+            "thumbs_down", "pray", "l", "gg", "fire", "heart",
+            "skull", "blob", "seal", "itmg", "rocket",
+            // MUST BE KEPT IN SYNC WITH SESSION SERVICE
+    });
 
     public static @Nullable Emoji findByName(@NotNull String name) {
         return EMOJI_MAP.get(name.toLowerCase());
+    }
+
+    public static boolean isPublic(@NotNull Emoji emoji) {
+        return PUBLIC_EMOJIS.contains(emoji.name);
     }
 
     public static @NotNull Collection<Emoji> values() {

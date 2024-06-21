@@ -72,4 +72,9 @@ public class NoopPlayerService implements PlayerService {
         return new CreateCheckoutLinkResponse("https://hollowcube.net/store/checkout/fkelnk");
     }
 
+    @Override
+    public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
+        throw new UnsupportedOperationException("");
+    }
+
 }

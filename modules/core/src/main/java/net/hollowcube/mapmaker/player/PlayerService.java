@@ -48,6 +48,16 @@ public interface PlayerService {
     @NotNull
     CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String username, @NotNull String product);
 
+    enum LinkResult {
+        SUCCESS,
+        INVALID_SECRET,
+        EXPIRED_SECRET,
+        ALREADY_LINKED,
+        INTERNAL_ERROR
+    }
+
+    @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret);
+
     class NotFoundError extends RuntimeException {
 
     }

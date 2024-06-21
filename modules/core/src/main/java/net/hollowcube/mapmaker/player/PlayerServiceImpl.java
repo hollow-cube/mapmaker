@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -166,6 +167,28 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         if (res.statusCode() != 200)
             throw new InternalError("Failed to create checkout url (" + res.statusCode() + "): " + res.body());
         return GSON.fromJson(res.body(), CreateCheckoutLinkResponse.class);
+    }
+
+    @Override
+    public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
+        var body = GSON.toJson(Map.of(
+                "verificationType", "discord",
+                "playerId", playerId,
+                "secret", secret
+        ));
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/verify/attempt"))
+                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+        var response = doRequest("attemptVerify", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (response.statusCode()) {
+            case 200 -> LinkResult.SUCCESS;
+            case 404 -> LinkResult.INVALID_SECRET;
+            case 204 -> LinkResult.EXPIRED_SECRET;
+            case 409 -> LinkResult.ALREADY_LINKED;
+            default ->
+                    throw new InternalError("Verification attempt failed: (" + response.statusCode() + "): " + response.body());
+        };
     }
 
 }
