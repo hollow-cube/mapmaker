@@ -100,11 +100,14 @@ public final class FontUtil {
                 Map.entry((int) '7', 5), Map.entry((int) '8', 5),
                 Map.entry((int) '9', 5), Map.entry((int) '0', 5),
                 Map.entry((int) 'k', 5), Map.entry((int) 'm', 6),
-                Map.entry((int) 'b', 5), Map.entry((int) '.', 2)
+                Map.entry((int) 'b', 5), Map.entry((int) '.', 2),
+                Map.entry((int) 'c', 6)
         ));
         result.put("currency", currencyGlyphs);
         result.put("currency_creative", currencyGlyphs);
         result.put("smallnums", currencyGlyphs);
+        result.put("addons_tab_line1", currencyGlyphs);
+        result.put("addons_tab_line2", currencyGlyphs);
 
         var smallGlyphs = new Int2IntArrayMap();
         smallGlyphs.putAll(Map.<Integer, Integer>ofEntries(

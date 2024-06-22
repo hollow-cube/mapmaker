@@ -71,6 +71,10 @@ public class FontTransform {
             charmaps.put("small", charmap);
             ascents.put("small", 7);
             heights.put("small", 8);
+            ascents.put("addons_tab_line1", 7);
+            heights.put("addons_tab_line1", 8);
+            ascents.put("addons_tab_line2", 7);
+            heights.put("addons_tab_line2", 8);
         }
         try (InputStream is = getClass().getResourceAsStream("/small_tall.json")) {
             if (is == null) throw new IOException("Failed to load small_tall.json");

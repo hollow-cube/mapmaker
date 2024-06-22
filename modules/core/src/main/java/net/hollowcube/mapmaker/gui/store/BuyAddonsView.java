@@ -1,11 +1,14 @@
 package net.hollowcube.mapmaker.gui.store;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -16,8 +19,11 @@ import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class BuyAddonsView extends View {
@@ -28,10 +34,14 @@ public class BuyAddonsView extends View {
 
     private @Outlet("terraform_switch") Switch terraformSwitch;
     private @Outlet("map_slots_switch") Switch mapSlotsSwitch;
+    private @Outlet("map_slots_cost") Text mapSlotsCost;
     // Boosts
     // Folders
     private @Outlet("map_size_switch") Switch mapSizeSwitch;
+    private @Outlet("map_size_cost") Text mapSizeCost;
     // Personal world
+
+    private @OutletGroup("buy_.+") Label[] buyableEntries;
 
     public BuyAddonsView(@NotNull Context context) {
         super(context);
@@ -40,60 +50,82 @@ public class BuyAddonsView extends View {
 
         if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_3, true)) {
             mapSlotsSwitch.setOption(0);
+            mapSlotsCost.setText(ShopUpgrade.MAP_SLOT_3.cubits() + "c");
         } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_4, true)) {
             mapSlotsSwitch.setOption(1);
+            mapSlotsCost.setText(ShopUpgrade.MAP_SLOT_4.cubits() + "c");
         } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SLOT_5, true)) {
             mapSlotsSwitch.setOption(2);
+            mapSlotsCost.setText(ShopUpgrade.MAP_SLOT_5.cubits() + "c");
         } else {
             mapSlotsSwitch.setOption(3);
         }
 
         if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_2, true)) {
             mapSizeSwitch.setOption(0);
+            mapSizeCost.setText(ShopUpgrade.MAP_SIZE_2.cubits() + "c");
         } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_3, true)) {
             mapSizeSwitch.setOption(1);
+            mapSizeCost.setText(ShopUpgrade.MAP_SIZE_3.cubits() + "c");
         } else if (!ShopUpgradeCache.has(player, ShopUpgrade.MAP_SIZE_4, true)) {
             mapSizeSwitch.setOption(2);
+            mapSizeCost.setText(ShopUpgrade.MAP_SIZE_4.cubits() + "c");
         } else {
             mapSizeSwitch.setOption(3);
+        }
+
+        for (var entry : buyableEntries) {
+            var upgrade = ShopUpgrade.valueOf(entry.id().substring(4).toUpperCase(Locale.ROOT));
+
+            var itemStack = entry.getItemDirect();
+            var lore = new ArrayList<>(itemStack.get(ItemComponent.LORE, List.of()));
+            lore.add(Component.empty());
+
+            upgrade.appendLore(PlayerDataV2.fromPlayer(player), PlayerBackpack.fromPlayer(player), lore);
+            entry.setItemDirect(itemStack.with(ItemComponent.LORE, lore));
         }
     }
 
     @Action(value = "terraform_advanced", async = true)
     private void handleBuildTools() {
+        // Not supported yet.
         //submitUpgradePurchase(ShopUpgrade.BUILD_TOOLS);
     }
 
-    @Action(value = "map_slots_3", async = true)
+    @Action(value = "buy_map_slot_3", async = true)
     private void handleMapSlot3() {
         submitUpgradePurchase(ShopUpgrade.MAP_SLOT_3);
     }
 
-    @Action(value = "map_slots_4", async = true)
+    @Action(value = "buy_map_slot_4", async = true)
     private void handleMapSlot4() {
         submitUpgradePurchase(ShopUpgrade.MAP_SLOT_4);
+    }
+
+    @Action(value = "buy_map_slot_5", async = true)
+    private void handleMapSlot5() {
+        submitUpgradePurchase(ShopUpgrade.MAP_SLOT_5);
     }
 
     //todo boosts
 
     //todo folders
 
-    @Action(value = "map_size_large", async = true)
+    @Action(value = "buy_map_size_2", async = true)
     private void handleMapSizeLarge() {
         submitUpgradePurchase(ShopUpgrade.MAP_SIZE_2);
     }
 
-    @Action(value = "map_size_massive", async = true)
+    @Action(value = "buy_map_size_3", async = true)
     private void handleMapSizeMassive() {
         submitUpgradePurchase(ShopUpgrade.MAP_SIZE_3);
     }
 
     @Action(value = "map_size_colossal", async = true)
     private void handleMapSizeColossal() {
-        submitUpgradePurchase(ShopUpgrade.MAP_SIZE_4);
+        // Not supported yet.
+//        submitUpgradePurchase(ShopUpgrade.MAP_SIZE_4);
     }
-
-    //todo personal worlds
 
     private void submitUpgradePurchase(@NotNull ShopUpgrade upgrade) {
         if (ShopUpgradeCache.has(player, upgrade, true))
