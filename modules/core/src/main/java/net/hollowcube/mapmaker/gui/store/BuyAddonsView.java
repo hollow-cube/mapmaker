@@ -154,12 +154,12 @@ public class BuyAddonsView extends View {
             permManager.overwrite(upgrade.indirectPerm(), playerData.id(), true);
 
             player.closeInventory();
-            player.sendMessage("You unlocked " + upgrade.name() + "!");
+            player.sendMessage(Component.translatable("store.add-ons.buy", Component.text(upgrade.name())));
         } catch (PlayerService.NotFoundError e) {
-            player.sendMessage("todo player not found");
+            player.sendMessage(Component.translatable("store.add-ons.buy.error"));
         } catch (Exception e) {
             MinecraftServer.getExceptionManager().handleException(e);
-            player.sendMessage("todo something went wrong");
+            player.sendMessage(Component.translatable("store.add-ons.buy.error"));
         }
     }
 
