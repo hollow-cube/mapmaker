@@ -4,14 +4,12 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
-import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,15 +60,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         ListBinaryTag.Builder<CompoundBinaryTag> entitiesTag = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
         for (var entity : getEntities(chunk)) {
-            CompoundBinaryTag.Builder tag = CompoundBinaryTag.builder();
-
-            tag.putString("id", entity.getEntityType().name());
-            tag.put("uuid", UniqueIdUtils.toNbt(entity.getUuid()));
-            tag.put("Pos", NbtUtil.into(entity.getPosition()));
-            tag.put("Rotation", NbtUtil.writeRotation(entity.getPosition()));
-            entity.writeData(tag);
-
-            entitiesTag.add(tag.build());
+            entitiesTag.add(entity.writeToTag());
         }
 
         return entitiesTag.build();

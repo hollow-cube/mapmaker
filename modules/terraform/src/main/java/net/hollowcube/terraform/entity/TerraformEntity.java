@@ -13,4 +13,10 @@ public interface TerraformEntity {
     void readData(@NotNull CompoundBinaryTag tag);
 
     void writeData(@NotNull CompoundBinaryTag.Builder tag);
+
+    default @NotNull CompoundBinaryTag writeToTag() {
+        var builder = CompoundBinaryTag.builder();
+        writeData(builder);
+        return builder.build();
+    }
 }

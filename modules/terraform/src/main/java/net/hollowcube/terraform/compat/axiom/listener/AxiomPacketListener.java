@@ -12,6 +12,7 @@ import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
@@ -181,11 +182,14 @@ public final class AxiomPacketListener {
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
             try {
-                if (entry.copyFrom() != null) throw new RuntimeException("cannot handle copyFrom yet.");
+                CompoundBinaryTag nbt = entry.nbt();
+                if (entry.copyFrom() != null) {
+                    final Entity copyEntity = instance.getEntityByUuid(entry.copyFrom());
+                    if (!(copyEntity instanceof TerraformEntity entity)) return;
+                    nbt = entity.writeToTag();
+                }
 
-                var nbt = entry.nbt();
-                var entityTypeName = entry.nbt().getString("id");
-                if (entityTypeName == null) throw new NullPointerException("entity id is required");
+                var entityTypeName = nbt.getString("id");
                 var entityType = EntityType.fromNamespaceId(entityTypeName);
                 if (entityType == null) throw new NullPointerException("unknown entity type: " + entityTypeName);
 
@@ -194,8 +198,10 @@ public final class AxiomPacketListener {
                 if (preEvent.isCancelled()) continue;
 
                 var entity = preEvent.getConstructor().apply(entityType, entry.uuid());
-                if (entity instanceof TerraformEntity tfEntity)
-                    entity.editEntityMeta(EntityMeta.class, $ -> tfEntity.readData(nbt));
+                if (entity instanceof TerraformEntity tfEntity) {
+                    final CompoundBinaryTag fnbt = nbt;
+                    entity.editEntityMeta(EntityMeta.class, _ -> tfEntity.readData(fnbt));
+                }
 
                 var event = new TerraformSpawnEntityEvent(player, instance, entity, entry.pos());
                 EventDispatcher.callCancellable(event, () -> event.getEntity().setInstance(instance, event.getPosition()));
