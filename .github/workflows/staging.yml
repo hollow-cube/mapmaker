@@ -3,7 +3,7 @@ concurrency: Staging
 
 on:
   push:
-    branches: [ main ]
+    tags: [ '\d+\.\d+\.\d+' ]
 
 jobs:
   resource-pack-build:
