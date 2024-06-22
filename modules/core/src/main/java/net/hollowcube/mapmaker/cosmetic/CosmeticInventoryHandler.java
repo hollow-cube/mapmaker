@@ -11,6 +11,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.listener.CreativeInventoryActionListener;
 import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -20,8 +21,8 @@ public class CosmeticInventoryHandler {
     public static void init(@NotNull Controller guiController) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
         globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, event));
-//        var packetListenerManager = MinecraftServer.getPacketListenerManager();
-//        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, (packet, player) -> creativeClickListener(guiController, packet, player));
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, (packet, player) -> creativeClickListener(guiController, packet, player));
     }
 
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
@@ -49,9 +50,11 @@ public class CosmeticInventoryHandler {
             Map.entry((short) 5, CosmeticType.HAT),
             Map.entry((short) 6, CosmeticType.BACKWEAR),
             Map.entry((short) 7, CosmeticType.PET),
-            Map.entry((short) 8, CosmeticType.PARTICLE),
-            Map.entry((short) 45, CosmeticType.ACCESSORY)
+            Map.entry((short) 8, CosmeticType.PARTICLE)
+//            Map.entry((short) 45, CosmeticType.ACCESSORY)
     );
+
+    private static final Tag<Integer> CREATIVE_LAST_SLOT_WIPE_HACK = Tag.Integer("creative_last_slot_wipe_hack").defaultValue(0);
 
     private static void creativeClickListener(@NotNull Controller guiController, ClientCreativeInventoryActionPacket packet, Player player) {
         if (player.getGameMode() != GameMode.CREATIVE) return;
@@ -78,7 +81,7 @@ public class CosmeticInventoryHandler {
         player.getInventory().update();
 
         // Show the cosmetic type selector
-        guiController.show(player, c -> new CosmeticView(c, cosmeticType));
+//        guiController.show(player, c -> new CosmeticView(c, cosmeticType));
     }
 
 }
