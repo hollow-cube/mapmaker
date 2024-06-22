@@ -34,7 +34,7 @@ public record AxiomClientSpawnEntitiesPacket(
         public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
             this(buffer.read(NetworkBuffer.UUID), ProtocolUtil.readPos(buffer),
                     buffer.readOptional(NetworkBuffer.UUID),
-                    (CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
+                    buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag compound ? compound : CompoundBinaryTag.empty());
         }
 
     }

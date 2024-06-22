@@ -24,7 +24,7 @@ public final class NbtUtil {
                 props.put(entry.getKey(), StringBinaryTag.stringBinaryTag(entry.getValue()));
             }
             var propsCompound = props.build();
-            
+
             var builder = CompoundBinaryTag.builder()
                     .putString("Name", value.name());
             if (propsCompound.size() > 0) builder.put("Properties", propsCompound);
@@ -43,7 +43,7 @@ public final class NbtUtil {
                 block = block.withProperty(entry.getKey(), string.value());
             }
 
-            return Block.AIR;
+            return block;
         }
     };
 

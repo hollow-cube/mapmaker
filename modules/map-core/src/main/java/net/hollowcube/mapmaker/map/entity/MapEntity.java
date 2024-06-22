@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.hollowcube.terraform.entity.TerraformEntity;
@@ -13,6 +14,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +103,10 @@ public class MapEntity extends Entity implements TerraformEntity {
 
     @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
-        //todo write metadata fields
+        tag.putString("id", getEntityType().name());
+        tag.put("uuid", UniqueIdUtils.toNbt(getUuid()));
+        tag.put("Pos", NbtUtil.into(getPosition()));
+        tag.put("Rotation", NbtUtil.writeRotation(getPosition()));
     }
 
     @Deprecated // Should never be used, but cannot be removed for backwards compatibility.
