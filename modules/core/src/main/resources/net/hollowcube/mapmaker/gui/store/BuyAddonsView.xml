@@ -7,15 +7,15 @@
 
         <!-- Map Slots -->
         <switch id="map_slots_switch" width="1" height="1">
-            <button id="map_slots_3" width="1" height="1"
+            <button id="buy_map_slot_3" width="1" height="1"
                     translationKey="gui.store.addons.map_slots_3"
                     sprite="store/addons/map_slot_icon"
                     backgroundSprite="store/addons/map_slot_locked_bg"/>
-            <button id="map_slots_4" width="1" height="1"
+            <button id="buy_map_slot_4" width="1" height="1"
                     translationKey="gui.store.addons.map_slots_4"
                     sprite="store/addons/map_slot_icon"
                     backgroundSprite="store/addons/map_slot_locked_bg"/>
-            <button id="map_slots_5" width="1" height="1"
+            <button id="buy_map_slot_5" width="1" height="1"
                     translationKey="gui.store.addons.map_slots_5"
                     sprite="store/addons/map_slot_icon"
                     backgroundSprite="store/addons/map_slot_locked_bg"/>
@@ -28,11 +28,11 @@
 
         <!-- Map Size -->
         <switch id="map_size_switch" width="1" height="1">
-            <button id="map_size_large" width="1" height="1"
+            <button id="buy_map_size_2" width="1" height="1"
                     translationKey="gui.store.addons.map_size_large"
                     sprite="store/addons/map_size_2_icon"
                     backgroundSprite="store/addons/map_size_2_locked_bg"/>
-            <button id="map_size_massive" width="1" height="1"
+            <button id="buy_map_size_3" width="1" height="1"
                     translationKey="gui.store.addons.map_size_massive"
                     sprite="store/addons/map_size_3_icon"
                     backgroundSprite="store/addons/map_size_3_locked_bg"/>
@@ -92,4 +92,10 @@
 
     </box>
 
+    <text id="map_slots_cost"
+          width="0" height="0" translationKey="irrelevant"
+          font="addons_tab_line1" shift="29" centered="true"/>
+    <text id="map_size_cost"
+          width="0" height="0" translationKey="irrelevant"
+          font="addons_tab_line1" shift="68" centered="true"/>
 </component>

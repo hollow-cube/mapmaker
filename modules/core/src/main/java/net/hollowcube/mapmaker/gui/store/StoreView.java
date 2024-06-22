@@ -48,7 +48,7 @@ public class StoreView extends View {
     }
 
     private void selectTab(int index) {
-        if (tabSwitch.getOption() == index || index == TAB_ADDONS) return;
+        if (tabSwitch.getOption() == index) return;
 
         tabSwitch.setOption(index);
         nameSwitch.setOption(index);

@@ -117,6 +117,11 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     }
 
     @Override
+    public @NotNull ItemStack getItemDirect() {
+        return itemSprite;
+    }
+
+    @Override
     public @NotNull LabelElement clone(@NotNull ElementContext context) {
         return new LabelElement(context, this);
     }
