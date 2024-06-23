@@ -10,7 +10,7 @@
         <button id="close" translationKey="gui.generic.close_menu"
                 backgroundSprite="generic/close_bg"
                 sprite="generic/close"/>
-        <label translationKey="gui.play_maps.simple.information"/>
+        <label translationKey="gui.play_maps.simple.information" sprite="generic/information"/>
         <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"
               font="play_maps_page" centered="true"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
