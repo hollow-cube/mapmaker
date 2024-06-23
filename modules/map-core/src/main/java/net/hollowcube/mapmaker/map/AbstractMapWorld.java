@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -257,7 +258,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             try {
                 if (reason != null) player.sendMessage(reason);
                 world.removePlayer(player);
-                world.server().bridge().joinHub(player);
+                if (reason instanceof TranslatableComponent trans && trans.key().equals("mapmaker.shutdown")) {
+                    player.kick(trans);
+                } else {
+                    world.server().bridge().joinHub(player);
+                }
             } catch (Exception e) {
                 logger.error("failed to move player to hub ({})", player.getUuid(), e);
                 MinecraftServer.getExceptionManager().handleException(e);

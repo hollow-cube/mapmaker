@@ -49,7 +49,7 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
                 .build();
         var mapIds = new MapIdStrategy();
         this.client = new DefaultUnleash(unleashConfig, mapIds);
-        shutdowner.queue(client::shutdown);
+        shutdowner.queue("unleash", client::shutdown);
         this.defaultAction = config.defaultAction();
     }
 

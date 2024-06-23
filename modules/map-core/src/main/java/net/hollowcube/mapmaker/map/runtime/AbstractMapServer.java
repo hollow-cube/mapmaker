@@ -151,7 +151,7 @@ public abstract class AbstractMapServer implements MapServer {
             this.metrics = new MetricWriterPosthog();
 //            this.metrics = new MetricWriterImpl(metricsConfig.password());
         } else this.metrics = new MetricWriterNoop();
-        shutdowner.queue(metrics::close);
+        shutdowner.queue("metric-writer", metrics::close);
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
         if (playerServiceUrl != null) {
@@ -227,12 +227,12 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         allocator = createAllocator();
-        shutdowner.queue(allocator::close);
+        shutdowner.queue("map-allocator", allocator::close);
         bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
         sessionManager = new SessionManager(sessionService, playerService, permManager, kafkaConfig, globalConfig.noop());
-        shutdowner.queue(sessionManager::close);
+        shutdowner.queue("session-manager", sessionManager::close);
         sessionManager().sync(); // Sync existing sessions with remote
 
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
@@ -245,21 +245,21 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
-            shutdowner.queue(mapInviteListener::close);
+            shutdowner.queue("map-invite-listener", mapInviteListener::close);
 
             mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
-            shutdowner.queue(mapInviteAcceptedOrRejectedListener::close);
+            shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServersStr());
-            shutdowner.queue(punishmentCreatedListener::close);
+            shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr());
             injector.bind(ChatMessageListener.class, chatMessageListener);
-            shutdowner.queue(chatMessageListener::close);
+            shutdowner.queue("chat-message-listener", chatMessageListener::close);
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
             playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr(), playerService);
-            shutdowner.queue(playerDataUpdateConsumer::close);
+            shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
         }
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);

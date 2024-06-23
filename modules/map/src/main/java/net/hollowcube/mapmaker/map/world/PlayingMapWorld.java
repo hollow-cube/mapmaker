@@ -105,7 +105,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void close(@Nullable Component reason) {
         super.close(reason); // Remove players & spectators
-        instance.unload();
+        instance.scheduleNextTick(_ -> instance.unload());
     }
 
     @Override

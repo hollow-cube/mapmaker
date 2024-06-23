@@ -239,10 +239,9 @@ public class DisplayEntity extends MapEntity {
                 tag.putByte("see_through", (byte) 1);
             if (meta.isUseDefaultBackground())
                 tag.putByte("default_background", (byte) 1);
-            if (meta.isAlignLeft() && !meta.isAlignRight())
-                tag.putString("alignment", "left");
-            if (meta.isAlignRight() && !meta.isAlignLeft())
-                tag.putString("alignment", "right");
+            if (meta.isAlignLeft()) tag.putString("alignment", "left");
+            else if (meta.isAlignRight()) tag.putString("alignment", "right");
+            else tag.putString("alignment", "center");
         }
 
         @Override
@@ -265,8 +264,9 @@ public class DisplayEntity extends MapEntity {
             if (tag.get("default_background") instanceof NumberBinaryTag defaultBackground)
                 meta.setUseDefaultBackground(defaultBackground.byteValue() != 0);
             if (tag.get("alignment") instanceof StringBinaryTag align) {
-                meta.setAlignLeft("left".equals(align.value()) || "center".equals(align.value()));
-                meta.setAlignRight("right".equals(align.value()) || "center".equals(align.value()));
+                // Center gets neither set
+                meta.setAlignLeft("left".equals(align.value()));
+                meta.setAlignRight("right".equals(align.value()));
             }
         }
 

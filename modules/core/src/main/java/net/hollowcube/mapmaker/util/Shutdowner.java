@@ -24,6 +24,8 @@ public class Shutdowner implements Service, HealthCheck {
     private static final Logger logger = LoggerFactory.getLogger(Shutdowner.class);
     private static final long SHUTDOWN_MAX_WAIT_MILLIS;
 
+    private volatile boolean isShuttingDown = false;
+
     static {
         try {
             SHUTDOWN_MAX_WAIT_MILLIS = Long.parseLong(System.getenv().getOrDefault("MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS", "5000"));
@@ -32,7 +34,15 @@ public class Shutdowner implements Service, HealthCheck {
         }
     }
 
-    private final List<Runnable> shutdownHooks = new ArrayList<>();
+    record Hook(@NotNull String name, @NotNull Runnable task) implements Runnable {
+
+        @Override
+        public void run() {
+            task.run();
+        }
+    }
+
+    private final List<Hook> shutdownHooks = new ArrayList<>();
     private final Supplier<CompletableFuture<Void>> quiescenceFunction;
     private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
 
@@ -40,7 +50,7 @@ public class Shutdowner implements Service, HealthCheck {
         this.quiescenceFunction = quiescenceFunction;
 
         //noinspection ResultOfMethodCallIgnored
-        shutdownHooks.add(() -> ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
+        shutdownHooks.add(new Hook("fjp wait", () -> ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS)));
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownImmediately));
     }
@@ -54,18 +64,27 @@ public class Shutdowner implements Service, HealthCheck {
      *
      * <p>The last hook added will be the last one to be executed.</p>
      */
-    public void queue(@NotNull Runnable hook) {
-        shutdownHooks.add(hook);
+    public void queue(@NotNull String name, @NotNull Runnable hook) {
+        shutdownHooks.add(new Hook(name, hook));
     }
 
     /**
      * Shuts down the server gracefully, immediately. Does not give any shutdown grace period.
      */
     public void shutdownImmediately() {
+        if (isShuttingDown) return;
         if (gracefulShutdownFuture == null) shutdownGracefully();
         gracefulShutdownFuture.complete(null);
 
-        shutdownHooks.forEach(Runnable::run);
+        isShuttingDown = true;
+        shutdownHooks.forEach(runnable -> {
+            try {
+                System.out.println("Running shutdown hook: " + runnable.name);
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void shutdownGracefully() {

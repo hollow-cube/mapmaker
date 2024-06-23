@@ -68,7 +68,7 @@ public final class MapServerInitializer {
         // Start everything
 
         webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
-        server.shutdowner().queue(webServer::shutdown);
+        server.shutdowner().queue("webserver", webServer::shutdown);
 
         try {
             server.start();
@@ -82,7 +82,7 @@ public final class MapServerInitializer {
         var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());
         MinecraftServer.getBenchmarkManager().enable(Duration.ofSeconds(2));
-        server.shutdowner().queue(() -> {
+        server.shutdowner().queue("minestom-kick", () -> {
             // todo why doesn't Minestom do this on its own?
             var connectionManager = MinecraftServer.getConnectionManager();
             for (var player : connectionManager.getOnlinePlayers()) {
@@ -90,7 +90,7 @@ public final class MapServerInitializer {
                 EventDispatcher.call(new PlayerDisconnectEvent(player));
             }
         });
-        server.shutdowner().queue(MinecraftServer::stopCleanly);
+        server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }

@@ -29,7 +29,7 @@ public final class ChatAnnouncer {
 
     public static void setupAnnouncements(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager, Shutdowner shutdowner) {
         var announcer = new ChatAnnouncer(configLoader, sessionManager);
-        shutdowner.queue(announcer::shutdown);
+        shutdowner.queue("ChatAnnouncer", announcer::shutdown);
     }
 
     private ChatAnnouncer(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager) {
