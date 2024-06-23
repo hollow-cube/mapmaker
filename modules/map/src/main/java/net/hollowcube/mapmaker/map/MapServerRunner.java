@@ -126,7 +126,7 @@ public class MapServerRunner extends AbstractMapServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         if (!globalConfig.noop()) {
             mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
-            shutdowner().queue(mapJoinConsumer::close);
+            shutdowner().queue("map-join-listener", mapJoinConsumer::close);
         }
 
         this.terraform = initBuildLogic(mapService(), commandManager());
@@ -143,7 +143,7 @@ public class MapServerRunner extends AbstractMapServer {
 
         this.features = FeatureList.load(config);
         addBinding(FeatureList.class, features);
-        shutdowner().queue(features::close);
+        shutdowner().queue("features", features::close);
     }
 
     // Static so it can be referenced from dev server runner
@@ -172,6 +172,7 @@ public class MapServerRunner extends AbstractMapServer {
         PlacementRules.init(terraform);
         var interactionEvents = EventNode.event("mapmaker:map/interaction", EventFilter.INSTANCE,
                 eventFilter(false, true, false));
+        interactionEvents.setPriority(-10000);
         globalEventHandler.addChild(interactionEvents);
         InteractionRules.register(interactionEvents);
 

@@ -113,7 +113,7 @@ public class DevServerRunner extends AbstractMapServer {
 
         this.features = FeatureList.load(config);
         addBinding(FeatureList.class, features);
-        shutdowner().queue(features::close);
+        shutdowner().queue("features", features::close);
     }
 
     protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
