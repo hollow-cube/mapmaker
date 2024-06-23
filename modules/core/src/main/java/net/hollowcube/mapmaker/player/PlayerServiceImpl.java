@@ -188,7 +188,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var body = GSON.toJson(Map.of(
                 "verificationType", "discord",
                 "playerId", playerId,
-                "secret", secret
+                "userSecret", secret
         ));
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/players/verify/attempt"))
