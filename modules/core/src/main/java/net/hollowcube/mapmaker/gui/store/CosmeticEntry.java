@@ -51,6 +51,7 @@ public class CosmeticEntry extends View {
         costs.put("hat/sunglasses", 5);
         costs.put("hat/hard_hat", 12);
         costs.put("hat/crown", 10);
+        costs.put("hat/straw_hat", 10);
         costs.put("hat/clown_mask", 28);
         costs.put("hat/bikers_helmet", 20);
         costs.put("hat/samurai_helmet", 25);

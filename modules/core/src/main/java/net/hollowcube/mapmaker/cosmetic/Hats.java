@@ -11,6 +11,7 @@ public final class Hats {
     public static Cosmetic SUNGLASSES = builder("sunglasses").rarity(Rarity.COMMON).build();
     public static Cosmetic HARD_HAT = builder("hard_hat").rarity(Rarity.COMMON).build();
     public static Cosmetic CROWN = builder("crown").rarity(Rarity.COMMON).build();
+    public static Cosmetic STRAW_HAT = builder("straw_hat").rarity(Rarity.COMMON).build();
     //    public static Cosmetic PIRATE_HAT = builder("pirate_hat").rarity(Rarity.RARE).build();
     public static Cosmetic CLOWN_MASK = builder("clown_mask").rarity(Rarity.RARE).build();
     public static Cosmetic BIKERS_HELMET = builder("bikers_helmet").rarity(Rarity.RARE).build();
