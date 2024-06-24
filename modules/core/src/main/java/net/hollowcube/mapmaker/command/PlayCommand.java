@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -55,6 +56,10 @@ public class PlayCommand extends CommandDsl {
             player.sendMessage(Component.translatable("command.play.already_playing", currentMap.settings().getNameComponent()));
             return;
         }
+
+        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var map = mapService.getMap(playerId, mapId);
+        if (!map.isPublished()) return;
 
         bridge.joinMap(player, mapId, ServerBridge.JoinMapState.PLAYING, "play_command");
     }

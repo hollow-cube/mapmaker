@@ -5,6 +5,7 @@ import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -20,11 +21,18 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class DemoServer {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.setProperty("terraform.debug.markers", "true");
+
+
+        new SpongeSchematicReader().read(Files.readAllBytes(Path.of("/Users/matt/Downloads/[ygamien]_Cubyg_I.schem")));
+
 
         var server = MinecraftServer.init();
 

@@ -7,6 +7,7 @@ import net.hollowcube.schem.SpongeSchematic;
 import net.hollowcube.schem.util.GameDataProvider;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
+import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -97,8 +98,12 @@ public class SpongeSchematicReader implements SchematicReader {
             for (var entry : blockPaletteObject) {
                 assertTrue(entry.getValue().type() == BinaryTagTypes.INT, "expected palette entry to be an int");
                 var paletteId = ((IntBinaryTag) entry.getValue()).value();
-                var block = ArgumentBlockState.staticParse(entry.getKey());
-                blockPalette[paletteId] = block;
+                try {
+                    var block = ArgumentBlockState.staticParse(entry.getKey());
+                    blockPalette[paletteId] = block;
+                } catch (ArgumentSyntaxException e) {
+                    throw new IllegalStateException("invalid block type: " + entry.getKey(), e);
+                }
             }
             blockData = getRequired(root, "BlockData", BinaryTagTypes.BYTE_ARRAY).value();
 
