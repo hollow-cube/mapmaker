@@ -90,6 +90,7 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
+import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
@@ -538,6 +539,16 @@ public abstract class AbstractMapServer implements MapServer {
      */
     @Blocking
     protected boolean transferPlayerSession(@NotNull Player player, @NotNull Presence presence) {
+
+        player.sendPacket(new ServerLinksPacket(List.of(
+                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
+                new ServerLinksPacket.Entry(Component.text("Store"), "https://hollowcube.net/store"),
+                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.NEWS, "https://hollowcube.net/news"),
+                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.COMMUNITY_GUIDELINES, "https://hollowcube.net/rules"),
+                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.SUPPORT, "https://hollowcube.net/contact"),
+                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.BUG_REPORT, "https://discord.hollowcube.net/")
+        )));
+
         // Make the required requests in parallel. This is valid even though transferSession can fail, because
         // the other two requests (getting map player data, getting backpack) are idempotent/valid to do at
         // any point.
