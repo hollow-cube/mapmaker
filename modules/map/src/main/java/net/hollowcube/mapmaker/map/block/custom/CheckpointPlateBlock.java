@@ -12,7 +12,10 @@ import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
@@ -21,7 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
@@ -41,6 +46,15 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         return playersOnPlate;
     }
 
+    public void editData(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block, @NotNull Consumer<CheckpointEffectData> func) {
+        var data = block.getTag(DATA_TAG);
+        func.accept(data);
+
+        var newTag = TagHandler.newHandler();
+        newTag.setTag(DATA_TAG, data);
+        instance.setBlock(blockPosition, block.withNbt(newTag.asCompound()));
+    }
+
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
         var player = interaction.getPlayer();
@@ -52,7 +66,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
         var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditCheckpointView(c, data, maxResetHeight, () -> {
+        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("blockPos", new BlockVec(interaction.getBlockPosition()))), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 

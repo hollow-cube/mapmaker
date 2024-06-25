@@ -6,6 +6,10 @@
     <box width="9" align="ltr">
         <BackButton/>
         <label translationKey="gui.effect.coordinate.information"/>
+
+        <spacer width="6"/>
+
+        <button id="set_external" translationKey="gui.effect.coordinate.set_external"/>
     </box>
 
     <box width="9" height="1" align="ltr">

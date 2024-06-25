@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,9 @@ import java.util.Optional;
 public abstract class BaseEffectData {
     public static final int NO_RESET_HEIGHT = PlayState.NO_RESET_HEIGHT;
     public static final int NO_TIME_LIMIT = 0;
+
+    // Used for setting coords on plates
+    public static final Tag<Point> TARGET_PLATE = Tag.Transient("custom_blocks/tp_plate/target");
 
     private String name;
     private int progressIndex;

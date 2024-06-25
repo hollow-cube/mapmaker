@@ -3,16 +3,22 @@ package net.hollowcube.mapmaker.map.gui.effect;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CoordinateEditorView extends View {
+    private @ContextObject BlockVec blockPos; // The block position of the checkpoint being edited.
+
     private @Outlet("x") Text xText;
     private @Outlet("y") Text yText;
     private @Outlet("z") Text zText;
@@ -28,6 +34,13 @@ public class CoordinateEditorView extends View {
         this.pos = initial;
 
         updateFromPos();
+    }
+
+    @Action("set_external")
+    public void handleSetExternal(@NotNull Player player) {
+        player.setTag(BaseEffectData.TARGET_PLATE, blockPos);
+        player.sendMessage(Component.text("todo message here but use command to update the pos later!"));
+        player.closeInventory();
     }
 
     @Action("x")

@@ -13,7 +13,10 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
@@ -23,7 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug, PlayerCooldown {
     private static final Tag<StatusEffectData> DATA_TAG = DFU.View(StatusEffectData.CODEC);
@@ -48,6 +53,15 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
         return playersOnPlate;
     }
 
+    public void editData(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block, @NotNull Consumer<StatusEffectData> func) {
+        var data = block.getTag(DATA_TAG);
+        func.accept(data);
+
+        var newTag = TagHandler.newHandler();
+        newTag.setTag(DATA_TAG, data);
+        instance.setBlock(blockPosition, block.withNbt(newTag.asCompound()));
+    }
+
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
         var player = interaction.getPlayer();
@@ -59,7 +73,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
         var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditStatusView(c, data, maxResetHeight, () -> {
+        world.server().showView(player, c -> new EditStatusView(c.with(Map.of("blockPos", new BlockVec(interaction.getBlockPosition()))), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 
