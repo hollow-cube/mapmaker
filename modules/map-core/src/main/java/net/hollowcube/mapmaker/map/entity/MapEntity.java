@@ -6,12 +6,15 @@ import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.StringBinaryTag;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityMetadataStealer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.UniqueIdUtils;
@@ -98,15 +101,37 @@ public class MapEntity extends Entity implements TerraformEntity {
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
-        //todo read metadata fields
+
+        // See note in writeData about the following fields which are
+        // uneven in these functions: id, uuid, Pos, Rotation
+
+        final EntityMeta meta = getEntityMeta();
+        if (tag.get("CustomName") instanceof StringBinaryTag string)
+            meta.setCustomName(GsonComponentSerializer.gson().deserialize(string.value()));
+        if (tag.getBoolean("CustomNameVisible")) meta.setCustomNameVisible(true);
+
+        if (tag.getBoolean("Glowing")) meta.setHasGlowingEffect(true);
+
     }
 
     @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
+
+        // These are kind of a special case. When writing an entity we add these here, but they are needed
+        // when creating and then adding the entity to the world, so we can't read them in the reader impl.
         tag.putString("id", getEntityType().name());
         tag.put("uuid", UniqueIdUtils.toNbt(getUuid()));
         tag.put("Pos", NbtUtil.into(getPosition()));
         tag.put("Rotation", NbtUtil.writeRotation(getPosition()));
+
+        final EntityMeta meta = getEntityMeta();
+        if (meta.getCustomName() != null) {
+            final String customNameString = GsonComponentSerializer.gson().serialize(meta.getCustomName());
+            tag.putString("CustomName", customNameString);
+        }
+        if (meta.isCustomNameVisible()) tag.putBoolean("CustomNameVisible", true);
+
+        if (meta.isHasGlowingEffect()) tag.putBoolean("Glowing", true);
     }
 
     @Deprecated // Should never be used, but cannot be removed for backwards compatibility.

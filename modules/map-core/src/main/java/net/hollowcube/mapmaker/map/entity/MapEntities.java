@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
-import net.hollowcube.mapmaker.map.entity.impl.EndCrystalEntity;
-import net.hollowcube.mapmaker.map.entity.impl.ItemFrameEntity;
-import net.hollowcube.mapmaker.map.entity.impl.PaintingEntity;
+import net.hollowcube.mapmaker.map.entity.impl.living.ArmorStandEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -20,12 +21,16 @@ public final class MapEntities {
         eventNode.addListener(PlayerEntityInteractEvent.class, MapEntities::handleEntityInteract);
         eventNode.addListener(EntityAttackEvent.class, MapEntities::handleEntityAttack);
 
+        // Living
+        MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
+
+        // Other
         MapEntityType.override(EntityType.ITEM_FRAME, ItemFrameEntity::new);
         MapEntityType.override(EntityType.GLOW_ITEM_FRAME, ItemFrameEntity.Glowing::new);
         MapEntityType.override(EntityType.PAINTING, PaintingEntity::new);
-
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
 
+        // Display
         MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity.Block::new);
         MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity.Item::new);
         MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity.Text::new);
