@@ -8,8 +8,7 @@ import java.util.ArrayList;
 final class RootCommandNode extends CommandNode {
 
     @Override
-    @NotNull
-    CommandNode nodeFor(@NotNull Argument<?> argument) {
+    @NotNull CommandNode nodeFor(@NotNull Argument<?> argument) {
         throw new UnsupportedOperationException("use register() to manage root node children");
     }
 
