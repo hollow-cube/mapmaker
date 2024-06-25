@@ -533,7 +533,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         }
         if (data.teleport().isPresent()) {
-            player.teleport(data.teleport().get()); //todo teleport is not immediate, need to handle that.
+            player.teleport(data.teleport().get()).thenRun(() -> {
+
+                // OOO YAY ender pearl sound, so nice. sfx!
+                player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition());
+            });
         }
     }
 
