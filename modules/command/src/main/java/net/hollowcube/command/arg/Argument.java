@@ -2,7 +2,9 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -62,6 +64,14 @@ public abstract class Argument<T> {
 
     public static @NotNull ArgumentItemStack ItemStack(@NotNull String id) {
         return new ArgumentItemStack(id);
+    }
+
+    public static <T extends Keyed> @NotNull ArgumentResource<T> Resource(@NotNull String id, @NotNull String registryName, @NotNull Function<NamespaceID, T> mapper) {
+        return new ArgumentResource<>(id, registryName, mapper);
+    }
+
+    public static @NotNull ArgumentCompoundBinaryTag CompoundBinaryTag(@NotNull String id) {
+        return new ArgumentCompoundBinaryTag(id);
     }
 
 

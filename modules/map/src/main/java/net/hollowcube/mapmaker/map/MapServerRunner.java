@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
 import net.hollowcube.mapmaker.map.command.utility.navigation.*;
+import net.hollowcube.mapmaker.map.command.vanilla.SummonCommand;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.hdb.command.HdbCommand;
@@ -233,6 +234,9 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(server.createInstance(EntitiesCommand.class));
 
         commandManager.register(server.createInstance(FixTheDripleafCommand.class));
+
+        // Vanilla commands
+        commandManager.register(server.createInstance(SummonCommand.class));
     }
 
     public static void initFeatureFlagMonitor(@NotNull ServerBridge bridge, @NotNull MapAllocator allocator) {
