@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -61,16 +62,16 @@ public final class CoordinateUtil {
 
     public static @NotNull List<Component> asTranslationArgs(@NotNull Point point) {
         return List.of(
-                Component.text(NumberUtil.format(point.x(), 2)),
-                Component.text(NumberUtil.format(point.y(), 2)),
-                Component.text(NumberUtil.format(point.z(), 2))
+                Component.text(NumberUtil.format(point.x(), 2)).hoverEvent(Component.text(point.x(), NamedTextColor.WHITE)),
+                Component.text(NumberUtil.format(point.y(), 2)).hoverEvent(Component.text(point.y(), NamedTextColor.WHITE)),
+                Component.text(NumberUtil.format(point.z(), 2)).hoverEvent(Component.text(point.z(), NamedTextColor.WHITE))
         );
     }
 
     public static @NotNull List<Component> asTranslationArgs(@NotNull Pos pos) {
         var pointArgs = new ArrayList<>(asTranslationArgs((Point) pos));
-        pointArgs.add(Component.text(NumberUtil.format(pos.yaw(), 2)));
-        pointArgs.add(Component.text(NumberUtil.format(pos.pitch(), 2)));
+        pointArgs.add(Component.text(NumberUtil.format(pos.yaw(), 2)).hoverEvent(Component.text(pos.yaw(), NamedTextColor.WHITE)));
+        pointArgs.add(Component.text(NumberUtil.format(pos.pitch(), 2)).hoverEvent(Component.text(pos.pitch(), NamedTextColor.WHITE)));
         return pointArgs;
     }
 }

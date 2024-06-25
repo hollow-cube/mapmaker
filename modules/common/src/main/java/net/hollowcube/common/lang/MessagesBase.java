@@ -8,6 +8,8 @@ import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface MessagesBase extends ComponentLike {
 
     @NotNull String translationKey();
@@ -23,6 +25,10 @@ public interface MessagesBase extends ComponentLike {
             }
         }
         return Component.translatable(translationKey(), componentArgs);
+    }
+
+    default @NotNull Component with(@NotNull List<Component> args) {
+        return Component.translatable(translationKey(), args);
     }
 
     default @NotNull Component asError(@Nullable String traceId, @NotNull Object... args) {

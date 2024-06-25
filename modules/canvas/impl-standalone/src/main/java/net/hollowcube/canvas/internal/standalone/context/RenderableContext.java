@@ -20,7 +20,9 @@ public record RenderableContext(
     @Override
     public @NotNull Context with(@NotNull Map<String, Object> contextObjects) {
         var newContextObjects = new HashMap<>(this.contextObjects);
-        newContextObjects.putAll(contextObjects);
+        for (var entry : contextObjects.entrySet()) {
+            newContextObjects.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue());
+        }
         return new RenderableContext(parent, inventory, newContextObjects);
     }
 

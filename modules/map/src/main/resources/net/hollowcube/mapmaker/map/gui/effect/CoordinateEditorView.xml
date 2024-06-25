@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.effect ?>
-<component width="9" height="3" align="ttb">
+<component width="9" height="6" align="ttb" sprite="effect/actions/teleport_container">
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
@@ -13,27 +13,38 @@
     </box>
 
     <box width="9" height="1" align="ltr">
-        <text id="x" width="3" height="1"
+        <spacer/>
+        <text id="x" width="7" height="1"
               translationKey="gui.effect.coordinate.x"
-              font="line_1" centered="true"/>
-        <text id="y" width="3" height="1"
-              translationKey="gui.effect.coordinate.y"
-              font="line_1" centered="true"/>
-        <text id="z" width="3" height="1"
-              translationKey="gui.effect.coordinate.z"
-              font="line_1" centered="true"/>
+              font="line_1" shift="23"/>
     </box>
 
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <text id="yaw" width="3" height="1"
-              translationKey="gui.effect.coordinate.yaw"
-              font="line_2" centered="true"/>
-        <spacer/>
-        <text id="pitch" width="3" height="1"
-              translationKey="gui.effect.coordinate.pitch"
-              font="line_2" centered="true"/>
+        <text id="y" width="7" height="1"
+              translationKey="gui.effect.coordinate.y"
+              font="line_2" shift="23"/>
     </box>
 
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <text id="z" width="7" height="1"
+              translationKey="gui.effect.coordinate.z"
+              font="line_3" shift="23"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <text id="yaw" width="7" height="1"
+              translationKey="gui.effect.coordinate.yaw"
+              font="line_4" shift="23"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <text id="pitch" width="7" height="1"
+              translationKey="gui.effect.coordinate.pitch"
+              font="line_5" shift="23"/>
+    </box>
 
 </component>
