@@ -8,8 +8,7 @@ import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.util.MapMessages;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -41,7 +40,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
         // Ensure they are editing a block
         var targetBlockPosition = player.getTag(BaseEffectData.TARGET_PLATE);
         if (targetBlockPosition == null) {
-            player.sendMessage("You must be editing a checkpoint to use this command. todo this message");
+            player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_NO_TARGET);
             return;
         }
 
@@ -59,14 +58,8 @@ public class SetPreciseCoordsCommand extends CommandDsl {
             sp.editData(player.getInstance(), targetBlockPosition, block, data -> data.setTeleport(pos));
         } else return;
 
-        //todo update message
-        player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
-                Component.text(pos.blockX()).hoverEvent(Component.text(pos.x(), NamedTextColor.WHITE)),
-                Component.text(pos.blockY()).hoverEvent(Component.text(pos.y(), NamedTextColor.WHITE)),
-                Component.text(pos.blockZ()).hoverEvent(Component.text(pos.z(), NamedTextColor.WHITE)),
-                Component.text(Math.floor(pos.pitch())).hoverEvent(Component.text(pos.pitch(), NamedTextColor.WHITE)),
-                Component.text(Math.floor(pos.yaw())).hoverEvent(Component.text(pos.yaw(), NamedTextColor.WHITE))
-        ));
+        player.removeTag(BaseEffectData.TARGET_PLATE);
+        player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_SUCCESS.with(CoordinateUtil.asTranslationArgs(pos)));
     }
 
 }

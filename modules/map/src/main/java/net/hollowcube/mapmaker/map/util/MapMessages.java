@@ -19,6 +19,10 @@ public enum MapMessages implements MessagesBase {
 
     COMMAND_SETSPAWN_SUCCESS("command.set_spawn.success"),
 
+    COMMAND_SETPRECISECOORDS_BEGIN("command.set_precise_coords.begin"),
+    COMMAND_SETPRECISECOORDS_NO_TARGET("command.set_precise_coords.no_target"),
+    COMMAND_SETPRECISECOORDS_SUCCESS("command.set_precise_coords.success"),
+
     // Misc
     SCHEMATIC_UPLOAD_SUCCESS("map.schematic.upload.success"),
     ;

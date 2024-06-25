@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
@@ -39,7 +40,7 @@ public class CoordinateEditorView extends View {
     @Action("set_external")
     public void handleSetExternal(@NotNull Player player) {
         player.setTag(BaseEffectData.TARGET_PLATE, blockPos);
-        player.sendMessage(Component.text("todo message here but use command to update the pos later!"));
+        player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_BEGIN);
         player.closeInventory();
     }
 
@@ -93,7 +94,9 @@ public class CoordinateEditorView extends View {
     }
 
     private void updateSingle(@NotNull Text text, double value) {
-        text.setText(String.format("%.2f", value));
+        String raw = String.valueOf(value);
+        if (raw.length() > 16) raw = raw.substring(0, 16);
+        text.setText(raw);
         text.setArgs(Component.text(value));
     }
 
