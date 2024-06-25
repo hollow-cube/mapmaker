@@ -6,11 +6,16 @@ import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.edit.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
+import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +24,9 @@ import java.util.function.Supplier;
 
 @AutoService(FeatureProvider.class)
 public class CustomBlocksFeatureProvider implements FeatureProvider {
+
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer);
 
     @Override
     public @NotNull List<Supplier<BlockHandler>> blockHandlers() {
@@ -42,10 +50,18 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             world.itemRegistry().register(BuilderMenuItem.INSTANCE);
             world.itemRegistry().register(EnterTestModeItem.INSTANCE);
             world.itemRegistry().register(SpawnPointItem.INSTANCE);
+
+            world.eventNode().addChild(eventNode);
+
             return true;
         }
 
         return false;
+    }
+
+    private void cleanupPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
+        var player = event.getPlayer();
+        player.removeTag(BaseEffectData.TARGET_PLATE);
     }
 
 }

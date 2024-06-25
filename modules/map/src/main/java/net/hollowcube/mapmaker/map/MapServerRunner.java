@@ -207,6 +207,7 @@ public class MapServerRunner extends AbstractMapServer {
 
         commandManager.register(server.createInstance(TestCommand.class));
         commandManager.register(server.createInstance(BuilderMenuCommand.class));
+        commandManager.register(server.createInstance(SetPreciseCoordsCommand.class));
         commandManager.register(server.createInstance(BuildCommand.class));
         commandManager.register(server.createInstance(SetSpawnCommand.class));
 

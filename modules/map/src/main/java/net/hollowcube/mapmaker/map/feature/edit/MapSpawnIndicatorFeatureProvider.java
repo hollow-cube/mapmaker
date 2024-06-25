@@ -12,6 +12,8 @@ import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -86,7 +89,8 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
         var controller = world.server().guiController();
         int maxResetHeight = entity.getPosition().blockY();
         var checkpointData = world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS);
-        controller.show(player, c -> new EditCheckpointView(c, checkpointData, maxResetHeight,
+        //todo the blockPos passed here isnt valid and will fizzle. You shouldnt really be able to set the tp coords on this checkpoint anyway because you never actually get it.
+        controller.show(player, c -> new EditCheckpointView(c.with(Map.of("blockPos", new BlockVec(Vec.ZERO))), checkpointData, maxResetHeight,
                 () -> world.setTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS, checkpointData)));
     }
 
