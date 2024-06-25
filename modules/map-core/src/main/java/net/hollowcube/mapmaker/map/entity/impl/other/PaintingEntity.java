@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.entity.impl;
+package net.hollowcube.mapmaker.map.entity.impl.other;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
