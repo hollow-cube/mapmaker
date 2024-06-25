@@ -141,6 +141,21 @@ public abstract class Argument<T> {
     }
 
 
+    // Vanilla completion support
+
+    public boolean supportsClientCompletion() {
+        return vanillaParser() != null;
+    }
+
+    public @Nullable String vanillaParser() {
+        return null;
+    }
+
+    public byte @Nullable [] vanillaProperties() {
+        return null;
+    }
+
+
     // Result factories
 
     public @NotNull ParseResult<T> partial() {

@@ -1,0 +1,55 @@
+
+
+brigadier:float -> 0x1 = hasMin, 0x2 = hasMax -> writeFloat(min), writeFloat(max) (if present)
+brigadier:double -> 0x1 = hasMin, 0x2 = hasMax -> writeDouble(min), writeDouble(max) (if present)
+brigadier:integer -> 0x1 = hasMin, 0x2 = hasMax -> writeInt(min), writeInt(max) (if present)
+brigadier:long -> 0x1 = hasMin, 0x2 = hasMax -> writeLong(min), writeLong(max) (if present)
+brigadier:string -> writeEnum(SINGLE_WORD, QUOTABLE_PHRASE, GREEDY_PHRASE)
+entity -> 0x1 = singleOnly, 0x2 = playersOnly
+game_profile
+block_pos
+column_pos
+vec3
+vec2
+block_state
+block_predicate
+item_stack
+item_predicate
+color
+component
+style
+message
+nbt_compound_tag
+nbt_tag
+nbt_path
+objective
+objective_criteria
+operation
+particle
+angle
+rotation
+scoreboard_slot
+score_holder -> 0x1 = allowMultiple
+swizzle
+team
+item_slot
+item_slots
+resource_location
+function
+entity_anchor
+int_range
+float_range
+dimension
+gamemode
+time -> writeInt(minimum)
+resource_or_tag -> writeResourceKey(registryKey)
+resource_or_tag_key -> writeResourceKey(registryKey)
+resource -> writeResourceKey(registryKey)
+resource_key -> writeResourceKey(registryKey)
+template_mirror
+template_rotation
+heightmap
+loot_table
+loot_predicate
+loot_modifier
+uuid
