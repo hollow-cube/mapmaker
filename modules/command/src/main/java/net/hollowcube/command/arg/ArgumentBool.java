@@ -5,12 +5,18 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ArgumentBool extends Argument<Boolean> {
-    // This is case sensitive right now, which matches Brigadier, maybe should have an option to match case insensitively for server side only?
+    // This is case-sensitive right now, which matches Brigadier, maybe should have an option to match case insensitively for server side only?
 
     public ArgumentBool(@NotNull String id) {
         super(id);
+    }
+
+    @Override
+    public @Nullable String vanillaParser() {
+        return "brigadier:bool";
     }
 
     @Override
