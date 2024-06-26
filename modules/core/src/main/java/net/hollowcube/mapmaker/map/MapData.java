@@ -176,8 +176,9 @@ public class MapData {
     public boolean addObject(@NotNull ObjectData object) {
         settings.updateLock.lock();
         try {
-            if (objectUsage() + object.type().cost() > objectLimit)
-                return false;
+            //todo reenable object limits later
+//            if (objectUsage() + object.type().cost() > objectLimit)
+//                return false;
 
             if (objects == null) objects = new ArrayList<>();
             objects.add(object);
