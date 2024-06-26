@@ -16,7 +16,7 @@ public class ArgumentCompoundBinaryTag extends Argument<CompoundBinaryTag> {
 
     @Override
     public @Nullable String vanillaParser() {
-        return "nbt_compound_tag";
+        return "minecraft:nbt_compound_tag";
     }
 
     @Override

@@ -2,6 +2,9 @@ package net.hollowcube.command;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.arg.ArgumentEnum;
+import net.hollowcube.command.arg.ArgumentLiteral;
+import net.hollowcube.command.arg.ArgumentMap;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.CommandReflection;
@@ -125,6 +128,117 @@ public class CommandManagerImpl implements CommandManager {
         root.children = rootNodes.toIntArray();
 
         return new DeclareCommandsPacket(nodes, 0);
+    }
+
+    private Map<CommandNode, Integer> redirectedNodeCache = new HashMap<>();
+    private int emptyArgsIndex = -1;
+
+    @Override
+    public @Nullable DeclareCommandsPacket createCommandPacketV2(@NotNull Player player) {
+        var nodes = new ArrayList<DeclareCommandsPacket.Node>();
+        var root = new DeclareCommandsPacket.Node();
+        nodes.add(root);
+
+        redirectedNodeCache.clear();
+        emptyArgsIndex = -1; //todo these need to be locals
+
+        var rootNodes = new IntArrayList();
+        for (var pair : this.root.children) {
+            int index = transformCommandNode(player, nodes, pair.argument(), pair.node());
+            if (index != -1) rootNodes.add(index);
+        }
+        root.children = rootNodes.toIntArray();
+
+        return new DeclareCommandsPacket(nodes, 0);
+    }
+
+    private int transformCommandNode(
+            @NotNull Player player,
+            @NotNull List<DeclareCommandsPacket.Node> packet,
+            @Nullable Argument<?> arg,
+            @NotNull CommandNode node
+    ) {
+        if (redirectedNodeCache.containsKey(node)) {
+            return redirectedNodeCache.get(node);
+        }
+
+        if (node.condition != null) {
+            var result = node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+            if (result == CommandCondition.HIDE) return -1;
+        }
+        if (node.redirect != null && node.redirect.condition != null) {
+            var result = node.redirect.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+            if (result == CommandCondition.HIDE) return -1;
+        }
+
+        int index = -1;
+        var packetNode = new DeclareCommandsPacket.Node();
+        if (arg != null) packetNode.name = arg.id();
+
+        boolean suggestionType = false;
+        DeclareCommandsPacket.NodeType type;
+        if (node.redirect != null) {
+            index = packet.size();
+            redirectedNodeCache.put(node, index);
+            packet.add(packetNode);
+
+            packetNode.redirectedNode = transformCommandNode(player, packet, null, node.redirect);
+            packetNode.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, false, true, false);
+            return index;
+        } else if (arg instanceof ArgumentLiteral) {
+            type = DeclareCommandsPacket.NodeType.LITERAL;
+        } else if (arg instanceof ArgumentEnum<?> en) {
+            throw new UnsupportedOperationException("ENUM HANDLING");
+        } else if (arg instanceof ArgumentMap<?, ?> map && map.source().vanillaParser() != null) {
+            // Map arguments need special handling to set the suggestion type to ask_server
+            type = DeclareCommandsPacket.NodeType.ARGUMENT;
+            packetNode.parser = arg.vanillaParser();
+            packetNode.properties = arg.vanillaProperties();
+
+            suggestionType = true;
+            packetNode.suggestionsType = "minecraft:ask_server";
+        } else if (arg == null) {
+            throw new UnsupportedOperationException("null argument, what to do here");
+        } else if (arg.vanillaParser() == null) {
+            return serverArgsNode(packet);
+        } else {
+            type = DeclareCommandsPacket.NodeType.ARGUMENT;
+            packetNode.parser = arg.vanillaParser();
+            packetNode.properties = arg.vanillaProperties();
+        }
+
+        index = packet.size();
+        redirectedNodeCache.put(node, index);
+        packet.add(packetNode);
+
+        packetNode.flags = DeclareCommandsPacket.getFlag(type, node.isExecutable(), false, suggestionType);
+
+        var children = new IntArrayList();
+        if (node.children != null) {
+            for (var pair : node.children) {
+                int childIndex = transformCommandNode(player, packet, pair.argument(), pair.node());
+                if (childIndex != -1) children.add(childIndex);
+            }
+        }
+        packetNode.children = children.toIntArray();
+
+        return index;
+    }
+
+    private int serverArgsNode(@NotNull List<DeclareCommandsPacket.Node> nodes) {
+        if (this.emptyArgsIndex != -1) return this.emptyArgsIndex;
+
+        var packetNode = new DeclareCommandsPacket.Node();
+        packetNode.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
+        packetNode.name = "args";
+        packetNode.parser = "brigadier:string";
+        packetNode.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
+        packetNode.suggestionsType = "minecraft:ask_server";
+
+        int index = nodes.size();
+        nodes.add(packetNode);
+        this.emptyArgsIndex = index;
+        return index;
     }
 
     @Override

@@ -35,6 +35,10 @@ public class ArgumentMap<S, T> extends Argument<T> {
         this.suggestFunc = suggestFunc;
     }
 
+    public @NotNull Argument<S> source() {
+        return source;
+    }
+
     @Override
     public @NotNull ParseResult<T> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         return switch (source.parse(sender, reader)) {

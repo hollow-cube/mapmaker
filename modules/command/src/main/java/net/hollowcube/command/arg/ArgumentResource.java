@@ -4,11 +4,14 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ArgumentResource<T extends Keyed> extends Argument<T> {
 
     private final String registryName;
@@ -18,6 +21,16 @@ public class ArgumentResource<T extends Keyed> extends Argument<T> {
         super(id);
         this.registryName = registryName;
         this.mapper = mapper;
+    }
+
+    @Override
+    public @Nullable String vanillaParser() {
+        return "minecraft:resource";
+    }
+
+    @Override
+    public byte @Nullable [] vanillaProperties() {
+        return NetworkBuffer.makeArray(buffer -> buffer.write(NetworkBuffer.STRING, registryName));
     }
 
     @Override

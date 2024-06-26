@@ -49,7 +49,7 @@ public abstract class CommandHandlingPlayer extends Player {
 
     @Override
     public void refreshCommands() {
-        var declareCommandsPacket = getCommandManager().createCommandPacket(this);
+        var declareCommandsPacket = getCommandManager().createCommandPacketV2(this);
         if (declareCommandsPacket != null) sendPacket(declareCommandsPacket);
     }
 

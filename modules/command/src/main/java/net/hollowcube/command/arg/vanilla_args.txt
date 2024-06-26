@@ -9,7 +9,6 @@ entity -> 0x1 = singleOnly, 0x2 = playersOnly
 game_profile
 block_pos
 column_pos
-vec3
 vec2
 block_state
 block_predicate

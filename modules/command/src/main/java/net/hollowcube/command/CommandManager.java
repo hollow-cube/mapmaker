@@ -54,11 +54,11 @@ public interface CommandManager {
      * @param input  The input text to execute
      */
     @Blocking
-    @NotNull
-    CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
+    @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
 
-    @Nullable
-    DeclareCommandsPacket createCommandPacket(@NotNull Player player);
+    @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player);
+
+    @Nullable DeclareCommandsPacket createCommandPacketV2(@NotNull Player player);
 
     /**
      * Provides access to the command manager's reflection API, which can be used to inspect the command graph.
