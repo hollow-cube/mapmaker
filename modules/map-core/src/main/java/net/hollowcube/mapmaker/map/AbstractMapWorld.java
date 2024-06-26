@@ -155,8 +155,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
             // Enable the 1.21 features
             player.sendPacket(new UpdateEnabledFeaturesPacket(Set.of(
-                    NamespaceID.from("minecraft:vanilla"),
-                    NamespaceID.from("minecraft:update_1_21")
+                    NamespaceID.from("minecraft:vanilla")
             )));
 
             // Set the instance and spawn point of the player.
