@@ -16,6 +16,11 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
     }
 
     @Override
+    public @Nullable String vanillaParser() {
+        return "minecraft:vec3";
+    }
+
+    @Override
     public @NotNull ParseResult<Point> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var origin = (sender instanceof Player player) ? player.getPosition() : Vec.ZERO;
         var x = readCoordinate(origin.x(), reader);
