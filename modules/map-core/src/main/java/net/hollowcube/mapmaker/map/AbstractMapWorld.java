@@ -153,7 +153,6 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
             event.setSendRegistryData(false);
 
-            // Enable the 1.21 features
             player.sendPacket(new UpdateEnabledFeaturesPacket(Set.of(
                     NamespaceID.from("minecraft:vanilla")
             )));

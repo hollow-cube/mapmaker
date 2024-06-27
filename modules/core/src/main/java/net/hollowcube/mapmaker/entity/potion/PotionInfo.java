@@ -1,13 +1,17 @@
 package net.hollowcube.mapmaker.entity.potion;
 
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,12 +57,18 @@ public record PotionInfo(
 
     public static final Codec<PotionInfo> CODEC = Codec.STRING.xmap(PotionInfo::getById, PotionInfo::id);
 
-    public static final PotionInfo SPEED = builder("speed").maxLevel(255).setVanillaEffect(PotionEffect.SPEED).setIcon("effect/potion/icon/speed").setHandler(new SpeedPotionHandler()).build();
-    public static final PotionInfo JUMP_BOOST = builder("jump_boost").maxLevel(255).setVanillaEffect(PotionEffect.JUMP_BOOST).setIcon("effect/potion/icon/jump_boost").build();
+    public static final PotionInfo SPEED = builder("speed").maxLevel(255).setVanillaEffect(PotionEffect.SPEED).setIcon("effect/potion/icon/speed")
+            .attribute(Attribute.GENERIC_MOVEMENT_SPEED, "minecraft:effect.speed", level -> 0.2 * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
+    public static final PotionInfo JUMP_BOOST = builder("jump_boost").maxLevel(255).setVanillaEffect(PotionEffect.JUMP_BOOST).setIcon("effect/potion/icon/jump_boost")
+            .attribute(Attribute.GENERIC_SAFE_FALL_DISTANCE, "minecraft:effect.jump_boost", level -> level + 1, AttributeOperation.ADD_VALUE).build();
     public static final PotionInfo DEPTH_STRIDER = builder("depth_strider").maxLevel(3).setVanillaEffect(PotionEffect.BAD_OMEN).setIcon("effect/potion/icon/depth_strider").setHandler(new DepthStriderPotionHandler()).build();
     public static final PotionInfo LEVITATION = builder("levitation").maxLevel(255).setVanillaEffect(PotionEffect.LEVITATION).setIcon("effect/potion/icon/levitation").build();
     public static final PotionInfo SLOW_FALL = builder("slow_fall").setVanillaEffect(PotionEffect.SLOW_FALLING).setIcon("effect/potion/icon/slow_fall").build();
-    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon("effect/potion/icon/slowness").setHandler(new SlownessPotionHandler()).build();
+
+    // .addAttributeModifier(Attributes.SAFE_FALL_DISTANCE, ResourceLocation.withDefaultNamespace("effect.jump_boost"), 1.0, AttributeModifier.Operation.ADD_VALUE));
+
+    public static final PotionInfo SLOWNESS = builder("slowness").maxLevel(255).setVanillaEffect(PotionEffect.SLOWNESS).setIcon("effect/potion/icon/slowness")
+            .attribute(Attribute.GENERIC_MOVEMENT_SPEED, "minecraft:effect.slowness", level -> -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
     public static final PotionInfo BLINDNESS = builder("blindness").maxLevel(255).setVanillaEffect(PotionEffect.BLINDNESS).setIcon("effect/potion/icon/blindness").build();
     public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon("effect/potion/icon/darkness").build();
     public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon("effect/potion/icon/nausea").build();
@@ -119,6 +129,11 @@ public record PotionInfo(
 
         public @NotNull Builder setHandler(@Nullable PotionHandler handler) {
             this.handler = handler;
+            return this;
+        }
+
+        public @NotNull Builder attribute(@NotNull Attribute attribute, @NotNull String id, @NotNull Int2DoubleFunction formula, @NotNull AttributeOperation operation) {
+            this.handler = new GenericModifierPotionHandler(attribute, NamespaceID.from(id), formula, operation);
             return this;
         }
 

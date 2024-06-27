@@ -33,6 +33,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -72,6 +74,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final Sound REMOVE_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 0.1f);
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
+
+    private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
@@ -205,8 +209,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
                 softReset(player, saveState);
             }
-
         }
+
+        //todo this should not be applied if fall damage is enabled
+        player.getAttribute(Attribute.GENERIC_SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
     }
 
     public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
@@ -262,6 +268,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         player.removeTag(COUNTDOWN_END);
+
+        player.getAttribute(Attribute.GENERIC_SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {

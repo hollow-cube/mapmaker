@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.entity.potion;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeInstance;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.item.enchant.LevelBasedValue;
@@ -15,7 +16,9 @@ public class DepthStriderPotionHandler implements PotionHandler {
     @Override
     public void apply(@NotNull Player player, int level) {
         var modifier = new AttributeModifier(MODIFIER_ID, VALUE.calc(level + 1), AttributeOperation.ADD_VALUE);
-        player.getAttribute(Attribute.GENERIC_WATER_MOVEMENT_EFFICIENCY).addModifier(modifier);
+        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_WATER_MOVEMENT_EFFICIENCY);
+        attr.removeModifier(MODIFIER_ID);
+        attr.addModifier(modifier);
     }
 
     @Override
