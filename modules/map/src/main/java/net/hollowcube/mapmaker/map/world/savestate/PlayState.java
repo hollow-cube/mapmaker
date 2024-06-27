@@ -208,7 +208,7 @@ public final class PlayState {
     public String toString(boolean includeLast) {
         return "PlayState{" +
                 "lastState=" + lastState.isPresent() +
-                ", statusEffects=" + history +
+                ", statusEffects=" + (history.size() > 1 ? history.size() : history) +
                 ", progressIndex=" + pretty(progressIndex) +
                 ", timeLimit=" + pretty(timeLimit) +
                 ", resetHeight=" + pretty(resetHeight) +

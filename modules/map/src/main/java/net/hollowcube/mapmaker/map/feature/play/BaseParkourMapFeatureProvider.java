@@ -24,6 +24,7 @@ import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.util.TagCooldown;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -62,6 +63,8 @@ import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpoi
 public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final int RESET_HEIGHT_OFFSET = 5;
     private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
+
+    private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
 
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
@@ -274,15 +277,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
         var player = event.getPlayer();
+        var world = MapWorld.forPlayer(player);
         var state = SaveState.fromPlayer(player).state(PlayState.class);
         var data = event.effectData();
 
         // Ensure the event should trigger a checkpoint change for the current players state
-        int currentIndex = state.progressIndex().orElse(0);
-        if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1)) {
-            player.sendMessage(Component.translatable("checkpoint.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
-            return; // Player has already passed this progress index.
-        }
+        if (checkProgressIndex(player, world, state, data)) return;
         if (state.lastState().isPresent() && state.lastState().get().hasStatus(event.checkpointId()))
             return; // Player already has this checkpoint in their history (they are backtracking)
 
@@ -295,14 +295,23 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         state.setTimeLimit(-1); // Time always reset on checkpoint
         player.removeTag(COUNTDOWN_END);
         updateStateFromPlayer(player, state);
-        updateCheckpointEffectState(MapWorld.forPlayer(player), player, data, state);
+        updateCheckpointEffectState(world, player, data, state);
+
+        List<String> newHistory;
+        if (world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)) {
+            // With additive progress index you can never touch a previous checkpoint
+            state.history().add(event.checkpointId());
+            newHistory = List.copyOf(state.history());
+        } else {
+            // Set the history to only contain the single checkpoint id so that you can go back to a previous
+            // checkpoint though of course this can be prevented by using progress indices
+            newHistory = List.of(event.checkpointId());
+        }
 
         // Cache the last state so that we can reset back here.
         state.setLastState(new PlayState(
                 Optional.empty(),
-                // Set the history to only contain the single checkpoint id so that you can go back to a previous
-                // checkpoint though of course this can be prevented by using progress indices
-                List.of(event.checkpointId()),
+                newHistory,
                 state.progressIndex(),
                 state.timeLimit(),
                 state.resetHeight(),
@@ -322,17 +331,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleStatusChange(@NotNull MapPlayerStatusChangeEvent event) {
         var player = event.getPlayer();
+        var world = MapWorld.forPlayer(player);
         var state = SaveState.fromPlayer(player).state(PlayState.class);
         var data = event.effectData();
 
         // Ensure the event should trigger a status change for the current players state
         if (!data.repeatable() && state.hasStatus(event.statusId()))
             return; // Player already has the status plate in this checkpoint.
-        int currentIndex = state.progressIndex().orElse(0);
-        if (data.progressIndex() > 0 && (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1)) {
-//            player.sendMessage(Component.translatable("status.progress_index.not_acceptable", Component.text(currentIndex), Component.text(data.progressIndex())));
-            return; // Player has already passed this progress index.
-        }
+        if (checkProgressIndex(player, world, state, data)) return;
 
         // Apply the status changes
         updateStateFromPlayer(player, state);
@@ -344,6 +350,25 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Update the player based on the new state
         updatePlayerFromState(player, state);
+    }
+
+    private boolean checkProgressIndex(@NotNull Player player, @NotNull MapWorld world, @NotNull PlayState state, @NotNull BaseEffectData data) {
+        if (data.progressIndex() > 0) {
+            int currentIndex = state.progressIndex().orElse(0);
+            boolean condition = world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)
+                    // With additive index you can get anything <= current + 1
+                    ? (data.progressIndex() > currentIndex + 1)
+                    // Without additive progress index you must be at the prior index or the current one
+                    : (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1);
+            if (condition) {
+                if (PROGRESS_INDEX_WARNING.test(player)) {
+                    player.sendMessage(Component.translatable("checkpoint.progress_index.not_acceptable",
+                            Component.text(currentIndex), Component.text(data.progressIndex())));
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     public void handlePlayerReset(@NotNull MapPlayerResetEvent event) {
