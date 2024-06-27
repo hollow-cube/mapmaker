@@ -22,11 +22,9 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -53,10 +51,14 @@ public class DevServerRunner extends AbstractMapServer {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("dev-init")
-                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+                        .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
+                        .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                        .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+                        .addListener(PlayerDisconnectEvent.class, this::handleDisconnect))
+                .addListener(PlayerStartSneakingEvent.class, event -> {
+                    var attr = event.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+                    event.getPlayer().sendMessage("base=" + attr.getBaseValue() + " comp=" + attr.getValue() + " mod=" + attr.modifiers().size());
+                });
     }
 
     @Override

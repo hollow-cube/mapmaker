@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.entity.potion;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
-import net.minestom.server.entity.attribute.AttributeInstance;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.utils.NamespaceID;
@@ -19,9 +18,7 @@ public record GenericModifierPotionHandler(
     @Override
     public void apply(@NotNull Player player, int level) {
         var modifier = new AttributeModifier(modifierId, formula.apply(level), operation);
-        final AttributeInstance attr = player.getAttribute(attribute);
-        attr.removeModifier(modifier);
-        attr.addModifier(modifier);
+        player.getAttribute(attribute).addModifier(modifier);
     }
 
     @Override
