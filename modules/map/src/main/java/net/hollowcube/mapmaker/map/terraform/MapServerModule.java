@@ -52,6 +52,7 @@ public class MapServerModule implements TerraformModule {
         register(overrides, BlockTags.BEDS, BlockHandlers.BED);
         register(overrides, Block.CONDUIT, BlockHandlers.CONDUIT);
         register(overrides, Block.BELL, BlockHandlers.BELL);
+        register(overrides, Block.ENCHANTING_TABLE, BlockHandlers.ENCHANTING_TABLE);
         register(overrides, Block.DECORATED_POT, BlockHandlers.DECORATED_POT);
         register(overrides, Block.CAMPFIRE, BlockHandlers.CAMPFIRE);
         register(overrides, Block.SOUL_CAMPFIRE, BlockHandlers.CAMPFIRE);

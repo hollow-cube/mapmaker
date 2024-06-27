@@ -22,6 +22,7 @@ public final class BlockHandlers {
     public static final BlockHandler BED = new NoopBlockHandler("minecraft:bed");
     public static final BlockHandler CONDUIT = new NoopBlockHandler("minecraft:conduit");
     public static final BlockHandler BELL = new NoopBlockHandler("minecraft:bell");
+    public static final BlockHandler ENCHANTING_TABLE = new NoopBlockHandler("minecraft:enchanting_table");
     public static final BlockHandler DECORATED_POT = new DecoratedPotBlockHandler();
     public static final BlockHandler CAMPFIRE = new CampfireBlockHandler();
 
@@ -43,6 +44,7 @@ public final class BlockHandlers {
         register.accept(BED);
         register.accept(CONDUIT);
         register.accept(BELL);
+        register.accept(ENCHANTING_TABLE);
         register.accept(DECORATED_POT);
         register.accept(CAMPFIRE);
     }

@@ -37,4 +37,5 @@ public abstract class BaseBlockPlacementRule extends BlockPlacementRule {
             instance.setBlock(point, block);
         }
     }
+
 }

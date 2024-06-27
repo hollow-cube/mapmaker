@@ -4,6 +4,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 @SuppressWarnings("UnstableApiUsage")
 public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
@@ -20,7 +22,11 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
         var posAbove = updateState.blockPosition().add(0, 1, 0);
         var blockAbove = updateState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);
         if (blockAbove.id() == Block.BIG_DRIPLEAF.id() || blockAbove.id() == Block.BIG_DRIPLEAF_STEM.id()) {
-            return Block.BIG_DRIPLEAF_STEM.withProperty(PROP_FACING, currentBlock.getProperty(PROP_FACING));
+            var worldBlock = updateState.instance().getBlock(updateState.blockPosition(), Block.Getter.Condition.TYPE);
+            return Block.BIG_DRIPLEAF_STEM.withProperties(Map.of(
+                    PROP_FACING, currentBlock.getProperty(PROP_FACING),
+                    "waterlogged", waterlogged(worldBlock)
+            ));
         }
 
         return currentBlock;

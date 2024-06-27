@@ -22,7 +22,7 @@ public class WaterloggedPlacementRule extends BaseBlockPlacementRule {
     }
 
     protected String waterlogged(@NotNull Block existing) {
-        return String.valueOf(existing.id() == Block.WATER.id());
+        return String.valueOf(existing.id() == Block.WATER.id() || "true".equals(existing.getProperty("waterlogged")));
     }
 
 }

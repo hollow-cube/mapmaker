@@ -10,6 +10,7 @@ import net.minestom.server.entity.metadata.other.ItemFrameMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.Rotation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -115,6 +116,8 @@ public class ItemFrameEntity extends MapEntity {
         tag.putByte("facing", (byte) meta.getOrientation().ordinal());
         if (meta.isInvisible()) tag.putBoolean("Invisible", true);
         if (!meta.getItem().isAir()) tag.put("Item", ItemStack.NBT_TYPE.write(meta.getItem()));
+
+        if (meta.getRotation() != Rotation.NONE) tag.putByte("ItemRotation", (byte) meta.getRotation().ordinal());
     }
 
     @Override
@@ -126,6 +129,8 @@ public class ItemFrameEntity extends MapEntity {
         meta.setInvisible(tag.getBoolean("Invisible", false));
         if (tag.get("Item") instanceof CompoundBinaryTag itemTag)
             meta.setItem(ItemStack.NBT_TYPE.read(itemTag));
+
+        meta.setRotation(Rotation.values()[tag.getByte("ItemRotation")]);
     }
 
     @Override

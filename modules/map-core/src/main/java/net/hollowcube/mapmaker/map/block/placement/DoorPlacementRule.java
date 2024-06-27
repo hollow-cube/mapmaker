@@ -23,7 +23,7 @@ public class DoorPlacementRule extends BaseBlockPlacementRule {
         var blockPosition = placementState.placePosition();
 
         var abovePosition = blockPosition.add(0, 1, 0);
-        if (!instance.getBlock(abovePosition, Block.Getter.Condition.TYPE).isAir())
+        if (!instance.getBlock(abovePosition, Block.Getter.Condition.TYPE).registry().isReplaceable())
             return null;
 
         var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
