@@ -6,6 +6,7 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
+import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,7 @@ public class ArgumentEntity extends Argument<EntityFinder> {
     //todo this argument needs a ton of work!
     private boolean onlySingleEntity = false;
     private boolean onlyPlayers = false;
+    private boolean sameWorld = false;
 
     ArgumentEntity(@NotNull String id) {
         super(id);
@@ -30,6 +32,11 @@ public class ArgumentEntity extends Argument<EntityFinder> {
 
     public @NotNull ArgumentEntity onlyPlayers(boolean onlyPlayers) {
         this.onlyPlayers = onlyPlayers;
+        return this;
+    }
+
+    public @NotNull ArgumentEntity sameWorld(boolean sameWorld) {
+        this.sameWorld = sameWorld;
         return this;
     }
 
@@ -50,6 +57,8 @@ public class ArgumentEntity extends Argument<EntityFinder> {
 
         // for now, just suggest matching players
         for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
+            if (sameWorld && sender instanceof Player p && !p.getInstance().equals(player.getInstance()))
+                continue;
             if (player.getUsername().toLowerCase(Locale.ROOT).startsWith(raw)) {
                 suggestion.add(player.getUsername());
             }
