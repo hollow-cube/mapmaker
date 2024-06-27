@@ -7,7 +7,9 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.map.MapServerRunner;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
@@ -212,5 +214,27 @@ public class DevServerRunner extends AbstractMapServer {
 
         // Again, need to implement the proxy part of the delete session flow
         sessionService().deleteSessionV2(player.getUuid().toString());
+    }
+
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        DebugCommand dbg = super.createDebugCommand();
+
+        dbg.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {
+            var world = MapWorld.forPlayerOptional(player);
+            if (world == null) {
+                player.sendMessage("You are not in a map world!");
+                return;
+            }
+
+            if (world instanceof EditingMapWorld && world.canEdit(player)) {
+                world.map().setSetting(MapSettings.PROGRESS_INDEX_ADDITION, true);
+                player.sendMessage("Enabled progress addition");
+            } else {
+                player.sendMessage("You are not in an editing world!");
+            }
+        }, "Enables progress index add mode for the current map");
+
+        return dbg;
     }
 }

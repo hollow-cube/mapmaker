@@ -309,6 +309,21 @@ public class MapServerRunner extends AbstractMapServer {
             player.sendMessage("Type: " + world.getClass().getSimpleName());
         }, "Shows information about the world you are in");
 
+        cmd.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {
+            var world = MapWorld.forPlayerOptional(player);
+            if (world == null) {
+                player.sendMessage("You are not in a map world!");
+                return;
+            }
+
+            if (world instanceof EditingMapWorld && world.canEdit(player)) {
+                world.map().setSetting(MapSettings.PROGRESS_INDEX_ADDITION, true);
+                player.sendMessage("Enabled progress addition");
+            } else {
+                player.sendMessage("You are not in an editing world!");
+            }
+        }, "Enables progress index add mode for the current map");
+
         return cmd;
     }
 
