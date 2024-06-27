@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -43,6 +42,7 @@ import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
+import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
@@ -557,17 +557,21 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             state.setTimeLimit(countdownEnd - now);
         }
 
-        for (var timedPotion : player.getActiveEffects()) {
-            var potion = timedPotion.potion();
-            var effectType = PotionInfo.getByVanillaEffect(potion.effect());
-            if (effectType == null) continue;
+        // Update remaining time for the remaining effects (and remove if expired)
+        var iter = state.potionEffects().entries().iterator();
+        while (iter.hasNext()) {
+            var entry = iter.next();
+            if (entry.duration() <= 0) continue; // No need to update if infinite
 
-            var entry = state.potionEffects().get(effectType);
-            if (entry == null) continue;
+            final TimedPotion activeEffect = player.getEffect(entry.type().vanillaEffect());
+            if (activeEffect == null) {
+                iter.remove(); // Expired effect
+                continue;
+            }
 
-            // Potion is valid, update the time remaining
+            // Otherwise, update the duration
             //todo convert all to ticks
-            int remainingWallTime = (int) ((potion.duration() - (player.getInstance().getWorldAge() - timedPotion.startingTicks())) * 50);
+            int remainingWallTime = (int) ((activeEffect.potion().duration() - (player.getInstance().getWorldAge() - activeEffect.startingTicks())) * 50);
             entry.setDuration(Math.max(0, remainingWallTime));
         }
 
