@@ -151,7 +151,12 @@ public class DebugCommand extends CommandDsl {
             player.sendMessage("Block: " + block.handler().getNamespaceId());
             bd.sendDebugInfo(player, block);
         } else {
-            player.sendMessage("Block: " + block.handler().getNamespaceId() + "@" + block.handler().getClass().getSimpleName());
+            if (block.handler() != null) {
+                player.sendMessage("Block: " + block.handler().getNamespaceId() + "@" + block.handler().getClass().getSimpleName());
+            } else {
+                player.sendMessage("Block: " + "no handler");
+            }
+
             player.sendMessage(block.nbt() == null ? "No block NBT" : TagStringIOExt.writeTag(block.nbt()));
         }
     }
