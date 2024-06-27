@@ -172,7 +172,7 @@ public class MapServerRunner extends AbstractMapServer {
         PlacementRules.init(terraform);
         var interactionEvents = EventNode.event("mapmaker:map/interaction", EventFilter.INSTANCE,
                 eventFilter(false, true, false));
-        interactionEvents.setPriority(-10000);
+        interactionEvents.setPriority(10000000);
         globalEventHandler.addChild(interactionEvents);
         InteractionRules.register(interactionEvents);
 
