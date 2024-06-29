@@ -12,7 +12,7 @@
                 sprite="generic/close"/>
         <label translationKey="gui.play_maps.simple.information" sprite="generic/information"/>
         <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"
-              font="play_maps_page" centered="true"/>
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
         <Query/>
     </box>
