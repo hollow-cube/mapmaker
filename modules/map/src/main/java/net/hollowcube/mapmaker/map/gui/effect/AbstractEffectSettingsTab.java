@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -112,11 +111,26 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
         try {
             var newIndex = Integer.parseInt(index);
-            newIndex = MathUtils.clamp(newIndex, -64, maxResetHeight);
+            if (newIndex < -64) {
+                player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_low"));
+                player().closeInventory();
+                return;
+            } else if (newIndex > adjustedMaxResetHeight(data, maxResetHeight)) {
+                player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_high", Component.text(newIndex), Component.text(adjustedMaxResetHeight(data, maxResetHeight))));
+                player().closeInventory();
+                return;
+            }
+
             data.setResetHeight(newIndex);
             updateFromData();
         } catch (NumberFormatException ignored) {
         }
+    }
+
+    static int adjustedMaxResetHeight(@NotNull BaseEffectData data, int maxResetHeight) {
+        if (data.teleport().isPresent())
+            return (int) Math.max(maxResetHeight, data.teleport().get().y());
+        return maxResetHeight;
     }
 
     protected void updateFromData() {

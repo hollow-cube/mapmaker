@@ -9,10 +9,14 @@ import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
@@ -51,15 +55,30 @@ public class SetPreciseCoordsCommand extends CommandDsl {
         if (context.has(pitchArgument)) targetPos = targetPos.withPitch(context.get(pitchArgument));
 
         final Pos pos = targetPos;
+        var updated = new AtomicBoolean();
+        Consumer<BaseEffectData> updater = data -> {
+            // Ensure they dont set the teleport in an invalid position relative to the reset height
+            if (data.resetHeight() != BaseEffectData.NO_RESET_HEIGHT && pos.blockY() < data.resetHeight())
+                return;
+
+            data.setTeleport(pos);
+            updated.set(true);
+        };
+
         var block = player.getInstance().getBlock(targetBlockPosition);
         if (block.handler() instanceof CheckpointPlateBlock cp) {
-            cp.editData(player.getInstance(), targetBlockPosition, block, data -> data.setTeleport(pos));
+            cp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
         } else if (block.handler() instanceof StatusPlateBlock sp) {
-            sp.editData(player.getInstance(), targetBlockPosition, block, data -> data.setTeleport(pos));
+            sp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
         } else return;
 
-        player.removeTag(BaseEffectData.TARGET_PLATE);
-        player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_SUCCESS.with(CoordinateUtil.asTranslationArgs(pos)));
+        if (updated.get()) {
+            player.removeTag(BaseEffectData.TARGET_PLATE);
+            player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_SUCCESS.with(CoordinateUtil.asTranslationArgs(pos)));
+        } else {
+            player.sendMessage(Component.translatable("create_maps.checkpoint.teleport.too_low"));
+        }
+
     }
 
 }

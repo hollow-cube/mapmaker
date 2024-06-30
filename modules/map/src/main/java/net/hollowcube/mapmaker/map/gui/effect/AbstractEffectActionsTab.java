@@ -97,7 +97,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
                 updateFromData();
             }
 
-            pushView(context -> new CoordinateEditorView(context, pos -> {
+            pushView(context -> new CoordinateEditorView(context, data, pos -> {
                 data.setTeleport(pos);
                 updateFromData();
                 save.run();

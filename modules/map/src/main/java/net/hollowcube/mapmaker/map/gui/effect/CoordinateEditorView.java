@@ -26,11 +26,13 @@ public class CoordinateEditorView extends View {
     private @Outlet("yaw") Text yawText;
     private @Outlet("pitch") Text pitchText;
 
+    private BaseEffectData data;
     private Consumer<Pos> updateFunc;
     private Pos pos;
 
-    public CoordinateEditorView(@NotNull Context context, @NotNull Consumer<Pos> updateFunc, @NotNull Pos initial) {
+    public CoordinateEditorView(@NotNull Context context, @NotNull BaseEffectData data, @NotNull Consumer<Pos> updateFunc, @NotNull Pos initial) {
         super(context);
+        this.data = data;
         this.updateFunc = updateFunc;
         this.pos = initial;
 
@@ -47,37 +49,43 @@ public class CoordinateEditorView extends View {
     @Action("x")
     public void handleChangeX() {
         pushView(context -> new CoordinateInputAnvil(context, input ->
-                safeUpdateComponent(Pos::withX, input), String.valueOf(pos.x())));
+                safeUpdateComponent(Pos::withX, input, false), String.valueOf(pos.x())));
     }
 
     @Action("y")
     public void handleChangeY() {
         pushView(context -> new CoordinateInputAnvil(context, input ->
-                safeUpdateComponent(Pos::withY, input), String.valueOf(pos.y())));
+                safeUpdateComponent(Pos::withY, input, true), String.valueOf(pos.y())));
     }
 
     @Action("z")
     public void handleChangeZ() {
         pushView(context -> new CoordinateInputAnvil(context, input ->
-                safeUpdateComponent(Pos::withZ, input), String.valueOf(pos.z())));
+                safeUpdateComponent(Pos::withZ, input, false), String.valueOf(pos.z())));
     }
 
     @Action("yaw")
     public void handleChangeYaw() {
         pushView(context -> new CoordinateInputAnvil(context, input ->
-                safeUpdateComponent((p, yaw) -> p.withYaw(yaw.floatValue()), input), String.valueOf(pos.yaw())));
+                safeUpdateComponent((p, yaw) -> p.withYaw(yaw.floatValue()), input, false), String.valueOf(pos.yaw())));
     }
 
     @Action("pitch")
     public void handleChangePitch() {
         pushView(context -> new CoordinateInputAnvil(context, input ->
-                safeUpdateComponent((p, pitch) -> p.withPitch(pitch.floatValue()), input), String.valueOf(pos.pitch())));
+                safeUpdateComponent((p, pitch) -> p.withPitch(pitch.floatValue()), input, false), String.valueOf(pos.pitch())));
     }
 
-    private void safeUpdateComponent(@NotNull BiFunction<Pos, Double, Pos> setter, @NotNull String input) {
+    private void safeUpdateComponent(@NotNull BiFunction<Pos, Double, Pos> setter, @NotNull String input, boolean isY) {
         if (input.isEmpty()) return;
         try {
             var value = Double.parseDouble(input);
+
+            if (isY && data.resetHeight() != BaseEffectData.NO_RESET_HEIGHT && value < data.resetHeight()) {
+                player().sendMessage(Component.translatable("create_maps.checkpoint.teleport.too_low"));
+                return;
+            }
+
             pos = setter.apply(pos, value);
             updateFunc.accept(pos);
             updateFromPos();
