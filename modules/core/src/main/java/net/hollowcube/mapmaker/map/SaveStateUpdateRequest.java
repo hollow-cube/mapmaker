@@ -13,6 +13,10 @@ public class SaveStateUpdateRequest {
         return !updates.isEmpty();
     }
 
+    public JsonObject updates() {
+        return updates;
+    }
+
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
         updates.addProperty("completed", completed);
         return this;

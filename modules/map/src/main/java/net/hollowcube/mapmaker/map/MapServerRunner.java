@@ -327,7 +327,7 @@ public class MapServerRunner extends AbstractMapServer {
         return cmd;
     }
 
-    private @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
+    protected @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
         if (mapService() instanceof NoopMapService) {
             //todo
             return CompletableFuture.completedFuture(new MapJoinInfo(

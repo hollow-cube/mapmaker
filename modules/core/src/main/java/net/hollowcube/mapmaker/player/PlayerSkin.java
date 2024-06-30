@@ -21,6 +21,10 @@ public record PlayerSkin(
         this(texture.orElse(null), signature.orElse(null));
     }
 
+    public PlayerSkin(@NotNull net.minestom.server.entity.PlayerSkin skin) {
+        this(skin.textures(), skin.signature());
+    }
+
     public @NotNull Optional<String> optTexture() {
         return Optional.ofNullable(texture);
     }
