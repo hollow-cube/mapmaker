@@ -21,8 +21,8 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-@SuppressWarnings({"ResultOfMethodCallIgnored", "UnstableApiUsage"})
 public final class MapServerInitializer {
     private static final Logger logger = LoggerFactory.getLogger(MapServerInitializer.class);
     private static final Map<String, String> SYSTEM_PROPERTIES = Map.of(
@@ -34,6 +34,10 @@ public final class MapServerInitializer {
     );
 
     public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull String[] args) {
+        run(serverFactory, () -> ConfigLoaderV3.loadDefault(args));
+    }
+
+    public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull Supplier<ConfigLoaderV3> loadConfig) {
         long start = System.nanoTime();
 
         SYSTEM_PROPERTIES.forEach(System::setProperty);
@@ -45,7 +49,7 @@ public final class MapServerInitializer {
 
         // Init tasks (minestom server, map server components, web server)
 
-        var config = ConfigLoaderV3.loadDefault(args);
+        var config = loadConfig.get();
 
         var minecraftServer = MinecraftServer.init();
         MinestomPrometheus.init();

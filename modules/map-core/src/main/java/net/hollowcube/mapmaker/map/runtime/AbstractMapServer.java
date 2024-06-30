@@ -147,11 +147,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         var otel = initTracing(config);
 
-        var metricsConfig = config.get(MetricsConfig.class);
-        if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
-            this.metrics = new MetricWriterPosthog();
-//            this.metrics = new MetricWriterImpl(metricsConfig.password());
-        } else this.metrics = new MetricWriterNoop();
+        this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);
 
         var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
@@ -188,6 +184,15 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         ShopUpgradeCache.init(permManager);
+    }
+
+    protected @NotNull MetricWriter createMetricWriter(@NotNull ConfigLoaderV3 config) {
+        var metricsConfig = config.get(MetricsConfig.class);
+        if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
+            return new MetricWriterPosthog();
+//            this.metrics = new MetricWriterImpl(metricsConfig.password());
+        }
+        return new MetricWriterNoop();
     }
 
     protected abstract @NotNull String name();
@@ -232,7 +237,7 @@ public abstract class AbstractMapServer implements MapServer {
         bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService, playerService, permManager, kafkaConfig, globalConfig.noop());
+        sessionManager = new SessionManager(sessionService(), playerService(), permManager(), kafkaConfig, globalConfig.noop());
         shutdowner.queue("session-manager", sessionManager::close);
         sessionManager().sync(); // Sync existing sessions with remote
 
@@ -363,45 +368,47 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
 
+        boolean fullInstance = !globalConfig.noop();
+
         commandManager.register(createInstance(MinestomCommand.class));
         commandManager.register(createInstance(EmojisCommand.class));
-        commandManager.register(createInstance(CosmeticsCommand.class));
-        commandManager.register(createInstance(RulesCommand.class));
+        if (fullInstance) commandManager.register(createInstance(CosmeticsCommand.class));
+        if (fullInstance) commandManager.register(createInstance(RulesCommand.class));
         commandManager.register(createDebugCommand());
-        commandManager.register(createInstance(StoreCommand.class));
-        commandManager.register(createInstance(HypercubeCommand.class));
+        if (fullInstance) commandManager.register(createInstance(StoreCommand.class));
+        if (fullInstance) commandManager.register(createInstance(HypercubeCommand.class));
         commandManager.register(createInstance(DiscordCommand.class));
-        commandManager.register(createInstance(LinkCommand.class));
+        if (fullInstance) commandManager.register(createInstance(LinkCommand.class));
         commandManager.register(createInstance(NoobCommand.class));
         commandManager.register(createInstance(HideCommand.class));
 
-        commandManager.register(createInstance(PlayCommand.class));
-        commandManager.register(createInstance(WhereCommand.class));
-        commandManager.register(createInstance(ListCommand.class));
-        commandManager.register(createInstance(MsgCommand.class));
-        commandManager.register(createInstance(ReplyCommand.class));
+        if (fullInstance) commandManager.register(createInstance(PlayCommand.class));
+        if (fullInstance) commandManager.register(createInstance(WhereCommand.class));
+        if (fullInstance) commandManager.register(createInstance(ListCommand.class));
+        if (fullInstance) commandManager.register(createInstance(MsgCommand.class));
+        if (fullInstance) commandManager.register(createInstance(ReplyCommand.class));
 
-        commandManager.register(createInstance(RequestCommand.class));
-        commandManager.register(createInstance(RejectCommand.class));
-        commandManager.register(createInstance(InviteCommand.class));
-        commandManager.register(createInstance(AcceptCommand.class));
-        commandManager.register(createInstance(JoinCommand.class));
+        if (fullInstance) commandManager.register(createInstance(RequestCommand.class));
+        if (fullInstance) commandManager.register(createInstance(RejectCommand.class));
+        if (fullInstance) commandManager.register(createInstance(InviteCommand.class));
+        if (fullInstance) commandManager.register(createInstance(AcceptCommand.class));
+        if (fullInstance) commandManager.register(createInstance(JoinCommand.class));
 
         commandManager.register(createInstance(MapCommand.class));
 
-        commandManager.register(createInstance(SFindCommand.class));
-        commandManager.register(createInstance(VanishCommand.class));
-        commandManager.register(createInstance(UnvanishCommand.class));
+        if (fullInstance) commandManager.register(createInstance(SFindCommand.class));
+        if (fullInstance) commandManager.register(createInstance(VanishCommand.class));
+        if (fullInstance) commandManager.register(createInstance(UnvanishCommand.class));
 
-        commandManager.register(createInstance(PHelpCommand.class));
-        commandManager.register(createInstance(PStatusCommand.class));
-        commandManager.register(createInstance(PHistoryCommand.class));
+        if (fullInstance) commandManager.register(createInstance(PHelpCommand.class));
+        if (fullInstance) commandManager.register(createInstance(PStatusCommand.class));
+        if (fullInstance) commandManager.register(createInstance(PHistoryCommand.class));
 
-        commandManager.register(createInstance(BanCommand.class));
-        commandManager.register(createInstance(UnbanCommand.class));
-        commandManager.register(createInstance(MuteCommand.class));
-        commandManager.register(createInstance(UnmuteCommand.class));
-        commandManager.register(createInstance(KickCommand.class));
+        if (fullInstance) commandManager.register(createInstance(BanCommand.class));
+        if (fullInstance) commandManager.register(createInstance(UnbanCommand.class));
+        if (fullInstance) commandManager.register(createInstance(MuteCommand.class));
+        if (fullInstance) commandManager.register(createInstance(UnmuteCommand.class));
+        if (fullInstance) commandManager.register(createInstance(KickCommand.class));
 
         // In 1.21 mojang introduced a bug which results in horse armor in the off hand being
         // swapped with the main hand when right clicking with anything. This is a workaround.
