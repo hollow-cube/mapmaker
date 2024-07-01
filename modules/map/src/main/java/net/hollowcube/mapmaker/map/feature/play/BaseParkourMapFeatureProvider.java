@@ -263,11 +263,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
-            var countdownEnd = player.getTag(COUNTDOWN_END);
-            if (countdownEnd != -1) {
-                var playState = saveState.state(PlayState.class);
-                playState.setTimeLimit(countdownEnd - System.currentTimeMillis());
-            }
+            var playState = saveState.state(PlayState.class);
+            updateStateFromPlayer(player, playState);
         }
 
         player.removeTag(COUNTDOWN_END);
@@ -597,7 +594,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             // Otherwise, update the duration
             //todo convert all to ticks
-            int remainingWallTime = (int) ((activeEffect.potion().duration() - (player.getInstance().getWorldAge() - activeEffect.startingTicks())) * 50);
+            int remainingWallTime = (int) (activeEffect.potion().duration() - ((player.getInstance().getWorldAge() - activeEffect.startingTicks())) * 50);
             entry.setDuration(Math.max(0, remainingWallTime));
         }
 
