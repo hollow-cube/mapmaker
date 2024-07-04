@@ -24,7 +24,7 @@ import java.util.UUID;
 
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
-public final class TestingMapWorld extends AbstractMapMakerMapWorld {
+public class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
 
     private final EditingMapWorld parent;

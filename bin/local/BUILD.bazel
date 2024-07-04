@@ -26,5 +26,8 @@ java_binary(
         "@maven//:ch_qos_logback_logback_classic",
         "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:dev_hollowcube_luau",
+        "@maven//:dev_hollowcube_luau_natives_macos_arm64",
+        "@maven//:it_unimi_dsi_fastutil",
     ],
 )

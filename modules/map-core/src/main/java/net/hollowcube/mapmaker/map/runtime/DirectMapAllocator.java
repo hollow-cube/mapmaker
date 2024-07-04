@@ -40,7 +40,7 @@ final class DirectMapAllocator implements MapAllocator {
 
     @Override
     public void free(@NotNull MapWorld mapWorld, @Nullable Component reason) {
-        reason = reason == null ? CLOSED_MESSAGE : reason;
+        final var reasonF = reason == null ? CLOSED_MESSAGE : reason;
 
         //todo There is a race here i think of someone joining before close. May need to lock the world for this.
         // Anyway LocalMapAllocator locks in relevant sections so this should never happen when the 'high level' api
@@ -48,7 +48,7 @@ final class DirectMapAllocator implements MapAllocator {
         var world = (AbstractMapWorld) mapWorld;
 
         // Unload the world
-        world.close(reason);
+        world.instance().scheduleNextTick(_ -> world.close(reasonF));
     }
 
     @Override

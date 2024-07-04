@@ -27,6 +27,7 @@ java_library(
         "@maven//:net_kyori_adventure_api",
         "@maven//:com_miguelfonseca_completely_completely_core",
         "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:dev_hollowcube_luau",
     ],
 )
 

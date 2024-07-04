@@ -94,6 +94,10 @@ maven_install(
         "io.helidon.metrics:helidon-metrics-system-meters:4.0.10",
         "io.helidon.metrics:helidon-metrics-prometheus:4.0.10",
 
+        # Luau
+        "dev.hollowcube:luau:dev",
+        "dev.hollowcube:luau-natives-macos-arm64:0.0.2",
+
         # Logging/Monitoring
         "org.slf4j:slf4j-api:2.0.9",
         "org.slf4j:jul-to-slf4j:2.0.6",
@@ -130,7 +134,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-        #        "m2Local",
+        "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",

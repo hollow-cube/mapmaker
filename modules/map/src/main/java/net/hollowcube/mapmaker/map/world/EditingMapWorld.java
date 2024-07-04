@@ -151,7 +151,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         }
 
         if (testWorld == null) {
-            testWorld = new TestingMapWorld(this);
+            testWorld = createTestingWorld();
             testWorld.load();
         }
 
@@ -177,6 +177,10 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                     .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
                     .schedule();
         }
+    }
+
+    protected @NotNull TestingMapWorld createTestingWorld() {
+        return new TestingMapWorld(this);
     }
 
     public void closeTestWorld() {

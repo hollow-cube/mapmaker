@@ -261,9 +261,7 @@ public class MapServerRunner extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
-            Class<? extends AbstractMapWorld> worldType = Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
-                    ? EditingMapWorld.class : PlayingMapWorld.class;
-            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldType)));
+            var mapWorld = createMapWorld(map, joinInfo.state());
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
@@ -317,6 +315,12 @@ public class MapServerRunner extends AbstractMapServer {
         }, "Enables progress index add mode for the current map");
 
         return cmd;
+    }
+
+    protected @NotNull AbstractMapWorld createMapWorld(@NotNull MapData map, @NotNull String state) {
+        Class<? extends AbstractMapWorld> worldType = Presence.MAP_BUILDING_STATES.contains(state)
+                ? EditingMapWorld.class : PlayingMapWorld.class;
+        return Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldType)));
     }
 
     protected @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {

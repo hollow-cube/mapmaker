@@ -32,9 +32,11 @@ public class LocalMapService extends NoopMapService {
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
+        var settings = new MapSettings();
+        settings.setVariant(MapVariant.PARKOUR);
         return new MapData(
                 LocalServerRunner.DUMMY_MAP_ID, UUID.randomUUID().toString(),
-                new MapSettings(), -1, null
+                settings, -1, null
         );
     }
 
@@ -46,6 +48,11 @@ public class LocalMapService extends NoopMapService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
+        //todo
     }
 
     @Override
