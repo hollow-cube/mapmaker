@@ -47,7 +47,7 @@ public class MCEditSchematicReader implements SchematicReader {
         }
     }
 
-    private @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
+    public @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
         assertTrue("Schematic".equals(rootPair.getKey()), "missing required root tag 'Schematic'");
         var root = rootPair.getValue();
 
@@ -118,7 +118,7 @@ public class MCEditSchematicReader implements SchematicReader {
 
     static {
         var entries = new HashMap<String, Block>();
-        try (var is = MCEditSchematicReader.class.getResourceAsStream("/__schem/legacy_blocks.json")) {
+        try (var is = MCEditSchematicReader.class.getResourceAsStream("/net/hollowcube/schem/legacy_blocks.json")) {
             Objects.requireNonNull(is, "legacy_blocks.json not found");
             var blockData = new Gson().fromJson(new InputStreamReader(is), JsonObject.class);
             for (var entry : blockData.entrySet())

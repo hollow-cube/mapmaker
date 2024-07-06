@@ -74,7 +74,7 @@ public class TerraformStorageMemory implements TerraformStorage {
             return SchematicCreateResult.ENTRY_LIMIT_EXCEEDED;
         }
 
-        var header = new SchematicHeader(name, schematic.size(), 0);
+        var header = new SchematicHeader(name, 0, schematic.size(), "unknown");
         playerSchems.add(new Schem(header, schematic));
         return SchematicCreateResult.SUCCESS;
     }

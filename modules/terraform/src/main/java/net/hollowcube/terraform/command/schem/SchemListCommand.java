@@ -20,7 +20,7 @@ public class SchemListCommand extends CommandDsl {
         try {
             var session = PlayerSession.forPlayer(player);
             var schematics = session.terraform().storage().listSchematics(session.id());
-            schematics.forEach(s -> player.sendMessage(s.name() + " " + s.dimensions() + " " + Format.formatBytes(s.size())));
+            schematics.forEach(s -> player.sendMessage(s.name() + " " + Format.formatBytes(s.size())));
         } catch (Exception e) {
             MinecraftServer.getExceptionManager().handleException(e);
         }

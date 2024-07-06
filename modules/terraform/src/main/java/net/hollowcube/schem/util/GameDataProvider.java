@@ -16,11 +16,11 @@ public interface GameDataProvider {
     int DATA_VERSION_UNKNOWN = 0;
 
     static @NotNull GameDataProvider provider() {
-        return net.hollowcube.schem.util.NoopGameDataProvider.INSTANCE;
+        return NoopGameDataProvider.INSTANCE;
     }
 
     static void replaceGlobals(@NotNull GameDataProvider provider) {
-        net.hollowcube.schem.util.NoopGameDataProvider.INSTANCE = Objects.requireNonNull(provider, "game data provider");
+        NoopGameDataProvider.INSTANCE = Objects.requireNonNull(provider, "game data provider");
     }
 
     //todo make note that 0 can be passed to upgrade in case the data version is unknown
@@ -29,6 +29,10 @@ public interface GameDataProvider {
      * Returns the current data version number.
      */
     int dataVersion();
+
+    default @NotNull String upgradeBlockState(int fromVersion, int toVersion, @NotNull String blockState) {
+        return blockState;
+    }
 
     default @NotNull CompoundBinaryTag upgradeBlockEntity(int fromVersion, int toVersion, @NotNull String id, @NotNull CompoundBinaryTag data) {
         return data;

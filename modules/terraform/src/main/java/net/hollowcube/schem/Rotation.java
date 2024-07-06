@@ -1,4 +1,4 @@
-package net.hollowcube.schem.old;
+package net.hollowcube.schem;
 
 import org.jetbrains.annotations.NotNull;
 

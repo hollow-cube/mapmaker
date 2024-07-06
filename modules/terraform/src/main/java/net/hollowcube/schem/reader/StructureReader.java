@@ -31,7 +31,7 @@ public class StructureReader implements SchematicReader {
         }
     }
 
-    private @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
+    public @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
         assertTrue("".equals(rootPair.getKey()), "root tag must be empty, was: '{0}'", rootPair.getKey());
         var root = rootPair.getValue();
         var dataVersion = getRequired(root, "DataVersion", BinaryTagTypes.INT);

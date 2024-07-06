@@ -3,7 +3,6 @@ package net.hollowcube.schem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.hollowcube.schem.old.CoordinateUtil;
-import net.hollowcube.schem.old.Rotation;
 import net.hollowcube.schem.util.BlockConsumer;
 import net.hollowcube.schem.util.VarIntReader;
 import net.kyori.adventure.nbt.*;

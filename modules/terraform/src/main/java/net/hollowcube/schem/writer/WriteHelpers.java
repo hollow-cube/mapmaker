@@ -10,7 +10,7 @@ final class WriteHelpers {
 
     public static void assertTrue(boolean condition, @NotNull String message, @NotNull Object... args) {
         if (condition) return;
-        throw new net.hollowcube.schem.writer.SchematicWriteException(MessageFormat.format(message, args));
+        throw new SchematicWriteException(MessageFormat.format(message, args));
     }
 
     public static @NotNull CompoundBinaryTag writeBlockState(@NotNull Block block) {

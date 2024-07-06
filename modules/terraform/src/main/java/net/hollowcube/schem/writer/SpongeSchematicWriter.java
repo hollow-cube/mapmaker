@@ -30,7 +30,7 @@ public class SpongeSchematicWriter implements SchematicWriter {
             BinaryTagIO.writer().writeNamed(Map.entry("", createRoot(schematic)), out, BinaryTagIO.Compression.GZIP);
             return out.toByteArray();
         } catch (IOException e) {
-            throw new net.hollowcube.schem.writer.SchematicWriteException("failed to write schematic", e);
+            throw new SchematicWriteException("failed to write schematic", e);
         }
     }
 
