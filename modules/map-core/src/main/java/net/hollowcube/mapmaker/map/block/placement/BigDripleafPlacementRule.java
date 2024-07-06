@@ -34,17 +34,27 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
 
     @Override
     public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
+        var waterlogged = waterlogged(placementState);
+
         var posBelow = placementState.placePosition().add(0, -1, 0);
         var blockBelow = placementState.instance().getBlock(posBelow, Block.Getter.Condition.TYPE);
-        if (blockBelow.id() == Block.BIG_DRIPLEAF.id() || blockBelow.id() == Block.BIG_DRIPLEAF_STEM.id())
+        if (blockBelow.id() == Block.BIG_DRIPLEAF.id() || blockBelow.id() == Block.BIG_DRIPLEAF_STEM.id()) {
             // If below has facing, use that.
-            return this.block.withProperty(PROP_FACING, blockBelow.getProperty(PROP_FACING));
+            return this.block.withProperties(Map.of(
+                    PROP_FACING, blockBelow.getProperty(PROP_FACING),
+                    "waterlogged", waterlogged
+            ));
+        }
 
         var posAbove = placementState.placePosition().add(0, 1, 0);
         var blockAbove = placementState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);
-        if (blockAbove.id() == Block.BIG_DRIPLEAF.id() || blockAbove.id() == Block.BIG_DRIPLEAF_STEM.id())
+        if (blockAbove.id() == Block.BIG_DRIPLEAF.id() || blockAbove.id() == Block.BIG_DRIPLEAF_STEM.id()) {
             // If above has facing, use that.
-            return this.block.withProperty(PROP_FACING, blockAbove.getProperty(PROP_FACING));
+            return this.block.withProperties(Map.of(
+                    PROP_FACING, blockAbove.getProperty(PROP_FACING),
+                    "waterlogged", waterlogged
+            ));
+        }
 
         // Otherwise, use the inverted player facing handled by the superclass.
         return super.blockPlace(placementState);
