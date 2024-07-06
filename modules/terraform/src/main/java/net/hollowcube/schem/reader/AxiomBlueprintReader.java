@@ -62,7 +62,7 @@ public class AxiomBlueprintReader implements SchematicReader {
                 var packedBlocks = getRequired(blockStates, "data", BinaryTagTypes.LONG_ARRAY).value();
                 var unpackedBlocks = new int[AxiomBlueprint.BLOCK_PALETTE_SIZE];
                 var bitsPerEntry = packedBlocks.length * 64 / AxiomBlueprint.BLOCK_PALETTE_SIZE;
-                net.hollowcube.schem.reader.ReadHelpers.unpackPalette(unpackedBlocks, packedBlocks, bitsPerEntry);
+                ReadHelpers.unpackPalette(unpackedBlocks, packedBlocks, bitsPerEntry);
                 blockData = IntArrayBinaryTag.intArrayBinaryTag(unpackedBlocks);
             }
 

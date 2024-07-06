@@ -1,6 +1,5 @@
 package net.hollowcube.schem;
 
-import net.hollowcube.schem.old.Rotation;
 import net.hollowcube.schem.util.BlockConsumer;
 import net.kyori.adventure.nbt.ByteArrayBinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;

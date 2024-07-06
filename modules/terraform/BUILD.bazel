@@ -1,5 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library")
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library")
 load("//third_party/rules_jmh:defs.bzl", "jmh_java_benchmarks")
 
 java_library(
@@ -46,6 +46,7 @@ java_junit5_test(
     test_class = "net.hollowcube.terraform.TerraformTestSuite",
     deps = [
         ":terraform",
+        "@maven//:net_kyori_adventure_nbt",
         "//modules/command",
         "//modules/common",
         "//modules/test",

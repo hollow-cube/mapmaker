@@ -1,7 +1,7 @@
 package net.hollowcube.schem.util;
 
-final class NoopGameDataProvider implements net.hollowcube.schem.util.GameDataProvider {
-    static net.hollowcube.schem.util.GameDataProvider INSTANCE = new NoopGameDataProvider();
+final class NoopGameDataProvider implements GameDataProvider {
+    static GameDataProvider INSTANCE = new NoopGameDataProvider();
 
     @Override
     public int dataVersion() {

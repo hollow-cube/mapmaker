@@ -45,7 +45,7 @@ public class SpongeSchematicReader implements SchematicReader {
         }
     }
 
-    private @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
+    public @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
         var root = rootPair.getValue();
         if ("".equals(rootPair.getKey())) {
             // V3 has the root tag as "", with "Schematic" embedded inside.
@@ -61,6 +61,7 @@ public class SpongeSchematicReader implements SchematicReader {
                 "unsupported schematic version {0}", version);
         int dataVersion = root.getInt("DataVersion");
         assertTrue(dataVersion >= 0, "invalid data version {0}", dataVersion);
+        int dataVersionMax = gameData.dataVersion();
 
         var metadata = root.getCompound("Metadata"); // Optional, default of empty map is fine
 
@@ -85,8 +86,8 @@ public class SpongeSchematicReader implements SchematicReader {
         }
 
         // === Block data ===
-        Block[] blockPalette = new Block[0];
-        byte[] blockData = new byte[0];
+        Block[] blockPalette;
+        byte[] blockData;
         var blockEntities = new Int2ObjectArrayMap<BlockEntityData>();
         if (version < 3) {
             var blockPaletteMax = root.getInt("PaletteMax", -1);
@@ -99,8 +100,10 @@ public class SpongeSchematicReader implements SchematicReader {
                 assertTrue(entry.getValue().type() == BinaryTagTypes.INT, "expected palette entry to be an int");
                 var paletteId = ((IntBinaryTag) entry.getValue()).value();
                 try {
-                    var block = ArgumentBlockState.staticParse(entry.getKey());
-                    blockPalette[paletteId] = block;
+                    String blockState = entry.getKey();
+                    if (dataVersion < dataVersionMax)
+                        blockState = gameData.upgradeBlockState(dataVersion, dataVersionMax, blockState);
+                    blockPalette[paletteId] = ArgumentBlockState.staticParse(blockState);
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalStateException("invalid block type: " + entry.getKey(), e);
                 }
@@ -124,8 +127,8 @@ public class SpongeSchematicReader implements SchematicReader {
                 }
 
                 var blockEntityData = extracted.build();
-                if (dataVersion < gameData.dataVersion())
-                    blockEntityData = gameData.upgradeBlockEntity(dataVersion, gameData.dataVersion(), id.value(), blockEntityData);
+                if (dataVersion < dataVersionMax)
+                    blockEntityData = gameData.upgradeBlockEntity(dataVersion, dataVersionMax, id.value(), blockEntityData);
                 blockEntities.put(blockIndex(size, pos), new BlockEntityData(id.value(), pos, blockEntityData));
             }
         } else {

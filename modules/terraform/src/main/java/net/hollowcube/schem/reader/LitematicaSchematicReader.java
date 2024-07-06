@@ -16,6 +16,7 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -44,7 +45,8 @@ public class LitematicaSchematicReader implements SchematicReader {
         }
     }
 
-    private @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
+    @ApiStatus.Internal
+    public @NotNull Schematic read(@NotNull Map.Entry<String, CompoundBinaryTag> rootPair) {
         assertTrue("".equals(rootPair.getKey()), "root tag must be empty, was: '{0}'", rootPair.getKey());
         var root = rootPair.getValue();
         var dataVersion = getRequired(root, "MinecraftDataVersion", BinaryTagTypes.INT).value();
@@ -101,7 +103,7 @@ public class LitematicaSchematicReader implements SchematicReader {
         var packedBlocks = getRequired(region, "BlockStates", BinaryTagTypes.LONG_ARRAY).value();
         var unpackedBlocks = new int[size.blockX() * size.blockY() * size.blockZ()];
         var bitsPerEntry = Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(blockPalette.length - 1));
-        net.hollowcube.schem.reader.ReadHelpers.unpackPaletteTight(unpackedBlocks, packedBlocks, bitsPerEntry);
+        ReadHelpers.unpackPaletteTight(unpackedBlocks, packedBlocks, bitsPerEntry);
         var blockData = ByteArrayBinaryTag.byteArrayBinaryTag(NetworkBuffer.makeArray(buffer -> {
             for (int index = 0; index < unpackedBlocks.length; index++) {
                 var paletteIndex = unpackedBlocks[index];

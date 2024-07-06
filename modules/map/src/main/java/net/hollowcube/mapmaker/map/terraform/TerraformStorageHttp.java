@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.terraform;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.reader.SpongeSchematicReader;
+import net.hollowcube.schem.reader.DetectingSchematicReader;
 import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.schem.SchematicHeader;
 import net.hollowcube.terraform.storage.TerraformStorage;
@@ -97,7 +97,13 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
         return switch (res.statusCode()) {
-            case 200 -> new SpongeSchematicReader().read(res.body());
+            case 200 -> {
+                try {
+                    yield new DetectingSchematicReader().read(res.body());
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to read schem data: " + e.getMessage());
+                }
+            }
             case 404 -> null;
             default ->
                     throw new RuntimeException("Failed to fetch schem data (" + res.statusCode() + "): " + new String(res.body()));
