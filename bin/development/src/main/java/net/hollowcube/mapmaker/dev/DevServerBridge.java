@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
@@ -31,6 +32,12 @@ public class DevServerBridge implements ServerBridge {
 //            return;
 //        }
 
+        // We need to remove the player from the map before entering configuration, because by the time we get
+        // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
+        // todo: this seems like a minestom bug that should be fixed.
+        var world = MapWorld.forPlayerOptional(player);
+        if (world != null) world.removePlayer(player);
+
         var playerId = PlayerDataV2.fromPlayer(player).id();
         var map = mapService.getMap(playerId, mapId);
         Class<? extends AbstractMapWorld> worldType = switch (joinMapState) {
@@ -45,6 +52,12 @@ public class DevServerBridge implements ServerBridge {
 
     @Override
     public void joinHub(@NotNull Player player) {
+
+        // We need to remove the player from the map before entering configuration, because by the time we get
+        // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
+        var world = MapWorld.forPlayerOptional(player);
+        if (world != null) world.removePlayer(player);
+
         // Any player reconfiguring without that tag will be sent to the hub, so simply remove it and reconfigure.
         player.removeTag(TARGET_WORLD);
         player.startConfigurationPhase();

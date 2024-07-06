@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.MapServerRunner;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -77,6 +78,12 @@ public class MapServerBridge implements ServerBridge {
             // Add a pending join and then send them to the config state where it will be acted upon.
             var playerId = PlayerDataV2.fromPlayer(player).id();
             server.addPendingJoin(playerId, mapId, state);
+
+            // We need to remove the player from the map before entering configuration, because by the time we get
+            // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
+            // todo: this seems like a minestom bug that should be fixed.
+            var world = MapWorld.forPlayerOptional(player);
+            if (world != null) world.removePlayer(player);
 
             player.startConfigurationPhase();
         } catch (Exception exception) {
