@@ -199,7 +199,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var playState = saveState.state(PlayState.class);
 
             // If this is a fresh save state, attempt to add the base effect state
-            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && saveState.getPlayStartTime() == 0) {
+            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && saveState.getPlayStartTime() == 0 && saveState.getPlaytime() == 0) {
                 updateCheckpointEffectState(world, player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
             }
 
