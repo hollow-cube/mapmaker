@@ -1,0 +1,48 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+
+java_library(
+    name = "luau_ap_lib",
+    srcs = glob(include = ["src/lib/java/**/*.java"]),
+    resources = glob(include = ["src/lib/resources/**"]),
+    deps = [
+        "@maven//:dev_hollowcube_luau",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)
+
+java_plugin(
+    name = "luau_ap_processor",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    processor_class = "net.hollowcube.luau.ap.LuauAnnotationProcessor",
+    resources = glob(include = ["src/main/resources/**"]),
+    deps = [
+        ":luau_ap_lib",
+        "//third_party:auto_service",
+        "@maven//:com_squareup_javapoet",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)
+
+java_library(
+    name = "luau_ap",
+    exported_plugins = [":luau_ap_processor"],
+    tags = ["maven:compile_only"],
+    visibility = ["//visibility:public"],
+    exports = [
+        ":luau_ap_lib",
+        "@maven//:dev_hollowcube_luau",
+    ],
+)
+
+java_junit5_test(
+    name = "luau_ap_test",
+    srcs = glob(include = ["src/test/java/**/*.java"]),
+    resources = glob(include = ["src/test/resources/**/*"]),
+    test_class = "net.hollowcube.luau.ap.LuauApTestSuite",
+    deps = [
+        ":luau_ap",
+        "//modules/test",
+        "@maven//:dev_hollowcube_luau_natives_macos_arm64",
+    ],
+)

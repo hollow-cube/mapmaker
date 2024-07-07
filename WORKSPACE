@@ -126,6 +126,7 @@ maven_install(
 
         # Compiler plugin util
         "org.burningwave:core:12.62.7",
+        "com.squareup:javapoet:1.13.0",
     ],
     excluded_artifacts = [
         "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.

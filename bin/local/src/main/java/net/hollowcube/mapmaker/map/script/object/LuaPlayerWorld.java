@@ -39,14 +39,6 @@ public class LuaPlayerWorld implements LuaObject {
         global.pop(1); // Pop the metatable
     }
 
-    public static void pushPlayerWorldRef(@NotNull LuaState state, @NotNull Player player, @NotNull MapWorld world) {
-        var playerRef = new LuaPlayerWorld(state, player, world);
-        state.newUserData(playerRef);
-
-        state.getMetaTable(TYPE_NAME);
-        state.setMetaTable(-2);
-    }
-
     private static int luaIndex(@NotNull LuaState state) {
         LuaPlayerWorld ref = (LuaPlayerWorld) state.checkUserDataArg(1, TYPE_NAME);
         String key = state.checkStringArg(2);
