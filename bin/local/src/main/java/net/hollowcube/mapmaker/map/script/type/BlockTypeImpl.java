@@ -5,7 +5,6 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.annotation.LuaMeta;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaTypeImpl;
-import net.hollowcube.luau.type.LuaTableView;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,16 +13,16 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-@LuaTypeImpl(Block.class)
+@LuaTypeImpl(type = Block.class, name = "BlockType")
 public final class BlockTypeImpl {
 
-    public static void pushValue(@NotNull LuaState state, @NotNull Block block) {
+    public static void pushLuaValue(@NotNull LuaState state, @NotNull Block block) {
         state.newUserDataInt(block.stateId());
         state.getMetaTable(BlockTypeImpl$Wrapper.TYPE_NAME);
         state.setMetaTable(-2);
     }
 
-    public static @NotNull Block checkArg(@NotNull LuaState state, int index) {
+    public static @NotNull Block checkLuaArg(@NotNull LuaState state, int index) {
         int stateId = state.checkUserDataIntArg(index, BlockTypeImpl$Wrapper.TYPE_NAME);
         return Objects.requireNonNull(Block.fromStateId(stateId));
     }
@@ -43,18 +42,43 @@ public final class BlockTypeImpl {
     }
 
     @LuaMeta(LuaMeta.Type.CALL)
-    static @NotNull Block luaCall(@NotNull Block block, @NotNull LuaTableView table) {
+    static int luaCall(@NotNull LuaState state) {
+        var block = checkLuaArg(state, 1);
+
         var newProps = new HashMap<String, String>();
-        for (var iter = table.iterator(); iter.hasNext(); ) {
-            newProps.put(iter.getStringKey(), iter.getStringValue());
+        state.pushNil();
+        while (state.next(2)) {
+            // Key is at index -2, value is at index -1
+            String key = state.toString(-2);
+            String value = state.toString(-1);
+            newProps.put(key, value);
+
+            // Remove the value, keep the key for the next iteration
+            state.pop(1);
         }
 
         try {
-            return block.withProperties(newProps);
+            pushLuaValue(state, block.withProperties(newProps));
+            return 1;
         } catch (IllegalArgumentException e) {
-            return block;
+            state.error(e.getMessage());
+            return 0;
         }
     }
+
+//    @LuaMeta(LuaMeta.Type.CALL)
+//    static @NotNull Block luaCall(@NotNull Block block, @NotNull LuaTableView table) {
+//        var newProps = new HashMap<String, String>();
+//        for (var iter = table.iterator(); iter.hasNext(); ) {
+//            newProps.put(iter.getStringKey(), iter.getStringValue());
+//        }
+//
+//        try {
+//            return block.withProperties(newProps);
+//        } catch (IllegalArgumentException e) {
+//            return block;
+//        }
+//    }
 
     @LuaMeta(LuaMeta.Type.TOSTRING)
     static @NotNull String luaToString(@NotNull Block block) {

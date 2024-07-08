@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LuaTypeImpl {
 
-    @NotNull Class<?> value();
-    
+    @NotNull Class<?> type();
+
+    @NotNull String name();
+
 }

@@ -14,15 +14,15 @@ import org.jetbrains.annotations.NotNull;
  * <p>These functions generally operate on a raw lua state rather than using conversion
  * to the Point class. No need to make the garbage for simple functions like these.</p>
  */
-@LuaTypeImpl(Point.class)
+@LuaTypeImpl(type = Point.class, name = "vector")
 public final class VectorTypeImpl {
     private static final float[] ZERO = new float[]{0.0f, 0.0f, 0.0f};
 
-    public static void pushValue(@NotNull LuaState state, @NotNull Point point) {
+    public static void pushLuaValue(@NotNull LuaState state, @NotNull Point point) {
         state.pushVector((float) point.x(), (float) point.y(), (float) point.z());
     }
 
-    public static @NotNull Point checkArg(@NotNull LuaState state, int index) {
+    public static @NotNull Point checkLuaArg(@NotNull LuaState state, int index) {
         float[] raw = state.checkVectorArg(index);
         return new Vec(raw[0], raw[1], raw[2]);
     }

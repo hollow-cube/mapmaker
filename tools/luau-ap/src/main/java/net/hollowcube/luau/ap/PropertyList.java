@@ -18,8 +18,8 @@ import java.util.Set;
 
 public record PropertyList(@NotNull List<Property> properties) {
 
-    record Property(@NotNull String name, @NotNull String accessor, boolean isPin,
-                    @UnknownNullability TypeConverter type) {
+    public record Property(@NotNull String name, @NotNull String accessor, boolean isPin,
+                           @UnknownNullability TypeConverter type) {
     }
 
     public static @NotNull PropertyList collect(@NotNull Messager log, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull List<? extends Element> elems) {

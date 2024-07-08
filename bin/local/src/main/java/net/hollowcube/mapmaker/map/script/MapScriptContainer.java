@@ -7,9 +7,6 @@ import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.script.lib.VectorLib;
-import net.hollowcube.mapmaker.map.script.object.BlockType;
-import net.hollowcube.mapmaker.map.script.object.LuaSystem;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -51,12 +48,12 @@ public class MapScriptContainer {
         global.pushCFunction(this::luaPrint, "luaPrint");
         global.setGlobal("print");
 
-        VectorLib.open(global);
+//        VectorLib.open(global);
 //        LuaPlayer.initGlobalLib(global);
 //        LuaPlayerWorld.initGlobalRef(global);
 //        EventSource.initGlobalLib(global);
-        BlockType.initGlobalLib(global);
-        LuaSystem.initGlobalLib(global);
+//        BlockType.initGlobalLib(global);
+//        LuaSystem.initGlobalLib(global);
 
         // Create metatable for `script`, which has an __index into java.
         global.newMetaTable("script");
@@ -81,7 +78,6 @@ public class MapScriptContainer {
         global.setMetaTable(-2);
         global.setReadOnly(-2, true);
         global.setGlobal("script");
-
 
         global.sandbox();
     }
