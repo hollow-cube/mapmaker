@@ -19,6 +19,7 @@ public record MethodList(@NotNull List<Method> methods) {
     record Method(
             @NotNull String name,
             @NotNull String methodName,
+            boolean isDirect,
             @NotNull List<Arg> args,
             @Nullable TypeConverter ret
     ) {
@@ -31,6 +32,18 @@ public record MethodList(@NotNull List<Method> methods) {
 
             var methodName = method.getSimpleName().toString();
             var name = Names.toMethodName(methodName);
+
+            // Include a special case. If the method has a single LuaState argument, and returns an int
+            // then just treat it as a direct c function impl.
+            if (method.getParameters().size() == 1) {
+                var arg = TypeName.get(method.getParameters().get(0).asType());
+                var ret = TypeName.get(method.getReturnType());
+
+                if (arg.equals(Types.LUA_STATE) && ret == TypeName.INT) {
+                    methods.add(new Method(name, methodName, true, List.of(), null));
+                    continue;
+                }
+            }
 
             var args = new ArrayList<Arg>();
             for (var arg : method.getParameters()) {
@@ -52,7 +65,7 @@ public record MethodList(@NotNull List<Method> methods) {
                 }
             }
 
-            methods.add(new Method(name, methodName, args, ret));
+            methods.add(new Method(name, methodName, false, args, ret));
         }
         return new MethodList(methods);
     }

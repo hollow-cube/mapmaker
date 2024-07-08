@@ -1,5 +1,6 @@
-package net.hollowcube.mapmaker.map.script.object2;
+package net.hollowcube.mapmaker.map.script.object;
 
+import net.hollowcube.luau.annotation.LuaBindable;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
@@ -8,6 +9,8 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,8 +29,14 @@ public class LuaWorldView {
         this.player = player;
         this.world = MapWorld.forPlayer(player);
 
-        this.onTick = null; //todo
-        this.onBlockInteract = null; //todo
+        this.onTick = Pin.value(LuaEventSource.create(
+                PlayerTickEvent.class, Callbacks.OnTick.class,
+                (_, onTick) -> onTick.call()
+        ));
+        this.onBlockInteract = Pin.value(LuaEventSource.create(
+                PlayerBlockInteractEvent.class, Callbacks.OnBlockInteract.class,
+                (e, onBlockInteract) -> onBlockInteract.call(e.getBlockPosition(), e.getBlock())
+        ));
     }
 
     @LuaProperty
@@ -45,14 +54,34 @@ public class LuaWorldView {
         GhostBlockHolder.forPlayer(player).setBlock(pos, block);
     }
 
-    //todo spawnEntity
+    //        todo spawnEntity
+    //        var entityName = state.checkStringArg(2);
+    //        var pos = state.checkVectorArg(3);
+    //        state.checkType(4, LuaType.TABLE);
+    //
+    //        var entityType = EntityType.fromNamespaceId(entityName);
+    //        if (entityType == null) {
+    //            state.error("No such entity: " + entityName);
+    //            return 0;
+    //        }
+    //        var entity = MapEntityType.create(entityType, UUID.randomUUID());
+    //        playerEntities.add(entity);
+    //        entity.setAutoViewable(false);
+    //        entity.setInstance(world.instance(), new Vec(pos[0], pos[1], pos[2]))
+    //                .thenRun(() -> entity.addViewer(player));
+    //
+    //        state.newTable();
+    //        return 1;
+
 
     public static final class Callbacks {
 
+        @LuaBindable
         public interface OnTick {
             void call();
         }
 
+        @LuaBindable
         public interface OnBlockInteract {
             void call(@NotNull Point pos, @NotNull Block block);
         }

@@ -74,13 +74,12 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
                     error(elem, "LuaObject must not have a superclass");
                     continue;
                 }
-                if (!typeElem.getInterfaces().isEmpty()) {
-                    error(elem, "LuaObject must not implement any interfaces");
-                    continue;
-                }
 
                 var packageName = elementUtils.getPackageOf(typeElem).getQualifiedName().toString();
                 var wrappedClass = TypeName.get(typeElem.asType());
+                if (wrappedClass instanceof ParameterizedTypeName ptn) {
+                    wrappedClass = ptn.rawType;
+                }
                 var className = typeElem.getSimpleName().toString() + "$Wrapper";
 
                 TypeSpec.Builder wrapper = TypeSpec.classBuilder(className)
@@ -99,7 +98,7 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
                 // Gen a constant for the metatable name
                 wrapper.addField(FieldSpec.builder(String.class, "TYPE_NAME")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                        .initializer("$T.class.getName()", TypeName.get(typeElem.asType()))
+                        .initializer("$T.class.getName()", wrappedClass)
                         .build());
 
                 // Gen the init function as well as the __index and __namecall metamethods
@@ -158,7 +157,7 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
             method.addCode("case $S -> {$>\n", prop.name());
 
             if (prop.isPin()) {
-                method.addStatement("(($T) ref.$L)).push(state)", Types.PIN_IMPL, prop.accessor());
+                method.addStatement("(($T) ref.$L).push(state)", Types.PIN_IMPL, prop.accessor());
                 method.addStatement("yield 1");
             } else {
                 prop.type().insertPush(method, "ref." + prop.accessor());
@@ -191,25 +190,29 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
         for (var meth : methods.methods()) {
             method.addCode("case $S -> {$>\n", meth.name());
 
-            for (int i = 0; i < meth.args().size(); i++) {
-                var arg = meth.args().get(i);
-                // Offset by 2 because we are 1 indexed and the first arg is the userdata object.
-                arg.type().insertPop(method, arg.name(), i + 2);
-            }
+            if (meth.isDirect()) {
+                method.addStatement("yield ref.$N(state)", meth.methodName());
+            } else {
+                for (int i = 0; i < meth.args().size(); i++) {
+                    var arg = meth.args().get(i);
+                    // Offset by 2 because we are 1 indexed and the first arg is the userdata object.
+                    arg.type().insertPop(method, arg.name(), i + 2);
+                }
 
-            if (meth.ret() != null) {
-                method.addCode("var result = ");
-            }
-            method.addStatement("ref.$N($L)", meth.methodName(), meth.args().stream()
-                    .map(MethodList.Arg::name)
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse(""));
+                if (meth.ret() != null) {
+                    method.addCode("var result = ");
+                }
+                method.addStatement("ref.$N($L)", meth.methodName(), meth.args().stream()
+                        .map(MethodList.Arg::name)
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse(""));
 
-            if (meth.ret() != null) {
-                meth.ret().insertPush(method, "result");
-            }
+                if (meth.ret() != null) {
+                    meth.ret().insertPush(method, "result");
+                }
 
-            method.addStatement("yield $L", meth.ret() == null ? 0 : 1);
+                method.addStatement("yield $L", meth.ret() == null ? 0 : 1);
+            }
 
             method.addCode("$<}\n");
         }

@@ -8,5 +8,7 @@ public sealed interface Pin<T> permits PinImpl {
         return new PinImpl<>(value);
     }
 
+    @NotNull T get();
+
     void close();
 }

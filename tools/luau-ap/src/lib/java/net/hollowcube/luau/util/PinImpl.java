@@ -15,6 +15,11 @@ public final class PinImpl<T> implements Pin<T> {
         this.value = value;
     }
 
+    @Override
+    public @NotNull T get() {
+        return value;
+    }
+
     public void push(@NotNull LuaState state) {
         if (this.state != null && this.state != state) {
             throw new IllegalStateException("Pin is already pinned to another LuaState");

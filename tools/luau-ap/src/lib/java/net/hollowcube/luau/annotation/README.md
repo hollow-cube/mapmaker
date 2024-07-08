@@ -16,14 +16,6 @@ TODO
 
 TODO
 
-Remaining bits:
-
-2. Callback methods/generic support
-3. Meta table classes (like VectorLib) & meta table functions in @LuaObject
-4. Library classes/extensions?
-    1. We need to extend the math library to support vectors
-5. Globals in a LuaState need to be defined somehow.
-
 # `@LuaMethod`
 
 TODO

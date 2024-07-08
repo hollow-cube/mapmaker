@@ -1,23 +1,24 @@
 package net.hollowcube.mapmaker.map.script.object;
 
 import net.hollowcube.luau.LuaState;
+import net.hollowcube.luau.annotation.LuaMethod;
+import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.mapmaker.map.script.PlayerScriptContainer;
 import org.jetbrains.annotations.NotNull;
 
-public class LuaSystem {
+@LuaObject
+public final class LuaSystem {
+    public static final LuaSystem INSTANCE = new LuaSystem();
 
-    public static void initGlobalLib(@NotNull LuaState global) {
-        global.newTable();
+    private LuaSystem() {
+    }
 
-        global.pushCFunction(state -> {
-            if (state.getThreadData() instanceof PlayerScriptContainer psc)
-                return psc.schedule(state);
-            state.error("unknown issue");
-            return 0;
-        }, "RunLater");
-        global.setField(-2, "RunLater");
-
-        global.setGlobal("system");
+    @LuaMethod
+    public int runLater(@NotNull LuaState state) {
+        if (state.getThreadData() instanceof PlayerScriptContainer psc)
+            return psc.schedule(state);
+        state.error("unknown issue");
+        return 0;
     }
 
 }

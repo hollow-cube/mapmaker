@@ -8,7 +8,8 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.script.lib.VectorLib;
-import net.hollowcube.mapmaker.map.script.object.*;
+import net.hollowcube.mapmaker.map.script.object.BlockType;
+import net.hollowcube.mapmaker.map.script.object.LuaSystem;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -51,9 +52,9 @@ public class MapScriptContainer {
         global.setGlobal("print");
 
         VectorLib.open(global);
-        LuaPlayer.initGlobalLib(global);
-        LuaPlayerWorld.initGlobalRef(global);
-        EventSource.initGlobalLib(global);
+//        LuaPlayer.initGlobalLib(global);
+//        LuaPlayerWorld.initGlobalRef(global);
+//        EventSource.initGlobalLib(global);
         BlockType.initGlobalLib(global);
         LuaSystem.initGlobalLib(global);
 
@@ -65,8 +66,9 @@ public class MapScriptContainer {
             var key = state.checkStringArg(2);
 
             if ("Parent".equals(key) && state.getThreadData() instanceof PlayerScriptContainer psc) {
-                psc.getParent().push(state);
-                return 1;
+//                psc.getParent().push(state);
+//                return 1;
+                return 0;
             }
 
             state.error("No such key: " + key);

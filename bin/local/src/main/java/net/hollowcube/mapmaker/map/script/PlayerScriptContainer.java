@@ -2,9 +2,12 @@ package net.hollowcube.mapmaker.map.script;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.mapmaker.map.script.friendly.Ref;
-import net.hollowcube.mapmaker.map.script.object.LuaPlayer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
@@ -24,7 +27,12 @@ public class PlayerScriptContainer {
     private final LuaState thread;
     private int ref; // Contains a Lua ref to the thread, so it is not collected.
 
-    private final Ref<LuaPlayer> playerRef;
+//    private final Ref<LuaPlayer> playerRef;
+
+    private final EventNode<InstanceEvent> eventNode = EventNode.event("player-world-events", EventFilter.INSTANCE, event -> {
+        if (!(event instanceof PlayerInstanceEvent pie)) return false;
+        return pie.getPlayer() == player();
+    });
 
     public PlayerScriptContainer(@NotNull LuaState global, @NotNull Player player) {
         this.global = global;
@@ -37,7 +45,7 @@ public class PlayerScriptContainer {
         thread.sandboxThread();
         thread.setThreadData(this);
 
-        this.playerRef = new Ref<>(thread, new LuaPlayer(thread, player));
+//        this.playerRef = new Ref<>(thread, new LuaPlayer(thread, player));
 
     }
 
@@ -61,11 +69,19 @@ public class PlayerScriptContainer {
         });
         this.tasks.clear();
 
-        this.playerRef.close(thread);
+//        this.playerRef.close(thread);
     }
 
-    public @NotNull Ref<LuaPlayer> getParent() {
-        return playerRef;
+//    public @NotNull Ref<LuaPlayer> getParent() {
+//        return playerRef;
+//    }
+
+    public void addListener(EventListener<?> listener) {
+        eventNode.addListener((EventListener<? extends InstanceEvent>) listener);
+    }
+
+    public void removeListener(EventListener<?> listener) {
+        eventNode.removeListener((EventListener<? extends InstanceEvent>) listener);
     }
 
     record TaskRef(Task task, int funcRef) {
