@@ -37,6 +37,7 @@ public abstract class AbstractLuaProcessor {
             @NotNull TypeName wrappedClass,
             @NotNull TypeName wrapperClass,
             @NotNull TypeName targetType,
+            @Nullable TypeName targetImplClass,
             @NotNull MethodList metaMethods
     ) {
         var method = MethodSpec.methodBuilder("initMetatable")
@@ -63,7 +64,7 @@ public abstract class AbstractLuaProcessor {
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addParameter(Types.LUA_STATE, "state")
                     .returns(TypeName.INT);
-            metaMethod.appendCall(proxy, wrappedClass, targetType, "return");
+            metaMethod.appendCall(proxy, wrappedClass, targetType, targetImplClass, "return");
             proxyMethods.add(proxy.build());
         }
 

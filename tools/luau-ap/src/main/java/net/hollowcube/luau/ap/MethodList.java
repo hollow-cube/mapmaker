@@ -32,8 +32,12 @@ public record MethodList(@NotNull List<Method> methods) {
             @Nullable TypeConverter ret
     ) {
 
-        public void appendCall(@NotNull MethodSpec.Builder method, @NotNull TypeName wrappedClass, @NotNull TypeName stateType, @NotNull String returnWord) {
-            method.addStatement("final $T ref = ($T) state.checkUserDataArg(1, TYPE_NAME)", stateType, stateType);
+        public void appendCall(@NotNull MethodSpec.Builder method, @NotNull TypeName wrappedClass, @NotNull TypeName stateType, @Nullable TypeName typeImplClass, @NotNull String returnWord) {
+            if (typeImplClass != null) {
+                method.addStatement("final $T ref = $T.checkLuaArg(state, 1)", stateType, typeImplClass);
+            } else {
+                method.addStatement("final $T ref = ($T) state.checkUserDataArg(1, TYPE_NAME)", stateType, stateType);
+            }
             if (isDirect()) {
                 method.addStatement("$L ref.$N(state)", returnWord, methodName());
                 return;

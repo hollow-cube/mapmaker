@@ -16,6 +16,16 @@ import java.util.Objects;
 @LuaTypeImpl(type = Block.class, name = "BlockType")
 public final class BlockTypeImpl {
 
+    public static void init(@NotNull LuaState state) {
+        BlockTypeImpl$Wrapper.initMetatable(state);
+        BlocksContainer$Wrapper.initMetatable(state);
+
+        state.newUserData(BlockTypeImpl.BlocksContainer.INSTANCE);
+        state.getMetaTable(BlocksContainer$Wrapper.TYPE_NAME);
+        state.setMetaTable(-2);
+        state.setGlobal("blocks");
+    }
+
     public static void pushLuaValue(@NotNull LuaState state, @NotNull Block block) {
         state.newUserDataInt(block.stateId());
         state.getMetaTable(BlockTypeImpl$Wrapper.TYPE_NAME);

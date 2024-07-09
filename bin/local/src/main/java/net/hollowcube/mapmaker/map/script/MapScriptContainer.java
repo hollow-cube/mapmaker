@@ -7,6 +7,12 @@ import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.script.object.Impl$Wrapper;
+import net.hollowcube.mapmaker.map.script.object.LuaPlayer$Wrapper;
+import net.hollowcube.mapmaker.map.script.object.LuaSystem$Wrapper;
+import net.hollowcube.mapmaker.map.script.object.LuaWorldView$Wrapper;
+import net.hollowcube.mapmaker.map.script.type.BlockTypeImpl;
+import net.hollowcube.mapmaker.map.script.type.VectorTypeImpl;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -48,12 +54,13 @@ public class MapScriptContainer {
         global.pushCFunction(this::luaPrint, "luaPrint");
         global.setGlobal("print");
 
-//        VectorLib.open(global);
-//        LuaPlayer.initGlobalLib(global);
-//        LuaPlayerWorld.initGlobalRef(global);
-//        EventSource.initGlobalLib(global);
-//        BlockType.initGlobalLib(global);
-//        LuaSystem.initGlobalLib(global);
+        VectorTypeImpl.init(global);
+        BlockTypeImpl.init(global);
+
+        LuaPlayer$Wrapper.initMetatable(global);
+        LuaWorldView$Wrapper.initMetatable(global);
+        Impl$Wrapper.initMetatable(global); // todo: bad name
+        LuaSystem$Wrapper.initMetatable(global);
 
         // Create metatable for `script`, which has an __index into java.
         global.newMetaTable("script");

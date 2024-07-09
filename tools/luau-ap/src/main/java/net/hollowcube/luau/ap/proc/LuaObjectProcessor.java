@@ -66,7 +66,7 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
         if (!methods.isEmpty())
             metaMethodList.addFirst(new MethodList.Method("__namecall", "generatedLuaNameCall", true, true, true, new ArrayList<>(), null));
 
-        appendInitFunc(wrapper, wrappedClass, wrapperClass, wrappedClass, new MethodList(metaMethodList));
+        appendInitFunc(wrapper, wrappedClass, wrapperClass, wrappedClass, null, new MethodList(metaMethodList));
         if (!properties.isEmpty()) wrapper.addMethod(buildIndexMetaMethod(wrappedClass, properties));
         if (!methods.isEmpty()) wrapper.addMethod(buildNameCallMetaMethod(wrappedClass, methods));
 

@@ -18,6 +18,18 @@ import org.jetbrains.annotations.NotNull;
 public final class VectorTypeImpl {
     private static final float[] ZERO = new float[]{0.0f, 0.0f, 0.0f};
 
+    public static void init(@NotNull LuaState state) {
+        VectorTypeImpl$Wrapper.initMetatable(state);
+
+        state.pushVector(ZERO);
+        state.getMetaTable(VectorTypeImpl$Wrapper.TYPE_NAME);
+        state.setMetaTable(-2);
+        state.pop(1); // pop the temp vector
+
+        state.pushCFunction(VectorTypeImpl::vectorCtor, "vec");
+        state.setGlobal("vec");
+    }
+
     public static void pushLuaValue(@NotNull LuaState state, @NotNull Point point) {
         state.pushVector((float) point.x(), (float) point.y(), (float) point.z());
     }
@@ -25,6 +37,14 @@ public final class VectorTypeImpl {
     public static @NotNull Point checkLuaArg(@NotNull LuaState state, int index) {
         float[] raw = state.checkVectorArg(index);
         return new Vec(raw[0], raw[1], raw[2]);
+    }
+
+    private static int vectorCtor(@NotNull LuaState state) {
+        double x = state.checkNumberArg(1);
+        double y = state.checkNumberArg(2);
+        double z = state.checkNumberArg(3);
+        state.pushVector((float) x, (float) y, (float) z);
+        return 1;
     }
 
     @LuaMeta(LuaMeta.Type.INDEX)

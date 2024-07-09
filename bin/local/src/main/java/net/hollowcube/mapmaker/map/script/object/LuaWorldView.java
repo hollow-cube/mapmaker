@@ -5,6 +5,7 @@ import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
 import net.hollowcube.luau.util.Pin;
+import net.hollowcube.luau.util.Pinned;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.minestom.server.coordinate.Point;
@@ -15,7 +16,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 @LuaObject
-public class LuaWorldView {
+public class LuaWorldView implements Pinned {
 
     private final Player player;
     private final MapWorld world;
@@ -73,6 +74,12 @@ public class LuaWorldView {
     //        state.newTable();
     //        return 1;
 
+
+    @Override
+    public void unpin() {
+        onTick.close();
+        onBlockInteract.close();
+    }
 
     public static final class Callbacks {
 
