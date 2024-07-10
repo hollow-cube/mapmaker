@@ -1,5 +1,6 @@
 package net.hollowcube.luau.ap;
 
+import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.hollowcube.luau.annotation.*;
@@ -19,8 +20,11 @@ public final class Types {
     public static final ClassName LUA_METHOD = ClassName.get(LuaMethod.class);
 
     public static final TypeName LUA_STATE = ClassName.get("net.hollowcube.luau", "LuaState");
-    public static final TypeName PIN = ClassName.get("net.hollowcube.luau.util", "Pin");
+    public static final TypeName LUA_TYPE = ClassName.get("net.hollowcube.luau", "LuaType");
+    public static final ClassName PIN = ClassName.get("net.hollowcube.luau.util", "Pin");
     public static final TypeName PIN_IMPL = ClassName.get("net.hollowcube.luau.util", "PinImpl");
 
+    public static final ClassName LUA_BINDER = ClassName.get("net.hollowcube.luau.func", "LuaBinder");
+    public static final ClassName AUTO_SERVICE = ClassName.get(AutoService.class);
 
 }

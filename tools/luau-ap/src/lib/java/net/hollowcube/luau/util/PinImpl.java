@@ -3,6 +3,7 @@ package net.hollowcube.luau.util;
 import net.hollowcube.luau.LuaState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public final class PinImpl<T> implements Pin<T> {
@@ -12,7 +13,14 @@ public final class PinImpl<T> implements Pin<T> {
     private int ref;
 
     public PinImpl(@NotNull T value) {
+        this(null, 0, value);
+    }
+
+    public PinImpl(@Nullable LuaState state, int ref, @NotNull T value) {
         this.value = value;
+        
+        this.state = state;
+        this.ref = ref;
     }
 
     @Override

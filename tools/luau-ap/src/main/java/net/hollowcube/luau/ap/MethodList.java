@@ -71,6 +71,41 @@ public record MethodList(@NotNull List<Method> methods) {
         }
     }
 
+    public static @Nullable Method single(
+            @NotNull Messager log,
+            @NotNull Map<TypeName, TypeConverter> typeConverters,
+            @NotNull ExecutableElement method,
+            @NotNull String name, @NotNull String methodName
+    ) {
+        boolean isStatic = method.getModifiers().contains(Modifier.STATIC);
+
+        var args = new ArrayList<Arg>();
+        var params = method.getParameters();
+        for (int i = isStatic ? 1 : 0; i < params.size(); i++) {
+            var param = params.get(i);
+            var type = typeConverters.get(TypeName.get(param.asType()));
+            if (type == null) {
+                log.printError("Unsupported type: " + param.asType(), param);
+                continue;
+            }
+            args.add(new Arg(param.getSimpleName().toString(), type));
+        }
+        // Defer return from args here to show multiple errors if there are them
+        if (args.size() != params.size()) return null;
+
+        TypeConverter ret = null;
+        TypeName retType = TypeName.get(method.getReturnType());
+        if (retType != TypeName.VOID) {
+            ret = typeConverters.get(retType);
+            if (ret == null) {
+                log.printError("Unsupported return type: " + retType, method);
+                return null;
+            }
+        }
+
+        return new Method(name, methodName, false, isStatic, false, args, ret);
+    }
+
     public static @NotNull MethodList collect(
             @NotNull Messager log,
             @NotNull Map<TypeName, TypeConverter> typeConverters,
@@ -124,29 +159,8 @@ public record MethodList(@NotNull List<Method> methods) {
                 if (!metaType.validate(log, userType, method)) continue;
             }
 
-            var args = new ArrayList<Arg>();
-            var params = method.getParameters();
-            for (int i = isStatic ? 1 : 0; i < params.size(); i++) {
-                var param = params.get(i);
-                var type = typeConverters.get(TypeName.get(param.asType()));
-                if (type == null) {
-                    log.printError("Unsupported type: " + param.asType(), param);
-                    continue;
-                }
-                args.add(new Arg(param.getSimpleName().toString(), type));
-            }
-
-            TypeConverter ret = null;
-            TypeName retType = TypeName.get(method.getReturnType());
-            if (retType != TypeName.VOID) {
-                ret = typeConverters.get(retType);
-                if (ret == null) {
-                    log.printError("Unsupported return type: " + retType, method);
-                    continue;
-                }
-            }
-
-            methods.add(new Method(name, methodName, false, isStatic, false, args, ret));
+            var meth = single(log, typeConverters, method, name, methodName);
+            if (meth != null) methods.add(meth);
         }
         return new MethodList(methods);
     }
