@@ -21,6 +21,7 @@ public final class Types {
 
     public static final TypeName LUA_STATE = ClassName.get("net.hollowcube.luau", "LuaState");
     public static final TypeName LUA_TYPE = ClassName.get("net.hollowcube.luau", "LuaType");
+    public static final ClassName LUA_FUNC = ClassName.get("net.hollowcube.luau", "LuaFunc");
     public static final ClassName PIN = ClassName.get("net.hollowcube.luau.util", "Pin");
     public static final TypeName PIN_IMPL = ClassName.get("net.hollowcube.luau.util", "PinImpl");
 

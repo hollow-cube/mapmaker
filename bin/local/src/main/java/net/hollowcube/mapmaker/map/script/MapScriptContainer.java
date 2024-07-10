@@ -4,13 +4,11 @@ import net.hollowcube.luau.BuilinLibrary;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.luau.compiler.LuauCompiler;
+import net.hollowcube.luau.util.PinImpl;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.script.object.Impl$Wrapper;
-import net.hollowcube.mapmaker.map.script.object.LuaPlayer$Wrapper;
-import net.hollowcube.mapmaker.map.script.object.LuaSystem$Wrapper;
-import net.hollowcube.mapmaker.map.script.object.LuaWorldView$Wrapper;
+import net.hollowcube.mapmaker.map.script.object.*;
 import net.hollowcube.mapmaker.map.script.type.BlockTypeImpl;
 import net.hollowcube.mapmaker.map.script.type.VectorTypeImpl;
 import net.kyori.adventure.text.Component;
@@ -57,10 +55,11 @@ public class MapScriptContainer {
         VectorTypeImpl.init(global);
         BlockTypeImpl.init(global);
 
+        LuaEntity$Wrapper.initMetatable(global);
         LuaPlayer$Wrapper.initMetatable(global);
         LuaWorldView$Wrapper.initMetatable(global);
         Impl$Wrapper.initMetatable(global); // todo: bad name
-        LuaSystem$Wrapper.initMetatable(global);
+        LuaSystem.init(global);
 
         // Create metatable for `script`, which has an __index into java.
         global.newMetaTable("script");
@@ -70,21 +69,23 @@ public class MapScriptContainer {
             var key = state.checkStringArg(2);
 
             if ("Parent".equals(key) && state.getThreadData() instanceof PlayerScriptContainer psc) {
-//                psc.getParent().push(state);
-//                return 1;
-                return 0;
+                ((PinImpl<?>) psc.getParent()).push(state);
+                return 1;
             }
 
             state.error("No such key: " + key);
             return 0;
         }, "scriptIndex");
         global.setTable(-3);
+
         // Create a global table with a metatable of `script`.
         global.newTable();
         global.getMetaTable("script");
         global.setMetaTable(-2);
         global.setReadOnly(-2, true);
         global.setGlobal("script");
+
+        // Create a global state for System
 
         global.sandbox();
     }

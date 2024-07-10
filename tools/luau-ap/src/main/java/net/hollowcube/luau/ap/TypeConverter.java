@@ -68,6 +68,19 @@ public interface TypeConverter {
             })
     );
 
+    @NotNull
+    TypeConverter PIN = new TypeConverter() {
+        @Override
+        public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+            method.addStatement("(($T) $L).push(state)", Types.PIN_IMPL, getter);
+        }
+
+        @Override
+        public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+            throw new UnsupportedOperationException("Pin cannot be popped");
+        }
+    };
+
     void insertPush(@NotNull MethodSpec.Builder method, @NotNull String getter);
     void insertPop(@NotNull MethodSpec.Builder method, @NotNull String name, int index);
 

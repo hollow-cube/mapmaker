@@ -1,6 +1,7 @@
 package net.hollowcube.luau.ap;
 
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.hollowcube.luau.ap.util.MetaMethodType;
 import net.hollowcube.luau.ap.util.ProcUtil;
@@ -91,13 +92,18 @@ public record MethodList(@NotNull List<Method> methods) {
             args.add(new Arg(param.getSimpleName().toString(), type));
         }
         // Defer return from args here to show multiple errors if there are them
-        if (args.size() != params.size()) return null;
+        if (args.size() != params.size() - (isStatic ? 1 : 0))
+            return null;
 
         TypeConverter ret = null;
         TypeName retType = TypeName.get(method.getReturnType());
         if (retType != TypeName.VOID) {
-            ret = typeConverters.get(retType);
-            if (ret == null) {
+            var simpleConverter = typeConverters.get(retType);
+            if (simpleConverter != null) {
+                ret = simpleConverter;
+            } else if (retType instanceof ParameterizedTypeName paramType && paramType.rawType.equals(Types.PIN)) {
+                ret = TypeConverter.PIN;
+            } else {
                 log.printError("Unsupported return type: " + retType, method);
                 return null;
             }
@@ -156,7 +162,8 @@ public record MethodList(@NotNull List<Method> methods) {
                     log.printError(enumCase + " requires a directly implemented metamethod", method);
                     continue;
                 }
-                if (!metaType.validate(log, userType, method)) continue;
+                if (!metaType.validate(log, userType, method))
+                    continue;
             }
 
             var meth = single(log, typeConverters, method, name, methodName);

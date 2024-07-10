@@ -3,6 +3,9 @@ java_binary(
     srcs = glob(include = [
         "src/main/java/**/*.java",
     ]),
+    javacopts = [
+        "--enable-preview",
+    ],
     main_class = "net.hollowcube.mapmaker.local.LocalServer",
     resources = glob(include = [
         "src/main/resources/**/*",

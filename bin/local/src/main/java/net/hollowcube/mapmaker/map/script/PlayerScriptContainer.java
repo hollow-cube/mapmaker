@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.map.script;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
+import net.hollowcube.luau.util.Pin;
+import net.hollowcube.mapmaker.map.script.object.LuaPlayer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventListener;
@@ -27,6 +29,7 @@ public class PlayerScriptContainer {
     private final LuaState thread;
     private int ref; // Contains a Lua ref to the thread, so it is not collected.
 
+    private final Pin<LuaPlayer> playerRef;
 //    private final Ref<LuaPlayer> playerRef;
 
     private final EventNode<InstanceEvent> eventNode = EventNode.event("player-world-events", EventFilter.INSTANCE, event -> {
@@ -45,8 +48,9 @@ public class PlayerScriptContainer {
         thread.sandboxThread();
         thread.setThreadData(this);
 
-//        this.playerRef = new Ref<>(thread, new LuaPlayer(thread, player));
-
+        this.playerRef = Pin.value(new LuaPlayer(player));
+        
+        player.getInstance().eventNode().addChild(eventNode);
     }
 
     public @NotNull Player player() {
@@ -69,12 +73,14 @@ public class PlayerScriptContainer {
         });
         this.tasks.clear();
 
-//        this.playerRef.close(thread);
+        this.playerRef.close();
+
+        player.getInstance().eventNode().removeChild(eventNode);
     }
 
-//    public @NotNull Ref<LuaPlayer> getParent() {
-//        return playerRef;
-//    }
+    public @NotNull Pin<LuaPlayer> getParent() {
+        return playerRef;
+    }
 
     public void addListener(EventListener<?> listener) {
         eventNode.addListener((EventListener<? extends InstanceEvent>) listener);

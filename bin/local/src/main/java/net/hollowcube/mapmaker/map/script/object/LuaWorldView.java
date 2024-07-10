@@ -8,18 +8,26 @@ import net.hollowcube.luau.util.Pin;
 import net.hollowcube.luau.util.Pinned;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @LuaObject
 public class LuaWorldView implements Pinned {
 
     private final Player player;
     private final MapWorld world;
+
+    private final List<Pin<LuaEntity>> playerEntities = new ArrayList<>();
 
     @LuaProperty
     public final Pin<LuaEventSource<Callbacks.OnTick>> onTick;
@@ -55,30 +63,27 @@ public class LuaWorldView implements Pinned {
         GhostBlockHolder.forPlayer(player).setBlock(pos, block);
     }
 
-    //        todo spawnEntity
-    //        var entityName = state.checkStringArg(2);
-    //        var pos = state.checkVectorArg(3);
-    //        state.checkType(4, LuaType.TABLE);
-    //
-    //        var entityType = EntityType.fromNamespaceId(entityName);
-    //        if (entityType == null) {
-    //            state.error("No such entity: " + entityName);
-    //            return 0;
-    //        }
-    //        var entity = MapEntityType.create(entityType, UUID.randomUUID());
-    //        playerEntities.add(entity);
-    //        entity.setAutoViewable(false);
-    //        entity.setInstance(world.instance(), new Vec(pos[0], pos[1], pos[2]))
-    //                .thenRun(() -> entity.addViewer(player));
-    //
-    //        state.newTable();
-    //        return 1;
+    @LuaMethod
+    public @NotNull Pin<LuaEntity> spawnEntity(@NotNull String entityTypeName, @NotNull Point pos) {
+        var entityType = EntityType.fromNamespaceId(entityTypeName);
+        if (entityType == null) throw new RuntimeException("No such entity: " + entityTypeName);
 
+        var entity = MapEntityType.create(entityType, UUID.randomUUID());
+        entity.setAutoViewable(false);
+        entity.setInstance(world.instance(), pos).thenRun(() -> entity.addViewer(player));
+
+        var pin = Pin.value(new LuaEntity(entity));
+        playerEntities.add(pin);
+        return pin;
+    }
 
     @Override
     public void unpin() {
         onTick.close();
         onBlockInteract.close();
+
+        playerEntities.forEach(Pin::close);
+        playerEntities.clear();
     }
 
     public static final class Callbacks {

@@ -88,7 +88,7 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
             method.addCode("case $S -> {$>\n", prop.name());
 
             if (prop.isPin()) {
-                method.addStatement("(($T) ref.$L).push(state)", Types.PIN_IMPL, prop.accessor());
+                TypeConverter.PIN.insertPush(method, "ref." + prop.accessor());
                 method.addStatement("yield 1");
             } else {
                 prop.type().insertPush(method, "ref." + prop.accessor());
@@ -111,7 +111,6 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
     public @NotNull MethodSpec buildNameCallMetaMethod(@NotNull TypeName wrappedClass, @NotNull MethodList methods) {
         var method = MethodSpec.methodBuilder("generatedLuaNameCall")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC);
-
         method.returns(int.class);
         method.addParameter(Types.LUA_STATE, "state");
         method.addStatement("final $T ref = ($T) state.checkUserDataArg(1, TYPE_NAME)", wrappedClass, wrappedClass);

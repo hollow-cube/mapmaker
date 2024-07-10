@@ -10,7 +10,13 @@ import org.jetbrains.annotations.NotNull;
 public final class LuaSystem {
     public static final LuaSystem INSTANCE = new LuaSystem();
 
-    private LuaSystem() {
+    public static void init(@NotNull LuaState state) {
+        LuaSystem$Wrapper.initMetatable(state);
+
+        state.newUserData(INSTANCE);
+        state.getMetaTable(LuaSystem$Wrapper.TYPE_NAME);
+        state.setMetaTable(-2);
+        state.setGlobal("system");
     }
 
     @LuaMethod
@@ -19,6 +25,9 @@ public final class LuaSystem {
             return psc.schedule(state);
         state.error("unknown issue");
         return 0;
+    }
+
+    private LuaSystem() {
     }
 
 }
