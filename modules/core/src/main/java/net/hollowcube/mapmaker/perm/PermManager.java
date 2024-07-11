@@ -21,7 +21,8 @@ public interface PermManager {
     boolean hasMapPermission(@NotNull Player player, @NotNull String mapId, @NotNull MapPerm perm);
 
     default @NotNull net.hollowcube.command.CommandCondition createPlatformCondition2(@NotNull PlatformPermLike perm) {
-        return (sender, context) -> sender instanceof Player p && hasPlatformPermission(p, perm)
+        var cond = createPrefetchedCondition(perm);
+        return (sender, context) -> sender instanceof Player p && cond.test(p.getUuid().toString())
                 ? net.hollowcube.command.CommandCondition.ALLOW
                 : net.hollowcube.command.CommandCondition.HIDE;
     }

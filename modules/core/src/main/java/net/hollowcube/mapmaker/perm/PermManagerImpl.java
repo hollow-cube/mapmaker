@@ -21,7 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -46,7 +49,7 @@ public class PermManagerImpl implements PermManager {
     private final PermissionsServiceBlockingStub svc;
     private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
 
-    private final List<PrefetchCondition> prefetchConditions = new ArrayList<>();
+    private final Map<PlatformPermLike, PrefetchCondition> prefetchConditions = new CopyOnWriteMap<>();
 
     public PermManagerImpl(@NotNull String address, @NotNull String token) {
         var channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
@@ -54,8 +57,8 @@ public class PermManagerImpl implements PermManager {
                 .withCallCredentials(new BearerToken(token));
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.forEach(c -> c.addPlayer(event.getPlayer())))
-                .addListener(PlayerDisconnectEvent.class, event -> prefetchConditions.forEach(c -> c.removePlayer(event.getPlayer())));
+                .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getPlayer())))
+                .addListener(PlayerDisconnectEvent.class, event -> prefetchConditions.values().forEach(c -> c.removePlayer(event.getPlayer())));
     }
 
     @Override
@@ -63,7 +66,7 @@ public class PermManagerImpl implements PermManager {
         var cache = platformPermissions.get(perm.permName());
         if (cache != null) cache.invalidate(playerId);
 
-        prefetchConditions.forEach(c -> {
+        prefetchConditions.values().forEach(c -> {
             if (!c.perm.permName().equals(perm.permName())) return;
 
             FutureUtil.submitVirtual(() -> {
@@ -80,7 +83,7 @@ public class PermManagerImpl implements PermManager {
         var cache = platformPermissions.get(perm.permName());
         if (cache != null) cache.put(playerId, value);
 
-        prefetchConditions.forEach(c -> {
+        prefetchConditions.values().forEach(c -> {
             if (!c.perm.permName().equals(perm.permName())) return;
             c.allowedPlayers.add(playerId);
         });
@@ -101,9 +104,7 @@ public class PermManagerImpl implements PermManager {
 
     @Override
     public @NotNull Predicate<String> createPrefetchedCondition(@NotNull PlatformPermLike perm) {
-        var condition = new PrefetchCondition(perm);
-        prefetchConditions.add(condition);
-        return condition;
+        return prefetchConditions.computeIfAbsent(perm, PrefetchCondition::new);
     }
 
     private boolean hasPlatformPermission0(@NotNull String playerId, @NotNull PlatformPermLike perm) {
