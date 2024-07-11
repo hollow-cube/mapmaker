@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
@@ -48,7 +49,7 @@ final class DirectMapAllocator implements MapAllocator {
         var world = (AbstractMapWorld) mapWorld;
 
         // Unload the world
-        world.instance().scheduleNextTick(_ -> world.close(reasonF));
+        FutureUtil.submitVirtual(() -> world.close(reasonF));
     }
 
     @Override

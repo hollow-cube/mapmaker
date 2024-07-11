@@ -319,8 +319,9 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
                 // Save terraform state
                 if (Axiom.isPresent(player)) Axiom.disable(player);
-                terraform.saveLocalSession(player, true);
-                terraform.savePlayerSession(player, true);
+                logger.error("not saving terraform state, need to resolve this");
+//                terraform.saveLocalSession(player, true); //todo the player isnt necessarily in the instance anymore.
+//                terraform.savePlayerSession(player, true);
 
                 //todo
 //                playerData.setLastEditedMap(map.id());

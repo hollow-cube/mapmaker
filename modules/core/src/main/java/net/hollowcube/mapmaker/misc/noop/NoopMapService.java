@@ -30,6 +30,11 @@ public class NoopMapService implements MapService {
     );
 
     @Override
+    public @NotNull String terraformStorageName() {
+        return "TerraformStorageMemory";
+    }
+
+    @Override
     public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
         throw new UnsupportedOperationException("not implemented");
     }

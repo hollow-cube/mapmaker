@@ -35,6 +35,7 @@ import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.TerraformModule;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
@@ -121,7 +122,7 @@ public class MapServerRunner extends AbstractMapServer {
             shutdowner().queue("map-join-listener", mapJoinConsumer::close);
         }
 
-        this.terraform = initBuildLogic(mapService(), commandManager());
+        this.terraform = initBuildLogic(mapService(), commandManager(), extraTfModules());
         addBinding(Terraform.class, terraform);
 
         var hdb = new HeadDatabase();
@@ -138,23 +139,29 @@ public class MapServerRunner extends AbstractMapServer {
         shutdowner().queue("features", features::close);
     }
 
+    protected @NotNull TerraformModule[] extraTfModules() {
+        return new TerraformModule[0];
+    }
+
     // Static so it can be referenced from dev server runner
-    public static @NotNull Terraform initBuildLogic(@NotNull MapService mapService, @NotNull CommandManager commandManager) {
+    public static @NotNull Terraform initBuildLogic(@NotNull MapService mapService, @NotNull CommandManager commandManager, @NotNull TerraformModule... extraModules) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         // Create terraform instance
         var terraformEvents = EventNode.event("mapmaker:map/terraform", EventFilter.INSTANCE,
                 eventFilter(false, true, false));
         globalEventHandler.addChild(terraformEvents);
-        var terraform = Terraform.builder()
+        var terraformBuilder = Terraform.builder()
                 .rootEventNode(terraformEvents)
                 .rootCommandManager(commandManager)
                 .globalCommandCondition(mapFilter(false, true, false))
                 .module(Terraform.BASE_MODULE)
                 .module(Terraform.AXIOM_MODULE)
-                .module(Terraform.WORLDEDIT_MODULE)
+                .module(Terraform.WORLDEDIT_MODULE);
+        for (var module : extraModules) terraformBuilder.module(module);
+        var terraform = terraformBuilder
                 .module(MapServerModule::new)
-                .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
+                .storage(mapService.terraformStorageName())
                 .build();
         //todo addListener for feature toggle refresh to disable terraform job execution
 //        globalEventHandler.addListener(terraform

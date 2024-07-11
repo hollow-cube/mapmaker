@@ -48,6 +48,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull String terraformStorageName() {
+        return "TerraformStorageHttp";
+    }
+
+    @Override
     public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
         FutureUtil.assertThreadWarn();
         logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());

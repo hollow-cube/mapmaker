@@ -30,6 +30,11 @@ public class LocalMapService extends NoopMapService {
     }
 
     @Override
+    public @NotNull String terraformStorageName() {
+        return "LocalTerraformStorage";
+    }
+
+    @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
         var settings = new MapSettings();
@@ -119,4 +124,5 @@ public class LocalMapService extends NoopMapService {
             throw new RuntimeException(e);
         }
     }
+
 }

@@ -20,6 +20,8 @@ public interface MapService {
     @NotNull
     String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
+    @NotNull String terraformStorageName();
+
     /**
      * Creates a new map in the map service with the given owner.
      *
