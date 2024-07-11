@@ -5,6 +5,7 @@ import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -127,7 +128,7 @@ public class CreateMaps extends View {
 
     @Signal(Element.SIG_UNMOUNT)
     private void onUnmount() {
-        playerData.writeUpdatesUpstream(playerService);
+        FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(playerService));
     }
 
 }
