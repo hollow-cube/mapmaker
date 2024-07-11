@@ -82,7 +82,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
         if (isCanceled) return TaskSchedule.stop();
         if (frame == TITLE_FRAMES.length) {
             player.clearTitle();
-            player.scheduleNextTick($ -> onComplete.run());
+            player.scheduleNextTick(_ -> onComplete.run());
             return TaskSchedule.stop();
         }
 

@@ -108,9 +108,9 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
             // Will be called when the completion animation is finished
             var lastRatingFuture = player.getTag(MapRatingFeatureProvider.LAST_RATING_TAG);
-            Runnable tryShowRateGui = () -> {
-                if (MapRatingFeatureProvider.isMapRatable(world)) {
-                    var lastRating = FutureUtil.getUnchecked(lastRatingFuture);
+            final Runnable tryShowRateGui = () -> {
+                if (MapRatingFeatureProvider.isMapRatable(world) && lastRatingFuture.isDone()) {
+                    final MapRating lastRating = lastRatingFuture.resultNow();
                     if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
                         world.server().showView(player, c -> new RateMapView(c, world.map()));
                     }
