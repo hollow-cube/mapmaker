@@ -51,10 +51,11 @@ public class MainLeaderboardFeature implements HubFeature {
         parkourLeaderboard.right.setTitle(Component.text("ᴛᴏᴘ ᴛɪᴍᴇѕ", NamedTextColor.GOLD));
         parkourLeaderboard.right.setSubtitle(Component.text("ᴀʟʟ ᴛɪᴍᴇ", NamedTextColor.GRAY));
 
-        parkourLeaderboard.update();
         parkourLeaderboard.setInstance(world.instance(), new Pos(6, 39, -22.5, 90, 0));
-        buildingLeaderboard.update();
         buildingLeaderboard.setInstance(world.instance(), new Pos(6, 39, 23.5, 90, 0));
+
+        FutureUtil.submitVirtual(() -> parkourLeaderboard.update());
+        FutureUtil.submitVirtual(() -> buildingLeaderboard.update());
 
         scheduler.scheduleTask(this::update, SCHEDULE, SCHEDULE);
     }
