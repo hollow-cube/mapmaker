@@ -1,11 +1,12 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
@@ -45,11 +46,12 @@ public class ResetSaveStateItem extends ItemHandler {
             if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
                 EventDispatcher.call(new MapPlayerResetEvent(player, world, false));
             }
-        } else {
+        } else FutureUtil.submitVirtual(() -> {
             // The player has no save state because they are spectating, so just re-add them to the world
             world.removePlayer(player);
             world.addPlayer(player);
-        }
+        });
+
     }
 
 }
