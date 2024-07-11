@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.util;
 
-import io.helidon.webserver.Routing;
-import io.helidon.webserver.ServerRequest;
-import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.Service;
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
+import io.helidon.health.HealthCheck;
+import io.helidon.health.HealthCheckResponse;
+import io.helidon.health.HealthCheckType;
+import io.helidon.webserver.http.HttpRules;
+import io.helidon.webserver.http.HttpService;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
+import net.hollowcube.common.util.FutureUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,7 @@ import java.util.function.Supplier;
 /**
  * Handles the typical shutdown sequence for a server.
  */
-public class Shutdowner implements Service, HealthCheck {
+public class Shutdowner implements HttpService, HealthCheck {
     private static final Logger logger = LoggerFactory.getLogger(Shutdowner.class);
     private static final long SHUTDOWN_MAX_WAIT_MILLIS;
 
@@ -104,6 +106,11 @@ public class Shutdowner implements Service, HealthCheck {
         quiescenceFunction.get().thenRun(this::shutdownImmediately);
     }
 
+    @Override
+    public void routing(HttpRules rules) {
+        rules.get("/shutdown", this::handleShutdownRequest);
+    }
+
     private void handleShutdownRequest(@NotNull ServerRequest request, @NotNull ServerResponse response) {
         if (gracefulShutdownFuture == null) {
             // We have not started shutting down separately, so begin shutdown
@@ -113,16 +120,22 @@ public class Shutdowner implements Service, HealthCheck {
         // Return from the request whenever shutdown is completed.
         // As soon as we return from this request, Kubernetes will send a SIGTERM to kill the pod
         // which will forcibly remove all players and shutdown the process.
-        gracefulShutdownFuture.thenRun(() -> response.status(200).send());
-    }
-
-    @Override
-    public void update(Routing.Rules rules) {
-        rules.get("/shutdown", this::handleShutdownRequest);
+        FutureUtil.getUnchecked(gracefulShutdownFuture);
+        response.status(200).send();
     }
 
     @Override
     public HealthCheckResponse call() {
-        return gracefulShutdownFuture == null ? HealthCheckResponse.up("shutdown") : HealthCheckResponse.down("shutdown");
+        return HealthCheckResponse.builder().status(gracefulShutdownFuture == null).build();
+    }
+
+    @Override
+    public HealthCheckType type() {
+        return HealthCheckType.READINESS;
+    }
+
+    @Override
+    public String name() {
+        return "shutdowner";
     }
 }

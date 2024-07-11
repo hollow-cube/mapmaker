@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import io.helidon.health.HealthCheck;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -52,6 +53,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
+import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
@@ -91,15 +93,16 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Function;
@@ -426,22 +429,16 @@ public abstract class AbstractMapServer implements MapServer {
         });
     }
 
-    public @NotNull Collection<HealthCheck> readinessChecks() {
-        //todo this should be probing session service for hubs, and session + maps for maps
+    public @NotNull List<HealthCheck> healthChecks() {
+//        //todo this should be probing session service for hubs, and session + maps for maps
         return List.of(
-                () -> MinecraftServer.isStarted() ? HealthCheckResponse.up("minestom") : HealthCheckResponse.down("minestom"), () -> HealthCheckResponse.up("mapmaker"),
-                () -> {
-                    var future = new CompletableFuture<>();
-                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(null));
-                    try {
-                        future.join();
-                        return HealthCheckResponse.up("tick");
-                    } catch (Exception e) {
-                        return HealthCheckResponse.down("tick");
-                    }
-                },
-                () -> isReady ? HealthCheckResponse.up("hub") : HealthCheckResponse.down("hub"),
-                shutdowner
+                new AnonHealthCheck("minestom", MinecraftServer::isStarted),
+                new AnonHealthCheck("hub", () -> isReady),
+                new AnonHealthCheck("tick", () -> {
+                    var future = new CompletableFuture<Boolean>();
+                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(true));
+                    return FutureUtil.getUnchecked(future);
+                })
         );
     }
 

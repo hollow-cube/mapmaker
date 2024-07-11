@@ -84,10 +84,14 @@ maven_install(
         "net.kyori:adventure-nbt:4.16.0",
 
         # Helidon
-        "io.helidon.health:helidon-health:3.0.2",
-        "io.helidon.metrics:helidon-metrics-prometheus:3.0.2",
-        "io.helidon.webserver:helidon-webserver:3.0.2",
-        "io.helidon.logging:helidon-logging-slf4j:3.0.2",
+        "io.helidon.health:helidon-health:4.0.10",
+        "io.helidon.health:helidon-health-checks:4.0.10",
+        "io.helidon.webserver.observe:helidon-webserver-observe-health:4.0.10",
+        "io.helidon.webserver:helidon-webserver:4.0.10",
+        "io.helidon.logging:helidon-logging-slf4j:4.0.10",
+        "io.helidon.webserver.observe:helidon-webserver-observe-metrics:4.0.10",
+        "io.helidon.metrics:helidon-metrics-system-meters:4.0.10",
+        "io.helidon.metrics:helidon-metrics-prometheus:4.0.10",
 
         # Logging/Monitoring
         "org.slf4j:slf4j-api:2.0.9",

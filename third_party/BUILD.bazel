@@ -32,11 +32,14 @@ java_library(
     name = "helidon",
     exports = [
         "@maven//:io_helidon_health_helidon_health",
+        "@maven//:io_helidon_health_helidon_health_checks",
         "@maven//:io_helidon_logging_helidon_logging_slf4j",
-        "@maven//:io_helidon_media_helidon_media_common",
         "@maven//:io_helidon_metrics_helidon_metrics_prometheus",
+        "@maven//:io_helidon_metrics_helidon_metrics_system_meters",
         "@maven//:io_helidon_webserver_helidon_webserver",
-        "@maven//:org_eclipse_microprofile_health_microprofile_health_api",
+        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe",
+        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe_health",
+        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe_metrics",
     ],
 )
 

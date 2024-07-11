@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.runtime;
 
-import io.helidon.health.HealthSupport;
 import io.helidon.metrics.prometheus.PrometheusSupport;
-import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
+import io.helidon.webserver.observe.ObserveFeature;
+import io.helidon.webserver.observe.health.HealthObserver;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,19 +59,32 @@ public final class MapServerInitializer {
 
         MinecraftServer.getExceptionManager().setExceptionHandler(server::handleUncaughtException);
 
+        HealthObserver healthObserver = HealthObserver.builder()
+                .details(true)
+                .addCheck(server.shutdowner())
+                .addHealthChecks(server.healthChecks())
+                .build();
+
+        ObserveFeature observe = ObserveFeature.builder()
+//                .config(config.get("server.features.observe"))
+                .addObserver(healthObserver)
+                .build();
+
         var httpConfig = config.get(HttpConfig.class);
-        WebServer webServer = WebServer.builder().host(httpConfig.host()).port(httpConfig.port()).addRouting(Routing.builder()
-                .register(HealthSupport.builder().webContext("alive")
-                        .addLiveness(() -> HealthCheckResponse.up("mapmaker")).build())
-                .register(HealthSupport.builder().webContext("ready")
-                        .addReadiness(server.readinessChecks()).build())
-                .register(PrometheusSupport.create())
-                .register(server.shutdowner()).build()).build();
+        WebServer webServer = WebServer.builder()
+                .host(httpConfig.host()).port(httpConfig.port())
+                .addFeature(observe)
+                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow())
+                        .register(server.shutdowner()))
+                .build()
+                .start();
+
+        logger.info("Web server is running at {}:{}", httpConfig.host(), webServer.port());
+        server.shutdowner().queue("webserver", webServer::stop);
+
 
         // Start everything
 
-        webServer.start().thenAccept(ws -> logger.info("Web server is running at {}:{}", httpConfig.host(), ws.port()));
-        server.shutdowner().queue("webserver", webServer::shutdown);
 
         try {
             server.start();

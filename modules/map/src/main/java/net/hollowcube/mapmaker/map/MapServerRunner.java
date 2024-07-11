@@ -44,13 +44,11 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.Scheduler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.eclipse.microprofile.health.HealthCheck;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -88,12 +86,6 @@ public class MapServerRunner extends AbstractMapServer {
     @Override
     protected @NotNull String name() {
         return "mapmaker-map";
-    }
-
-    @Override
-    public @NotNull Collection<HealthCheck> readinessChecks() {
-        return super.readinessChecks();
-        //todo
     }
 
     public void addPendingJoin(@NotNull String playerId, @NotNull String mapId, @NotNull String state) {

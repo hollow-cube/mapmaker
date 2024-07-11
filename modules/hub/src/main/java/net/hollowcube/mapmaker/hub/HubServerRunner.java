@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import io.helidon.health.HealthCheck;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
@@ -16,6 +17,7 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.session.Presence;
 import net.minestom.server.MinecraftServer;
@@ -25,14 +27,12 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.Scheduler;
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class HubServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServerRunner.class);
@@ -58,9 +58,9 @@ public class HubServerRunner extends AbstractMapServer {
     }
 
     @Override
-    public @NotNull Collection<HealthCheck> readinessChecks() {
-        var checks = new ArrayList<>(super.readinessChecks());
-        checks.add(() -> sessionService().ready() ? HealthCheckResponse.up("session-service") : HealthCheckResponse.down("session-service"));
+    public @NotNull List<HealthCheck> healthChecks() {
+        var checks = new ArrayList<>(super.healthChecks());
+        checks.add(new AnonHealthCheck("session-service", sessionService()::ready));
         return checks;
     }
 
