@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -62,6 +64,7 @@ public final class FutureUtil {
     }
 
     public static void sleep(long millis) {
+        FutureUtil.assertThreadWarn();
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
@@ -78,8 +81,20 @@ public final class FutureUtil {
         throw new IllegalStateException("Unsafe blocking call on '" + thread.getName() + "'");
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(FutureUtil.class);
+
+    public static void assertThreadWarn() {
+        var thread = Thread.currentThread();
+        if (thread.isVirtual()) return;
+        if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
+            return;
+
+        logger.error("Unsafe blocking call on '{}'", thread.getName(), new RuntimeException("dummy exception for stacktrace"));
+    }
+
     @Contract("null -> null")
     public static <T> @UnknownNullability T getUnchecked(@Nullable Future<T> future) {
+        FutureUtil.assertThreadWarn();
         if (future == null) return null;
         try {
             return future.get();

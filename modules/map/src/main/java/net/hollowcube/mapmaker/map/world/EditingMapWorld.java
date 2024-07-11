@@ -274,7 +274,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // If there is no position stored then this is a fresh edit state so add the builder menu
             player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
         }
-        player.teleport(editState.pos().orElse(map().settings().getSpawnPoint())).join();
+        FutureUtil.getUnchecked(player.teleport(editState.pos().orElse(map().settings().getSpawnPoint())));
     }
 
     @Override

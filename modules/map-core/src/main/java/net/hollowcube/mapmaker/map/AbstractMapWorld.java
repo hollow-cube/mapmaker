@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
@@ -233,7 +234,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         // Sanity: If they are still in this world, remove them from it.
         var player = event.getPlayer();
         if (isPlaying(player) || isSpectating(player)) {
-            removePlayer(player);
+            FutureUtil.submitVirtual(() -> removePlayer(player));
         }
     }
 

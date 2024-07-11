@@ -9,6 +9,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
@@ -96,6 +97,7 @@ public abstract class AbstractHttpService {
     }
 
     protected <T> HttpResponse<T> doRequest(@NotNull String name, @NotNull HttpRequest.Builder reqBuilder, HttpResponse.BodyHandler<T> handler) {
+        FutureUtil.assertThreadWarn();
         var span = tracer.spanBuilder(name).setSpanKind(SpanKind.CLIENT).startSpan();
         var context = Context.root().with(span);
         try {
@@ -124,6 +126,7 @@ public abstract class AbstractHttpService {
     }
 
     protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
+        FutureUtil.assertThreadWarn();
         try {
             logger.log(System.Logger.Level.DEBUG, "{0} {1}", req.method(), req.uri());
             var res = httpClient.send(req, handler);

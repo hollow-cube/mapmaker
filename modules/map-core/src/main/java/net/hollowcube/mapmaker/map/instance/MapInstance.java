@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
@@ -66,7 +67,7 @@ public class MapInstance extends InstanceContainer {
         // Load all the chunks immediately
         var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
         loader.world().chunks().forEach(chunk -> loadingChunks.add(loadChunk(chunk.x(), chunk.z())));
-        CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
+        FutureUtil.getUnchecked(CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)));
 
         // Delete the polar world to avoid the second copy of the world data
         setChunkLoader(NoopChunkLoader.INSTANCE);
@@ -79,7 +80,7 @@ public class MapInstance extends InstanceContainer {
         if (worldAccess != null) loader.setWorldAccess(worldAccess);
         setChunkLoader(loader);
 
-        saveInstance().join();
+        FutureUtil.getUnchecked(saveInstance());
 
         var polarWorld = loader.world();
         var worldData = PolarWriter.write(polarWorld);

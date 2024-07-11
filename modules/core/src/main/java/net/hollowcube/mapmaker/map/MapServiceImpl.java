@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.utils.validate.Check;
@@ -48,6 +49,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
+        FutureUtil.assertThreadWarn();
         logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
         var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot, "size", size.id()));
         var req = HttpRequest.newBuilder()
@@ -72,6 +74,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId) {
+        FutureUtil.assertThreadWarn();
         logger.log(System.Logger.Level.INFO, "creating new org map for " + orgId);
         var reqBody = GSON.toJson(Map.of("owner", orgId, "isOrg", true, "size", 2));
         var req = HttpRequest.newBuilder()
@@ -88,6 +91,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
+        FutureUtil.assertThreadWarn();
         Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
         logger.log(System.Logger.Level.INFO, "searching maps for " + query);
         var req = HttpRequest.newBuilder()

@@ -117,7 +117,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         player.setTag(SaveState.TAG, saveState);
 
         var pos = saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint());
-        player.teleport(pos).join();
+        FutureUtil.getUnchecked(player.teleport(pos));
 
         super.addPlayer(player); // Add to player list & reset inventory.
 

@@ -239,7 +239,7 @@ public abstract class AbstractMapServer implements MapServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         sessionManager = new SessionManager(sessionService(), playerService(), permManager(), kafkaConfig, globalConfig.noop());
         shutdowner.queue("session-manager", sessionManager::close);
-        sessionManager().sync(); // Sync existing sessions with remote
+        FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
@@ -404,9 +404,9 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(createInstance(PStatusCommand.class));
         if (fullInstance) commandManager.register(createInstance(PHistoryCommand.class));
 
-        if (fullInstance) commandManager.register(createInstance(BanCommand.class));
+        if (fullInstance) FutureUtil.submitVirtual(() -> commandManager.register(createInstance(BanCommand.class)));
         if (fullInstance) commandManager.register(createInstance(UnbanCommand.class));
-        if (fullInstance) commandManager.register(createInstance(MuteCommand.class));
+        if (fullInstance) FutureUtil.submitVirtual(() -> commandManager.register(createInstance(MuteCommand.class)));
         if (fullInstance) commandManager.register(createInstance(UnmuteCommand.class));
         if (fullInstance) commandManager.register(createInstance(KickCommand.class));
 

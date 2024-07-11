@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.spi.ClassServiceLoader;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
@@ -117,7 +118,7 @@ public class HubServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
 
-        ResourcePackManager.sendResourcePack(player).join();
+        FutureUtil.getUnchecked(ResourcePackManager.sendResourcePack(player));
         if (!player.isOnline()) return;
 
         // Setup the player in the world

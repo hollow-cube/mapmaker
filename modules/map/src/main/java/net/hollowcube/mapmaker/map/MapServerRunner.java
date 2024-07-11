@@ -274,7 +274,7 @@ public class MapServerRunner extends AbstractMapServer {
             var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldType)));
 
             // Ensure resource pack was applied before allowing the player in
-            resourcePackFuture.join();
+            FutureUtil.getUnchecked(resourcePackFuture);
             if (!player.isOnline()) return;
 
             // Setup the player in the world

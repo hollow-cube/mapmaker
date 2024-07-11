@@ -107,6 +107,7 @@ public class PermManagerImpl implements PermManager {
     }
 
     private boolean hasPlatformPermission0(@NotNull String playerId, @NotNull PlatformPermLike perm) {
+        FutureUtil.assertThreadWarn();
         var req = CheckPermissionRequest.newBuilder()
                 .setConsistency(Consistency.newBuilder().setMinimizeLatency(true).build())
                 .setResource(PLATFORM_OBJECT)

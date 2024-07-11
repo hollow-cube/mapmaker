@@ -44,8 +44,8 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.setHandler(this::handleMapInteract);
         mapEntity.setModel(Material.STICK, 5);
         mapEntity.getEntityMeta().setScale(new Vec(4));
-        mapEntity.setInstance(world.instance(), MAP_ENTITY_POS).join();
-        mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0)).join();
+        mapEntity.setInstance(world.instance(), MAP_ENTITY_POS);
+        mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0));
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 

@@ -40,11 +40,11 @@ public class LeftMapAnimator extends AbstractAnimator {
 
         clawPillar.setModel(Material.STICK, 9);
         clawPillar.getEntityMeta().setScale(new Vec(16));
-        clawPillar.setInstance(instance, new Pos(CLAW_PIVOT, 180, 0)).join();
+        FutureUtil.getUnchecked(clawPillar.setInstance(instance, new Pos(CLAW_PIVOT, 180, 0)));
 
         clawClaw.setModel(Material.STICK, 10);
         clawClaw.getEntityMeta().setScale(new Vec(16));
-        clawClaw.setInstance(instance, new Pos(CLAW_PIVOT.withY(y -> y + 5), 180, 0)).join();
+        FutureUtil.getUnchecked(clawClaw.setInstance(instance, new Pos(CLAW_PIVOT.withY(y -> y + 5), 180, 0)));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class LeftMapAnimator extends AbstractAnimator {
             NpcItemModel mapModel = new NpcItemModel();
             mapModel.setModel(Material.STICK, 5);
             mapModel.getEntityMeta().setScale(new Vec(3.5));
-            mapModel.setInstance(instance, POS1).join();
+            FutureUtil.getUnchecked(mapModel.setInstance(instance, POS1));
             mapModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0), Math.toRadians(-90)).into());
 
             if (i++ % 2 == 0) {

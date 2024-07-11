@@ -139,7 +139,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         meta.setBackgroundColor(0);
         meta.setAlignLeft(true);
         meta.setAlignRight(false);
-        entity.setInstance(instance, pos).join();
+        entity.setInstance(instance, pos);
         return meta;
     }
 
@@ -158,7 +158,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         var meta = (BlockDisplayMeta) entity.getEntityMeta();
         meta.setBlockState(Block.GRAY_CONCRETE);
         meta.setScale(new Vec(MAX_WIDTH, 0.3, 0.001));
-        entity.setInstance(instance, pos).join();
+        entity.setInstance(instance, pos);
         return meta;
     }
 }

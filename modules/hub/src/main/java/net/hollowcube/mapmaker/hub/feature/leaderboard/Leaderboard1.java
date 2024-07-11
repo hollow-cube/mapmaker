@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import net.hollowcube.common.math.Quaternion;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.kyori.adventure.text.Component;
@@ -44,7 +45,7 @@ public class Leaderboard1 {
     }
 
     public void setInstance(@NotNull Instance instance, @NotNull Pos pos) {
-        screenModel.setInstance(instance, pos).join();
-        text.setInstance(instance, pos).join();
+        FutureUtil.getUnchecked(screenModel.setInstance(instance, pos));
+        FutureUtil.getUnchecked(text.setInstance(instance, pos));
     }
 }

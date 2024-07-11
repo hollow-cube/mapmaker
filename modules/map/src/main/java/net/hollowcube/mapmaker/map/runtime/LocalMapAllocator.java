@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -87,23 +86,24 @@ public class LocalMapAllocator implements MapAllocator {
 
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
-        lock.lock();
-        try {
+        return VIRTUAL_EXECUTOR.<Boolean>submit(() -> {
             for (var map : List.copyOf(maps.entrySet())) {
                 var key = map.getKey();
                 var world = FutureUtil.getUnchecked(map.getValue());
                 if (!world.worldId().equals(worldId)) continue;
 
-                maps.remove(key);
-                return VIRTUAL_EXECUTOR.submit(() -> {
-                    direct.free(world, reason);
-                    return true;
-                });
+                lock.lock();
+                try {
+                    maps.remove(key);
+                } finally {
+                    lock.unlock();
+                }
+                direct.free(world, reason);
+                return true;
             }
-        } finally {
-            lock.unlock();
-        }
-        return CompletableFuture.completedFuture(false);
+
+            return false;
+        });
     }
 
     @Override

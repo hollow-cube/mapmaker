@@ -1,14 +1,15 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapHooks;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
+import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.event.EventFilter;
@@ -43,7 +44,7 @@ public class BoatFeatureProvider implements FeatureProvider {
 
         var boat = new Entity(EntityType.BOAT);
         boat.setTag(MapHooks.ASSOCIATED_PLAYER, player);
-        boat.setInstance(player.getInstance(), player.getPosition()).join();
+        FutureUtil.getUnchecked(boat.setInstance(player.getInstance(), player.getPosition()));
         boat.addPassenger(player);
     }
 

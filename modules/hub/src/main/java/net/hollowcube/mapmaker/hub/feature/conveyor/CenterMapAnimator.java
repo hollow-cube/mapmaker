@@ -44,7 +44,7 @@ public class CenterMapAnimator extends AbstractAnimator {
     private void doSimplePathMove(@NotNull NpcItemModel mapModel) {
         var orientation = ThreadLocalRandom.current().nextInt(4) * 90;
         orientation += (int) ThreadLocalRandom.current().nextDouble(-10, 10);
-        mapModel.setInstance(instance, new Pos(SIMPLE_POS7, orientation, 0)).join();
+        FutureUtil.getUnchecked(mapModel.setInstance(instance, new Pos(SIMPLE_POS7, orientation, 0)));
 
         moveToTarget(mapModel, SIMPLE_POS6);
         wait(100);

@@ -211,7 +211,7 @@ public class DevServerRunner extends AbstractMapServer {
         super.handlePlayerDisconnect(player);
 
         // Again, need to implement the proxy part of the delete session flow
-        sessionService().deleteSessionV2(player.getUuid().toString());
+        FutureUtil.submitVirtual(() -> sessionService().deleteSessionV2(player.getUuid().toString()));
     }
 
     @Override

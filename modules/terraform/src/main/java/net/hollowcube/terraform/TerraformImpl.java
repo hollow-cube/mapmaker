@@ -5,6 +5,7 @@ import com.google.inject.Guice;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -248,7 +249,7 @@ public final class TerraformImpl implements Terraform {
                     if (chunk == null) {
                         // Chunk is not loaded
                         logger.warn("{}: reference to unloaded chunk at {}, {}", task, chunkX, chunkZ);
-                        chunk = instance.loadChunk(chunkX, chunkZ).join(); // We are in apply thread, its fine to block
+                        chunk = FutureUtil.getUnchecked(instance.loadChunk(chunkX, chunkZ)); // We are in apply thread, its fine to block
                     }
                     final var chunkRef = chunk; // Final var for lambda
 

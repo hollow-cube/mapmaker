@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.conveyor;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -31,7 +32,7 @@ abstract class AbstractAnimator {
         meta.setPosRotInterpolationDuration(time / 50);
 
         meta.setNotifyAboutChanges(true);
-        entity.teleport(entity.getPosition().withYaw(degrees)).join();
+        FutureUtil.getUnchecked(entity.teleport(entity.getPosition().withYaw(degrees)));
 
         if (wait) wait(time);
     }
@@ -49,7 +50,7 @@ abstract class AbstractAnimator {
         meta.setPosRotInterpolationDuration(0);
 
         meta.setNotifyAboutChanges(true);
-        entity.teleport(new Pos(teleportPos != null ? teleportPos : newPivot).withView(entity.getPosition())).join();
+        FutureUtil.getUnchecked(entity.teleport(new Pos(teleportPos != null ? teleportPos : newPivot).withView(entity.getPosition())));
         entity.sendPacketsToViewers(new BundlePacket());
     }
 

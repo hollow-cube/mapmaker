@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.kafka;
 
 import io.prometheus.client.Counter;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -51,7 +52,7 @@ public class FriendlyProducer implements AutoCloseable {
                 future.complete(null);
             }
         });
-        future.join();
+        FutureUtil.getUnchecked(future);
     }
 
     public void produceAndForget(@NotNull String topic, @NotNull String value) {
