@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.gui.store;
 import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -108,7 +109,7 @@ public class CosmeticView extends View {
 
     @Signal(Element.SIG_CLOSE)
     private void onClose() {
-        playerData.writeUpdatesUpstream(playerService);
+        FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(playerService));
         MiscFunctionality.applyCosmetics(player, playerData);
     }
 
