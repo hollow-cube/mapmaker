@@ -69,7 +69,7 @@ public final class FontUtil {
             Map.entry(9827, 8), Map.entry(9829, 8), Map.entry(9830, 8), Map.entry(64, 7),
             Map.entry(38, 6), Map.entry(182, 7), Map.entry(167, 6), Map.entry(174, 7),
             Map.entry(124, 2), Map.entry(94, 6), Map.entry(8962, 6), Map.entry(184, 4),
-            Map.entry(8230, 5)
+            Map.entry(8230, 5), Map.entry(176, 5)
     );
 
     public static final Map<String, Int2IntMap> GLYPH_WIDTHS_V2;
