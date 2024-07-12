@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
+import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -27,7 +28,7 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.map.block.handler.BlockHandlerHelpers.applyStoredBlockData;
 
-public class SignBlockHandler implements BlockHandler {
+public class SignBlockHandler implements BlockHandler, InteractTarget {
     public record SignData(
             boolean hasGlowingText,
             String color,
@@ -122,8 +123,8 @@ public class SignBlockHandler implements BlockHandler {
         var isFront = isFacingFront(block, blockPosition, player);
 
         MapWorld world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.canEdit(player))
-            return false;
+        if (world == null || !world.canEdit(player)) return false;
+        if (world.itemRegistry().isOnCooldown(player)) return true;
 
         if (itemStack.material().equals(Material.GLOW_INK_SAC)) {
             var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);

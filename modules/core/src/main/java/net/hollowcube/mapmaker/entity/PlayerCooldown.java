@@ -13,18 +13,23 @@ public interface PlayerCooldown {
 
     @NotNull Duration cooldownDuration();
 
-
-    /**
-     * @param player The player who is trying to attempt an interaction with a cooldown
-     * @param onUse The code to run when the interaction is successful (we are off cooldown)
-     */
-    default void tryUseCooldown(@NotNull Player player, @NotNull Runnable onUse) {
-        tryUseCooldown(player, onUse, () -> {});
+    default boolean isOnCooldown(@NotNull Player player) {
+        Cooldown cooldown = player.getTag(cooldownTag());
+        return cooldown != null && !cooldown.isReady(System.currentTimeMillis());
     }
 
     /**
      * @param player The player who is trying to attempt an interaction with a cooldown
-     * @param onUse The code to run when the interaction is successful (we are off cooldown)
+     * @param onUse  The code to run when the interaction is successful (we are off cooldown)
+     */
+    default void tryUseCooldown(@NotNull Player player, @NotNull Runnable onUse) {
+        tryUseCooldown(player, onUse, () -> {
+        });
+    }
+
+    /**
+     * @param player    The player who is trying to attempt an interaction with a cooldown
+     * @param onUse     The code to run when the interaction is successful (we are off cooldown)
      * @param onFailure The code to run when the interaction is on cooldown
      */
     default void tryUseCooldown(@NotNull Player player, @NotNull Runnable onUse, @NotNull Runnable onFailure) {

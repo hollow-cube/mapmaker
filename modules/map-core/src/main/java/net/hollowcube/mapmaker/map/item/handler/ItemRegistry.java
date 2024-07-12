@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -206,10 +207,15 @@ public class ItemRegistry implements PlayerCooldown {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
+        // This is a somewhat weird special case to allow right clicking a checkpoint with a checkpoint. But oh well.
+        if (!player.isSneaking() && event.getBlock().handler() instanceof InteractTarget)
+            return;
+
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
         tryUseCooldown(player, () -> {
+            System.out.println("place the block item");
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(

@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
+import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
@@ -28,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
+public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
 
     public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,
@@ -60,6 +61,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
         var player = interaction.getPlayer();
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.canEdit(player)) return true;
+        if (world.itemRegistry().isOnCooldown(player)) return true;
 
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
 
@@ -74,6 +76,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, PressurePlateBl
             newTag.setTag(DATA_TAG, data);
             instance.setBlock(blockPosition, interaction.getBlock().withNbt(newTag.asCompound()));
         }));
+        System.out.println("opened the gui");
 
         return false;
     }

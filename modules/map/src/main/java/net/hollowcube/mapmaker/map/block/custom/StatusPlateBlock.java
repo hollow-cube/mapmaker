@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
+import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.coordinate.BlockVec;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug, PlayerCooldown {
+public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug, PlayerCooldown {
     private static final Tag<StatusEffectData> DATA_TAG = DFU.View(StatusEffectData.CODEC);
     private static final Tag<Cooldown> APPLY_COOLDOWN_TAG = Tag.Transient("mapmaker:status_plate_cooldown");
     private static final Duration COOLDOWN_TIME = Duration.of(250L, ChronoUnit.MILLIS);
@@ -67,6 +68,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, PressurePlateBlockM
         var player = interaction.getPlayer();
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.canEdit(player)) return true;
+        if (world.itemRegistry().isOnCooldown(player)) return true;
 
         if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
 
