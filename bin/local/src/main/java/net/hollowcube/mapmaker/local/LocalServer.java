@@ -11,7 +11,7 @@ import java.nio.file.Path;
 public class LocalServer {
 
     public static void main(String[] args) {
-        Path projectPath = Path.of("/Users/matt/Downloads/localmapmakertest");
+        Path projectPath = Path.of("/Users/matt/Downloads/hublightingtest");
 
         MapServerInitializer.run(LocalServerRunner::new, () -> {
             var parentConfig = ConfigLoaderV3.loadDefault(args);

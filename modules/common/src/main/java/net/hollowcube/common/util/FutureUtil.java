@@ -12,7 +12,13 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
+    private static volatile boolean isShuttingDown = false;
+
     private FutureUtil() {
+    }
+
+    public static void markShutdown() {
+        isShuttingDown = true;
     }
 
     public static final Executor VIRTUAL = Executors.newVirtualThreadPerTaskExecutor();
@@ -85,7 +91,7 @@ public final class FutureUtil {
 
     public static void assertThreadWarn() {
         var thread = Thread.currentThread();
-        if (thread.isVirtual()) return;
+        if (isShuttingDown || thread.isVirtual()) return;
         if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
             return;
 

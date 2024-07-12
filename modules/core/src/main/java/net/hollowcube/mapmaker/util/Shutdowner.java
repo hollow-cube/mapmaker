@@ -77,6 +77,7 @@ public class Shutdowner implements HttpService, HealthCheck {
         if (isShuttingDown) return;
         if (gracefulShutdownFuture == null) shutdownGracefully();
         gracefulShutdownFuture.complete(null);
+        FutureUtil.markShutdown();
 
         isShuttingDown = true;
         shutdownHooks.forEach(runnable -> {
