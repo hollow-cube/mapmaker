@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.hdb.gui;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
@@ -37,8 +38,8 @@ public class HeadIconView extends View {
     }
 
     @Action("label")
-    private void handleSelect(@NotNull Player player) {
-        if (head == null) return;
+    private void handleSelect(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (head == null || (clickType != ClickType.LEFT_CLICK && clickType != ClickType.SHIFT_LEFT_CLICK)) return;
 
         // Gross special case for alphabet subcategory
         if (alphabetSubcategory != null) {
@@ -47,6 +48,6 @@ public class HeadIconView extends View {
         }
 
         PlayerUtil.smartAddItemStack(player, head.createItemStack());
-        player.closeInventory();
+        if (clickType == ClickType.LEFT_CLICK) player.closeInventory();
     }
 }
