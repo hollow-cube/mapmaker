@@ -13,5 +13,6 @@
     <logger name="io.grpc" level="WARN"/>
     <logger name="io.helidon" level="WARN"/>
     <logger name="jdk.event.security" level="WARN"/>
+    <logger name="sun.net.www" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>
 </configuration>
