@@ -22,6 +22,11 @@ public class LuaEntity implements Pinned {
         return entity.getPosition();
     }
 
+    @LuaProperty
+    public @NotNull LuaCuboid getBoundingBox() {
+        return new LuaCuboid(entity);
+    }
+
     @LuaMethod
     public void remove() {
         entity.remove();

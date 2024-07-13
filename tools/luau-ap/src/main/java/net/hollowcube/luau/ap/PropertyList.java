@@ -1,5 +1,6 @@
 package net.hollowcube.luau.ap;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import org.jetbrains.annotations.NotNull;
@@ -54,8 +55,9 @@ public record PropertyList(@NotNull List<Property> properties) {
             return new Property(name, methodName + "()", true, null);
         }
 
-        log.printError("Unsupported return type: " + returnType, method);
-        return null;
+        ClassName returnTypeClass = (ClassName) returnType;
+        ClassName returnTypeWrapper = ClassName.get(returnTypeClass.packageName(), returnTypeClass.simpleName() + "$Wrapper");
+        return new Property(name, methodName + "()", false, TypeConverter.forSingleValue(returnTypeWrapper));
     }
 
     private static @Nullable Property collectField(@NotNull Messager log, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull VariableElement field) {

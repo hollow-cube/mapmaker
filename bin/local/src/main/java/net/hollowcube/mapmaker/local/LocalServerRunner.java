@@ -2,14 +2,12 @@ package net.hollowcube.mapmaker.local;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.local.svc.LocalMapService;
-import net.hollowcube.mapmaker.local.svc.LocalPlayerService;
-import net.hollowcube.mapmaker.local.svc.LocalSessionService;
-import net.hollowcube.mapmaker.local.svc.LocalTerraformStorage;
+import net.hollowcube.mapmaker.local.svc.*;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.world.LocalEditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -60,6 +58,11 @@ public class LocalServerRunner extends MapServerRunner {
     @Override
     public @NotNull SessionService sessionService() {
         return sessionService;
+    }
+
+    @Override
+    protected @NotNull ServerBridge createBridge() {
+        return new LocalServerBridge();
     }
 
     @Override

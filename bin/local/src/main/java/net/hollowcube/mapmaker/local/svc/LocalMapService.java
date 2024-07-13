@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.local.LocalServerRunner;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.world.savestate.EditState;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -20,11 +21,13 @@ import java.util.UUID;
 
 public class LocalMapService extends NoopMapService {
     private final Path worldFile;
+    private final Path mapFile;
     private final Path savestatePath;
     private final Path perfdumpPath;
 
     public LocalMapService(@NotNull Path workspace) {
         this.worldFile = workspace.resolve("world.polar");
+        this.mapFile = workspace.resolve("map.json");
         this.savestatePath = workspace.resolve("savestates");
         this.perfdumpPath = workspace.resolve("perfdump");
     }
@@ -37,12 +40,24 @@ public class LocalMapService extends NoopMapService {
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
+
         var settings = new MapSettings();
         settings.setVariant(MapVariant.PARKOUR);
-        return new MapData(
-                LocalServerRunner.DUMMY_MAP_ID, UUID.randomUUID().toString(),
-                settings, -1, null
-        );
+        settings.setSize(MapSize.UNLIMITED);
+        var map = new MapData(LocalServerRunner.DUMMY_MAP_ID, UUID.randomUUID().toString(), settings, -1, null);
+        map.setSetting(MapSettings.LIGHTING, true);
+
+        if (Files.exists(mapFile)) {
+            try {
+                var updates = AbstractHttpService.GSON.fromJson(Files.readString(mapFile), MapUpdateRequest.class);
+                settings.setName(updates.name);
+                settings.setSpawnPoint(updates.spawnPoint);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return map;
     }
 
     @Override
@@ -57,7 +72,18 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        //todo
+        try {
+            JsonObject object = Files.exists(mapFile)
+                    ? AbstractHttpService.GSON.fromJson(Files.readString(mapFile), JsonObject.class)
+                    : new JsonObject();
+            AbstractHttpService.GSON.toJsonTree(update).getAsJsonObject()
+                    .entrySet().forEach(entry -> object.add(entry.getKey(), entry.getValue()));
+            Files.createDirectories(mapFile.getParent());
+            Files.writeString(mapFile, AbstractHttpService.GSON.toJson(object),
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

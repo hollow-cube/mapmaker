@@ -27,6 +27,11 @@ public class LuaPlayer implements Pinned {
         return player.getPosition();
     }
 
+    @LuaProperty
+    public @NotNull LuaCuboid getBoundingBox() {
+        return new LuaCuboid(player);
+    }
+
     @Override
     public void unpin() {
         world.close();

@@ -14,4 +14,5 @@
     <logger name="io.helidon" level="WARN"/>
     <logger name="jdk.event.security" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="java.lang" level="WARN"/>
 </configuration>

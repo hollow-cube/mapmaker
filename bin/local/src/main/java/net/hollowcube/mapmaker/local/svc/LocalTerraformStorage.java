@@ -51,6 +51,7 @@ public class LocalTerraformStorage implements TerraformStorage {
     public void savePlayerSession(@NotNull String playerId, byte @NotNull [] session) {
         try {
             var path = tfstate.resolve(playerId + "_global");
+            Files.createDirectories(path.getParent());
             Files.write(path, session, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -73,6 +74,7 @@ public class LocalTerraformStorage implements TerraformStorage {
     public void saveLocalSession(@NotNull String playerId, @NotNull String instanceId, byte @NotNull [] session) {
         try {
             var path = tfstate.resolve(playerId + "_local");
+            Files.createDirectories(path.getParent());
             Files.write(path, session, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);

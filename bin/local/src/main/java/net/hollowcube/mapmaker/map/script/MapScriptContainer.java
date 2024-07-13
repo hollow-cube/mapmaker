@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.script;
 import net.hollowcube.luau.BuilinLibrary;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.luau.util.PinImpl;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -18,7 +17,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MapScriptContainer {
@@ -60,6 +58,7 @@ public class MapScriptContainer {
         LuaWorldView$Wrapper.initMetatable(global);
         Impl$Wrapper.initMetatable(global); // todo: bad name
         LuaSystem.init(global);
+        LuaCuboid.init(global);
 
         // Create metatable for `script`, which has an __index into java.
         global.newMetaTable("script");
@@ -91,16 +90,16 @@ public class MapScriptContainer {
     }
 
     private void handlePlayerJoined(@NotNull MapPlayerInitEvent event) {
-        try {
-            var script = Files.readAllBytes(workspace.resolve("src/Player.luau"));
-            var bytecode = LuauCompiler.DEFAULT.compile(new String(script)); //todo use byte array overload
-
-            var playerScript = new PlayerScriptContainer(global, event.player());
-            event.player().setTag(PlayerScriptContainer.TAG, playerScript);
-            playerScript.eval("Player.luau", bytecode);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            var script = Files.readAllBytes(workspace.resolve("src/Player.luau"));
+//            var bytecode = LuauCompiler.DEFAULT.compile(new String(script)); //todo use byte array overload
+//
+//            var playerScript = new PlayerScriptContainer(global, event.player());
+//            event.player().setTag(PlayerScriptContainer.TAG, playerScript);
+//            playerScript.eval("Player.luau", bytecode);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private void handlePlayerLeave(@NotNull MapWorldPlayerStopPlayingEvent event) {

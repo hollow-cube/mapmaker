@@ -81,6 +81,22 @@ public interface TypeConverter {
         }
     };
 
+    static @NotNull TypeConverter forSingleValue(@NotNull TypeName wrapperClass) {
+        return new TypeConverter() {
+            @Override
+            public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+                method.addStatement("state.newUserData($L)", getter);
+                method.addStatement("state.getMetaTable($T.TYPE_NAME)", wrapperClass);
+                method.addStatement("state.setMetaTable(-2)");
+            }
+
+            @Override
+            public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+                throw new UnsupportedOperationException("Value type cannot be popped");
+            }
+        };
+    }
+
     void insertPush(@NotNull MethodSpec.Builder method, @NotNull String getter);
     void insertPop(@NotNull MethodSpec.Builder method, @NotNull String name, int index);
 
