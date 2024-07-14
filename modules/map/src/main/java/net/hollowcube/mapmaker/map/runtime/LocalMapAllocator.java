@@ -150,7 +150,6 @@ public class LocalMapAllocator implements MapAllocator {
         lock.lock();
         try {
             isClosing = true;
-            logger.debug("active maps: " + maps.keySet().stream().map(MapKey::mapId).toList());
             for (var future : List.copyOf(maps.values())) {
                 var world = FutureUtil.getUnchecked(future);
                 FutureUtil.getUnchecked(destroy(world.worldId(), Component.translatable("mapmaker.shutdown")));

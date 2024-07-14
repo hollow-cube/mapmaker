@@ -13,8 +13,8 @@ import java.nio.file.Path;
 public class LocalServer {
 
     public static void main(String[] args) throws Exception {
-        Path projectPath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2/0_0_cubed_prologue");
-//        Path projectPath = Path.of("/Users/matt/Downloads/localmapmakertest");
+//        Path projectPath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2/0_0_cubed_prologue");
+        Path projectPath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2/1_0_a_time_of_war");
 
         MapServerInitializer.run(
                 c -> new LocalServerRunner(projectPath, c),

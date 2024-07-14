@@ -28,8 +28,8 @@ public class LocalMapService extends NoopMapService {
     public LocalMapService(@NotNull Path workspace) {
         this.worldFile = workspace.resolve("world.polar");
         this.mapFile = workspace.resolve("map.json");
-        this.savestatePath = workspace.resolve("savestates");
-        this.perfdumpPath = workspace.resolve("perfdump");
+        this.savestatePath = workspace.resolve(".savestates");
+        this.perfdumpPath = workspace.resolve(".perfdump");
     }
 
     @Override

@@ -31,7 +31,7 @@ public class LocalTerraformStorage implements TerraformStorage {
     }
 
     public LocalTerraformStorage(@NotNull Path workspace) {
-        this.tfstate = workspace.resolve("tfstate");
+        this.tfstate = workspace.resolve(".tfstate");
         this.schematics = workspace.resolve("schematics");
     }
 

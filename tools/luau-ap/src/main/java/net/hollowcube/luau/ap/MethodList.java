@@ -84,8 +84,11 @@ public record MethodList(@NotNull List<Method> methods) {
         var params = method.getParameters();
         for (int i = isStatic ? 1 : 0; i < params.size(); i++) {
             var param = params.get(i);
-            var type = typeConverters.get(TypeName.get(param.asType()));
-            if (type == null) {
+            var paramType = TypeName.get(param.asType());
+            var type = typeConverters.get(paramType);
+            if (paramType instanceof ParameterizedTypeName pt && pt.rawType.equals(Types.PIN)) {
+                type = TypeConverter.PIN;
+            } else if (type == null) {
                 log.printError("Unsupported type: " + param.asType(), param);
                 continue;
             }

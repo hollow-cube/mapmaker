@@ -38,14 +38,14 @@ public class LuaWorldView implements Pinned {
         this.player = player;
         this.world = MapWorld.forPlayer(player);
 
-        this.onTick = Pin.value(LuaEventSource.create(
-                PlayerTickEvent.class, Callbacks.OnTick.class,
+        this.onTick = LuaEventSource.create(
+                Callbacks.OnTick.class, PlayerTickEvent.class,
                 (_, onTick) -> onTick.call()
-        ));
-        this.onBlockInteract = Pin.value(LuaEventSource.create(
-                PlayerBlockInteractEvent.class, Callbacks.OnBlockInteract.class,
+        );
+        this.onBlockInteract = LuaEventSource.create(
+                Callbacks.OnBlockInteract.class, PlayerBlockInteractEvent.class,
                 (e, onBlockInteract) -> onBlockInteract.call(e.getBlockPosition(), e.getBlock())
-        ));
+        );
     }
 
     @LuaProperty

@@ -70,8 +70,12 @@ public class LuaCuboid {
             return 0;
         }
 
-        state.pushBoolean(false);
+        state.pushBoolean(intersects0(other));
         return 1;
+    }
+
+    public boolean intersects0(@NotNull LuaCuboid other) {
+        return CoordinateUtil.intersects(min, max, other.min, other.max);
     }
 
 }
