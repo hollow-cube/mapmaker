@@ -9,6 +9,7 @@ import net.hollowcube.luau.util.Pin;
 import net.hollowcube.luau.util.Pinned;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.script.type.VectorTypeImpl;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -84,6 +85,16 @@ public class LuaPlayer implements Pinned {
         }
 
         player.teleport(new Pos(pos, yaw, pitch), null, relativeFlags);
+        return 0;
+    }
+
+    @LuaMethod
+    public int reset(@NotNull LuaState state) {
+        boolean toStart = state.optBooleanArg(2, false);
+
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return 0;
+        world.callEvent(new MapPlayerResetEvent(player, world, !toStart));
         return 0;
     }
 
