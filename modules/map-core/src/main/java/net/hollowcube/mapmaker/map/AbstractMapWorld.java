@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
@@ -65,9 +64,6 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         // Configure the events from the instance & managers
         instance.eventNode().addChild(eventNode);
         instance.eventNode().addChild(itemRegistry.eventNode());
-
-        // Add support for adding and removing potion effects
-        eventNode().addChild(PotionHandler.EVENT_NODE);
 
         instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, this::handleInstanceLeave);
 

@@ -7,8 +7,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
-import net.hollowcube.mapmaker.entity.potion.PotionInfo;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

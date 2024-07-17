@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play.effect;
 
-import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;

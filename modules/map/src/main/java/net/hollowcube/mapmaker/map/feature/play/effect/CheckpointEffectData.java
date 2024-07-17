@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;

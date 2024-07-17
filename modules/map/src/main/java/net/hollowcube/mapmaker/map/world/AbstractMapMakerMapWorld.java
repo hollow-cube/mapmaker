@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.world;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
@@ -26,6 +27,9 @@ public class AbstractMapMakerMapWorld extends AbstractMapWorld {
         super(server, map, instance);
 
         this.features = features;
+        
+        // Add support for adding and removing potion effects
+        eventNode().addChild(PotionHandler.EVENT_NODE);
     }
 
     public @NotNull FeatureList features() {

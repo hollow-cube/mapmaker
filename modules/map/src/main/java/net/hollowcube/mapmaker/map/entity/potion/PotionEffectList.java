@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.entity.potion;
+package net.hollowcube.mapmaker.map.entity.potion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -10,8 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-//todo: it is giga yikes for this to be in the core module. The core module never needs the play or build state from a savestate, so they should be moved
-// to some class MapSaveState extends SaveState and then this should be moved to the map module
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
             .xmap(PotionEffectList::new, PotionEffectList::entries);

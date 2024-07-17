@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.entity.potion;
+package net.hollowcube.mapmaker.map.entity.potion;
 
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;

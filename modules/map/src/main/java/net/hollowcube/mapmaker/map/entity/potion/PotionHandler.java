@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.entity.potion;
+package net.hollowcube.mapmaker.map.entity.potion;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -14,7 +14,8 @@ public interface PotionHandler {
 
     void remove(@NotNull Player player);
 
-    @NotNull EventNode<InstanceEvent> EVENT_NODE = EventNode.type("potion-handler", EventFilter.INSTANCE)
+    @NotNull
+    EventNode<InstanceEvent> EVENT_NODE = EventNode.type("potion-handler", EventFilter.INSTANCE)
             .addListener(EntityPotionAddEvent.class, event -> {
                 if (!(event.getEntity() instanceof Player player)) return;
 
