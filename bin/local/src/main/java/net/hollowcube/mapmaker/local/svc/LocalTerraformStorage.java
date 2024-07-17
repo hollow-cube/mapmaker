@@ -23,21 +23,21 @@ public class LocalTerraformStorage implements TerraformStorage {
     private static final Logger logger = LoggerFactory.getLogger(LocalTerraformStorage.class);
     private static final List<String> VALID_EXTENSIONS = List.of(".schem", ".schematic", ".bp", ".litematica", ".litematic");
 
-    private final Path tfstate;
+    private final LocalServerRunner server;
     private final Path schematics;
 
     public LocalTerraformStorage() {
-        this(LocalServerRunner.workspace);
+        this.server = LocalServerRunner.instance;
+        this.schematics = server.workspace().schematicDirectory();
     }
 
-    public LocalTerraformStorage(@NotNull Path workspace) {
-        this.tfstate = workspace.resolve(".tfstate");
-        this.schematics = workspace.resolve("schematics");
+    private @NotNull Path tfState() {
+        return server.activeProjectDirectory().resolve(".tfstate");
     }
 
     @Override
     public byte @Nullable [] loadPlayerSession(@NotNull String playerId) {
-        var path = tfstate.resolve(playerId + "_global");
+        var path = tfState().resolve(playerId + "_global");
         if (!Files.exists(path)) return null;
 
         try {
@@ -50,7 +50,7 @@ public class LocalTerraformStorage implements TerraformStorage {
     @Override
     public void savePlayerSession(@NotNull String playerId, byte @NotNull [] session) {
         try {
-            var path = tfstate.resolve(playerId + "_global");
+            var path = tfState().resolve(playerId + "_global");
             Files.createDirectories(path.getParent());
             Files.write(path, session, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class LocalTerraformStorage implements TerraformStorage {
 
     @Override
     public byte @Nullable [] loadLocalSession(@NotNull String playerId, @NotNull String instanceId) {
-        var path = tfstate.resolve(playerId + "_local");
+        var path = tfState().resolve(playerId + "_local");
         if (!Files.exists(path)) return null;
 
         try {
@@ -73,7 +73,7 @@ public class LocalTerraformStorage implements TerraformStorage {
     @Override
     public void saveLocalSession(@NotNull String playerId, @NotNull String instanceId, byte @NotNull [] session) {
         try {
-            var path = tfstate.resolve(playerId + "_local");
+            var path = tfState().resolve(playerId + "_local");
             Files.createDirectories(path.getParent());
             Files.write(path, session, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {

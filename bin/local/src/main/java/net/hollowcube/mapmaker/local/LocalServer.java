@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.GlobalConfig;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.local.config.LocalWorkspace;
+import net.hollowcube.mapmaker.local.proj.Workspace;
 import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,11 +14,16 @@ import java.nio.file.Path;
 public class LocalServer {
 
     public static void main(String[] args) throws Exception {
-//        Path projectPath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2/0_0_cubed_prologue");
-        Path projectPath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2/1_0_a_time_of_war");
+        Path workspacePath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2");
+        Workspace workspace = Workspace.read(workspacePath);
+
+        LocalWorkspace wsConf = new LocalWorkspace(
+                workspacePath.resolve(workspace.activeProject()),
+                workspacePath.resolve("schematics")
+        );
 
         MapServerInitializer.run(
-                c -> new LocalServerRunner(projectPath, c),
+                LocalServerRunner::new,
                 () -> {
                     var parentConfig = ConfigLoaderV3.loadDefault(args);
                     return new ConfigLoaderV3() {
@@ -26,7 +32,7 @@ public class LocalServer {
                             if (clazz == GlobalConfig.class)
                                 return (C) new GlobalConfig(true);
                             if (clazz == LocalWorkspace.class)
-                                return (C) new LocalWorkspace(projectPath);
+                                return (C) wsConf;
                             if (clazz == UnleashConfig.class)
                                 return (C) new UnleashConfig(false, "", "", true);
                             return parentConfig.get(clazz);

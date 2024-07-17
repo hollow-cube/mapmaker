@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.local;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.local.config.LocalWorkspace;
 import net.hollowcube.mapmaker.local.svc.*;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -25,17 +26,21 @@ import java.util.concurrent.CompletableFuture;
 public class LocalServerRunner extends MapServerRunner {
     public static final String DUMMY_MAP_ID = "0557bb41-225a-4556-af2e-51f72c0a005c"; // PigianaJones
 
-    public static Path workspace;
+    public static LocalServerRunner instance;
+
+    private final LocalWorkspace workspace;
 
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionService sessionService;
 
-    LocalServerRunner(@NotNull Path workspace, @NotNull ConfigLoaderV3 config) {
+    LocalServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
-        LocalServerRunner.workspace = workspace;
 
-        this.mapService = new LocalMapService(workspace);
+        LocalServerRunner.instance = this;
+        this.workspace = config.get(LocalWorkspace.class);
+
+        this.mapService = new LocalMapService(activeProjectDirectory());
         this.playerService = new LocalPlayerService();
         this.sessionService = new LocalSessionService();
     }
@@ -43,6 +48,14 @@ public class LocalServerRunner extends MapServerRunner {
     @Override
     protected @NotNull String name() {
         return "local-mapmaker";
+    }
+
+    public @NotNull LocalWorkspace workspace() {
+        return workspace;
+    }
+
+    public @NotNull Path activeProjectDirectory() {
+        return workspace.path();
     }
 
     @Override

@@ -4,5 +4,5 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-public record LocalWorkspace(@NotNull Path path) {
+public record LocalWorkspace(@NotNull Path path, @NotNull Path schematicDirectory) {
 }
