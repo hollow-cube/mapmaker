@@ -10,7 +10,6 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -190,7 +189,7 @@ public class DisplayEntity extends MapEntity {
             final ItemDisplayMeta meta = getEntityMeta();
             var itemStack = meta.getItemStack();
             if (!itemStack.isAir() && itemStack.amount() > 0)
-                tag.put("item", ItemStack.NBT_TYPE.write(itemStack));
+                tag.put("item", NbtUtil.writeItemStack(itemStack));
             if (meta.getDisplayContext() != ItemDisplayMeta.DisplayContext.NONE)
                 tag.put("item_display", DISPLAY_CONTEXT.write(meta.getDisplayContext()));
         }
@@ -201,7 +200,7 @@ public class DisplayEntity extends MapEntity {
 
             final ItemDisplayMeta meta = getEntityMeta();
             if (tag.get("item") instanceof CompoundBinaryTag item)
-                meta.setItemStack(ItemStack.NBT_TYPE.read(item));
+                meta.setItemStack(NbtUtil.readItemStack(item));
             if (tag.get("item_display") instanceof StringBinaryTag itemDisplay)
                 meta.setDisplayContext(DISPLAY_CONTEXT.read(itemDisplay));
 

@@ -1,16 +1,20 @@
 package net.hollowcube.mapmaker.map.util;
 
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class NbtUtil {
 
     public static final BinaryTagSerializer<Block> BLOCK_COMPOUND = new BinaryTagSerializer<>() {
@@ -88,5 +92,22 @@ public final class NbtUtil {
             case NumberBinaryTag number -> defaultValue.getDeclaringClass().getEnumConstants()[number.intValue()];
             case null, default -> defaultValue;
         };
+    }
+
+    public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
+        var tag = (CompoundBinaryTag) ItemStack.NBT_TYPE.write(itemStack);
+        var cmdId = BadSprite.getCmdId(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA));
+        if (cmdId != null) tag = tag.putString("custom_model_data", cmdId);
+        return tag;
+    }
+
+    public static @NotNull ItemStack readItemStack(@NotNull BinaryTag tag) {
+        if (!(tag instanceof CompoundBinaryTag compound)) return ItemStack.AIR;
+        var itemStack = ItemStack.NBT_TYPE.read(compound);
+        if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
+            int cmd = BadSprite.getIdCmd(cmdId.value());
+            if (cmd > 0) itemStack = itemStack.with(ItemComponent.CUSTOM_MODEL_DATA, cmd);
+        }
+        return itemStack;
     }
 }

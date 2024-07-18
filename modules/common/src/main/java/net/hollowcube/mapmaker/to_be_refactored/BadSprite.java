@@ -2,7 +2,14 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,13 +22,26 @@ public record BadSprite(char fontChar, int cmd, int width, int offsetX, int righ
     private static final System.Logger logger = System.getLogger(BadSprite.class.getName());
 
     public static final Map<String, BadSprite> SPRITE_MAP;
+    public static final Int2ObjectMap<String> CMD_ID_MAP;
+    public static final Object2IntMap<String> ID_CMD_MAP;
 
     public static @NotNull BadSprite require(@NotNull String path) {
         return Objects.requireNonNull(SPRITE_MAP.get(path), path);
     }
 
+    public static @Nullable String getCmdId(@Nullable Integer cmd) {
+        if (cmd == null) return null;
+        return CMD_ID_MAP.get((int) cmd);
+    }
+
+    public static int getIdCmd(@NotNull String id) {
+        return ID_CMD_MAP.getInt(id);
+    }
+
     static {
         var sprites = new HashMap<String, BadSprite>();
+        var cmdIdMap = new Int2ObjectArrayMap<String>();
+        var idCmdMap = new Object2IntArrayMap<String>();
         try (var is = BadSprite.class.getResourceAsStream("/sprites.json")) {
             if (is != null) {
                 var entries = new Gson().fromJson(new String(is.readAllBytes(), StandardCharsets.UTF_8), JsonArray.class);
@@ -32,7 +52,11 @@ public record BadSprite(char fontChar, int cmd, int width, int offsetX, int righ
                     int cmd = 0;
                     if (obj.has("fontChar"))
                         fontChar = obj.get("fontChar").getAsString().charAt(0);
-                    else cmd = obj.get("cmd").getAsInt();
+                    else {
+                        cmd = obj.get("cmd").getAsInt();
+                        cmdIdMap.put(cmd, key);
+                        idCmdMap.put(key, cmd);
+                    }
                     var width = obj.get("width");
                     var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
@@ -48,6 +72,8 @@ public record BadSprite(char fontChar, int cmd, int width, int offsetX, int righ
             logger.log(System.Logger.Level.ERROR, "Failed to load sprites.json", e);
         } finally {
             SPRITE_MAP = Map.copyOf(sprites);
+            CMD_ID_MAP = Int2ObjectMaps.unmodifiable(cmdIdMap);
+            ID_CMD_MAP = Object2IntMaps.unmodifiable(idCmdMap);
         }
     }
 

@@ -21,6 +21,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -29,7 +30,7 @@ public class PlayMapsView extends View {
     private static final PlayerSetting<Boolean> PARKOUR = PlayerSetting.Bool("play_maps.parkour", false);
     private static final PlayerSetting<Boolean> BUILDING = PlayerSetting.Bool("play_maps.building", false);
 
-    private enum SortPreset {
+    public enum SortPreset {
         APPROVED, BEST, BOOSTED, RECENT, TRENDING;
 
         public @NotNull String getSortName() {
@@ -61,10 +62,17 @@ public class PlayMapsView extends View {
 
     private final PlayerDataV2 playerData;
 
-
     public PlayMapsView(@NotNull Context context) {
+        this(context, null);
+    }
+
+    public PlayMapsView(@NotNull Context context, @Nullable SortPreset startingSort) {
         super(context);
         playerData = PlayerDataV2.fromPlayer(player);
+
+        if (startingSort != null) {
+            playerData.setSetting(SORT_PRESET, startingSort);
+        }
 
         updateQuery(false);
     }

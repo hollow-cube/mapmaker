@@ -10,6 +10,21 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BaseNpcEntity extends Entity {
+
+    public static @NotNull BaseNpcEntity createInteractionEntity(int width, int height, @NotNull NpcHandler handler) {
+        var storeEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
+            @Override protected void movementTick() {
+                // Intentionally do nothing
+            }
+        };
+        storeEntity.setNoGravity(true);
+        var interactionMeta = (InteractionMeta) storeEntity.getEntityMeta();
+        interactionMeta.setWidth(width);
+        interactionMeta.setHeight(height);
+        storeEntity.setTag(NpcHandler.TAG, handler);
+        return storeEntity;
+    }
+
     private Entity interactionEntity = null;
 
     public BaseNpcEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
