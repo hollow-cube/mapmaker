@@ -12,6 +12,8 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
@@ -40,13 +42,14 @@ public class StoreAdFeatureProvider implements HubFeature {
                 3, 4, this::handleStoreClick);
         viewStoreEntity.setInstance(world.instance(), STORE_AD_POS);
 
-        goldBlockEntity.setModel(Material.GOLD_BLOCK, 0);
-        goldBlockEntity.getEntityMeta().setScale(new Vec(2));
+        goldBlockEntity.getEntityMeta().setItemStack(ItemStack.of(Material.GOLD_BLOCK)
+                .with(ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, true));
+        goldBlockEntity.getEntityMeta().setScale(new Vec(1));
         goldBlockEntity.setInstance(world.instance(), GOLD_BLOCK_ENTITY_POS);
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand) {
+    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
         if (hand != Player.Hand.MAIN) return;
 
         guiController.show(player, c -> new StoreView(c, StoreView.TAB_HYPERCUBE));

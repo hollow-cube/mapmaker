@@ -51,10 +51,11 @@ public class BaseNpcEntity extends Entity {
         var interactionMeta = (InteractionMeta) interactionEntity.getEntityMeta();
         interactionMeta.setWidth(width);
         interactionMeta.setHeight(height);
+        interactionMeta.setResponse(true);
 
-        this.interactionEntity.setTag(NpcHandler.TAG, (player, npc, hand) -> {
+        this.interactionEntity.setTag(NpcHandler.TAG, (player, npc, hand, isLeftHand) -> {
             if (!BaseNpcEntity.this.hasTag(NpcHandler.TAG)) return;
-            BaseNpcEntity.this.getTag(NpcHandler.TAG).handlePlayerInteract(player, BaseNpcEntity.this, hand);
+            BaseNpcEntity.this.getTag(NpcHandler.TAG).handlePlayerInteract(player, BaseNpcEntity.this, hand, isLeftHand);
         });
         return this.interactionEntity.setInstance(this.getInstance(), this.getPosition().add(offset));
     }

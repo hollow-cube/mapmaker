@@ -29,6 +29,9 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -55,6 +58,8 @@ public class HubMapWorld extends AbstractMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(HubMapWorld.class);
 
     private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("selected_slot", 0);
+
+    private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach", 100, AttributeOperation.MULTIPLY_TOTAL);
 
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
     public static final MapData HUB_MAP_DATA = new MapData(
@@ -150,6 +155,7 @@ public class HubMapWorld extends AbstractMapWorld {
         player.setAllowFlying(true);
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
         player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
+        player.getAttribute(Attribute.PLAYER_ENTITY_INTERACTION_RANGE).addModifier(REACH_MOD);
 
         player.getInventory().setItemStack(10, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
 
@@ -174,6 +180,8 @@ public class HubMapWorld extends AbstractMapWorld {
         // Write their settings to the database
         var playerData = PlayerDataV2.fromPlayer(player);
         playerData.writeUpdatesUpstream(server().playerService());
+
+        player.getAttribute(Attribute.PLAYER_ENTITY_INTERACTION_RANGE).removeModifier(REACH_MOD);
 
         super.removePlayer(player);
     }

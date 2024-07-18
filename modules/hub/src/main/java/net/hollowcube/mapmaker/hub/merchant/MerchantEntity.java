@@ -26,8 +26,8 @@ public class MerchantEntity extends NpcPlayerEntity {
         setHandler(this::handleInteract);
     }
 
-    private void handleInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand) {
-        if (data == null || hand != Player.Hand.MAIN) return;
+    private void handleInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
+        if (data == null || hand != Player.Hand.MAIN || isLeftClick) return;
 
         var world = MapWorld.unsafeFromInstance(getInstance());
         if (world == null) return; // Sanity

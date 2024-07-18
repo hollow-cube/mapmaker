@@ -49,7 +49,9 @@ public class MapOfTheWeekFeature implements HubFeature {
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand) {
+    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand, boolean isLeftClick) {
+        if (isLeftClick) return;
+        
         player.sendMessage(Component.translatable("motw.coming_soon"));
 //        try {
         //todo in vthread

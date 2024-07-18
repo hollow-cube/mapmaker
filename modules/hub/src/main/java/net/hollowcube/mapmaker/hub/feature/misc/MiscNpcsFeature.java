@@ -32,8 +32,8 @@ public class MiscNpcsFeature implements HubFeature {
         playtimeNpc.setHandler(this::handlePlaytimeClick);
     }
 
-    private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand) {
-        if (hand != Player.Hand.MAIN) return;
+    private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
+        if (hand != Player.Hand.MAIN || isLeftClick) return;
 
         var playerData = PlayerDataV2.fromPlayer(player);
         player.sendMessage("You have played for " + NumberUtil.formatPlayerPlaytime(playerData.totalPlaytime()));

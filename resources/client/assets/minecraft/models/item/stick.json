@@ -94,6 +94,13 @@
       },
       "model": "minecraft:item/shm",
       "axiom:hide": false
+    },
+    {
+      "predicate": {
+        "custom_model_data": 14
+      },
+      "model": "minecraft:item/house_v2",
+      "axiom:hide": true
     }
   ]
 }
