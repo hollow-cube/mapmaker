@@ -58,7 +58,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("selected_slot", 0);
 
-    private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach", 100, AttributeOperation.MULTIPLY_TOTAL);
+    private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach", 40 - Attribute.PLAYER_ENTITY_INTERACTION_RANGE.defaultValue(), AttributeOperation.ADD_VALUE);
 
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
     public static final MapData HUB_MAP_DATA = new MapData(

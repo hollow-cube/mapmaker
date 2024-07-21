@@ -43,7 +43,8 @@ public class BaseNpcEntity extends Entity {
         if (this.interactionEntity != null) this.interactionEntity.remove();
 
         this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };

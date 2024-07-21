@@ -16,13 +16,18 @@ public class InteractionEntity extends Entity {
         default void endHover(@NotNull Player player) {
         }
 
+        default void onRightClick(@NotNull Player player) {
+        }
+
     }
 
     private final Target target;
+    private final double interactionDistance;
 
-    public InteractionEntity(int width, int height, @NotNull Target target) {
+    public InteractionEntity(int width, int height, double interactionDistance, @NotNull Target target) {
         super(EntityType.INTERACTION);
         this.target = target;
+        this.interactionDistance = interactionDistance;
 
         setNoGravity(true);
         hasPhysics = false;
@@ -33,6 +38,10 @@ public class InteractionEntity extends Entity {
         meta.setHeight(height);
 
         setBoundingBox(width, height, width);
+    }
+
+    public double interactionDistance() {
+        return interactionDistance;
     }
 
     public @NotNull Target target() {

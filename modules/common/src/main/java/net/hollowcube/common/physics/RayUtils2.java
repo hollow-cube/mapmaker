@@ -8,13 +8,12 @@ import org.jetbrains.annotations.NotNull;
 public final class RayUtils2 {
 
     public static boolean boundingBoxContainsPoint(@NotNull BoundingBox bb, @NotNull Point bbRelative, @NotNull Point other) {
-        return other.x() >= bbRelative.x() + bb.minX() && other.x() <= bbRelative.x() + bb.maxX()
-                && other.y() >= bbRelative.y() + bb.minY() && other.y() <= bbRelative.y() + bb.maxY()
-                && other.z() >= bbRelative.z() + bb.minZ() && other.z() <= bbRelative.z() + bb.maxZ();
+        return other.x() >= bb.minX() + bbRelative.x() && other.x() <= bb.maxX() + bbRelative.x()
+                && other.y() >= bb.minY() + bbRelative.y() && other.y() <= bb.maxY() + bbRelative.y()
+                && other.z() >= bb.minZ() + bbRelative.z() && other.z() <= bb.maxZ() + bbRelative.z();
     }
 
     public static boolean BoundingBoxIntersectionCheck(Point rayStart, Point rayDirection, BoundingBox collidableStatic, Point staticCollidableOffset, SweepResult2 finalResult) {
-
         // Translate bounding box
         Vec bbOffMin = new Vec(collidableStatic.minX() - rayStart.x() + staticCollidableOffset.x(), collidableStatic.minY() - rayStart.y() + staticCollidableOffset.y(), collidableStatic.minZ() - rayStart.z() + staticCollidableOffset.z());
         Vec bbOffMax = new Vec(collidableStatic.maxX() - rayStart.x() + staticCollidableOffset.x(), collidableStatic.maxY() - rayStart.y() + staticCollidableOffset.y(), collidableStatic.maxZ() - rayStart.z() + staticCollidableOffset.z());

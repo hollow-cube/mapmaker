@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.hub.feature.conveyor;
 
 import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.anim.AnimationEntity;
 import net.hollowcube.mapmaker.hub.anim.Channel;
+import net.hollowcube.mapmaker.hub.anim.ChannelImpl;
 import net.hollowcube.mapmaker.hub.anim.Keyframe;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -37,6 +39,9 @@ public class MapConveyorFeature implements HubFeature {
             BadSprite.require("5x5/small_house"),
             BadSprite.require("5x5/stylized_floating_parkour_ossipago1")
     );
+
+    private static final double SCALE_FACTOR = 4.5;
+    private static final double MAP_HEIGHT = SCALE_FACTOR / 2;
 
     // 0.15 blocks per tick
 //    private static final double BLOCKS_PER_TICK = 0.5;
@@ -115,34 +120,39 @@ public class MapConveyorFeature implements HubFeature {
     );
 
     private final List<Keyframe> LEFT_COMPLEX_MAP = List.of(
-            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 39.5, 85.5))),
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 85.5))),
             new Keyframe(distance(85 - 38), () -> {
                 clawPillar.playOnce(LEFT_COMPLEX_PILLAR);
                 clawClaw.playOnce(LEFT_COMPLEX_CLAW);
-            }, Channel.POSITION.set(new Pos(-71.5, 39.5, 38.5))),
+            }, Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 38.5))),
             new Keyframe(wait(1)),
             new Keyframe(distance(4)), // Wait for claw
 
-            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-71.5, 44.5, 38.5))), // Move up
+            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-71.5, 42 + MAP_HEIGHT, 38.5))), // Move up
 
-            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 44.5, 38.5)), // Shift pivot
+            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 38.5)), // Shift pivot
                     Channel.TRANSLATION.set(new Vec(-7, 0, 0))),
 
-            new Keyframe(rotation(90, 7), Channel.POSITION.set(new Pos(-64.5, 44.5, 38.5, 90, 0))), // Rotate
+            new Keyframe(rotation(90, 7), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 38.5, 90, 0))), // Rotate
 
-            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 44.5, 31.5, 90, 0)), // Shift pivot
+            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 31.5, 90, 0)), // Shift pivot
                     Channel.TRANSLATION.defaultValue()),
-            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-64.5, 39.5, 31.5, 90, 0))), // Move down
-            new Keyframe(distance(31 - 22), Channel.POSITION.set(new Pos(-64.5, 39.5, 22.5, 90, 0))),
-            new Keyframe(distance(81 - 64), Channel.POSITION.set(new Pos(-81.5, 39.5, 22.5, 90, 0))),
-            new Keyframe(distance(22 - 4), Channel.POSITION.set(new Pos(-81.5, 39.5, 4.5, 90, 0)))
+            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-64.5, 37 + MAP_HEIGHT, 31.5, 90, 0))), // Move down
+            new Keyframe(distance(31 - 22), Channel.POSITION.set(new Pos(-64.5, 37 + MAP_HEIGHT, 22.5, 90, 0))),
+            new Keyframe(distance(81 - 64), Channel.POSITION.set(new Pos(-81.5, 37 + MAP_HEIGHT, 22.5, 90, 0))),
+            new Keyframe(distance(22 - 4), Channel.POSITION.set(new Pos(-81.5, 37 + MAP_HEIGHT, 4.5, 90, 0)))
     );
     private final List<Keyframe> LEFT_SIMPLE = matchLength(List.of(
-            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37 + 2.5, 85.5))),
-            new Keyframe(distance(85 - 32), Channel.POSITION.set(new Pos(-71.5, 37 + 2.5, 32.5))),
-            new Keyframe(distance(91 - 71), Channel.POSITION.set(new Pos(-91.5, 37 + 2.5, 32.5))),
-            new Keyframe(distance(32 - 4), Channel.POSITION.set(new Pos(-91.5, 37 + 2.5, 4.5)))
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 85.5))),
+            new Keyframe(distance(85 - 32), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 32.5))),
+            new Keyframe(distance(91 - 71), Channel.POSITION.set(new Pos(-91.5, 37 + MAP_HEIGHT, 32.5))),
+            new Keyframe(distance(32 - 4), Channel.POSITION.set(new Pos(-91.5, 37 + MAP_HEIGHT, 4.5)))
     ), LEFT_COMPLEX_MAP);
+
+    private final List<Keyframe> CENTER = List.of(
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-57.5, 34 + MAP_HEIGHT, 53.5))),
+            new Keyframe(distance((int) (53.5 + 65.5)), Channel.POSITION.set(new Pos(-57.5, 34 + MAP_HEIGHT, -65.5)))
+    );
 
     private int spawnIndex = 0;
 
@@ -155,6 +165,9 @@ public class MapConveyorFeature implements HubFeature {
             } else {
                 spawnLeftSimpleMap(world);
             }
+
+            spawnCenterMap(world);
+
             return TaskSchedule.tick((int) (7.5 * 20));
         });
 
@@ -171,22 +184,42 @@ public class MapConveyorFeature implements HubFeature {
         clawClaw.getInterp().setPosition(new Pos(-64.5, 42, 38.5, 180, 0));
     }
 
+    private void initMapEntity(@NotNull AnimationEntity entity) {
+        entity.onReset = () -> ((ItemDisplayMeta) entity.getEntityMeta()).setItemStack(getRandomMapItem());
+        entity.getEntityMeta().setScale(new Vec(4.5)); // 5x5
+
+        // Random 0,90,180,270
+        // Random -5,5 degrees added
+        var rand = ThreadLocalRandom.current();
+        var rotation = (rand.nextInt(4) * 90) + rand.nextInt(-5, 6);
+        entity.getEntityMeta().setLeftRotation(new Quaternion(new Vec(0, 1, 0), Math.toRadians(rotation)).into());
+    }
+
     private void spawnLeftComplexMap(@NotNull HubMapWorld world) {
         var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
-        entity.onReset = () -> ((ItemDisplayMeta) entity.getEntityMeta()).setItemStack(getRandomMapItem());
-        entity.getEntityMeta().setScale(new Vec(5)); // 5x5
+        initMapEntity(entity);
         entity.setKeyframes(LEFT_COMPLEX_MAP);
 
-        entity.setInstance(world.instance()).thenRun(entity::spawnHitbox);
+        var spawnPos = ((ChannelImpl.Position.Value) LEFT_COMPLEX_MAP.get(0).getOrDefault(Channel.POSITION)).vec();
+        entity.setInstance(world.instance(), spawnPos).thenRun(entity::spawnHitbox);
     }
 
     private void spawnLeftSimpleMap(@NotNull HubMapWorld world) {
         var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
-        entity.onReset = () -> ((ItemDisplayMeta) entity.getEntityMeta()).setItemStack(getRandomMapItem());
-        entity.getEntityMeta().setScale(new Vec(5)); // 5x5
+        initMapEntity(entity);
         entity.setKeyframes(LEFT_SIMPLE);
 
-        entity.setInstance(world.instance()).thenRun(entity::spawnHitbox);
+        var spawnPos = ((ChannelImpl.Position.Value) LEFT_SIMPLE.get(0).getOrDefault(Channel.POSITION)).vec();
+        entity.setInstance(world.instance(), spawnPos).thenRun(entity::spawnHitbox);
+    }
+
+    private void spawnCenterMap(@NotNull HubMapWorld world) {
+        var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
+        initMapEntity(entity);
+        entity.setKeyframes(CENTER);
+
+        var spawnPos = ((ChannelImpl.Position.Value) CENTER.get(0).getOrDefault(Channel.POSITION)).vec();
+        entity.setInstance(world.instance(), spawnPos).thenRun(entity::spawnHitbox);
     }
 
     private @NotNull ItemStack getRandomMapItem() {
