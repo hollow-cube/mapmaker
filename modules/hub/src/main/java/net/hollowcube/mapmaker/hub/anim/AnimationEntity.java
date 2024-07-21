@@ -63,6 +63,7 @@ public class AnimationEntity extends Entity {
     }
 
     public void spawnHitbox() {
+
         var entityId = getEntityId();
         interactionEntity = new InteractionEntity(4, 5, 6, new InteractionEntity.Target() {
             @Override
@@ -108,7 +109,7 @@ public class AnimationEntity extends Entity {
         var meta = getEntityMeta();
 
         if (interactionEntity != null && getAliveTicks() % 4 == 0) {
-            this.interactionEntity.refreshPosition(interp.getCurrentPosition().withY(y -> y - 2.5), false, true);
+            this.interactionEntity.refreshPosition(interp.getCurrentPosition(), false, true);
         }
 
         // If uninitialized, snap to init.
@@ -180,6 +181,12 @@ public class AnimationEntity extends Entity {
     @Override
     public void updateNewViewer(@NotNull Player player) {
         this.interp.spawn(player);
+
+        //todo sounds are complicated because they dont repeat. We would need to resend them constantly, per player
+        // That seems not worth honestly. I think we should just have sounds for the actions like arms moving,
+        // smashers smashing, etc.
+
+//        player.playSound(Sound.sound(SoundEvent.ENTITY_MINECART_RIDING, Sound.Source.NEUTRAL, 1, 1), this);
     }
 
     @Override

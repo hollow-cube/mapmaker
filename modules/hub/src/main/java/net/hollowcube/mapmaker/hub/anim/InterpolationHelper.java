@@ -151,6 +151,9 @@ public class InterpolationHelper {
      */
     public void spawn(@NotNull Player player) {
         var spawnPosition = getCurrentPosition();
+        // If at zero, start at the spawn position. This can happen if the entity is spawned before a tick.
+        if (spawnPosition.isZero()) spawnPosition = entity.getPosition();
+
         player.sendPacket(new SpawnEntityPacket(entity.getEntityId(), entity.getUuid(), entity.getEntityType().id(),
                 spawnPosition, spawnPosition.yaw(), 0, (short) 0, (short) 0, (short) 0));
         player.sendPacket(getCurrentMetadataPacket());
@@ -165,66 +168,5 @@ public class InterpolationHelper {
             }
         });
     }
-
-    //  // Spawn at the current interpolation position
-    //        var interpPos = getInterpPosition();
-    //        var spawnPacket = new SpawnEntityPacket(getEntityId(), getUuid(), getEntityType().id(), interpPos,
-    //                position.yaw(), 0, (short) 0, (short) 0, (short) 0);
-    //        player.sendPacket(spawnPacket);
-    //
-    //        // Create the metadata packet for the current interpolated position
-    //        var t = (getAliveTicks() - frameStart) / (double) (frameEnd - frameStart);
-    //        var metaEntries = new HashMap<>(getMetadataPacket().entries());
-    //        var nextTranslation = this.lastValues.get(Channel.TRANSLATION);
-    //        if (nextTranslation != null) {
-    //            Vec interTranslation = this.lastValues.get(Channel.TRANSLATION).lerp(nextTranslation, (float) t);
-    //            metaEntries.put(AbstractDisplayMeta.OFFSET + 3, Metadata.Vector3(interTranslation));
-    //        }
-    //        player.sendPacket(new EntityMetaDataPacket(getEntityId(), metaEntries));
-    //        player.sendPacket(new EntityHeadLookPacket(getEntityId(), position.yaw()));
-    //
-    //        // Next tick send the current position and interpolation values.
-    //        scheduleNextTick(_ -> scheduleNextTick(_ -> {
-    //            var remaining = frameEnd - frameStart - getAliveTicks();
-    //            var nextMetaEntries = new HashMap<>(getMetadataPacket().entries());
-    //            nextMetaEntries.put(AbstractDisplayMeta.OFFSET + 0, Metadata.VarInt(0)); // interp start delta
-    //            nextMetaEntries.put(AbstractDisplayMeta.OFFSET + 1, Metadata.VarInt((int) remaining)); // transform duration
-    //            nextMetaEntries.put(AbstractDisplayMeta.OFFSET + 2, Metadata.VarInt((int) remaining)); // posrot duration
-    //            player.sendPacket(new EntityMetaDataPacket(getEntityId(), nextMetaEntries));
-    //            if (next != null) {
-    //                var nextPos = next.get(Channel.POSITION);
-    //                if (nextPos != null) {
-    //                    refreshPositionForPlayer(player, interpPos, ((ChannelImpl.Position.Value) nextPos).vec(), false);
-    //                }
-    //            }
-    //        }));
-
-//    public void refreshPositionForPlayer(@NotNull Player player, @NotNull Pos previousPosition, @NotNull final Pos newPosition, boolean ignoreView) {
-//        final Pos position = ignoreView ? previousPosition.withCoord(newPosition) : newPosition;
-//        if (!position.samePoint(previousPosition)) refreshCoordinate(position);
-//        // Update viewers
-//        final boolean viewChange = !position.sameView(previousPosition);
-//        final double distanceX = Math.abs(position.x() - previousPosition.x());
-//        final double distanceY = Math.abs(position.y() - previousPosition.y());
-//        final double distanceZ = Math.abs(position.z() - previousPosition.z());
-//        final boolean positionChange = (distanceX + distanceY + distanceZ) > 0;
-//
-//        final Chunk chunk = getChunk();
-//        assert chunk != null;
-//        if (distanceX > 8 || distanceY > 8 || distanceZ > 8) {
-//            player.sendPacket(new EntityTeleportPacket(getEntityId(), position, isOnGround()));
-//        } else if (positionChange && viewChange) {
-//            player.sendPacket(EntityPositionAndRotationPacket.getPacket(getEntityId(), position, previousPosition, isOnGround()));
-//            // Fix head rotation
-//            player.sendPacket(new EntityHeadLookPacket(getEntityId(), position.yaw()));
-//        } else if (positionChange) {
-//            // This is a confusing fix for a confusing issue. If rotation is only sent when the entity actually changes, then spawning an entity
-//            // on the ground causes the entity not to update its rotation correctly. It works fine if the entity is spawned in the air. Very weird.
-//            player.sendPacket(EntityPositionAndRotationPacket.getPacket(getEntityId(), position, previousPosition, onGround));
-//        } else if (viewChange) {
-//            player.sendPacket(new EntityHeadLookPacket(getEntityId(), position.yaw()));
-//            player.sendPacket(EntityPositionAndRotationPacket.getPacket(getEntityId(), position, previousPosition, isOnGround()));
-//        }
-//    }
 
 }
