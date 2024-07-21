@@ -101,6 +101,27 @@
       },
       "model": "minecraft:item/house_v2",
       "axiom:hide": true
+    },
+    {
+      "predicate": {
+        "custom_model_data": 15
+      },
+      "model": "minecraft:item/5x5_glow",
+      "axiom:hide": true
+    },
+    {
+      "predicate": {
+        "custom_model_data": 16
+      },
+      "model": "minecraft:item/claw_claw_v2",
+      "axiom:hide": true
+    },
+    {
+      "predicate": {
+        "custom_model_data": 17
+      },
+      "model": "minecraft:item/claw_pillar_v2",
+      "axiom:hide": true
     }
   ]
 }

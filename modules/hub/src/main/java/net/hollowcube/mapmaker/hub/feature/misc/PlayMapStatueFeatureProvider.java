@@ -48,6 +48,12 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     public PlayMapStatueFeatureProvider(@NotNull HubMapWorld world, @NotNull Scheduler scheduler, @NotNull Controller guiController) {
         this.guiController = guiController;
 
+//        var glowEntity = new NpcItemModel();
+//        glowEntity.setModel(Material.STICK, 15);
+//        glowEntity.getEntityMeta().setScale(new Vec(5.001 / 3., 1, 5.001 / 3.));
+//        glowEntity.getEntityMeta().setTranslation(new Vec(0, 0.5, 0));
+//        glowEntity.setInstance(world.instance(), MIDDLE);
+
         edgeEntities[0] = new NpcItemModel();
         edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map").cmd());
         edgeEntities[0].setHandler(this::handleCreateMapsClick);
@@ -59,12 +65,12 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         edgeEntities[3].setInstance(world.instance(), LEFT_MIDDLE);
 
         edgeEntities[4] = new NpcItemModel();
-        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.STICK)
-                .with(ItemComponent.CUSTOM_MODEL_DATA, 14)
+        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.LEATHER_HORSE_ARMOR)
+                .with(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("5x5/blossom_itmg").cmd())
                 .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0xFF0000))));
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
-        edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(180, 0));
+        edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));
         edgeEntities[4].setHandler(this::handleQualityMapsClick);
         edgeEntities[4].setInteractionBox(6, 6);
 
@@ -123,6 +129,9 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private @NotNull TaskSchedule entityUpdate() {
         int updateInterval = (int) (20 * 0.5) * ENTITY_UPDATE_INTERVAL;
 
+        {   // Spawn some particles around the center entity
+        }
+
         for (int i = 0; i < edgeEntities.length; i++) {
             var meta = edgeEntities[i].getEntityMeta();
             meta.setNotifyAboutChanges(false);
@@ -132,9 +141,21 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
 
             double verticalOffset = ((entityHeightTarget + i) % 8) * (1 / 8.0);
             if (verticalOffset > 0.5) verticalOffset = 1 - verticalOffset;
-            meta.setTranslation(new Vec(0, (i == 4 ? 1 : 0) + BASE_OFFSET + (verticalOffset * 0.75), 0));
+            var yTranslation = new Vec(0, (i == 4 ? 1 : 0) + BASE_OFFSET + (verticalOffset * 0.75), 0);
+            meta.setTranslation(yTranslation);
 
             meta.setNotifyAboutChanges(true);
+
+            // For the middle one we also want to spawn some extra particles
+            // they look ugly as is
+//            if (i == 4) {
+//                edgeEntities[i].sendPacketToViewers(new ParticlePacket(
+//                        Particle.DUST_COLOR_TRANSITION.withProperties(
+//                                new Color(0xFFFFFF), new Color(0xFF0000), 1
+//                        ), MIDDLE.add(0, yTranslation.y(), 0), new Vec(0.8),
+//                        0f, 10
+//                ));
+//            }
         }
 
         entityHeightTarget += 1;

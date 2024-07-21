@@ -50,7 +50,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -105,12 +104,13 @@ public class HubMapWorld extends AbstractMapWorld {
 
     @Override
     public @NotNull Pos spawnPoint(@NotNull Player player) {
-        var seeded = new Random(player.getUuid().getLeastSignificantBits());
-        return MIN_SPAWN_POINT.add(
-                (seeded.nextDouble() * 10) % 3,
-                0,
-                (seeded.nextDouble() * 10) % 3
-        );
+        return new Pos(-70.2, 41, 17.2, 2f, 14.6f);
+//        var seeded = new Random(player.getUuid().getLeastSignificantBits());
+//        return MIN_SPAWN_POINT.add(
+//                (seeded.nextDouble() * 10) % 3,
+//                0,
+//                (seeded.nextDouble() * 10) % 3
+//        );
     }
 
     @Override
