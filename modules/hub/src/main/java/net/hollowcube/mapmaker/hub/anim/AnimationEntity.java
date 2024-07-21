@@ -1,15 +1,20 @@
 package net.hollowcube.mapmaker.hub.anim;
 
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
+import net.hollowcube.mapmaker.hub.util.ScreenCursorIcon;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AnimationEntity extends Entity {
@@ -58,15 +63,26 @@ public class AnimationEntity extends Entity {
     }
 
     public void spawnHitbox() {
-        interactionEntity = new InteractionEntity(5, 5, new InteractionEntity.Target() {
+        var entityId = getEntityId();
+        interactionEntity = new InteractionEntity(4, 5, 6, new InteractionEntity.Target() {
             @Override
             public void beginHover(@NotNull Player player) {
-                AnimationEntity.this.getEntityMeta().setHasGlowingEffect(true);
+                // Enable glowing - This works because we never set any other flags in this set, otherwise
+                // it would be overridden when sending other metadata changes.
+                player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x40))));
+                ActionBar.forPlayer(player).addProvider(ScreenCursorIcon.INSTANCE);
             }
 
             @Override
             public void endHover(@NotNull Player player) {
-                AnimationEntity.this.getEntityMeta().setHasGlowingEffect(false);
+                // Disable glowing - See above for how/why this is functional.
+                player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x0))));
+                ActionBar.forPlayer(player).removeProvider(ScreenCursorIcon.INSTANCE);
+            }
+
+            @Override
+            public void onRightClick(@NotNull Player player) {
+                player.sendMessage("you clicked one!!!");
             }
         });
         interactionEntity.setInstance(getInstance());

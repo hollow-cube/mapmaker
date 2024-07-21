@@ -7,8 +7,8 @@ import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 public class ChannelImpl {
-    static class Position implements Channel<Pos> {
-        record Value(@NotNull Pos vec) implements Channel.Value {
+    public static class Position implements Channel<Pos> {
+        public record Value(@NotNull Pos vec) implements Channel.Value {
             @Override
             public @NotNull Channel<?> channel() {
                 return Channel.POSITION;
