@@ -13,8 +13,11 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
+import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -41,7 +44,6 @@ public class MapConveyorFeature implements HubFeature {
     );
 
     private static final double SCALE_FACTOR = 4.5;
-    private static final double MAP_HEIGHT = SCALE_FACTOR / 2;
 
     // 0.15 blocks per tick
 //    private static final double BLOCKS_PER_TICK = 0.5;
@@ -120,41 +122,43 @@ public class MapConveyorFeature implements HubFeature {
     );
 
     private final List<Keyframe> LEFT_COMPLEX_MAP = List.of(
-            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 85.5))),
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37, 85.5))),
             new Keyframe(distance(85 - 38), () -> {
                 clawPillar.playOnce(LEFT_COMPLEX_PILLAR);
                 clawClaw.playOnce(LEFT_COMPLEX_CLAW);
-            }, Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 38.5))),
+            }, Channel.POSITION.set(new Pos(-71.5, 37, 38.5))),
             new Keyframe(wait(1)),
             new Keyframe(distance(4)), // Wait for claw
 
-            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-71.5, 42 + MAP_HEIGHT, 38.5))), // Move up
+            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-71.5, 42, 38.5))), // Move up
 
-            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 38.5)), // Shift pivot
+            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42, 38.5)), // Shift pivot
                     Channel.TRANSLATION.set(new Vec(-7, 0, 0))),
 
-            new Keyframe(rotation(90, 7), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 38.5, 90, 0))), // Rotate
+            new Keyframe(rotation(90, 7), Channel.POSITION.set(new Pos(-64.5, 42, 38.5, 90, 0))), // Rotate
 
-            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42 + MAP_HEIGHT, 31.5, 90, 0)), // Shift pivot
+            new Keyframe(sameTick(), Channel.POSITION.set(new Pos(-64.5, 42, 31.5, 90, 0)), // Shift pivot
                     Channel.TRANSLATION.defaultValue()),
-            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-64.5, 37 + MAP_HEIGHT, 31.5, 90, 0))), // Move down
-            new Keyframe(distance(31 - 22), Channel.POSITION.set(new Pos(-64.5, 37 + MAP_HEIGHT, 22.5, 90, 0))),
-            new Keyframe(distance(81 - 64), Channel.POSITION.set(new Pos(-81.5, 37 + MAP_HEIGHT, 22.5, 90, 0))),
-            new Keyframe(distance(22 - 4), Channel.POSITION.set(new Pos(-81.5, 37 + MAP_HEIGHT, 4.5, 90, 0)))
+            new Keyframe(distance(4), Channel.POSITION.set(new Pos(-64.5, 37, 31.5, 90, 0))), // Move down
+            new Keyframe(distance(31 - 22), Channel.POSITION.set(new Pos(-64.5, 37, 22.5, 90, 0))),
+            new Keyframe(distance(81 - 64), Channel.POSITION.set(new Pos(-81.5, 37, 22.5, 90, 0))),
+            new Keyframe(distance(22 - 4), Channel.POSITION.set(new Pos(-81.5, 37, 4.5, 90, 0)))
     );
     private final List<Keyframe> LEFT_SIMPLE = matchLength(List.of(
-            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 85.5))),
-            new Keyframe(distance(85 - 32), Channel.POSITION.set(new Pos(-71.5, 37 + MAP_HEIGHT, 32.5))),
-            new Keyframe(distance(91 - 71), Channel.POSITION.set(new Pos(-91.5, 37 + MAP_HEIGHT, 32.5))),
-            new Keyframe(distance(32 - 4), Channel.POSITION.set(new Pos(-91.5, 37 + MAP_HEIGHT, 4.5)))
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-71.5, 37, 85.5))),
+            new Keyframe(distance(85 - 32), Channel.POSITION.set(new Pos(-71.5, 37, 32.5))),
+            new Keyframe(distance(91 - 71), Channel.POSITION.set(new Pos(-91.5, 37, 32.5))),
+            new Keyframe(distance(32 - 4), Channel.POSITION.set(new Pos(-91.5, 37, 4.5)))
     ), LEFT_COMPLEX_MAP);
 
     private final List<Keyframe> CENTER = List.of(
-            new Keyframe(start(), Channel.POSITION.set(new Pos(-57.5, 34 + MAP_HEIGHT, 53.5))),
-            new Keyframe(distance((int) (53.5 + 65.5)), Channel.POSITION.set(new Pos(-57.5, 34 + MAP_HEIGHT, -65.5)))
+            new Keyframe(start(), Channel.POSITION.set(new Pos(-57.5, 34, 53.5))),
+            new Keyframe(distance((int) (53.5 + 65.5)), Channel.POSITION.set(new Pos(-57.5, 34, -65.5)))
     );
 
     private int spawnIndex = 0;
+
+    private final List<Entity> theEntities = new ArrayList<>();
 
     @Inject
     public MapConveyorFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
@@ -171,33 +175,61 @@ public class MapConveyorFeature implements HubFeature {
             return TaskSchedule.tick((int) (7.5 * 20));
         });
 
+        world.instance().eventNode().addListener(AddEntityToInstanceEvent.class, event -> {
+            if (!(event.getEntity() instanceof Player player)) return;
+            theEntities.forEach(e -> e.addViewer(player));
+        });
+
         ((ItemDisplayMeta) clawPillar.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 17));
         clawPillar.getEntityMeta().setScale(new Vec(10));
         clawPillar.getInterp().setTranslation(new Vec(-2 / 4., 20 / 4., 0));
         clawPillar.setInstance(world.instance());
         clawPillar.getInterp().setPosition(new Pos(-64.5, 37, 38.5, 180, 0));
+        theEntities.add(clawPillar);
 
         ((ItemDisplayMeta) clawClaw.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
         clawClaw.getEntityMeta().setScale(new Vec(9));
         clawClaw.getInterp().setTranslation(new Vec(8 / 4., 12 / 4., 0));
         clawClaw.setInstance(world.instance());
         clawClaw.getInterp().setPosition(new Pos(-64.5, 42, 38.5, 180, 0));
+        theEntities.add(clawClaw);
     }
 
-    private void initMapEntity(@NotNull AnimationEntity entity) {
+    private @NotNull AnimationEntity initMapEntity() {
+        var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true) {
+            @Override
+            public void spawn() {
+                super.spawn();
+                theEntities.add(this);
+                getInstance().getPlayers().forEach(this::addViewer);
+            }
+
+            @Override
+            protected void remove(boolean permanent) {
+                super.remove(permanent);
+                theEntities.remove(this);
+            }
+        };
+        entity.setAutoViewable(false);
         entity.onReset = () -> ((ItemDisplayMeta) entity.getEntityMeta()).setItemStack(getRandomMapItem());
-        entity.getEntityMeta().setScale(new Vec(4.5)); // 5x5
+        var meta = entity.getEntityMeta();
+        meta.setScale(new Vec(4.5)); // 5x5
+        //todo setting a width and height makes them all lag behind in very unpredictable ways.
+        // No idea why, feels like a vanilla bug but i assume im just misunderstanding something
+//        meta.setWidth(5);
+//        meta.setHeight(5);
+        ((ItemDisplayMeta) meta).setDisplayContext(ItemDisplayMeta.DisplayContext.THIRD_PERSON_RIGHT_HAND);
 
         // Random 0,90,180,270
         // Random -5,5 degrees added
         var rand = ThreadLocalRandom.current();
         var rotation = (rand.nextInt(4) * 90) + rand.nextInt(-5, 6);
         entity.getEntityMeta().setLeftRotation(new Quaternion(new Vec(0, 1, 0), Math.toRadians(rotation)).into());
+        return entity;
     }
 
     private void spawnLeftComplexMap(@NotNull HubMapWorld world) {
-        var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
-        initMapEntity(entity);
+        var entity = initMapEntity();
         entity.setKeyframes(LEFT_COMPLEX_MAP);
 
         var spawnPos = ((ChannelImpl.Position.Value) LEFT_COMPLEX_MAP.get(0).getOrDefault(Channel.POSITION)).vec();
@@ -205,8 +237,7 @@ public class MapConveyorFeature implements HubFeature {
     }
 
     private void spawnLeftSimpleMap(@NotNull HubMapWorld world) {
-        var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
-        initMapEntity(entity);
+        var entity = initMapEntity();
         entity.setKeyframes(LEFT_SIMPLE);
 
         var spawnPos = ((ChannelImpl.Position.Value) LEFT_SIMPLE.get(0).getOrDefault(Channel.POSITION)).vec();
@@ -214,8 +245,7 @@ public class MapConveyorFeature implements HubFeature {
     }
 
     private void spawnCenterMap(@NotNull HubMapWorld world) {
-        var entity = new AnimationEntity(EntityType.ITEM_DISPLAY, true);
-        initMapEntity(entity);
+        var entity = initMapEntity();
         entity.setKeyframes(CENTER);
 
         var spawnPos = ((ChannelImpl.Position.Value) CENTER.get(0).getOrDefault(Channel.POSITION)).vec();
