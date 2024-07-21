@@ -62,6 +62,10 @@ public class Packer {
         DynamicDataTransform hubMerchantsTransform = new DynamicDataTransform("hub_merchants");
         hubMerchantsTransform.process(ctx);
 
+        Hub5x5Transform hub5x5Transform = new Hub5x5Transform();
+        hub5x5Transform.init(ctx);
+        hub5x5Transform.process(ctx);
+
         new LangCloner().process(ctx);
 
         ctx.cleanup();
