@@ -36,6 +36,8 @@ public class PaintingEntity extends MapEntity {
 
         hasPhysics = false;
         setNoGravity(true);
+
+        setAutoViewable(false);
     }
 
     public void playSpawnSound() {
