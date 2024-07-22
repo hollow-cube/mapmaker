@@ -57,12 +57,12 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         edgeEntities[0] = new NpcItemModel();
         edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map").cmd());
         edgeEntities[0].setInstance(world.instance(), LEFT);
-        appendInteractor(edgeEntities[0], 4, 5, this::handleCreateMapsClick);
+        appendInteractor(edgeEntities[0], 3, 5, this::handleCreateMapsClick, false);
 
         edgeEntities[3] = new NpcItemModel();
         edgeEntities[3].setModel(Material.DIAMOND, BadSprite.require("icon/map/best").cmd());
         edgeEntities[3].setInstance(world.instance(), LEFT_MIDDLE);
-        appendInteractor(edgeEntities[3], 4, 5, this::handleBestMapsClick);
+        appendInteractor(edgeEntities[3], 3, 5, this::handleBestMapsClick, false);
 
         edgeEntities[4] = new NpcItemModel();
         edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.LEATHER_HORSE_ARMOR)
@@ -71,17 +71,17 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
         edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));
-        appendInteractor(edgeEntities[4], 6, 6, this::handleQualityClick);
+        appendInteractor(edgeEntities[4], 6, 6, this::handleQualityClick, true);
 
         edgeEntities[1] = new NpcItemModel();
         edgeEntities[1].setModel(Material.DIAMOND, BadSprite.require("icon/map/new").cmd());
         edgeEntities[1].setInstance(world.instance(), RIGHT_MIDDLE);
-        appendInteractor(edgeEntities[1], 4, 5, this::handleNewMapsClick);
+        appendInteractor(edgeEntities[1], 3, 5, this::handleNewMapsClick, false);
 
         edgeEntities[2] = new NpcItemModel();
         edgeEntities[2].setModel(Material.DIAMOND, BadSprite.require("icon/map/search").cmd());
         edgeEntities[2].setInstance(world.instance(), RIGHT);
-        appendInteractor(edgeEntities[2], 4, 5, this::handleSearchMapsClick);
+        appendInteractor(edgeEntities[2], 3, 5, this::handleSearchMapsClick, false);
 
         // Configure the edge entities to be the same (not the center)
         for (int i = 0; i < 4; i++) {
@@ -114,7 +114,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         guiController.show(player, QueryMapsView::new);
     }
 
-    private void appendInteractor(@NotNull Entity entity, int width, int height, @NotNull Consumer<Player> onClick) {
+    private void appendInteractor(@NotNull Entity entity, int width, int height, @NotNull Consumer<Player> onClick, boolean isCenter) {
         var entityId = entity.getEntityId();
         var interactionEntity = new InteractionEntity(width, height, 40, new InteractionEntity.Target() {
             @Override
