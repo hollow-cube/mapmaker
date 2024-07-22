@@ -66,7 +66,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
 
         edgeEntities[4] = new NpcItemModel();
         edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.LEATHER_HORSE_ARMOR)
-                .with(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("5x5/blossom_itmg").cmd())
+                .with(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("hub/5x5/blossom_itmg").cmd())
                 .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0xFF0000))));
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
