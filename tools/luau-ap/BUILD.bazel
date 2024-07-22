@@ -22,6 +22,7 @@ java_plugin(
     deps = [
         ":luau_ap_lib",
         "//third_party:auto_service",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_squareup_javapoet",
         "@maven//:org_jetbrains_annotations",
     ],

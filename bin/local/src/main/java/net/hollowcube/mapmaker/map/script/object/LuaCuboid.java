@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.script.object;
 
 import net.hollowcube.luau.LuaState;
+import net.hollowcube.luau.annotation.LuaConstructor;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
@@ -10,6 +11,9 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * I am a cuboid
+ */
 @LuaObject
 public class LuaCuboid {
 
@@ -34,11 +38,22 @@ public class LuaCuboid {
         return 1;
     }
 
+    /**
+     * <p>Hello, world</p>
+     *
+     * <code>
+     * Lua.run("print('Hello, world!')");
+     * </code>
+     */
     @LuaProperty
     public final Point min;
+    /**
+     * <p>Hello, world</p>
+     */
     @LuaProperty
     public final Point max;
 
+    @LuaConstructor
     public LuaCuboid(@NotNull Point pos1, @NotNull Point pos2) {
         this.min = CoordinateUtil.min(pos1, pos2);
         this.max = CoordinateUtil.max(pos1, pos2);

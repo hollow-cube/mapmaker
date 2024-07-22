@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.hollowcube.luau.ap.MethodList;
 import net.hollowcube.luau.ap.TypeConverter;
 import net.hollowcube.luau.ap.Types;
+import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,11 +24,13 @@ public abstract class AbstractLuaProcessor {
     protected final Elements elements;
 
     protected final Map<TypeName, TypeConverter> typeConverters;
+    protected final LuaTypeRegistry types;
 
-    protected AbstractLuaProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters) {
+    protected AbstractLuaProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull LuaTypeRegistry types) {
         this.log = log;
         this.elements = elements;
         this.typeConverters = typeConverters;
+        this.types = types;
     }
 
     public abstract @Nullable TypeSpec process(@NotNull TypeElement typeElem);

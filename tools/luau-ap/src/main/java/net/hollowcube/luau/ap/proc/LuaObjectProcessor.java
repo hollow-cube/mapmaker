@@ -1,10 +1,15 @@
 package net.hollowcube.luau.ap.proc;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.squareup.javapoet.*;
 import net.hollowcube.luau.ap.MethodList;
 import net.hollowcube.luau.ap.PropertyList;
 import net.hollowcube.luau.ap.TypeConverter;
 import net.hollowcube.luau.ap.Types;
+import net.hollowcube.luau.ap.util.DocContent;
+import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import net.hollowcube.luau.ap.util.ProcUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +23,8 @@ import java.util.Map;
 
 public class LuaObjectProcessor extends AbstractLuaProcessor {
 
-    public LuaObjectProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters) {
-        super(log, elements, typeConverters);
+    public LuaObjectProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull LuaTypeRegistry types) {
+        super(log, elements, typeConverters, types);
     }
 
     @Override
@@ -33,12 +38,13 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
         var wrapperClass = ClassName.get(packageName, className);
 
         // Find the @LuaProperty, @LuaMethod declarations
-        var properties = PropertyList.collect(log, typeConverters,
+        var properties = PropertyList.collect(log, elements, types,
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_PROPERTY));
         var methods = MethodList.collect(log, typeConverters, wrappedClass,
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_METHOD));
         var metaMethods = MethodList.collect(log, typeConverters, wrappedClass,
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_META));
+        var typeDoc = DocContent.parse(elements.getDocComment(typeElem));
 
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(className)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -65,12 +71,96 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
             metaMethodList.addFirst(new MethodList.Method("__index", "generatedLuaIndex", true, true, true, new ArrayList<>(), null));
         if (!methods.isEmpty())
             metaMethodList.addFirst(new MethodList.Method("__namecall", "generatedLuaNameCall", true, true, true, new ArrayList<>(), null));
+        metaMethods = new MethodList(metaMethodList);
 
-        appendInitFunc(wrapper, wrappedClass, wrapperClass, wrappedClass, null, new MethodList(metaMethodList));
+        appendInitFunc(wrapper, wrappedClass, wrapperClass, wrappedClass, null, metaMethods);
         if (!properties.isEmpty()) wrapper.addMethod(buildIndexMetaMethod(wrappedClass, properties));
         if (!methods.isEmpty()) wrapper.addMethod(buildNameCallMetaMethod(wrappedClass, methods));
+        appendTypeDocMethods(wrapper, (ClassName) wrappedClass, typeDoc, properties, methods, metaMethods);
 
         return wrapper.build();
+    }
+
+    private void appendTypeDocMethods(
+            @NotNull TypeSpec.Builder type,
+            @NotNull ClassName wrappedClass,
+            @Nullable DocContent typeDocContent,
+            @NotNull PropertyList properties,
+            @NotNull MethodList methods,
+            @NotNull MethodList metaMethods
+    ) {
+        var typeName = wrappedClass.simpleName().replace("Lua", "");
+
+        var types = new StringBuilder();
+        var docs = new JsonObject();
+
+        // Header
+        types.append("declare class ").append(typeName).append(" {\n");
+        var typeDoc = new JsonObject();
+        addDocKeys(typeDoc, typeDocContent);
+        var typeKeys = new JsonArray();
+        typeDoc.add("keys", typeKeys);
+        var typeDocName = "@roblox/globaltype/" + typeName;
+        docs.add(typeDocName, typeDoc);
+
+        // Properties
+        for (var property : properties.properties()) {
+            types.append("  ").append(property.name());
+            types.append(": ").append(property.type().name());
+            types.append('\n');
+
+            var propDocName = typeDocName + "." + property.name();
+            typeKeys.add(propDocName);
+            docs.add(propDocName, addDocKeys(new JsonObject(), property.doc()));
+        }
+        types.append("\n");
+
+        // Methods
+        for (var method : methods.methods()) {
+            types.append("  function ").append(method.name()).append("(self");
+
+            types.append(")");
+            if (method.ret() != null) {
+                types.append(": ").append("todo");
+            }
+
+            types.append('\n');
+        }
+        types.append("\n");
+
+        // Metamethods
+        for (var method : metaMethods.methods()) {
+            types.append("  ").append(method.name()).append(": ").append('\n');
+        }
+
+        types.append("}\n");
+
+        var generatedLuaTypesMethod = MethodSpec.methodBuilder("generatedLuaTypes")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(String.class);
+        generatedLuaTypesMethod.addStatement("return $S", types.toString());
+        type.addMethod(generatedLuaTypesMethod.build());
+
+        var generatedLuaDocMethod = MethodSpec.methodBuilder("generatedLuaDocs")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(String.class);
+        generatedLuaDocMethod.addStatement("return $S", new GsonBuilder().setPrettyPrinting().create().toJson(docs));
+        type.addMethod(generatedLuaDocMethod.build());
+    }
+
+    private @NotNull JsonObject addDocKeys(@NotNull JsonObject doc, @Nullable DocContent content) {
+        if (content == null) {
+            // Always add an empty documentation key. Seems required.
+            doc.addProperty("documentation", "");
+            return doc;
+        }
+
+        doc.addProperty("documentation", content.text());
+        if (content.codeSample() != null)
+            doc.addProperty("code_sample", content.codeSample());
+        if (content.url() != null)
+            doc.addProperty("learn_more_link", content.url());
+        return doc;
     }
 
     private @NotNull MethodSpec buildIndexMetaMethod(@NotNull TypeName wrappedClass, @NotNull PropertyList properties) {
@@ -87,13 +177,8 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
         for (var prop : properties.properties()) {
             method.addCode("case $S -> {$>\n", prop.name());
 
-            if (prop.isPin()) {
-                TypeConverter.PIN.insertPush(method, "ref." + prop.accessor());
-                method.addStatement("yield 1");
-            } else {
-                prop.type().insertPush(method, "ref." + prop.accessor());
-                method.addStatement("yield 1");
-            }
+            prop.type().insertPush(method, "ref." + prop.accessor());
+            method.addStatement("yield 1");
 
             method.addCode("$<}\n");
         }

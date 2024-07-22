@@ -6,6 +6,8 @@ import net.hollowcube.luau.ap.proc.AbstractLuaProcessor;
 import net.hollowcube.luau.ap.proc.LuaBindableProcessor;
 import net.hollowcube.luau.ap.proc.LuaObjectProcessor;
 import net.hollowcube.luau.ap.proc.LuaTypeImplProcessor;
+import net.hollowcube.luau.ap.util.LuaTypeMirror;
+import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import net.hollowcube.luau.ap.util.ProcUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,18 +49,20 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
         var typeConverters = TypeConverter.collectTypeConverters(roundEnv, luaTypeImpl);
         //todo i probably need to add the associated type impl to the elements which create an output.
 
+        var types = createTypeRegistry(roundEnv, luaTypeImpl, luaObject);
+
         {   // LuaObject
-            AbstractLuaProcessor proc = new LuaObjectProcessor(processingEnv.getMessager(), elementUtils, typeConverters);
+            AbstractLuaProcessor proc = new LuaObjectProcessor(processingEnv.getMessager(), elementUtils, typeConverters, types);
             processAnnotation(roundEnv, luaObject, proc);
         }
 
         {   // LuaTypeImpl
-            AbstractLuaProcessor proc = new LuaTypeImplProcessor(processingEnv.getMessager(), elementUtils, typeConverters);
+            AbstractLuaProcessor proc = new LuaTypeImplProcessor(processingEnv.getMessager(), elementUtils, typeConverters, types);
             processAnnotation(roundEnv, luaTypeImpl, proc);
         }
 
         {   // LuaBindable
-            AbstractLuaProcessor proc = new LuaBindableProcessor(processingEnv.getMessager(), elementUtils, typeConverters);
+            AbstractLuaProcessor proc = new LuaBindableProcessor(processingEnv.getMessager(), elementUtils, typeConverters, types);
             processAnnotation(roundEnv, luaBindable, proc);
         }
 
@@ -99,5 +103,93 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
                 ProcUtil.logStackTrace(log, elem, e);
             }
         }
+    }
+
+    private @NotNull LuaTypeRegistry createTypeRegistry(
+            @NotNull RoundEnvironment roundEnv,
+            @NotNull TypeElement luaTypeImpl,
+            @NotNull TypeElement luaObject
+    ) {
+        var registry = new LuaTypeRegistry();
+
+        // Primitives
+        registry.defineBasicPrimitive(TypeName.BOOLEAN, "boolean", "pushBoolean", "checkBooleanArg");
+        registry.defineBasicPrimitive(TypeName.get(String.class), "string", "pushString", "checkStringArg");
+
+        // Find all the LuaTypeImpls
+        for (var elem : roundEnv.getElementsAnnotatedWith(luaTypeImpl)) {
+            var implType = TypeName.get(elem.asType());
+            var typeImplAnnotation = Objects.requireNonNull(ProcUtil.getAnnotation(elem, Types.LUA_TYPE_IMPL));
+            var targetTypeMirror = ProcUtil.getAnnotationValue(typeImplAnnotation, "type", TypeMirror.class);
+            var targetLuaName = ProcUtil.getAnnotationValue(typeImplAnnotation, "name", String.class);
+
+            var targetType = TypeName.get(targetTypeMirror);
+            registry.define(targetType, new LuaTypeMirror() {
+                @Override
+                public @NotNull String name() {
+                    return targetLuaName;
+                }
+
+                @Override
+                public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+                    method.addStatement("$T.pushLuaValue(state, $L)", implType, getter);
+                }
+
+                @Override
+                public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+                    method.addStatement("$T $L = $T.checkLuaArg(state, $L)", targetType, name, implType, index);
+                }
+            });
+        }
+
+        // Find all the LuaObjects
+        for (var elem : roundEnv.getElementsAnnotatedWith(luaObject)) {
+            var implType = TypeName.get(elem.asType());
+            if (implType instanceof ParameterizedTypeName ptn) implType = ptn.rawType;
+            var implClass = (ClassName) implType;
+            var wrapperType = ClassName.get(implClass.packageName(), implClass.simpleName() + "$Wrapper");
+
+            //todo this is wrong
+            registry.define(implType, new LuaTypeMirror() {
+                @Override
+                public @NotNull String name() {
+                    return implClass.simpleName().replace("Lua", "");
+                }
+
+                @Override
+                public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+                    //todo we need to add a push function to wrapper prob.
+                    method.addStatement("state.newUserData($L)", getter);
+                    method.addStatement("state.getMetaTable($T.TYPE_NAME)", wrapperType);
+                    method.addStatement("state.setMetaTable(-2)");
+                }
+
+                @Override
+                public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+                    method.addStatement("$T $L = ($T) state.checkUserDataArg($L, $T.TYPE_NAME)", implClass, name, implClass, index, wrapperType);
+                }
+            });
+        }
+
+        // Temp solution for Pin
+        registry.define(Types.PIN, new LuaTypeMirror() {
+            @Override
+            public @NotNull String name() {
+                return "pin";
+            }
+
+            @Override
+            public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+                method.addStatement("(($T) $L).push(state)", Types.PIN_IMPL, getter);
+            }
+
+            @Override
+            public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+                throw new UnsupportedOperationException("Pin cannot be popped");
+            }
+        });
+
+
+        return registry;
     }
 }

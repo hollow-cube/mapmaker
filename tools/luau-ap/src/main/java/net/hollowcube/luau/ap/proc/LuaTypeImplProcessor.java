@@ -4,6 +4,7 @@ import com.squareup.javapoet.*;
 import net.hollowcube.luau.ap.MethodList;
 import net.hollowcube.luau.ap.TypeConverter;
 import net.hollowcube.luau.ap.Types;
+import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import net.hollowcube.luau.ap.util.ProcUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +20,8 @@ import java.util.Set;
 
 public class LuaTypeImplProcessor extends AbstractLuaProcessor {
 
-    public LuaTypeImplProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters) {
-        super(log, elements, typeConverters);
+    public LuaTypeImplProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull LuaTypeRegistry types) {
+        super(log, elements, typeConverters, types);
     }
 
     @Override
