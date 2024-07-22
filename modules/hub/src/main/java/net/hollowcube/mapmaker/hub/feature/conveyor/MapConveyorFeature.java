@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.conveyor;
 
-import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class MapConveyorFeature implements HubFeature {
 
     private static final BadSprite PISTON_SPRITE = BadSprite.require("hub/extra/big_piston");
