@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.script.type;
+package net.hollowcube.mapmaker.map.script.api.world;
 
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.luau.LuaState;
@@ -35,6 +35,7 @@ public final class BlockTypeImpl {
     public static @NotNull Block checkLuaArg(@NotNull LuaState state, int index) {
         int stateId = state.checkUserDataIntArg(index, BlockTypeImpl$Wrapper.TYPE_NAME);
         return Objects.requireNonNull(Block.fromStateId(stateId));
+
     }
 
     @LuaMeta(LuaMeta.Type.INDEX)

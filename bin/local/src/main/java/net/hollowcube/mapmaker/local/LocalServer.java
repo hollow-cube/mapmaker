@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.local.config.LocalWorkspace;
 import net.hollowcube.mapmaker.local.proj.Workspace;
 import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
-import net.hollowcube.mapmaker.map.script.object.LuaCuboid$Wrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -15,15 +14,6 @@ import java.nio.file.Path;
 public class LocalServer {
 
     public static void main(String[] args) throws Exception {
-        System.out.println(LuaCuboid$Wrapper.generatedLuaDocs());
-        System.out.println(LuaCuboid$Wrapper.generatedLuaTypes());
-//        System.out.println(LuaEntity$Wrapper.generatedLuaDoc());
-//        System.out.println(LuaMarker$Wrapper.generatedLuaDoc());
-//        System.out.println(LuaPlayer$Wrapper.generatedLuaDoc());
-//        System.out.println(LuaWorld$Wrapper.generatedLuaDoc());
-//        System.out.println(LuaWorldView$Wrapper.generatedLuaDoc());
-        if (true) System.exit(0);
-
         Path workspacePath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2");
         Workspace workspace = Workspace.read(workspacePath);
 

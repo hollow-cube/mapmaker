@@ -2,25 +2,19 @@ package net.hollowcube.mapmaker.map.script.engine;
 
 import net.hollowcube.luau.util.Pin;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.script.object.LuaWorld;
-import net.minestom.server.event.EventListener;
+import net.hollowcube.mapmaker.map.script.api.world.LuaWorld;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class WorldScriptContainer implements ScriptContainer {
+public class WorldScriptContainer extends AbstractRefManager implements ScriptContainer {
 
     private final Pin<LuaWorld> worldRef;
-    private final EventNode<InstanceEvent> eventNode;
 
     public WorldScriptContainer(@NotNull MapWorld world, @NotNull EventNode<InstanceEvent> eventNode) {
-        this.worldRef = Pin.value(new LuaWorld(world));
-        this.eventNode = eventNode;
-    }
+        super(eventNode, _ -> true);
 
-    @Override
-    public void addListener(EventListener<?> listener) {
-        eventNode.addListener((EventListener<? extends InstanceEvent>) listener);
+        this.worldRef = Pin.value(new LuaWorld(world));
     }
 
     @Override

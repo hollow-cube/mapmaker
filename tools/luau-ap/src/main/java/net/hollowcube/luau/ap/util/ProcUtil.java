@@ -26,6 +26,7 @@ public final class ProcUtil {
 
     public static @NotNull List<? extends Element> getAnnotatedMembers(@NotNull Elements elements, @NotNull TypeElement elem, @NotNull TypeName annotation) {
         return elements.getAllMembers(elem).stream()
+                .filter(e -> e.getEnclosingElement() == elem) // Normally this includes entries from superclass, filter them out.
                 .filter(e -> e.getAnnotationMirrors().stream()
                         .anyMatch(a -> annotation.equals(TypeName.get(a.getAnnotationType()))))
                 .toList();

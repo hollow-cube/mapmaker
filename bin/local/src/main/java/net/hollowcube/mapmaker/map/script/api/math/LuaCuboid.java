@@ -1,11 +1,10 @@
-package net.hollowcube.mapmaker.map.script.object;
+package net.hollowcube.mapmaker.map.script.api.math;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.annotation.LuaConstructor;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
-import net.hollowcube.mapmaker.map.script.type.VectorTypeImpl;
+import net.hollowcube.mapmaker.map.script.api.entity.LuaEntity;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
@@ -32,7 +31,7 @@ public class LuaCuboid {
         var pos2 = VectorTypeImpl.checkLuaArg(state, 2);
 
         state.newUserData(new LuaCuboid(pos1, pos2));
-        state.getMetaTable(LuaCuboid$Wrapper.TYPE_NAME);
+//        state.getMetaTable(LuaCuboid$Wrapper.TYPE_NAME);
         state.setMetaTable(-2);
 
         return 1;
@@ -53,7 +52,6 @@ public class LuaCuboid {
     @LuaProperty
     public final Point max;
 
-    @LuaConstructor
     public LuaCuboid(@NotNull Point pos1, @NotNull Point pos2) {
         this.min = CoordinateUtil.min(pos1, pos2);
         this.max = CoordinateUtil.max(pos1, pos2);
@@ -64,33 +62,18 @@ public class LuaCuboid {
     }
 
     @LuaMethod
-    public int contains(@NotNull LuaState state) {
-        var point = VectorTypeImpl.checkLuaArg(state, 1);
-        state.pushBoolean(CoordinateUtil.isBetween(min, max, point));
-        return 1;
+    public boolean contains(@NotNull Point point) {
+        return CoordinateUtil.isBetween(min, max, point);
     }
 
     @LuaMethod
-    public int intersects(@NotNull LuaState state) {
-        //todo properly support overloads
-        LuaCuboid other = null;
-        if (state.isUserData(1)) {
-            var arg1 = state.toUserData(1);
-            if (arg1 instanceof LuaCuboid c) other = c;
-            else if (arg1 instanceof LuaEntity e) other = e.getBoundingBox();
-            else if (arg1 instanceof LuaPlayer p) other = p.getBoundingBox();
-        }
-        if (other == null) {
-            state.argError(1, "expected entity, got " + state.typeName(1));
-            return 0;
-        }
-
-        state.pushBoolean(intersects0(other));
-        return 1;
+    public boolean intersects(@NotNull LuaCuboid other) {
+        return CoordinateUtil.intersects(min, max, other.min, other.max);
     }
 
-    public boolean intersects0(@NotNull LuaCuboid other) {
-        return CoordinateUtil.intersects(min, max, other.min, other.max);
+    @LuaMethod
+    public boolean intersects(@NotNull LuaEntity other) {
+        return intersects(other.getBoundingBox());
     }
 
 }

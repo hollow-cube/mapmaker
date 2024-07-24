@@ -8,17 +8,26 @@ import net.hollowcube.luau.util.PinImpl;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.script.api.EventImpl$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.LuaEventSource$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.LuaSystem;
+import net.hollowcube.mapmaker.map.script.api.entity.LuaEntity$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.entity.LuaMarkerEntity$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.entity.LuaPlayer$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.math.LuaCuboid;
+import net.hollowcube.mapmaker.map.script.api.math.VectorTypeImpl;
+import net.hollowcube.mapmaker.map.script.api.world.BlockTypeImpl;
+import net.hollowcube.mapmaker.map.script.api.world.LuaWorld$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.world.LuaWorldView$Wrapper;
 import net.hollowcube.mapmaker.map.script.loader.MapScriptLoader;
 import net.hollowcube.mapmaker.map.script.loader.ScriptManifest;
-import net.hollowcube.mapmaker.map.script.object.*;
-import net.hollowcube.mapmaker.map.script.type.BlockTypeImpl;
-import net.hollowcube.mapmaker.map.script.type.VectorTypeImpl;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +71,11 @@ public class ScriptEngine {
         world.instance().eventNode().addChild(eventNode);
     }
 
+    public @Nullable LuaState getThread(@NotNull UUID threadId) {
+        var pair = threads.get(threadId);
+        return pair == null ? null : pair.getKey();
+    }
+
     public void sendDebugLog(@NotNull String message) {
         world.instance().sendMessage(Component.text("[lua] ").append(Component.text(message)));
     }
@@ -84,7 +98,7 @@ public class ScriptEngine {
             if (script.type() != ScriptManifest.Type.PLAYER) continue;
             logger.info("Loading player script: {}", script.filename());
             loadScript(script.id(), script.filename(), event.player().getUuid(),
-                    new PlayerScriptContainer(event.player(), eventNode));
+                    new PlayerScriptContainer(eventNode, event.player()));
         }
     }
 
@@ -130,10 +144,11 @@ public class ScriptEngine {
         LuaWorldView$Wrapper.initMetatable(global);
         LuaWorld$Wrapper.initMetatable(global);
         EventImpl$Wrapper.initMetatable(global); // todo: bad name
-        TriggerImpl$Wrapper.initMetatable(global); // todo: bad name
+        LuaEventSource$Wrapper.initMetatable(global);
+//        TriggerImpl$Wrapper.initMetatable(global); // todo: bad name
         LuaSystem.init(global);
         LuaCuboid.init(global);
-        LuaMarker$Wrapper.initMetatable(global);
+        LuaMarkerEntity$Wrapper.initMetatable(global);
 
         // Create metatable for `script`, which has an __index into java.
         global.newMetaTable("script");

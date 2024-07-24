@@ -1,8 +1,7 @@
 package net.hollowcube.luau.ap.proc;
 
 import com.squareup.javapoet.*;
-import net.hollowcube.luau.ap.MethodList;
-import net.hollowcube.luau.ap.TypeConverter;
+import net.hollowcube.luau.ap.Methods;
 import net.hollowcube.luau.ap.Types;
 import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import net.hollowcube.luau.ap.util.ProcUtil;
@@ -15,13 +14,12 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class LuaTypeImplProcessor extends AbstractLuaProcessor {
 
-    public LuaTypeImplProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull LuaTypeRegistry types) {
-        super(log, elements, typeConverters, types);
+    public LuaTypeImplProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types) {
+        super(log, elements, types);
     }
 
     @Override
@@ -46,7 +44,7 @@ public class LuaTypeImplProcessor extends AbstractLuaProcessor {
         if (!findRequiredConverters(typeElem, targetType)) return null;
 
         // Locate any meta methods to add to the meta table
-        var metaMethods = MethodList.collect(log, typeConverters, targetType,
+        var metaMethods = Methods.collect(log, elements, types, targetType,
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_META));
 
         // Ensure no properties or methods are declared

@@ -1,8 +1,7 @@
 package net.hollowcube.luau.ap;
 
-import com.squareup.javapoet.TypeName;
+import net.hollowcube.luau.ap.tree.Node;
 import net.hollowcube.luau.ap.util.DocContent;
-import net.hollowcube.luau.ap.util.LuaTypeMirror;
 import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,14 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public record PropertyList(@NotNull List<Property> properties) {
+public final class Properties {
 
-    public record Property(@NotNull String name, @NotNull String accessor, @NotNull LuaTypeMirror type,
-                           @Nullable DocContent doc) {
-    }
-
-    public static @NotNull PropertyList collect(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull List<? extends Element> elems) {
-        var props = new ArrayList<Property>();
+    public static @NotNull List<Node.Property> collect(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull List<? extends Element> elems) {
+        var props = new ArrayList<Node.Property>();
         for (var elem : elems) {
             switch (elem) {
                 case ExecutableElement method -> {
@@ -38,14 +33,14 @@ public record PropertyList(@NotNull List<Property> properties) {
                 default -> log.printError("Only fields and methods may be @LuaProperty", elem);
             }
         }
-        return new PropertyList(props);
+        return props;
     }
 
-    private static @Nullable Property collectMethod(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull ExecutableElement method) {
+    private static @Nullable Node.Property collectMethod(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull ExecutableElement method) {
         var methodName = method.getSimpleName().toString();
-        var name = Names.toPropertyName(methodName);
+        var name = toPropertyName(methodName);
 
-        var returnType = types.forTypeName(TypeName.get(method.getReturnType()));
+        var returnType = types.forTypeMirror(method.getReturnType());
         if (returnType == null) {
             log.printError("Unsupported return type: " + method.getReturnType(), method);
             return null;
@@ -53,10 +48,10 @@ public record PropertyList(@NotNull List<Property> properties) {
 
         var doc = DocContent.parse(elements.getDocComment(method));
 
-        return new Property(name, methodName + "()", returnType, doc);
+        return new Node.Property(method, name, methodName + "()", returnType, doc);
     }
 
-    private static @Nullable Property collectField(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull VariableElement field) {
+    private static @Nullable Node.Property collectField(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull VariableElement field) {
         final Set<Modifier> mods = field.getModifiers();
         if (!mods.contains(Modifier.PUBLIC) || mods.contains(Modifier.STATIC)) {
             log.printError("@LuaProperty fields must be public and non-static", field);
@@ -64,9 +59,9 @@ public record PropertyList(@NotNull List<Property> properties) {
         }
 
         var fieldName = field.getSimpleName().toString();
-        var name = Names.toPropertyName(fieldName);
+        var name = toPropertyName(fieldName);
 
-        var fieldType = types.forTypeName(TypeName.get(field.asType()));
+        var fieldType = types.forTypeMirror(field.asType());
         if (fieldType == null) {
             log.printError("Unsupported field type: " + field.asType(), field);
             return null;
@@ -74,11 +69,12 @@ public record PropertyList(@NotNull List<Property> properties) {
 
         var doc = DocContent.parse(elements.getDocComment(field));
 
-        return new Property(name, fieldName, fieldType, doc);
+        return new Node.Property(field, name, fieldName, fieldType, doc);
     }
 
-    public boolean isEmpty() {
-        return properties.isEmpty();
+    private static @NotNull String toPropertyName(@NotNull String methodName) {
+        if (methodName.startsWith("get")) methodName = methodName.substring(3);
+        return Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
     }
 
 }

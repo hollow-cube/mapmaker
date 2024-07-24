@@ -1,9 +1,9 @@
 package net.hollowcube.luau.ap.proc;
 
 import com.squareup.javapoet.*;
-import net.hollowcube.luau.ap.MethodList;
-import net.hollowcube.luau.ap.TypeConverter;
+import net.hollowcube.luau.ap.Methods;
 import net.hollowcube.luau.ap.Types;
+import net.hollowcube.luau.ap.tree.Node;
 import net.hollowcube.luau.ap.util.LuaTypeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,13 +16,12 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class LuaBindableProcessor extends AbstractLuaProcessor {
 
-    public LuaBindableProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull Map<TypeName, TypeConverter> typeConverters, @NotNull LuaTypeRegistry types) {
-        super(log, elements, typeConverters, types);
+    public LuaBindableProcessor(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types) {
+        super(log, elements, types);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class LuaBindableProcessor extends AbstractLuaProcessor {
             return null;
         }
 
-        MethodList.Method meth = MethodList.single(log, typeConverters, possibleMethods.get(0), "bind", "bind");
+        var meth = Methods.single(log, elements, types, possibleMethods.get(0), "bind", "bind");
         if (meth == null) return null;
         if (meth.ret() != null) {
             log.printError("LuaBindable method must not return a value", typeElem);
@@ -84,7 +83,7 @@ public class LuaBindableProcessor extends AbstractLuaProcessor {
         return binder.build();
     }
 
-    private @NotNull MethodSpec buildBindMethod(@NotNull TypeName wrappedClass, @NotNull MethodList.Method meth) {
+    private @NotNull MethodSpec buildBindMethod(@NotNull TypeName wrappedClass, @NotNull Node.Method.Actual meth) {
         var method = MethodSpec.methodBuilder("bind")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -96,7 +95,7 @@ public class LuaBindableProcessor extends AbstractLuaProcessor {
         method.addStatement("final int $N = state.ref($N)", "l$ref", "impl$index");
 
         String argString = meth.args().stream()
-                .map(MethodList.Arg::name)
+                .map(Node.Method.Arg::name)
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("");
 

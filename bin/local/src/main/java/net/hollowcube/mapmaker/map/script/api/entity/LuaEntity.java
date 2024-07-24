@@ -1,15 +1,19 @@
-package net.hollowcube.mapmaker.map.script.object;
+package net.hollowcube.mapmaker.map.script.api.entity;
 
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
+import net.hollowcube.mapmaker.map.script.api.math.LuaCuboid;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 @LuaObject
 public class LuaEntity {
-    private final Entity entity;
+    public static final Tag<Boolean> SCRIPT_SPAWNED = Tag.<Boolean>Transient("script_spawned").defaultValue(false);
+
+    protected final Entity entity;
 
     public LuaEntity(@NotNull Entity entity) {
         this.entity = entity;
@@ -27,6 +31,8 @@ public class LuaEntity {
 
     @LuaMethod
     public void remove() {
+        if (!entity.hasTag(SCRIPT_SPAWNED))
+            throw new IllegalStateException("Only entities spawned by scripts may be removed.");
         entity.remove();
     }
 
