@@ -52,6 +52,11 @@ public final class VectorTypeImpl {
         var vec = state.checkVectorArg(1);
         var name = state.checkStringArg(2);
 
+        if ("Length".equals(name)) {
+            state.pushNumber(Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]));
+            return 1;
+        }
+
         int elem = name.charAt(0) - 'x';
         if (elem < 0 || elem > 2) {
             state.error("No such key: " + name);

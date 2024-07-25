@@ -11,6 +11,11 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.script.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.script.api.math.LuaCuboid;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorldView;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.util.Ticks;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -18,11 +23,16 @@ import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.particle.Particle;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("UnstableApiUsage")
 @LuaObject
 public class LuaPlayer extends LuaEntity {
+    private static final MiniMessage MM = MiniMessage.miniMessage();
 
     private final Player player;
     private LuaWorldView lazyWorld = null;
@@ -65,6 +75,24 @@ public class LuaPlayer extends LuaEntity {
     }
 
     @LuaMethod
+    public void sendMessage(@NotNull String message) {
+        player.sendMessage(MM.deserialize(message));
+    }
+
+    @LuaMethod
+    public void showTitle(@Nullable String title, @Nullable String subtitle, @Nullable Integer fadeIn, @Nullable Integer stay, @Nullable Integer fadeOut) {
+        if (title == null && subtitle == null) return;
+        var titleComp = title == null ? Component.empty() : MM.deserialize(title);
+        var subtitleComp = subtitle == null ? Component.empty() : MM.deserialize(subtitle);
+        var times = Title.Times.times(
+                fadeIn != null ? Ticks.duration(fadeIn) : Ticks.duration(10L),
+                stay != null ? Ticks.duration(stay) : Ticks.duration(70L),
+                fadeOut != null ? Ticks.duration(fadeOut) : Ticks.duration(20L)
+        );
+        player.showTitle(Title.title(titleComp, subtitleComp, times));
+    }
+
+    @LuaMethod
     public void teleport(@NotNull Point pos, @Nullable Double yaw, @Nullable Double pitch, @Nullable String relativeFlags) {
         int relFlags = 0;
 
@@ -104,6 +132,23 @@ public class LuaPlayer extends LuaEntity {
     }
 
     @LuaMethod
+    public void playSound(@NotNull String sound, @Nullable Point pos, @Nullable Double volume, @Nullable Double pitch) {
+        var soundEvent = SoundEvent.fromNamespaceId(sound);
+        if (soundEvent == null) throw new LuaArgError(0, "Invalid sound name");
+
+        //todo source as arg
+        var s = Sound.sound(soundEvent, Sound.Source.MASTER, (float) orElse(volume, 1.0), (float) orElse(pitch, 1.0));
+        if (pos != null) player.playSound(s, pos);
+        else player.playSound(s);
+    }
+
+    @LuaMethod
+    public void spawnParticle(@NotNull Particle particle, @NotNull Point pos, @NotNull Point delta, double speed, int count, @Nullable Boolean forceVisible) {
+        boolean longDistance = forceVisible != null && forceVisible;
+        player.sendPacket(new ParticlePacket(particle, longDistance, pos, delta, (float) speed, count));
+    }
+
+    @LuaMethod
     public void reset(@Nullable Boolean toStart) {
         boolean resetToStart = toStart != null && toStart;
 
@@ -131,5 +176,9 @@ public class LuaPlayer extends LuaEntity {
             void call();
         }
 
+    }
+
+    private double orElse(@Nullable Double d, double def) {
+        return d == null ? def : d;
     }
 }

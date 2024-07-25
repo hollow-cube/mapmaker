@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.impl.living;
 
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -14,7 +13,7 @@ import java.util.UUID;
 import static net.hollowcube.mapmaker.map.util.NbtUtilV2.readFloat3;
 import static net.hollowcube.mapmaker.map.util.NbtUtilV2.writeFloat3;
 
-public class ArmorStandEntity extends MapEntity {
+public class ArmorStandEntity extends AbstractLivingEntity {
 
     public ArmorStandEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);

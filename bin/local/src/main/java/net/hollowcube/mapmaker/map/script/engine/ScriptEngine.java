@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.script.api.math.VectorTypeImpl;
 import net.hollowcube.mapmaker.map.script.api.world.BlockTypeImpl;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorld$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorldView$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.world.ParticleTypeImpl;
 import net.hollowcube.mapmaker.map.script.loader.MapScriptLoader;
 import net.hollowcube.mapmaker.map.script.loader.ScriptManifest;
 import net.kyori.adventure.text.Component;
@@ -142,6 +143,7 @@ public class ScriptEngine {
         VectorTypeImpl.init(global);
         BlockTypeImpl.init(global);
         ItemStackTypeImpl.init(global);
+        ParticleTypeImpl.init(global);
 
         LuaEntity$Wrapper.initMetatable(global);
         LuaPlayer$Wrapper.initMetatable(global);

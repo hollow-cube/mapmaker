@@ -112,6 +112,11 @@ public class MapEntity extends Entity implements TerraformEntity {
 
         if (tag.getBoolean("Glowing")) meta.setHasGlowingEffect(true);
 
+        if (tag.getBoolean("NoGravity")) {
+            setNoGravity(true);
+            hasPhysics = false;
+        }
+
     }
 
     @Override
@@ -132,6 +137,8 @@ public class MapEntity extends Entity implements TerraformEntity {
         if (meta.isCustomNameVisible()) tag.putBoolean("CustomNameVisible", true);
 
         if (meta.isHasGlowingEffect()) tag.putBoolean("Glowing", true);
+
+        if (hasNoGravity()) tag.putBoolean("NoGravity", true);
     }
 
     @Deprecated // Should never be used, but cannot be removed for backwards compatibility.

@@ -1,13 +1,14 @@
 package net.hollowcube.mapmaker.map.script.api.world;
 
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.annotation.LuaMeta;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaTypeImpl;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -35,11 +36,11 @@ public final class BlockTypeImpl {
         return Objects.requireNonNull(Block.fromStateId(stateId));
     }
 
-    @LuaMeta(LuaMeta.Type.INDEX)
-    static @Nullable String luaIndex(@NotNull Block block, @NotNull String key) {
-        return block.getProperty(key); // May return null, which is converted to lua nil
-    }
-
+//    @LuaMeta(LuaMeta.Type.INDEX)
+//    static @Nullable String luaIndex(@NotNull Block block, @NotNull String key) {
+//        return block.getProperty(key); // May return null, which is converted to lua nil
+//    }
+//
 //    @LuaMeta(LuaMeta.Type.NEWINDEX)
 //    static @NotNull Block luaNewIndex(@NotNull Block block, @NotNull String key, @NotNull String value) {
 //        try {
@@ -49,32 +50,32 @@ public final class BlockTypeImpl {
 //        }
 //    }
 
-//    @LuaMeta(LuaMeta.Type.CALL)
-//    static int luaCall(@NotNull LuaState state) {
-//        var block = checkLuaArg(state, 1);
-//
-//        var newProps = new HashMap<String, String>();
-//        state.pushNil();
-//        while (state.next(2)) {
-//            // Key is at index -2, value is at index -1
-//            String key = state.toString(-2);
-//            String value = state.toString(-1);
-//            newProps.put(key, value);
-//
-//            // Remove the value, keep the key for the next iteration
-//            state.pop(1);
-//        }
-//
-//        try {
-//            pushLuaValue(state, block.withProperties(newProps));
-//            return 1;
-//        } catch (IllegalArgumentException e) {
-//            state.error(e.getMessage());
-//            return 0;
-//        }
-//    }
-//
-////    @LuaMeta(LuaMeta.Type.CALL)
+    @LuaMeta(LuaMeta.Type.CALL)
+    static int luaCall(@NotNull LuaState state) {
+        var block = checkLuaArg(state, 1);
+
+        var newProps = new HashMap<String, String>();
+        state.pushNil();
+        while (state.next(2)) {
+            // Key is at index -2, value is at index -1
+            String key = state.toString(-2);
+            String value = state.toString(-1);
+            newProps.put(key, value);
+
+            // Remove the value, keep the key for the next iteration
+            state.pop(1);
+        }
+
+        try {
+            pushLuaValue(state, block.withProperties(newProps));
+            return 1;
+        } catch (IllegalArgumentException e) {
+            state.error(e.getMessage());
+            return 0;
+        }
+    }
+
+    ////    @LuaMeta(LuaMeta.Type.CALL)
 ////    static @NotNull Block luaCall(@NotNull Block block, @NotNull LuaTableView table) {
 ////        var newProps = new HashMap<String, String>();
 ////        for (var iter = table.iterator(); iter.hasNext(); ) {
@@ -87,7 +88,21 @@ public final class BlockTypeImpl {
 ////            return block;
 ////        }
 ////    }
-//
+    @LuaMeta(LuaMeta.Type.TOSTRING)
+    static int luaToString(@NotNull LuaState state) {
+        var block = checkLuaArg(state, 1);
+        state.pushString(BlockUtil.toString(block));
+        return 1;
+    }
+
+    @LuaMeta(LuaMeta.Type.EQ)
+    static int luaEqBlock(@NotNull LuaState state) {
+        var left = checkLuaArg(state, 1);
+        var right = checkLuaArg(state, 2);
+        state.pushBoolean(left.id() == right.id());
+        return 1;
+    }
+
 //    @LuaMeta(LuaMeta.Type.TOSTRING)
 //    static @NotNull String luaToString(@NotNull Block block) {
 //        return BlockUtil.toString(block);

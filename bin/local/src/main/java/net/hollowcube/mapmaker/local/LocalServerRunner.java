@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.world.LocalEditingMapWorld;
@@ -15,6 +16,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,5 +98,20 @@ public class LocalServerRunner extends MapServerRunner {
                 return Set.of(LocalTerraformStorage.class);
             }
         }};
+    }
+
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        var cmd = super.createDebugCommand();
+        cmd.createPermissionlessSubcommand("killall", (sender, context) -> {
+            int i = 0;
+            for (var entity : sender.getInstance().getEntities()) {
+                if (entity instanceof Player) continue;
+                entity.remove();
+                i++;
+            }
+            sender.sendMessage("Killed " + i + " entities");
+        }, "Kills all entities in the world");
+        return cmd;
     }
 }

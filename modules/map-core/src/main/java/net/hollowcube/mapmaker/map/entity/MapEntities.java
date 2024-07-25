@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.entity;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.entity.impl.living.ArmorStandEntity;
+import net.hollowcube.mapmaker.map.entity.impl.living.PandaEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
@@ -23,6 +24,7 @@ public final class MapEntities {
 
         // Living
         MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
+        MapEntityType.override(EntityType.PANDA, PandaEntity::new);
 
         // Other
         MapEntityType.override(EntityType.ITEM_FRAME, ItemFrameEntity::new);

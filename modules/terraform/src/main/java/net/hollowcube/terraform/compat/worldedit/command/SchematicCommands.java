@@ -7,6 +7,9 @@ import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compat.worldedit.util.WEMessages;
 import net.hollowcube.terraform.compute.RegionFunctions;
+import net.hollowcube.terraform.entity.TerraformEntity;
+import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
+import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
@@ -17,14 +20,22 @@ import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.Messages;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.EntityMeta;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
+import java.util.UUID;
 
 public final class SchematicCommands {
 
@@ -369,6 +380,34 @@ public final class SchematicCommands {
                 selection.selectSecondary(max, false);
                 player.sendMessage(WEMessages.CLIPBOARD_PASTE_SELECT_ONLY);
                 return;
+            }
+
+            for (var nbt : schem.entities()) {
+                var entityTypeName = nbt.getString("Id");
+                var entityType = EntityType.fromNamespaceId(entityTypeName);
+                if (entityType == null) throw new NullPointerException("unknown entity type: " + entityTypeName);
+
+                var preEvent = new TerraformPreSpawnEntityEvent(player, player.getInstance());
+                EventDispatcher.call(preEvent);
+                if (preEvent.isCancelled()) continue;
+
+                var entity = preEvent.getConstructor().apply(entityType, UUID.randomUUID());
+                if (entity instanceof TerraformEntity tfEntity && nbt.get("Data") instanceof CompoundBinaryTag data) {
+                    entity.editEntityMeta(EntityMeta.class, _ -> tfEntity.readData(data));
+                }
+
+                var pos = Pos.ZERO;
+                if (nbt.get("Pos") instanceof ListBinaryTag posTag && posTag.elementType().equals(BinaryTagTypes.DOUBLE) && posTag.size() >= 3)
+                    pos = new Pos(posTag.getDouble(0), posTag.getDouble(1), posTag.getDouble(2));
+                if (nbt.getCompound("Data").get("Rotation") instanceof ListBinaryTag rotTag && rotTag.elementType().equals(BinaryTagTypes.FLOAT) && rotTag.size() >= 2)
+                    pos = pos.withView(rotTag.getFloat(0), rotTag.getFloat(1));
+
+                // Data.Rotation = 2 floats in list
+                var event = new TerraformSpawnEntityEvent(player, player.getInstance(), entity, pos.add(min));
+                EventDispatcher.callCancellable(event, () -> {
+                    System.out.println("spawned entity " + event.getEntity() + " at " + event.getPosition());
+                    event.getEntity().setInstance(player.getInstance(), event.getPosition());
+                });
             }
 
             var sourceMask = mask;
