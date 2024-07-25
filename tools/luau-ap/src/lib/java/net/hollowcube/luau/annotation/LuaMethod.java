@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LuaMethod {
 
+    @NotNull String name() default "";
+
     @NotNull String signature() default "";
 
 }

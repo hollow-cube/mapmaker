@@ -39,6 +39,7 @@ public interface Node {
 
             @NotNull String name,
             @NotNull String accessor, // How to fetch the property. Eg just the name for fields, or name() for methods.
+            boolean isStatic,
 
             @NotNull LuaTypeMirror type,
             @Nullable DocContent doc

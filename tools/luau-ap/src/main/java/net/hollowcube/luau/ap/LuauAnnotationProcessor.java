@@ -105,6 +105,7 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
         // Primitives (note that adding a boxed one will also register the unboxed one)
         registry.defineBasicPrimitive("boolean", TypeName.get(Boolean.class), "pushBoolean", "checkBooleanArg");
         registry.defineBasicPrimitive("number", TypeName.get(Double.class), "pushNumber", "checkNumberArg");
+        registry.defineBasicPrimitive("number", TypeName.get(Integer.class), "pushInteger", "checkIntegerArg");
         registry.defineBasicPrimitive("string", TypeName.get(String.class), "pushString", "checkStringArg");
 
         // Find all the LuaTypeImpls
@@ -139,6 +140,11 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
                 @Override
                 public @NotNull String createCheck(int index) {
                     return "false"; //todo
+                }
+
+                @Override
+                public String toString() {
+                    return luaType() + " -> " + javaType();
                 }
             });
         }
@@ -177,6 +183,47 @@ public class LuauAnnotationProcessor extends AbstractProcessor {
                 @Override
                 public @NotNull String createCheck(int index) {
                     return "net.hollowcube.luau.util.LuaHelpers.isUserData(state, " + index + ", " + wrapperType.canonicalName() + ".TYPE_NAME)";
+                }
+
+                @Override
+                public String toString() {
+                    return luaType() + " -> " + javaType();
+                }
+            });
+        }
+
+        // Find all the LuaBindables
+        for (var elem : roundEnv.getElementsAnnotatedWith(luaBindable)) {
+            var implType = TypeName.get(elem.asType());
+            if (implType instanceof ParameterizedTypeName ptn) implType = ptn.rawType;
+            var implClass = (ClassName) implType;
+            var wrapperType = ClassName.get(implClass.packageName(), implClass.simpleName() + "$Wrapper");
+
+            registry.define(implType, new LuaTypeMirror() {
+                @Override
+                public @NotNull String luaType() {
+                    return "function"; //todo actual type sig
+                }
+
+                @Override
+                public @NotNull TypeName javaType() {
+                    return implClass;
+                }
+
+                @Override
+                public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+                    throw new UnsupportedOperationException("Not implemented");
+                }
+
+                @Override
+                public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+                    //todo this is leaking global refs.
+                    method.addStatement("$T $L = $T.bind($T.class, state, $L).get()", implClass, name, Types.LUA_FUNCTIONS, implClass, index);
+                }
+
+                @Override
+                public @NotNull String createCheck(int index) {
+                    return "state.isFunction(" + index + ")";
                 }
             });
         }

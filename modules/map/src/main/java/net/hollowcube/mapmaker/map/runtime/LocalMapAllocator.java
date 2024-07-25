@@ -176,9 +176,10 @@ public class LocalMapAllocator implements MapAllocator {
             }
 
             // Stop if there are still players in the instance
-            if (event.getInstance().getPlayers().size() > 1) return;
-
-            destroy(world.worldId(), Component.translatable("map.closed"));
+            createdWorld.instance().scheduleNextTick(_ -> {
+                if (world.playerCount() > 0) return;
+                destroy(world.worldId(), Component.translatable("map.closed"));
+            });
         });
         return createdWorld;
     }

@@ -86,6 +86,8 @@ public class LuaNameCallBuilder {
 
         @Override
         public void visitMethodActual(Node.Method.@NotNull Actual node, MethodSpec.Builder builder) {
+            if (node.isStatic()) return;
+
             if (!isOverload) builder.addCode("case $S -> {$>\n", node.name()); // Common method header
 
             if (node.isDirect()) {

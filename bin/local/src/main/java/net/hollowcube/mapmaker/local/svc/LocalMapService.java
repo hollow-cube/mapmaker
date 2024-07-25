@@ -51,7 +51,7 @@ public class LocalMapService extends NoopMapService {
             try {
                 var updates = AbstractHttpService.GSON.fromJson(Files.readString(mapFile), MapUpdateRequest.class);
                 settings.setName(updates.name);
-                settings.setSpawnPoint(updates.spawnPoint);
+                if (updates.spawnPoint != null) settings.setSpawnPoint(updates.spawnPoint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

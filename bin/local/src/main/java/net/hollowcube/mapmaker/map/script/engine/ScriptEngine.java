@@ -10,10 +10,11 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.script.api.EventImpl$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.LuaEventSource$Wrapper;
-import net.hollowcube.mapmaker.map.script.api.LuaSystem;
+import net.hollowcube.mapmaker.map.script.api.LuaSystem$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.entity.LuaEntity$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.entity.LuaMarkerEntity$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.entity.LuaPlayer$Wrapper;
+import net.hollowcube.mapmaker.map.script.api.item.ItemStackTypeImpl;
 import net.hollowcube.mapmaker.map.script.api.math.LuaCuboid;
 import net.hollowcube.mapmaker.map.script.api.math.VectorTypeImpl;
 import net.hollowcube.mapmaker.map.script.api.world.BlockTypeImpl;
@@ -22,6 +23,7 @@ import net.hollowcube.mapmaker.map.script.api.world.LuaWorldView$Wrapper;
 import net.hollowcube.mapmaker.map.script.loader.MapScriptLoader;
 import net.hollowcube.mapmaker.map.script.loader.ScriptManifest;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -77,7 +79,7 @@ public class ScriptEngine {
     }
 
     public void sendDebugLog(@NotNull String message) {
-        world.instance().sendMessage(Component.text("[lua] ").append(Component.text(message)));
+        Audiences.all().sendMessage(Component.text("[lua] ").append(Component.text(message)));
     }
 
     public void close() {
@@ -104,6 +106,7 @@ public class ScriptEngine {
 
     private void handlePlayerLeave(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var thread = threads.remove(event.getPlayer().getUuid());
+        if (thread == null) return;
         ((ScriptContainer) thread.getKey().getThreadData()).close();
         global.unref(thread.getValue());
     }
@@ -138,6 +141,7 @@ public class ScriptEngine {
 
         VectorTypeImpl.init(global);
         BlockTypeImpl.init(global);
+        ItemStackTypeImpl.init(global);
 
         LuaEntity$Wrapper.initMetatable(global);
         LuaPlayer$Wrapper.initMetatable(global);
@@ -146,7 +150,7 @@ public class ScriptEngine {
         EventImpl$Wrapper.initMetatable(global); // todo: bad name
         LuaEventSource$Wrapper.initMetatable(global);
 //        TriggerImpl$Wrapper.initMetatable(global); // todo: bad name
-        LuaSystem.init(global);
+        LuaSystem$Wrapper.initMetatable(global);
         LuaCuboid.init(global);
         LuaMarkerEntity$Wrapper.initMetatable(global);
 

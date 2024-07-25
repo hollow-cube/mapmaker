@@ -39,6 +39,7 @@ public final class Properties {
     private static @Nullable Node.Property collectMethod(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull ExecutableElement method) {
         var methodName = method.getSimpleName().toString();
         var name = toPropertyName(methodName);
+        final Set<Modifier> mods = method.getModifiers();
 
         var returnType = types.forTypeMirror(method.getReturnType());
         if (returnType == null) {
@@ -48,7 +49,7 @@ public final class Properties {
 
         var doc = DocContent.parse(elements.getDocComment(method));
 
-        return new Node.Property(method, name, methodName + "()", returnType, doc);
+        return new Node.Property(method, name, methodName + "()", mods.contains(Modifier.STATIC), returnType, doc);
     }
 
     private static @Nullable Node.Property collectField(@NotNull Messager log, @NotNull Elements elements, @NotNull LuaTypeRegistry types, @NotNull VariableElement field) {
@@ -69,7 +70,7 @@ public final class Properties {
 
         var doc = DocContent.parse(elements.getDocComment(field));
 
-        return new Node.Property(field, name, fieldName, fieldType, doc);
+        return new Node.Property(field, name, fieldName, false, fieldType, doc);
     }
 
     private static @NotNull String toPropertyName(@NotNull String methodName) {

@@ -30,6 +30,11 @@ public class LuaEntity {
     }
 
     @LuaMethod
+    public void setInvisible(boolean invisible) {
+        entity.setInvisible(invisible);
+    }
+
+    @LuaMethod
     public void remove() {
         if (!entity.hasTag(SCRIPT_SPAWNED))
             throw new IllegalStateException("Only entities spawned by scripts may be removed.");

@@ -18,23 +18,11 @@ public class LuaCuboid {
 
     public static void init(@NotNull LuaState state) {
         LuaCuboid$Wrapper.initMetatable(state);
-
-        state.newTable();
-        state.pushCFunction(LuaCuboid::newCuboid, "new");
-        state.setField(-2, "new");
-        state.setReadOnly(-1, true);
-        state.setGlobal("Cuboid");
     }
 
-    private static int newCuboid(@NotNull LuaState state) {
-        var pos1 = VectorTypeImpl.checkLuaArg(state, 1);
-        var pos2 = VectorTypeImpl.checkLuaArg(state, 2);
-
-        state.newUserData(new LuaCuboid(pos1, pos2));
-//        state.getMetaTable(LuaCuboid$Wrapper.TYPE_NAME);
-        state.setMetaTable(-2);
-
-        return 1;
+    @LuaMethod(name = "new")
+    public static @NotNull LuaCuboid newCuboid(@NotNull Point pos1, @NotNull Point pos2) {
+        return new LuaCuboid(pos1, pos2);
     }
 
     /**

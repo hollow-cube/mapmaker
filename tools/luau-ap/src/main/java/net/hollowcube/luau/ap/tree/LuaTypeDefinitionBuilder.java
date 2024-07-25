@@ -2,6 +2,7 @@ package net.hollowcube.luau.ap.tree;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import net.hollowcube.luau.ap.util.LuaTypeMirror;
 import org.jetbrains.annotations.NotNull;
 
 public class LuaTypeDefinitionBuilder {
@@ -44,6 +45,8 @@ public class LuaTypeDefinitionBuilder {
             code.add("function $L(self", node.name());
 
             for (var arg : node.args()) {
+                if (arg.type() == LuaTypeMirror.LUA_STATE_MARKER)
+                    continue; // Synthetic arg, not represented in type definition
                 code.add(", $L: $L", arg.name(), arg.type().luaType());
             }
             code.add(")");

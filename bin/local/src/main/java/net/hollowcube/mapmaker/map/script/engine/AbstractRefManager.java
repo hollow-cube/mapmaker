@@ -8,6 +8,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public abstract class AbstractRefManager {
     private final List<Pin<?>> pins = new ArrayList<>();
     private final EventNode<InstanceEvent> eventNode;
     private final List<Entity> entities = new ArrayList<>();
+    private final List<Task> tasks = new ArrayList<>();
 
     protected AbstractRefManager(@NotNull EventNode<InstanceEvent> parentNode, @NotNull Predicate<InstanceEvent> eventFilter) {
         this.parentNode = parentNode;
@@ -47,11 +49,18 @@ public abstract class AbstractRefManager {
         entities.add(entity);
     }
 
+    public void addTask(@NotNull Task task) {
+        tasks.add(task);
+    }
+
     public void close() {
-        parentNode.removeChild(eventNode);
+        for (Task task : tasks) task.cancel();
+        tasks.clear();
 
         for (Entity entity : entities) entity.remove();
         entities.clear();
+
+        parentNode.removeChild(eventNode);
 
         for (Pin<?> pin : pins) pin.close();
         pins.clear();

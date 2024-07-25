@@ -72,6 +72,11 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
 
     @NotNull Collection<Player> players();
     @NotNull Collection<Player> spectators();
+    default int playerCount() {
+        // This is kind of a hack. its used to see if an instance is
+        // empty to close it, but needs to account for split off testing worlds.
+        return instance().getPlayers().size();
+    }
 
     @Deprecated
     default @Nullable MapWorld playWorld() {

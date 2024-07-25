@@ -28,10 +28,16 @@ public class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
 
     private final EditingMapWorld parent;
+    private final MapInstance ownedInstance;
 
     public TestingMapWorld(@NotNull EditingMapWorld parent) {
-        super(parent.server(), parent.map(), parent.features(), (MapInstance) parent.instance());
+        this(parent, null);
+    }
+
+    protected TestingMapWorld(@NotNull EditingMapWorld parent, @Nullable MapInstance instance) {
+        super(parent.server(), parent.map(), parent.features(), instance != null ? instance : (MapInstance) parent.instance());
         this.parent = parent;
+        this.ownedInstance = instance;
     }
 
     @Override
@@ -63,15 +69,24 @@ public class TestingMapWorld extends AbstractMapMakerMapWorld {
         // remove from this map (leaving them in the Minestom instance)
         // then add them to the build world.
         removePlayer(player);
+        if (player.getInstance() != parent.instance())
+            FutureUtil.getUnchecked(player.setInstance(parent.instance()));
+
         parent.addPlayer(player);
+    }
+
+    @Override
+    public void load() {
+        super.load();
     }
 
     @Override
     public void close(@Nullable Component reason) {
         super.close(reason);
 
-        // Override left just to comment that the instance should not be unregistered here. It is owned
-        // by the parent editing world and is managed by that.
+        if (ownedInstance != null) {
+            ownedInstance.unload();
+        }
     }
 
     @Override
@@ -90,7 +105,10 @@ public class TestingMapWorld extends AbstractMapMakerMapWorld {
 
         var startingPos = player.getPosition();
         player.setTag(SPECTATOR_CHECKPOINT, startingPos);
-        player.teleport(startingPos); //todo is this necessary it seems hella dumb?
+
+        if (ownedInstance != null) {
+            player.setInstance(ownedInstance, startingPos);
+        } else player.teleport(startingPos);
 
         callEvent(new MapPlayerInitEvent(this, player, true));
     }

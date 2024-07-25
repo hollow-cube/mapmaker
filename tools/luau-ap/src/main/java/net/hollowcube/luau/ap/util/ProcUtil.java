@@ -51,4 +51,17 @@ public final class ProcUtil {
                 .orElseThrow(() -> new IllegalArgumentException("Annotation does not have a value named " + name));
     }
 
+    public static <T> @Nullable T getOptAnnotationValue(@NotNull AnnotationMirror annotation, @NotNull String name, Class<T> valueType) {
+        return annotation.getElementValues().entrySet().stream()
+                .filter(e -> e.getKey().getSimpleName().contentEquals(name))
+                .map(entry -> {
+                    Object value = entry.getValue().getValue();
+                    if (!valueType.isAssignableFrom(value.getClass()))
+                        throw new IllegalArgumentException("Expected " + valueType + " but got " + value.getClass());
+                    return valueType.cast(value);
+                })
+                .findFirst()
+                .orElse(null);
+    }
+
 }

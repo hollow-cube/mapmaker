@@ -3,6 +3,7 @@ package net.hollowcube.luau.ap.tree;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hollowcube.luau.ap.util.DocContent;
+import net.hollowcube.luau.ap.util.LuaTypeMirror;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,9 +90,11 @@ public class LuaDocBuilder {
                 params.add(paramObj);
                 output.add(paramName, addDocKeys(new JsonObject(), null));
             }
-            for (int i = 0; i < node.args().size(); i++) {
-                var arg = node.args().get(i);
-                var paramName = name + "/param/" + (i + 1);
+            int argIndex = 1; // Start at 1 because of self param
+            for (var arg : node.args()) {
+                if (arg.type() == LuaTypeMirror.LUA_STATE_MARKER)
+                    continue; // Synthetic arg, not represented in docs
+                var paramName = name + "/param/" + (argIndex++);
 
                 // Object for the param array
                 var paramObj = new JsonObject();

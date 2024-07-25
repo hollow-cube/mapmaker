@@ -62,7 +62,7 @@ public class BlockItemHandler extends ItemHandler {
                     block, instance, click.placePosition(),
                     click.player(), click.hand(), click.face(),
                     0f, 0f, 0f
-            ));
+            ), false);
 
         });
     }

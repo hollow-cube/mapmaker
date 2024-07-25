@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface LuaTypeMirror {
 
+    LuaTypeMirror LUA_STATE_MARKER = new LuaState();
+
     @NotNull String luaType();
     @NotNull TypeName javaType();
 
@@ -72,6 +74,34 @@ public interface LuaTypeMirror {
         @Override
         public @NotNull String createCheck(int index) {
             return "state.is" + checkMethod + "(" + index + ")";
+        }
+    }
+
+    record LuaState() implements LuaTypeMirror {
+
+        @Override
+        public @NotNull String luaType() {
+            throw new UnsupportedOperationException("unreachable");
+        }
+
+        @Override
+        public @NotNull TypeName javaType() {
+            throw new UnsupportedOperationException("unreachable");
+        }
+
+        @Override
+        public void insertPush(MethodSpec.@NotNull Builder method, @NotNull String getter) {
+            throw new UnsupportedOperationException("unreachable");
+        }
+
+        @Override
+        public void insertPop(MethodSpec.@NotNull Builder method, @NotNull String name, int index) {
+            throw new UnsupportedOperationException("unreachable");
+        }
+
+        @Override
+        public @NotNull String createCheck(int index) {
+            throw new UnsupportedOperationException("unreachable");
         }
     }
 }

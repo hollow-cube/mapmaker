@@ -20,6 +20,9 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -95,9 +98,40 @@ public class MapInstance extends InstanceContainer {
         INSTANCE_MANAGER.unregisterInstance(this);
     }
 
+    @Override
+    public synchronized MapInstance copy() {
+        MapInstance copiedInstance = new MapInstance(getDimensionName(), getDimensionType(), hasLighting);
+        copiedInstance.srcInstance = this;
+        copiedInstance.tagHandler = this.tagHandler.copy();
+        copiedInstance.refreshLastBlockChangeTime();
+        for (Chunk chunk : getChunks()) {
+            final int chunkX = chunk.getChunkX();
+            final int chunkZ = chunk.getChunkZ();
+            final Chunk copiedChunk = chunk.copy(copiedInstance, chunkX, chunkZ);
+            copiedInstance.cacheChunkHack(copiedChunk);
+        }
+        return copiedInstance;
+    }
+
     private void handleEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {
         if (event.getEntity() instanceof Player player) {
             EventDispatcher.call(new PlayerInstanceLeaveEvent(player, event.getInstance()));
+        }
+    }
+
+    private void cacheChunkHack(@NotNull Chunk chunk) {
+        class Holder {
+            static MethodHandle method;
+        }
+        try {
+            if (Holder.method == null) {
+                Method method = InstanceContainer.class.getDeclaredMethod("cacheChunk", Chunk.class);
+                method.setAccessible(true);
+                Holder.method = MethodHandles.lookup().unreflect(method);
+            }
+            Holder.method.invoke(this, chunk);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
 }

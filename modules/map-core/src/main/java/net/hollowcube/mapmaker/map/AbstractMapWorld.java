@@ -43,6 +43,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
     private final String worldId = UUID.randomUUID().toString();
 
+    private volatile boolean isClosed = false;
+
     private final MapServer server;
     private final MapData map;
     protected final MapInstance instance;
@@ -254,6 +256,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         removePlayerSet(this, spectators, reason);
         players.clear();
         spectators.clear();
+        isClosed = true;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
     }
 
     private static void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @Nullable Component reason) {

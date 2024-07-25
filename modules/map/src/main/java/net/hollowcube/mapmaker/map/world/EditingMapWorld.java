@@ -111,6 +111,14 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
+    public int playerCount() {
+        // Need to support the case where the test world is in a different instance
+        if (testWorld != null && instance() != testWorld.instance())
+            return super.playerCount() + testWorld.playerCount();
+        return super.playerCount();
+    }
+
+    @Override
     public @Nullable MapWorld playWorld() {
         return testWorld();
     }
@@ -185,7 +193,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     public void closeTestWorld() {
         if (testWorld != null) {
-            testWorld.close(Component.text("Test world closed"));
+            if (!testWorld.isClosed())
+                testWorld.close(Component.text("Test world closed"));
             testWorld = null;
         }
     }

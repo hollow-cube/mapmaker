@@ -21,6 +21,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class LuaObjectProcessor extends AbstractLuaProcessor {
 
@@ -49,6 +51,19 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
             superClassType = superClass != null ? (ClassName) Types.unwrap(TypeName.get(superClass)) : null;
         }
 
+        var luaObject = Objects.requireNonNull(ProcUtil.getAnnotation(typeElem, Types.LUA_OBJECT));
+
+        // Name of the type
+        var luaName = typeElem.getSimpleName().toString().replace("Lua", "");
+        var nameOverride = ProcUtil.getOptAnnotationValue(luaObject, "name", String.class);
+        if (nameOverride != null && !nameOverride.trim().isEmpty()) {
+            luaName = nameOverride;
+        }
+
+        // Singleton state
+        var singleton = ProcUtil.getOptAnnotationValue(luaObject, "singleton", Boolean.class);
+        var isSingleton = singleton != null && singleton;
+
         // Find the @LuaProperty, @LuaMethod declarations
         var properties = Properties.collect(log, elements, types,
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_PROPERTY));
@@ -58,10 +73,18 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
                 ProcUtil.getAnnotatedMembers(elements, typeElem, Types.LUA_META));
         var typeDoc = DocContent.parse(elements.getDocComment(typeElem));
 
+        var staticMethods = new ArrayList<Node.Method.Actual>();
+        for (var method : methods) {
+            if (!(method instanceof Node.Method.Actual act)) continue;
+            if (act.isStatic()) staticMethods.add(act);
+        }
+
+        if (isSingleton && checkSingletonState(properties, methods))
+            return null;
+
         var typeNode = new Node.Type(
-                typeElem.getSimpleName().toString().replace("Lua", ""),
-                typeElem, wrappedClass, wrapperClass, superClassType,
-                typeDoc, properties, methods
+                luaName, typeElem, wrappedClass, wrapperClass,
+                superClassType, typeDoc, properties, methods
         );
 
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(className)
@@ -91,7 +114,7 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
             metaMethodList.addFirst(new Node.Method.Actual(typeElem, "__namecall", "generatedLuaNameCall", true, true, true, new ArrayList<>(), null, null));
         metaMethods = metaMethodList;
 
-        appendInitFunc(wrapper, wrappedClass, wrapperClass, wrappedClass, null, metaMethods);
+        appendInitFunc(wrapper, typeNode, wrappedClass, wrapperClass, wrappedClass, null, metaMethods, staticMethods, isSingleton);
         appendIndexMetaMethod(wrapper, typeNode);
         appendNameCallMetaMethod(wrapper, typeNode);
         //todo meta methods
@@ -115,6 +138,7 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
         method.addCode("return switch (key) {$>\n");
 
         for (var prop : typeNode.properties()) {
+            if (prop.isStatic()) return;
             method.addCode("case $S -> {$>\n", prop.name());
 
             prop.type().insertPush(method, "ref." + prop.accessor());
@@ -154,6 +178,23 @@ public class LuaObjectProcessor extends AbstractLuaProcessor {
         var docString = LuaDocBuilder.buildDocObject(typeNode);
         generatedLuaDocMethod.addStatement("return $S", new GsonBuilder().setPrettyPrinting().create().toJson(docString));
         type.addMethod(generatedLuaDocMethod.build());
+    }
+
+    private boolean checkSingletonState(@NotNull List<Node.Property> properties, @NotNull List<Node.Method> methods) {
+        boolean fail = false;
+        for (var prop : properties) {
+            if (prop.isStatic()) continue;
+            log.printError("Non-static properties are not allowed in singleton LuaObjects", prop.elem());
+            fail = true;
+        }
+
+        for (var meth : methods) {
+            if (meth instanceof Node.Method.Actual act && act.isStatic()) continue;
+            log.printError("Non-static methods are not allowed in singleton LuaObjects", meth.elem());
+            fail = true;
+        }
+
+        return fail;
     }
 
 }

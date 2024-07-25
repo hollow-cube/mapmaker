@@ -5,6 +5,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.hollowcube.luau.annotation.*;
+import net.hollowcube.luau.func.LuaFunctions;
 import net.hollowcube.luau.util.LuaHelpers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,7 @@ public final class Types {
     public static final ClassName LUA_METHOD = ClassName.get(LuaMethod.class);
 
     public static final ClassName LUA_HELPERS = ClassName.get(LuaHelpers.class);
+    public static final ClassName LUA_FUNCTIONS = ClassName.get(LuaFunctions.class);
 
     public static final TypeName LUA_STATE = ClassName.get("net.hollowcube.luau", "LuaState");
     public static final TypeName LUA_TYPE = ClassName.get("net.hollowcube.luau", "LuaType");

@@ -1,17 +1,20 @@
 package net.hollowcube.mapmaker.map.script.api.world;
 
+import net.hollowcube.luau.annotation.LuaBindable;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.annotation.LuaProperty;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
+import net.hollowcube.mapmaker.map.script.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.script.api.entity.LuaEntity;
 import net.hollowcube.mapmaker.map.script.engine.AbstractRefManager;
 import net.hollowcube.mapmaker.map.script.engine.ScriptEngine;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +35,8 @@ public class LuaWorldView {
     private final Player player;
     private final MapWorld world;
 
+    private LuaEventSource<Callbacks.OnTick> onTick;
+
     public LuaWorldView(@NotNull Player player) {
         this.player = player;
         this.world = MapWorld.forPlayer(player);
@@ -40,6 +45,17 @@ public class LuaWorldView {
     @LuaProperty
     public @NotNull String getName() {
         return world.worldId();
+    }
+
+    @LuaProperty
+    public @NotNull LuaEventSource<Callbacks.OnTick> getOnTick() {
+        if (onTick == null) {
+            onTick = LuaEventSource.create(
+                    Callbacks.OnTick.class, PlayerTickEvent.class,
+                    (_, onTick) -> onTick.call()
+            );
+        }
+        return onTick;
     }
 
     @LuaMethod
@@ -72,5 +88,14 @@ public class LuaWorldView {
         Check.notNull(playerThread, "Player thread not found");
         return (AbstractRefManager) Objects.requireNonNull(playerThread.getThreadData());
     }
-    
+
+    public static final class Callbacks {
+
+        @LuaBindable
+        public interface OnTick {
+            void call();
+        }
+
+    }
+
 }

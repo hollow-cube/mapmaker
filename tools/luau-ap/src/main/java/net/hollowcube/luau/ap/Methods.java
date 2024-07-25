@@ -25,10 +25,21 @@ public final class Methods {
     ) {
         boolean isStatic = method.getModifiers().contains(Modifier.STATIC);
 
+        // Name override support
+        var luaMethod = ProcUtil.getAnnotation(method, Types.LUA_METHOD);
+        if (luaMethod != null) {
+            var nameOverride = ProcUtil.getOptAnnotationValue(luaMethod, "name", String.class);
+            if (nameOverride != null && !nameOverride.trim().isEmpty()) name = nameOverride;
+        }
+
         var args = new ArrayList<Node.Method.Arg>();
         var params = method.getParameters();
-        for (int i = isStatic ? 1 : 0; i < params.size(); i++) {
-            var param = params.get(i);
+        for (VariableElement param : params) {
+            // The first argument may be a lua state always and it will be passed in.
+            if (args.isEmpty() && TypeName.get(param.asType()).withoutAnnotations().equals(Types.LUA_STATE)) {
+                args.add(new Node.Method.Arg(param.getSimpleName().toString(), LuaTypeMirror.LUA_STATE_MARKER));
+                continue;
+            }
 
             var paramType = types.forTypeMirror(param.asType());
             if (paramType == null) {
@@ -39,7 +50,7 @@ public final class Methods {
             args.add(new Node.Method.Arg(param.getSimpleName().toString(), paramType));
         }
         // Defer return from args here to show multiple errors if there are them
-        if (args.size() != params.size() - (isStatic ? 1 : 0))
+        if (args.size() != params.size())
             return null;
 
         LuaTypeMirror ret = null;

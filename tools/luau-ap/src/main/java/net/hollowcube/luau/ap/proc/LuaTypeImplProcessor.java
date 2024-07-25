@@ -64,7 +64,7 @@ public class LuaTypeImplProcessor extends AbstractLuaProcessor {
                 .build());
 
         // Generate the metatable init method.
-        appendInitFunc(wrapper, wrappedClass, wrapperClass, targetType, wrappedClass, metaMethods);
+        appendInitFunc(wrapper, null, wrappedClass, wrapperClass, targetType, wrappedClass, metaMethods, List.of(), false);
 
         return wrapper.build();
     }
