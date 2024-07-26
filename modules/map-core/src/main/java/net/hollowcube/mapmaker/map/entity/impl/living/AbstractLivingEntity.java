@@ -4,9 +4,11 @@ import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.LazyPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import static net.hollowcube.mapmaker.map.util.NbtUtilV2.*;
  * {@link net.minestom.server.entity.LivingEntity} from Minestom, although this
  * implementation is <b>not</b> (necessarily) thread-safe.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class AbstractLivingEntity extends MapEntity implements EquipmentHandler {
     private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{
             EquipmentSlot.BOOTS, EquipmentSlot.LEGGINGS,
@@ -136,6 +139,13 @@ public class AbstractLivingEntity extends MapEntity implements EquipmentHandler 
     public void setBoots(@NotNull ItemStack itemStack) {
         equipment[EquipmentSlot.BOOTS.ordinal()] = itemStack;
         syncEquipment(EquipmentSlot.BOOTS);
+    }
+
+    @Override
+    public void updateNewViewer(@NotNull Player player) {
+        super.updateNewViewer(player);
+        player.sendPacket(new LazyPacket(this::getEquipmentsPacket));
+//        player.sendPacket(new LazyPacket(this::getAttributesPacket));
     }
 
 }

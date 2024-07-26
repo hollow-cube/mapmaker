@@ -157,4 +157,10 @@ public class MapEntity extends Entity implements TerraformEntity {
         // Read the nbt
         tagHandler().updateContent((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
     }
+
+    public @NotNull MapEntity copy() {
+        var copied = MapEntityType.create(getEntityType(), getUuid());
+        copied.readData(writeToTag());
+        return copied;
+    }
 }

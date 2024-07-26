@@ -135,7 +135,6 @@ public class MarkerEntity extends MapEntity {
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
-
     }
 
     @Override
