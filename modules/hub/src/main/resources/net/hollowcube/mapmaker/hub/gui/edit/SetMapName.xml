@@ -2,6 +2,6 @@
     <box width="9" height="1" align="ltr">
         <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
         <label translationKey="gui.generic.empty" sprite="anvil/earth_and_quill"/>
-        <button id="output" translationKey="gui.generic.empty" sprite="anvil/checkmark" backgroundSprite="anvil/checkmark_bg"/>
+        <button id="output" translationKey="gui.generic.empty" backgroundSprite="anvil/checkmark_bg"/>
     </box>
 </component>

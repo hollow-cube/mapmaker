@@ -5,9 +5,9 @@
         <!-- Top bar -->
         <box width="9" align="ltr">
             <BackButton/>
-            <label translationKey="gui.report_map.information"/>
+            <label translationKey="gui.report_map.information" sprite="generic/information"/>
             <text id="map_id_text" width="5" height="1" translationKey="gui.report_map.map_id"
-                  font="play_maps_page" centered="true"/>
+                  sprite="generic/text_display_5" font="play_maps_page" centered="true"/>
             <button width="2" id="add_comment" translationKey="gui.report_map.add_comment"/>
         </box>
 
@@ -19,33 +19,33 @@
 
             <switch id="switch_cheated">
                 <button id="reason_cheated_off" translationKey="gui.report_map.category.cheated.off"
-                        sprite="report_map/cheating_icon" backgroundSprite="report_map/cheating_unselected_bg"/>
+                        sprite="report_map/cheating_icon" backgroundSprite="report_map/default_bg"/>
                 <button id="reason_cheated_on" translationKey="gui.report_map.category.cheated.on"
-                        sprite="report_map/cheating_icon" backgroundSprite="report_map/cheating_selected_bg"/>
+                        sprite="report_map/cheating_icon" backgroundSprite="report_map/selected_bg"/>
             </switch>
             <switch id="switch_discrimination">
                 <button id="reason_discrimination_off" translationKey="gui.report_map.category.discrimination.off"
-                        sprite="report_map/hate_icon" backgroundSprite="report_map/hate_unselected_bg"/>
+                        sprite="report_map/hate_icon" backgroundSprite="report_map/default_bg"/>
                 <button id="reason_discrimination_on" translationKey="gui.report_map.category.discrimination.on"
-                        sprite="report_map/hate_icon" backgroundSprite="report_map/hate_selected_bg"/>
+                        sprite="report_map/hate_icon" backgroundSprite="report_map/selected_bg"/>
             </switch>
             <switch id="switch_explicit_content">
                 <button id="reason_explicit_content_off" translationKey="gui.report_map.category.explicit_content.off"
-                        sprite="report_map/sex_icon" backgroundSprite="report_map/sex_unselected_bg"/>
+                        sprite="report_map/sex_icon" backgroundSprite="report_map/default_bg"/>
                 <button id="reason_explicit_content_on" translationKey="gui.report_map.category.explicit_content.on"
-                        sprite="report_map/sex_icon" backgroundSprite="report_map/sex_selected_bg"/>
+                        sprite="report_map/sex_icon" backgroundSprite="report_map/selected_bg"/>
             </switch>
             <switch id="switch_spam">
                 <button id="reason_spam_off" translationKey="gui.report_map.category.spam.off"
-                        sprite="report_map/spam_icon" backgroundSprite="report_map/spam_unselected_bg"/>
+                        sprite="report_map/spam_icon" backgroundSprite="report_map/default_bg"/>
                 <button id="reason_spam_on" translationKey="gui.report_map.category.spam.on"
-                        sprite="report_map/spam_icon" backgroundSprite="report_map/spam_selected_bg"/>
+                        sprite="report_map/spam_icon" backgroundSprite="report_map/selected_bg"/>
             </switch>
             <switch id="switch_dmca">
-                <button id="reason_dmca_off" translationKey="gui.report_map.category.dmca.off"
-                        sprite="report_map/dmca_icon" backgroundSprite="report_map/dmca_unselected_bg"/>
-                <button id="reason_dmca_on" translationKey="gui.report_map.category.dmca.on"
-                        sprite="report_map/dmca_icon" backgroundSprite="report_map/dmca_selected_bg"/>
+                <button id="reason_dmca_off" translationKey="gui.report_map.category.dcma.off"
+                        sprite="report_map/dmca_icon" backgroundSprite="report_map/default_bg"/>
+                <button id="reason_dmca_on" translationKey="gui.report_map.category.dcma.on"
+                        sprite="report_map/dmca_icon" backgroundSprite="report_map/selected_bg"/>
             </switch>
         </box>
 
@@ -54,8 +54,12 @@
         <box width="9" height="1" align="ltr">
             <spacer width="2"/>
 
-            <button id="submit" width="5" height="1"
-                    translationKey="gui.report_map.submit"/>
+            <switch id="submit_switch" width="5" height="1">
+                <label id="submit_error" width="5" height="1" sprite="report_map/submit_report_error"
+                       translationKey="gui.report_map.submit.missing_categories"/>
+                <button id="submit" width="5" height="1" sprite="report_map/submit_report"
+                        translationKey="gui.report_map.submit"/>
+            </switch>
         </box>
 
     </box>

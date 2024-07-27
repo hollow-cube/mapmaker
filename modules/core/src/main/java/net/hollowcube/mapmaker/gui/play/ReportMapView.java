@@ -28,6 +28,7 @@ public class ReportMapView extends View {
     private @OutletGroup("reason_.+_off") Label[] reasonOffButtons;
     private @OutletGroup("reason_.+_on") Label[] reasonOnButtons;
     private @Outlet("add_comment") Label addCommentButton;
+    private @Outlet("submit_switch") Switch submitStateSwitch;
     private @Outlet("submit") Label submitButton;
 
     private final String mapId;
@@ -83,6 +84,7 @@ public class ReportMapView extends View {
         List<Component> lore = new ArrayList<>();
 
         if (canSubmit()) {
+            submitStateSwitch.setOption(1);
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.header", List.of()));
             for (var category : categories) {
                 lore.add(Component.translatable("gui.report_map.submit.category",
@@ -91,8 +93,7 @@ public class ReportMapView extends View {
 
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.footer", List.of(getCommentText())));
         } else {
-            title = Component.translatable("gui.report_map.submit.missing_categories.name");
-            lore.add(Component.translatable("gui.report_map.submit.missing_categories.lore"));
+            submitStateSwitch.setOption(0);
         }
 
         submitButton.setComponentsDirect(title, lore);
@@ -134,7 +135,7 @@ public class ReportMapView extends View {
                 mapService.reportMap(mapId, req);
                 player.sendMessage(Component.translatable("gui.report_map.submit.success"));
             } catch (Exception e) {
-                player.sendMessage(Component.translatable("gui.report_map.submit.error"));
+                player.sendMessage(Component.translatable("gui.report_map.submit.failure"));
                 MinecraftServer.getExceptionManager().handleException(e);
             } finally {
                 submitButton.setState(State.ACTIVE);
