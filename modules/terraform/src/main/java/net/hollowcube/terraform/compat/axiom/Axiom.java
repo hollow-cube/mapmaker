@@ -97,7 +97,7 @@ public class Axiom {
                 true, // todo: constant/configurable
                 List.of() //todo: constant/configurable
         );
-        player.sendPacket(enablePacket.toPacket(player));
+        player.scheduleNextTick(_ -> player.sendPacket(enablePacket.toPacket(player)));
         player.setTag(ENABLED_TAG, true);
 
         //todo init hotbars
@@ -109,7 +109,7 @@ public class Axiom {
         player.removeTag(ENABLED_TAG);
 
         var packet = new AxiomEnablePacket(false);
-        player.sendPacket(packet.toPacket(player));
+//        player.sendPacket(packet.toPacket(player));
     }
 
     private static final Map<String, ReadableAxiomPacket<?>> CLIENT_PACKETS = Map.ofEntries(

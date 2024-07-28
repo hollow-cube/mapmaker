@@ -1,8 +1,11 @@
 package net.hollowcube.mapmaker.local;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.local.command.WorkspaceCommand;
 import net.hollowcube.mapmaker.local.config.LocalWorkspace;
+import net.hollowcube.mapmaker.local.proj.Project;
 import net.hollowcube.mapmaker.local.svc.*;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -16,21 +19,23 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class LocalServerRunner extends MapServerRunner {
-    public static final String DUMMY_MAP_ID = "0557bb41-225a-4556-af2e-51f72c0a005c"; // PigianaJones
-
     public static LocalServerRunner instance;
 
     private final LocalWorkspace workspace;
+    private final Path stateDir;
 
     private final MapService mapService;
     private final PlayerService playerService;
@@ -41,8 +46,9 @@ public class LocalServerRunner extends MapServerRunner {
 
         LocalServerRunner.instance = this;
         this.workspace = config.get(LocalWorkspace.class);
+        this.stateDir = workspace.path().resolve(".workspacestate");
 
-        this.mapService = new LocalMapService(activeProjectDirectory());
+        this.mapService = new LocalMapService(workspace);
         this.playerService = new LocalPlayerService();
         this.sessionService = new LocalSessionService();
     }
@@ -57,7 +63,7 @@ public class LocalServerRunner extends MapServerRunner {
     }
 
     public @NotNull Path activeProjectDirectory() {
-        return workspace.path();
+        return workspace.activeProject();
     }
 
     @Override
@@ -77,12 +83,47 @@ public class LocalServerRunner extends MapServerRunner {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return new LocalServerBridge();
+        return new LocalServerBridge(this);
+    }
+
+    @Override
+    protected void prepareStart() {
+        super.prepareStart();
+
+        commandManager().register(createInstance(WorkspaceCommand.class));
     }
 
     @Override
     protected @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
-        return CompletableFuture.completedFuture(new MapJoinInfo(playerId, DUMMY_MAP_ID, "editing"));
+        try {
+            var player = MinecraftServer.getConnectionManager().getConfigPlayers().stream()
+                    .filter(p -> p.getUuid().toString().equals(playerId))
+                    .findFirst().orElse(null);
+            Check.notNull(player, "Player not found");
+
+            String mapId = player.getTag(LocalServerBridge.TARGET_SERVER_TAG);
+            var playerStatePath = stateDir.resolve(playerId + ".json");
+            if (mapId == null) {
+                // todo workspace default project option
+                mapId = "0_0_cubed_prologue";
+                if (Files.exists(playerStatePath)) {
+                    var state = Project.GSON.fromJson(Files.readString(playerStatePath), JsonObject.class);
+                    var lastMapId = state.get("lastMapId").getAsString();
+                    if (Files.exists(workspace.path().resolve(lastMapId)))
+                        mapId = lastMapId;
+                }
+            } else {
+                // Update the player state file
+                var state = new JsonObject();
+                state.addProperty("lastMapId", mapId);
+                Files.createDirectories(playerStatePath.getParent());
+                Files.writeString(playerStatePath, Project.GSON.toJson(state));
+            }
+
+            return CompletableFuture.completedFuture(new MapJoinInfo(playerId, mapId, "editing"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

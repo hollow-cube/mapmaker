@@ -18,6 +18,7 @@ public class LocalServer {
         Workspace workspace = Workspace.read(workspacePath);
 
         LocalWorkspace wsConf = new LocalWorkspace(
+                workspacePath,
                 workspacePath.resolve(workspace.activeProject()),
                 workspacePath.resolve("schematics")
         );

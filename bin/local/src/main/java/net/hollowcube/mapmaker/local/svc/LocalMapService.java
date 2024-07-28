@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.local.svc;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.hollowcube.mapmaker.local.LocalServerRunner;
+import net.hollowcube.mapmaker.local.config.LocalWorkspace;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.world.savestate.EditState;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
@@ -20,16 +20,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 
 public class LocalMapService extends NoopMapService {
-    private final Path worldFile;
-    private final Path mapFile;
-    private final Path savestatePath;
+    private final Path wsRoot;
     private final Path perfdumpPath;
 
-    public LocalMapService(@NotNull Path workspace) {
-        this.worldFile = workspace.resolve("world.polar");
-        this.mapFile = workspace.resolve("map.json");
-        this.savestatePath = workspace.resolve(".savestates");
-        this.perfdumpPath = workspace.resolve(".perfdump");
+    public LocalMapService(@NotNull LocalWorkspace workspace) {
+        this.wsRoot = workspace.path();
+        this.perfdumpPath = workspace.path().resolve(".perfdump");
     }
 
     @Override
@@ -39,14 +35,13 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
-        Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
-
         var settings = new MapSettings();
         settings.setVariant(MapVariant.PARKOUR);
         settings.setSize(MapSize.UNLIMITED);
-        var map = new MapData(LocalServerRunner.DUMMY_MAP_ID, UUID.randomUUID().toString(), settings, -1, null);
+        var map = new MapData(id, UUID.randomUUID().toString(), settings, -1, null);
         map.setSetting(MapSettings.LIGHTING, true);
 
+        var mapFile = wsRoot.resolve(id).resolve("map.json");
         if (Files.exists(mapFile)) {
             try {
                 var updates = AbstractHttpService.GSON.fromJson(Files.readString(mapFile), MapUpdateRequest.class);
@@ -62,8 +57,8 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
-        Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
         try {
+            var worldFile = wsRoot.resolve(id).resolve("world.polar");
             return Files.exists(worldFile) ? Files.readAllBytes(worldFile) : null;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -73,6 +68,7 @@ public class LocalMapService extends NoopMapService {
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
         try {
+            var mapFile = wsRoot.resolve(id).resolve("map.json");
             JsonObject object = Files.exists(mapFile)
                     ? AbstractHttpService.GSON.fromJson(Files.readString(mapFile), JsonObject.class)
                     : new JsonObject();
@@ -88,8 +84,8 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
-        Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
         try {
+            var worldFile = wsRoot.resolve(id).resolve("world.polar");
             Files.createDirectories(worldFile.getParent());
             Files.write(worldFile, worldData, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
@@ -102,13 +98,13 @@ public class LocalMapService extends NoopMapService {
             @NotNull String mapId, @NotNull String playerId,
             @Nullable SaveStateType type, SaveStateType.@Nullable Serializer<?> serializer
     ) {
-        Check.argCondition(!mapId.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + mapId);
+        System.out.println("getting save state for " + mapId);
         Check.notNull(type, "type cannot be null");
         Check.notNull(serializer, "serializer cannot be null");
 
         try {
             EditState editState;
-            var saveStatePath = savestatePath.resolve(playerId);
+            var saveStatePath = wsRoot.resolve(mapId).resolve(".savestates").resolve(playerId);
             if (Files.exists(saveStatePath)) {
                 JsonObject object = new Gson().fromJson(Files.readString(saveStatePath), JsonObject.class);
                 editState = (EditState) DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, object)).getFirst();
@@ -128,10 +124,11 @@ public class LocalMapService extends NoopMapService {
             @NotNull String mapId, @NotNull String playerId,
             @NotNull String id, @NotNull SaveStateUpdateRequest update
     ) {
+        System.out.println("save state for " + mapId);
         var updates = update.updates();
         if (!updates.has("editState")) return null;
 
-        var saveStatePath = savestatePath.resolve(playerId);
+        var saveStatePath = wsRoot.resolve(mapId).resolve(".savestates").resolve(playerId);
         try {
             Files.createDirectories(saveStatePath.getParent());
             Files.writeString(saveStatePath, new Gson().toJson(updates.get("editState")));

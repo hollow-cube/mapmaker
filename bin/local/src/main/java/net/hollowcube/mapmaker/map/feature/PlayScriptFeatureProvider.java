@@ -33,7 +33,7 @@ public class PlayScriptFeatureProvider implements FeatureProvider {
 
     @Override
     public void init(@NotNull ConfigLoaderV3 config) {
-        this.workspace = config.get(LocalWorkspace.class).path();
+        this.workspace = config.get(LocalWorkspace.class).activeProject();
     }
 
     @Override
