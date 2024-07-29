@@ -105,8 +105,6 @@ public class ItemRegistry implements PlayerCooldown {
         for (var item : Material.values()) {
             allItemNames.add(item.namespace());
         }
-
-//        register(DebugStickItem.INSTANCE); //todo
     }
 
     public @NotNull EventNode<InstanceEvent> eventNode() {

@@ -37,7 +37,8 @@ public abstract class ItemHandler {
     public static final int LEFT_CLICK_BLOCK = 1 << 5;
     public static final int LEFT_CLICK_ENTITY = 1 << 6;
 
-    public static final int LEFT_CLICK_GUI = 1 << 6;
+    // Not implemented very well, and not included in the ANY flags.
+    public static final int LEFT_CLICK_GUI = 1 << 7;
 
     public static final int RIGHT_CLICK_ANY = RIGHT_CLICK_AIR | RIGHT_CLICK_BLOCK | RIGHT_CLICK_ENTITY;
     public static final int LEFT_CLICK_ANY = LEFT_CLICK_AIR | LEFT_CLICK_BLOCK | LEFT_CLICK_ENTITY;
