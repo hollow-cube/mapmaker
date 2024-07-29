@@ -19,6 +19,7 @@ import org.jetbrains.annotations.*;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
     int DATA_VERSION = HCVersions.V1_21_HC1;
@@ -110,7 +111,23 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
         return instance().getTag(tag);
     }
     @Override
+    default <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
+    @Override
+    default <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
+    @Override
+    default <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
+    @Override
     default <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        throw new UnsupportedOperationException("World is read-only");
+    }
+    @Override
+    default <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
         throw new UnsupportedOperationException("World is read-only");
     }
     @Override

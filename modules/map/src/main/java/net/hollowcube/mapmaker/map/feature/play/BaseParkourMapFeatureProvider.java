@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -38,6 +39,7 @@ import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -80,6 +82,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
+    private static final CustomizableHotbarManager PARKOUR_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
+            .defaultItem(0, MapDetailsItem.ID)
+            .defaultItem(1, ReturnToCheckpointItem.ID)
+            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
+
+            .defaultItem(4, EnterSpectatorModeItem.ID, (_, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
+
+            .defaultItem(7, ResetSaveStateItem.ID)
+            .defaultItem(8, ReturnToHubItem.ID)
+            .build();
+
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/parkour", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapPlayerStartSpectatorEvent.class, this::initSpectatorPlayer)
@@ -90,7 +103,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
             .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
-            .addListener(PlayerTickEvent.class, this::handlePlayerTick);
+            .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+
+            .addListener(InventoryPreClickEvent.class, event -> {
+                if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(event.getPlayer()))
+                    return;
+                event.setCancelled(true);
+            });
 
 //            .addListener(PlayerBlockInteractEvent.class, event -> {
 //                var block = event.getBlock();
@@ -128,6 +147,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return false;
 
+        PARKOUR_HOTBAR.registerEvents(eventNode);
         world.eventNode().addChild(eventNode);
 
         // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
@@ -167,26 +187,30 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        if (event.getMapWorld() instanceof TestingMapWorld) {
-            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-            inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_TESTING, null));
-
-            inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
-            inventory.setItemStack(8, itemRegistry.getItemStack(ExitTestModeItem.ID, null));
+        if (event.getMapWorld() instanceof PlayingMapWorld && MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
+            PARKOUR_HOTBAR.apply(player, world);
         } else {
-            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-            inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
-            if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
-                inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
-            }
+            if (event.getMapWorld() instanceof TestingMapWorld) {
+                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+                inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
+                inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_TESTING, null));
 
-            if (!event.getMap().getSetting(MapSettings.NO_SPECTATOR)) {
-                inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
-            }
+                inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+                inventory.setItemStack(8, itemRegistry.getItemStack(ExitTestModeItem.ID, null));
+            } else {
+                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+                inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
+                if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
+                    inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+                }
 
-            inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
-            inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+                if (!event.getMap().getSetting(MapSettings.NO_SPECTATOR)) {
+                    inventory.setItemStack(4, itemRegistry.getItemStack(EnterSpectatorModeItem.ID, null));
+                }
+
+                inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+                inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+            }
         }
 
         var visibilityPredicate = new PlayerVisibilityPredicate(player);
