@@ -39,6 +39,10 @@ public class CustomizableHotbarManager {
         return new Builder(name);
     }
 
+    public static boolean isActive(@NotNull Player player) {
+        return player.hasTag(TAG);
+    }
+
     public static void unregister(@NotNull Player player) {
         player.removeTag(TAG);
     }
