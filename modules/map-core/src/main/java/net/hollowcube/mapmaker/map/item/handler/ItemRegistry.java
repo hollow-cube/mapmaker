@@ -10,11 +10,14 @@ import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.instance.InstanceTickEvent;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -84,7 +87,11 @@ public class ItemRegistry implements PlayerCooldown {
             .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
             .addListener(EntityAttackEvent.class, this::handleHitEntity)
-            .addListener(InstanceTickEvent.class, this::handleInstanceTick);
+            .addListener(InstanceTickEvent.class, this::handleInstanceTick)
+            .addListener(EventListener.builder(InventoryPreClickEvent.class)
+                    .handler(this::handleLeftClickGui)
+                    .ignoreCancelled(false)
+                    .build());
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
@@ -316,6 +323,23 @@ public class ItemRegistry implements PlayerCooldown {
                 null,
                 null,
                 event.getTarget()
+        ));
+    }
+
+    private void handleLeftClickGui(@NotNull InventoryPreClickEvent event) {
+        var player = event.getPlayer();
+        if (player.getTag(TRIGGER_TAG) != null) return;
+        //todo support other gui actions here
+        if (event.getInventory() != null || event.getClickType() != ClickType.LEFT_CLICK) return;
+
+        var itemStack = event.getClickedItem();
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_GUI)) return;
+
+        player.setTag(TRIGGER_TAG, true);
+        itemHandler.leftClicked(new ItemHandler.Click(
+                itemHandler, player, itemStack, Player.Hand.MAIN,
+                null, null, null, null
         ));
     }
 
