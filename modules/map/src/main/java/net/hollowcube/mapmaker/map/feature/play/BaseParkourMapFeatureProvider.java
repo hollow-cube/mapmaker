@@ -82,12 +82,40 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
-    private static final CustomizableHotbarManager PARKOUR_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
+    private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
+            .defaultItem(0, MapDetailsItem.ID)
+            .defaultItem(1, ReturnToCheckpointItem.ID)
+            .defaultItem(2, SetSpectatorCheckpointItem.ID_TESTING)
+
+            .defaultItem(7, ResetSaveStateItem.ID)
+            .defaultItem(8, ExitTestModeItem.ID)
+            .build();
+
+    private static final CustomizableHotbarManager PLAYING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
             .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToCheckpointItem.ID)
             .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
             .defaultItem(4, EnterSpectatorModeItem.ID, (_, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
+
+            .defaultItem(7, ResetSaveStateItem.ID)
+            .defaultItem(8, ReturnToHubItem.ID)
+            .build();
+
+    private static final CustomizableHotbarManager SPEC_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/spec")
+            .defaultItem(0, MapDetailsItem.ID)
+            .defaultItem(1, ReturnToSpectatorCheckpointItem.ID)
+            .defaultItem(2, SetSpectatorCheckpointItem.ID_SPECTATOR)
+
+            .defaultItem(4, ExitSpectatorModeItem.ID)
+
+            .defaultItem(7, ToggleFlightItem.ID_OFF)
+            .defaultItem(8, ReturnToHubItem.ID)
+            .build();
+
+    private static final CustomizableHotbarManager FINISH_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/finish")
+            .defaultItem(0, MapDetailsItem.ID)
+            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
             .defaultItem(7, ResetSaveStateItem.ID)
             .defaultItem(8, ReturnToHubItem.ID)
@@ -147,7 +175,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return false;
 
-        PARKOUR_HOTBAR.registerEvents(eventNode);
+        if (world instanceof TestingMapWorld) {
+            TESTING_HOTBAR.registerEvents(eventNode);
+        } else {
+            PLAYING_HOTBAR.registerEvents(eventNode);
+            SPEC_HOTBAR.registerEvents(eventNode);
+            FINISH_HOTBAR.registerEvents(eventNode);
+        }
         world.eventNode().addChild(eventNode);
 
         // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
@@ -187,8 +221,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        if (event.getMapWorld() instanceof PlayingMapWorld && MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
-            PARKOUR_HOTBAR.apply(player, world);
+        if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
+            if (event.getMapWorld() instanceof TestingMapWorld) {
+                TESTING_HOTBAR.apply(player, world);
+            } else {
+                PLAYING_HOTBAR.apply(player, world);
+            }
         } else {
             if (event.getMapWorld() instanceof TestingMapWorld) {
                 inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
@@ -248,12 +286,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
-        inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_SPECTATOR, null));
-        inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
-        inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID_OFF, null));
-        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+        if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
+            SPEC_HOTBAR.apply(player, event.getMapWorld());
+        } else {
+            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+            inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
+            inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_SPECTATOR, null));
+            inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
+            inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID_OFF, null));
+            inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+        }
 
         // Only visibility extension, no viewer rule (spectators can see anyone)
         player.updateViewerRule(null);
@@ -267,13 +309,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();
-        inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
-        if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
-            inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
-        }
+        if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
+            FINISH_HOTBAR.apply(player, event.getMapWorld());
+        } else {
+            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+            if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
+                inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
+            }
 
-        inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
-        inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+            inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
+            inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
+        }
 
         // Only visibility extension, no viewer rule (spectators can see anyone)
         player.updateViewerRule(null);
