@@ -17,6 +17,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,10 +28,15 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 
 public class CustomizableHotbarManager {
+    private static final Tag<CustomizableHotbarManager> TAG = Tag.Transient("active_hotbar");
     private static final int N_ENTRIES = 9;
 
     public static @NotNull Builder builder(@NotNull String name) {
         return new Builder(name);
+    }
+
+    public static void unregister(@NotNull Player player) {
+        player.removeTag(TAG);
     }
 
     private final PlayerSetting<String[]> setting; // Empty string or null == not present.
@@ -69,6 +75,8 @@ public class CustomizableHotbarManager {
 
             inventory.setItemStack(i, itemRegistry.getItemStack(itemId, null));
         }
+
+        player.setTag(TAG, this);
     }
 
     private @NotNull JsonElement writeHotbarSetting(String[] hotbar) {
@@ -95,8 +103,8 @@ public class CustomizableHotbarManager {
     private void handlePreClick(@NotNull InventoryPreClickEvent event) {
         var player = event.getPlayer();
         if (!MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) return; // Not enabled for this player
-        if (event.getInventory() != null || player.getOpenInventory() != null)
-            return; // Not the player inventory
+        if (this != player.getTag(TAG) || event.getInventory() != null || player.getOpenInventory() != null)
+            return; // Not active on this hotbar or not the player inventory
         if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK) {
             event.setCancelled(true);
             return; // Not the hotbar or not a left click
@@ -109,8 +117,8 @@ public class CustomizableHotbarManager {
     private void handlePostClick(@NotNull InventoryClickEvent event) {
         var player = event.getPlayer();
         if (!MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) return; // Not enabled for this player
-        if (event.getInventory() != null || player.getOpenInventory() != null)
-            return; // Not the player inventory
+        if (this != player.getTag(TAG) || event.getInventory() != null || player.getOpenInventory() != null)
+            return; // Not active on this hotbar or not the player inventory
         if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK)
             return; // Not the hotbar or not a left click
 
@@ -144,7 +152,8 @@ public class CustomizableHotbarManager {
     private void handleCloseInventory(@NotNull InventoryCloseEvent event) {
         var player = event.getPlayer();
         if (!MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) return; // Not enabled for this player
-        if (event.getInventory() != null) return; // Not the player inventory
+        if (this != player.getTag(TAG) || event.getInventory() != null)
+            return; // Not active on this hotbar or not the player inventory
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return; // Sanity
 
