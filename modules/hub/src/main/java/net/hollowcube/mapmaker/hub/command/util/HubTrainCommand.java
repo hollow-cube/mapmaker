@@ -7,7 +7,6 @@ import net.hollowcube.command.arg.ArgumentEntity;
 import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -86,7 +85,7 @@ public class HubTrainCommand extends CommandDsl {
                     // Spawn the train in the world, we will set the proper position in the charge step
                     model.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into());
                     model.getEntityMeta().setScale(new Vec(0));
-                    FutureUtil.getUnchecked(model.setInstance(target.getInstance(), target.getPosition().add(target.getPosition().direction().withY(0).normalize().mul(20))));
+                    model.setInstance(target.getInstance(), target.getPosition().add(target.getPosition().direction().withY(0).normalize().mul(20)));
                 }
                 target.sendMessage(Component.text("You hear the rumbling of a distant train...", NamedTextColor.RED));
                 // Spawn train
@@ -100,7 +99,7 @@ public class HubTrainCommand extends CommandDsl {
                 for (NpcItemModel model : train) {
                     // Move further parts of the train back with offset so it doesn't overlap
                     Pos offsetStart = trainStart.add(trainDirection.mul(5 * offset)).withView(target.getPosition().yaw() + 90f, 0f);
-                    FutureUtil.getUnchecked(model.teleport(offsetStart));
+                    model.teleport(offsetStart);
                     offset++;
                 }
                 state++;
@@ -111,7 +110,7 @@ public class HubTrainCommand extends CommandDsl {
                     // Move further parts of the train back with offset so it doesn't overlap
                     model.getEntityMeta().setScale(new Vec(4));
                     model.getEntityMeta().setPosRotInterpolationDuration(trainActive);
-                    FutureUtil.getUnchecked(model.teleport(model.getPosition().add(trainDirection.mul(distanceFromPlayer * -2))));
+                    model.teleport(model.getPosition().add(trainDirection.mul(distanceFromPlayer * -2)));
                 }
                 state++;
                 return TaskSchedule.tick(trainActive / 2);

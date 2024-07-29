@@ -325,7 +325,7 @@ public class InventoryViewHost {
                     slot += invSize - 9;
                 }
             } else {
-                event.setCancelled(true);
+                // Not a relevant click
                 return;
             }
 

@@ -158,6 +158,11 @@ public class ItemRegistry implements PlayerCooldown {
         return builder.build();
     }
 
+    public @Nullable String getItemId(@NotNull ItemStack itemStack) {
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        return itemHandler == null ? null : itemHandler.id().asString();
+    }
+
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
         return allItemNames.stream()

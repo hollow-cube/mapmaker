@@ -118,6 +118,7 @@ public class MapEntity extends Entity implements TerraformEntity {
             return PreDataFixFixes.readEntityMeta1_20_4(type, b1);
         });
         for (var entry : loadedMetadata.entrySet()) {
+
             metadata.setIndex(entry.getKey(), entry.getValue());
         }
 

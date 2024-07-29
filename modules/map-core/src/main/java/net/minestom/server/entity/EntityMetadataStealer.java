@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class EntityMetadataStealer {
 
-    public static @NotNull Metadata steal(@NotNull Entity entity) {
+    public static @NotNull MetadataHolder steal(@NotNull Entity entity) {
         return entity.metadata;
     }
 
