@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
+import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.feature.play.item.ReturnToHubItem;
@@ -26,6 +27,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/building", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::deinitPlayer)
             .addListener(PlayerTickEvent.class, this::handlePlayerTick);
 
     @Override
@@ -37,6 +39,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         world.eventNode().addChild(eventNode);
 
         var itemRegistry = world.itemRegistry();
+        itemRegistry.registerSilent(CustomizableHotbarManager.RESET_TO_DEFAULT_ITEM);
         itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
 
@@ -58,6 +61,11 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         }
 
         player.setAllowFlying(true);
+    }
+
+    public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
+        var player = event.getPlayer();
+        CustomizableHotbarManager.unregister(player);
     }
 
     public void handlePlayerTick(@NotNull PlayerTickEvent event) {

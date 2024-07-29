@@ -186,6 +186,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
         var itemRegistry = world.itemRegistry();
+        itemRegistry.registerSilent(CustomizableHotbarManager.RESET_TO_DEFAULT_ITEM);
         itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(EnterSpectatorModeItem.INSTANCE);
@@ -329,6 +330,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var player = event.getPlayer();
+        CustomizableHotbarManager.unregister(player);
+
         if (!event.getMapWorld().isPlaying(player)) return;
 
         var saveState = SaveState.optionalFromPlayer(player);

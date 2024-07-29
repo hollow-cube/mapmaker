@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.entity.Player;
@@ -17,6 +18,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,8 @@ import java.util.function.BiPredicate;
 public class CustomizableHotbarManager {
     private static final Tag<CustomizableHotbarManager> TAG = Tag.Transient("active_hotbar");
     private static final int N_ENTRIES = 9;
+
+    public static final ItemHandler RESET_TO_DEFAULT_ITEM = new ResetToDefaultItem();
 
     public static @NotNull Builder builder(@NotNull String name) {
         return new Builder(name);
@@ -75,6 +79,8 @@ public class CustomizableHotbarManager {
 
             inventory.setItemStack(i, itemRegistry.getItemStack(itemId, null));
         }
+        // Always add the reset item (bottom right of inventory)
+        inventory.setItemStack(35, itemRegistry.getItemStack(ResetToDefaultItem.ID, null));
 
         player.setTag(TAG, this);
     }
@@ -192,6 +198,40 @@ public class CustomizableHotbarManager {
 
         public @NotNull CustomizableHotbarManager build() {
             return new CustomizableHotbarManager(name, defaultPositions, conditions);
+        }
+    }
+
+    private static class ResetToDefaultItem extends ItemHandler {
+        public static final String ID = "mapmaker:reset_hotbar";
+
+        public ResetToDefaultItem() {
+            super(ID, LEFT_CLICK_GUI);
+        }
+
+        @Override
+        public @NotNull Material material() {
+            return Material.BARRIER;
+        }
+
+        @Override
+        public int customModelData() {
+            return 420;
+        }
+
+        @Override
+        protected void leftClicked(@NotNull Click click) {
+            var hotbar = click.player().getTag(TAG);
+            if (hotbar == null) return;
+
+            var world = MapWorld.forPlayerOptional(click.player());
+            if (world == null) return; // Sanity
+
+            var playerData = PlayerDataV2.fromPlayer(click.player());
+            playerData.setSetting(hotbar.setting, new String[0]);
+            hotbar.apply(click.player(), world);
+
+            // Save the reset setting.
+            FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().playerService()));
         }
     }
 }
