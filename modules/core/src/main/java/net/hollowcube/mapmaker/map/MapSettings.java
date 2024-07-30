@@ -29,6 +29,7 @@ public class MapSettings {
 
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
+    public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
 
     // Weird/one off/experimental settings
     public static final MapSetting<Boolean> PROGRESS_INDEX_ADDITION = MapSetting.Bool("progress_index_addition", false);

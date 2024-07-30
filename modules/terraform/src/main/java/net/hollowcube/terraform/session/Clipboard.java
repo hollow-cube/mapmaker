@@ -75,18 +75,19 @@ public class Clipboard {
 //            newSize = transform.apply2(newSize);
 //        }
 
-        var newSchem = SchematicBuilder.builder();
+//        var newSchem = SchematicBuilder.builder();
 //        newSchem.offset(schematic.offset());
-        schematic.forEachBlock((p, block) -> {
-            for (var transform : transforms) {
-                p = transform.apply2(p);
-                if (hasRotationProperty(block)) {
-                    block = transform.applyToBlock(block);
-                }
-            }
-            newSchem.block(p, block);
-        });
-        return newSchem.build();
+//        schematic.forEachBlock((p, block) -> {
+//            for (var transform : transforms) {
+//                p = transform.apply2(p);
+//                if (hasRotationProperty(block)) {
+//                    block = transform.applyToBlock(block);
+//                }
+//            }
+//            newSchem.block(p, block);
+//        });
+//        return newSchem.build();
+        return schematic;
     }
 
     public @NotNull CompletableFuture<Void> apply(@NotNull LocalSession session, @NotNull Point pos) {

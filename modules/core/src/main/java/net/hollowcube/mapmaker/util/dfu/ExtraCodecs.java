@@ -14,6 +14,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.particle.Particle;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +44,9 @@ public final class ExtraCodecs {
 
     public static final Codec<Material> MATERIAL = Codec.STRING
             .xmap(Material::fromNamespaceId, Material::name);
+
+    public static final Codec<Particle> PARTICLE = Codec.STRING
+            .xmap(Particle::fromNamespaceId, Particle::name);
 
     public static final Codec<ItemStack> ITEM_STACK = new Codec<>() {
         @Override

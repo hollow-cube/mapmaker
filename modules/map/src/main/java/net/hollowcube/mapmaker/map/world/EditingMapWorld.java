@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
@@ -19,12 +20,14 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.compat.axiom.Axiom;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomLateEnableEvent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -66,7 +69,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final EventNode<InstanceEvent> readWriteNode = EventNode.event("editing-events-rw", EventFilter.INSTANCE, this::canEventWrite)
             .addListener(InstanceTickEvent.class, ev -> tick())
             .addListener(PlayerUseItemEvent.class, this::handleItemUse)
-            .addListener(PlayerBlockBreakEvent.class, this::handleBlockBreak);
+            .addListener(PlayerBlockBreakEvent.class, this::handleBlockBreak)
+            .addListener(TerraformAxiomLateEnableEvent.class, this::handleAxiomLateInit);
     private final EventNode<InstanceEvent> readOnlyNode = EventNode.event("editing-events-ro", EventFilter.INSTANCE, Predicate.not(this::canEventWrite))
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
@@ -74,7 +78,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
 
-    private TestingMapWorld testWorld = null;
+    private volatile TestingMapWorld testWorld = null;
 
     private final ReentrantLock saveLock = new ReentrantLock();
     private Task autoSaveTask = null;
@@ -84,7 +88,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             @NotNull MapServer server, @NotNull Terraform terraform,
             @NotNull FeatureList features, @NotNull MapData map
     ) {
-        super(server, map, features, new MapInstance(map.createDimensionName('e'), false)); // map.id().equals(MapData.SPAWN_MAP_ID)
+        super(server, map, features, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
         this.terraform = terraform;
 
         instance.setGenerator(MapGenerators.voidWorld());
@@ -102,6 +106,11 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public boolean canEdit(@NotNull Player player) {
         return isPlaying(player);
+    }
+
+    @Override
+    public @Nullable MapWorld playWorld() {
+        return testWorld();
     }
 
     public int memoryUsage() {
@@ -168,10 +177,19 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         }
     }
 
+    public void closeTestWorld() {
+        if (testWorld != null) {
+            testWorld.close(Component.text("Test world closed"));
+            testWorld = null;
+        }
+    }
+
     @Override
     public void close(@Nullable Component reason) {
-        if (testWorld != null)
+        if (testWorld != null) {
             testWorld.close(reason);
+            testWorld = null;
+        }
 
         super.close(reason);
 
@@ -368,6 +386,16 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         ItemStack itemStack = event.getItemStack();
         if (itemStack.material() == Material.SUSPICIOUS_STEW) {
             event.setCancelled(true);
+        }
+    }
+
+    private void handleAxiomLateInit(@NotNull TerraformAxiomLateEnableEvent event) {
+        final Player player = event.getPlayer();
+        if (!canEdit(player)) return;
+
+        for (final Entity entity : instance.getEntities()) {
+            if (entity instanceof MarkerEntity m)
+                m.updateNewViewer(player);
         }
     }
 

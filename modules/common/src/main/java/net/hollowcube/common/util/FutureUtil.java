@@ -23,6 +23,14 @@ public final class FutureUtil {
 
     public static final Executor VIRTUAL = Executors.newVirtualThreadPerTaskExecutor();
 
+    public static <T> @NotNull Future<T> callNow(@NotNull Callable<T> callable) {
+        try {
+            return CompletableFuture.completedFuture(callable.call());
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> @Nullable T handleException(@NotNull Throwable t) {
         MinecraftServer.getExceptionManager().handleException(t);
@@ -60,6 +68,11 @@ public final class FutureUtil {
     }
 
     public static void submitVirtual(@NotNull Runnable runnable) {
+        if (isShuttingDown) {
+            runnable.run();
+            return;
+        }
+        
         Thread.startVirtualThread(() -> {
             try {
                 runnable.run();

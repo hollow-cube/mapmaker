@@ -82,7 +82,6 @@ public class Shutdowner implements HttpService, HealthCheck {
         isShuttingDown = true;
         shutdownHooks.forEach(runnable -> {
             try {
-                System.out.println("Running shutdown hook: " + runnable.name);
                 runnable.run();
             } catch (Exception e) {
                 e.printStackTrace();

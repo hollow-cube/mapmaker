@@ -15,6 +15,8 @@ public interface ChunkExt {
         return getHeight(heightmap, point.blockX(), point.blockZ());
     }
 
+    @NotNull Heightmap heightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap);
+
     void loadHeightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap, int[] data);
     int[] saveHeightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap);
 

@@ -8,6 +8,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "@maven//:dev_hollowcube_dataconverter",
         "//modules/command",
         "//modules/common",
         "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.

@@ -5,8 +5,9 @@ import com.google.inject.Guice;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
-import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.schem.util.GameDataProvider;
 import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.schem.SchemUpgrader;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.session.history.Change;
@@ -98,6 +99,8 @@ public final class TerraformImpl implements Terraform {
 
         this.threadPoolCompute = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-compute"));
         this.threadPoolApply = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-apply"));
+
+        GameDataProvider.replaceGlobals(new SchemUpgrader());
     }
 
     @Override
@@ -130,7 +133,7 @@ public final class TerraformImpl implements Terraform {
     @Override
     public void initPlayerSession(@NotNull Player player, @NotNull String playerId) {
         //todo handle exceptions here i guess
-        Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
+//        Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
 
         var sessionData = storage.loadPlayerSession(playerId);
         var session = new PlayerSession(this, playerId, player, sessionData);
@@ -154,7 +157,7 @@ public final class TerraformImpl implements Terraform {
         //todo handle exceptions here i guess
         var instance = Objects.requireNonNull(player.getInstance(), "Player must be in an instance");
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
-        Check.stateCondition(instance.hasTag(tag), "Player already has a local session");
+//        Check.stateCondition(instance.hasTag(tag), "Player already has a local session");
 
         var playerSession = PlayerSession.forPlayer(player);
         var sessionData = storage.loadLocalSession(playerSession.id(), sessionId);
@@ -249,7 +252,7 @@ public final class TerraformImpl implements Terraform {
                     if (chunk == null) {
                         // Chunk is not loaded
                         logger.warn("{}: reference to unloaded chunk at {}, {}", task, chunkX, chunkZ);
-                        chunk = FutureUtil.getUnchecked(instance.loadChunk(chunkX, chunkZ)); // We are in apply thread, its fine to block
+                        chunk = instance.loadChunk(chunkX, chunkZ).join(); // We are in apply thread, its fine to block
                     }
                     final var chunkRef = chunk; // Final var for lambda
 

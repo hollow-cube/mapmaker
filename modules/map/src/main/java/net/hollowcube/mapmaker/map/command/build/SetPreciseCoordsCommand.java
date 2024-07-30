@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
@@ -42,8 +43,8 @@ public class SetPreciseCoordsCommand extends CommandDsl {
 
     private void updatePreciseCoords(@NotNull Player player, @NotNull CommandContext context) {
         // Ensure they are editing a block
-        var targetBlockPosition = player.getTag(BaseEffectData.TARGET_PLATE);
-        if (targetBlockPosition == null) {
+        var updateTarget = player.getTag(BaseEffectData.TARGET_PLATE);
+        if (updateTarget == null) {
             player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_NO_TARGET);
             return;
         }
@@ -65,11 +66,19 @@ public class SetPreciseCoordsCommand extends CommandDsl {
             updated.set(true);
         };
 
-        var block = player.getInstance().getBlock(targetBlockPosition);
-        if (block.handler() instanceof CheckpointPlateBlock cp) {
-            cp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
-        } else if (block.handler() instanceof StatusPlateBlock sp) {
-            sp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
+        if (updateTarget instanceof Point targetBlockPosition) {
+            var block = player.getInstance().getBlock(targetBlockPosition);
+            if (block.handler() instanceof CheckpointPlateBlock cp) {
+                cp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
+            } else if (block.handler() instanceof StatusPlateBlock sp) {
+                sp.editData(player.getInstance(), targetBlockPosition, block, updater::accept);
+            } else return;
+        } else if (updateTarget instanceof MarkerEntity marker) {
+            if ("mapmaker:checkpoint".equals(marker.getType())) {
+                var data = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
+                updater.accept(data);
+                marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, data);
+            }
         } else return;
 
         if (updated.get()) {

@@ -8,6 +8,8 @@ import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class UnlitChunk extends DynamicChunk implements ChunkExt {
     private final Heightmaps heightmaps;
 
@@ -19,6 +21,11 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     @Override
     public int getHeight(int heightmap, int x, int z) {
         return heightmaps.get(heightmap, x, z);
+    }
+
+    @Override
+    public @NotNull Heightmap heightmap(int heightmap) {
+        return Objects.requireNonNull(heightmaps.heightmap(heightmap), "no such heightmap: " + heightmap);
     }
 
     @Override

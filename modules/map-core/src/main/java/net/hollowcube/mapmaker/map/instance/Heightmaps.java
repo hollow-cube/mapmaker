@@ -23,6 +23,10 @@ public class Heightmaps {
         heightmaps[WORLD_BOTTOM] = new Heightmap(chunk, Heightmap.BOTTOM, Predicate.not(Block::isAir));
     }
 
+    public @NotNull Heightmap heightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap) {
+        return heightmaps[heightmap];
+    }
+
     public int get(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap, int x, int z) {
         return heightmaps[heightmap].get(x, z);
     }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -49,6 +50,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final BiomeContainer biomeContainer = new BiomeContainer();
+    private final MarkerHandlerRegistry markerRegistry = new MarkerHandlerRegistry();
 
     private final Set<Player> players = Collections.synchronizedSet(new HashSet<>());
     private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
@@ -103,6 +105,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     }
 
     @Override
+    public @NotNull MarkerHandlerRegistry markerRegistry() {
+        return markerRegistry;
+    }
+
+    @Override
     public @NotNull Set<Player> players() {
         return playersUnmodifiable;
     }
@@ -127,11 +134,13 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
                 }
                 knownPacks = knownPacksFuture.get(5, TimeUnit.SECONDS);
             } catch (InterruptedException | TimeoutException e) {
-                throw new RuntimeException("Client failed to respond to known packs request", e);
+                logger.warn("Client failed to respond to known packs request", e);
+                knownPacks = null;
+//                throw new RuntimeException("Client failed to respond to known packs request", e);
             } catch (ExecutionException e) {
                 throw new RuntimeException("Error receiving known packs", e);
             }
-            boolean excludeVanilla = !knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
+            boolean excludeVanilla = knownPacks != null && !knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
 
             // Send registry data ourself to allow custom biomes per map
             var serverProcess = MinecraftServer.process();
