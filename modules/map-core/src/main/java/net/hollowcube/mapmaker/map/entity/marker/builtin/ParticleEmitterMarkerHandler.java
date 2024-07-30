@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerHandler;
 import net.hollowcube.mql.jit.MqlCompiler;
 import net.hollowcube.mql.jit.ValueScript;
 import net.kyori.adventure.nbt.*;
+import net.minestom.server.color.Color;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.coordinate.Point;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 public class ParticleEmitterMarkerHandler extends MarkerHandler {
     public static final String ID = "mapmaker:particle_emitter";
@@ -37,7 +39,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
     private boolean isValid = false;
     private int lifetime; // Loop duration, in ticks. 0 for infinite
     private double rate; // Particles per tick
-    private Particle particle;
+    private Function<ValueScript.Variables, Particle> particle;
     private ValueScript positionX;
     private ValueScript positionY;
     private ValueScript positionZ;
@@ -51,6 +53,8 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
     private ValueScript velocityX;
     private ValueScript velocityY;
     private ValueScript velocityZ;
+    // If not provided or 1, particles will be spawned. Otherwise they will not.
+    private ValueScript active;
 
     private final ValueScript.Variables variables = new ValueScript.Variables();
     private double toSpawn = 0;
@@ -94,12 +98,16 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
 
         while (toSpawn >= 1) {
             toSpawn--;
+
+            if (active != null && active.eval(ValueScript.Queries.INSTANCE, variables) != 1)
+                continue;
+
             Point position = entity.getPosition();
             if (positionX != null) {
                 position = position.add(
-                        positionX.eval(variables),
-                        positionY.eval(variables),
-                        positionZ.eval(variables)
+                        positionX.eval(ValueScript.Queries.INSTANCE, variables),
+                        positionY.eval(ValueScript.Queries.INSTANCE, variables),
+                        positionZ.eval(ValueScript.Queries.INSTANCE, variables)
                 );
             }
 
@@ -107,19 +115,19 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             int computedCount;
             Vec computedOffset;
             if (speed != null || count != null || offsetX != null) {
-                computedSpeed = (float) (speed != null ? speed.eval(variables) : 0);
-                double evaledCount = count != null ? count.eval(variables) : 1;
+                computedSpeed = (float) (speed != null ? speed.eval(ValueScript.Queries.INSTANCE, variables) : 0);
+                double evaledCount = count != null ? count.eval(ValueScript.Queries.INSTANCE, variables) : 1;
                 computedCount = evaledCount < 1 ? 1 : (int) evaledCount;
                 computedOffset = new Vec(
-                        offsetX != null ? offsetX.eval(variables) : 0,
-                        offsetY != null ? offsetY.eval(variables) : 0,
-                        offsetZ != null ? offsetZ.eval(variables) : 0
+                        offsetX != null ? offsetX.eval(ValueScript.Queries.INSTANCE, variables) : 0,
+                        offsetY != null ? offsetY.eval(ValueScript.Queries.INSTANCE, variables) : 0,
+                        offsetZ != null ? offsetZ.eval(ValueScript.Queries.INSTANCE, variables) : 0
                 );
             } else if (velocityX != null) {
                 var computedVelocity = new Vec(
-                        velocityX.eval(variables),
-                        velocityY.eval(variables),
-                        velocityZ.eval(variables)
+                        velocityX.eval(ValueScript.Queries.INSTANCE, variables),
+                        velocityY.eval(ValueScript.Queries.INSTANCE, variables),
+                        velocityZ.eval(ValueScript.Queries.INSTANCE, variables)
                 );
                 computedSpeed = (float) computedVelocity.length();
                 computedCount = 0;
@@ -130,7 +138,8 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
                 computedOffset = Vec.ZERO;
             }
 
-            entity.sendPacketToViewers(new ParticlePacket(particle, false, position, computedOffset, computedSpeed, computedCount));
+            var computedParticle = particle.apply(variables);
+            entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, position, computedOffset, computedSpeed, computedCount));
         }
     }
 
@@ -140,9 +149,9 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
         // Particle
         var particleName = data.getString("particle");
         Check.argCondition(particleName.isEmpty(), "Missing particle name");
-        particle = Particle.fromNamespaceId(particleName);
-        Check.argCondition(particle == null, "Unknown particle: " + particleName);
-        readTypedParticleData(data);
+        var rawParticle = Particle.fromNamespaceId(particleName);
+        Check.argCondition(rawParticle == null, "Unknown particle: " + particleName);
+        readTypedParticleData(rawParticle, data);
 
         // Rate
         if (keys.contains("rate")) {
@@ -190,6 +199,9 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             velocityZ = loadValueScript("velocity.z", velocityTag.get(2));
         } else velocityX = velocityY = velocityZ = null;
 
+        // Active
+        active = loadValueScript("active", data.get("active"));
+
         // Final validity checks
         boolean hasOffset = speed != null || count != null || offsetX != null || offsetY != null || offsetZ != null;
         boolean hasVelocity = velocityX != null || velocityY != null || velocityZ != null;
@@ -220,37 +232,83 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
                 throw new IllegalArgumentException(name + ": failed to compile script: " + e.getMessage());
             }
         } else if (tag instanceof NumberBinaryTag numberTag) {
-            return _ -> numberTag.doubleValue();
+            return (_, _) -> numberTag.doubleValue();
         } else {
             throw new IllegalArgumentException(name + ": expected number or script, got " + tag.getClass().getSimpleName());
         }
     }
 
-    private void readTypedParticleData(@NotNull CompoundBinaryTag data) throws IllegalArgumentException {
-        switch (particle) {
+    private void readTypedParticleData(@NotNull Particle rawParticle, @NotNull CompoundBinaryTag data) throws IllegalArgumentException {
+        switch (rawParticle) {
             case Particle.Block blockParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = _ -> blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
             case Particle.BlockMarker blockMarkerParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = _ -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
             case Particle.Dust dustParticle -> {
-                //todo need to support expressions in here.
+                ValueScript red, green, blue;
+                if (data.keySet().contains("color")) {
+                    var colorTag = assertVecTag("color", data.get("color"));
+                    red = loadValueScript("color.r", colorTag.get(0));
+                    green = loadValueScript("color.g", colorTag.get(1));
+                    blue = loadValueScript("color.b", colorTag.get(2));
+                } else red = green = blue = null;
+                var scale = loadValueScript("scale", data.get("scale"));
+                particle = variables -> {
+                    var p = dustParticle;
+                    if (red != null && green != null && blue != null) p = p.withColor(new Color(
+                            (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                    ));
+                    if (scale != null) p = p.withScale((float) scale.eval(ValueScript.Queries.INSTANCE, variables));
+                    return p;
+                };
             }
             case Particle.DustColorTransition dustColorTransitionParticle -> {
-                //todo
+                ValueScript red, green, blue;
+                if (data.keySet().contains("color")) {
+                    var colorTag = assertVecTag("color", data.get("color"));
+                    red = loadValueScript("color.r", colorTag.get(0));
+                    green = loadValueScript("color.g", colorTag.get(1));
+                    blue = loadValueScript("color.b", colorTag.get(2));
+                } else red = green = blue = null;
+                ValueScript tRed, tGreen, tBlue;
+                if (data.keySet().contains("color")) {
+                    var transitionTag = assertVecTag("transition", data.get("transition"));
+                    tRed = loadValueScript("transition.r", transitionTag.get(0));
+                    tGreen = loadValueScript("transition.g", transitionTag.get(1));
+                    tBlue = loadValueScript("transition.b", transitionTag.get(2));
+                } else tRed = tGreen = tBlue = null;
+                var scale = loadValueScript("scale", data.get("scale"));
+                particle = variables -> {
+                    var p = dustColorTransitionParticle;
+                    if (red != null && green != null && blue != null) p = p.withColor(new Color(
+                            (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                    ));
+                    if (tRed != null && tGreen != null && tBlue != null) p = p.withTransitionColor(new Color(
+                            (int) (tRed.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (tGreen.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                            (int) (tBlue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                    ));
+                    if (scale != null) p = p.withScale((float) scale.eval(ValueScript.Queries.INSTANCE, variables));
+                    return p;
+                };
             }
             case Particle.DustPillar dustPillarParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = _ -> dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -258,7 +316,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             // EntityEffect
             case Particle.FallingDust fallingDustParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = _ -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -266,11 +324,12 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             case Particle.Item itemParticle when data.get("item") instanceof StringBinaryTag itemName -> {
                 var material = Material.fromNamespaceId(itemName.value());
                 Check.argCondition(material == null, "Unknown item: " + itemName);
-                particle = itemParticle.withItem(ItemStack.of(material));
+                particle = _ -> itemParticle.withItem(ItemStack.of(material));
                 //todo should support custom model data and maybe other components.
             }
             // SculkCharge, Shriek, Vibration
             default -> {
+                particle = _ -> rawParticle;
             } // No data or unsupported
         }
     }
