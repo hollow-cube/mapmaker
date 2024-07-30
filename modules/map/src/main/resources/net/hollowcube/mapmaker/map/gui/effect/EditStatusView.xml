@@ -5,15 +5,13 @@
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.status.information"/>
+        <label translationKey="gui.status.information" sprite="generic/information"/>
 
         <text id="tab_text" width="5" height="1" translationKey="gui.status.tab"
-              font="play_maps_page" centered="true"/>
+              sprite="generic/text_display_5" font="play_maps_page" centered="true"/>
 
-        <button translationKey="gui.checkpoint.custom_blocks"
-                sprite="effect/executor_menu"/>
-        <button id="pick_up" translationKey="gui.status.pick_up"
-                sprite="effect/pick_up"/>
+        <label translationKey="gui.status.custom_blocks"/>
+        <label translationKey="gui.status.pick_up"/>
     </box>
 
     <switch id="tab_switch" width="9" height="4">
