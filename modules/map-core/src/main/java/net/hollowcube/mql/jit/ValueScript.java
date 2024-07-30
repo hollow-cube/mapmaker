@@ -43,6 +43,56 @@ public interface ValueScript {
         }
     }
 
-    double eval(@MqlEnv({"variable", "v"}) Variables variables);
+    class Queries {
+        public static final Queries INSTANCE = new Queries();
+
+        private Queries() {
+        }
+
+        @Query("hsb_to_red")
+        public double hsb_to_red(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 1 -> brightness * (1.0f - saturation * f);
+                case 2, 3 -> brightness * (1.0f - saturation);
+                case 4 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                default -> brightness;
+            };
+        }
+
+        @Query("hsb_to_green")
+        public double hsb_to_green(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 0 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                case 3 -> brightness * (1.0f - saturation * f);
+                case 4, 5 -> brightness * (1.0f - saturation);
+                default -> brightness;
+            };
+        }
+
+        //todo mql apparently doesnt correctly use renames for methods.
+        @Query("hsb_to_blue")
+        public double hsb_to_blue(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 0, 1 -> brightness * (1.0f - saturation);
+                case 2 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                case 5 -> brightness * (1.0f - saturation * f);
+                default -> brightness;
+            };
+        }
+    }
+
+    double eval(
+            @MqlEnv({"query", "q"}) Queries queries,
+            @MqlEnv({"variable", "v"}) Variables variables
+    );
 
 }
