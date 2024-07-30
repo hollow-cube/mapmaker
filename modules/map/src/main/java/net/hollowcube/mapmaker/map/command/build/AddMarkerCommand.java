@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.command.build;
 import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.kyori.adventure.text.Component;
@@ -15,7 +14,6 @@ import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.map.util.MapCondition.mapFeature;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class AddMarkerCommand extends CommandDsl {
@@ -25,8 +23,8 @@ public class AddMarkerCommand extends CommandDsl {
         super("addmarker");
 
         setCondition(and(
-                mapFilter(false, true, false),
-                mapFeature(MapFeatureFlags.MARKER_TOOL)
+                mapFilter(false, true, false)
+//                mapFeature(MapFeatureFlags.MARKER_TOOL)
         ));
 
         addSyntax(playerOnly(this::addMarkerEntity));

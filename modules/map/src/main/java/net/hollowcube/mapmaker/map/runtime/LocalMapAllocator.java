@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -45,6 +46,8 @@ public class LocalMapAllocator implements MapAllocator {
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<MapKey, Future<AbstractMapWorld>> maps = new HashMap<>();
+
+    private boolean isClosing = false;
 
     private record MapKey(@NotNull String mapId, @NotNull Class<?> worldType) {
     }
@@ -86,7 +89,7 @@ public class LocalMapAllocator implements MapAllocator {
 
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
-        return VIRTUAL_EXECUTOR.<Boolean>submit(() -> {
+        Callable<Boolean> task = () -> {
             for (var map : List.copyOf(maps.entrySet())) {
                 var key = map.getKey();
                 var world = FutureUtil.getUnchecked(map.getValue());
@@ -103,7 +106,8 @@ public class LocalMapAllocator implements MapAllocator {
             }
 
             return false;
-        });
+        };
+        return isClosing ? FutureUtil.callNow(task) : VIRTUAL_EXECUTOR.submit(task);
     }
 
     @Override
@@ -145,8 +149,11 @@ public class LocalMapAllocator implements MapAllocator {
     public void close() {
         lock.lock();
         try {
+            isClosing = true;
+            logger.debug("active maps: " + maps.keySet().stream().map(MapKey::mapId).toList());
             for (var future : List.copyOf(maps.values())) {
-                FutureUtil.getUnchecked(destroy(FutureUtil.getUnchecked(future).worldId(), Component.translatable("mapmaker.shutdown")));
+                var world = FutureUtil.getUnchecked(future);
+                FutureUtil.getUnchecked(destroy(world.worldId(), Component.translatable("mapmaker.shutdown")));
             }
         } finally {
             lock.unlock();

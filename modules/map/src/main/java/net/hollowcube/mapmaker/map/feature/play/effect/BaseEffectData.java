@@ -16,7 +16,8 @@ public abstract class BaseEffectData {
     public static final int NO_TIME_LIMIT = 0;
 
     // Used for setting coords on plates
-    public static final Tag<Point> TARGET_PLATE = Tag.Transient("custom_blocks/tp_plate/target");
+    // Either an Entity or a Point
+    public static final Tag<Object> TARGET_PLATE = Tag.Transient("custom_blocks/tp_plate/target");
 
     private String name;
     private int progressIndex;

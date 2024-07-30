@@ -11,26 +11,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapUpdateRequest {
-    String name = null;
-    String icon = null;
-    MapVariant variant = null;
-    String subvariant = null;
-    Pos spawnPoint = null;
-    MapSize size = null;
+    public String name = null;
+    public String icon = null;
+    public MapVariant variant = null;
+    public String subvariant = null;
+    public Pos spawnPoint = null;
+    public MapSize size = null;
 
-    Boolean onlySprint = null;
-    Boolean noSprint = null;
-    Boolean noJump = null;
-    Boolean noSneak = null;
-    Boolean boat = null;
-    JsonObject extra = null;
+    public Boolean onlySprint = null;
+    public Boolean noSprint = null;
+    public Boolean noJump = null;
+    public Boolean noSneak = null;
+    public Boolean boat = null;
+    public JsonObject extra = null;
 
-    List<MapTags.Tag> tags = null;
+    public List<MapTags.Tag> tags = null;
 
-    List<ObjectData> newObjects = new ArrayList<>();
-    List<String> removedObjects = new ArrayList<>();
+    public List<ObjectData> newObjects = new ArrayList<>();
+    public List<String> removedObjects = new ArrayList<>();
 
-    MapQuality qualityOverride = null;
+    public MapQuality qualityOverride = null;
 
 
     public boolean hasChanges() {

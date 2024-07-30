@@ -3,6 +3,7 @@ package net.hollowcube.terraform.compat.axiom.event;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
+import net.minestom.server.event.trait.PlayerInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * <p>By default, no response will be sent to the client. Only after setting the data it will send a response, unless
  * the event is cancelled in which case no response will be sent also.</p>
  */
-public class TerraformAxiomRequestMarkerDataEvent implements CancellableEvent {
+public class TerraformAxiomRequestMarkerDataEvent implements PlayerInstanceEvent, CancellableEvent {
     private final Player editor;
     private final UUID entityUuid;
     private CompoundBinaryTag data = null;
@@ -26,6 +27,11 @@ public class TerraformAxiomRequestMarkerDataEvent implements CancellableEvent {
     }
 
     public @NotNull Player getEditor() {
+        return editor;
+    }
+
+    @Override
+    public @NotNull Player getPlayer() {
         return editor;
     }
 

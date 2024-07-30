@@ -3,6 +3,9 @@ package net.hollowcube.mapmaker.map.entity.marker;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.hollowcube.terraform.compat.axiom.Axiom;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
@@ -12,6 +15,8 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
@@ -22,9 +27,7 @@ import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -38,19 +41,20 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class MarkerEntity extends MapEntity {
+    private static final BoundingBox NO_BB = new BoundingBox(0, 0, 0);
     private static final NamespaceID UNKNOWN_TYPE = NamespaceID.from("mapmaker:unknown");
 
-    // The persistent marker data is stored in `marker_data` where `type`, `name`, `min`, `max` are reserved.
+    // The persistent marker data is stored in `data` where `type`, `name`, `min`, `max` are reserved.
     // They are kept in a separate tag to avoid sending the root to axiom players which may have weird content by accident.
-    // When we eventually have an anvil converter, the `marker_data` tag will replace the root tag.
-    private static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("marker_data")
+    // When we eventually have an anvil converter, the `data` tag will replace the root tag.
+    private static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("data")
             .map(n -> (CompoundBinaryTag) n, n -> n).defaultValue(CompoundBinaryTag.empty());
-    private static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("marker_data")
+    private static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("data")
             .map(NamespaceID::from, NamespaceID::asString).defaultValue(UNKNOWN_TYPE);
-    private static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("marker_data");
+    private static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
     // Region min and max are stored as relative values.
-    private static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("marker_data");
-    private static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("marker_data");
+    private static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
+    private static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("data");
 
     private static final ListBinaryTag AXIOM_HIDE_LIST = ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, List.of(
             StringBinaryTag.stringBinaryTag("name"), StringBinaryTag.stringBinaryTag("min"), StringBinaryTag.stringBinaryTag("max"),
@@ -59,12 +63,20 @@ public class MarkerEntity extends MapEntity {
     private static final List<String> AXIOM_RESERVED_KEYS = List.of("line_argb", "line_thickness", "face_argb", "axiom:hide", "axiom:modify");
 
     static {
-        MinecraftServer.getGlobalEventHandler()
-                .addListener(TerraformAxiomRequestMarkerDataEvent.class, MarkerEntity::handleAxiomRequestMarkerData)
-                .addListener(TerraformAxiomUpdateMarkerDataEvent.class, MarkerEntity::handleAxiomUpdateMarkerData);
+        // Minestom event priorities are kinda dumb. They eval in this order (per node):
+        // - direct listeners first, non deterministic order
+        // - mapped nodes second, non deterministic order
+        // - children third, ordered by priority
+        // We need these to run first, so we directly register them on the root....
+        var globalEventHandler = MinecraftServer.getGlobalEventHandler();
+        globalEventHandler.addListener(TerraformAxiomRequestMarkerDataEvent.class, MarkerEntity::handleAxiomRequestMarkerData);
+        globalEventHandler.addListener(TerraformAxiomUpdateMarkerDataEvent.class, MarkerEntity::handleAxiomUpdateMarkerData);
     }
 
+    private MarkerHandler handler;
     private boolean visible = false;
+
+    private final Set<Player> insidePlayers = new HashSet<>();
 
     public MarkerEntity() {
         this(UUID.randomUUID());
@@ -72,6 +84,10 @@ public class MarkerEntity extends MapEntity {
 
     public MarkerEntity(@NotNull UUID uuid) {
         super(EntityType.MARKER, uuid);
+
+        hasPhysics = false;
+        setNoGravity(true);
+        hasCollision = false;
     }
 
     public @NotNull String getDisplayName() {
@@ -86,6 +102,14 @@ public class MarkerEntity extends MapEntity {
         return getTag(DATA_TAG);
     }
 
+    public @Nullable Point getMin() {
+        return getTag(REGION_MIN_TAG);
+    }
+
+    public @Nullable Point getMax() {
+        return getTag(REGION_MAX_TAG);
+    }
+
     public void setType(@NotNull NamespaceID type) {
         setTag(TYPE_TAG, type);
         updateForViewers();
@@ -95,21 +119,30 @@ public class MarkerEntity extends MapEntity {
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
         var world = MapWorld.unsafeFromInstance(instance);
         visible = world != null && !world.isReadOnly();
-        return super.setInstance(instance, spawnPosition);
+        if (handler != null) {
+            handler.onRemove();
+            handler = null;
+        }
+        return super.setInstance(instance, spawnPosition).thenRun(() -> {
+            if (world == null) return;
+            handler = world.markerRegistry().create(getType(), this);
+        });
     }
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
         super.readData(tag);
 
-        tagHandler().updateContent(tag.getCompound("data"));
+        setTag(DATA_TAG, tag.getCompound("data"));
+        updateBoundingBox();
+
     }
 
     @Override
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
         super.writeData(tag);
 
-        tag.put("data", tagHandler().asCompound());
+        tag.put("data", getTag(DATA_TAG));
     }
 
     @Override
@@ -135,6 +168,19 @@ public class MarkerEntity extends MapEntity {
     }
 
     @Override
+    public void tick(long time) {
+        super.tick(time);
+
+        if (handler != null) handler.onTick();
+    }
+
+    @Override
+    protected void remove(boolean permanent) {
+        if (handler != null) handler.onRemove();
+        super.remove(permanent);
+    }
+
+    @Override
     public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, int flags) {
         return super.teleport(position, chunks, flags).thenRun(() -> {
 
@@ -156,20 +202,43 @@ public class MarkerEntity extends MapEntity {
         var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
         if (marker == null) return;
 
-
         var builder = CompoundBinaryTag.builder();
         builder.put(event.getData().getCompound("data"));
         AXIOM_RESERVED_KEYS.forEach(builder::remove);
 
+        var oldType = marker.getType();
         marker.setTag(DATA_TAG, builder.build());
         marker.updateForViewers(); // Send updated region to viewers
+        marker.updateBoundingBox();
+
+        var newType = marker.getType();
+        if (!Objects.equals(oldType, newType)) {
+            if (marker.handler != null) marker.handler.onRemove();
+
+            var world = MapWorld.unsafeFromInstance(marker.getInstance());
+            if (world != null) {
+                marker.handler = world.markerRegistry().create(newType, marker);
+            } else marker.handler = null;
+        }
+        if (marker.handler != null) marker.handler.onDataChange(event.getEditor());
     }
 
     private void updateForViewers() {
-        if (isRemoved() || !visible || viewers.isEmpty()) return;
+        if (isRemoved() || !visible) return;
 
         var axiomAddPacket = createAxiomAddPacket();
         Axiom.sendPacket(getInstance(), axiomAddPacket);
+    }
+
+    private void updateBoundingBox() {
+        Point min = getMin(), max = getMax();
+        if (min == null || max == null) {
+            setBoundingBox(NO_BB);
+            return;
+        }
+
+        var size = max.sub(min);
+        setBoundingBox(new BoundingBox(size.x(), size.y(), size.z(), min));
     }
 
     private @NotNull AxiomMarkerDataPacket createAxiomAddPacket() {
@@ -179,8 +248,7 @@ public class MarkerEntity extends MapEntity {
         if (regionMax != null) regionMax = regionMax.add(getPosition());
         return new AxiomMarkerDataPacket(new AxiomMarkerDataPacket.Entry(
                 getUuid(), getPosition(), getDisplayName(),
-                regionMin, regionMax,
-                0, 0, 0
+                regionMin, regionMax, 0, 0, 0
         ));
     }
 
@@ -196,4 +264,36 @@ public class MarkerEntity extends MapEntity {
         return entity instanceof MarkerEntity marker ? marker : null;
     }
 
+    private void collisionTick() {
+        var world = MapWorld.unsafeFromInstance(getInstance());
+        if (world == null || world.playWorld() == null) return;
+        world = world.playWorld();
+        if (world == null || getInstance() != world.instance()) return;
+
+        for (var player : world.players()) {
+            if (insidePlayers.contains(player) || !CoordinateUtil.intersects(this, player)) continue;
+
+            insidePlayers.add(player); // Just entered
+            world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
+        }
+        for (var player : insidePlayers) {
+            if (world.isPlaying(player) && CoordinateUtil.intersects(this, player)) continue;
+
+            insidePlayers.remove(player); // Just exited
+            world.callEvent(new MarkerEntityExitedEvent(world, player, this));
+        }
+    }
+
+    @Override
+    public void update(long time) {
+        super.update(time);
+
+        if (getBoundingBox() != NO_BB)
+            collisionTick();
+    }
+
+    @Override
+    protected void movementTick() {
+        // Intentionally do nothing
+    }
 }

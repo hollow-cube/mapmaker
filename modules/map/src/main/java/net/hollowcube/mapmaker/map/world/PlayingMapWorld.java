@@ -206,6 +206,11 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         }
     }
 
+    @Override
+    public @Nullable MapWorld playWorld() {
+        return this;
+    }
+
     private void removeSpectatingPlayer(@NotNull Player player) {
         if (!isSpectating(player)) return;
 

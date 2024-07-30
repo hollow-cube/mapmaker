@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -31,6 +30,7 @@ import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
+    public static final Tag<CheckpointEffectData> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint").path("data");
 
     public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,
             Block.HEAVY_WEIGHTED_PRESSURE_PLATE, CheckpointPlateBlock::updateItemStack);
@@ -68,7 +68,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
         var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("blockPos", new BlockVec(interaction.getBlockPosition()))), data, maxResetHeight, () -> {
+        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 
@@ -76,7 +76,6 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
             newTag.setTag(DATA_TAG, data);
             instance.setBlock(blockPosition, interaction.getBlock().withNbt(newTag.asCompound()));
         }));
-        System.out.println("opened the gui");
 
         return false;
     }

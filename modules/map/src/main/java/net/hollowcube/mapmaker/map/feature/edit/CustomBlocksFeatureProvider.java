@@ -6,13 +6,21 @@ import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.edit.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -20,13 +28,19 @@ import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 @AutoService(FeatureProvider.class)
 public class CustomBlocksFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer)
+            .addListener(TerraformAxiomRequestMarkerDataEvent.class, this::handleMarkerClick);
+    private final EventNode<InstanceEvent> playingNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
+            .addListener(MarkerEntityEnteredEvent.class, this::handleEffectMarkerEnter);
+
 
     @Override
     public @NotNull List<Supplier<BlockHandler>> blockHandlers() {
@@ -54,6 +68,9 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             world.eventNode().addChild(eventNode);
 
             return true;
+        } else if (world instanceof PlayingMapWorld || world instanceof TestingMapWorld) {
+            world.eventNode().addChild(playingNode);
+            return true;
         }
 
         return false;
@@ -62,6 +79,37 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
     private void cleanupPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         var player = event.getPlayer();
         player.removeTag(BaseEffectData.TARGET_PLATE);
+    }
+
+    private void handleMarkerClick(@NotNull TerraformAxiomRequestMarkerDataEvent event) {
+        var player = event.getPlayer(); // If sneaking allow edit like normal
+        if (event.isCancelled() || event.getData() == null || player.isSneaking()) return;
+
+        var markerType = event.getData().getString("type");
+        if (!"mapmaker:checkpoint".equals(markerType)) return;
+        var entity = player.getInstance().getEntityByUuid(event.getEntityUuid());
+        if (!(entity instanceof MarkerEntity marker)) return; // Sanity
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
+
+        // Block the edit and open the checkpoint editor gui
+        event.setCancelled(true);
+        var checkpointData = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
+        var maxResetHeight = (int) (Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y() + marker.getPosition().y());
+        world.server().guiController().show(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", marker)),
+                checkpointData, maxResetHeight, () -> marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData)));
+    }
+
+    private void handleEffectMarkerEnter(@NotNull MarkerEntityEnteredEvent event) {
+        var marker = event.getMarkerEntity();
+        if (!"mapmaker:checkpoint".equals(marker.getType())) return;
+
+        var checkpoint = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
+        if (checkpoint == null) return;
+
+        var world = event.getMapWorld();
+        var checkpointId = marker.getUuid().toString();
+        world.callEvent(new MapPlayerCheckpointPreChangeEvent(event.getPlayer(), world, checkpointId, checkpoint));
     }
 
 }

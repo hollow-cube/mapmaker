@@ -177,7 +177,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
                 return true;
             }
         }
-        return false;
+        return false; // Allow the marker to be spawned
     }
 
     @Deprecated // WARN :: No new calls should be added to this function

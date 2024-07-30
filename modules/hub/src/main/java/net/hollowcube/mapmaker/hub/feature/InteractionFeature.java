@@ -86,6 +86,9 @@ public class InteractionFeature implements HubFeature {
                 entity.getBoundingBox(), entity.getPosition(), result);
         if (!hit || result.getCollidedPosition().distance(rayStart) > entity.interactionDistance() + 0.5)
             return;
+        // Only trigger the right click if they dont have another item or they are sneaking.
+        if (!player.isSneaking() && !player.getItemInMainHand().isAir())
+            return;
 
         entity.target().onRightClick(player);
     }

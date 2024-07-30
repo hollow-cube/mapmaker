@@ -27,6 +27,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +42,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class DebugCommand extends CommandDsl {
 
@@ -69,6 +72,8 @@ public class DebugCommand extends CommandDsl {
                 "Show information about yourself");
         createPermissionlessSubcommand("server", this::handleDebugServer,
                 "Show information about the current server");
+        createPermissionedSubcommand("gc", (_, _) -> System.gc(),
+                "Force a garbage collection");
 
         // Minestom stuff
         createPermissionlessSubcommand("commands", this::handleCommandsDebug,
@@ -82,6 +87,8 @@ public class DebugCommand extends CommandDsl {
                 "Show map allocator debug info");
         createPermissionedSubcommand("relight", this::relightWorld,
                 "Relight the world");
+        createPermissionedSubcommand("reheightmap", this::handleReHeightmapDebug,
+                "Rebuild the heightmap in the map");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
@@ -177,17 +184,41 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage("SH: " + sh + " SM: " + sm + " BH: " + bh);
     }
 
+    private void handleReHeightmapDebug(@NotNull Player player, @NotNull CommandContext context) {
+        queueRateLimitedWorldUpdate(player, "reheightmap", batch -> {
+            for (var chunk : batch) {
+                if (!(chunk instanceof ChunkExt ext)) return;
+
+                ext.heightmap(Heightmaps.WORLD_SURFACE).recalculate();
+                ext.heightmap(Heightmaps.MOTION_BLOCKING).recalculate();
+                ext.heightmap(Heightmaps.WORLD_BOTTOM).recalculate();
+            }
+        }, 100);
+    }
+
     private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {
         allocator.showDebugInfo(player);
     }
 
     private void relightWorld(@NotNull Player player, @NotNull CommandContext context) {
+        queueRateLimitedWorldUpdate(player, "relight", batch -> {
+            LightingChunk.relight(player.getInstance(), batch);
+            batch.forEach(player::sendChunk);
+        }, 50);
+    }
+
+    private void queueRateLimitedWorldUpdate(@NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
         FutureUtil.submitVirtual(() -> {
-            var instance = player.getInstance();
-            var chunks = instance.getChunks();
-            LightingChunk.relight(instance, chunks);
-            chunks.forEach(player::sendChunk);
-            player.sendMessage("done relighting.");
+            var chunks = List.copyOf(player.getInstance().getChunks());
+            int nBatches = (chunks.size() + rate - 1) / rate;
+            for (int i = 0; i < nBatches; i++) {
+                player.sendMessage("processing batch " + i + "/" + nBatches + ": " + name);
+                var batch = chunks.subList(i * rate, Math.min(chunks.size(), (i + 1) * rate));
+                action.accept(batch);
+                FutureUtil.sleep(500);
+            }
+
+            player.sendMessage("task finished: " + name);
         });
     }
 

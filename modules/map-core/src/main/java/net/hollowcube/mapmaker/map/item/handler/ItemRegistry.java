@@ -215,7 +215,6 @@ public class ItemRegistry implements PlayerCooldown {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
         tryUseCooldown(player, () -> {
-            System.out.println("place the block item");
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(

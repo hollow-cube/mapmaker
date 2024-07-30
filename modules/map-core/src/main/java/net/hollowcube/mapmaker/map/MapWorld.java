@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -65,10 +66,17 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
 
     @NotNull ItemRegistry itemRegistry();
     @NotNull BiomeContainer biomes();
+    @NotNull MarkerHandlerRegistry markerRegistry();
     // AnimationManager, etc.
 
     @NotNull Collection<Player> players();
     @NotNull Collection<Player> spectators();
+
+    @Deprecated
+    default @Nullable MapWorld playWorld() {
+        // This is a gross hack because we need to get the test world from an edit world out of that module.
+        return null;
+    }
 
     @Blocking
     void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event);

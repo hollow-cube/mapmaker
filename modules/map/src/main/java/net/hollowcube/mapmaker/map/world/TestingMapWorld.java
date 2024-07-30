@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
 

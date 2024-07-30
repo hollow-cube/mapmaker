@@ -9,7 +9,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CoordinateEditorView extends View {
-    private @ContextObject BlockVec blockPos; // The block position of the checkpoint being edited.
+    private @ContextObject Object updateTarget; // The block position (Point) or entity (Entity) of the checkpoint being edited.
 
     private @Outlet("x") Text xText;
     private @Outlet("y") Text yText;
@@ -41,7 +40,7 @@ public class CoordinateEditorView extends View {
 
     @Action("set_external")
     public void handleSetExternal(@NotNull Player player) {
-        player.setTag(BaseEffectData.TARGET_PLATE, blockPos);
+        player.setTag(BaseEffectData.TARGET_PLATE, updateTarget);
         player.sendMessage(MapMessages.COMMAND_SETPRECISECOORDS_BEGIN);
         player.closeInventory();
     }

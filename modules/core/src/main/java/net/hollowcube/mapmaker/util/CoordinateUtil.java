@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -12,6 +14,29 @@ import java.util.List;
 
 public final class CoordinateUtil {
     private CoordinateUtil() {
+    }
+
+    public static boolean intersects(@NotNull Point min1, @NotNull Point max1, @NotNull Point min2, @NotNull Point max2) {
+        return min1.x() <= max2.x() && max1.x() >= min2.x() &&
+                min1.y() <= max2.y() && max1.y() >= min2.y() &&
+                min1.z() <= max2.z() && max1.z() >= min2.z();
+    }
+
+    // pos1 = position of bb, bb1 = bounding box of entity
+    public static boolean intersects(@NotNull Point pos1, @NotNull BoundingBox bb1, @NotNull Point pos2, @NotNull BoundingBox bb2) {
+        return pos1.x() + bb1.minX() <= pos2.x() + bb2.maxX() && pos1.x() + bb1.maxX() >= pos2.x() + bb2.minX() &&
+                pos1.y() + bb1.minY() <= pos2.y() + bb2.maxY() && pos1.y() + bb1.maxY() >= pos2.y() + bb2.minY() &&
+                pos1.z() + bb1.minZ() <= pos2.z() + bb2.maxZ() && pos1.z() + bb1.maxZ() >= pos2.z() + bb2.minZ();
+    }
+
+    public static boolean intersects(@NotNull Entity entity1, @NotNull Entity entity2) {
+        return intersects(entity1.getPosition(), entity1.getBoundingBox(), entity2.getPosition(), entity2.getBoundingBox());
+    }
+
+    public static boolean isBetween(@NotNull Point min, @NotNull Point max, @NotNull Point p) {
+        return p.x() >= min.x() && p.x() <= max.x() &&
+                p.y() >= min.y() && p.y() <= max.y() &&
+                p.z() >= min.z() && p.z() <= max.z();
     }
 
     public static @NotNull Point abs(@NotNull Point point) {

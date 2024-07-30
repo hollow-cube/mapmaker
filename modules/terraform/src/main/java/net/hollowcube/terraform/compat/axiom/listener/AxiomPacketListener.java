@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.compat.axiom.listener;
 
 import net.hollowcube.terraform.compat.axiom.Axiom;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomLateEnableEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
@@ -49,6 +50,7 @@ public final class AxiomPacketListener {
             // It may have been enabled before the hello message was received, so check that.
             if (Axiom.isEnabled(player)) {
                 Axiom.enable(player); // This time the hello message will be sent.
+                EventDispatcher.call(new TerraformAxiomLateEnableEvent(player, player.getInstance()));
             } else {
                 var disablePacket = new AxiomEnablePacket(false);
                 player.sendPacket(disablePacket.toPacket(player));
@@ -239,18 +241,20 @@ public final class AxiomPacketListener {
                 EventDispatcher.callCancellable(event, () -> entity.teleport(event.getNewPosition()));
             }
 
-            if (entity.getEntityType().equals(EntityType.MARKER)) {
-                // Markers have special NBT handling for now.
-                //todo i think i can get rid of this special case now that we have TerraformEntity#readData
-                var event = new TerraformAxiomUpdateMarkerDataEvent(player, entry.uuid(), entry.nbt());
-                EventDispatcher.call(event);
-            } else {
-                if (entity instanceof TerraformEntity tfEntity)
-                    entity.editEntityMeta(EntityMeta.class, $ -> tfEntity.readData(entry.nbt()));
-                EventDispatcher.call(new TerraformModifyEntityEvent(entity));
+            if (entry.nbt().size() > 0) {
+                if (entity.getEntityType().equals(EntityType.MARKER)) {
+                    // Markers have special NBT handling for now.
+                    //todo i think i can get rid of this special case now that we have TerraformEntity#readData
+                    var event = new TerraformAxiomUpdateMarkerDataEvent(player, entry.uuid(), entry.nbt());
+                    EventDispatcher.call(event);
+                } else if (entity instanceof TerraformEntity tfEntity) {
+                    entity.editEntityMeta(EntityMeta.class, _ -> tfEntity.readData(entry.nbt()));
+                }
             }
 
             //todo passengers
+
+            EventDispatcher.call(new TerraformModifyEntityEvent(entity));
         }
     }
 
