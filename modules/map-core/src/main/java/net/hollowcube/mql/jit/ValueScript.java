@@ -11,6 +11,10 @@ public interface ValueScript {
         public double random2;
         public double random3;
         public double random4;
+        public double particleRandom1;
+        public double particleRandom2;
+        public double particleRandom3;
+        public double particleRandom4;
 
         @Query
         public double age() {
@@ -41,6 +45,27 @@ public interface ValueScript {
         public double random4() {
             return random4;
         }
+
+        @Query
+        public double particle_random_1() {
+            return particleRandom1;
+        }
+
+        @Query
+        public double particle_random_2() {
+            return particleRandom2;
+        }
+
+        @Query
+        public double particle_random_3() {
+            return particleRandom3;
+        }
+
+        @Query
+        public double particle_random_4() {
+            return particleRandom4;
+        }
+
     }
 
     class Queries {

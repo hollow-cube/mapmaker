@@ -102,6 +102,11 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             if (active != null && active.eval(ValueScript.Queries.INSTANCE, variables) != 1)
                 continue;
 
+            variables.particleRandom1 = ThreadLocalRandom.current().nextDouble();
+            variables.particleRandom2 = ThreadLocalRandom.current().nextDouble();
+            variables.particleRandom3 = ThreadLocalRandom.current().nextDouble();
+            variables.particleRandom4 = ThreadLocalRandom.current().nextDouble();
+
             Point position = entity.getPosition();
             if (positionX != null) {
                 position = position.add(
