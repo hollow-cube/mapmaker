@@ -14,7 +14,13 @@ import java.nio.file.Path;
 public class LocalServer {
 
     public static void main(String[] args) throws Exception {
-        Path workspacePath = Path.of("/Users/matt/dev/projects/hollowcube/project-run-2");
+        if (args.length < 1) {
+            System.err.println("Usage: LocalServer <path>");
+            System.exit(1);
+        }
+
+
+        Path workspacePath = Path.of(args[0]);
         Workspace workspace = Workspace.read(workspacePath);
 
         LocalWorkspace wsConf = new LocalWorkspace(

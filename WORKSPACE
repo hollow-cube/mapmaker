@@ -96,7 +96,8 @@ maven_install(
 
         # Luau
         "dev.hollowcube:luau:dev",
-        "dev.hollowcube:luau-natives-macos-arm64:0.0.2",
+        "dev.hollowcube:luau-natives-macos-arm64:0.1.0",
+        "dev.hollowcube:luau-natives-windows-x64:0.1.0",
 
         # Logging/Monitoring
         "org.slf4j:slf4j-api:2.0.9",
