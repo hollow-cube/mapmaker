@@ -4,9 +4,9 @@
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.map_rating.information"/>
+        <label translationKey="gui.map_rating.information" sprite="generic/information"/>
         <text id="map_id_text" width="5" height="1" translationKey="gui.map_rating.map_id"
-              font="play_maps_page" centered="true"/>
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
         <button id="add_comment" translationKey="gui.map_rating.add_comment"
                 sprite="rate_map/add_comment"/>
         <button id="report_map" translationKey="gui.map_rating.report_map"
