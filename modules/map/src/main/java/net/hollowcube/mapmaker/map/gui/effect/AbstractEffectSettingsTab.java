@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect;
 
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Switch;
-import net.hollowcube.canvas.Text;
-import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
@@ -13,6 +10,8 @@ import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.entity.Player;
+import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -87,8 +86,13 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     }
 
     @Action("time_limit_active")
-    public void handleChangeTimeLimitActive() {
-        openBaseEffectTimeLimitAnvil();
+    public void handleChangeTimeLimitActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+            openBaseEffectTimeLimitAnvil();
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setTimeLimit(BaseEffectData.NO_TIME_LIMIT);
+            updateFromData();
+        }
     }
 
     private void openBaseEffectTimeLimitAnvil() {
@@ -118,8 +122,13 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     }
 
     @Action("reset_height_active")
-    public void handleChangeResetHeightActive() {
-        openBaseEffectResetHeightAnvil();
+    public void handleChangeResetHeightActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+            openBaseEffectResetHeightAnvil();
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setResetHeight(BaseEffectData.NO_RESET_HEIGHT);
+            updateFromData();
+        }
     }
 
     private void openBaseEffectResetHeightAnvil() {

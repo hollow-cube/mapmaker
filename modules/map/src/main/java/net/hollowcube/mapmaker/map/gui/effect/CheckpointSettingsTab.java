@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect;
 
+import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.annotation.Action;
@@ -9,6 +10,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.entity.Player;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +30,13 @@ public class CheckpointSettingsTab extends AbstractEffectSettingsTab<CheckpointE
     }
 
     @Action("checkpoint_lives_active")
-    public void handleCheckpointLivesActive() {
-        openCheckpointLivesAnvil();
+    public void handleCheckpointLivesActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+            openCheckpointLivesAnvil();
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setLives(CheckpointEffectData.NO_LIVES);
+            updateFromData();
+        }
     }
 
     private void openCheckpointLivesAnvil() {

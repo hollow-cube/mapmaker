@@ -4,9 +4,9 @@
 
     <box width="9" align="ltr" sprite="effect/settings/name_and_progress_index">
         <text id="name_text" width="6" font="line_1" shift="19"
-              translationKey="gui.effect.name"/>
+              translationKey="gui.checkpoint.name"/>
         <text id="progress_index_text" width="3" font="line_1" centered="true"
-              translationKey="gui.effect.progress_index"/>
+              translationKey="gui.checkpoint.progress_index"/>
     </box>
 
     <box width="9" height="3" align="ltr">
@@ -15,7 +15,7 @@
                     translationKey="gui.checkpoint.lives"
                     sprite="effect/checkpoint/lives_inactive"/>
             <button id="checkpoint_lives_active" width="3" height="3"
-                    translationKey="gui.checkpoint.lives"
+                    translationKey="gui.checkpoint.lives.data"
                     sprite="effect/checkpoint/lives_active"/>
         </switch>
         <switch id="time_limit_switch" width="3" height="3">
@@ -23,7 +23,7 @@
                     translationKey="gui.effect.time_limit"
                     sprite="effect/settings/time_limit_inactive"/>
             <button id="time_limit_active" width="3" height="3"
-                    translationKey="gui.effect.time_limit"
+                    translationKey="gui.effect.time_limit.data"
                     sprite="effect/settings/time_limit_active"/>
         </switch>
         <switch id="reset_height_switch" width="3" height="3">
@@ -31,7 +31,7 @@
                     translationKey="gui.effect.reset_height"
                     sprite="effect/settings/reset_height_inactive"/>
             <button id="reset_height_active" width="3" height="3"
-                    translationKey="gui.effect.reset_height"
+                    translationKey="gui.effect.reset_height.data"
                     sprite="effect/settings/reset_height_active"/>
         </switch>
     </box>

@@ -1,8 +1,7 @@
-<?xml version="1.0" ?>
-<component id="anvil" width="9" height="5" align="ltr">
+<component id="anvil" width="9" height="5" align="ltr" sprite="anvil/field_container">
     <box width="9" height="1" align="ltr">
-        <button id="input" translationKey="forced.input"/>
-        <spacer/>
-        <button id="output" translationKey="gui.generic.empty"/>
+        <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
+        <label translationKey="gui.generic.empty" sprite="anvil/heart_and_clock"/>
+        <button id="output" translationKey="gui.generic.empty" backgroundSprite="anvil/checkmark_bg"/>
     </box>
 </component>
