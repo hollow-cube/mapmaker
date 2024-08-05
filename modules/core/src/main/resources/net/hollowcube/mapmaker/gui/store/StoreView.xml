@@ -5,14 +5,14 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.store.information"/>
+        <label translationKey="gui.store.information" sprite="generic/information"/>
         <switch id="name_switch" width="5" height="1">
             <text id="cubits_text" width="5" translationKey="gui.store.buy_cubits" font="slot_title"
-                  centered="true"/>
+                  centered="true" sprite="generic/text_display_5"/>
             <text id="hypercube_text" width="5" translationKey="gui.store.buy_hypercube" font="slot_title"
-                  centered="true"/>
+                  centered="true" sprite="generic/text_display_5"/>
             <text id="addons_text" width="5" translationKey="gui.store.buy_addons" font="slot_title"
-                  centered="true"/>
+                  centered="true" sprite="generic/text_display_5"/>
         </switch>
         <button id="cubits_to_coins" width="2" height="1"
                 translationKey="gui.store.cubits_to_coins"/>
@@ -26,11 +26,20 @@
 
     <!-- Bottom switcher -->
     <box width="9" height="3" align="ltr">
-        <button id="tab_id_cubits" width="3" height="3"
-                translationKey="gui.store.tab_cubits"/>
-        <button id="tab_id_hypercube" width="3" height="3"
-                translationKey="gui.store.tab_hypercube"/>
-        <button id="tab_id_addons" width="3" height="3"
-                translationKey="gui.store.tab_addons"/>
+        <switch id="tab_cubits_switch" width="3" height="3">
+            <button id="tab_id_cubits" width="3" height="3" translationKey="gui.store.tab_cubits.inactive"
+                    sprite="store/cubits_inactive"/>
+            <label width="3" height="3" translationKey="gui.store.tab_cubits.active" sprite="store/cubits_active"/>
+        </switch>
+        <switch id="tab_hypercube_switch" width="3" height="3">
+            <button id="tab_id_hypercube" width="3" height="3" translationKey="gui.store.tab_hypercube.inactive"
+                    sprite="store/ranks_inactive"/>
+            <label width="3" height="3" translationKey="gui.store.tab_hypercube.active" sprite="store/ranks_active"/>
+        </switch>
+        <switch id="tab_addons_switch" width="3" height="3">
+            <button id="tab_id_addons" width="3" height="3" translationKey="gui.store.tab_addons.inactive"
+                    sprite="store/add-ons_inactive"/>
+            <label width="3" height="3" translationKey="gui.store.tab_addons.active" sprite="store/add-ons_active"/>
+        </switch>
     </box>
 </component>

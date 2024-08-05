@@ -1,19 +1,20 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.hdb.gui ?>
-<component width="9" height="10" align="ttb">
+<component width="9" height="10" align="ttb" sprite="hdb/container">
     <box width="9" height="1" align="ltr">
         <BackButton/>
-        <label translationKey="gui.hdb.browser.information"/>
-        <label width="7" translationKey="todo"/>
+        <label translationKey="gui.hdb.browser.information" sprite="generic/information"/>
+        <label width="5" translationKey="todo" sprite="generic/text_display_5"/>
+        <label width="2" translationKey="todo"/>
     </box>
 
     <box width="9" height="5" align="ltr">
-        <button id="prev_page" width="1" height="5" translationKey="gui.hdb.browser.prev_page"/>
+        <button id="prev_page" width="1" height="5" translationKey="gui.hdb.browser.prev_page" sprite="generic/left_big"/>
 
         <pagination id="heads" width="7" height="5" child="HeadIconView"/>
 
-        <button id="next_page" width="1" height="5" translationKey="gui.hdb.browser.next_page"/>
+        <button id="next_page" width="1" height="5" translationKey="gui.hdb.browser.next_page" sprite="generic/right_big"/>
     </box>
 
     <box width="9" height="2" align="ltr">
