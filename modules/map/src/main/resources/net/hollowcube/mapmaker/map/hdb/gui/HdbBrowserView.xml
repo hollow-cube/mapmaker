@@ -5,16 +5,29 @@
     <box width="9" height="1" align="ltr">
         <BackButton/>
         <label translationKey="gui.hdb.browser.information" sprite="generic/information"/>
-        <label width="5" translationKey="todo" sprite="generic/text_display_5"/>
-        <label width="2" translationKey="todo"/>
+        <text id="hdb_browser_title" width="5" translationKey="gui.hdb.browser.title"
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
+        <button id="hdb_browser_search" width="2" translationKey="gui.hdb.browser.search"/>
     </box>
 
     <box width="9" height="5" align="ltr">
-        <button id="prev_page" width="1" height="5" translationKey="gui.hdb.browser.prev_page" sprite="generic/left_big"/>
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="prev_page" height="3"
+                    translationKey="gui.generic.previous_page"
+                    sprite="generic/left_big" spritePos="1"/>
+            <spacer/>
+        </box>
 
         <pagination id="heads" width="7" height="5" child="HeadIconView"/>
 
-        <button id="next_page" width="1" height="5" translationKey="gui.hdb.browser.next_page" sprite="generic/right_big"/>
+        <box height="5" align="ttb">
+            <spacer/>
+            <button id="next_page" height="3"
+                    translationKey="gui.generic.next_page"
+                    sprite="generic/right_big" spritePos="1"/>
+            <spacer/>
+        </box>
     </box>
 
     <box width="9" height="2" align="ltr">

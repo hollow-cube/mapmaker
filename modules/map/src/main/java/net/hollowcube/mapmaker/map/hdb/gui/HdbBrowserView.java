@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.hdb.gui;
 
 import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
@@ -9,6 +10,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.hdb.HeadInfo;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -23,12 +25,15 @@ public class HdbBrowserView extends View {
     private @ContextObject HeadDatabase hdb;
 
     private @Outlet("heads") Pagination headsPagination;
+    private @Outlet("hdb_browser_title") Text hdbBrowserTitle; //TODO make these match the translation keys without creating aids
 
     private String category;
     private String subCategory; // Only used for alphabet
 
     public HdbBrowserView(@NotNull Context context) {
         this(context, DEFAULT_CATEGORY);
+        hdbBrowserTitle.setText(category);
+        hdbBrowserTitle.setArgs(Component.text(category));
     }
 
     public HdbBrowserView(@NotNull Context context, @NotNull String category) {
@@ -95,8 +100,13 @@ public class HdbBrowserView extends View {
         request.respond(result, false);
     }
 
+    @Action("hdb_browser_search")
+    private void openSearchMenu() {
+        pushView(context -> new HdbSearchView(context, "")); //TODO make the back button work in this UI
+    }
+
     @Signal(CategoryIconView.SIG_SELECTED)
-    private void handleCategoryChanged(@NotNull String newCategory) {
+    private void handleCategoryChanged(@NotNull String newCategory) { //TODO make a selected background sprite for the currently selected category
         if (newCategory.contains("|")) {
             var split = newCategory.split("\\|");
             this.category = split[0];
@@ -105,6 +115,8 @@ public class HdbBrowserView extends View {
             this.category = newCategory;
             this.subCategory = null;
         }
+        hdbBrowserTitle.setText(category);
+        hdbBrowserTitle.setArgs(Component.text(category));
         this.headsPagination.reset();
     }
 }
