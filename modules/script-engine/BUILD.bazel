@@ -1,0 +1,18 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "script-engine",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//modules/common",
+        "//modules/core",
+        "//modules/map",
+        "//modules/map-core",
+        "//third_party:adventure_all",
+        "//third_party:minestom",
+        "//tools/luau-ap:luau_ap",
+        "@maven//:dev_hollowcube_luau",
+    ],
+)

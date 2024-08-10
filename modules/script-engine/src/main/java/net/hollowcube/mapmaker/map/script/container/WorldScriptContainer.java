@@ -1,7 +1,8 @@
-package net.hollowcube.mapmaker.map.script.engine;
+package net.hollowcube.mapmaker.map.script.container;
 
 import net.hollowcube.luau.util.Pin;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.script.AbstractRefManager;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorld;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -16,7 +17,7 @@ public class WorldScriptContainer extends AbstractRefManager implements ScriptCo
         super(eventNode, _ -> true);
 
         this.world = world;
-        
+
         this.worldRef = Pin.value(new LuaWorld(world));
     }
 

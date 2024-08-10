@@ -5,8 +5,8 @@ import net.hollowcube.luau.annotation.LuaBindable;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
 import net.hollowcube.luau.error.LuaArgError;
-import net.hollowcube.mapmaker.map.script.engine.AbstractRefManager;
-import net.hollowcube.mapmaker.map.script.engine.ScriptContainer;
+import net.hollowcube.mapmaker.map.script.AbstractRefManager;
+import net.hollowcube.mapmaker.map.script.container.ScriptContainer;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 

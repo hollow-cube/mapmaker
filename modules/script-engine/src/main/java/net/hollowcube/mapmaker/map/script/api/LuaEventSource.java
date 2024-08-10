@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.script.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.annotation.LuaMethod;
 import net.hollowcube.luau.annotation.LuaObject;
-import net.hollowcube.mapmaker.map.script.engine.AbstractRefManager;
+import net.hollowcube.mapmaker.map.script.AbstractRefManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;

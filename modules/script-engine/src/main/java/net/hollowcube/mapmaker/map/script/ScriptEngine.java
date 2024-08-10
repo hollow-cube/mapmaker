@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.script.engine;
+package net.hollowcube.mapmaker.map.script;
 
 import net.hollowcube.luau.BuilinLibrary;
 import net.hollowcube.luau.LuaState;
@@ -21,6 +21,9 @@ import net.hollowcube.mapmaker.map.script.api.world.BlockTypeImpl;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorld$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.world.LuaWorldView$Wrapper;
 import net.hollowcube.mapmaker.map.script.api.world.ParticleTypeImpl;
+import net.hollowcube.mapmaker.map.script.container.PlayerScriptContainer;
+import net.hollowcube.mapmaker.map.script.container.ScriptContainer;
+import net.hollowcube.mapmaker.map.script.container.WorldScriptContainer;
 import net.hollowcube.mapmaker.map.script.loader.MapScriptLoader;
 import net.hollowcube.mapmaker.map.script.loader.ScriptManifest;
 import net.kyori.adventure.text.Component;

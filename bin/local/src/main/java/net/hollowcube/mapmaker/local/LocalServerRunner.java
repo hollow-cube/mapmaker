@@ -62,10 +62,6 @@ public class LocalServerRunner extends MapServerRunner {
         return workspace;
     }
 
-    public @NotNull Path activeProjectDirectory() {
-        return workspace.activeProject();
-    }
-
     @Override
     public @NotNull MapService mapService() {
         return mapService;

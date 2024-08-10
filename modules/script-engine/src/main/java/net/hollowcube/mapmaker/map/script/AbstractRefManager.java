@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.script.engine;
+package net.hollowcube.mapmaker.map.script;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.func.LuaFunctions;

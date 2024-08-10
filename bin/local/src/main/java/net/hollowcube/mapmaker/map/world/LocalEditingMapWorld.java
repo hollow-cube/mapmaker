@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.world;
 import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.local.LocalServerRunner;
+import net.hollowcube.mapmaker.local.proj.Project;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
@@ -13,7 +14,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LocalEditingMapWorld extends EditingMapWorld {
+import java.nio.file.Files;
+
+public class LocalEditingMapWorld extends EditingMapWorld implements LocalProjectWorld {
 
     @Inject
     public LocalEditingMapWorld(
@@ -28,6 +31,13 @@ public class LocalEditingMapWorld extends EditingMapWorld {
     @Override
     public @NotNull LocalServerRunner server() {
         return (LocalServerRunner) super.server();
+    }
+
+    @Override
+    public @NotNull Project project() {
+        var path = server().workspace().path().resolve(map().id()).resolve("mmproj.json");
+        if (!Files.exists(path)) throw new RuntimeException("Project file not found: " + path);
+        return Project.read(path);
     }
 
     @Override

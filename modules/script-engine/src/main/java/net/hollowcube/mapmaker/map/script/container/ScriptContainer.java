@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.script.engine;
+package net.hollowcube.mapmaker.map.script.container;
 
 import net.hollowcube.luau.util.Pin;
 import net.hollowcube.mapmaker.map.MapWorld;
