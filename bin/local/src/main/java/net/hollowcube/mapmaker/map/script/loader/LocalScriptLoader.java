@@ -4,9 +4,10 @@ import com.google.auto.service.AutoService;
 import com.google.inject.Inject;
 import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.local.config.LocalWorkspace;
 import net.hollowcube.mapmaker.local.proj.Project;
-import net.minestom.server.network.packet.server.play.StatisticsPacket;
+import net.hollowcube.mapmaker.map.MapWorld;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,14 +25,18 @@ public class LocalScriptLoader implements MapScriptLoader {
     private final Map<String, Map.Entry<Integer, byte[]>> bytecodeCache = new HashMap<>();
 
     @Inject
-    public LocalScriptLoader(@NotNull ) {
-        this.projectRoot = projectRoot;
+    public LocalScriptLoader(@NotNull ConfigLoaderV3 config, @NotNull MapWorld world) {
+        this.projectRoot = config.get(LocalWorkspace.class).path().resolve(world.map().id());
+    }
+
+    @Override
+    public boolean shouldLoad() {
+        return Files.exists(projectRoot);
     }
 
     @Override
     public @NotNull ScriptManifest getManifest() {
         final Project project = Project.read(projectRoot);
-        StatisticsPacket
         return new ScriptManifest(project.scripts().stream()
                 .map(script -> new ScriptManifest.Script(script.path(), Path.of(script.path()).getFileName().toString(), script.type()))
                 .toList());

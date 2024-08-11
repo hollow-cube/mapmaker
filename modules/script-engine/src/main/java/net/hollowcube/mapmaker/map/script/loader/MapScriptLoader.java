@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface MapScriptLoader {
 
+    boolean shouldLoad();
+
     @NotNull ScriptManifest getManifest();
 
     /**

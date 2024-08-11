@@ -17,6 +17,7 @@ import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @AutoService(FeatureProvider.class)
@@ -40,7 +41,8 @@ public class PlayScriptFeatureProvider implements FeatureProvider {
         if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
 
-        MapScriptLoader loader = world.server().createInstance(LOADER_CLASS);
+        MapScriptLoader loader = world.server().createInstance(LOADER_CLASS, Map.of(MapWorld.class, world));
+        if (!loader.shouldLoad()) return false;
 
         // this is gross, but this gets called in a virtual thread which is bad because we need this to run on the
         // instance thread. May add some event that runs on instance thread when its starting.
