@@ -19,7 +19,6 @@ public class LocalServer {
             System.exit(1);
         }
 
-
         Path workspacePath = Path.of(args[0]);
         Workspace workspace = Workspace.read(workspacePath);
 

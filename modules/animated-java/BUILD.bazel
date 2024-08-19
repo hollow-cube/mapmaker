@@ -1,0 +1,23 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "animated-java",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//modules/common",
+        "//third_party:adventure_all",
+        "//third_party:minestom",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
+java_binary(
+    name = "animated-java-bin",
+    main_class = "net.hollowcube.aj.ExampleServer",
+    runtime_deps = [
+        ":animated-java",
+        "@maven//:ch_qos_logback_logback_classic",
+    ],
+)
