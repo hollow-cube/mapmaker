@@ -1,7 +1,10 @@
 package net.hollowcube.aj;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import net.hollowcube.aj.model.ExportedModel;
+import net.hollowcube.aj.resourcepack.ResourcePackExporter;
+import net.hollowcube.aj.util.MqlCompilerOps;
+import net.hollowcube.mql.MqlCompiler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -11,11 +14,24 @@ import net.minestom.server.event.player.PlayerStartSneakingEvent;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class ExampleServer {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        System.out.println("Hello, world!");
+
+//        var modelPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/house.json");
+        var modelPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/armorstand-unbaked.json");
+        var compiler2 = MqlCompiler.create();
+        compiler2.addInitializer("v.walk_speed = 360 * 1;\n" +
+                "v.run_speed = 360 * 1.5;\n" +
+                "v.stickbug_speed = 360 * 1.25;", null);
+        ExportedModel model2 = ExportedModel.fromFile(new MqlCompilerOps<>(JsonOps.INSTANCE, compiler2), modelPath);
+
+        var packRoot = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/test-rp");
+        ResourcePackExporter.export(packRoot, model2);
+
+
         var server = MinecraftServer.init();
 
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer();
@@ -33,13 +49,23 @@ public class ExampleServer {
                 })
                 .addListener(PlayerStartSneakingEvent.class, event -> {
                     try {
-                        var obj = new Gson().fromJson(Files.readString(Path.of("/Users/matt/Downloads/out.json")), JsonObject.class);
-                        var model = ModelLoader.loadModel(obj);
-                        model.setInstance(instance, event.getPlayer().getPosition().withPitch(0).withYaw(0)).thenRun(() -> {
-                            System.out.println(model);
-                            System.out.println(model.getPosition());
+                        var compiler = MqlCompiler.create();
+                        compiler.addInitializer("v.walk_speed = 360 * 1;\n" +
+                                "v.run_speed = 360 * 1.5;\n" +
+                                "v.stickbug_speed = 360 * 1.25;", null);
+                        ExportedModel model = ExportedModel.fromFile(new MqlCompilerOps<>(JsonOps.INSTANCE, compiler), modelPath);
+                        var module = compiler.compile();
+                        var spawned = new SpawnedModelImpl(model, module.newInstance(), instance);
+                        spawned.setPosition(event.getPlayer().getPosition().withPitch(0).withYaw(0));
+                        event.getPlayer().scheduleNextTick(_ -> spawned.addViewer(event.getPlayer()));
 
-                        });
+//                        var obj = new Gson().fromJson(Files.readString(Path.of("/Users/matt/Downloads/out.json")), JsonObject.class);
+//                        var model = ModelLoader.loadModel(obj);
+//                        model.setInstance(instance, event.getPlayer().getPosition().withPitch(0).withYaw(0)).thenRun(() -> {
+//                            System.out.println(model);
+//                            System.out.println(model.getPosition());
+//
+//                        });
 
                     } catch (Exception e) {
                         throw new RuntimeException(e);
