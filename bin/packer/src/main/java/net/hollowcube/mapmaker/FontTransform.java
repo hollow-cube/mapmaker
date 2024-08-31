@@ -88,6 +88,19 @@ public class FontTransform {
             ascents.put("small_tall", 24);
             heights.put("small_tall", 24);
         }
+        try (InputStream is = getClass().getResourceAsStream("/gui_title.json")) {
+            if (is == null) throw new IOException("Failed to load gui_title.json");
+            Json5Array fontChars = json5.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8))
+                    .getAsJson5Object().getAsJson5Array("chars");
+            List<String> charmap = new ArrayList<>();
+            for (Json5Element charset : fontChars) {
+                charmap.add(charset.getAsString());
+            }
+            charmaps.put("gui_title", charmap);
+            ascents.put("gui_title", 7);
+            heights.put("gui_title", 32);
+            System.out.println(charmap);
+        }
     }
 
     public int getNextChar() {
