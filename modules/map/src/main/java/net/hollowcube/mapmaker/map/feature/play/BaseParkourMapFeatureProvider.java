@@ -667,7 +667,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             // Otherwise, update the duration
             //todo convert all to ticks
-            int remainingWallTime = (int) (activeEffect.potion().duration() - ((player.getInstance().getWorldAge() - activeEffect.startingTicks())) * 50);
+            int remainingWallTime = (int) ((activeEffect.potion().duration() - (player.getAliveTicks() - activeEffect.startingTicks())) * 50);
             entry.setDuration(Math.max(0, remainingWallTime));
         }
 

@@ -149,9 +149,9 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
             this.level = level;
         }
 
-        public void setDuration(int duration) {
-            Check.argCondition(duration < 0, "duration must be positive");
-            this.duration = duration;
+        public void setDuration(int millis) {
+            Check.argCondition(millis < 0, "duration must be positive");
+            this.duration = millis;
         }
 
         @Override
