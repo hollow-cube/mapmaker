@@ -69,7 +69,7 @@ public class AnimEntityV2 extends Entity {
                             // yxz
 
 //                            meta.setLeftRotation(new float[]{0, 0, 0, 0});
-//                            meta.setRightRotation(eulerToQuaternion(newValue));
+                            meta.setLeftRotation(eulerToQuaternion(newValue));
 
 //                            float yaw = (float) Math.toRadians(newValue.y());
 //                            float pitch = (float) Math.toRadians(newValue.x());
@@ -106,9 +106,9 @@ public class AnimEntityV2 extends Entity {
 
 
         var p = new Vec(
-                Math.toRadians(v.x()),
                 Math.toRadians(v.y()),
-                Math.toRadians(v.z())
+                Math.toRadians(v.z()),
+                Math.toRadians(v.x())
         );
 
         double cy = Math.cos(p.z() * 0.5);
