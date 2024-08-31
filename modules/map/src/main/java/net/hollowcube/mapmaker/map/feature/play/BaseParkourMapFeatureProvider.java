@@ -539,7 +539,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
      * @param player the player to reset
      */
     public void softReset(@NotNull Player player, @NotNull SaveState saveState) {
-        new RuntimeException().printStackTrace();
         if (saveState.isCompleted()) return;
         var world = MapWorld.forPlayerOptional(player);
         if (!(world instanceof AbstractMapWorld abstractWorld)) return;
