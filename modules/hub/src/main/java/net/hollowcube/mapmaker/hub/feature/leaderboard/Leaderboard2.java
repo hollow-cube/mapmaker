@@ -70,10 +70,10 @@ public class Leaderboard2 {
     }
 
     public void setInstance(@NotNull Instance instance, @NotNull Pos pos) {
-        FutureUtil.getUnchecked(screenModel.setInstance(instance, pos));
-        FutureUtil.getUnchecked(updatedTextEntity.setInstance(instance, pos));
-        if (left != null) FutureUtil.getUnchecked(left.setInstance(instance, pos));
-        if (right != null) FutureUtil.getUnchecked(right.setInstance(instance, pos));
+        screenModel.setInstance(instance, pos);
+        updatedTextEntity.setInstance(instance, pos);
+        if (left != null) left.setInstance(instance, pos);
+        if (right != null) right.setInstance(instance, pos);
     }
 
     public void update() {

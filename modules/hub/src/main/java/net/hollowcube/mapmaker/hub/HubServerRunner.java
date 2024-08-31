@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class HubServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServerRunner.class);
@@ -81,7 +82,10 @@ public class HubServerRunner extends AbstractMapServer {
         BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
 
         // Create the hub world once, which will never go away.
-        this.world = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
+        var worldFuture = new CompletableFuture<HubMapWorld>();
+        FutureUtil.submitVirtual(() -> worldFuture.complete(
+                allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class)));
+        this.world = worldFuture.join(); // Wait to continue.
         addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
         addBinding(Scheduler.class, world.instance().scheduler());
 
