@@ -10,7 +10,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -130,44 +129,15 @@ public sealed interface ModelNode permits ModelNode.Bone, ModelNode.Struct,
             @NotNull String name,
             @NotNull UUID uuid,
             @NotNull Optional<String> parent,
-            @NotNull DefaultTransform defaultTransform
+            @NotNull NodeTransform defaultTransform
     ) {
         public static MapCodec<BaseProps> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 NodeType.CODEC.fieldOf("type").forGetter(BaseProps::type),
                 Codec.STRING.fieldOf("name").forGetter(BaseProps::name),
                 Codec.STRING.xmap(UUID::fromString, UUID::toString).fieldOf("uuid").forGetter(BaseProps::uuid),
                 Codec.STRING.optionalFieldOf("parent").forGetter(BaseProps::parent),
-                DefaultTransform.CODEC.fieldOf("default_transform").forGetter(BaseProps::defaultTransform)
+                NodeTransform.CODEC.fieldOf("default_transform").forGetter(BaseProps::defaultTransform)
         ).apply(i, BaseProps::new));
     }
 
-    record DefaultTransform(
-            @NotNull List<Float> matrix,
-            @NotNull DecomposedMatrix decomposed,
-            float[] pos,
-            float[] rot,
-            float[] headRot,
-            float[] scale
-    ) {
-        public static final Codec<DefaultTransform> CODEC = RecordCodecBuilder.create(i -> i.group(
-                Codec.FLOAT.listOf().fieldOf("matrix").forGetter(DefaultTransform::matrix),
-                DecomposedMatrix.CODEC.fieldOf("decomposed").forGetter(DefaultTransform::decomposed),
-                ExtraCodecs.FLOAT_3.fieldOf("pos").forGetter(DefaultTransform::pos),
-                ExtraCodecs.FLOAT_3.fieldOf("rot").forGetter(DefaultTransform::rot),
-                ExtraCodecs.FLOAT_2.fieldOf("head_rot").forGetter(DefaultTransform::headRot),
-                ExtraCodecs.FLOAT_3.fieldOf("scale").forGetter(DefaultTransform::scale)
-        ).apply(i, DefaultTransform::new));
-    }
-
-    record DecomposedMatrix(
-            float[] translation,
-            float[] leftRotation,
-            float[] scale
-    ) {
-        public static final Codec<DecomposedMatrix> CODEC = RecordCodecBuilder.create(i -> i.group(
-                ExtraCodecs.FLOAT_3.fieldOf("translation").forGetter(DecomposedMatrix::translation),
-                ExtraCodecs.FLOAT_4.fieldOf("left_rotation").forGetter(DecomposedMatrix::leftRotation),
-                ExtraCodecs.FLOAT_3.fieldOf("scale").forGetter(DecomposedMatrix::scale)
-        ).apply(i, DecomposedMatrix::new));
-    }
 }

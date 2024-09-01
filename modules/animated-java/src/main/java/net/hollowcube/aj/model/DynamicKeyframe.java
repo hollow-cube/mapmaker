@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-public sealed interface ModelKeyframe {
+public sealed interface DynamicKeyframe {
 
     enum Channel {
         POSITION,
@@ -25,7 +25,7 @@ public sealed interface ModelKeyframe {
 
         public static final Codec<Channel> CODEC = ExtraCodecs.enumString(Channel.class);
 
-        public @NotNull Codec<? extends ModelKeyframe> channelCodec() {
+        public @NotNull Codec<? extends DynamicKeyframe> channelCodec() {
             return switch (this) {
                 case POSITION, ROTATION, SCALE -> Vec3.CODEC;
                 case VARIANT -> Variant.CODEC;
@@ -38,7 +38,7 @@ public sealed interface ModelKeyframe {
 
     @NotNull Channel channel();
 
-    Codec<ModelKeyframe> CODEC = Channel.CODEC.dispatch("channel", ModelKeyframe::channel, Channel::channelCodec);
+    Codec<DynamicKeyframe> CODEC = Channel.CODEC.dispatch("channel", DynamicKeyframe::channel, Channel::channelCodec);
 
     record ScriptTriple(
             @NotNull MqlCompiler.Unit<ValueScript> x,
@@ -77,7 +77,7 @@ public sealed interface ModelKeyframe {
             @NotNull ScriptTriple value
             //todo: post,
             //todo: interpolation
-    ) implements ModelKeyframe {
+    ) implements DynamicKeyframe {
         public static final Codec<Vec3> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.DOUBLE.fieldOf("time").forGetter(Vec3::time),
                 Channel.CODEC.fieldOf("channel").forGetter(Vec3::channel),
@@ -89,7 +89,7 @@ public sealed interface ModelKeyframe {
             double time,
             @NotNull UUID variant,
             @NotNull String executeCondition
-    ) implements ModelKeyframe {
+    ) implements DynamicKeyframe {
         public static final Codec<Variant> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.DOUBLE.fieldOf("time").forGetter(Variant::time),
                 ExtraCodecs.UUID_STRING.fieldOf("variant").forGetter(Variant::variant),
@@ -108,7 +108,7 @@ public sealed interface ModelKeyframe {
             @NotNull String executeCondition,
             boolean repeat,
             double repeatFrequency
-    ) implements ModelKeyframe {
+    ) implements DynamicKeyframe {
         public static final Codec<Commands> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.DOUBLE.fieldOf("time").forGetter(Commands::time),
                 Codec.STRING.fieldOf("commands").forGetter(Commands::commands),

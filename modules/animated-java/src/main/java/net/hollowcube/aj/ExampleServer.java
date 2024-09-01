@@ -21,6 +21,7 @@ public class ExampleServer {
         System.out.println("Hello, world!");
 
 //        var modelPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/house.json");
+//        var modelPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/mymodel_out.json");
         var modelPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/animated-java/armorstand-unbaked.json");
         var compiler2 = MqlCompiler.create();
         compiler2.addInitializer("v.walk_speed = 360 * 1;\n" +

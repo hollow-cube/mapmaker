@@ -1,6 +1,6 @@
 package net.hollowcube.aj.entity;
 
-import net.hollowcube.aj.model.ModelKeyframe;
+import net.hollowcube.aj.model.DynamicKeyframe;
 import net.hollowcube.aj.model.ModelNode;
 import net.hollowcube.mql.MqlModule;
 import net.minestom.server.coordinate.Vec;
@@ -11,11 +11,15 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class AnimEntityV2 extends Entity {
     private final ModelNode.BaseProps base;
+
+    private List<AnimEntityV2> children = new ArrayList<>();
 
     public AnimEntityV2(@NotNull EntityType entityType, @NotNull ModelNode.BaseProps base) {
         super(entityType);
@@ -38,15 +42,22 @@ public class AnimEntityV2 extends Entity {
         return (AbstractDisplayMeta) super.getEntityMeta();
     }
 
-    public void applyFrame(
-            double duration,
+    public void addChild(AnimEntityV2 entity) {
+        children.add(entity);
+    }
+
+    public void doFrame(
+            @NotNull Map<String, List<DynamicKeyframe>> keyframeMap,
             @NotNull MqlModule.Instance scriptInstance,
             @NotNull AnimQuery scriptQuery,
-            @NotNull List<ModelKeyframe> keyframes
+            @NotNull Vec baseTranslation,
+            @NotNull float[] baseRotation,
+            @NotNull Vec baseScale
     ) {
-        for (var keyframe : keyframes) {
+        float[] computedRotation = Arrays.copyOf(baseRotation, baseRotation.length);
+        for (var keyframe : keyframeMap.getOrDefault(base.uuid().toString(), List.of())) {
             switch (keyframe) {
-                case ModelKeyframe.Vec3 vec3 -> {
+                case DynamicKeyframe.Vec3 vec3 -> {
                     var meta = getEntityMeta();
                     var newValue = new Vec(
                             scriptInstance.getScript(vec3.value().x()).eval(scriptQuery),
@@ -60,7 +71,87 @@ public class AnimEntityV2 extends Entity {
 
                     switch (vec3.channel()) {
                         case POSITION -> {
-                            System.out.println("Setting position to " + newValue);
+                            var tr = base.defaultTransform().decomposed().translation();
+                            baseTranslation = baseTranslation.add(newValue.div(16));
+                            var pos = new Vec(tr[0], tr[1], tr[2]);
+                            meta.setTranslation(pos.add(baseTranslation));
+                        }
+                        case ROTATION -> {
+                            // yxz
+
+                            float[] added = eulerToQuaternion(newValue);
+                            for (int i = 0; i < 4; i++) {
+                                computedRotation[i] *= added[i];
+                            }
+
+//                            computedRotation
+
+//                            baseRotation = baseRotation.add(newValue
+//                                    .mul(1, 1, 1)
+//                                    .add(0, 0, 0));
+
+//                            meta.setLeftRotation(new float[]{0, 0, 0, 0});
+                            meta.setLeftRotation(computedRotation);
+
+//                            float yaw = (float) Math.toRadians(newValue.y());
+//                            float pitch = (float) Math.toRadians(newValue.x());
+//                            float roll = (float) Math.toRadians(newValue.z());
+//
+//                            var fs = new float[16];
+//                            for (int i = 0; i < 16; i++) {
+//                                fs[i] = base.defaultTransform().matrix().get(i);
+//                            }
+//                            var mat = new Matrix4d().set(fs)
+//                                    .rotateY(yaw).rotateX(pitch).rotateZ(roll);
+//
+//                            var q = new Quaternionf().setFromNormalized(mat);
+//
+//                            System.out.println("Setting rotation to " + newValue);
+//                            meta.setLeftRotation(new float[]{q.x, q.y, q.z, q.w});
+                        }
+                        case SCALE -> {
+//                            meta.setScale(newValue);
+                        }
+                    }
+                    meta.setNotifyAboutChanges(true);
+                }
+                case DynamicKeyframe.Variant variant -> {
+                }
+                case DynamicKeyframe.Commands commands -> {
+                }
+            }
+        }
+
+        for (var child : children) {
+            child.doFrame(
+                    keyframeMap, scriptInstance, scriptQuery,
+                    baseTranslation, baseRotation, baseScale
+            );
+        }
+    }
+
+    public void applyFrame(
+            double duration,
+            @NotNull MqlModule.Instance scriptInstance,
+            @NotNull AnimQuery scriptQuery,
+            @NotNull List<DynamicKeyframe> keyframes
+    ) {
+        for (var keyframe : keyframes) {
+            switch (keyframe) {
+                case DynamicKeyframe.Vec3 vec3 -> {
+                    var meta = getEntityMeta();
+                    var newValue = new Vec(
+                            scriptInstance.getScript(vec3.value().x()).eval(scriptQuery),
+                            scriptInstance.getScript(vec3.value().y()).eval(scriptQuery),
+                            scriptInstance.getScript(vec3.value().z()).eval(scriptQuery)
+                    );
+
+                    meta.setNotifyAboutChanges(false);
+                    meta.setTransformationInterpolationDuration(1);
+                    meta.setTransformationInterpolationStartDelta(0);
+
+                    switch (vec3.channel()) {
+                        case POSITION -> {
                             var tr = base.defaultTransform().decomposed().translation();
                             var pos = new Vec(tr[0], tr[1], tr[2]);
                             meta.setTranslation(pos.add(newValue.div(16)));
@@ -88,14 +179,14 @@ public class AnimEntityV2 extends Entity {
 //                            meta.setLeftRotation(new float[]{q.x, q.y, q.z, q.w});
                         }
                         case SCALE -> {
-                            meta.setScale(newValue);
+//                            meta.setScale(newValue);
                         }
                     }
                     meta.setNotifyAboutChanges(true);
                 }
-                case ModelKeyframe.Variant variant -> {
+                case DynamicKeyframe.Variant variant -> {
                 }
-                case ModelKeyframe.Commands commands -> {
+                case DynamicKeyframe.Commands commands -> {
                 }
             }
         }
@@ -103,12 +194,10 @@ public class AnimEntityV2 extends Entity {
     }
 
     public static float[] eulerToQuaternion(Vec v) {
-
-
         var p = new Vec(
+                Math.toRadians(v.x()),
                 Math.toRadians(v.y()),
-                Math.toRadians(v.z()),
-                Math.toRadians(v.x())
+                Math.toRadians(v.z())
         );
 
         double cy = Math.cos(p.z() * 0.5);
