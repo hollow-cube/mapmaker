@@ -44,6 +44,9 @@ public class FontTransform {
             charmaps.put("ascii_2x", charmap);
             ascents.put("ascii_2x", 7);
             heights.put("ascii_2x", 16);
+            charmaps.put("ascii_4x", charmap);
+            ascents.put("ascii_4x", 7);
+            heights.put("ascii_4x", 32);
         }
         try (InputStream is = getClass().getResourceAsStream("/currency.json")) {
             if (is == null) throw new IOException("Failed to load currency.json");
