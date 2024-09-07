@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
+
 public class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     private final FeatureList features;
@@ -27,7 +29,7 @@ public class AbstractMapMakerMapWorld extends AbstractMapWorld {
         super(server, map, instance);
 
         this.features = features;
-        
+
         // Add support for adding and removing potion effects
         eventNode().addChild(PotionHandler.EVENT_NODE);
     }
@@ -60,6 +62,13 @@ public class AbstractMapMakerMapWorld extends AbstractMapWorld {
         super.addPlayer(player);
 
         sendBossBars(player);
+    }
+
+    @Override
+    public void removePlayer(@NotNull Player player) {
+        player.removeTag(SPECTATOR_CHECKPOINT);
+
+        super.removePlayer(player);
     }
 
     protected void sendBossBars(@NotNull Player player) {
