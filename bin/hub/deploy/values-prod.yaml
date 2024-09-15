@@ -30,7 +30,7 @@ env:
   MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "21600000" # 6 hours
 
   MAPMAKER_METRICS_PASSWORD: "${METRICS_PASSWORD}"
-  MAPMAKER_TRACING_OTLP_ENDPOINT: "http://grafana-k8s-monitoring-grafana-agent.mapmaker.svc.cluster.local:4318/v1/traces"
+  MAPMAKER_TRACING_OTLP_ENDPOINT: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
 
