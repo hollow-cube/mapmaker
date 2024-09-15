@@ -1,7 +1,7 @@
 fullnameOverride: mapmaker-map
 
 nodeSelector:
-  nodepool: "main-sm"
+  kubernetes.io/arch: arm64
 
 mapmaker:
   role: map
@@ -43,7 +43,7 @@ env:
   MAPMAKER_SPICEDB_TOKEN: "${SPICEDB_SECRET_KEY}"
   MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
 
-  MAPMAKER_UNLEASH_ENABLED: "true"
+  MAPMAKER_UNLEASH_ENABLED: "false"
   MAPMAKER_UNLEASH_ADDRESS: "http://unleash.mgmt.svc.cluster.local:4242/api"
   MAPMAKER_UNLEASH_TOKEN: "${UNLEASH_TOKEN}"
 
