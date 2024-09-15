@@ -23,6 +23,7 @@ public class ReportMapView extends View {
 
     private @ContextObject MapService mapService;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("map_id_text") Text mapIdText;
     private @OutletGroup("switch_.+") Switch[] categorySwitches;
     private @OutletGroup("reason_.+_off") Label[] reasonOffButtons;
@@ -43,6 +44,7 @@ public class ReportMapView extends View {
 
         String mapId = MapData.formatPublishedId(map.publishedId());
 
+        titleText.setText("Report Map");
         mapIdText.setText(mapId);
         mapIdText.setArgs(Component.text(mapId));
 

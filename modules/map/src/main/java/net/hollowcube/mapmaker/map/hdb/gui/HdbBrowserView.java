@@ -24,6 +24,7 @@ public class HdbBrowserView extends View {
 
     private @ContextObject HeadDatabase hdb;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("heads") Pagination headsPagination;
     private @Outlet("hdb_browser_title") Text hdbBrowserTitle; //TODO make these match the translation keys without creating aids
 
@@ -32,6 +33,7 @@ public class HdbBrowserView extends View {
 
     public HdbBrowserView(@NotNull Context context) {
         this(context, DEFAULT_CATEGORY);
+        titleText.setText("HeadDatabase Browser");
         hdbBrowserTitle.setText(category);
         hdbBrowserTitle.setArgs(Component.text(category));
     }

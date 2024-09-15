@@ -20,6 +20,7 @@ public class StoreView extends View {
     private @Outlet("hypercube_text") Text hypercubeText;
     private @Outlet("addons_text") Text addonsText;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("name_switch") Switch nameSwitch;
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_cubits_switch") Switch tabCubitsSwitch;
@@ -30,6 +31,7 @@ public class StoreView extends View {
 
     public StoreView(@NotNull Context context) {
         this(context, 0);
+        titleText.setText("Store");
     }
 
     public StoreView(@NotNull Context context, int tab) {

@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.edit ?>
 <component width="9" height="10" align="ttb" sprite="create_maps/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
 <label width="0" height="0" translationKey="" sprite="generic/header"/>
     <switch id="switch" width="9" height="9">
         <EditMap id="editor"/>

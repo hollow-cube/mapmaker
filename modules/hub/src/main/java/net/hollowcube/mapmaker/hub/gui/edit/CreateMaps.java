@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
@@ -27,6 +28,7 @@ public class CreateMaps extends View {
     private @ContextObject Player player;
     private @ContextObject ServerBridge bridge;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("switch") Switch switcher;
     private @Outlet("editor") EditMap editor;
     private @Outlet("creator") CreateMap creator;
@@ -38,7 +40,7 @@ public class CreateMaps extends View {
     public CreateMaps(@NotNull Context context) {
         super(context);
         playerData = PlayerDataV2.fromPlayer(player);
-
+        titleText.setText("Create Maps");
         reset();
     }
 
