@@ -1,7 +1,7 @@
 fullnameOverride: mapmaker-hub
 
 nodeSelector:
-  nodepool: "main-sm"
+  kubernetes.io/arch: arm64
 
 mapmaker:
   role: hub
