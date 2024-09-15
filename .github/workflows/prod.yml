@@ -1,5 +1,5 @@
-name: Staging Build & Deploy
-concurrency: Staging
+name: Prod Build & Deploy
+concurrency: Production
 
 on:
   push:
@@ -94,7 +94,7 @@ jobs:
         with:
           context: bazel-bin/bin/map
           file: "bin/map/deploy/Dockerfile"
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: mworzala/mapmaker-map:${{ github.sha }}
   docker-build-hub:
@@ -133,7 +133,7 @@ jobs:
         with:
           context: bazel-bin/bin/hub
           file: "bin/hub/deploy/Dockerfile"
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: mworzala/mapmaker-hub:${{ github.sha }}
 
@@ -165,7 +165,7 @@ jobs:
           oauth-client-id: ${{ env.TAILSCALE_OAUTH_KEY }}
           oauth-secret: ${{ env.TAILSCALE_OAUTH_SECRET }}
           tags: tag:ci
-          version: 1.52.0
+          version: 1.74.0
       - uses: azure/setup-helm@v3
         with:
           version: v3.10.2
@@ -176,7 +176,7 @@ jobs:
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: staging/mapmaker
+          path: prod/mapmaker
       # </ALERT>
       - name: Upgrade/install helm chart
         env:
@@ -184,7 +184,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig ovh-staging
+          tailscale configure kubeconfig prod
           kubectl cluster-info
 
           # Deploy the chart
@@ -192,7 +192,7 @@ jobs:
           helm pull oci://registry-1.docker.io/mworzala/mapmaker-node --version "1.0.0-${{ github.sha }}"
           
           # <ALERT BEEP BOOP DIFFERENT FROM COMMON ACTION>
-          cat bin/hub/deploy/values-staging.yaml | envsubst > ./values-override-hub.yaml
+          cat bin/hub/deploy/values-prod.yaml | envsubst > ./values-override-hub.yaml
           # </ALERT>
           
           helm upgrade mapmaker-hub mapmaker-node-1.0.0-${{ github.sha }}.tgz \
@@ -219,7 +219,7 @@ jobs:
           oauth-client-id: ${{ env.TAILSCALE_OAUTH_KEY }}
           oauth-secret: ${{ env.TAILSCALE_OAUTH_SECRET }}
           tags: tag:ci
-          version: 1.52.0
+          version: 1.74.0
       - uses: azure/setup-helm@v3
         with:
           version: v3.10.2
@@ -230,7 +230,7 @@ jobs:
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: staging/mapmaker
+          path: prod/mapmaker
       # </ALERT>
       - name: Upgrade/install helm chart
         env:
@@ -238,7 +238,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig ovh-staging
+          tailscale configure kubeconfig prod
           kubectl cluster-info
 
           # Deploy the chart
@@ -246,7 +246,7 @@ jobs:
           helm pull oci://registry-1.docker.io/mworzala/mapmaker-node --version "1.0.0-${{ github.sha }}"
           
           # <ALERT BEEP BOOP DIFFERENT FROM COMMON ACTION>
-          cat bin/map/deploy/values-staging.yaml | envsubst > ./values-override-map.yaml
+          cat bin/map/deploy/values-prod.yaml | envsubst > ./values-override-map.yaml
           # </ALERT>
           
           helm upgrade mapmaker-map mapmaker-node-1.0.0-${{ github.sha }}.tgz \
