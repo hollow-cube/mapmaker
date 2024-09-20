@@ -1,9 +1,12 @@
-name: Prod Build & Deploy
-concurrency: Production
+name: Staging Build & Deploy
+concurrency: Staging
 
 on:
   push:
-    tags: [ '\d+\.\d+\.\d+' ]
+    branches: [ main ]
+#on:
+#  push:
+#    tags: [ '\d+\.\d+\.\d+' ]
 
 jobs:
   resource-pack-build:
