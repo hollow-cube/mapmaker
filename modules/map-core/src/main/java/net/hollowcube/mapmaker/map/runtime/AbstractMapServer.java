@@ -42,6 +42,7 @@ import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
 import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
+import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
 import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
@@ -231,6 +232,9 @@ public abstract class AbstractMapServer implements MapServer {
             logger.info("Unleash is enabled, loading feature flag provider");
             var provider = new UnleashFeatureFlagProvider(unleashConfig, shutdowner);
             FeatureFlagProvider.replaceGlobals(provider);
+        } else if (unleashConfig.usePosthog()) {
+            logger.info("Posthog is enabled, loading feature flag provider");
+            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
         } else {
             FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());
         }

@@ -24,13 +24,14 @@ public class MetricWriterPosthog implements MetricWriter {
 
     private static final String POSTHOG_API_KEY = "phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA"; // Not a secret
     private static final String POSTHOG_HOST = "https://us.i.posthog.com";
+    public static final PostHog POSTHOG_CLIENT = new PostHog.Builder(POSTHOG_API_KEY).host(POSTHOG_HOST).build();
 
-    private static final String NO_USER = "00000000-0000-0000-0000-000000000000";
+    public static final String NO_USER = "00000000-0000-0000-0000-000000000000";
 
     private final PostHog client;
 
     public MetricWriterPosthog() {
-        client = new PostHog.Builder(POSTHOG_API_KEY).host(POSTHOG_HOST).build();
+        client = POSTHOG_CLIENT;
     }
 
     @Override
