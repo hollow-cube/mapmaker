@@ -1,7 +1,7 @@
 fullnameOverride: mapmaker-hub
 
 nodeSelector:
-  kubernetes.io/arch: arm64
+#  kubernetes.io/arch: arm64
 
 mapmaker:
   role: hub
