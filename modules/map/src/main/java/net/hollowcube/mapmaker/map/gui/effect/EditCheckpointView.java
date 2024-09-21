@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class EditCheckpointView extends View {
 
-    private @Outlet("title") Text titleText;
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_settings_state_switch") Switch tabSettingsStateSwitch;
     private @Outlet("tab_actions_state_switch") Switch tabActionsStateSwitch;
@@ -31,7 +30,6 @@ public class EditCheckpointView extends View {
         this.data = data;
         this.save = save;
 
-        titleText.setText("Checkpoint");
         tabSettingsStateSwitch.setOption(true);
         tabText.setText("CP Settings");
         tabText.setArgs(Component.text("Checkpoint Settings"));

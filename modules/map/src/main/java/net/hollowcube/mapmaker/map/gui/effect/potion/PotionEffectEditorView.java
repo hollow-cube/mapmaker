@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class PotionEffectEditorView extends View {
 
-    private @Outlet("title") Text titleText;
     private @Outlet("header") Text headerText;
 
     private @Outlet("level") Text levelText;
@@ -35,9 +34,6 @@ public class PotionEffectEditorView extends View {
 
     public PotionEffectEditorView(@NotNull Context context, @NotNull PotionEffectList.Entry effect, @NotNull Runnable save) {
         super(context);
-
-        titleText.setText("Potion Editor");
-
         this.effect = effect;
         this.save = save;
 

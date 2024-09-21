@@ -23,13 +23,11 @@ public class ReportMapView extends View {
 
     private @ContextObject MapService mapService;
 
-    private @Outlet("title") Text titleText;
     private @Outlet("map_id_text") Text mapIdText;
     private @OutletGroup("switch_.+") Switch[] categorySwitches;
     private @OutletGroup("reason_.+_off") Label[] reasonOffButtons;
     private @OutletGroup("reason_.+_on") Label[] reasonOnButtons;
     private @Outlet("add_comment") Label addCommentButton;
-    private @Outlet("submit_switch") Switch submitStateSwitch;
     private @Outlet("submit") Label submitButton;
 
     private final String mapId;
@@ -44,7 +42,6 @@ public class ReportMapView extends View {
 
         String mapId = MapData.formatPublishedId(map.publishedId());
 
-        titleText.setText("Report Map");
         mapIdText.setText(mapId);
         mapIdText.setArgs(Component.text(mapId));
 
@@ -86,7 +83,6 @@ public class ReportMapView extends View {
         List<Component> lore = new ArrayList<>();
 
         if (canSubmit()) {
-            submitStateSwitch.setOption(1);
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.header", List.of()));
             for (var category : categories) {
                 lore.add(Component.translatable("gui.report_map.submit.category",
@@ -95,7 +91,8 @@ public class ReportMapView extends View {
 
             lore.addAll(LanguageProviderV2.translateMulti("gui.report_map.submit.footer", List.of(getCommentText())));
         } else {
-            submitStateSwitch.setOption(0);
+            title = Component.translatable("gui.report_map.submit.missing_categories.name");
+            lore.add(Component.translatable("gui.report_map.submit.missing_categories.lore"));
         }
 
         submitButton.setComponentsDirect(title, lore);
@@ -137,7 +134,7 @@ public class ReportMapView extends View {
                 mapService.reportMap(mapId, req);
                 player.sendMessage(Component.translatable("gui.report_map.submit.success"));
             } catch (Exception e) {
-                player.sendMessage(Component.translatable("gui.report_map.submit.failure"));
+                player.sendMessage(Component.translatable("gui.report_map.submit.error"));
                 MinecraftServer.getExceptionManager().handleException(e);
             } finally {
                 submitButton.setState(State.ACTIVE);

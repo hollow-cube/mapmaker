@@ -2,16 +2,14 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.buildermenu ?>
 <component width="9" height="10" align="ttb" sprite="builder_menu/container">
-    <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.builder_menu.information" sprite="generic/information"/>
+        <label translationKey="gui.builder_menu.information"/>
         <text id="tab_name" width="5" translationKey="gui.builder_menu.tab"
               font="map_details_author" centered="true"/>
         <label translationKey="gui.builder_menu.invite_players"/>
-        <button id="save_and_exit" translationKey="gui.builder_menu.save_and_exit" sprite="builder_menu/save_and_exit"/>
+        <button id="save_and_exit" translationKey="gui.builder_menu.save_and_exit" sprite="hud/hotbar/return_to_hub"/>
     </box>
 
     <box width="9" height="4" align="ttb">

@@ -20,9 +20,9 @@
         <box width="9" height="5" align="ttb" sprite="play_maps/details/tab_info/container">
             <box width="9" align="ltr">
                 <BackButton/>
-                <button id="information" translationKey="gui.map_details.map_info_tab.information" sprite="generic/information"/>
+                <button id="information" translationKey="gui.map_details.map_info_tab.information"/>
                 <text id="author" width="5" translationKey="gui.map_details.creator_profile"
-                      font="map_details_author" centered="true" sprite="generic/text_display_5"/>
+                      font="map_details_author" centered="true"/>
                 <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
                         sprite="play_maps/details/add_to_playlist"/>
                 <button id="report_button_info" translationKey="gui.map_details.map_info_tab.report_map"
@@ -386,7 +386,7 @@
             <switch id="tab_info_switch_building">
                 <button id="tab_info_building" translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon"
-                        backgroundSprite="play_maps/details/tab_info/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_info/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon_selected"/>
             </switch>
@@ -394,7 +394,7 @@
             <switch id="tab_stats_switch_building">
                 <button id="tab_stats_building" translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon"
-                        backgroundSprite="play_maps/details/tab_stats/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_stats/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon_selected"/>
             </switch>
@@ -402,7 +402,7 @@
             <switch id="tab_reviews_switch_building">
                 <button id="tab_reviews_building" translationKey="gui.map_details.map_reviews_tab"
                         sprite="play_maps/details/tab_reviews/icon"
-                        backgroundSprite="play_maps/details/tab_reviews/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_reviews/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_reviews_tab"
                         sprite="play_maps/details/tab_reviews/icon_selected"/>
             </switch>
@@ -413,7 +413,7 @@
             <switch id="tab_info_switch">
                 <button id="tab_info" translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon"
-                        backgroundSprite="play_maps/details/tab_info/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_info/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_info_tab"
                         sprite="play_maps/details/tab_info/icon_selected"/>
             </switch>
@@ -421,7 +421,7 @@
             <switch id="tab_stats_switch">
                 <button id="tab_stats" translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon"
-                        backgroundSprite="play_maps/details/tab_stats/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_stats/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_stats_tab"
                         sprite="play_maps/details/tab_stats/icon_selected"/>
             </switch>
@@ -429,7 +429,7 @@
             <switch id="tab_times_switch">
                 <button id="tab_times" translationKey="gui.map_details.top_times_tab"
                         sprite="play_maps/details/tab_times/icon"
-                        backgroundSprite="play_maps/details/tab_times/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_times/icon_bg_default"/>
                 <button translationKey="gui.map_details.top_times_tab"
                         sprite="play_maps/details/tab_times/icon_selected"/>
             </switch>
@@ -437,7 +437,7 @@
             <switch id="tab_reviews_switch">
                 <button id="tab_reviews" translationKey="gui.map_details.map_reviews_tab"
                         sprite="play_maps/details/tab_reviews/icon"
-                        backgroundSprite="play_maps/details/tab_reviews/icon_bg"/>
+                        backgroundSprite="play_maps/details/tab_reviews/icon_bg_default"/>
                 <button translationKey="gui.map_details.map_reviews_tab"
                         sprite="play_maps/details/tab_reviews/icon_selected"/>
             </switch>

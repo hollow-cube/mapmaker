@@ -20,18 +20,13 @@ public class StoreView extends View {
     private @Outlet("hypercube_text") Text hypercubeText;
     private @Outlet("addons_text") Text addonsText;
 
-    private @Outlet("title") Text titleText;
     private @Outlet("name_switch") Switch nameSwitch;
     private @Outlet("tab_switch") Switch tabSwitch;
-    private @Outlet("tab_cubits_switch") Switch tabCubitsSwitch;
-    private @Outlet("tab_hypercube_switch") Switch tabHypercubeSwitch;
-    private @Outlet("tab_addons_switch") Switch tabAddOnsSwitch;
 
     private @OutletGroup("tab_id_.*") Label[] tabButtons;
 
     public StoreView(@NotNull Context context) {
         this(context, 0);
-        titleText.setText("Store");
     }
 
     public StoreView(@NotNull Context context, int tab) {
@@ -40,7 +35,6 @@ public class StoreView extends View {
         cubitsText.setText("Buy Cubits");
         hypercubeText.setText("Buy Hypercube");
         addonsText.setText("Buy Add-Ons");
-        tabCubitsSwitch.setOption(1);
 
         for (int i = 0; i < tabButtons.length; i++) {
             var tabIndex = i;
@@ -58,19 +52,5 @@ public class StoreView extends View {
 
         tabSwitch.setOption(index);
         nameSwitch.setOption(index);
-
-        if (index == 0) {
-            tabCubitsSwitch.setOption(1);
-            tabHypercubeSwitch.setOption(0);
-            tabAddOnsSwitch.setOption(0);
-        } else if (index == 1) {
-            tabCubitsSwitch.setOption(0);
-            tabHypercubeSwitch.setOption(1);
-            tabAddOnsSwitch.setOption(0);
-        } else if (index == 2) {
-            tabCubitsSwitch.setOption(0);
-            tabHypercubeSwitch.setOption(0);
-            tabAddOnsSwitch.setOption(1);
-        }
     }
 }

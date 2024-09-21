@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.gui.effect.potion;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Pagination;
-import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 
 public class PotionEffectListView extends View {
 
-    private @Outlet("title") Text titleText;
     private @Outlet("entries") Pagination pagination;
 
     private final PotionEffectList effectList;
@@ -24,9 +22,6 @@ public class PotionEffectListView extends View {
 
     public PotionEffectListView(@NotNull Context context, @NotNull PotionEffectList effectList, @NotNull Runnable save) {
         super(context);
-
-        titleText.setText("Active Potions");
-
         this.effectList = effectList;
         this.save = save;
     }

@@ -1,9 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.hub.gui.edit ?>
 <component width="9" height="10" align="ttb" sprite="create_maps/container">
-    <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
-<label width="0" height="0" translationKey="" sprite="generic/header"/>
+
     <switch id="switch" width="9" height="9">
         <EditMap id="editor"/>
         <CreateMap id="creator"/>
@@ -15,8 +13,9 @@
         <EditMapIcon3 id="slot2"/>
         <EditMapIcon4 id="slot3"/>
         <EditMapIcon5 id="slot4"/>
-        <button id="personal_world" translationKey="gui.create_maps.personal_world"/>
-        <button id="folder" translationKey="gui.create_maps.map_folder"/>
+        <button id="personal_world" translationKey="gui.create_maps.personal_world"
+                sprite="create_maps/personal_world" />
+        <button id="folder" translationKey="gui.create_maps.map_folder" />
         <button id="build_with_friends" translationKey="gui.create_maps.build_with_friends" width="2"/>
     </box>
 

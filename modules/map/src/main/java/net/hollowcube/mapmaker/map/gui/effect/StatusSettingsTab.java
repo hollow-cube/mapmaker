@@ -12,20 +12,20 @@ import org.jetbrains.annotations.NotNull;
 public class StatusSettingsTab extends AbstractEffectSettingsTab<StatusEffectData> {
 
     private @Outlet("repeatable_switch") Switch repeatableSwitch;
-    private @Outlet("repeatable_inactive") Label repeatableInactiveLabel;
-    private @Outlet("repeatable_active") Label repeatableActiveLabel;
+    private @Outlet("repeatable_off") Label repeatableOffLabel;
+    private @Outlet("repeatable_on") Label repeatableOnLabel;
 
     public StatusSettingsTab(@NotNull Context context) {
         super(context);
     }
 
-    @Action("repeatable_inactive")
+    @Action("repeatable_off")
     public void toggleRepeatableA() {
         data.setRepeatable(true);
         updateFromData();
     }
 
-    @Action("repeatable_active")
+    @Action("repeatable_on")
     public void toggleRepeatableB() {
         data.setRepeatable(false);
         updateFromData();
@@ -37,10 +37,10 @@ public class StatusSettingsTab extends AbstractEffectSettingsTab<StatusEffectDat
 
         if (data.repeatable()) {
             repeatableSwitch.setOption(1);
-            repeatableActiveLabel.setArgs(Component.translatable("gui.status.repeatable.enabled"));
+            repeatableOnLabel.setArgs(Component.translatable("gui.status.repeatable.enabled"));
         } else {
             repeatableSwitch.setOption(0);
-            repeatableInactiveLabel.setArgs(Component.translatable("gui.status.repeatable.disabled"));
+            repeatableOffLabel.setArgs(Component.translatable("gui.status.repeatable.disabled"));
         }
     }
 }

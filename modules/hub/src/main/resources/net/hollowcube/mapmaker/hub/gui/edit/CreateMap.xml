@@ -1,14 +1,12 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="9" align="ttb" sprite="create_maps/create/container">
-    <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
     <box width="9" height="1" align="ltr">
         <BackButton/>
-        <label translationKey="gui.create_maps.new_map.information" sprite="generic/information"/>
+        <label translationKey="gui.create_maps.new_map.information"/>
         <text id="slot_id_create" width="5" translationKey="gui.create_maps.new_map.title" font="slot_title"
-              centered="true" sprite="generic/text_display_5"/>
-        <button width="2" translationKey="gui.create_maps.new_map.reset_to_default" sprite="generic/2x1s/reset"/>
+              centered="true"/>
+        <button width="2" translationKey="gui.create_maps.new_map.reset_to_default"/>
     </box>
 
     <spacer width="9" height="1"/>

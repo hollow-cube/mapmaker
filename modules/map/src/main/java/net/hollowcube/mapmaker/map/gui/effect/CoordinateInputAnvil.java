@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.gui.effect;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -17,7 +16,6 @@ import java.util.function.Consumer;
 
 public class CoordinateInputAnvil extends View {
 
-    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("output") Label outputField;
 
@@ -27,8 +25,6 @@ public class CoordinateInputAnvil extends View {
     public CoordinateInputAnvil(@NotNull Context context, @NotNull Consumer<String> updateFunc, @Nullable String startingInput) {
         super(context);
         this.updateFunc = updateFunc;
-
-        titleText.setText("Set Coordinates");
 
         if (startingInput == null) {
             startingInput = "";

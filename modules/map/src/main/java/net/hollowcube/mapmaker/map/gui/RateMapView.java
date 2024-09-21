@@ -28,7 +28,6 @@ public class RateMapView extends View {
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
-    private @Outlet("title") Text titleText;
     private @Outlet("map_id_text") Text mapIdText;
     private @Outlet("like_switch") Switch likeSwitch;
     private @Outlet("dislike_switch") Switch dislikeSwitch;
@@ -40,7 +39,6 @@ public class RateMapView extends View {
         super(context);
         this.map = map;
 
-        titleText.setText("Rate Map");
         String mapId = MapData.formatPublishedId(map.publishedId());
 
         mapIdText.setText(mapId);

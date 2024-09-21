@@ -18,19 +18,19 @@ import org.jetbrains.annotations.NotNull;
 public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData> {
 
     private @Outlet("add_time_switch") Switch addTimeSwitch;
-    private @Outlet("add_time_inactive") Label addTimeInactiveLabel;
-    private @Outlet("add_time_active") Label addTimeActiveLabel;
+    private @Outlet("add_time_off") Label addTimeOffLabel;
+    private @Outlet("add_time_on") Label addTimeOnLabel;
 
     public StatusActionsTab(@NotNull Context context) {
         super(context);
     }
 
-    @Action("add_time_inactive")
+    @Action("add_time_off")
     public void handleChangeAddTimeA() {
         pushView(context -> new BaseEffectTimeLimitAnvil(context, data.extraTime() > 0 ? String.valueOf(data.extraTime() / 1000.0) : ""));
     }
 
-    @Action("add_time_active")
+    @Action("add_time_on")
     public void handleChangeAddTimeB(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             handleChangeAddTimeA();
@@ -64,10 +64,10 @@ public class StatusActionsTab extends AbstractEffectActionsTab<StatusEffectData>
 
         if (data.extraTime() <= 0) {
             addTimeSwitch.setOption(0);
-            addTimeInactiveLabel.setArgs(Component.translatable("gui.effects.actions.add_time.none"));
+            addTimeOffLabel.setArgs(Component.translatable("gui.effects.actions.add_time.none"));
         } else {
             addTimeSwitch.setOption(1);
-            addTimeActiveLabel.setArgs(Component.text(NumberUtil.formatDuration(data.extraTime()), TextColor.color(0x30FBFF)));
+            addTimeOnLabel.setArgs(Component.text(NumberUtil.formatDuration(data.extraTime()), TextColor.color(0x30FBFF)));
         }
     }
 }

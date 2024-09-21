@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.map.gui.effect;
 
-import net.hollowcube.canvas.*;
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.entity.Player;
-import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -21,13 +20,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     private @Outlet("name_text") Text nameText;
     private @Outlet("progress_index_text") Text progressIndexText;
 
-    private @Outlet("time_limit_inactive") Label timeLimitInactiveLabel;
-    private @Outlet("time_limit_active") Label timeLimitActiveLabel;
-    private @Outlet("time_limit_switch") Switch timeLimitSwitch;
-
-    private @Outlet("reset_height_inactive") Label resetHeightInactiveLabel;
-    private @Outlet("reset_height_active") Label resetHeightActiveLabel;
-    private @Outlet("reset_height_switch") Switch resetHeightSwitch;
+    private @Outlet("time_limit") Label timeLimitLabel;
+    private @Outlet("reset_height") Label resetHeightLabel;
 
     protected EffectData data;
     private int maxResetHeight;
@@ -80,22 +74,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
         }
     }
 
-    @Action("time_limit_inactive")
-    public void handleChangeTimeLimitInactive() {
-        openBaseEffectTimeLimitAnvil();
-    }
-
-    @Action("time_limit_active")
-    public void handleChangeTimeLimitActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
-            openBaseEffectTimeLimitAnvil();
-        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
-            data.setTimeLimit(BaseEffectData.NO_TIME_LIMIT);
-            updateFromData();
-        }
-    }
-
-    private void openBaseEffectTimeLimitAnvil() {
+    @Action("time_limit")
+    public void handleChangeTimeLimit() {
         pushView(context -> new BaseEffectTimeLimitAnvil(context, data.timeLimit() > 0 ? String.valueOf((double) data.timeLimit() / 1000) : ""));
     }
 
@@ -116,22 +96,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
         }
     }
 
-    @Action("reset_height_inactive")
-    public void handleChangeResetHeightInactive() {
-        openBaseEffectResetHeightAnvil();
-    }
-
-    @Action("reset_height_active")
-    public void handleChangeResetHeightActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
-            openBaseEffectResetHeightAnvil();
-        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
-            data.setResetHeight(BaseEffectData.NO_RESET_HEIGHT);
-            updateFromData();
-        }
-    }
-
-    private void openBaseEffectResetHeightAnvil() {
+    @Action("reset_height")
+    public void handleChangeResetHeight() {
         pushView(context -> new BaseEffectResetHeightAnvil(context, data.resetHeight() == BaseEffectData.NO_RESET_HEIGHT ? "" : String.valueOf(data.resetHeight())));
     }
 
@@ -184,21 +150,10 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
             progressIndexText.setText("PI: " + data.progressIndex());
         }
 
-        if (data.timeLimit() == BaseEffectData.NO_TIME_LIMIT) {
-            timeLimitInactiveLabel.setArgs(Component.translatable("gui.effect.time_limit.none"));
-            timeLimitSwitch.setOption(0);
-        } else {
-            timeLimitActiveLabel.setArgs(Component.text(NumberUtil.formatDuration(data.timeLimit()), TextColor.color(0x30FBFF)));
-            timeLimitSwitch.setOption(1);
-        }
-
-        if (data.resetHeight() == BaseEffectData.NO_RESET_HEIGHT) {
-            resetHeightInactiveLabel.setArgs(Component.translatable("gui.effect.reset_height.none"));
-            resetHeightSwitch.setOption(0);
-        } else {
-            resetHeightActiveLabel.setArgs(Component.text(data.resetHeight(), TextColor.color(0x30FBFF)));
-            resetHeightSwitch.setOption(1);
-        }
+        resetHeightLabel.setArgs(data.resetHeight() == BaseEffectData.NO_RESET_HEIGHT ?
+                Component.translatable("gui.effect.reset_height.none") : Component.text(data.resetHeight(), TextColor.color(0x30FBFF)));
+        timeLimitLabel.setArgs(data.timeLimit() == BaseEffectData.NO_TIME_LIMIT ?
+                Component.translatable("gui.effect.time_limit.none") : Component.text(NumberUtil.formatDuration(data.timeLimit()), TextColor.color(0x30FBFF)));
     }
 
 }

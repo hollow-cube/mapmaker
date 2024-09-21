@@ -6,10 +6,13 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton/>
-        <button id="information" translationKey="gui.map_details.top_times_tab.information" sprite="generic/information"/>
+        <button id="information" translationKey="gui.map_details.top_times_tab.information"/>
         <text id="map_author" width="5" translationKey="gui.map_details.creator_profile"
-              sprite="generic/text_display_5" font="map_details_author" centered="true"/>
-        <button id="toggle_top_ten_btn" width="2" translationKey="gui.map_details.top_times_tab.other_top_times"/>
+              font="map_details_author" centered="true"/>
+        <button id="toggle_top_ten_btn" translationKey="gui.map_details.top_times_tab.other_top_times"
+                sprite="play_maps/details/tab_times/toggle_top_ten"/>
+        <button translationKey="gui.map_details.top_times_tab.toggle_first_completions"
+                sprite="play_maps/details/tab_times/toggle_first"/>
     </box>
 
     <!-- Center content (top 3 times/4-9 times) -->

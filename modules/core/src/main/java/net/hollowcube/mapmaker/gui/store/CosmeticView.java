@@ -27,8 +27,6 @@ public class CosmeticView extends View {
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
 
-    private @Outlet("title") Text titleText;
-
     private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
     private @Outlet("tab_name_text") Text tabNameText;
 
@@ -46,7 +44,6 @@ public class CosmeticView extends View {
         super(context);
         this.playerData = PlayerDataV2.fromPlayer(player);
 
-        titleText.setText("Cosmetics");
         showLockedSwitch.setOption(playerData.getSetting(SHOW_LOCKED) ? 1 : 0);
 
         if (DISABLED_TABS.contains(selectedTab)) {

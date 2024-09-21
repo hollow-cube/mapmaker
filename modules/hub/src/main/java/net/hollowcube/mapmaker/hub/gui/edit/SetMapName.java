@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 public class SetMapName extends View {
     public static final String SIG_UPDATE_NAME = "set_map_view_update_name";
 
-    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("output") Label outputField;
 
@@ -24,7 +22,6 @@ public class SetMapName extends View {
     public SetMapName(@NotNull Context context, @NotNull String name) {
         super(context);
         input = name;
-        titleText.setText("Set Map Name");
         inputField.setArgs(Component.text(name));
     }
 

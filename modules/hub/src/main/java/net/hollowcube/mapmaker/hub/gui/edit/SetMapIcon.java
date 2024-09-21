@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
-import net.hollowcube.canvas.*;
+import net.hollowcube.canvas.Element;
+import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
@@ -20,7 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SetMapIcon extends View {
     public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
 
-    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("page") Pagination pagination;
 
@@ -29,7 +31,6 @@ public class SetMapIcon extends View {
     public SetMapIcon(@NotNull Context context) {
         super(context);
         inputField.setArgs(Component.text(input));
-        titleText.setText("Set Display Item");
     }
 
     private static Task task = null;
