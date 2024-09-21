@@ -24,6 +24,7 @@ kafka:
 
 unleash:
   enabled: false
+  use_posthog: false
   address: ""
   token: ""
   default_action: false
