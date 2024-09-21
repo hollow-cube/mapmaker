@@ -18,7 +18,7 @@ resources:
     cpu: 1500m
     memory: 3Gi
   requests:
-    cpu: 500m
+    #    cpu: 500m
     memory: 3Gi
 
 serviceMonitor:
