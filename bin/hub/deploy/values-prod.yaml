@@ -1,6 +1,7 @@
 fullnameOverride: mapmaker-hub
 
 nodeSelector:
+  kubernetes.io/hostname: bloom-01
 #  kubernetes.io/arch: arm64
 
 mapmaker:
