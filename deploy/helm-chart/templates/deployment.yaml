@@ -62,6 +62,8 @@ spec:
           env:
             - name: MAPMAKER_TERMINATION_SECONDS
               value: "{{ .Values.mapmaker.terminationSeconds }}"
+            - name: "MAPMAKER_ROLE"
+              value: "{{ .Values.mapmaker.role }}"
           {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"

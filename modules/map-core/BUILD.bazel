@@ -20,6 +20,7 @@ java_library(
         "@maven//:dev_hollowcube_mql",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_prometheus_simpleclient_hotspot",
+        "@maven//:io_pyroscope_agent",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_nbt",

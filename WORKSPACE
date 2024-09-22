@@ -100,7 +100,7 @@ maven_install(
         "ch.qos.logback:logback-classic:1.4.5",
         "io.prometheus:simpleclient:0.16.0",
         "io.prometheus:simpleclient_hotspot:0.16.0",
-        "io.pyroscope:agent:0.11.1",
+        "io.pyroscope:agent:0.14.0",
         "io.opentelemetry:opentelemetry-api:1.36.0",
         "io.opentelemetry:opentelemetry-context:1.36.0",
         "io.opentelemetry:opentelemetry-sdk:1.36.0",
