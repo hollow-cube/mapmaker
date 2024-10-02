@@ -4,7 +4,9 @@
       <blaze-target>//bin/development:development</blaze-target>
       <blaze-user-exe-flag>MAPMAKER_UNLEASH_DEFAULT_ACTION=true</blaze-user-exe-flag>
       <env_state>
-        <envs />
+        <envs>
+          <env name="MAPMAKER_ROLE" value="dev" />
+        </envs>
       </env_state>
     </blaze-settings>
     <method v="2">

@@ -3,10 +3,6 @@ package net.hollowcube.mapmaker.util;
 import io.helidon.health.HealthCheck;
 import io.helidon.health.HealthCheckResponse;
 import io.helidon.health.HealthCheckType;
-import io.helidon.webserver.http.HttpRules;
-import io.helidon.webserver.http.HttpService;
-import io.helidon.webserver.http.ServerRequest;
-import io.helidon.webserver.http.ServerResponse;
 import net.hollowcube.common.util.FutureUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -15,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -22,11 +19,9 @@ import java.util.function.Supplier;
 /**
  * Handles the typical shutdown sequence for a server.
  */
-public class Shutdowner implements HttpService, HealthCheck {
+public class Shutdowner implements HealthCheck {
     private static final Logger logger = LoggerFactory.getLogger(Shutdowner.class);
     private static final long SHUTDOWN_MAX_WAIT_MILLIS;
-
-    private volatile boolean isShuttingDown = false;
 
     static {
         try {
@@ -46,7 +41,8 @@ public class Shutdowner implements HttpService, HealthCheck {
 
     private final List<Hook> shutdownHooks = new ArrayList<>();
     private final Supplier<CompletableFuture<Void>> quiescenceFunction;
-    private volatile CompletableFuture<Void> gracefulShutdownFuture = null;
+
+    private volatile boolean isShuttingDown = false;
 
     public Shutdowner(@NotNull Supplier<CompletableFuture<Void>> quiescenceFunction) {
         this.quiescenceFunction = quiescenceFunction;
@@ -54,11 +50,11 @@ public class Shutdowner implements HttpService, HealthCheck {
         //noinspection ResultOfMethodCallIgnored
         shutdownHooks.add(new Hook("fjp wait", () -> ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS)));
 
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownImmediately));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::performShutdown));
     }
 
     public boolean isShuttingDown() {
-        return gracefulShutdownFuture != null;
+        return isShuttingDown;
     }
 
     /**
@@ -70,63 +66,35 @@ public class Shutdowner implements HttpService, HealthCheck {
         shutdownHooks.add(new Hook(name, hook));
     }
 
-    /**
-     * Shuts down the server gracefully, immediately. Does not give any shutdown grace period.
-     */
-    public void shutdownImmediately() {
+    public void performShutdown() {
         if (isShuttingDown) return;
-        if (gracefulShutdownFuture == null) shutdownGracefully();
-        gracefulShutdownFuture.complete(null);
-        FutureUtil.markShutdown();
 
-        isShuttingDown = true;
-        shutdownHooks.forEach(runnable -> {
+        try {
+            logger.info("Beginning graceful shutdown. The server will terminate in {} seconds.", SHUTDOWN_MAX_WAIT_MILLIS / 1000);
             try {
-                runnable.run();
-            } catch (Exception e) {
-                e.printStackTrace();
+                quiescenceFunction.get().get();
+            } catch (ExecutionException e) {
+                logger.error("Error waiting for quiescence", e);
             }
-        });
-    }
 
-    public void shutdownGracefully() {
-        if (gracefulShutdownFuture != null) return;
+            logger.info("Players have drained successfully, .");
+            FutureUtil.markShutdown();
+            for (var hook : shutdownHooks) {
+                try {
+                    hook.run();
+                } catch (Throwable e) {
+                    logger.error("Error running shutdown hook {}", hook.name(), e);
+                }
+            }
 
-        logger.info("Beginning graceful shutdown. The server will terminate in {} seconds.", SHUTDOWN_MAX_WAIT_MILLIS / 1000);
-        gracefulShutdownFuture = CompletableFuture.runAsync(
-                () -> {
-                }, // Automatically complete the future after the timeout.
-                CompletableFuture.delayedExecutor(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS)
-        );
-
-        // At this point we have entered the pre shutdown hook for the pod. We have a maximum of
-        // SHUTDOWN_MAX_WAIT_MILLIS to remove all players from the server then we will enter
-        // the shutdown hook for the jvm (receive sigterm).
-
-        quiescenceFunction.get().thenRun(this::shutdownImmediately);
-    }
-
-    @Override
-    public void routing(HttpRules rules) {
-        rules.get("/shutdown", this::handleShutdownRequest);
-    }
-
-    private void handleShutdownRequest(@NotNull ServerRequest request, @NotNull ServerResponse response) {
-        if (gracefulShutdownFuture == null) {
-            // We have not started shutting down separately, so begin shutdown
-            shutdownGracefully();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-
-        // Return from the request whenever shutdown is completed.
-        // As soon as we return from this request, Kubernetes will send a SIGTERM to kill the pod
-        // which will forcibly remove all players and shutdown the process.
-        FutureUtil.getUnchecked(gracefulShutdownFuture);
-        response.status(200).send();
     }
 
     @Override
     public HealthCheckResponse call() {
-        return HealthCheckResponse.builder().status(gracefulShutdownFuture == null).build();
+        return HealthCheckResponse.builder().status(!isShuttingDown()).build();
     }
 
     @Override

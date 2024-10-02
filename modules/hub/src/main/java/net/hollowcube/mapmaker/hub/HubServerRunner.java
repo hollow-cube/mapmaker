@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import io.helidon.health.HealthCheck;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
@@ -17,7 +16,6 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.session.Presence;
 import net.minestom.server.MinecraftServer;
@@ -31,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class HubServerRunner extends AbstractMapServer {
@@ -56,13 +52,6 @@ public class HubServerRunner extends AbstractMapServer {
     @Override
     protected @NotNull String name() {
         return "mapmaker-hub";
-    }
-
-    @Override
-    public @NotNull List<HealthCheck> healthChecks() {
-        var checks = new ArrayList<>(super.healthChecks());
-        checks.add(new AnonHealthCheck("session-service", sessionService()::ready));
-        return checks;
     }
 
     @Override

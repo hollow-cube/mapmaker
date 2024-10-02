@@ -106,8 +106,7 @@ public final class MapServerInitializer {
         WebServer webServer = WebServer.builder()
                 .host(httpConfig.host()).port(httpConfig.port())
                 .addFeature(observe)
-                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow())
-                        .register(server.shutdowner()))
+                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow()))
                 .build()
                 .start();
 
@@ -120,8 +119,7 @@ public final class MapServerInitializer {
             server.start();
         } catch (Exception e) {
             logger.error("server start failed, shutting down", e);
-            e.printStackTrace();
-            server.shutdowner().shutdownImmediately();
+            server.shutdowner().performShutdown();
             System.exit(1);
         }
 

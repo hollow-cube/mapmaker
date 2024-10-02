@@ -54,9 +54,8 @@ spec:
               port: http
           lifecycle:
             preStop:
-              httpGet:
-                port: http
-                path: shutdown
+              exec:
+                command: [ "/bin/sh", "-c", "kill -SIGTERM 1" ]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
