@@ -1,8 +1,10 @@
 http:
   host: 0.0.0.0
   port: 9124
+
 metrics:
   password: ""
+  pyroscope_endpoint: "http://localhost:4040"
 
 minestom:
   host: 0.0.0.0
@@ -24,6 +26,7 @@ kafka:
 
 unleash:
   enabled: false
+  use_posthog: false
   address: ""
   token: ""
   default_action: false

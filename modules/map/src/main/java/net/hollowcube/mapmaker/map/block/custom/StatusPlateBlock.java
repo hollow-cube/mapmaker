@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.dfu.DFU;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -75,7 +74,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
         var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditStatusView(c.with(Map.of("blockPos", new BlockVec(interaction.getBlockPosition()))), data, maxResetHeight, () -> {
+        world.server().showView(player, c -> new EditStatusView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 

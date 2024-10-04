@@ -1,10 +1,11 @@
-fullnameOverride: mapmaker-hub
+fullnameOverride: mapmaker-map
 
 nodeSelector:
-  nodepool: "main-sm"
+  kubernetes.io/hostname: bloom-01.hollowcube.dev
+#  kubernetes.io/arch: arm64
 
 mapmaker:
-  role: hub
+  role: map
 
   terminationSeconds: 22600
 
@@ -15,11 +16,11 @@ image:
 
 resources:
   limits:
-    cpu: 1000m
-    memory: 750Mi
+    #    cpu: 1500m
+    memory: 3Gi
   requests:
-    cpu: 500m
-    memory: 750Mi
+    #    cpu: 500m
+    memory: 3Gi
 
 serviceMonitor:
   enabled: true
@@ -30,7 +31,8 @@ env:
   MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "21600000" # 6 hours
 
   MAPMAKER_METRICS_PASSWORD: "${METRICS_PASSWORD}"
-  MAPMAKER_TRACING_OTLP_ENDPOINT: "http://grafana-k8s-monitoring-grafana-agent.mapmaker.svc.cluster.local:4318/v1/traces"
+  MAPMAKER_METRICS_PYROSCOPE_ENDPOINT: "http://pyroscope.monitoring.svc.cluster.local:4040"
+  MAPMAKER_TRACING_OTLP_ENDPOINT: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
 
@@ -43,7 +45,8 @@ env:
   MAPMAKER_SPICEDB_TOKEN: "${SPICEDB_SECRET_KEY}"
   MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
 
-  MAPMAKER_UNLEASH_ENABLED: "true"
+  MAPMAKER_UNLEASH_ENABLED: "false"
+  MAPMAKER_UNLEASH_USE_POSTHOG: "true"
   MAPMAKER_UNLEASH_ADDRESS: "http://unleash.mgmt.svc.cluster.local:4242/api"
   MAPMAKER_UNLEASH_TOKEN: "${UNLEASH_TOKEN}"
 

@@ -60,10 +60,7 @@ public class TimerFeatureProvider implements FeatureProvider {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return;
 
-        long time = 0;
-        if (saveState.getPlayStartTime() != 0) {
-            time = saveState.getPlaytime() + System.currentTimeMillis() - saveState.getPlayStartTime();
-        }
+        long time = saveState.getRealPlaytime();
 
         // Append the countdown timer, but only if it's not a testing map.
         // We should not show the normal timer in testing mode.

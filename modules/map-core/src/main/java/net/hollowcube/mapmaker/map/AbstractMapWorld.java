@@ -140,7 +140,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             } catch (ExecutionException e) {
                 throw new RuntimeException("Error receiving known packs", e);
             }
-            boolean excludeVanilla = knownPacks != null && !knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
+            boolean excludeVanilla = knownPacks != null && knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
 
             // Send registry data ourself to allow custom biomes per map
             var serverProcess = MinecraftServer.process();

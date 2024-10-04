@@ -54,14 +54,15 @@ spec:
               port: http
           lifecycle:
             preStop:
-              httpGet:
-                port: http
-                path: shutdown
+              exec:
+                command: [ "/bin/sh", "-c", "kill -SIGTERM 1" ]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: MAPMAKER_TERMINATION_SECONDS
               value: "{{ .Values.mapmaker.terminationSeconds }}"
+            - name: "MAPMAKER_ROLE"
+              value: "{{ .Values.mapmaker.role }}"
           {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"

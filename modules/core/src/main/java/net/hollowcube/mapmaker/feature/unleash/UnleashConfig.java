@@ -7,6 +7,8 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public record UnleashConfig(
         boolean enabled,
+        @Setting("use_posthog")
+        boolean usePosthog,
         @NotNull String address,
         @NotNull String token,
         @Setting("default_action")

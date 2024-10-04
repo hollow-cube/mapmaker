@@ -4,8 +4,13 @@ import io.helidon.metrics.prometheus.PrometheusSupport;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.observe.ObserveFeature;
 import io.helidon.webserver.observe.health.HealthObserver;
+import io.pyroscope.http.Format;
+import io.pyroscope.javaagent.EventType;
+import io.pyroscope.javaagent.PyroscopeAgent;
+import io.pyroscope.javaagent.config.Config;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
+import net.hollowcube.mapmaker.config.MetricsConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.kyori.adventure.text.Component;
@@ -57,6 +62,7 @@ public final class MapServerInitializer {
         // Init tasks (minestom server, map server components, web server)
 
         var config = loadConfig.get();
+        enablePyroscopeProfiling(config);
 
         var minecraftServer = MinecraftServer.init();
         MinestomPrometheus.init();
@@ -100,24 +106,20 @@ public final class MapServerInitializer {
         WebServer webServer = WebServer.builder()
                 .host(httpConfig.host()).port(httpConfig.port())
                 .addFeature(observe)
-                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow())
-                        .register(server.shutdowner()))
+                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow()))
                 .build()
                 .start();
 
         logger.info("Web server is running at {}:{}", httpConfig.host(), webServer.port());
         server.shutdowner().queue("webserver", webServer::stop);
 
-
         // Start everything
-
 
         try {
             server.start();
         } catch (Exception e) {
             logger.error("server start failed, shutting down", e);
-            e.printStackTrace();
-            server.shutdowner().shutdownImmediately();
+            server.shutdowner().performShutdown();
             System.exit(1);
         }
 
@@ -135,6 +137,21 @@ public final class MapServerInitializer {
         server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
+    }
+
+    private static void enablePyroscopeProfiling(@NotNull ConfigLoaderV3 config) {
+        var endpoint = config.get(MetricsConfig.class).pyroscopeEndpoint();
+        if (endpoint == null || endpoint.trim().isEmpty()) return;
+        var role = System.getenv("MAPMAKER_ROLE");
+        if (role == null || role.trim().isEmpty()) return;
+
+        logger.info("Enabling Pyroscope profiling (role={}, endpoint={})", role, endpoint);
+        PyroscopeAgent.start(new Config.Builder()
+                .setApplicationName("mapmaker-" + role)
+                .setProfilingEvent(EventType.ITIMER)
+                .setFormat(Format.JFR)
+                .setServerAddress(endpoint)
+                .build());
     }
 
 }
