@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -52,9 +53,9 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private final BiomeContainer biomeContainer = new BiomeContainer();
     private final MarkerHandlerRegistry markerRegistry = new MarkerHandlerRegistry();
 
-    private final Set<Player> players = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Player> players = new CopyOnWriteArraySet<>();
     private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
-    private final Set<Player> spectators = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Player> spectators = new CopyOnWriteArraySet<>();
     private final Set<Player> spectatorsUnmodifiable = Collections.unmodifiableSet(spectators);
 
     protected AbstractMapWorld(@NotNull MapServer server, @NotNull MapData map, @NotNull MapInstance instance) {

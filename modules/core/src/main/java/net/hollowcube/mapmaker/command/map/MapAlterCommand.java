@@ -26,6 +26,8 @@ import static net.hollowcube.command.dsl.CommandDsl.playerOnly;
 public class MapAlterCommand {
 
     private final Argument<MapData> mapArg;
+    private final Argument<MapVariant> typeArg = Argument.Enum("type", MapVariant.class)
+            .description("The new type for the map");
     private final Argument<String> nameArg = Argument.GreedyString("name")
             .description("The new name for the map");
     private final Argument<Material> displayItemArg = Argument.Material("item")
@@ -62,6 +64,10 @@ public class MapAlterCommand {
                 .condition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN))
                 .description("Edit information related to a map")
                 .child(mapArg, alter -> alter
+                                .child("type", di -> di
+                                        .executes(playerOnly(this::handleSetType), typeArg)
+                                        .description("Change the type of a map")
+                                        .examples("/map alter 123-456-789 type parkour"))
                                 .child("name", name -> name
                                         .executes(playerOnly(this::handleSetName), nameArg)
                                         .description("Change the name of a map")
@@ -93,6 +99,21 @@ public class MapAlterCommand {
                                         .examples("/map alter 123-456-789 quality unrated"))
                         // todo toggle settings?
                 ));
+    }
+
+    private void handleSetType(@NotNull Player player, @NotNull CommandContext context) {
+        var map = context.get(mapArg);
+        var newType = context.get(typeArg);
+
+        if (map.settings().getVariant() == newType) {
+            player.sendMessage("Map already has type " + newType);
+            return;
+        }
+
+        map.settings().setVariant(newType);
+        if (doMapUpdate(player, map)) {
+            player.sendMessage("Map type set to " + newType);
+        }
     }
 
     private void handleSetName(@NotNull Player player, @NotNull CommandContext context) {
