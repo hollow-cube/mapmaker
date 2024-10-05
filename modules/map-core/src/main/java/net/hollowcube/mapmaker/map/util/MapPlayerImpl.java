@@ -109,10 +109,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
                 var didCollideY = CollisionUtils.handlePhysics(getInstance(), getBoundingBox(), getPreviousPosition(),
                         new Vec(0, deltaY, 0), null, true).collisionY();
                 if (didCollideY) {
-                    if (lastCollideTick == getAliveTicks() - 1) {
-                        teleport(getPreviousPosition());
-                        log.info("Teleported {} to prevent falling through the floor", getUsername());
-                    }
+                    teleport(getPreviousPosition());
+                    log.info("Teleported {} to prevent falling through the floor", getUsername());
                     lastCollideTick = getAliveTicks();
                 } else {
                     lastCollideTick = -1;
