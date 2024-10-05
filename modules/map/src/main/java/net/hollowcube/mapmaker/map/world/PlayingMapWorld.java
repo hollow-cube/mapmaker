@@ -113,11 +113,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
-        var playerData = PlayerDataV2.fromPlayer(player);
-
-        var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
-        player.setTag(SaveState.TAG, saveState);
+        var saveState = getOrCreateSaveState(player);
 
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
@@ -126,7 +122,13 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void addPlayer(@NotNull Player player) {
-        var saveState = SaveState.fromPlayer(player);
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null) {
+            // We need to handle missing save states here because they do not reenter configuration to reset
+            // a map after completing it.
+            saveState = getOrCreateSaveState(player);
+            player.teleport(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+        }
 
         super.addPlayer(player); // Add to player list & reset inventory.
 
@@ -136,6 +138,15 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // Otherwise, we will start timing when they move the first time.
             saveState.setPlayStartTime(System.currentTimeMillis());
         }
+    }
+
+    private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
+        var playerData = PlayerDataV2.fromPlayer(player);
+
+        var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
+        player.setTag(SaveState.TAG, saveState);
+        return saveState;
     }
 
     @Override
