@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +73,11 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
         // Override left just to comment that the instance should not be unregistered here. It is owned
         // by the parent editing world and is managed by that.
+    }
+
+    @Override
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        // Irrelevant for testing world
     }
 
     @Override

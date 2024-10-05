@@ -18,7 +18,7 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
-public class AbstractMapMakerMapWorld extends AbstractMapWorld {
+public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     private final FeatureList features;
     private List<FeatureProvider> enabledFeatures;

@@ -36,10 +36,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
-import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.item.ItemStack;
@@ -264,12 +261,28 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        var player = event.getPlayer();
+
+        var saveState = getOrCreateSaveState(player);
+
+        // We must set the respawn point during config so that their spawn chunks are sent there.
+        // This prevents falling through the floor when joining.
+        player.setRespawnPoint(saveState.state(EditState.class).pos().orElse(map().settings().getSpawnPoint()));
+    }
+
+    @Override
     public void addPlayer(@NotNull Player player) {
         ActionBar.forPlayer(player).addProvider(RamUsageOverlay.INSTANCE);
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING, EditState.SERIALIZER);
-        player.setTag(SaveState.TAG, saveState);
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null) {
+            // We need to handle missing save states here because they do not reenter configuration to go from test
+            // mode back to editing. Thus the preAddPlayer would not trigger.
+            saveState = getOrCreateSaveState(player);
+            player.teleport(saveState.state(EditState.class).pos().orElse(map().settings().getSpawnPoint()));
+        }
 
         super.addPlayer(player);
 
@@ -294,7 +307,13 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // If there is no position stored then this is a fresh edit state so add the builder menu
             player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
         }
-        FutureUtil.getUnchecked(player.teleport(editState.pos().orElse(map().settings().getSpawnPoint())));
+    }
+
+    private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
+        var playerData = PlayerDataV2.fromPlayer(player);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING, EditState.SERIALIZER);
+        player.setTag(SaveState.TAG, saveState);
+        return saveState;
     }
 
     @Override

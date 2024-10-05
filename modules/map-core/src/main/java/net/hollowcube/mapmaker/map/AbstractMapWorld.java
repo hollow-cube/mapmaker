@@ -121,7 +121,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     }
 
     @Override
-    public void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+    public final void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
 
         try {
@@ -166,7 +166,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());
-            player.setRespawnPoint(spawnPoint(player));
+            preAddPlayer(event);
 
             // addPlayer is called during PlayerSpawnEvent meaning that the player is already in the instance,
             // and all of the entity `updateNewViewer` calls were already made. This makes it unsafe to call
@@ -181,6 +181,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.kick("An unexpected error occurred while configuring your player. Please try again.");
         }
     }
+
+    public abstract void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event);
 
     @Override
     public void addPlayer(@NotNull Player player) {

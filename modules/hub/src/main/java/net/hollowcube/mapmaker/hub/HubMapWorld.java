@@ -148,6 +148,11 @@ public class HubMapWorld extends AbstractMapWorld {
     }
 
     @Override
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        event.getPlayer().setRespawnPoint(spawnPoint(event.getPlayer()));
+    }
+
+    @Override
     public void addPlayer(@NotNull Player player) {
         super.addPlayer(player);
 

@@ -36,6 +36,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
@@ -110,16 +111,22 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         instance.scheduleNextTick(_ -> instance.unload());
     }
 
-    @Override
-    public void addPlayer(@NotNull Player player) {
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        var player = event.getPlayer();
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
         var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
 
-        var pos = saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint());
-        FutureUtil.getUnchecked(player.teleport(pos));
+        // We must set the respawn point during config so that their spawn chunks are sent there.
+        // This prevents falling through the floor when joining.
+        player.setRespawnPoint(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+    }
+
+    @Override
+    public void addPlayer(@NotNull Player player) {
+        var saveState = SaveState.fromPlayer(player);
 
         super.addPlayer(player); // Add to player list & reset inventory.
 
