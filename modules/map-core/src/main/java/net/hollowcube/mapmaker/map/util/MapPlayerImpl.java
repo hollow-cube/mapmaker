@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.util;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.minestom.server.collision.CollisionUtils;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
@@ -11,6 +13,8 @@ import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
@@ -22,10 +26,15 @@ import java.util.function.Function;
  * - Always set listed to false on tab list entries. They will be managed by the session manager.
  */
 public abstract class MapPlayerImpl extends CommandHandlingPlayer implements PlayerVisibilityExtension {
+    private static final Set<String> ENABLED_FLOOR_TEST_USERS = Set.of("ontal", "itmg", "notmattw", "sethprg");
+    private static final Logger log = LoggerFactory.getLogger(MapPlayerImpl.class);
+
     private Function<Player, Visibility> visibilityFunc = null;
 
     // entity id -> visibility ordinal
     private Int2IntMap visibilityByEntity = new Int2IntArrayMap();
+
+    private long lastCollideTick = -1;
 
     public MapPlayerImpl(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
         super(uuid, username, playerConnection);
@@ -85,6 +94,32 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         for (var viewer : getViewers()) {
             viewer.sendPacket(visibilityByEntity.get(viewer.getEntityId()) != Visibility.VISIBLE.ordinal()
                     ? invisPacket : metaPacket);
+        }
+    }
+
+    @Override
+    public void tick(long time) {
+        super.tick(time);
+
+        // This is some relatively temporary code to attempt to prevent a player from falling through the floor on spawn.
+        // It is not intended to be a solid check against noclip in an anticheat.
+        if (ENABLED_FLOOR_TEST_USERS.contains(getUsername().toLowerCase(Locale.ROOT))) {
+            var deltaY = Vec.fromPoint(getPosition().sub(getPreviousPosition())).y();
+            if (deltaY < 0) {
+                var didCollideY = CollisionUtils.handlePhysics(getInstance(), getBoundingBox(), getPreviousPosition(),
+                        new Vec(0, deltaY, 0), null, true).collisionY();
+                if (didCollideY) {
+                    if (lastCollideTick == getAliveTicks() - 1) {
+                        teleport(getPreviousPosition());
+                        log.info("Teleported {} to prevent falling through the floor", getUsername());
+                    }
+                    lastCollideTick = getAliveTicks();
+                } else {
+                    lastCollideTick = -1;
+                }
+            } else {
+                lastCollideTick = -1;
+            }
         }
     }
 
