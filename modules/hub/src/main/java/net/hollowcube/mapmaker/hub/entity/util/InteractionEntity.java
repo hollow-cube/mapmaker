@@ -31,7 +31,7 @@ public class InteractionEntity extends Entity {
 
         setNoGravity(true);
         hasPhysics = false;
-        hasCollision = false;
+        collidesWithEntities = false;
 
         final InteractionMeta meta = getEntityMeta();
         meta.setWidth(width);

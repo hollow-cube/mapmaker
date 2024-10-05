@@ -434,7 +434,6 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     public @NotNull List<HealthCheck> healthChecks() {
-//        //todo this should be probing session service for hubs, and session + maps for maps
         return List.of(
                 new AnonHealthCheck("minestom", MinecraftServer::isStarted),
                 new AnonHealthCheck("hub", () -> isReady),

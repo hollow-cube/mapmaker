@@ -87,7 +87,7 @@ public class MarkerEntity extends MapEntity {
 
         hasPhysics = false;
         setNoGravity(true);
-        hasCollision = false;
+        collidesWithEntities = false;
     }
 
     public @NotNull String getDisplayName() {

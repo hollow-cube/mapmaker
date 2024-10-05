@@ -107,7 +107,7 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
 
             setNoGravity(true);
             hasPhysics = false;
-            hasCollision = false;
+            collidesWithEntities = false;
 
             // Only show the entity to players in build mode
             updateViewableRule(p -> MapWorld.forPlayerOptional(p) instanceof EditingMapWorld world && world.canEdit(p));

@@ -58,6 +58,8 @@ public final class MapServerInitializer {
         SLF4JBridgeHandler.install();
         // Prometheus JVM exporters
         io.prometheus.client.hotspot.DefaultExports.initialize();
+        // Default thread death handler
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception in thread {}", t, e));
 
         // Init tasks (minestom server, map server components, web server)
 

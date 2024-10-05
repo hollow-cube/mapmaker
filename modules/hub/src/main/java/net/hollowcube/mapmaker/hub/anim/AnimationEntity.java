@@ -41,7 +41,7 @@ public class AnimationEntity extends Entity {
 
         setNoGravity(true);
         hasPhysics = false;
-        hasCollision = false;
+        collidesWithEntities = false;
 
         // If Minestom sends position sync, it will reset the interpolation breaking the animation
         setSynchronizationTicks(Integer.MAX_VALUE);
