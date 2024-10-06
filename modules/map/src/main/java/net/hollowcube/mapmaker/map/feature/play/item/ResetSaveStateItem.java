@@ -11,11 +11,14 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+
+import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public class ResetSaveStateItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/reset_item_confirm", 2000);
@@ -56,7 +59,7 @@ public class ResetSaveStateItem extends ItemHandler {
             return;
         }
 
-        if (requireConfirmation(saveState) && CONFIRM_COOLDOWN.test(player)) {
+        if (requireConfirmation(player, saveState) && CONFIRM_COOLDOWN.test(player)) {
             player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
             return;
         }
@@ -66,7 +69,9 @@ public class ResetSaveStateItem extends ItemHandler {
         }
     }
 
-    private boolean requireConfirmation(@NotNull SaveState saveState) {
+    private boolean requireConfirmation(@NotNull Player player, @NotNull SaveState saveState) {
+        // If you have a spectator checkpoint, never require confirmation
+        if (player.hasTag(SPECTATOR_CHECKPOINT)) return false;
         // The reset item requires confirm click if the playtime is > MIN_RESET_TIME or if the player has a checkpoint
         if (saveState.getRealPlaytime() > MIN_RESET_TIME) return true;
         var playState = saveState.state(PlayState.class);
