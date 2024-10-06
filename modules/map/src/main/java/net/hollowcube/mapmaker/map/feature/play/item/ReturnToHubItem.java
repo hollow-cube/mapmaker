@@ -40,7 +40,8 @@ public class ReturnToHubItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return; // Sanity
 
         FutureUtil.submitVirtual(() -> {
             try {
