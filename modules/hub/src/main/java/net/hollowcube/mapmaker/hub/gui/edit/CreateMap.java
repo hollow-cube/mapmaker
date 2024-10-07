@@ -29,7 +29,6 @@ public class CreateMap extends View {
     private @ContextObject MapService mapService;
 
     private @Outlet("submit") Label submitButton;
-    private @Outlet("title") Text titleText;
 
     private @Outlet("slot_id_create") Text slotIdText;
     private @OutletGroup("map_size_.+_switch") Switch[] sizeSwitches;
@@ -41,7 +40,6 @@ public class CreateMap extends View {
 
     public CreateMap(@NotNull Context context) {
         super(context);
-        titleText.setText("Create New Map");
 
         final String playerId = PlayerDataV2.fromPlayer(player).id();
         for (int i = 0; i < sizeSwitches.length; i++) {
