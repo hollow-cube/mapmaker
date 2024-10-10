@@ -72,11 +72,11 @@ public final class FutureUtil {
             runnable.run();
             return;
         }
-        
+
         Thread.startVirtualThread(() -> {
             try {
                 runnable.run();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 MinecraftServer.getExceptionManager().handleException(e);
             }
         });
@@ -117,7 +117,7 @@ public final class FutureUtil {
         if (future == null) return null;
         try {
             return future.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
