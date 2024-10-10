@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.dev;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
@@ -123,7 +124,7 @@ public class DevServerRunner extends AbstractMapServer {
         // on our own here.
         // Note that we dont transfer here, its deferred to config phase (and reconfig)
 
-        net.minestom.server.entity.PlayerSkin skin = net.minestom.server.entity.PlayerSkin.fromUuid(event.getPlayerUuid().toString());
+        net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(event.getPlayerUuid().toString());
 
         var playerId = event.getPlayerUuid().toString();
         sessionService().createSessionV2(playerId, new SessionCreateRequestV2(

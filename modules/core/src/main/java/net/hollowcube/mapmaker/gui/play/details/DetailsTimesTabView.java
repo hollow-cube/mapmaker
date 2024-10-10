@@ -10,6 +10,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -116,7 +117,7 @@ public class DetailsTimesTabView extends View {
     static @NotNull ItemStack getPlayerHead2d(@Nullable String uuid, int model) {
         if (uuid == null) return MISSING_ITEM.with(ItemComponent.CUSTOM_MODEL_DATA, model);
         return HEAD_CACHE.get(uuid, key -> {
-            var skin = PlayerSkin.fromUuid(key);
+            var skin = Objects.requireNonNull(MojangUtil.getSkinFromUuid(key));
             return ItemStack.builder(Material.PLAYER_HEAD)
                     .set(ItemComponent.PROFILE, new HeadProfile(skin))
                     .build();
