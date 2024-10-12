@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventFilter;
@@ -46,6 +47,10 @@ public class NoJumpFeatureProvider implements FeatureProvider {
         if (world == null || !world.isPlaying(player)) return;
 
         addEffect(player);
+
+        if (event.isMapJoin()) {
+            player.sendMessage(Component.translatable("map.join.warning.setting.no_jump"));
+        }
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {

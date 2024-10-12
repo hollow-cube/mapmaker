@@ -77,6 +77,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        event.getPlayer().setTag(FIRST_JOIN_TAG, true);
         // Irrelevant for testing world
     }
 
@@ -98,7 +99,8 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         player.setTag(SPECTATOR_CHECKPOINT, startingPos);
         player.teleport(startingPos); //todo is this necessary it seems hella dumb?
 
-        callEvent(new MapPlayerInitEvent(this, player, true));
+        var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
+        callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));
     }
 
     @Override

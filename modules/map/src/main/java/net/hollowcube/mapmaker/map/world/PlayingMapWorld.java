@@ -118,6 +118,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
         player.setRespawnPoint(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+        player.setTag(FIRST_JOIN_TAG, true);
     }
 
     @Override
@@ -132,7 +133,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         super.addPlayer(player); // Add to player list & reset inventory.
 
-        EventDispatcher.call(new MapPlayerInitEvent(this, player, true));
+        var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
+        EventDispatcher.call(new MapPlayerInitEvent(this, player, true, isMapJoin));
         if (saveState.getPlaytime() > 0) {
             // If the playtime is non-zero (ie they have played before) start timing immediately.
             // Otherwise, we will start timing when they move the first time.

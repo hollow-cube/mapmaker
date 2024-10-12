@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import io.prometheus.client.Counter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -63,6 +64,12 @@ import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpoi
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class BaseParkourMapFeatureProvider implements FeatureProvider {
+    private static final int THIRTY_MINUTES = 30 * 60 * 1000;
+    private static final Counter RESETS_AFTER_30_MINUTES = Counter.build()
+            .name("reset_after_30_minutes_count")
+            .help("Number of times a player has reset after 30 minutes of play")
+            .register();
+
     private static final int RESET_HEIGHT_OFFSET = 5;
     private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
 
@@ -516,6 +523,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Remove the playing tag so that they can't trigger a checkpoint/status/completion
         abstractWorld.removePlayerImmediate(player);
 
+        // iTMG thinks that this happens a lot and we should add a feature to let people
+        if (saveState.getRealPlaytime() > THIRTY_MINUTES) {
+            RESETS_AFTER_30_MINUTES.inc();
+        }
+
         saveState.setCompleted(false);
         saveState.setPlaytime(0);
         saveState.setPlayStartTime(0);
@@ -529,7 +541,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             updatePlayerFromState(player, newPlayState);
             abstractWorld.addPlayerImmediate(player);
 
-            EventDispatcher.call(new MapPlayerInitEvent(world, player, true));
+            EventDispatcher.call(new MapPlayerInitEvent(world, player, true, false));
         });
     }
 
@@ -552,11 +564,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
                 player.teleport(world.spawnPoint(player)).thenRun(() -> {
-                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
                 });
             } else {
                 player.teleport(checkpoint).thenRun(() -> {
-                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+                    EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
                 });
             }
             return;
@@ -593,7 +605,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.teleport(playState.pos().orElseThrow()).thenRun(() -> {
             abstractWorld.addPlayerImmediate(player);
 
-            EventDispatcher.call(new MapPlayerInitEvent(world, player, false));
+            EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
         });
     }
 

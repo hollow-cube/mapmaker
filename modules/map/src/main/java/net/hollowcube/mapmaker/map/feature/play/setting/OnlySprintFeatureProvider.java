@@ -1,13 +1,14 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -49,6 +50,9 @@ public class OnlySprintFeatureProvider implements FeatureProvider {
         if (!event.getMapWorld().isPlaying(player)) return;
 
         player.setTag(ONLY_SPRINT_TAG, player.getPosition());
+        if (event.isMapJoin()) {
+            player.sendMessage(Component.translatable("map.join.warning.setting.only_sprint"));
+        }
     }
 
     public void onStopSprinting(@NotNull PlayerStopSprintingEvent event) {

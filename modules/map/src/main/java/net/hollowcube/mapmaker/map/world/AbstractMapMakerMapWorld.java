@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.misc.BossBars;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
+    protected static final Tag<Boolean> FIRST_JOIN_TAG = Tag.Boolean("mapworld.firstjoin");
 
     private final FeatureList features;
     private List<FeatureProvider> enabledFeatures;

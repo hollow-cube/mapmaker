@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -33,6 +35,16 @@ public class NoSneakFeatureProvider implements FeatureProvider {
         world.eventNode().addChild(eventNode);
 
         return true;
+    }
+
+    public void onPlayerInit(@NotNull MapPlayerInitEvent event) {
+        var player = event.getPlayer();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
+
+        if (event.isMapJoin()) {
+            player.sendMessage(Component.translatable("map.join.warning.setting.no_sneak"));
+        }
     }
 
     //todo(matt): not a big fan of using the move event here, but i don't know any other way
