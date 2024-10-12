@@ -4,6 +4,7 @@ import net.hollowcube.command.arg.Argument;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 final class RootCommandNode extends CommandNode {
 
@@ -16,7 +17,7 @@ final class RootCommandNode extends CommandNode {
     void register(@NotNull String name, @NotNull CommandNode node) {
         if (this.children == null) this.children = new ArrayList<>();
 
-        for (var pair : this.children) {
+        for (var pair : List.copyOf(this.children)) {
             if (pair.argument().id().equalsIgnoreCase(name)) {
                 throw new IllegalArgumentException("duplicate child name: " + name);
             }
