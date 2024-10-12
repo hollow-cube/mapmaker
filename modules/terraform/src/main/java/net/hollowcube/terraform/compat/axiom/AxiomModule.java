@@ -68,6 +68,7 @@ public class AxiomModule implements TerraformModule {
             case AxiomClientModifyEntitiesPacket packet -> handler.handleModifyEntities(player, packet);
             case AxiomClientDeleteEntitiesPacket packet -> handler.handleDeleteEntities(player, packet);
             case AxiomClientMarkerNbtRequestPacket packet -> handler.handleRequestMarkerData(player, packet);
+            case AxiomClientAnnotationUpdatePacket packet -> handler.handleAnnotationUpdate(player, packet);
             case null -> logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
         }
     }

@@ -38,7 +38,7 @@ public final class AxiomPacketListener {
     private static final Logger logger = LoggerFactory.getLogger(AxiomPacketListener.class);
 
     public void handleHelloMessage(@NotNull Player player, @NotNull AxiomClientHelloPacket packet) {
-        var clientInfo = new Axiom.ClientInfo(packet.apiVersion(), packet.extraData());
+        var clientInfo = new Axiom.ClientInfo(packet.apiVersion());
         logger.info("Axiom is present for {} (API {})", player.getUsername(), clientInfo.apiVersion());
         if (clientInfo.apiVersion() < Axiom.MIN_API_VERSION) {
             player.sendMessage("Your version of Axiom is too old, please update to the latest version.");
@@ -286,6 +286,12 @@ public final class AxiomPacketListener {
             var responsePacket = new AxiomMarkerNbtResponsePacket(packet.uuid(), event.getData());
             player.sendPacket(responsePacket.toPacket(player));
         });
+    }
+
+    public void handleAnnotationUpdate(@NotNull Player player, @NotNull AxiomClientAnnotationUpdatePacket packet) {
+        if (!Axiom.isEnabled(player)) return;
+
+        //todo
     }
 
     private @Nullable AxiomMarkerDataPacket.Entry createAddMarkerEntry(@NotNull Entity entity) {

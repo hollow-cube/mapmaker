@@ -3,7 +3,6 @@ package net.hollowcube.terraform.compat.axiom;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomServerPacket;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.instance.Instance;
@@ -22,7 +21,7 @@ import java.util.Map;
 public class Axiom {
 
     public static final int MIN_API_VERSION = 7;
-    public static final int MAX_API_VERSION = 7;
+    public static final int MAX_API_VERSION = 8;
 
 
     // Config properties
@@ -38,7 +37,7 @@ public class Axiom {
     public static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
 
 
-    public record ClientInfo(int apiVersion, @NotNull CompoundBinaryTag extraData) {
+    public record ClientInfo(int apiVersion) {
     }
 
     static final Tag<Boolean> ENABLED_TAG = Tag.Boolean("terraform:axiom/enabled");
@@ -128,7 +127,8 @@ public class Axiom {
             Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
             Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
             Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new),
-            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new)
+            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new),
+            Map.entry("axiom:annotation_update", AxiomClientAnnotationUpdatePacket::new)
     );
 
     /**

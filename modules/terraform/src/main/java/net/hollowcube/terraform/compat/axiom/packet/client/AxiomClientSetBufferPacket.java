@@ -91,11 +91,6 @@ public record AxiomClientSetBufferPacket(
                     // Reached the end, exit normally w/o overflow. this is the normal case
                     return updates;
                 }
-                int chunkX = PaletteUtil.unpackX(index);
-                int sectionY = PaletteUtil.unpackY(index);
-                int chunkZ = PaletteUtil.unpackZ(index);
-
-                System.out.println("pos: " + chunkX + ", " + sectionY + ", " + chunkZ);
 
                 var palette = readAxiomPalette(buffer);
                 var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
