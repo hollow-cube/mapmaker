@@ -58,7 +58,7 @@ public final class FontUtil {
             Map.entry(8226, 3), Map.entry(42, 4), Map.entry(35, 6), Map.entry(47, 6),
             Map.entry(92, 6), Map.entry(40, 4), Map.entry(41, 4), Map.entry(123, 5),
             Map.entry(125, 5), Map.entry(91, 4), Map.entry(93, 4), Map.entry(45, 6),
-            Map.entry(173, 3), Map.entry(8212, 6), Map.entry(95, 6), Map.entry(171, 6),
+            Map.entry(173, 3), Map.entry(8212, 6), Map.entry(95, 6), Map.entry(171, 7),
             Map.entry(187, 6), Map.entry(34, 4), Map.entry(39, 2), Map.entry(32, 4),
             Map.entry(162, 5), Map.entry(164, 4), Map.entry(36, 6), Map.entry(402, 6),
             Map.entry(163, 6), Map.entry(43, 6), Map.entry(247, 6), Map.entry(61, 6),
