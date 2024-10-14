@@ -1,7 +1,7 @@
 <?import net.hollowcube.mapmaker.hub.gui.edit ?>
 <component id="anvil" width="9" height="5" align="ttb" sprite="anvil/search_container">
     <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
+          font="map_details_title" shift="0"/>
     <box width="3" height="1" align="ltr">
         <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
         <label translationKey="gui.generic.empty" sprite="anvil/item_frame_and_magnifying_glass"/>

@@ -7,7 +7,7 @@
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>
-        <label translationKey="gui.effect.coordinate.information"/>
+        <label translationKey="gui.effect.coordinate.information" sprite="generic/information"/>
 
         <spacer width="6"/>
 
