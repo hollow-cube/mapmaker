@@ -25,6 +25,7 @@ java_library(
         "@maven//:dev_hollowcube_polar",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
+        "@maven//:io_prometheus_simpleclient",
         "@maven//:com_miguelfonseca_completely_completely_core",
         "@maven//:net_kyori_adventure_text_serializer_plain",
     ],
