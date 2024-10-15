@@ -2,7 +2,7 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ltr" sprite="report_map/container">
     <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
+          font="map_details_title" shift="50"/>
     <box width="9" height="5" align="ttb">
         <!-- Top bar -->
         <box width="9" align="ltr">

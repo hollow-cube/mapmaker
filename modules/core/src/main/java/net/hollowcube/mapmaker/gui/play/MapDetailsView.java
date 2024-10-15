@@ -12,6 +12,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
+//import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -112,7 +113,9 @@ public class MapDetailsView extends View {
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
+    private @Outlet("play_leave_switch") Switch playLeaveSwitch;
     private @Outlet("play_map") Label playMapButton;
+    private @Outlet("leave_map") Label leaveMapButton;
 
     private @Outlet("times_view") DetailsTimesTabView topTimesView;
 
@@ -326,6 +329,13 @@ public class MapDetailsView extends View {
         authorText.setArgs(authorDisplayName);
 
         topTimesView.setMap(map, authorTextContent, authorDisplayName);
+
+//        var hubWorld = MapWorld.forPlayerOptional(context.player());
+//        if (hubWorld instanceof HubMapWorld) {
+//            playLeaveSwitch.setOption(1);
+//        } else {
+            playLeaveSwitch.setOption(0);
+//        }
     }
 
     public void handleReportMap(@NotNull Player player) {
@@ -351,6 +361,11 @@ public class MapDetailsView extends View {
             logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
+    }
+
+    @Action(value = "leave_map", async = true)
+    public void handleLeaveMap(@NotNull Player player) {
+        bridge.joinHub(player);
     }
 
     // TAB SWITCHING
