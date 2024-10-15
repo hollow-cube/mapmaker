@@ -12,9 +12,9 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
-//import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -330,12 +330,12 @@ public class MapDetailsView extends View {
 
         topTimesView.setMap(map, authorTextContent, authorDisplayName);
 
-//        var hubWorld = MapWorld.forPlayerOptional(context.player());
-//        if (hubWorld instanceof HubMapWorld) {
-//            playLeaveSwitch.setOption(1);
-//        } else {
+        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, context.player());
+        if (currentMap != null) {
+            playLeaveSwitch.setOption(1);
+        } else {
             playLeaveSwitch.setOption(0);
-//        }
+        }
     }
 
     public void handleReportMap(@NotNull Player player) {
