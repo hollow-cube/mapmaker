@@ -33,9 +33,10 @@ public class HdbBrowserView extends View {
 
     public HdbBrowserView(@NotNull Context context) {
         this(context, DEFAULT_CATEGORY);
-        titleText.setText("HeadDatabase Browser");
-        hdbBrowserTitle.setText(category);
-        hdbBrowserTitle.setArgs(Component.text(category));
+        titleText.setText("Head Database");
+        var name = Component.translatable("hdb.category." + category + ".name");
+        hdbBrowserTitle.setText(category); //TODO idk how to get the translation key with capital names :/
+        hdbBrowserTitle.setArgs(name);
     }
 
     public HdbBrowserView(@NotNull Context context, @NotNull String category) {

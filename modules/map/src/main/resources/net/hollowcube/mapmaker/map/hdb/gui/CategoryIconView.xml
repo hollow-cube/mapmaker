@@ -2,8 +2,8 @@
 <component width="1" height="1" align="ltr">
     <switch id="root">
         <button id="label_off" translationKey="unused"
-                sprite="diamond_block"/>
+                sprite="diamond_block" backgroundSprite="hdb/bg_unselected_row_1"/>
         <button id="label_on" translationKey="unused"
-                sprite="diamond_block"/>
+                sprite="diamond_block" backgroundSprite="hdb/bg_selected_row_1"/>
     </switch>
 </component>
