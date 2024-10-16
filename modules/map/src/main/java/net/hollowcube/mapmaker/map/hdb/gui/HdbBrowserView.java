@@ -14,8 +14,10 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HdbBrowserView extends View {
     private static final String DEFAULT_CATEGORY = "alphabet";
@@ -34,9 +36,15 @@ public class HdbBrowserView extends View {
     public HdbBrowserView(@NotNull Context context) {
         this(context, DEFAULT_CATEGORY);
         titleText.setText("Head Database");
-        var name = Component.translatable("hdb.category." + category + ".name");
-        hdbBrowserTitle.setText(category); //TODO idk how to get the translation key with capital names :/
-        hdbBrowserTitle.setArgs(name);
+
+        hdbBrowserTitle.setText(formatCategoryName(category));
+        hdbBrowserTitle.setArgs(Component.text(formatCategoryName(category)));
+    }
+
+    private String formatCategoryName(String category) {
+        return Arrays.stream(category.replace("-", " & ").split(" "))
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
     public HdbBrowserView(@NotNull Context context, @NotNull String category) {
@@ -118,8 +126,8 @@ public class HdbBrowserView extends View {
             this.category = newCategory;
             this.subCategory = null;
         }
-        hdbBrowserTitle.setText(category);
-        hdbBrowserTitle.setArgs(Component.text(category));
+        hdbBrowserTitle.setText(formatCategoryName(category));
+        hdbBrowserTitle.setArgs(Component.text(formatCategoryName(category)));
         this.headsPagination.reset();
     }
 }
