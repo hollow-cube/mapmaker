@@ -37,7 +37,7 @@ public class HdbSearchView extends View {
         super(context);
         this.input = input;
 
-        titleText.setText("HeadDatabase Search");
+        titleText.setText("Search Heads");
         inputField.setArgs(Component.text(input));
     }
 

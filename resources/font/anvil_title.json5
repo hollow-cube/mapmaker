@@ -1,0 +1,5 @@
+{
+    // type=ascii uses minecraft:font/ascii.png
+    "type": "ascii_4x",
+    "y": -20,
+}

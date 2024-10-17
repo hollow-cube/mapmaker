@@ -16,9 +16,12 @@ public class QueryMapsView extends View {
     private String query = null;
     private final Context context;
 
+    @Outlet("title") Text titleText;
+
     public QueryMapsView(@NotNull Context context) {
         super(context);
         this.context = context;
+        titleText.setText("Search Maps");
     }
 
     @Action("input") public void handleBackButton() { popView(); }
