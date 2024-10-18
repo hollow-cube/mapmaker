@@ -192,7 +192,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         Map<Object, Object> body = new HashMap<>();
         body.put("senderId", sender.getUuid().toString());
         if (targetId != null) {
-            body.put("recipientId", targetId);
+            body.put("targetId", targetId);
         }
 
         var request = HttpRequest.newBuilder()
