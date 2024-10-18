@@ -109,7 +109,9 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
 
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 PotionInfo.CODEC.fieldOf("type").forGetter(Entry::type),
-                Codec.INT.optionalFieldOf("level", 0).forGetter(Entry::level),
+                // Historically people were allowed to have effects > 128, need to clamp it so that you dont crash.
+                Codec.INT.xmap(num -> Math.min(num, 128), num -> Math.min(num, 128))
+                        .optionalFieldOf("level", 0).forGetter(Entry::level),
                 Codec.INT.optionalFieldOf("duration", 0).forGetter(Entry::duration)
         ).apply(i, Entry::new));
 
