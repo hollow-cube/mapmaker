@@ -21,6 +21,7 @@ public class BuilderMenuView extends View {
 
     private @ContextObject("bridge") ServerBridge bridge;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("tab_name") Text tabNameText;
     private @Outlet("tab_content") Switch tabContentSwitch;
     private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
@@ -30,6 +31,7 @@ public class BuilderMenuView extends View {
     public BuilderMenuView(@NotNull Context context) {
         super(context);
 
+        titleText.setText("Builder Menu");
         selectTab(0);
     }
 
