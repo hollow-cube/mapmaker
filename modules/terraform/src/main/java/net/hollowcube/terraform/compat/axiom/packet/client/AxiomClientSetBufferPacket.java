@@ -11,6 +11,7 @@ import net.hollowcube.terraform.util.PaletteUtil;
 import net.hollowcube.terraform.util.ProtocolUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.ArrayUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,9 +94,14 @@ public record AxiomClientSetBufferPacket(
                 }
 
                 var palette = readAxiomPalette(buffer);
+
                 var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
-                if (blockEntityCount > 0) {
-                    System.out.println("BLOCK ENTITY COUNT: " + blockEntityCount);
+                for (int j = 0; j < blockEntityCount; j++) {
+                    buffer.read(SHORT); // Offset
+                    // Begin compressed block entity
+                    buffer.read(VAR_INT); // Original size
+                    buffer.read(BYTE); // Compression dict
+                    buffer.read(BYTE_ARRAY); // Compressed data
                 }
 
                 updates.put(index, palette);
@@ -115,6 +121,15 @@ public record AxiomClientSetBufferPacket(
                         buffer.read(LONG_ARRAY); // Data
                     }
                     default -> buffer.read(LONG_ARRAY); // Global
+                }
+
+                var blockEntityCount = Math.min(4096, buffer.read(VAR_INT));
+                for (int j = 0; j < blockEntityCount; j++) {
+                    buffer.read(SHORT); // Offset
+                    // Begin compressed block entity
+                    buffer.read(VAR_INT); // Original size
+                    buffer.read(BYTE); // Compression dict
+                    buffer.read(BYTE_ARRAY); // Compressed data
                 }
             }
 
@@ -176,7 +191,7 @@ public record AxiomClientSetBufferPacket(
                 default -> { // Vanilla: Global palette (bpe = max)
                     var palette = new NaivePalette();
                     var paletteData = palette.array();
-                    PaletteUtil.unpack(paletteData,
+                    ArrayUtils.unpack(paletteData,
                             buffer.read(NetworkBuffer.LONG_ARRAY),
                             PaletteUtil.MAX_BITS_PER_ENTRY);
                     for (int i = 0; i < paletteData.length; i++) {
