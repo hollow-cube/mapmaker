@@ -21,28 +21,28 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     private static final Component TELEPORT_NONE = Component.translatable("gui.effect.actions.teleport.none");
 
     private @Outlet("potion_effects_switch") Switch potionEffectsSwitch;
-    private @Outlet("potion_effects_off") Label potionEffectsOffLabel;
-    private @Outlet("potion_effects_on") Label potionEffectsOnLabel;
+    private @Outlet("potion_effects_inactive") Label potionEffectsOffLabel;
+    private @Outlet("potion_effects_active") Label potionEffectsOnLabel;
 
     private @Outlet("clear_effects_switch") Switch clearEffectsSwitch;
-    private @Outlet("clear_effects_off") Label clearEffectsOffLabel;
-    private @Outlet("clear_effects_on") Label clearEffectsOnLabel;
+    private @Outlet("clear_effects_inactive") Label clearEffectsOffLabel;
+    private @Outlet("clear_effects_active") Label clearEffectsOnLabel;
 
     private @Outlet("teleport_switch") Switch teleportSwitch;
-    private @Outlet("teleport_off") Label teleportOffLabel;
-    private @Outlet("teleport_on") Label teleportOnLabel;
+    private @Outlet("teleport_inactive") Label teleportOffLabel;
+    private @Outlet("teleport_active") Label teleportOnLabel;
 
     private @Outlet("settings_switch") Switch settingsSwitch;
-    private @Outlet("settings_off") Label settingsOffLabel;
-    private @Outlet("settings_on") Label settingsOnLabel;
+    private @Outlet("settings_inactive") Label settingsOffLabel;
+    private @Outlet("settings_active") Label settingsOnLabel;
 
     private @Outlet("add_item_switch") Switch addItemSwitch;
-    private @Outlet("add_item_off") Label addItemOffLabel;
-    private @Outlet("add_item_on") Label addItemOnLabel;
+    private @Outlet("add_item_inactive") Label addItemOffLabel;
+    private @Outlet("add_item_active") Label addItemOnLabel;
 
     private @Outlet("remove_item_switch") Switch removeItemSwitch;
-    private @Outlet("remove_item_off") Label removeItemOffLabel;
-    private @Outlet("remove_item_on") Label removeItemOnLabel;
+    private @Outlet("remove_item_inactive") Label removeItemOffLabel;
+    private @Outlet("remove_item_active") Label removeItemOnLabel;
 
     protected EffectData data;
     protected Runnable save;
@@ -58,7 +58,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         updateFromData();
     }
 
-    @Action("potion_effects_off")
+    @Action("potion_effects_inactive")
     public void addPotionEffectA() {
         // If this is the first effect go straight to the selector view
         // Otherwise open the list view
@@ -69,18 +69,18 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         }
     }
 
-    @Action("potion_effects_on")
+    @Action("potion_effects_active")
     public void addPotionEffectB() {
         addPotionEffectA();
     }
 
-    @Action("clear_effects_off")
+    @Action("clear_effects_inactive")
     public void toggleClearEffectsA() {
         data.setClearPotionEffects(true);
         updateFromData();
     }
 
-    @Action("clear_effects_on")
+    @Action("clear_effects_active")
     public void toggleClearEffectsB() {
         data.setClearPotionEffects(false);
         updateFromData();
@@ -91,7 +91,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         updateFromData();
     }
 
-    @Action("teleport_off")
+    @Action("teleport_inactive")
     public void handleTeleportInteractA(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
             if (data.teleport().isEmpty()) {
@@ -111,7 +111,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         }
     }
 
-    @Action("teleport_on")
+    @Action("teleport_active")
     public void handleTeleportInteractB(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         handleTeleportInteractA(player, slot, clickType);
     }

@@ -2,10 +2,12 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.effect ?>
 <component width="9" height="6" align="ttb" sprite="effect/actions/teleport_container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="41"/>
     <!-- Header -->
     <box width="9" align="ltr">
-        <BackButton/>
-        <label translationKey="gui.effect.coordinate.information"/>
+        <BackButton2/>
+        <label translationKey="gui.effect.coordinate.information" sprite="generic/information"/>
 
         <spacer width="6"/>
 
@@ -35,15 +37,15 @@
 
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <text id="yaw" width="7" height="1"
-              translationKey="gui.effect.coordinate.yaw"
+        <text id="pitch" width="7" height="1"
+              translationKey="gui.effect.coordinate.pitch"
               font="line_4" shift="23"/>
     </box>
 
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <text id="pitch" width="7" height="1"
-              translationKey="gui.effect.coordinate.pitch"
+        <text id="yaw" width="7" height="1"
+              translationKey="gui.effect.coordinate.yaw"
               font="line_5" shift="23"/>
     </box>
 

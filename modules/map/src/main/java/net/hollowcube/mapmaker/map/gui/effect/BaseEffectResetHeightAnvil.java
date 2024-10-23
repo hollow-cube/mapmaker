@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.gui.effect;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class BaseEffectResetHeightAnvil extends View {
     public static final String SIG_UPDATE_NAME = "base_effect.update_reset_height";
 
+    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("output") Label outputField;
 
@@ -22,6 +24,8 @@ public class BaseEffectResetHeightAnvil extends View {
 
     public BaseEffectResetHeightAnvil(@NotNull Context context, @Nullable String startingInput) {
         super(context);
+
+        titleText.setText("Set Reset Height");
 
         if (startingInput == null) {
             startingInput = "";
