@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.gui.effect;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class BaseEffectTimeLimitAnvil extends View {
     public static final String SIG_UPDATE_NAME = "base_effect.update_time_limit";
 
+    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("output") Label outputField;
 
@@ -22,6 +24,8 @@ public class BaseEffectTimeLimitAnvil extends View {
 
     public BaseEffectTimeLimitAnvil(@NotNull Context context, @Nullable String startingInput) {
         super(context);
+
+        titleText.setText("Set Time Limit");
 
         if (startingInput == null) {
             startingInput = "";

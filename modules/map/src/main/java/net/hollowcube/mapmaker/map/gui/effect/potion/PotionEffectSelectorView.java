@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map.gui.effect.potion;
 
 import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
+import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
@@ -14,8 +16,13 @@ public class PotionEffectSelectorView extends View {
     private final PotionEffectList potionList;
     private final Runnable save;
 
+    private @Outlet("title") Text titleText;
+
     public PotionEffectSelectorView(@NotNull Context context, @NotNull PotionEffectList potionList, @NotNull Runnable save) {
         super(context);
+
+        titleText.setText("Add New Potion");
+
         this.potionList = potionList;
         this.save = save;
     }
