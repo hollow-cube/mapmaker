@@ -2,6 +2,8 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.effect.potion ?>
 <component width="9" height="4" wipe_player_inv="true" align="ttb" sprite="effect/potion/potion_list">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title" shift="55"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton/>

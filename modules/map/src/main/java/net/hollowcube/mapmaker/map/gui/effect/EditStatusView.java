@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class EditStatusView extends View {
 
+    private @Outlet("title") Text titleText;
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_text") Text tabText;
     private @Outlet("tab_settings_state_switch") Switch tabSettingsStateSwitch;
@@ -28,6 +29,7 @@ public class EditStatusView extends View {
         super(context);
         this.onClose = onClose;
 
+        titleText.setText("Edit Status Plate");
         tabSettingsStateSwitch.setOption(true);
         tabText.setText("SP Settings");
         tabText.setArgs(Component.text("Status Plate Settings"));

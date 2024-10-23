@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 public class CoordinateEditorView extends View {
     private @ContextObject Object updateTarget; // The block position (Point) or entity (Entity) of the checkpoint being edited.
 
+    private @Outlet("title") Text titleText;
     private @Outlet("x") Text xText;
     private @Outlet("y") Text yText;
     private @Outlet("z") Text zText;
@@ -36,6 +37,7 @@ public class CoordinateEditorView extends View {
         this.pos = initial;
 
         updateFromPos();
+        titleText.setText("Set Coordinates");
     }
 
     @Action("set_external")
