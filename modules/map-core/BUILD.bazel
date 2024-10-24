@@ -38,6 +38,6 @@ java_junit5_test(
         ":map-core",
         "//modules/terraform",
         "//modules/test",
-        "@maven//:net_minestom_minestom_snapshots",
+        "@maven//:com_github_mworzala_Minestom",
     ],
 )
