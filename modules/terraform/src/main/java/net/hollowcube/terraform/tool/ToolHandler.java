@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.tool;
 
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
@@ -83,7 +83,7 @@ public class ToolHandler {
                 tool,
                 event.getPlayer(),
                 itemStack,
-                Player.Hand.MAIN,
+                PlayerHand.MAIN,
                 event.getBlockPosition(),
                 null,
                 event.getBlockFace(),

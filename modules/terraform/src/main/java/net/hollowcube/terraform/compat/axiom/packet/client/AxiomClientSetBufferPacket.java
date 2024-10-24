@@ -11,7 +11,6 @@ import net.hollowcube.terraform.util.PaletteUtil;
 import net.hollowcube.terraform.util.ProtocolUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.ArrayUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -117,7 +116,8 @@ public record AxiomClientSetBufferPacket(
                 switch (buffer.read(BYTE)) {
                     case 0 -> buffer.read(VAR_INT); // Fixed
                     case 1, 2, 3, 4, 5, 6, 7, 8 -> { // Linear or HashMap
-                        buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE); // Palette
+                        // TODO: 1.21.2
+//                        buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE); // Palette
                         buffer.read(LONG_ARRAY); // Data
                     }
                     default -> buffer.read(LONG_ARRAY); // Global
@@ -152,48 +152,52 @@ public record AxiomClientSetBufferPacket(
                 }
                 case 1, 2, 3, 4 -> { // Vanilla: Linear palette (always bpe 4)
                     var palette = new NaivePalette(); //todo need to not use this, its bad. NaivePalette should be package private.
-                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
-                    var paletteEntries = new int[rawPalette.size()];
-                    for (int i = 0; i < paletteEntries.length; i++) {
-                        // Convert to our internal representation
-                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
-                    }
+                    // TODO: 1.21.2
+//                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
+//                    var paletteEntries = new int[rawPalette.size()];
+//                    for (int i = 0; i < paletteEntries.length; i++) {
+                    // Convert to our internal representation
+//                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
+//                    }
 
                     var paletteData = palette.array();
                     PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), 4);
 
                     // Replace indices with their actual block ids
                     for (int i = 0; i < paletteData.length; i++) {
-                        paletteData[i] = paletteEntries[paletteData[i]];
+                        // TODO: 1.21.2
+//                        paletteData[i] = paletteEntries[paletteData[i]];
                     }
 
                     yield palette;
                 }
                 case 5, 6, 7, 8 -> { // Vanilla: Hashmap palette (bpe = bits)
                     var palette = new NaivePalette();
-                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
-                    var paletteEntries = new int[rawPalette.size()];
-                    for (int i = 0; i < paletteEntries.length; i++) {
-                        // Convert to our internal representation
-                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
-                    }
-
-                    var paletteData = palette.array();
-                    PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), bitsPerEntry);
-
-                    // Replace indices with their actual block ids
-                    for (int i = 0; i < paletteData.length; i++) {
-                        paletteData[i] = paletteEntries[paletteData[i]];
-                    }
+// TODO: 1.21.2
+                    //                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
+//                    var paletteEntries = new int[rawPalette.size()];
+//                    for (int i = 0; i < paletteEntries.length; i++) {
+//                         Convert to our internal representation
+//                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
+//                    }
+//
+//                    var paletteData = palette.array();
+//                    PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), bitsPerEntry);
+//
+//                     Replace indices with their actual block ids
+//                    for (int i = 0; i < paletteData.length; i++) {
+//                        paletteData[i] = paletteEntries[paletteData[i]];
+//                    }
 
                     yield palette;
                 }
                 default -> { // Vanilla: Global palette (bpe = max)
                     var palette = new NaivePalette();
                     var paletteData = palette.array();
-                    ArrayUtils.unpack(paletteData,
-                            buffer.read(NetworkBuffer.LONG_ARRAY),
-                            PaletteUtil.MAX_BITS_PER_ENTRY);
+                    // TODO: 1.21.2
+//                    ArrayUtils.unpack(paletteData,
+//                            buffer.read(NetworkBuffer.LONG_ARRAY),
+//                            PaletteUtil.MAX_BITS_PER_ENTRY);
                     for (int i = 0; i < paletteData.length; i++) {
                         // Convert to our internal representation
                         paletteData[i] = (paletteData[i] == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : paletteData[i]) + 1;

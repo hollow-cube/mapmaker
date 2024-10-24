@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.entity;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public interface NpcHandler {
     Tag<NpcHandler> TAG = Tag.Transient("mapmaker:hub/npc_handler");
 
-    void handlePlayerInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick);
+    void handlePlayerInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick);
 
     EventNode<InstanceEvent> EVENT_NODE = EventNode.type("mapmaker:hub/npc_handler", EventFilter.INSTANCE)
             .addListener(PlayerEntityInteractEvent.class, event -> {

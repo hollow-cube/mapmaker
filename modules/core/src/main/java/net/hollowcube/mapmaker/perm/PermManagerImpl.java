@@ -57,7 +57,7 @@ public class PermManagerImpl implements PermManager {
                 .withCallCredentials(new BearerToken(token));
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getPlayer())))
+                .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getGameProfile().uuid().toString())))
                 .addListener(PlayerDisconnectEvent.class, event -> prefetchConditions.values().forEach(c -> c.removePlayer(event.getPlayer())));
     }
 
@@ -138,8 +138,7 @@ public class PermManagerImpl implements PermManager {
         }
 
         @Blocking
-        public void addPlayer(@NotNull Player player) {
-            var playerId = player.getUuid().toString();
+        public void addPlayer(@NotNull String playerId) {
             if (hasPlatformPermission0(playerId, perm)) {
                 allowedPlayers.add(playerId);
             }

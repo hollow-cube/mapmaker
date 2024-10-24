@@ -8,7 +8,7 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
-import net.minestom.server.utils.PacketUtils;
+import net.minestom.server.utils.PacketSendingUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +45,21 @@ public class SyntheticTabListManager {
         var username = displayName.getUsernameForTabList();
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
                 getListUuid(session.playerId()), username, properties,
-                true, 0, null, displayName.build(), null
+                true, 0, null, displayName.build(),
+                null, 0
         );
 
         listedPlayers.put(session.playerId(), playerListEntry);
         MiscFunctionality.broadcastTabList(Audiences.all(), listedPlayers.size());
         var packet = new PlayerInfoUpdatePacket(ACTIONS, List.of(playerListEntry));
-        PacketUtils.broadcastPlayPacket(packet);
+        PacketSendingUtils.broadcastPlayPacket(packet);
     }
 
     public void removeSession(@NotNull String sessionId) {
         listedPlayers.remove(sessionId);
         MiscFunctionality.broadcastTabList(Audiences.all(), listedPlayers.size());
         var packet = new PlayerInfoRemovePacket(List.of(getListUuid(sessionId)));
-        PacketUtils.broadcastPlayPacket(packet);
+        PacketSendingUtils.broadcastPlayPacket(packet);
     }
 
     public void addLocalPlayer(@NotNull Player player) {

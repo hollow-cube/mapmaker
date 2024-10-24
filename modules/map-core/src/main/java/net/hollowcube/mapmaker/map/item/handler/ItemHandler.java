@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemComponent;
@@ -99,7 +100,7 @@ public abstract class ItemHandler {
             @NotNull ItemHandler handler,
             @NotNull Player player,
             @NotNull ItemStack itemStack,
-            @NotNull Player.Hand hand,
+            @NotNull PlayerHand hand,
             @UnknownNullability Point blockPosition,
             @UnknownNullability Point placePosition,
             @UnknownNullability BlockFace face,

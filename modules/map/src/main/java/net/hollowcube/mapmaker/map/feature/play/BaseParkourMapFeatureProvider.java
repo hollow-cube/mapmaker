@@ -285,7 +285,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         //todo this should not be applied if fall damage is enabled
-        player.getAttribute(Attribute.GENERIC_SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
+        player.getAttribute(Attribute.SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
     }
 
     public void initSpectatorPlayer(@NotNull MapPlayerStartSpectatorEvent event) {
@@ -349,7 +349,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         player.removeTag(COUNTDOWN_END);
 
-        player.getAttribute(Attribute.GENERIC_SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+        player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
@@ -690,11 +690,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private void updatePlayerFromState(@NotNull Player player, @NotNull PlayState state) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
         if (state.maxLives().isPresent() && state.lives().isPresent()) {
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
             player.setHealth(2 * state.lives().get());
         } else {
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Attribute.GENERIC_MAX_HEALTH.defaultValue());
-            player.setHealth((float) Attribute.GENERIC_MAX_HEALTH.defaultValue());
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
+            player.setHealth((float) Attribute.MAX_HEALTH.defaultValue());
         }
 
         // Update the countdown timer (time may have been added

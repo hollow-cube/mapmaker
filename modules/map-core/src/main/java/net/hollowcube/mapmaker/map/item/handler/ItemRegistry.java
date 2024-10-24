@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
@@ -185,7 +186,7 @@ public class ItemRegistry {
 
     private void handleUseItem(@NotNull PlayerUseItemEvent event) {
         if (event.isCancelled()) return;
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var itemHandler = getHandlerFromItemStack(event.getItemStack());
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_AIR)) return;
@@ -212,7 +213,7 @@ public class ItemRegistry {
 
     private void handleUseItemOnBlock(@NotNull PlayerBlockInteractEvent event) {
         if (event.isCancelled() || event.isBlockingItemUse()) return;
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
@@ -242,7 +243,7 @@ public class ItemRegistry {
     }
 
     private void handleUseItemOnEntity(@NotNull PlayerEntityInteractEvent event) {
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
@@ -266,7 +267,7 @@ public class ItemRegistry {
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
         if (event.isCancelled()) return;
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var player = event.getPlayer();
         var itemStack = player.getItemInHand(event.getHand());
@@ -294,7 +295,7 @@ public class ItemRegistry {
         if (event.isCancelled()) return;
 
         var player = event.getPlayer();
-        var itemStack = player.getItemInHand(Player.Hand.MAIN);
+        var itemStack = player.getItemInHand(PlayerHand.MAIN);
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_BLOCK)) return;
 
@@ -303,7 +304,7 @@ public class ItemRegistry {
                     itemHandler,
                     event.getPlayer(),
                     itemStack,
-                    Player.Hand.MAIN,
+                    PlayerHand.MAIN,
                     event.getBlockPosition(),
                     null,
                     event.getBlockFace(),
@@ -325,7 +326,7 @@ public class ItemRegistry {
         player.setTag(TRIGGER_TAG, true);
         itemHandler.leftClicked(new ItemHandler.Click(
                 itemHandler, player,
-                itemStack, Player.Hand.MAIN,
+                itemStack, PlayerHand.MAIN,
                 null,
                 null,
                 null,
@@ -345,7 +346,7 @@ public class ItemRegistry {
 
         player.setTag(TRIGGER_TAG, true);
         itemHandler.leftClicked(new ItemHandler.Click(
-                itemHandler, player, itemStack, Player.Hand.MAIN,
+                itemHandler, player, itemStack, PlayerHand.MAIN,
                 null, null, null, null
         ));
     }

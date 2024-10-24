@@ -14,10 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
-import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
@@ -148,23 +146,25 @@ public class PlayerSession {
         return NetworkBuffer.makeArray(buffer -> {
             buffer.write(SHORT, (short) STATE_VERSION);
 
-            buffer.writeCollection(clipboards.values(), (b, c) -> c.write(b));
+            // TODO(1.21.2)
+//            buffer.writeCollection(clipboards.values(), (b, c) -> c.write(b));
             insertMarker(buffer);
         });
     }
 
     @ApiStatus.Internal
     public void read(byte @NotNull [] data) {
-        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
-
-        var version = buffer.read(SHORT);
-        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
-
-        var clipboards = buffer.readCollection(Clipboard::new, ABSOLUTE_MAX_CLIPBOARDS);
-        clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
-        assertMarker(buffer, "clipboards");
-
-        assert buffer.readableBytes() == 0 : "Buffer not fully read";
+        // TODO(1.21.2)
+//        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+//
+//        var version = buffer.read(SHORT);
+//        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+//
+//        var clipboards = buffer.readCollection(Clipboard::new, ABSOLUTE_MAX_CLIPBOARDS);
+//        clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
+//        assertMarker(buffer, "clipboards");
+//
+//        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 
 }

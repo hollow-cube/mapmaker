@@ -21,7 +21,6 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.Scheduler;
@@ -42,7 +41,6 @@ public class HubServerRunner extends AbstractMapServer {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
-                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
@@ -103,13 +101,12 @@ public class HubServerRunner extends AbstractMapServer {
         }
     }
 
-    protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {
-        transferPlayerSession(event.getPlayer(), HUB_PRESENCE);
-        // Result ignored because nothing happens here, but if above returns false the player was kicked.
-    }
-
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
+
+        if (!transferPlayerSession(event.getPlayer(), HUB_PRESENCE)) {
+            return;
+        }
 
         FutureUtil.getUnchecked(ResourcePackManager.sendResourcePack(player));
         if (!player.isOnline()) return;

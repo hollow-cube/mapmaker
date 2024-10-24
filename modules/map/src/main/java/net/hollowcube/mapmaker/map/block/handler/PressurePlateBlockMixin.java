@@ -14,7 +14,7 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.thread.TickThread;
-import net.minestom.server.utils.PacketUtils;
+import net.minestom.server.utils.PacketSendingUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +99,7 @@ public interface PressurePlateBlockMixin extends BlockHandler {
         var world = MapWorld.unsafeFromInstance(instance);
         if (!(world instanceof EditingMapWorld)) return;
 
-        PacketUtils.sendGroupedPacket(world.players(), new ParticlePacket(
+        PacketSendingUtils.sendGroupedPacket(world.players(), new ParticlePacket(
                 Particle.DUST.withProperties(new Color(0, 255, 0), 1f),
                 true, blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
                 0.25f, 0.25f, 0.25f, 0, 5

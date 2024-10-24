@@ -13,7 +13,6 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -105,7 +104,8 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
 
             if (block == null) {
                 // Block not set, write an air value
-                Utils.writeVarInt(blockBytes, 0);
+                // TODO(1.21.2)
+//                Utils.writeVarInt(blockBytes, 0);
                 continue;
             }
 
@@ -117,7 +117,8 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
             } else {
                 blockId = paletteMap.getInt(block);
             }
-            Utils.writeVarInt(blockBytes, blockId);
+            // TODO(1.21.2)
+//            Utils.writeVarInt(blockBytes, blockId);
 
             // Write block entity
             var blockHandler = block.handler();

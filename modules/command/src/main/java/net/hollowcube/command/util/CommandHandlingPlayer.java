@@ -12,10 +12,9 @@ import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
 import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.play.TabCompletePacket;
+import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 /**
  * Implements a player which handles commands. Can be overridden for additional functionality.
@@ -27,7 +26,7 @@ public abstract class CommandHandlingPlayer extends Player {
     private static boolean initialized = false;
 
     public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager commandManager) {
-        return (uuid, username, connection) -> new CommandHandlingPlayer(uuid, username, connection) {
+        return (connection, gameProfile) -> new CommandHandlingPlayer(connection, gameProfile) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 return commandManager;
@@ -35,8 +34,8 @@ public abstract class CommandHandlingPlayer extends Player {
         };
     }
 
-    public CommandHandlingPlayer(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
-        super(uuid, username, playerConnection);
+    public CommandHandlingPlayer(@NotNull PlayerConnection connection, @NotNull GameProfile gameProfile) {
+        super(connection, gameProfile);
 
         if (!initialized) {
             initialized = true;

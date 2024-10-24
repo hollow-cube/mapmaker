@@ -49,9 +49,8 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        #        "net.minestom:minestom-snapshots:59406d5b54",
-        "com.github.mworzala:Minestom:d11ea1d941",
-        "dev.hollowcube:polar:1.9.5",
+        "net.minestom:minestom-snapshots:dev",
+        "dev.hollowcube:polar:dev",
         "dev.hollowcube:dataconverter:1.21-rv2",
         "dev.hollowcube:mql:1.1.0",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",

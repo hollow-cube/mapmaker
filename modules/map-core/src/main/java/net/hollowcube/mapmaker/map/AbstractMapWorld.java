@@ -18,11 +18,8 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
-import net.minestom.server.network.packet.server.configuration.UpdateEnabledFeaturesPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -157,12 +154,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.paintingVariant().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(excludeVanilla));
 
-            player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
+            player.sendPacket(MinecraftServer.getTagManager().packet());
             event.setSendRegistryData(false);
-
-            player.sendPacket(new UpdateEnabledFeaturesPacket(Set.of(
-                    NamespaceID.from("minecraft:vanilla")
-            )));
 
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());

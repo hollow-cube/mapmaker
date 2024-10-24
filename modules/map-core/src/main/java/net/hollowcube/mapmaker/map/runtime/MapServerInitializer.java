@@ -78,7 +78,7 @@ public final class MapServerInitializer {
         //todo minestom bug, need to fix
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientInteractEntityPacket.class, (packet, player) -> {
             final Entity entity = player.getInstance().getEntityById(packet.targetId());
-            final double interactionRange = player.getAttributeValue(Attribute.PLAYER_ENTITY_INTERACTION_RANGE);
+            final double interactionRange = player.getAttributeValue(Attribute.ENTITY_INTERACTION_RANGE);
             if (entity == null || !entity.isViewer(player) || player.getDistance(entity) > interactionRange)
                 return;
 

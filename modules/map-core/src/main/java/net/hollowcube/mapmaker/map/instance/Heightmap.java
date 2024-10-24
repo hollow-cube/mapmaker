@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-import static net.minestom.server.utils.chunk.ChunkUtils.toSectionRelativeCoordinate;
-
 @SuppressWarnings("UnstableApiUsage")
 public class Heightmap {
     private static final int DATA_SIZE = Chunk.CHUNK_SIZE_X * Chunk.CHUNK_SIZE_Z;
@@ -37,7 +35,7 @@ public class Heightmap {
 
     public int get(int x, int z) {
         if (data == null || data.length == 0) return worldMin - 1;
-        return data[toSectionRelativeCoordinate(z) << 4 | toSectionRelativeCoordinate(x)] + worldMin - 1;
+        return data[(z & 0xF) << 4 | (x & 0xF)] + worldMin - 1;
     }
 
     public void update(int x, int y, int z, @NotNull Block block) {

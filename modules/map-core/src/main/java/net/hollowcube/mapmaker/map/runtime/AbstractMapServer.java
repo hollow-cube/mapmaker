@@ -86,6 +86,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -217,7 +218,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
-        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImpl(uuid, username, connection) {
+        MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayerImpl(connection, gameProfile) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 return commandManager;
@@ -438,7 +439,7 @@ public abstract class AbstractMapServer implements MapServer {
                 Material.WOLF_ARMOR
         );
         globalEventHandler.addListener(PlayerUseItemEvent.class, event -> {
-            if (event.getHand() != Player.Hand.OFF) return;
+            if (event.getHand() != PlayerHand.OFF) return;
             var material = event.getItemStack().material();
             if (!problemMaterials.contains(material)) return;
             event.setCancelled(true);

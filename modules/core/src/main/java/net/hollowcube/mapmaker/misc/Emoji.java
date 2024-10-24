@@ -172,7 +172,8 @@ public record Emoji(
             EMOJI_MAP.put(id, emoji);
             EMOJI_PACKET_ENTRIES.add(new PlayerInfoUpdatePacket.Entry(
                     UUID.randomUUID(), ":" + id + ":",
-                    List.of(), false, 0, null, null, null
+                    List.of(), false, 0, null,
+                    null, null, 0
             ));
             return emoji;
         }

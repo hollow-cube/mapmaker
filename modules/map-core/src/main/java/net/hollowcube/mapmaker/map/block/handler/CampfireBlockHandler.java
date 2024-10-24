@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
@@ -40,7 +40,7 @@ public class CampfireBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
-        if (interaction.getHand() != Player.Hand.MAIN) return true;
+        if (interaction.getHand() != PlayerHand.MAIN) return true;
         var handItemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
 
         var block = interaction.getBlock();

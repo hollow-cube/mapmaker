@@ -37,7 +37,7 @@ public final class PreDataFixFixes {
         return switch (type) {
             // Read old ItemStack format
             case 7 -> Metadata.ItemStack(readItemStack1_20_4(buffer));
-            default -> Metadata.Entry.read(type, buffer);
+            default -> Metadata.Entry.SERIALIZER.read(buffer);
         };
     }
 

@@ -34,7 +34,7 @@ public class PlaybackPlayer extends Entity {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
-                0, GameMode.SURVIVAL, null, null);
+                0, GameMode.SURVIVAL, null, null, 0);
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
         // Spawn the player entity

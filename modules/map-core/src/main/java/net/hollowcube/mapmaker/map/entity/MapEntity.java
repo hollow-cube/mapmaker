@@ -8,10 +8,7 @@ import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityMetadataStealer;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.*;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.UniqueIdUtils;
@@ -40,11 +37,11 @@ public class MapEntity extends Entity implements TerraformEntity {
      * Note that this function is never called for spectating players.
      *
      * <p>This should ONLY be used to handle entities which need interaction in a playing state. If the entity
-     * only needs to be configured in build mode then {@link #onBuildRightClick(MapWorld, Player, Player.Hand, Point)}
+     * only needs to be configured in build mode then {@link #onBuildRightClick(MapWorld, Player, PlayerHand, Point)}
      * should be used.</p>
      */
     public void onRightClick(@NotNull MapWorld world, @NotNull Player player,
-                             @NotNull Player.Hand hand, @NotNull Point interactPosition) {
+                             @NotNull PlayerHand hand, @NotNull Point interactPosition) {
         if (!world.canEdit(player)) return;
         onBuildRightClick(world, player, hand, interactPosition);
     }
@@ -52,11 +49,11 @@ public class MapEntity extends Entity implements TerraformEntity {
     /**
      * Called when a player interacts (right click) with this entity in build mode.
      *
-     * <p>Note: this function is called from {@link #onRightClick(MapWorld, Player, Player.Hand, Point)},
+     * <p>Note: this function is called from {@link #onRightClick(MapWorld, Player, PlayerHand, Point)},
      * so may not be called if that is overridden.</p>
      */
     public void onBuildRightClick(@NotNull MapWorld world, @NotNull Player player,
-                                  @NotNull Player.Hand hand, @NotNull Point interactPosition) {
+                                  @NotNull PlayerHand hand, @NotNull Point interactPosition) {
         // No interaction by default
     }
 

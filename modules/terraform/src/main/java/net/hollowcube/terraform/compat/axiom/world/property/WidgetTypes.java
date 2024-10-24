@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static net.minestom.server.network.NetworkBuffer.INT;
-import static net.minestom.server.network.NetworkBuffer.STRING;
 
 @SuppressWarnings("UnstableApiUsage")
 final class WidgetTypes {
@@ -122,8 +121,10 @@ final class WidgetTypes {
 
         @Override
         public byte[] properties() {
-            return ProtocolUtil.makeArray(32, buffer ->
-                    buffer.writeCollection(buttons, (b, s) -> b.write(STRING, s)));
+            // TODO(1.21.2)
+            return new byte[0];
+//            return ProtocolUtil.makeArray(32, buffer ->
+//                    buffer.writeCollection(buttons, (b, s) -> b.write(STRING, s)));
         }
     }
 

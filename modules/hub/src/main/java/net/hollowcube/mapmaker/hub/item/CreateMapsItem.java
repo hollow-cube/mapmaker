@@ -14,6 +14,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.instance.Instance;
@@ -49,7 +50,7 @@ public class CreateMapsItem extends ItemHandler {
 
     @Override
     protected void leftClicked(@NotNull Click click) {
-        if (click.hand() != Player.Hand.MAIN) return;
+        if (click.hand() != PlayerHand.MAIN) return;
 
         var player = click.player();
         var target = click.entity();

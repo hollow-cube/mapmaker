@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.hub.merchant.gui.MerchantShopView;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,8 @@ public class MerchantEntity extends NpcPlayerEntity {
         setHandler(this::handleInteract);
     }
 
-    private void handleInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
-        if (data == null || hand != Player.Hand.MAIN || isLeftClick) return;
+    private void handleInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+        if (data == null || hand != PlayerHand.MAIN || isLeftClick) return;
 
         var world = MapWorld.unsafeFromInstance(getInstance());
         if (world == null) return; // Sanity

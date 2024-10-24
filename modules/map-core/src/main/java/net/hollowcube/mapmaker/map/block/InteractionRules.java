@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.map.block.interaction.*;
 import net.hollowcube.mapmaker.map.item.ItemTags;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
@@ -75,7 +75,7 @@ public class InteractionRules {
         if (event.isCancelled() || event.isBlockingItemUse()) return;
         //todo how to block the other hand from interacting when we get this event _if_ we handled it in the main hand
         // for now just disable all interactions in off hand
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var player = event.getPlayer();
         var itemStack = player.getItemInHand(event.getHand());
@@ -121,7 +121,7 @@ public class InteractionRules {
 
     private static void handleItemUse(@NotNull PlayerUseItemEvent event) {
         if (event.isCancelled()) return;
-        if (event.getHand() != Player.Hand.MAIN) return;
+        if (event.getHand() != PlayerHand.MAIN) return;
 
         var player = event.getPlayer();
         var itemStack = event.getItemStack();

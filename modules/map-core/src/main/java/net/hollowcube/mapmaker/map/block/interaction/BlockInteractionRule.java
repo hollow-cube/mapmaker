@@ -4,6 +4,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.block.Block;
@@ -64,7 +65,7 @@ public interface BlockInteractionRule {
     record Interaction(
             @NotNull Player player, @NotNull Instance instance, @UnknownNullability Point blockPosition,
             @UnknownNullability BlockFace blockFace, @Nullable Point cursorPosition,
-            @NotNull ItemStack item, Player.@NotNull Hand hand
+            @NotNull ItemStack item, @NotNull PlayerHand hand
     ) implements Block.Getter, Block.Setter {
 
         public @NotNull WorldBorder worldBorder() {

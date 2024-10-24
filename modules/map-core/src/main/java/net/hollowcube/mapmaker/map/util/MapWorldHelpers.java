@@ -41,7 +41,7 @@ public final class MapWorldHelpers {
         player.setAllowFlying(false);
         player.setFlying(false);
         player.setFlyingSpeed(0.05f);
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
         player.setHealth(20);
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);

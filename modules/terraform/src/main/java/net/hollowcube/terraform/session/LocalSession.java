@@ -18,11 +18,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
@@ -238,7 +236,8 @@ public class LocalSession {
             buffer.write(SHORT, (short) STATE_VERSION);
 
             // Selections
-            buffer.writeCollection(selections.values(), (b, s) -> s.write(b));
+            // TODO(1.21.2)
+//            buffer.writeCollection(selections.values(), (b, s) -> s.write(b));
             insertMarker(buffer);
 
             // History
@@ -251,20 +250,21 @@ public class LocalSession {
     }
 
     private void deserialize(byte @NotNull [] data) {
-        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
-
-        var version = buffer.read(SHORT);
-        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
-
-        // Selections
-        var selections = buffer.readCollection(b -> new Selection(this, b), ABSOLUTE_MAX_SELECTIONS);
-        selections.forEach(s -> this.selections.put(s.name(), s));
-        assertMarker(buffer, "selections");
+        // TODO(1.21.2)
+//        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+//
+//        var version = buffer.read(SHORT);
+//        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+//
+//        // Selections
+//        var selections = buffer.readCollection(b -> new Selection(this, b), ABSOLUTE_MAX_SELECTIONS);
+//        selections.forEach(s -> this.selections.put(s.name(), s));
+//        assertMarker(buffer, "selections");
 
         // History
 //        this.historyPointer = buffer.read(VAR_INT);
         //todo
 
-        assert buffer.readableBytes() == 0 : "Buffer not fully read";
+//        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 }

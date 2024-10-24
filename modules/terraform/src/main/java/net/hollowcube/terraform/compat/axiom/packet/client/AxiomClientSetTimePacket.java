@@ -13,8 +13,9 @@ public record AxiomClientSetTimePacket(
         @Nullable Boolean freezeTime
 ) implements AxiomClientPacket {
 
-    public AxiomClientSetTimePacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(STRING), buffer.readOptional(INT), buffer.readOptional(BOOLEAN));
-    }
+    // TODO: 1.21.2
+//    public AxiomClientSetTimePacket(@NotNull NetworkBuffer buffer, int apiVersion) {
+//        this(buffer.read(STRING), buffer.readOptional(INT), buffer.readOptional(BOOLEAN));
+//    }
 
 }

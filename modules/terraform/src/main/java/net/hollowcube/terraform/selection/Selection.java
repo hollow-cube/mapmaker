@@ -29,7 +29,7 @@ public final class Selection {
     }
 
     public Selection(@NotNull LocalSession session, @NotNull NetworkBuffer buffer) {
-        this(session, buffer.read(STRING), buffer.readEnum(Region.Type.class));
+        this(session, buffer.read(STRING), buffer.read(Region.Type.NETWORK_TYPE));
 
         selector.read(buffer);
     }
@@ -112,7 +112,7 @@ public final class Selection {
     @ApiStatus.Internal
     public void write(@NotNull NetworkBuffer buffer) {
         buffer.write(STRING, name);
-        buffer.writeEnum(Region.Type.class, regionType);
+        buffer.write(Region.Type.NETWORK_TYPE, regionType);
         selector.write(buffer);
     }
 

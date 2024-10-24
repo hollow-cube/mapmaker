@@ -4,6 +4,7 @@ import net.hollowcube.terraform.cui.ClientInterface;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -15,6 +16,8 @@ public interface Region extends Iterable<@NotNull Point> {
         CUBOID(CuboidRegionSelector::new),
         LINE(LineRegionSelector::new),
         BEZIER_SURFACE(BezierSurfaceRegionSelector::new);
+
+        public static final NetworkBuffer.Type<Type> NETWORK_TYPE = NetworkBuffer.Enum(Type.class);
 
         private final BiFunction<ClientInterface, String, RegionSelector> factory;
 

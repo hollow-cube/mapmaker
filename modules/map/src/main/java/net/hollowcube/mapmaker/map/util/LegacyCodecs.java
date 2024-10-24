@@ -11,7 +11,6 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 
-import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class LegacyCodecs {
     public static final Codec<Map<Integer, ItemStack>> ITEM_STACK_MAP_AS_BASE64 = Codec.STRING.xmap(
             s -> {
                 // This is gross because we need to handle backwards compat to before the data version was encoded here
-                var buffer = new NetworkBuffer(ByteBuffer.wrap(Base64.getDecoder().decode(s)));
+                var buffer = NetworkBuffer.wrap(Base64.getDecoder().decode(s), 0, 0);
                 int dataVersionOrLength = buffer.read(NetworkBuffer.VAR_INT);
                 int dataVersion = dataVersionOrLength > 99 ? dataVersionOrLength : MapWorld.DATA_VERSION;
                 int length = dataVersionOrLength > 99 ? buffer.read(NetworkBuffer.VAR_INT) : dataVersionOrLength;

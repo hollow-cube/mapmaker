@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
@@ -67,7 +68,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
         if (world == null || !world.canEdit(player)) return true;
         if (world.itemRegistry().isOnCooldown(player)) return true;
 
-        if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
+        if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);
