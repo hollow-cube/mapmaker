@@ -106,7 +106,7 @@ public class MapServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        MinecraftServer.getConnectionManager().setPlayerProvider((uuid, username, connection) -> new MapPlayerImplImpl(uuid, username, connection) {
+        MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayerImplImpl(connection, gameProfile) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 return commandManager();

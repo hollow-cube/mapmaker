@@ -21,7 +21,8 @@ public record RecordedPlayerSpawn(
 ) implements RecordedChange {
 
     public RecordedPlayerSpawn(@NotNull ReplayMetadata metadata, @NotNull NetworkBuffer buffer) {
-        this(buffer.read(VAR_INT), buffer.read(STRING), buffer.readOptional(STRING), buffer.readOptional(STRING),
+        //todo rewrite using network buffer types proper
+        this(buffer.read(VAR_INT), buffer.read(STRING), buffer.read(STRING.optional()), buffer.read(STRING.optional()),
                 Binary.readRelativePos(buffer).add(metadata.origin()));
     }
 
@@ -29,8 +30,8 @@ public record RecordedPlayerSpawn(
     public void write(@NotNull ReplayMetadata metadata, @NotNull NetworkBuffer buffer) {
         buffer.write(VAR_INT, entityId);
         buffer.write(STRING, username);
-        buffer.writeOptional(STRING, skinTexture);
-        buffer.writeOptional(STRING, skinSignature);
+        buffer.write(STRING.optional(), skinTexture);
+        buffer.write(STRING.optional(), skinSignature);
         Binary.writeRelativePos(buffer, pos.sub(metadata.origin()));
     }
 

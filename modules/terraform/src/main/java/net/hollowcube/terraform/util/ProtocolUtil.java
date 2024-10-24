@@ -76,11 +76,13 @@ public final class ProtocolUtil {
     }
 
     public static byte[] makeArray(int initialCapacity, @NotNull Consumer<@NotNull NetworkBuffer> writing) {
-        NetworkBuffer writer = new NetworkBuffer(initialCapacity);
-        writing.accept(writer);
-        byte[] bytes = new byte[writer.writeIndex()];
-        writer.copyTo(0, bytes, 0, bytes.length);
-        return bytes;
+//        NetworkBuffer writer = new NetworkBuffer(initialCapacity);
+//        writing.accept(writer);
+//        byte[] bytes = new byte[writer.writeIndex()];
+//        writer.copyTo(0, bytes, 0, bytes.length);
+//        return bytes;
+        // TODO(1.21.2)
+        return null;
     }
 
     private ProtocolUtil() {

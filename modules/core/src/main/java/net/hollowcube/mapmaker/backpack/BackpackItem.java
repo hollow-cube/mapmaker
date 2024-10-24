@@ -7,8 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
-import net.minestom.server.recipe.RecipeCategory;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,8 +50,8 @@ public enum BackpackItem {
 
     ;
 
-    private static final List<DeclareRecipesPacket.Ingredient> CRAFTABLE = List.of(new DeclareRecipesPacket.Ingredient(List.of(RecipeBookHack.BLANK_ITEM_CRAFTABLE)));
-    private static final List<DeclareRecipesPacket.Ingredient> UNCRAFTABLE = List.of(new DeclareRecipesPacket.Ingredient(List.of(RecipeBookHack.BLANK_ITEM_UNCRAFTABLE)));
+//    private static final List<Recipe.Ingredient> CRAFTABLE = List.of(new Recipe.Ingredient(Material.STICK));
+//    private static final List<Recipe.Ingredient> UNCRAFTABLE = List.of(new Recipe.Ingredient(Material.STICK));
 
     private final BackpackCategory category;
     private final Rarity rarity;
@@ -133,13 +131,13 @@ public enum BackpackItem {
                 .build();
     }
 
-    @NotNull
-    DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
-        return new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
-                recipeBookId, "",
-                RecipeCategory.Crafting.REDSTONE,
-                amount == 0 ? UNCRAFTABLE : CRAFTABLE,
-                getItemStack(amount)
-        );
-    }
+//    @NotNull
+//    DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
+//        return new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
+//                recipeBookId, "",
+//                RecipeCategory.Crafting.REDSTONE,
+//                amount == 0 ? UNCRAFTABLE : CRAFTABLE,
+//                getItemStack(amount)
+//        );
+//    }
 }

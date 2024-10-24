@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import static net.minestom.server.network.NetworkBuffer.VAR_INT;
@@ -26,7 +25,7 @@ public class Replay {
     }
 
     public static @NotNull Replay read(@NotNull ReplayFactory factory, byte[] data) {
-        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+        var buffer = NetworkBuffer.wrap(data, 0, 0);
         var version = buffer.read(VAR_INT);
         var userVersion = buffer.read(VAR_INT);
         var tickRate = buffer.read(VAR_INT);
@@ -34,12 +33,13 @@ public class Replay {
         var origin = buffer.read(VECTOR3D);
 
         var metadata = new ReplayMetadata(origin);
-        var changes = buffer.readCollection($ -> buffer.readCollection($$ -> {
-            var entryId = buffer.read(VAR_INT);
-            return factory.readEntry(entryId, metadata, buffer);
-        }, MAX_ENTRIES), MAX_ENTRIES);
+        //todo Network buffer types
+//        var changes = buffer.readCollection($ -> buffer.readCollection($$ -> {
+//            var entryId = buffer.read(VAR_INT);
+//            return factory.readEntry(entryId, metadata, buffer);
+//        }, MAX_ENTRIES), MAX_ENTRIES);
 
-        return new Replay(changes);
+        return new Replay(List.of()); // changes
     }
 
     private final List<List<RecordedChange>> changes;

@@ -1,9 +1,7 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
-import net.hollowcube.terraform.util.ProtocolUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -27,9 +25,10 @@ public record AxiomClientModifyEntitiesPacket(
         entries = List.copyOf(entries);
     }
 
-    public AxiomClientModifyEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion), MAX_ENTRIES));
-    }
+    // TODO: 1.21.2
+//    public AxiomClientModifyEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
+//        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion), MAX_ENTRIES));
+//    }
 
     public record Entry(
             @NotNull UUID uuid,
@@ -40,23 +39,23 @@ public record AxiomClientModifyEntitiesPacket(
             @UnknownNullability List<@NotNull UUID> passengers
     ) {
 
-        public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
-            this(read(buffer, apiVersion));
-        }
+//        public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
+//            this(read(buffer, apiVersion));
+//        }
 
         public Entry(@NotNull Entry other) {
             this(other.uuid(), other.flags(), other.pos(), other.nbt(), other.passengerChange(), other.passengers());
         }
 
-        private static @NotNull Entry read(@NotNull NetworkBuffer buffer, int apiVersion) {
-            var uuid = buffer.read(NetworkBuffer.UUID);
-            byte flags = buffer.read(NetworkBuffer.BYTE);
-            var pos = flags > 0 ? ProtocolUtil.readPos(buffer) : null;
-            var nbt = buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag nbtCompound ? nbtCompound : CompoundBinaryTag.empty();
-            var passengerChange = buffer.readEnum(PassengerChange.class);
-            var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES) : null;
-            return new Entry(uuid, flags, pos, nbt, passengerChange, passengers);
-        }
+//        private static @NotNull Entry read(@NotNull NetworkBuffer buffer, int apiVersion) {
+//            var uuid = buffer.read(NetworkBuffer.UUID);
+//            byte flags = buffer.read(NetworkBuffer.BYTE);
+//            var pos = flags > 0 ? ProtocolUtil.readPos(buffer) : null;
+//            var nbt = buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag nbtCompound ? nbtCompound : CompoundBinaryTag.empty();
+//            var passengerChange = buffer.readEnum(PassengerChange.class);
+//            var passengers = passengerChange.hasEntries() ? buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES) : null;
+//            return new Entry(uuid, flags, pos, nbt, passengerChange, passengers);
+//        }
     }
 
     public enum PassengerChange {

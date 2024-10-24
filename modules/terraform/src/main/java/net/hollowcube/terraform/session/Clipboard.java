@@ -2,7 +2,6 @@ package net.hollowcube.terraform.session;
 
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
-import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.util.math.AffineTransform;
 import net.minestom.server.coordinate.Point;
@@ -41,7 +40,8 @@ public class Clipboard {
     public Clipboard(@NotNull NetworkBuffer buffer) {
         this.name = buffer.read(STRING);
 
-        this.schematic = buffer.readOptional(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY)));
+        // TODO(1.21.2)
+//        this.schematic = buffer.readOptional(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY)));
         this.transforms = new ArrayList<>();
     }
 

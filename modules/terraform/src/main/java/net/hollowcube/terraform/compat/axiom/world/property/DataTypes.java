@@ -3,9 +3,7 @@ package net.hollowcube.terraform.compat.axiom.world.property;
 import net.hollowcube.terraform.util.ProtocolUtil;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.NetworkBuffer;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static net.minestom.server.network.NetworkBuffer.VAR_INT;
@@ -43,7 +41,9 @@ final class DataTypes {
 
         @Override
         public Integer deserialize(byte[] value) {
-            return new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT);
+            // TODO(1.21.2)
+//            return new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT);
+            return null;
         }
     }
 
@@ -77,7 +77,9 @@ final class DataTypes {
 
         @Override
         public Material deserialize(byte[] value) {
-            return Material.fromId(new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT));
+//            return Material.fromId(new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT));
+            // TODO(1.21.2)
+            return null;
         }
     }
 
@@ -94,7 +96,8 @@ final class DataTypes {
 
         @Override
         public Block deserialize(byte[] value) {
-            return Block.fromStateId(new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT).shortValue());
+//            return Block.fromStateId(new NetworkBuffer(ByteBuffer.wrap(value)).read(VAR_INT).shortValue());
+            return null;
         }
     }
 

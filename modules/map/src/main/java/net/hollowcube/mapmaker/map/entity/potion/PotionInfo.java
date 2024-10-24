@@ -60,9 +60,9 @@ public record PotionInfo(
     public static final Codec<PotionInfo> CODEC = Codec.STRING.xmap(PotionInfo::getById, PotionInfo::id);
 
     public static final PotionInfo SPEED = builder("speed").maxLevel().setVanillaEffect(PotionEffect.SPEED).setIcon("effect/potion/icon/speed")
-            .attribute(Attribute.GENERIC_MOVEMENT_SPEED, "minecraft:effect.speed", level -> 0.2 * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
+            .attribute(Attribute.MOVEMENT_SPEED, "minecraft:effect.speed", level -> 0.2 * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
     public static final PotionInfo JUMP_BOOST = builder("jump_boost").maxLevel().setVanillaEffect(PotionEffect.JUMP_BOOST).setIcon("effect/potion/icon/jump_boost")
-            .attribute(Attribute.GENERIC_SAFE_FALL_DISTANCE, "minecraft:effect.jump_boost", level -> level + 1, AttributeOperation.ADD_VALUE).build();
+            .attribute(Attribute.SAFE_FALL_DISTANCE, "minecraft:effect.jump_boost", level -> level + 1, AttributeOperation.ADD_VALUE).build();
     public static final PotionInfo DEPTH_STRIDER = builder("depth_strider").maxLevel(3).setVanillaEffect(PotionEffect.BAD_OMEN).setIcon("effect/potion/icon/depth_strider").setHandler(new DepthStriderPotionHandler()).build();
     public static final PotionInfo LEVITATION = builder("levitation").maxLevel().setVanillaEffect(PotionEffect.LEVITATION).setIcon("effect/potion/icon/levitation").build();
     public static final PotionInfo SLOW_FALL = builder("slow_fall").setVanillaEffect(PotionEffect.SLOW_FALLING).setIcon("effect/potion/icon/slow_fall").build();
@@ -70,7 +70,7 @@ public record PotionInfo(
     // .addAttributeModifier(Attributes.SAFE_FALL_DISTANCE, ResourceLocation.withDefaultNamespace("effect.jump_boost"), 1.0, AttributeModifier.Operation.ADD_VALUE));
 
     public static final PotionInfo SLOWNESS = builder("slowness").maxLevel().setVanillaEffect(PotionEffect.SLOWNESS).setIcon("effect/potion/icon/slowness")
-            .attribute(Attribute.GENERIC_MOVEMENT_SPEED, "minecraft:effect.slowness", level -> -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
+            .attribute(Attribute.MOVEMENT_SPEED, "minecraft:effect.slowness", level -> -0.15f * (level + 1), AttributeOperation.MULTIPLY_TOTAL).build();
     public static final PotionInfo BLINDNESS = builder("blindness").maxLevel().setVanillaEffect(PotionEffect.BLINDNESS).setIcon("effect/potion/icon/blindness").build();
     public static final PotionInfo DARKNESS = builder("darkness").setVanillaEffect(PotionEffect.DARKNESS).setIcon("effect/potion/icon/darkness").build();
     public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon("effect/potion/icon/nausea").build();

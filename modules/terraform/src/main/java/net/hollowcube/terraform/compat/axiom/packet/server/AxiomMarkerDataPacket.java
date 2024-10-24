@@ -33,8 +33,9 @@ public record AxiomMarkerDataPacket(
 
     @Override
     public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
-        buffer.writeCollection(entries, (b1, entry) -> entry.write(b1, apiVersion));
-        buffer.writeCollection(removedMarkers, (b1, uuid) -> b1.write(NetworkBuffer.UUID, uuid));
+        // TODO: 1.21.2
+//        buffer.writeCollection(entries, (b1, entry) -> entry.write(b1, apiVersion));
+//        buffer.writeCollection(removedMarkers, (b1, uuid) -> b1.write(NetworkBuffer.UUID, uuid));
     }
 
     public record Entry(
@@ -47,7 +48,8 @@ public record AxiomMarkerDataPacket(
         public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
             buffer.write(NetworkBuffer.UUID, uuid);
             buffer.write(NetworkBuffer.VECTOR3D, position);
-            buffer.writeOptional(NetworkBuffer.STRING, name);
+            // TODO: 1.21.2
+//            buffer.writeOptional(NetworkBuffer.STRING, name);
             if (regionMin != null && regionMax != null) {
                 // Note: All flags besides FLAG_REGION are only valid to write if the region is present
                 //       that's why this logic looks slightly odd.

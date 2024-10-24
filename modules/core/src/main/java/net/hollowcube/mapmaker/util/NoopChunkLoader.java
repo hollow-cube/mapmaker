@@ -6,8 +6,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
-
 public final class NoopChunkLoader implements IChunkLoader {
 
     public static final NoopChunkLoader INSTANCE = new NoopChunkLoader();
@@ -17,12 +15,12 @@ public final class NoopChunkLoader implements IChunkLoader {
     }
 
     @Override
-    public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
-        return CompletableFuture.completedFuture(null);
+    public @Nullable Chunk loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+        return null;
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
-        return CompletableFuture.completedFuture(null);
+    public void saveChunk(@NotNull Chunk chunk) {
+
     }
 }

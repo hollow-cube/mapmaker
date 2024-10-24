@@ -19,7 +19,6 @@ import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.EventDispatcher;
@@ -61,7 +60,8 @@ public final class AxiomPacketListener {
     public void handleSetGamemode(@NotNull Player player, @NotNull AxiomClientSetGameModePacket packet) {
         if (!Axiom.isEnabled(player)) return;
         try {
-            player.setGameMode(GameMode.fromId(packet.gameModeId()));
+            // TODO(1.21.2)
+//            player.setGameMode(GameMode.fromId(packet.gameModeId()));
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid gamemode received from {} ({})", player.getUuid(), packet.gameModeId());
         }

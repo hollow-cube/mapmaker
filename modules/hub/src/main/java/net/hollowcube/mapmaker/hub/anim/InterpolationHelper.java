@@ -164,7 +164,7 @@ public class InterpolationHelper {
         player.scheduleNextTick(_ -> {
             player.sendPacket(getNextMetadataPacket());
             if (nextPosition != null) {
-                player.sendPacket(new EntityTeleportPacket(entity.getEntityId(), nextPosition, entity.isOnGround()));
+                player.sendPacket(new EntityTeleportPacket(entity.getEntityId(), nextPosition, Vec.ZERO, 0, entity.isOnGround()));
             }
         });
     }

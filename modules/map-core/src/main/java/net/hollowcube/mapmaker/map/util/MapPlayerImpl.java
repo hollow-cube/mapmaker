@@ -8,11 +8,15 @@ import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
+import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -27,8 +31,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     // entity id -> visibility ordinal
     private Int2IntMap visibilityByEntity = new Int2IntArrayMap();
 
-    public MapPlayerImpl(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
-        super(uuid, username, playerConnection);
+    public MapPlayerImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
+        super(playerConnection, gameProfile);
     }
 
     @Override
@@ -123,7 +127,7 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         var infoEntry = new PlayerInfoUpdatePacket.Entry(
                 getUuid(), getUsername(), List.of(), false, 0,
                 gameMode, // This is the relevant one, we are only updating the gamemode
-                null, null
+                null, null, 0
         );
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, infoEntry));
     }
@@ -137,7 +141,7 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         PlayerSkin skin = getSkin();
         List<PlayerInfoUpdatePacket.Property> prop = skin != null ? List.of(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature())) : List.of();
         // Listed is always false. SessionManager manages the tab list for us.
-        return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null);
+        return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null, 0);
     }
 
     @Override

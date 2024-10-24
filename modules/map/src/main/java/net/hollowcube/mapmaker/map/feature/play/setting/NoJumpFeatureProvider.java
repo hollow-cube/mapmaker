@@ -71,10 +71,10 @@ public class NoJumpFeatureProvider implements FeatureProvider {
     }
 
     private void addEffect(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(0);
+        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0);
     }
 
     private void removeEffect(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(Attribute.GENERIC_JUMP_STRENGTH.defaultValue());
+        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(Attribute.JUMP_STRENGTH.defaultValue());
     }
 }

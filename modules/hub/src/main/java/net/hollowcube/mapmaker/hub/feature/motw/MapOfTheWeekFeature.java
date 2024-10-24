@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
@@ -49,9 +50,9 @@ public class MapOfTheWeekFeature implements HubFeature {
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, Player.@NotNull Hand hand, boolean isLeftClick) {
+    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (isLeftClick) return;
-        
+
         player.sendMessage(Component.translatable("motw.coming_soon"));
 //        try {
         //todo in vthread

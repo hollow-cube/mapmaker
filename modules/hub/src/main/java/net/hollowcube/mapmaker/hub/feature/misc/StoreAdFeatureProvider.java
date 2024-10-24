@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -49,8 +50,8 @@ public class StoreAdFeatureProvider implements HubFeature {
         scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
-        if (hand != Player.Hand.MAIN) return;
+    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+        if (hand != PlayerHand.MAIN) return;
 
         guiController.show(player, c -> new StoreView(c, StoreView.TAB_HYPERCUBE));
     }

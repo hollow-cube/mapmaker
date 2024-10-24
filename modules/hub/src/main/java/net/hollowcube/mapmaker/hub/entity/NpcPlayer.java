@@ -52,7 +52,7 @@ public class NpcPlayer extends BaseNpcEntity {
         if (this.skin != null) {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
         }
-        var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null, null);
+        var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null, null, 0);
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
         // Spawn the player entity

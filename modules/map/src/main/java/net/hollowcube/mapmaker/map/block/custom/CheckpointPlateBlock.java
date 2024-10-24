@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.object.ObjectType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -63,7 +64,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (world == null || !world.canEdit(player)) return true;
         if (world.itemRegistry().isOnCooldown(player)) return true;
 
-        if (interaction.getHand() != Player.Hand.MAIN || player.isSneaking()) return true;
+        if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
         var data = interaction.getBlock().getTag(DATA_TAG);

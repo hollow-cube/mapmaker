@@ -6,6 +6,7 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.metadata.other.ItemFrameMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
@@ -72,7 +73,7 @@ public class ItemFrameEntity extends MapEntity {
     }
 
     @Override
-    public void onBuildRightClick(@NotNull MapWorld world, @NotNull Player player, @NotNull Player.Hand hand,
+    public void onBuildRightClick(@NotNull MapWorld world, @NotNull Player player, @NotNull PlayerHand hand,
                                   @NotNull Point interactPosition) {
         ItemStack heldItem = player.getItemInMainHand();
         if (heldItem.isAir()) {
@@ -138,7 +139,7 @@ public class ItemFrameEntity extends MapEntity {
         super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
-        getEntityMeta().setOrientation(buffer.readEnum(ItemFrameMeta.Orientation.class));
+        getEntityMeta().setOrientation(buffer.read(NetworkBuffer.Enum(ItemFrameMeta.Orientation.class)));
     }
 
     private @NotNull ItemFrameMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {

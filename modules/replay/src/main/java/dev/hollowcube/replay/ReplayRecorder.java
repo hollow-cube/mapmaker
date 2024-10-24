@@ -56,6 +56,7 @@ public class ReplayRecorder implements Closeable {
     public void setUserVersion(int userVersion) {
         this.userVersion = userVersion;
     }
+
     public int getUserVersion() {
         return userVersion;
     }
@@ -72,10 +73,12 @@ public class ReplayRecorder implements Closeable {
             buffer.write(VAR_INT, MinecraftServer.TICK_PER_SECOND);
             buffer.write(VAR_INT, changes.size());
             buffer.write(VECTOR3D, origin);
-            buffer.writeCollection(changes, ($, change) -> buffer.writeCollection(change, ($$, entry) -> {
-                buffer.write(VAR_INT, entry.id());
-                entry.write(metadata, buffer);
-            }));
+
+            // TODO: 1.21.2 broke this, need to use proper network buffer types here
+//            buffer.writeCollection(changes, ($, change) -> buffer.writeCollection(change, ($$, entry) -> {
+//                buffer.write(VAR_INT, entry.id());
+//                entry.write(metadata, buffer);
+//            }));
         }));
     }
 

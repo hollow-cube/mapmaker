@@ -15,7 +15,6 @@ import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
@@ -28,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 @AutoService(HubFeature.class)
 public class LauncherFeature implements HubFeature {
     private static final SoundEvent EMPTY_SOUND = SoundEvent.of(NamespaceID.from("not.a.real.sound"), 0f);
-    private static final byte[] AIR_BLOCK_PARTICLE = NetworkBuffer.makeArray(buffer -> Particle.BLOCK.withBlock(Block.AIR).writeData(buffer));
 
     // From the perspective of the player when they spawn in the world.
     private final LauncherEntity left = new LauncherEntity();
@@ -149,15 +147,7 @@ public class LauncherFeature implements HubFeature {
         }
 
         private static @NotNull ExplosionPacket makeExplosion(@NotNull Point position, @NotNull Vec motion) {
-            return new ExplosionPacket(
-                    position.x(), position.y(), position.z(),
-                    0, new byte[0],
-                    (float) motion.x(), (float) motion.y(), (float) motion.z(),
-                    ExplosionPacket.BlockInteraction.KEEP,
-                    Particle.BLOCK.id(), AIR_BLOCK_PARTICLE,
-                    Particle.BLOCK.id(), AIR_BLOCK_PARTICLE,
-                    EMPTY_SOUND
-            );
+            return new ExplosionPacket(position, motion, Particle.BLOCK.withBlock(Block.AIR), EMPTY_SOUND);
         }
     }
 }

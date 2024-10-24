@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
+import net.hollowcube.mapmaker.hub.util.OldChunkUtils;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -39,7 +40,6 @@ import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Chunk;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("selected_slot", 0);
 
-    private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach", 40 - Attribute.PLAYER_ENTITY_INTERACTION_RANGE.defaultValue(), AttributeOperation.ADD_VALUE);
+    private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach", 40 - Attribute.ENTITY_INTERACTION_RANGE.defaultValue(), AttributeOperation.ADD_VALUE);
 
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
     public static final MapData HUB_MAP_DATA = new MapData(
@@ -139,7 +139,7 @@ public class HubMapWorld extends AbstractMapWorld {
         loader.loadInstance(instance); // Load world data
 
         var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
-        ChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
+        OldChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
                 .thenRun(() -> logger.info("Loaded spawn chunks"));
 
@@ -161,7 +161,7 @@ public class HubMapWorld extends AbstractMapWorld {
         player.setAllowFlying(true);
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
         player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
-        player.getAttribute(Attribute.PLAYER_ENTITY_INTERACTION_RANGE).addModifier(REACH_MOD);
+        player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).addModifier(REACH_MOD);
 
         player.getInventory().setItemStack(10, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
 
@@ -187,7 +187,7 @@ public class HubMapWorld extends AbstractMapWorld {
         var playerData = PlayerDataV2.fromPlayer(player);
         playerData.writeUpdatesUpstream(server().playerService());
 
-        player.getAttribute(Attribute.PLAYER_ENTITY_INTERACTION_RANGE).removeModifier(REACH_MOD);
+        player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).removeModifier(REACH_MOD);
 
         super.removePlayer(player);
     }

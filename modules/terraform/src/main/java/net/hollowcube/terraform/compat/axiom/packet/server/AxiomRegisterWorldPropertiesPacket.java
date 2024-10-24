@@ -47,7 +47,8 @@ public record AxiomRegisterWorldPropertiesPacket(
         buffer.write(VAR_INT, properties.size());
         for (var entry : properties.entrySet()) {
             entry.getKey().write(buffer, apiVersion);
-            buffer.writeCollection(entry.getValue(), (b, property) -> property.write(b, apiVersion));
+            // TODO: 1.21.2
+//            buffer.writeCollection(entry.getValue(), (b, property) -> property.write(b, apiVersion));
         }
     }
 

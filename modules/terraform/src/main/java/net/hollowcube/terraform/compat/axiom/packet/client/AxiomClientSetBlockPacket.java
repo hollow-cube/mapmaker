@@ -1,8 +1,7 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
-import net.hollowcube.terraform.util.ProtocolUtil;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.network.NetworkBuffer;
@@ -19,7 +18,7 @@ public record AxiomClientSetBlockPacket(
         int reason,
         boolean breaking,
         BlockHitResult blockHit,
-        Player.Hand hand,
+        PlayerHand hand,
         int sequence
 ) implements AxiomClientPacket {
 
@@ -34,18 +33,19 @@ public record AxiomClientSetBlockPacket(
         }
     }
 
-    public AxiomClientSetBlockPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(
-                ProtocolUtil.readMap(buffer,
-                        b -> b.read(BLOCK_POSITION),
-                        b -> b.read(Block.NETWORK_TYPE)),
-                buffer.read(BOOLEAN),
-                buffer.read(VAR_INT),
-                buffer.read(BOOLEAN),
-                new BlockHitResult(buffer),
-                buffer.readEnum(Player.Hand.class),
-                buffer.read(VAR_INT)
-        );
-    }
+    // TODO: 1.21.2
+//    public AxiomClientSetBlockPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
+//        this(
+//                ProtocolUtil.readMap(buffer,
+//                        b -> b.read(BLOCK_POSITION),
+//                        b -> b.read(Block.NETWORK_TYPE)),
+//                buffer.read(BOOLEAN),
+//                buffer.read(VAR_INT),
+//                buffer.read(BOOLEAN),
+//                new BlockHitResult(buffer),
+//                buffer.readEnum(Player.Hand.class),
+//                buffer.read(VAR_INT)
+//        );
+//    }
 
 }

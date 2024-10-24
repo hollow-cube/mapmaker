@@ -41,7 +41,8 @@ public record AxiomEnablePacket(
             buffer.write(VAR_INT, maxReachDistance);
             buffer.write(VAR_INT, maxViews);
             buffer.write(BOOLEAN, editableViews);
-            buffer.writeCollection(blocksWithCustomData, (b1, block) -> b1.write(VAR_INT, block.id()));
+            // TODO: 1.21.2
+//            buffer.writeCollection(blocksWithCustomData, (b1, block) -> b1.write(VAR_INT, block.id()));
         }
     }
 }

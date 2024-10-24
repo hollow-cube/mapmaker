@@ -16,13 +16,13 @@ public class DepthStriderPotionHandler implements PotionHandler {
     @Override
     public void apply(@NotNull Player player, int level) {
         var modifier = new AttributeModifier(MODIFIER_ID, VALUE.calc(level + 1), AttributeOperation.ADD_VALUE);
-        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_WATER_MOVEMENT_EFFICIENCY);
+        final AttributeInstance attr = player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY);
         attr.removeModifier(MODIFIER_ID);
         attr.addModifier(modifier);
     }
 
     @Override
     public void remove(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_WATER_MOVEMENT_EFFICIENCY).removeModifier(MODIFIER_ID);
+        player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY).removeModifier(MODIFIER_ID);
     }
 }

@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.compat.axiom;
 
-import net.hollowcube.terraform.compat.axiom.packet.client.*;
+import net.hollowcube.terraform.compat.axiom.packet.client.AxiomClientPacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
 import net.hollowcube.terraform.compat.axiom.packet.server.AxiomServerPacket;
 import net.minestom.server.entity.Player;
@@ -12,7 +12,6 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -112,23 +111,23 @@ public class Axiom {
     }
 
     private static final Map<String, ReadableAxiomPacket<?>> CLIENT_PACKETS = Map.ofEntries(
-            Map.entry("axiom:hello", AxiomClientHelloPacket::new),
-            Map.entry("axiom:set_gamemode", AxiomClientSetGameModePacket::new),
-            Map.entry("axiom:set_fly_speed", AxiomClientSetFlySpeedPacket::new),
-            Map.entry("axiom:set_hotbar_slot", AxiomClientSetHotbarSlotPacket::new),
-            Map.entry("axiom:switch_active_hotbar", AxiomClientSwitchActiveHotbarPacket::new),
-            Map.entry("axiom:teleport", AxiomClientTeleportPacket::new),
-            Map.entry("axiom:set_editor_views", AxiomClientSetEditorViewsPacket::new),
-            Map.entry("axiom:request_chunk_data", AxiomClientChunkDataRequestPacket::new),
-            Map.entry("axiom:set_block", AxiomClientSetBlockPacket::new),
-            Map.entry("axiom:set_buffer", AxiomClientSetBufferPacket::new),
-            Map.entry("axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new),
-            Map.entry("axiom:set_time", AxiomClientSetTimePacket::new),
-            Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
-            Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
-            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new),
-            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new),
-            Map.entry("axiom:annotation_update", AxiomClientAnnotationUpdatePacket::new)
+//            Map.entry("axiom:hello", AxiomClientHelloPacket::new),
+//            Map.entry("axiom:set_gamemode", AxiomClientSetGameModePacket::new),
+//            Map.entry("axiom:set_fly_speed", AxiomClientSetFlySpeedPacket::new),
+//            Map.entry("axiom:set_hotbar_slot", AxiomClientSetHotbarSlotPacket::new),
+//            Map.entry("axiom:switch_active_hotbar", AxiomClientSwitchActiveHotbarPacket::new),
+//            Map.entry("axiom:teleport", AxiomClientTeleportPacket::new),
+//            Map.entry("axiom:set_editor_views", AxiomClientSetEditorViewsPacket::new),
+//            Map.entry("axiom:request_chunk_data", AxiomClientChunkDataRequestPacket::new),
+//            Map.entry("axiom:set_block", AxiomClientSetBlockPacket::new),
+//            Map.entry("axiom:set_buffer", AxiomClientSetBufferPacket::new),
+//            Map.entry("axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new),
+//            Map.entry("axiom:set_time", AxiomClientSetTimePacket::new),
+//            Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
+//            Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
+//            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new),
+//            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new),
+//            Map.entry("axiom:annotation_update", AxiomClientAnnotationUpdatePacket::new)
     );
 
     /**
@@ -160,13 +159,14 @@ public class Axiom {
     public static @Nullable AxiomClientPacket readPacket(@NotNull PlayerPluginMessageEvent event) {
         var reader = CLIENT_PACKETS.get(event.getIdentifier());
         if (reader == null) return null;
-        var buffer = new NetworkBuffer(ByteBuffer.wrap(event.getMessage()));
+//        var buffer = new NetworkBuffer(ByteBuffer.wrap(event.getMessage()));
 
         // When we receive the hello packet there will be no client info, so default to
         // the highest supported API version. It is present in the hello packet anyway.
-        var clientInfo = event.getPlayer().getTag(CLIENT_INFO_TAG);
-        var apiVersion = clientInfo == null ? MAX_API_VERSION : clientInfo.apiVersion();
-        return reader.read(buffer, apiVersion);
+//        var clientInfo = event.getPlayer().getTag(CLIENT_INFO_TAG);
+//        var apiVersion = clientInfo == null ? MAX_API_VERSION : clientInfo.apiVersion();
+//        return reader.read(buffer, apiVersion);
+        return null;
     }
 
     private Axiom() {

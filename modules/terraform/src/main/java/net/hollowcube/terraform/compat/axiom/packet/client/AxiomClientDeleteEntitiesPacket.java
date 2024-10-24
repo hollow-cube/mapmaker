@@ -16,7 +16,8 @@ public record AxiomClientDeleteEntitiesPacket(
         uuids = List.copyOf(uuids);
     }
 
-    public AxiomClientDeleteEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES));
-    }
+    // TODO: 1.21.2
+//    public AxiomClientDeleteEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
+//        this(buffer.readCollection(NetworkBuffer.UUID, MAX_ENTRIES));
+//    }
 }

@@ -101,8 +101,9 @@ public class CuboidRegionSelector implements RegionSelector {
     @Override
     public void write(@NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.BYTE, DATA_VERSION);
-        buffer.writeOptional(NetworkBuffer.VECTOR3, pos1);
-        buffer.writeOptional(NetworkBuffer.VECTOR3, pos2);
+        // TODO(1.21.2)
+//        buffer.writeOptional(NetworkBuffer.VECTOR3, pos1);
+//        buffer.writeOptional(NetworkBuffer.VECTOR3, pos2);
     }
 
     @Override
@@ -110,8 +111,9 @@ public class CuboidRegionSelector implements RegionSelector {
         byte version = buffer.read(NetworkBuffer.BYTE);
         Check.stateCondition(version > DATA_VERSION, "Unsupported data version: " + version);
 
-        pos1 = buffer.readOptional(NetworkBuffer.VECTOR3);
-        pos2 = buffer.readOptional(NetworkBuffer.VECTOR3);
+        // TODO(1.21.2)
+//        pos1 = buffer.readOptional(NetworkBuffer.VECTOR3);
+//        pos2 = buffer.readOptional(NetworkBuffer.VECTOR3);
     }
 
     private Point boundToWorldBorder(Point point, @Nullable Instance world) {

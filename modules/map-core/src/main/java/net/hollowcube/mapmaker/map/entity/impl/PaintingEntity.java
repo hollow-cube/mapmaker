@@ -99,7 +99,7 @@ public class PaintingEntity extends MapEntity {
         super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
-        getEntityMeta().setOrientation(buffer.readEnum(PaintingMeta.Orientation.class));
+        getEntityMeta().setOrientation(buffer.read(NetworkBuffer.Enum(PaintingMeta.Orientation.class)));
     }
 
     private @NotNull PaintingMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {

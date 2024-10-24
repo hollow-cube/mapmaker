@@ -7,8 +7,6 @@ import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static net.minestom.server.network.NetworkBuffer.VECTOR3;
-
 @SuppressWarnings("UnstableApiUsage")
 public class LineRegionSelector implements RegionSelector {
     private final ClientInterface cui;
@@ -81,14 +79,16 @@ public class LineRegionSelector implements RegionSelector {
 
     @Override
     public void write(@NotNull NetworkBuffer buffer) {
-        buffer.writeOptional(VECTOR3, pos1);
-        buffer.writeOptional(VECTOR3, pos2);
+        // TODO(1.21.2)
+//        buffer.writeOptional(VECTOR3, pos1);
+//        buffer.writeOptional(VECTOR3, pos2);
     }
 
     @Override
     public void read(@NotNull NetworkBuffer buffer) {
-        pos1 = buffer.readOptional(VECTOR3);
-        pos2 = buffer.readOptional(VECTOR3);
+        // TODO(1.21.2)
+//        pos1 = buffer.readOptional(VECTOR3);
+//        pos2 = buffer.readOptional(VECTOR3);
     }
 
 }

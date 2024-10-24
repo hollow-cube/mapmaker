@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,8 +33,8 @@ public class MiscNpcsFeature implements HubFeature {
         playtimeNpc.setHandler(this::handlePlaytimeClick);
     }
 
-    private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull Player.Hand hand, boolean isLeftClick) {
-        if (hand != Player.Hand.MAIN || isLeftClick) return;
+    private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+        if (hand != PlayerHand.MAIN || isLeftClick) return;
 
         var playerData = PlayerDataV2.fromPlayer(player);
         player.sendMessage("You have played for " + NumberUtil.formatPlayerPlaytime(playerData.totalPlaytime()));

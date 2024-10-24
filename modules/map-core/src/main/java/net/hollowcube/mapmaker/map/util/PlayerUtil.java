@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
@@ -29,8 +30,8 @@ public final class PlayerUtil {
         return net.hollowcube.terraform.util.PlayerUtil.getTargetBlock(player, maxDistance);
     }
 
-    public static void swingHand(@NotNull Player player, @NotNull Player.Hand hand, boolean includeSelf) {
-        if (hand == Player.Hand.MAIN) {
+    public static void swingHand(@NotNull Player player, @NotNull PlayerHand hand, boolean includeSelf) {
+        if (hand == PlayerHand.MAIN) {
             player.swingMainHand(); // Sends only to viewers
             if (includeSelf)
                 player.sendPacket(new EntityAnimationPacket(player.getEntityId(), EntityAnimationPacket.Animation.SWING_MAIN_ARM));
