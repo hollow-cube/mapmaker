@@ -83,8 +83,7 @@ public record AxiomClientSetBufferPacket(
                 switch (buffer.read(BYTE)) {
                     case 0 -> buffer.read(VAR_INT); // Fixed
                     case 1, 2, 3, 4, 5, 6, 7, 8 -> { // Linear or HashMap
-                        // TODO: 1.21.2
-//                        buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE); // Palette
+                        buffer.read(VAR_INT_ARRAY);
                         buffer.read(LONG_ARRAY); // Data
                     }
                     default -> buffer.read(LONG_ARRAY); // Global

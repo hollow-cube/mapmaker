@@ -7,6 +7,10 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
+import net.minestom.server.recipe.RecipeBookCategory;
+import net.minestom.server.recipe.display.RecipeDisplay;
+import net.minestom.server.recipe.display.SlotDisplay;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.hollowcube.mapmaker.backpack.BackpackCategory.MATERIAL;
 
@@ -50,21 +55,25 @@ public enum BackpackItem {
 
     ;
 
-//    private static final List<Recipe.Ingredient> CRAFTABLE = List.of(new Recipe.Ingredient(Material.STICK));
-//    private static final List<Recipe.Ingredient> UNCRAFTABLE = List.of(new Recipe.Ingredient(Material.STICK));
+    private static final SlotDisplay CRAFTABLE = new SlotDisplay.ItemStack(RecipeBookHack.BLANK_ITEM_CRAFTABLE);
+    private static final SlotDisplay UNCRAFTABLE = new SlotDisplay.ItemStack(RecipeBookHack.BLANK_ITEM_UNCRAFTABLE);
 
+    private final int recipeBookId;
     private final BackpackCategory category;
     private final Rarity rarity;
     private final BadSprite sprite;
-    private final String recipeBookId;
 
     BackpackItem(@NotNull BackpackCategory category, @NotNull Rarity rarity) {
+        class IdHolder {
+            static final AtomicInteger NEXT_ID = new AtomicInteger(0);
+        }
+        this.recipeBookId = IdHolder.NEXT_ID.getAndIncrement();
+
         this.category = category;
         this.rarity = rarity;
 
         var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
         this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
-        this.recipeBookId = RecipeBookHack.getOrderedId(ordinal());
     }
 
     public static @Nullable BackpackItem byId(@NotNull String item) {
@@ -96,7 +105,7 @@ public enum BackpackItem {
         };
     }
 
-    public @NotNull String recipeBookId() {
+    public int recipeBookId() {
         return recipeBookId;
     }
 
@@ -129,6 +138,19 @@ public enum BackpackItem {
                 .set(ItemComponent.CUSTOM_NAME, displayName())
                 .set(ItemComponent.LORE, lore)
                 .build();
+    }
+
+    @NotNull RecipeBookAddPacket.Entry getRecipeBookEntry(int amount) {
+        RecipeDisplay display = new RecipeDisplay.CraftingShapeless(
+                List.of(amount == 0 ? UNCRAFTABLE : CRAFTABLE),
+                new SlotDisplay.ItemStack(getItemStack(amount)),
+                new SlotDisplay.Item(Material.CRAFTING_TABLE)
+        );
+        return new RecipeBookAddPacket.Entry(
+                recipeBookId(), display, null,
+                RecipeBookCategory.CRAFTING_REDSTONE,
+                null, (byte) 0
+        );
     }
 
 //    @NotNull

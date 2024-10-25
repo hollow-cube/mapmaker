@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.selection.region;
 
+import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
@@ -101,9 +102,9 @@ public class CuboidRegionSelector implements RegionSelector {
     @Override
     public void write(@NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.BYTE, DATA_VERSION);
-        // TODO(1.21.2)
-//        buffer.writeOptional(NetworkBuffer.VECTOR3, pos1);
-//        buffer.writeOptional(NetworkBuffer.VECTOR3, pos2);
+
+        buffer.write(NetworkBufferTypes.OPT_VECTOR3, pos1);
+        buffer.write(NetworkBufferTypes.OPT_VECTOR3, pos2);
     }
 
     @Override
@@ -111,9 +112,8 @@ public class CuboidRegionSelector implements RegionSelector {
         byte version = buffer.read(NetworkBuffer.BYTE);
         Check.stateCondition(version > DATA_VERSION, "Unsupported data version: " + version);
 
-        // TODO(1.21.2)
-//        pos1 = buffer.readOptional(NetworkBuffer.VECTOR3);
-//        pos2 = buffer.readOptional(NetworkBuffer.VECTOR3);
+        pos1 = buffer.read(NetworkBufferTypes.OPT_VECTOR3);
+        pos2 = buffer.read(NetworkBufferTypes.OPT_VECTOR3);
     }
 
     private Point boundToWorldBorder(Point point, @Nullable Instance world) {

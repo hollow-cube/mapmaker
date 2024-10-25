@@ -23,6 +23,7 @@ import java.util.List;
 REMAINING TODOS FROM 1.21.2
 - Re-add world properties
 - Support biome buffers
+  Not so simple we need support for biome buffers in Terraform at all.
 - Finish chunk data response
 FROM SERVER
 - Add custom blocks packet
@@ -31,12 +32,12 @@ FROM SERVER
 - Add response entity data
 - Add restrictions
 - Add serverside set editor views
-- Blueprint manifest
-- Blueprint response
+- Blueprint manifest (SCHEM UPDATE)
+- Blueprint response (SCHEM UPDATE)
 FROM CLIENT
 - Add request entity data
-- Request blueprint
-- Upload blueprint
+- Request blueprint (SCHEM UPDATE)
+- Upload blueprint (SCHEM UPDATE)
  */
 
 @SuppressWarnings("UnstableApiUsage")
