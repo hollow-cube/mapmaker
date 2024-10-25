@@ -1,12 +1,12 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetWorldPropertyPacket(
         @NotNull NamespaceID id,
         int typeId,

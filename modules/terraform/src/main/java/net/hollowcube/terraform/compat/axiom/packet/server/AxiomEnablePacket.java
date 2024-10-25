@@ -1,48 +1,47 @@
 package net.hollowcube.terraform.compat.axiom.packet.server;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomServerPacket;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.validate.Check;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static net.minestom.server.network.NetworkBuffer.*;
-
-@SuppressWarnings("UnstableApiUsage")
+/**
+ * Enables or disables axiom for the client. May be sent multiple times.
+ *
+ * @param serverConfig Present to enable, null to disable
+ */
 public record AxiomEnablePacket(
-        boolean enabled,
-        int maxBufferSize,
-        boolean sendSourceInfo,
-        boolean sendSourceSettings,
-        int maxReachDistance,
-        int maxViews,
-        boolean editableViews,
-        @NotNull List<@NotNull Block> blocksWithCustomData
+        @Nullable ServerConfig serverConfig
 ) implements AxiomServerPacket {
+    public static final NetworkBuffer.Type<AxiomEnablePacket> SERIALIZER = NetworkBufferTemplate.template(
+            ServerConfig.SERIALIZER.optional(), AxiomEnablePacket::serverConfig,
+            AxiomEnablePacket::new);
 
-    public AxiomEnablePacket(boolean enabled) {
-        this(enabled, 0, false, false, 0, 0, false, List.of());
-        Check.argCondition(enabled, "all settings must be provided for enable packet");
-    }
-
-    @Override
-    public @NotNull String packetChannel() {
-        return "axiom:enable";
-    }
-
-    @Override
-    public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
-        buffer.write(BOOLEAN, enabled);
-        if (enabled) {
-            buffer.write(INT, maxBufferSize);
-            buffer.write(BOOLEAN, sendSourceInfo);
-            buffer.write(BOOLEAN, sendSourceSettings);
-            buffer.write(VAR_INT, maxReachDistance);
-            buffer.write(VAR_INT, maxViews);
-            buffer.write(BOOLEAN, editableViews);
-            // TODO: 1.21.2
-//            buffer.writeCollection(blocksWithCustomData, (b1, block) -> b1.write(VAR_INT, block.id()));
-        }
+    public record ServerConfig(
+            int maxBufferSize,
+            boolean sendSourceInfo,
+            boolean sendSourceSettings,
+            int maxReachDistance,
+            int maxViews,
+            boolean editableViews,
+            @NotNull List<Block> blocksWithCustomData,
+            @NotNull List<Block> ignoreRotationSet,
+            int blueprintVersion
+    ) {
+        public static final NetworkBuffer.Type<ServerConfig> SERIALIZER = NetworkBufferTemplate.template(
+                NetworkBuffer.INT, ServerConfig::maxBufferSize,
+                NetworkBuffer.BOOLEAN, ServerConfig::sendSourceInfo,
+                NetworkBuffer.BOOLEAN, ServerConfig::sendSourceSettings,
+                NetworkBuffer.VAR_INT, ServerConfig::maxReachDistance,
+                NetworkBuffer.VAR_INT, ServerConfig::maxViews,
+                NetworkBuffer.BOOLEAN, ServerConfig::editableViews,
+                Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::blocksWithCustomData,
+                Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::ignoreRotationSet,
+                NetworkBuffer.VAR_INT, ServerConfig::blueprintVersion,
+                ServerConfig::new);
     }
 }

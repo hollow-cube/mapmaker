@@ -1,17 +1,15 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
-import static net.minestom.server.network.NetworkBuffer.BYTE;
-
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetGameModePacket(
-        byte gameModeId
+        @NotNull GameMode gameMode
 ) implements AxiomClientPacket {
-
-    public AxiomClientSetGameModePacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(BYTE));
-    }
-
+    public static final NetworkBuffer.Type<AxiomClientSetGameModePacket> SERIALIZER = NetworkBufferTemplate.template(
+            GameMode.NETWORK_TYPE, AxiomClientSetGameModePacket::gameMode,
+            AxiomClientSetGameModePacket::new);
 }

@@ -7,7 +7,6 @@ import net.hollowcube.test.subject.TestPlayer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -58,8 +57,8 @@ public class TestEnvImpl implements TestEnv {
 
         // Load some chunks around the center
         var loadingChunks = new ArrayList<CompletableFuture<Void>>();
-        ChunkUtils.forChunksInRange(0, 0, 3, (x, z) ->
-                loadingChunks.add(instance.loadChunk(x, z).thenApply(v -> null)));
+//        ChunkUtils.forChunksInRange(0, 0, 3, (x, z) ->
+//                loadingChunks.add(instance.loadChunk(x, z).thenApply(v -> null)));
         CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)).join();
 
         return instance;

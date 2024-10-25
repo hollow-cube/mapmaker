@@ -147,6 +147,6 @@ public final class WorldPropertiesRegistry {
             packetProperties.put(packetCategory, packetPropertiesList);
         }
 
-        return new AxiomRegisterWorldPropertiesPacket(packetProperties).toPacket(player);
+        return Axiom.writePacket(new AxiomRegisterWorldPropertiesPacket(packetProperties));
     }
 }

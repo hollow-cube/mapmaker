@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.compat.axiom.packet.server;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomServerPacket;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +10,6 @@ import java.util.Map;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomRegisterWorldPropertiesPacket(
         @NotNull Map<Category, List<WorldProperty>> properties
 ) implements AxiomServerPacket {
@@ -42,19 +42,14 @@ public record AxiomRegisterWorldPropertiesPacket(
         }
     }
 
-    @Override
-    public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
-        buffer.write(VAR_INT, properties.size());
-        for (var entry : properties.entrySet()) {
-            entry.getKey().write(buffer, apiVersion);
-            // TODO: 1.21.2
-//            buffer.writeCollection(entry.getValue(), (b, property) -> property.write(b, apiVersion));
-        }
-    }
-
-    @Override
-    public @NotNull String packetChannel() {
-        return "axiom:register_world_properties";
-    }
+//    @Override
+//    public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
+//        buffer.write(VAR_INT, properties.size());
+//        for (var entry : properties.entrySet()) {
+//            entry.getKey().write(buffer, apiVersion);
+//            // TODO: 1.21.2
+////            buffer.writeCollection(entry.getValue(), (b, property) -> property.write(b, apiVersion));
+//        }
+//    }
 
 }

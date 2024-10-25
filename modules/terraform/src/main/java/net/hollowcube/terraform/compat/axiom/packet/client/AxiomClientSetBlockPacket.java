@@ -1,26 +1,45 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.common.util.NetworkBufferTypes;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-import static net.minestom.server.network.NetworkBuffer.*;
-
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetBlockPacket(
-        Map<Point, Block> blocks,
+        @NotNull Map<Point, Block> blocks,
         boolean updateNeighbors,
         int reason,
         boolean breaking,
-        BlockHitResult blockHit,
-        PlayerHand hand,
+        @NotNull BlockHitResult blockHit,
+        @NotNull PlayerHand hand,
         int sequence
 ) implements AxiomClientPacket {
+    public static final NetworkBuffer.Type<AxiomClientSetBlockPacket> SERIALIZER = NetworkBufferTemplate.template(
+            NetworkBuffer.BLOCK_POSITION.mapValue(Block.NETWORK_TYPE), AxiomClientSetBlockPacket::blocks,
+            NetworkBuffer.BOOLEAN, AxiomClientSetBlockPacket::updateNeighbors,
+            NetworkBuffer.VAR_INT, AxiomClientSetBlockPacket::reason,
+            NetworkBuffer.BOOLEAN, AxiomClientSetBlockPacket::breaking,
+            BlockHitResult.SERIALIZER, AxiomClientSetBlockPacket::blockHit,
+            NetworkBuffer.Enum(PlayerHand.class), AxiomClientSetBlockPacket::hand,
+            NetworkBuffer.VAR_INT, AxiomClientSetBlockPacket::sequence,
+            AxiomClientSetBlockPacket::new);
+
+    public static final int REASON_REPLACEMODE = 1;
+    public static final int REASON_TINKER = 2;
+    public static final int REASON_FORCEPLACE = 4;
+    public static final int REASON_NOUPDATES = 8;
+    public static final int REASON_CUSTOMSHAPEUPDATE = 16;
+    public static final int REASON_CUSTOMPLACEMENT = 32;
+    public static final int REASON_INFINITEREACH = 64;
+    public static final int REASON_ANGEL = 128;
+    public static final int REASON_SYMMETRY = 256;
 
     public record BlockHitResult(
             @NotNull Point blockPos,
@@ -28,24 +47,16 @@ public record AxiomClientSetBlockPacket(
             @NotNull Point cursorPosition,
             boolean inside
     ) {
-        public BlockHitResult(@NotNull NetworkBuffer buffer) {
-            this(buffer.read(BLOCK_POSITION), BlockFace.fromDirection(buffer.read(DIRECTION)), buffer.read(VECTOR3), buffer.read(BOOLEAN));
-        }
+        public static final NetworkBuffer.Type<BlockHitResult> SERIALIZER = NetworkBufferTemplate.template(
+                NetworkBuffer.BLOCK_POSITION, BlockHitResult::blockPos,
+                NetworkBufferTypes.BLOCK_FACE, BlockHitResult::blockFace,
+                NetworkBuffer.VECTOR3, BlockHitResult::cursorPosition,
+                NetworkBuffer.BOOLEAN, BlockHitResult::inside,
+                BlockHitResult::new);
     }
 
-    // TODO: 1.21.2
-//    public AxiomClientSetBlockPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-//        this(
-//                ProtocolUtil.readMap(buffer,
-//                        b -> b.read(BLOCK_POSITION),
-//                        b -> b.read(Block.NETWORK_TYPE)),
-//                buffer.read(BOOLEAN),
-//                buffer.read(VAR_INT),
-//                buffer.read(BOOLEAN),
-//                new BlockHitResult(buffer),
-//                buffer.readEnum(Player.Hand.class),
-//                buffer.read(VAR_INT)
-//        );
-//    }
+    public AxiomClientSetBlockPacket {
+        blocks = Map.copyOf(blocks);
+    }
 
 }

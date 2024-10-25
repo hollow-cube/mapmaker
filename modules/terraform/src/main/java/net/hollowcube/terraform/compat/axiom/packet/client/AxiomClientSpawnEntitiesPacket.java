@@ -1,27 +1,23 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.common.util.NetworkBufferTypes;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSpawnEntitiesPacket(
         @NotNull List<@NotNull Entry> entries
 ) implements AxiomClientPacket {
-    private static final int MAX_ENTRIES = 1024;
-
-    public AxiomClientSpawnEntitiesPacket {
-        entries = List.copyOf(entries);
-    }
-
-    // TODO: 1.21.2
-//    public AxiomClientSpawnEntitiesPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-//        this(buffer.readCollection(b1 -> new Entry(b1, apiVersion), MAX_ENTRIES));
-//    }
+    public static final NetworkBuffer.Type<AxiomClientSpawnEntitiesPacket> SERIALIZER = NetworkBufferTemplate.template(
+            Entry.SERIALIZER.list(1024), AxiomClientSpawnEntitiesPacket::entries,
+            AxiomClientSpawnEntitiesPacket::new);
 
     public record Entry(
             @NotNull UUID uuid,
@@ -29,12 +25,15 @@ public record AxiomClientSpawnEntitiesPacket(
             @Nullable UUID copyFrom,
             @NotNull CompoundBinaryTag nbt
     ) {
+        public static final NetworkBuffer.Type<Entry> SERIALIZER = NetworkBufferTemplate.template(
+                NetworkBuffer.UUID, Entry::uuid,
+                NetworkBuffer.POS, Entry::pos,
+                NetworkBuffer.UUID.optional(), Entry::copyFrom,
+                NetworkBufferTypes.NBT_COMPOUND_OR_END, Entry::nbt,
+                Entry::new);
+    }
 
-//        public Entry(@NotNull NetworkBuffer buffer, int apiVersion) {
-//            this(buffer.read(NetworkBuffer.UUID), ProtocolUtil.readPos(buffer),
-//                    buffer.readOptional(NetworkBuffer.UUID),
-//                    buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag compound ? compound : CompoundBinaryTag.empty());
-//        }
-
+    public AxiomClientSpawnEntitiesPacket {
+        entries = List.copyOf(entries);
     }
 }

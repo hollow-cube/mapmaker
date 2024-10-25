@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class AxiomPacketListener {
     private static final Logger logger = LoggerFactory.getLogger(AxiomPacketListener.class);
 
@@ -51,20 +50,15 @@ public final class AxiomPacketListener {
                 Axiom.enable(player); // This time the hello message will be sent.
                 EventDispatcher.call(new TerraformAxiomLateEnableEvent(player, player.getInstance()));
             } else {
-                var disablePacket = new AxiomEnablePacket(false);
-                player.sendPacket(disablePacket.toPacket(player));
+                var disablePacket = new AxiomEnablePacket(null);
+                player.sendPacket(Axiom.writePacket(disablePacket));
             }
         }
     }
 
     public void handleSetGamemode(@NotNull Player player, @NotNull AxiomClientSetGameModePacket packet) {
         if (!Axiom.isEnabled(player)) return;
-        try {
-            // TODO(1.21.2)
-//            player.setGameMode(GameMode.fromId(packet.gameModeId()));
-        } catch (IllegalArgumentException e) {
-            logger.warn("Invalid gamemode received from {} ({})", player.getUuid(), packet.gameModeId());
-        }
+        player.setGameMode(packet.gameMode());
     }
 
     public void handleSetFlySpeed(@NotNull Player player, @NotNull AxiomClientSetFlySpeedPacket packet) {
@@ -73,10 +67,12 @@ public final class AxiomPacketListener {
     }
 
     public void handleSetHotbarSlot(@NotNull Player player, @NotNull AxiomClientSetHotbarSlotPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
 
     }
 
     public void handleSwitchActiveHotbar(@NotNull Player player, @NotNull AxiomClientSwitchActiveHotbarPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
 
     }
 
@@ -94,13 +90,15 @@ public final class AxiomPacketListener {
     }
 
     public void handleSetEditorViews(@NotNull Player player, @NotNull AxiomClientSetEditorViewsPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
 
     }
 
     public void handleRequestChunkData(@NotNull Player player, @NotNull AxiomClientChunkDataRequestPacket packet) {
+        if (!Axiom.isEnabled(player)) return;
+
         //todo need to properly handle this in the future, for now just send back an empty response always
-        var response = new AxiomChunkDataResponsePacket(packet.correlationId());
-        player.sendPacket(response.toPacket(player));
+        Axiom.sendPacket(player, new AxiomChunkDataResponsePacket(packet.correlationId()));
     }
 
     public void handleSetBlock(@NotNull Player player, @NotNull AxiomClientSetBlockPacket packet) {
@@ -170,11 +168,11 @@ public final class AxiomPacketListener {
         var handled = registry.handlePropertyChange(player, packet);
         if (!handled) return;
 
-        var response = new AxiomAckWorldPropertyPacket(packet.sequenceId());
-        player.sendPacket(response.toPacket(player));
+        Axiom.sendPacket(player, new AxiomAckWorldPropertyPacket(packet.sequenceId()));
     }
 
     public void handleSetTime(@NotNull Player player, @NotNull AxiomClientSetTimePacket packet) {
+        if (!Axiom.isEnabled(player)) return;
 
     }
 
@@ -283,8 +281,7 @@ public final class AxiomPacketListener {
         EventDispatcher.callCancellable(event, () -> {
             if (event.getData() == null) return;
 
-            var responsePacket = new AxiomMarkerNbtResponsePacket(packet.uuid(), event.getData());
-            player.sendPacket(responsePacket.toPacket(player));
+            Axiom.sendPacket(player, new AxiomMarkerNbtResponsePacket(packet.uuid(), event.getData()));
         });
     }
 

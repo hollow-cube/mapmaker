@@ -60,7 +60,7 @@ public class DemoServer {
         MinecraftServer.getGlobalEventHandler()
                 .addListener(AsyncPlayerPreLoginEvent.class, event -> {
                     // Use username as session ID here because we are in offline mode
-                    terraform.initPlayerSession(event.getPlayer(), event.getUsername());
+//                    terraform.initPlayerSession(event.getPlayer(), event.getUsername());
                 })
                 .addListener(AsyncPlayerConfigurationEvent.class, event -> {
                     event.setSpawningInstance(instance);

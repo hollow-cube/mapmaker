@@ -1,26 +1,79 @@
 package net.hollowcube.terraform.compat.axiom;
 
-import net.hollowcube.terraform.compat.axiom.packet.client.AxiomClientPacket;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomEnablePacket;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomServerPacket;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomPacketRegistry;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomServerPacket;
+import net.hollowcube.terraform.compat.axiom.packet.client.*;
+import net.hollowcube.terraform.compat.axiom.packet.server.*;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.packet.server.common.PluginMessagePacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+
+/*
+
+REMAINING TODOS FROM 1.21.2
+- Re-add world properties
+- Support biome buffers
+- Finish chunk data response
+FROM SERVER
+- Add custom blocks packet
+- Add editor warning packet
+- Add initialize hotbars packet
+- Add response entity data
+- Add restrictions
+- Add serverside set editor views
+- Blueprint manifest
+- Blueprint response
+FROM CLIENT
+- Add request entity data
+- Request blueprint
+- Upload blueprint
+ */
 
 @SuppressWarnings("UnstableApiUsage")
 public class Axiom {
 
-    public static final int MIN_API_VERSION = 7;
+    public static final int MIN_API_VERSION = 8;
     public static final int MAX_API_VERSION = 8;
+
+    public static final AxiomPacketRegistry<AxiomClientPacket> CLIENT_PACKETS = new AxiomPacketRegistry<>() {{
+        register("axiom:annotation_update", AxiomClientAnnotationUpdatePacket.class, AxiomClientAnnotationUpdatePacket.SERIALIZER);
+        register("axiom:request_chunk_data", AxiomClientChunkDataRequestPacket.class, AxiomClientChunkDataRequestPacket.SERIALIZER);
+        register("axiom:delete_entity", AxiomClientDeleteEntitiesPacket.class, AxiomClientDeleteEntitiesPacket.SERIALIZER);
+        register("axiom:hello", AxiomClientHelloPacket.class, AxiomClientHelloPacket.SERIALIZER);
+        register("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket.class, AxiomClientMarkerNbtRequestPacket.SERIALIZER);
+        register("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket.class, AxiomClientModifyEntitiesPacket.SERIALIZER);
+        register("axiom:set_block", AxiomClientSetBlockPacket.class, AxiomClientSetBlockPacket.SERIALIZER);
+        register("axiom:set_buffer", AxiomClientSetBufferPacket.class, AxiomClientSetBufferPacket.SERIALIZER);
+        register("axiom:set_editor_views", AxiomClientSetEditorViewsPacket.class, AxiomClientSetEditorViewsPacket.SERIALIZER);
+        register("axiom:set_fly_speed", AxiomClientSetFlySpeedPacket.class, AxiomClientSetFlySpeedPacket.SERIALIZER);
+        register("axiom:set_gamemode", AxiomClientSetGameModePacket.class, AxiomClientSetGameModePacket.SERIALIZER);
+        register("axiom:set_hotbar_slot", AxiomClientSetHotbarSlotPacket.class, AxiomClientSetHotbarSlotPacket.SERIALIZER);
+        register("axiom:set_time", AxiomClientSetTimePacket.class, AxiomClientSetTimePacket.SERIALIZER);
+//        register("axiom:set_world_property", AxiomClientSetWorldPropertyPacket.class, AxiomClientSetWorldPropertyPacket.SERIALIZER);
+        register("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket.class, AxiomClientSpawnEntitiesPacket.SERIALIZER);
+        register("axiom:switch_active_hotbar", AxiomClientSwitchActiveHotbarPacket.class, AxiomClientSwitchActiveHotbarPacket.SERIALIZER);
+        register("axiom:teleport", AxiomClientTeleportPacket.class, AxiomClientTeleportPacket.SERIALIZER);
+    }};
+    public static final AxiomPacketRegistry<AxiomServerPacket> SERVER_PACKETS = new AxiomPacketRegistry<>() {{
+        register("axiom:ack_world_properties", AxiomAckWorldPropertyPacket.class, AxiomAckWorldPropertyPacket.SERIALIZER);
+        register("axiom:annotation_update", AxiomAnnotationUpdatePacket.class, AxiomAnnotationUpdatePacket.SERIALIZER);
+//        register("axiom:response_chunk_data", AxiomChunkDataResponsePacket.class, AxiomChunkDataResponsePacket.SERIALIZER);
+        register("axiom:enable", AxiomEnablePacket.class, AxiomEnablePacket.SERIALIZER);
+        register("axiom:marker_data", AxiomMarkerDataPacket.class, AxiomMarkerDataPacket.SERIALIZER);
+        register("axiom:marker_nbt_response", AxiomMarkerNbtResponsePacket.class, AxiomMarkerNbtResponsePacket.SERIALIZER);
+//        register("axiom:register_world_properties", AxiomRegisterWorldPropertiesPacket.class, AxiomRegisterWorldPropertiesPacket.SERIALIZER);
+//        register("axiom:set_world_property", AxiomSetWorldPropertyPacket.class, AxiomSetWorldPropertyPacket.SERIALIZER);
+    }};
 
 
     // Config properties
@@ -42,21 +95,33 @@ public class Axiom {
     static final Tag<Boolean> ENABLED_TAG = Tag.Boolean("terraform:axiom/enabled");
     public static final Tag<ClientInfo> CLIENT_INFO_TAG = Tag.Structure("terraform:axiom/client_info", ClientInfo.class);
 
+    public static @NotNull PluginMessagePacket writePacket(@NotNull AxiomServerPacket packet) {
+        final AxiomPacketRegistry.PacketInfo<AxiomServerPacket> spec = SERVER_PACKETS.packetInfo(packet.getClass());
+        final byte[] packetData = NetworkBuffer.makeArray(spec.serializer(), packet);
+        return new PluginMessagePacket(spec.channel(), packetData);
+    }
+
     public static void sendPacket(@NotNull Player player, @NotNull AxiomServerPacket packet) {
         if (!Axiom.isPresent(player) || !Axiom.isEnabled(player)) return;
-        player.sendPacket(packet.toPacket(player));
+        player.sendPacket(writePacket(packet));
     }
 
     public static void sendPacket(@NotNull Collection<Player> players, @NotNull AxiomServerPacket packet) {
         for (var player : players) {
             if (!Axiom.isPresent(player) || !Axiom.isEnabled(player))
                 continue;
-            player.sendPacket(packet.toPacket(player));
+            sendPacket(player, packet);
         }
     }
 
     public static void sendPacket(@NotNull Instance instance, @NotNull AxiomServerPacket packet) {
         sendPacket(instance.getPlayers(), packet);
+    }
+
+    public static @Nullable AxiomClientPacket readPacket(@NotNull PlayerPluginMessageEvent event) {
+        final NetworkBuffer.Type<AxiomClientPacket> packetType = CLIENT_PACKETS.packetInfo(event.getIdentifier());
+        if (packetType == null) return null;
+        return NetworkBuffer.wrap(event.getMessage(), 0, event.getMessage().length).read(packetType);
     }
 
     /**
@@ -86,16 +151,17 @@ public class Axiom {
         }
 
         // Axiom is present, perform the enable sequence.
-        var enablePacket = new AxiomEnablePacket(
-                true,
+        var enablePacket = new AxiomEnablePacket(new AxiomEnablePacket.ServerConfig(
                 0x100000, // 1mb, todo: constant/configurable
                 false, false,
                 5, // todo: constant/configurable
                 16, // todo: constant/configurable
                 true, // todo: constant/configurable
-                List.of() //todo: constant/configurable
-        );
-        player.sendPacket(enablePacket.toPacket(player));
+                List.of(), //todo: constant/configurable
+                List.of(), //todo: constant/configurable
+                1 //todo: constant/configurable
+        ));
+        sendPacket(player, enablePacket);
         player.setTag(ENABLED_TAG, true);
 
         //todo init hotbars
@@ -106,67 +172,7 @@ public class Axiom {
         if (!isEnabled(player)) return;
         player.removeTag(ENABLED_TAG);
 
-        var packet = new AxiomEnablePacket(false);
-        player.sendPacket(packet.toPacket(player));
-    }
-
-    private static final Map<String, ReadableAxiomPacket<?>> CLIENT_PACKETS = Map.ofEntries(
-//            Map.entry("axiom:hello", AxiomClientHelloPacket::new),
-//            Map.entry("axiom:set_gamemode", AxiomClientSetGameModePacket::new),
-//            Map.entry("axiom:set_fly_speed", AxiomClientSetFlySpeedPacket::new),
-//            Map.entry("axiom:set_hotbar_slot", AxiomClientSetHotbarSlotPacket::new),
-//            Map.entry("axiom:switch_active_hotbar", AxiomClientSwitchActiveHotbarPacket::new),
-//            Map.entry("axiom:teleport", AxiomClientTeleportPacket::new),
-//            Map.entry("axiom:set_editor_views", AxiomClientSetEditorViewsPacket::new),
-//            Map.entry("axiom:request_chunk_data", AxiomClientChunkDataRequestPacket::new),
-//            Map.entry("axiom:set_block", AxiomClientSetBlockPacket::new),
-//            Map.entry("axiom:set_buffer", AxiomClientSetBufferPacket::new),
-//            Map.entry("axiom:set_world_property", AxiomClientSetWorldPropertyPacket::new),
-//            Map.entry("axiom:set_time", AxiomClientSetTimePacket::new),
-//            Map.entry("axiom:spawn_entity", AxiomClientSpawnEntitiesPacket::new),
-//            Map.entry("axiom:manipulate_entity", AxiomClientModifyEntitiesPacket::new),
-//            Map.entry("axiom:delete_entity", AxiomClientDeleteEntitiesPacket::new),
-//            Map.entry("axiom:marker_nbt_request", AxiomClientMarkerNbtRequestPacket::new),
-//            Map.entry("axiom:annotation_update", AxiomClientAnnotationUpdatePacket::new)
-    );
-
-    /**
-     * All the axiom channels which the server will read from.
-     */
-    static final List<String> INCOMING_CHANNELS = List.copyOf(CLIENT_PACKETS.keySet());
-
-    /**
-     * All the axiom channels which the server supports (will handle).
-     */
-    static final List<String> OUTGOING_CHANNELS = List.of(
-            "axiom:enable",
-            "axiom:ack_world_properties",
-            "axiom:response_chunk_data",
-            "axiom:set_editor_views",
-            "axiom:set_world_property",
-            "axiom:initialize_hotbars",
-            "axiom:custom_blocks", // todo
-            "axiom:editor_warning", // todo
-            "axiom:register_world_properties",
-            "axiom:marker_nbt_response",
-            "axiom:marker_data"
-    );
-
-    private interface ReadableAxiomPacket<T extends AxiomClientPacket> {
-        @NotNull T read(@NotNull NetworkBuffer buffer, int apiVersion);
-    }
-
-    public static @Nullable AxiomClientPacket readPacket(@NotNull PlayerPluginMessageEvent event) {
-        var reader = CLIENT_PACKETS.get(event.getIdentifier());
-        if (reader == null) return null;
-//        var buffer = new NetworkBuffer(ByteBuffer.wrap(event.getMessage()));
-
-        // When we receive the hello packet there will be no client info, so default to
-        // the highest supported API version. It is present in the hello packet anyway.
-//        var clientInfo = event.getPlayer().getTag(CLIENT_INFO_TAG);
-//        var apiVersion = clientInfo == null ? MAX_API_VERSION : clientInfo.apiVersion();
-//        return reader.read(buffer, apiVersion);
-        return null;
+        sendPacket(player, new AxiomEnablePacket(null));
     }
 
     private Axiom() {

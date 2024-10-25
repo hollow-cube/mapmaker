@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
-import static net.minestom.server.network.NetworkBuffer.STRING;
-
 @SuppressWarnings("UnstableApiUsage")
 final class CoreEnv {
     private static final URI VIEWER_URL = URI.create("http://localhost:12415/");
@@ -81,11 +78,11 @@ final class CoreEnv {
 
         try {
             var data = NetworkBuffer.makeArray(buffer -> {
-                buffer.writeCollection(snapshotFailures, (unused, failure) -> {
-                    buffer.write(STRING, failure.id());
-                    buffer.write(BYTE_ARRAY, failure.expected());
-                    buffer.write(BYTE_ARRAY, failure.actual());
-                });
+//                buffer.writeCollection(snapshotFailures, (unused, failure) -> {
+//                    buffer.write(STRING, failure.id());
+//                    buffer.write(BYTE_ARRAY, failure.expected());
+//                    buffer.write(BYTE_ARRAY, failure.actual());
+//                });
             });
 
             httpClient.send(
