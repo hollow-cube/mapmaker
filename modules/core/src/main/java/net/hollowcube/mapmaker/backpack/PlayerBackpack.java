@@ -1,15 +1,20 @@
 package net.hollowcube.mapmaker.backpack;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.packet.client.play.ClientPlaceRecipePacket;
+import net.minestom.server.network.packet.client.play.ClientSetRecipeBookStatePacket;
+import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PlayerBackpack {
     private static final PlayerSetting<Boolean> IS_BACKPACK_OPEN = PlayerSetting.Bool("backpack_open", false);
     private static final PlayerSetting<Boolean> IS_BACKPACK_FILTERED = PlayerSetting.Bool("backpack_filtered", false);
@@ -22,9 +27,8 @@ public class PlayerBackpack {
 
     static {
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        // TODO: 1.21.2
-//        packetListenerManager.setPlayListener(ClientCraftRecipeRequest.class, PlayerBackpack::handleRecipeBookClick);
-//        packetListenerManager.setPlayListener(ClientSetRecipeBookStatePacket.class, PlayerBackpack::handleSetRecipeBookState);
+        packetListenerManager.setPlayListener(ClientPlaceRecipePacket.class, PlayerBackpack::handleRecipeBookClick);
+        packetListenerManager.setPlayListener(ClientSetRecipeBookStatePacket.class, PlayerBackpack::handleSetRecipeBookState);
     }
 
     private final Player player;
@@ -54,12 +58,11 @@ public class PlayerBackpack {
      * Sends the backpack to the player
      */
     public void refresh() {
-        // TODO: 1.21.2
-//        var declareRecipesPacket = new DeclareRecipesPacket(Arrays.stream(BackpackItem.values())
-//                .map(cm -> cm.getRecipePlaceholder(getQuantity(cm))).toList());
-//        player.sendPacket(declareRecipesPacket);
+        var recipeBookPacket = new RecipeBookAddPacket(Arrays.stream(BackpackItem.values())
+                .map(cm -> cm.getRecipeBookEntry(getQuantity(cm))).toList(), true);
+        player.sendPacket(recipeBookPacket);
 
-        // Having an empty second list stops the weird expanding animation. it seems like wikivg is just wrong about this.
+        // TODO: 1.21.2 (RecipeBookSettingsPacket)
 //        var playerData = PlayerDataV2.fromPlayer(player);
 //        var unlockRecipesPacket = new UnlockRecipesPacket(0,
 //                playerData.getSetting(IS_BACKPACK_OPEN), playerData.getSetting(IS_BACKPACK_FILTERED),
@@ -68,22 +71,22 @@ public class PlayerBackpack {
 //                false, false,
 //                Arrays.stream(BackpackItem.values()).map(BackpackItem::recipeBookId).toList(), List.of());
 //        player.sendPacket(unlockRecipesPacket);
-//
-//        player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
+
+        player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }
 
-//    private static void handleRecipeBookClick(@NotNull ClientCraftRecipeRequest packet, @NotNull Player player) {
-//        // Remove the ghost recipe
-//        player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
-//    }
-//
-//    private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
-//        if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
-//
-//        var playerData = PlayerDataV2.fromPlayer(player);
-//        playerData.setSetting(IS_BACKPACK_OPEN, packet.bookOpen());
-//        playerData.setSetting(IS_BACKPACK_FILTERED, packet.filterActive());
-//        // No need to write updates, the player data will be saved when leaving the hub
-//    }
+    private static void handleRecipeBookClick(@NotNull ClientPlaceRecipePacket packet, @NotNull Player player) {
+        // Remove the ghost recipe
+        player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
+    }
+
+    private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
+        if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
+
+        var playerData = PlayerDataV2.fromPlayer(player);
+        playerData.setSetting(IS_BACKPACK_OPEN, packet.bookOpen());
+        playerData.setSetting(IS_BACKPACK_FILTERED, packet.filterActive());
+        // No need to write updates, the player data will be saved when leaving the hub
+    }
 
 }

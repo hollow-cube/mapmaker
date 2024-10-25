@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
+import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 /**
  * A Terraform session local to a world. Stores only information relevant to the
@@ -236,8 +238,15 @@ public class LocalSession {
             buffer.write(SHORT, (short) STATE_VERSION);
 
             // Selections
-            // TODO(1.21.2)
-//            buffer.writeCollection(selections.values(), (b, s) -> s.write(b));
+            buffer.write(new NetworkBuffer.Type<Selection>() {
+                @Override public void write(@NotNull NetworkBuffer buffer, Selection value) {
+                    value.write(buffer);
+                }
+
+                @Override public Selection read(@NotNull NetworkBuffer buffer) {
+                    return null;
+                }
+            }.list(), List.copyOf(selections.values()));
             insertMarker(buffer);
 
             // History
@@ -250,21 +259,27 @@ public class LocalSession {
     }
 
     private void deserialize(byte @NotNull [] data) {
-        // TODO(1.21.2)
-//        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
-//
-//        var version = buffer.read(SHORT);
-//        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
-//
-//        // Selections
-//        var selections = buffer.readCollection(b -> new Selection(this, b), ABSOLUTE_MAX_SELECTIONS);
-//        selections.forEach(s -> this.selections.put(s.name(), s));
-//        assertMarker(buffer, "selections");
+        var buffer = NetworkBuffer.wrap(data, 0, data.length);
+
+        var version = buffer.read(SHORT);
+        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+
+        // Selections
+        var selections = buffer.read(new NetworkBuffer.Type<Selection>() {
+            @Override public void write(@NotNull NetworkBuffer buffer, Selection value) {
+            }
+
+            @Override public Selection read(@NotNull NetworkBuffer buffer) {
+                return new Selection(LocalSession.this, buffer);
+            }
+        }.list(ABSOLUTE_MAX_SELECTIONS));
+        selections.forEach(s -> this.selections.put(s.name(), s));
+        assertMarker(buffer, "selections");
 
         // History
-//        this.historyPointer = buffer.read(VAR_INT);
+        this.historyPointer = buffer.read(VAR_INT);
         //todo
 
-//        assert buffer.readableBytes() == 0 : "Buffer not fully read";
+        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 }

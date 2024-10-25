@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
@@ -28,7 +29,6 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
  * <br/>
  * todo are clipboards really going to be global?
  */
-@SuppressWarnings({"UnstableApiUsage"})
 public class PlayerSession {
     private static final Logger logger = LoggerFactory.getLogger(PlayerSession.class);
 
@@ -146,25 +146,23 @@ public class PlayerSession {
         return NetworkBuffer.makeArray(buffer -> {
             buffer.write(SHORT, (short) STATE_VERSION);
 
-            // TODO(1.21.2)
-//            buffer.writeCollection(clipboards.values(), (b, c) -> c.write(b));
+            buffer.write(Clipboard.NETWORK_TYPE.list(), List.copyOf(clipboards.values()));
             insertMarker(buffer);
         });
     }
 
     @ApiStatus.Internal
     public void read(byte @NotNull [] data) {
-        // TODO(1.21.2)
-//        var buffer = new NetworkBuffer(ByteBuffer.wrap(data));
-//
-//        var version = buffer.read(SHORT);
-//        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
-//
-//        var clipboards = buffer.readCollection(Clipboard::new, ABSOLUTE_MAX_CLIPBOARDS);
-//        clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
-//        assertMarker(buffer, "clipboards");
-//
-//        assert buffer.readableBytes() == 0 : "Buffer not fully read";
+        var buffer = NetworkBuffer.wrap(data, 0, data.length);
+
+        var version = buffer.read(SHORT);
+        Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
+
+        var clipboards = buffer.read(Clipboard.NETWORK_TYPE.list(ABSOLUTE_MAX_CLIPBOARDS));
+        clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
+        assertMarker(buffer, "clipboards");
+
+        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 
 }

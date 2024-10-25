@@ -1,7 +1,9 @@
 package net.hollowcube.terraform.session;
 
+import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
+import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.schem.writer.SpongeSchematicWriter;
 import net.hollowcube.terraform.util.math.AffineTransform;
 import net.minestom.server.coordinate.Point;
@@ -19,8 +21,21 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class Clipboard {
+    private static final NetworkBuffer.Type<Schematic> OPT_SCHEMATIC_NETWORK_TYPE = NetworkBufferTypes
+            .readOnly(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY))).optional();
+    public static final NetworkBuffer.Type<Clipboard> NETWORK_TYPE = new NetworkBuffer.Type<>() {
+        @Override
+        public void write(@NotNull NetworkBuffer buffer, Clipboard value) {
+            value.write(buffer);
+        }
+
+        @Override
+        public Clipboard read(@NotNull NetworkBuffer buffer) {
+            return new Clipboard(buffer);
+        }
+    };
+
     public static final @NotNull String DEFAULT = "default";
     @RegExp
     public static final @NotNull String NAME_REGEX = "[a-z0-9_]+";
@@ -40,8 +55,7 @@ public class Clipboard {
     public Clipboard(@NotNull NetworkBuffer buffer) {
         this.name = buffer.read(STRING);
 
-        // TODO(1.21.2)
-//        this.schematic = buffer.readOptional(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY)));
+        this.schematic = buffer.read(OPT_SCHEMATIC_NETWORK_TYPE);
         this.transforms = new ArrayList<>();
     }
 

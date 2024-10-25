@@ -7,7 +7,9 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public final class NetworkBufferTypes {
@@ -49,4 +51,20 @@ public final class NetworkBufferTypes {
             }
         };
     }
+
+    public static <T> NetworkBuffer.@NotNull Type<T> writeOnly(@NotNull BiConsumer<NetworkBuffer, T> writer) {
+        return new NetworkBuffer.Type<>() {
+            @Override
+            public void write(@NotNull NetworkBuffer buffer, T value) {
+                writer.accept(buffer, value);
+            }
+
+            @Override
+            public T read(@NotNull NetworkBuffer buffer) {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public static final NetworkBuffer.Type<@Nullable Point> OPT_VECTOR3 = NetworkBuffer.VECTOR3.optional();
 }

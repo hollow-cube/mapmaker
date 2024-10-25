@@ -15,6 +15,7 @@ import static net.minestom.server.network.NetworkBuffer.STRING;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class Selection {
+
     public static final @NotNull String DEFAULT = "default";
 
     private final LocalSession session;
