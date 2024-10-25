@@ -4,6 +4,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +16,7 @@ public class FakePlayer extends Player {
     public static final CommandSender CONSOLE = new ConsoleSender();
 
     public FakePlayer() {
-        super(UUID.randomUUID(), "random", new PlayerConnection() {
+        super(new PlayerConnection() {
             @Override
             public void sendPacket(@NotNull SendablePacket packet) {
 
@@ -25,6 +26,6 @@ public class FakePlayer extends Player {
             public @NotNull SocketAddress getRemoteAddress() {
                 return new InetSocketAddress(0);
             }
-        });
+        }, new GameProfile(UUID.randomUUID(), "random"));
     }
 }

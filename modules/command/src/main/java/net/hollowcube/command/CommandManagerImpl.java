@@ -6,6 +6,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
@@ -110,7 +111,7 @@ public class CommandManagerImpl implements CommandManager {
             var args = new DeclareCommandsPacket.Node();
             args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
             args.name = "args";
-            args.parser = "brigadier:string";
+            args.parser = ArgumentParserType.STRING;
             args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
             args.suggestionsType = "minecraft:ask_server";
             nodes.add(args);

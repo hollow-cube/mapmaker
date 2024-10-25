@@ -1,19 +1,22 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
-import static net.minestom.server.network.NetworkBuffer.LONG;
-
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientChunkDataRequestPacket(
-        long correlationId
-//    @NotNull String dimensionName,
-//    boolean sendBlockEntities,
-
+        long correlationId,
+        @NotNull String worldName,
+        boolean sendBlockEntitiesInChunks,
+        long[] blockEntities,
+        long[] chunkSections
 ) implements AxiomClientPacket {
-
-    public AxiomClientChunkDataRequestPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(buffer.read(LONG));
-    }
+    public static final @NotNull NetworkBuffer.Type<AxiomClientChunkDataRequestPacket> SERIALIZER = NetworkBufferTemplate.template(
+            NetworkBuffer.LONG, AxiomClientChunkDataRequestPacket::correlationId,
+            NetworkBuffer.STRING, AxiomClientChunkDataRequestPacket::worldName,
+            NetworkBuffer.BOOLEAN, AxiomClientChunkDataRequestPacket::sendBlockEntitiesInChunks,
+            NetworkBuffer.LONG_ARRAY, AxiomClientChunkDataRequestPacket::blockEntities,
+            NetworkBuffer.LONG_ARRAY, AxiomClientChunkDataRequestPacket::chunkSections,
+            AxiomClientChunkDataRequestPacket::new);
 }

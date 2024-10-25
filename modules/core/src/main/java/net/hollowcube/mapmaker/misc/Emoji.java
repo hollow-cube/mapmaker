@@ -82,7 +82,7 @@ public record Emoji(
     public static final Emoji POOP = builder("poop").parent("misc").build();
     public static final Emoji DEVIL = builder("devil").parent("face").build();
 
-    public static final Emoji THUMBS_UP = builder("thumbs_up").parent("misc").build();
+    public static final Emoji THUMBS_UP = builder("thumbs_up").parent("misc").build(); //todo alias
     public static final Emoji THUMBS_DOWN = builder("thumbs_down").parent("misc").build();
     public static final Emoji PRAY = builder("pray").parent("misc").build();
     public static final Emoji OK = builder("ok").parent("misc").build();

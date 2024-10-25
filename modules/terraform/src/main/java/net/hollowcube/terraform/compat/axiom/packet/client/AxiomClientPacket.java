@@ -1,5 +1,0 @@
-package net.hollowcube.terraform.compat.axiom.packet.client;
-
-public sealed interface AxiomClientPacket permits AxiomClientAnnotationUpdatePacket, AxiomClientChunkDataRequestPacket, AxiomClientDeleteEntitiesPacket, AxiomClientHelloPacket, AxiomClientMarkerNbtRequestPacket, AxiomClientModifyEntitiesPacket, AxiomClientSetBlockPacket, AxiomClientSetBufferPacket, AxiomClientSetEditorViewsPacket, AxiomClientSetFlySpeedPacket, AxiomClientSetGameModePacket, AxiomClientSetHotbarSlotPacket, AxiomClientSetTimePacket, AxiomClientSetWorldPropertyPacket, AxiomClientSpawnEntitiesPacket, AxiomClientSwitchActiveHotbarPacket, AxiomClientTeleportPacket {
-
-}

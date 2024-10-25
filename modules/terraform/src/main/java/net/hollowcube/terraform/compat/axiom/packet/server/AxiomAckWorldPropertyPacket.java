@@ -1,21 +1,15 @@
 package net.hollowcube.terraform.compat.axiom.packet.server;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomServerPacket;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
+import net.minestom.server.network.NetworkBufferTemplate;
 
 import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomAckWorldPropertyPacket(
         int sequenceId
 ) implements AxiomServerPacket {
-    @Override
-    public @NotNull String packetChannel() {
-        return "axiom:ack_world_properties";
-    }
-
-    @Override
-    public void write(@NotNull NetworkBuffer buffer, int apiVersion) {
-        buffer.write(VAR_INT, sequenceId);
-    }
+    public static final NetworkBuffer.Type<AxiomAckWorldPropertyPacket> SERIALIZER = NetworkBufferTemplate.template(
+            VAR_INT, AxiomAckWorldPropertyPacket::sequenceId,
+            AxiomAckWorldPropertyPacket::new);
 }

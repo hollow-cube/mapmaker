@@ -2,14 +2,17 @@ package net.hollowcube.terraform.compat.axiom.packet.client;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.buffer.palette.FixedPalette;
 import net.hollowcube.terraform.buffer.palette.NaivePalette;
 import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.compat.axiom.Axiom;
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.hollowcube.terraform.util.PaletteUtil;
 import net.hollowcube.terraform.util.ProtocolUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.instance.palette.Palettes;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetBufferPacket(
         @NotNull String dimensionName,
         @NotNull String correlationId,
@@ -29,24 +31,14 @@ public record AxiomClientSetBufferPacket(
 ) implements AxiomClientPacket {
     private static final Logger logger = LoggerFactory.getLogger(AxiomClientSetBufferPacket.class);
 
-    private static final int MAX_PALETTE_SIZE = 4096;
-
-    public AxiomClientSetBufferPacket(@NotNull AxiomClientSetBufferPacket other) {
-        this(other.dimensionName, other.correlationId, other.isContinuation, other.sourceInfo, other.buffer);
-    }
-
-    public AxiomClientSetBufferPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-        this(read(buffer, apiVersion));
-    }
-
-    private static @NotNull AxiomClientSetBufferPacket read(@NotNull NetworkBuffer buffer, int apiVersion) {
+    public static final NetworkBuffer.Type<AxiomClientSetBufferPacket> SERIALIZER = NetworkBufferTypes.readOnly(buffer -> {
         var dimensionName = buffer.read(STRING);
         var correlationId = buffer.read(UUID).toString();
         var isContinuation = buffer.read(BOOLEAN);
         var rawSourceInfo = isContinuation ? null : buffer.read(NBT);
-        var sourceInfo = rawSourceInfo instanceof CompoundBinaryTag ? (CompoundBinaryTag) rawSourceInfo : null;
+        var sourceInfo = rawSourceInfo instanceof CompoundBinaryTag compound ? compound : null;
         var updateBuffer = switch (buffer.read(BYTE)) {
-            case 0 -> new AxiomBlockBuffer(buffer, apiVersion);
+            case 0 -> buffer.read(AxiomBlockBuffer.SERIALIZER);
             case 1 -> {
                 logger.info("received biome buffer but cannot process it correctly :(");
                 yield BlockBuffer.empty(); //todo
@@ -54,42 +46,17 @@ public record AxiomClientSetBufferPacket(
             default -> throw new IllegalStateException("Unexpected axiom buffer type!");
         };
         return new AxiomClientSetBufferPacket(dimensionName, correlationId, isContinuation, sourceInfo, updateBuffer);
-    }
+    });
 
-    record AxiomBlockBuffer(
-            Long2ObjectMap<Palette> updates
-    ) implements BlockBuffer {
-
-        public AxiomBlockBuffer(@NotNull NetworkBuffer buffer, int apiVersion) {
-            this(readSectionList(buffer, apiVersion));
-        }
-
-        @Override
-        public void forEachSection(@NotNull SectionConsumer consumer) {
-            for (var entry : updates.long2ObjectEntrySet()) {
-                int chunkX = PaletteUtil.unpackX(entry.getLongKey());
-                int sectionY = PaletteUtil.unpackY(entry.getLongKey());
-                int chunkZ = PaletteUtil.unpackZ(entry.getLongKey());
-
-                consumer.accept(chunkX, sectionY, chunkZ, entry.getValue());
-            }
-        }
-
-        @Override
-        public long sizeBytes() {
-            return updates.values().stream()
-                    .mapToLong(Palette::sizeBytes)
-                    .sum();
-        }
-
-        private static @NotNull Long2ObjectMap<Palette> readSectionList(@NotNull NetworkBuffer buffer, int apiVersion) {
+    record AxiomBlockBuffer(@NotNull Long2ObjectMap<Palette> updates) implements BlockBuffer {
+        static final NetworkBuffer.Type<AxiomBlockBuffer> SERIALIZER = NetworkBufferTypes.readOnly(buffer -> {
             var updates = new Long2ObjectArrayMap<Palette>(10); // 10 is just an arbitrary number
 
             for (int i = 0; i < Axiom.MAX_SECTIONS_PER_UPDATE; i++) {
                 long index = buffer.read(LONG);
                 if (index == ProtocolUtil.MIN_POSITION_LONG) {
                     // Reached the end, exit normally w/o overflow. this is the normal case
-                    return updates;
+                    return new AxiomBlockBuffer(updates);
                 }
 
                 var palette = readAxiomPalette(buffer);
@@ -134,14 +101,30 @@ public record AxiomClientSetBufferPacket(
             }
 
             logger.warn("Received {} overflowed sections", overflow);
-            return updates;
+            return new AxiomBlockBuffer(updates);
+        });
+
+        @Override
+        public void forEachSection(@NotNull SectionConsumer consumer) {
+            for (var entry : updates.long2ObjectEntrySet()) {
+                int chunkX = PaletteUtil.unpackX(entry.getLongKey());
+                int sectionY = PaletteUtil.unpackY(entry.getLongKey());
+                int chunkZ = PaletteUtil.unpackZ(entry.getLongKey());
+
+                consumer.accept(chunkX, sectionY, chunkZ, entry.getValue());
+            }
         }
 
+        @Override
+        public long sizeBytes() {
+            return updates.values().stream()
+                    .mapToLong(Palette::sizeBytes)
+                    .sum();
+        }
 
         /**
          * Reads an Axiom palette. It is a mojang palette, except that we treat {@link Axiom#EMPTY_BLOCK_STATE} as unset.
          */
-        @SuppressWarnings("UnstableApiUsage")
         static @NotNull Palette readAxiomPalette(@NotNull NetworkBuffer buffer) {
             var bitsPerEntry = buffer.read(NetworkBuffer.BYTE);
             return switch (bitsPerEntry) {
@@ -152,52 +135,46 @@ public record AxiomClientSetBufferPacket(
                 }
                 case 1, 2, 3, 4 -> { // Vanilla: Linear palette (always bpe 4)
                     var palette = new NaivePalette(); //todo need to not use this, its bad. NaivePalette should be package private.
-                    // TODO: 1.21.2
-//                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
-//                    var paletteEntries = new int[rawPalette.size()];
-//                    for (int i = 0; i < paletteEntries.length; i++) {
-                    // Convert to our internal representation
-//                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
-//                    }
+                    var paletteEntries = buffer.read(VAR_INT_ARRAY);
+                    for (int i = 0; i < paletteEntries.length; i++) { // Convert to our internal representation
+                        int blockId = paletteEntries[i];
+                        paletteEntries[i] = (blockId == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : blockId) + 1;
+                    }
 
                     var paletteData = palette.array();
                     PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), 4);
 
                     // Replace indices with their actual block ids
                     for (int i = 0; i < paletteData.length; i++) {
-                        // TODO: 1.21.2
-//                        paletteData[i] = paletteEntries[paletteData[i]];
+                        paletteData[i] = paletteEntries[paletteData[i]];
                     }
 
                     yield palette;
                 }
                 case 5, 6, 7, 8 -> { // Vanilla: Hashmap palette (bpe = bits)
                     var palette = new NaivePalette();
-// TODO: 1.21.2
-                    //                    var rawPalette = buffer.readCollection(VAR_INT, MAX_PALETTE_SIZE);
-//                    var paletteEntries = new int[rawPalette.size()];
-//                    for (int i = 0; i < paletteEntries.length; i++) {
-//                         Convert to our internal representation
-//                        paletteEntries[i] = (rawPalette.get(i) == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : rawPalette.get(i)) + 1;
-//                    }
-//
-//                    var paletteData = palette.array();
-//                    PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), bitsPerEntry);
-//
-//                     Replace indices with their actual block ids
-//                    for (int i = 0; i < paletteData.length; i++) {
-//                        paletteData[i] = paletteEntries[paletteData[i]];
-//                    }
+                    var paletteEntries = buffer.read(VAR_INT_ARRAY);
+                    for (int i = 0; i < paletteEntries.length; i++) { // Convert to our internal representation
+                        int blockId = paletteEntries[i];
+                        paletteEntries[i] = (blockId == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : blockId) + 1;
+                    }
+
+                    var paletteData = palette.array();
+                    PaletteUtil.unpack(paletteData, buffer.read(LONG_ARRAY), bitsPerEntry);
+
+                    // Replace indices with their actual block ids
+                    for (int i = 0; i < paletteData.length; i++) {
+                        paletteData[i] = paletteEntries[paletteData[i]];
+                    }
 
                     yield palette;
                 }
                 default -> { // Vanilla: Global palette (bpe = max)
                     var palette = new NaivePalette();
                     var paletteData = palette.array();
-                    // TODO: 1.21.2
-//                    ArrayUtils.unpack(paletteData,
-//                            buffer.read(NetworkBuffer.LONG_ARRAY),
-//                            PaletteUtil.MAX_BITS_PER_ENTRY);
+                    Palettes.unpack(paletteData,
+                            buffer.read(NetworkBuffer.LONG_ARRAY),
+                            PaletteUtil.MAX_BITS_PER_ENTRY);
                     for (int i = 0; i < paletteData.length; i++) {
                         // Convert to our internal representation
                         paletteData[i] = (paletteData[i] == Axiom.EMPTY_BLOCK_STATE ? Palette.UNSET : paletteData[i]) + 1;

@@ -1,8 +1,18 @@
 package net.hollowcube.common.math;
 
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 
 public final class Quaternion {
+    public static final NetworkBuffer.Type<Quaternion> FLOAT_NETWORK_TYPE = NetworkBufferTemplate.template(
+            NetworkBuffer.FLOAT, i -> (float) i.getX(),
+            NetworkBuffer.FLOAT, i -> (float) i.getY(),
+            NetworkBuffer.FLOAT, i -> (float) i.getZ(),
+            NetworkBuffer.FLOAT, i -> (float) i.getW(),
+            Quaternion::new
+    );
+
     private double x;
     private double y;
     private double z;
@@ -51,10 +61,8 @@ public final class Quaternion {
     }
 
     /**
-     * @param axis
-     *            rotation axis, unit vector
-     * @param angle
-     *            the rotation angle
+     * @param axis  rotation axis, unit vector
+     * @param angle the rotation angle
      * @return this
      */
     public Quaternion set(Vec axis, double angle) {
@@ -106,7 +114,7 @@ public final class Quaternion {
     }
 
     public float[] into() {
-        return new float[] { (float) x, (float) y, (float) z, (float) w };
+        return new float[]{(float) x, (float) y, (float) z, (float) w};
     }
 
     public Quaternion interpolateThis(Quaternion q, double t) {
@@ -168,6 +176,7 @@ public final class Quaternion {
 
     /**
      * Converts this Quaternion into a matrix, placing the values into the given array.
+     *
      * @param matrixs 16-length float array.
      */
     public final void toMatrix(float[] matrixs) {

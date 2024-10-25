@@ -1,23 +1,23 @@
 package net.hollowcube.terraform.compat.axiom.packet.client;
 
+import net.hollowcube.terraform.compat.axiom.packet.AxiomClientPacket;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("UnstableApiUsage")
 public record AxiomClientSetEditorViewsPacket(
         @NotNull UUID uuid,
         @NotNull List<View> views
 ) implements AxiomClientPacket {
-    private static final int MAX_VIEWS = 1024;
-
-    // TODO: 1.21.2
-//    public AxiomClientSetEditorViewsPacket(@NotNull NetworkBuffer buffer, int apiVersion) {
-//        this(buffer.read(NetworkBuffer.UUID), buffer.readCollection(b1 -> new View(b1, apiVersion), MAX_VIEWS));
-//    }
+    public static final NetworkBuffer.Type<AxiomClientSetEditorViewsPacket> SERIALIZER = NetworkBufferTemplate.template(
+            NetworkBuffer.UUID, AxiomClientSetEditorViewsPacket::uuid,
+            View.SERIALIZER.list(1024), AxiomClientSetEditorViewsPacket::views,
+            AxiomClientSetEditorViewsPacket::new);
 
     public record View(
             @NotNull String name,
@@ -27,11 +27,13 @@ public record AxiomClientSetEditorViewsPacket(
             boolean pinLocation,
             @Nullable Pos location
     ) {
-
-//        public View(@NotNull NetworkBuffer buffer, int apiVersion) {
-//            this(buffer.read(NetworkBuffer.STRING), buffer.read(NetworkBuffer.UUID),
-//                    buffer.read(NetworkBuffer.BOOLEAN), buffer.readOptional(NetworkBuffer.STRING),
-//                    buffer.read(NetworkBuffer.BOOLEAN), buffer.readOptional(ProtocolUtil::readPos));
-//        }
+        public static final NetworkBuffer.Type<View> SERIALIZER = NetworkBufferTemplate.template(
+                NetworkBuffer.STRING, View::name,
+                NetworkBuffer.UUID, View::uuid,
+                NetworkBuffer.BOOLEAN, View::pinLevel,
+                NetworkBuffer.STRING.optional(), View::dimensionName,
+                NetworkBuffer.BOOLEAN, View::pinLocation,
+                NetworkBuffer.POS.optional(), View::location,
+                View::new);
     }
 }
