@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.utils.MathUtils;
+import org.apache.kafka.common.protocol.types.Field;
 import org.jetbrains.annotations.NotNull;
 
 public class PotionEffectEditorView extends View {
@@ -45,6 +46,13 @@ public class PotionEffectEditorView extends View {
         headerText.setText(PlainTextComponentSerializer.plainText().serialize(LanguageProviderV2.translate(effectName)));
         headerText.setArgs(effectName);
 
+        updateFromEffect();
+    }
+
+    @Action("reset")
+    public void resetToDefault() {
+        effect.setLevel(1);
+        effect.setDuration(0);
         updateFromEffect();
     }
 
@@ -86,6 +94,30 @@ public class PotionEffectEditorView extends View {
         effect.setDuration(MathUtils.clamp(effect.duration() + change, PotionEffectList.MIN_DURATION_MS, PotionEffectList.MAX_DURATION_MS));
         updateFromEffect();
         save.run();
+    }
+
+    @Action("level")
+    public void handleSetCustomLevel() {
+        pushView(c -> new PotionEffectCustomLevelAnvil(c, String.valueOf(effect.level())));
+    }
+
+    @Signal(PotionEffectCustomLevelAnvil.SIG_UPDATE_NAME)
+    public void handleUpdateLevelFromInput(@NotNull String input) {
+        if (input.isEmpty()) {
+            effect.setLevel(1);
+            updateFromEffect();
+            return;
+        }
+
+        try {
+            int newLevel = Integer.parseInt(input);
+            if (newLevel >= 128) {
+                effect.setLevel(128);
+            } else effect.setLevel(Math.max(newLevel, 1));
+            updateFromEffect();
+            save.run();
+        } catch (NumberFormatException ignored) {
+        }
     }
 
     @Action("time")

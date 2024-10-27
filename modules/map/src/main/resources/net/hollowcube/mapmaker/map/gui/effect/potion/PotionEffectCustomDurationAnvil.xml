@@ -1,6 +1,6 @@
 <component id="anvil" width="9" height="5" align="ltr" sprite="anvil/field_container">
     <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title" shift="55"/>
+          font="anvil_title" shift="-19"/>
     <box width="9" height="1" align="ltr">
         <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
         <label translationKey="gui.generic.empty" sprite="anvil/clock"/>
