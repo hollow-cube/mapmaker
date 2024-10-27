@@ -11,12 +11,15 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.chunk.ChunkCache;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
 
 // I(matt)DK what to name this class lol
 public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension {
+    private static final Logger logger = LoggerFactory.getLogger(MapPlayerImplImpl.class);
 
     private int riptideTicks = 0;
 
@@ -48,6 +51,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
     public void tick(long time) {
         super.tick(time);
 
+        logger.info("{}, start impl impl tick", getUsername());
         if (needsPhysicsPrediction()) {
             var velocity = Vec.fromPoint(position.sub(previousPosition));
 
@@ -58,6 +62,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         } else {
             nextPhysicsResult = null;
         }
+        logger.info("{} done physics", getUsername());
 
         if (riptideTicks > 0) {
             riptideTicks--;
@@ -71,6 +76,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
                 getPlayerMeta().setInRiptideSpinAttack(false);
             }
         }
+        logger.info("{} done impl impl", getUsername());
     }
 
     // We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player dripleaf states.
