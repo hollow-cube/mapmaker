@@ -3,7 +3,7 @@
           font="anvil_title" shift="-12"/>
     <box width="9" height="1" align="ltr">
         <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
-        <label translationKey="gui.generic.empty" sprite="anvil/ruler_and_clock"/>
+        <label translationKey="gui.generic.empty" sprite="anvil/ruler"/>
         <button id="output" translationKey="gui.generic.empty" backgroundSprite="anvil/checkmark_bg"/>
     </box>
 </component>
