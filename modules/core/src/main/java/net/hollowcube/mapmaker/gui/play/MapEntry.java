@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.TagUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -86,7 +87,12 @@ public class MapEntry extends View {
 
         // todo we could update the icon + title immediately and only update the lore once we have the player name perhaps
         if (authorName == null) {
-            authorName = playerService.getPlayerDisplayName2(map.owner());
+            try {
+                authorName = playerService.getPlayerDisplayName2(map.owner());
+            } catch (Exception e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+                authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
+            }
         }
 
         var title = Component.translatable(switch (map.settings().getVariant()) {
