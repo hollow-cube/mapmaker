@@ -12,6 +12,8 @@
         <spacer width="7"/>
     </box>
 
+    <spacer width="9"/>
+
     <box width="9" height="2" align="ltr">
         <spacer width="1" height="2"/>
 
