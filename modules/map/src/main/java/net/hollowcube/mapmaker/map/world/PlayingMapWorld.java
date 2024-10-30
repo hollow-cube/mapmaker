@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
+import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.misc.BossBars;
@@ -30,6 +31,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
@@ -41,6 +43,8 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.network.packet.server.play.BundlePacket;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -48,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
@@ -128,7 +133,15 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // We need to handle missing save states here because they do not reenter configuration to reset
             // a map after completing it.
             saveState = getOrCreateSaveState(player);
+
+            // Teleport to the spawn point of the map, and update the pose to what the server thinks it should be.
+            // This is to prevent a but where the player can remain in crawling state 1 tick after leaving spec
+            // and go into a 1 block gap.
+            player.sendPacket(new BundlePacket());
             player.teleport(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+            ((MapPlayerImplImpl) player).updatePose();
+            player.sendPacket(new EntityMetaDataPacket(player.getEntityId(), Map.of(6, Metadata.Pose(player.getPose()))));
+            player.sendPacket(new BundlePacket());
         }
 
         super.addPlayer(player); // Add to player list & reset inventory.
@@ -196,9 +209,19 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void removePlayer(@NotNull Player player) {
         if (isPlaying(player)) {
-            callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
+            preRemoveActivePlayer(player);
             removeActivePlayer(player);
         } else if (isSpectating(player)) removeSpectatingPlayer(player);
+    }
+
+    public void preRemoveActivePlayer(@NotNull Player player) {
+        callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null) return; // Sanity check
+
+        saveState.updatePlaytime();
+        var playState = saveState.state(PlayState.class);
+        playState.setPos(player.getPosition());
     }
 
     public @Nullable SaveStateUpdateResponse removeActivePlayer(@NotNull Player player) {
@@ -209,9 +232,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         // Update the playtime and playing state to the current state
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return null; // Sanity check
-        saveState.updatePlaytime();
-        var playState = saveState.state(PlayState.class);
-        playState.setPos(player.getPosition());
         var update = saveState.createUpdateRequest();
 
         // Write the save state to the database

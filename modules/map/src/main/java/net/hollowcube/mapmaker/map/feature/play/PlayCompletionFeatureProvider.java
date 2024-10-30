@@ -74,7 +74,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         //todo this is a bad solution. Basically we need to remove the player immediately, but the remove method runs in a virtual thread
         // which means it will have a tiny scheduling delay which means duplicates can trigger. To get around this we just remove these
         // two tags immediately which will stop them from triggering new events. Its a terrible solution and needs to be reworked.
-        world.callEvent(new MapWorldPlayerStopPlayingEvent(world, player));
+        world.preRemoveActivePlayer(player);
         world.removePlayerImmediate(player);
 
         FutureUtil.submitVirtual(() -> {

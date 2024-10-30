@@ -39,7 +39,7 @@ public class EnterSpectatorModeItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var world = MapWorld.forPlayerOptional(player);
-        if (!(world instanceof PlayingMapWorld)) return;
+        if (!(world instanceof PlayingMapWorld playWorld)) return;
         if (world.map().getSetting(MapSettings.NO_SPECTATOR)) return;
 
         // Must be standing on the ground (not falling) to enter spectator mode
@@ -48,11 +48,19 @@ public class EnterSpectatorModeItem extends ItemHandler {
             return;
         }
 
+        // Save the position immediately not after virtual thread delay.
+        final var savePosition = player.getPosition();
+
+        // Remove the playing tags immediately
+        playWorld.preRemoveActivePlayer(player);
+        playWorld.removePlayerImmediate(player);
+
+        // Perform the updates based on the removal.
         FutureUtil.submitVirtual(() -> {
-            world.removePlayer(player);
+            playWorld.removeActivePlayer(player);
             world.addSpectator(player);
 
-            player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
+            player.setTag(SPECTATOR_CHECKPOINT, savePosition);
         });
     }
 

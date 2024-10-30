@@ -81,7 +81,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     // We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player dripleaf states.
     @Override
-    protected void updatePose() {
+    public void updatePose() {
         Pose oldPose = getPose();
         Pose newPose;
 
