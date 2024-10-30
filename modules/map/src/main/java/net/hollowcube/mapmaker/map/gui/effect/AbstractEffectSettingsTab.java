@@ -85,7 +85,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Action("time_limit_active")
     public void handleChangeTimeLimitActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+        if (clickType == ClickType.LEFT_CLICK) {
             openBaseEffectTimeLimitAnvil();
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setTimeLimit(BaseEffectData.NO_TIME_LIMIT);
@@ -121,7 +121,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
 
     @Action("reset_height_active")
     public void handleChangeResetHeightActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+        if (clickType == ClickType.LEFT_CLICK) {
             openBaseEffectResetHeightAnvil();
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setResetHeight(BaseEffectData.NO_RESET_HEIGHT);

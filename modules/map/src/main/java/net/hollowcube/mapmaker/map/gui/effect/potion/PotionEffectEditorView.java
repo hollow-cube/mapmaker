@@ -111,9 +111,7 @@ public class PotionEffectEditorView extends View {
 
         try {
             int newLevel = Integer.parseInt(input);
-            if (newLevel >= 128) {
-                effect.setLevel(128);
-            } else effect.setLevel(Math.max(newLevel, 1));
+            effect.setLevel(Math.min(Math.max(newLevel, 1), 128));
             updateFromEffect();
             save.run();
         } catch (NumberFormatException ignored) {
