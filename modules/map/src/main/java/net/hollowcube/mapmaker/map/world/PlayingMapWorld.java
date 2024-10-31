@@ -30,6 +30,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
@@ -106,8 +107,13 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         super.load();
         //todo load features
 
-        this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
-                .build(DisplayName.Context.BOSS_BAR);
+        try {
+            this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
+                    .build(DisplayName.Context.BOSS_BAR);
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+            this.ownerBossBarName = Component.text("!error!", NamedTextColor.RED);
+        }
     }
 
     @Override

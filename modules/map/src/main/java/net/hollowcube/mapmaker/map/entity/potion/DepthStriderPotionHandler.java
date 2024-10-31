@@ -23,6 +23,6 @@ public class DepthStriderPotionHandler implements PotionHandler {
 
     @Override
     public void remove(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).removeModifier(MODIFIER_ID);
+        player.getAttribute(Attribute.GENERIC_WATER_MOVEMENT_EFFICIENCY).removeModifier(MODIFIER_ID);
     }
 }
