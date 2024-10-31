@@ -122,6 +122,13 @@
       },
       "model": "minecraft:item/claw_pillar_v2",
       "axiom:hide": true
+    },
+    {
+      "predicate": {
+        "custom_model_data": 18
+      },
+      "model": "minecraft:item/the_creature",
+      "axiom:hide": false
     }
   ]
 }
