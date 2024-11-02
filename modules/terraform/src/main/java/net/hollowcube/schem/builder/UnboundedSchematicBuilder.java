@@ -3,6 +3,7 @@ package net.hollowcube.schem.builder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.hollowcube.schem.BlockEntityData;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.SpongeSchematic;
@@ -104,8 +105,7 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
 
             if (block == null) {
                 // Block not set, write an air value
-                // TODO(1.21.2)
-//                Utils.writeVarInt(blockBytes, 0);
+                ProtocolUtil.writeVarInt(blockBytes, 0);
                 continue;
             }
 
@@ -117,8 +117,7 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
             } else {
                 blockId = paletteMap.getInt(block);
             }
-            // TODO(1.21.2)
-//            Utils.writeVarInt(blockBytes, blockId);
+            ProtocolUtil.writeVarInt(blockBytes, blockId);
 
             // Write block entity
             var blockHandler = block.handler();
