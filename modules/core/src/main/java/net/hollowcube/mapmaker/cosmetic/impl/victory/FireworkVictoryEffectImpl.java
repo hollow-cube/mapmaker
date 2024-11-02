@@ -22,6 +22,7 @@ import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -32,8 +33,10 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
 
     @Override
     public void trigger(@NotNull Player player, @NotNull Point position) {
+        var viewersAndSelf = new ArrayList<>(player.getViewers());
+        viewersAndSelf.add(player);
         showFirework(
-                PacketGroupingAudience.of(List.of(player)),
+                PacketGroupingAudience.of(viewersAndSelf),
                 player.getInstance(),
                 position,
                 15,
