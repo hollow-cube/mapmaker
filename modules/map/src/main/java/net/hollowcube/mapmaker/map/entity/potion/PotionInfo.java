@@ -76,7 +76,7 @@ public record PotionInfo(
     public static final PotionInfo NAUSEA = builder("nausea").setVanillaEffect(PotionEffect.NAUSEA).setIcon("effect/potion/icon/nausea").build();
     public static final PotionInfo DOLPHINS_GRACE = builder("dolphins_grace").setVanillaEffect(PotionEffect.DOLPHINS_GRACE).setIcon("effect/potion/icon/dolphins_grace").build();
     public static final PotionInfo SWIFT_SNEAK = builder("swift_sneak").maxLevel(5).setVanillaEffect(PotionEffect.INFESTED).setIcon("effect/potion/icon/swift_sneak")
-            .attribute(Attribute.PLAYER_SNEAKING_SPEED, "minecraft:enchantment.swift_sneak", level -> 0.15 * (level + 1), AttributeOperation.ADD_VALUE).build();
+            .attribute(Attribute.SNEAKING_SPEED, "minecraft:enchantment.swift_sneak", level -> 0.15 * (level + 1), AttributeOperation.ADD_VALUE).build();
 
     @Override
     public int compareTo(@NotNull PotionInfo o) {

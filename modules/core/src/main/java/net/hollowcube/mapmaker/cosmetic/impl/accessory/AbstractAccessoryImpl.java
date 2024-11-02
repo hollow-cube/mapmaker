@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerUseItemEvent;
@@ -14,7 +15,7 @@ public abstract class AbstractAccessoryImpl extends ModelCosmeticImpl {
     public static void addListeners(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             var player = event.getPlayer();
-            if (event.getHand() != Player.Hand.OFF || !player.getItemInMainHand().isAir())
+            if (event.getHand() != PlayerHand.OFF || !player.getItemInMainHand().isAir())
                 return; // TODO: using air check here is bad, but oh well.
 
             var playerData = PlayerDataV2.fromPlayer(player);

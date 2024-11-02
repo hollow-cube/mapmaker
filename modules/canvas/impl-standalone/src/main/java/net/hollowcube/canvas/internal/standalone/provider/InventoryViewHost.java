@@ -331,11 +331,11 @@ public class InventoryViewHost {
 
             // todo below will return post-inventory rework.
             // If the click happened inside the player inventory we need to do our weird accounting of anvil being 9 internally
-//            if (slot >= wrapper.getSize()) {
-//                slot -= wrapper.getSize(); // Now represents the slot starting from the bottom inventory
-//                var offset = wrapper.getInventoryType() == InventoryType.ANVIL ? 9 : wrapper.getInventoryType().getSize();
-//                slot += offset; // Offset to the bottom of the top inventory (accounting for our weird anvil inventory)
-//            }
+            if (slot >= wrapper.getSize()) {
+                slot -= wrapper.getSize(); // Now represents the slot starting from the bottom inventory
+                var offset = wrapper.getInventoryType() == InventoryType.ANVIL ? 9 : wrapper.getInventoryType().getSize();
+                slot += offset; // Offset to the bottom of the top inventory (accounting for our weird anvil inventory)
+            }
 
             var allow = wrapper.tryHandleClick(slot, event.getPlayer(), clickType);
             event.setCancelled(!allow);
@@ -424,13 +424,11 @@ public class InventoryViewHost {
         private final Player player;
 
         public DelegatingPlayerInventory(@NotNull Player player) {
-            super(player);
             this.player = player;
-
 
             // Copy all contents of players current inventory to this one
             var old = player.getInventory();
-//            viewers.addAll(old.getViewers()); todo reenable when updating minestom
+            viewers.addAll(old.getViewers()); //todo reenable when updating minestom
             // PlayerInventory
             setCursorItem(old.getCursorItem());
             // AbstractInventory
@@ -450,15 +448,15 @@ public class InventoryViewHost {
             super.update();
         }
 
-//        @Override
-//        public void update(@NotNull Player player) {
-//            // Same as above (but in case a single player update is called)
-//            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
-//                wrapper.updatePlayerInventory();
-//                return;
-//            }
-//
-//            super.update(player);
-//        }
+        @Override
+        public void update(@NotNull Player player) {
+            // Same as above (but in case a single player update is called)
+            if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.needsPlayerInventory()) {
+                wrapper.updatePlayerInventory();
+                return;
+            }
+
+            super.update(player);
+        }
     }
 }
