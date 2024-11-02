@@ -40,7 +40,7 @@ public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
             return;
 
         // If they are already shrunk then unshrink them immediately.
-        var scaleAttribute = player.getAttribute(Attribute.GENERIC_SCALE);
+        var scaleAttribute = player.getAttribute(Attribute.SCALE);
         if (scaleAttribute.removeModifier(SHRINK_MODIFIER) != null) {
             player.getInstance().playSound(UNSHRINK_SOUND, player.getPosition());
             return;
