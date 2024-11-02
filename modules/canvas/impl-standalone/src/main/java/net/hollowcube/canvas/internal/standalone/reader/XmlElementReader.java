@@ -36,7 +36,6 @@ public class XmlElementReader {
 
     public static @NotNull ViewContainer load(@NotNull ElementContext context, @NotNull String viewPath, boolean cache) {
         if (cache && xmlCache.containsKey(viewPath)) {
-            logger.log(System.Logger.Level.DEBUG, "Cache hit for '{0}'", viewPath);
             return xmlCache.get(viewPath).clone(context);
         }
 
