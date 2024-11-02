@@ -1,6 +1,7 @@
-package net.hollowcube.mapmaker.cosmetic.impl;
+package net.hollowcube.mapmaker.cosmetic.impl.victory;
 
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NonBlocking;

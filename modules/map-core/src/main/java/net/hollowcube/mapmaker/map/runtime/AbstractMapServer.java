@@ -40,6 +40,7 @@ import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
+import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
@@ -355,6 +356,7 @@ public abstract class AbstractMapServer implements MapServer {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         CosmeticInventoryHandler.init(guiController);
+        AbstractAccessoryImpl.addListeners(globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);

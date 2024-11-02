@@ -33,6 +33,9 @@ import java.util.function.Predicate;
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
+    @Deprecated
+    public static SessionManager instance; // todo fixme this is garbage
+
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
     private final SessionService sessionService;
@@ -51,6 +54,7 @@ public class SessionManager {
             @NotNull KafkaConfig kafkaConfig,
             boolean noop
     ) {
+        instance = this;
         this.sessionService = sessionService;
         this.playerService = playerService;
 

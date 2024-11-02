@@ -5,7 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
-import net.hollowcube.mapmaker.cosmetic.impl.AbstractVictoryEffectImpl;
+import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;

@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.cosmetic.impl.victory;
 
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.cosmetic.impl.AbstractVictoryEffectImpl;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.color.Color;

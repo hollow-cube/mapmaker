@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
+import net.hollowcube.mapmaker.cosmetic.impl.accessory.ShrinkingDeviceImpl;
 import org.jetbrains.annotations.NotNull;
 
 public final class Accessories {
@@ -16,7 +17,8 @@ public final class Accessories {
     public static Cosmetic COFFEE_CUP = builder("coffee_cup").rarity(Rarity.EPIC).build();
     public static Cosmetic DRILL = builder("drill").rarity(Rarity.LEGENDARY).build();
     public static Cosmetic EXCALIBUR = builder("excalibur").rarity(Rarity.LEGENDARY).build();
-    public static Cosmetic SHRINKING_DEVICE = builder("shrinking_device").rarity(Rarity.LEGENDARY).build();
+    public static Cosmetic SHRINKING_DEVICE = builder("shrinking_device").rarity(Rarity.LEGENDARY)
+            .impl(ShrinkingDeviceImpl::new).build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
         return new Cosmetic.Builder(CosmeticType.ACCESSORY, id)
